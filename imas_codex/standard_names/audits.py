@@ -3775,6 +3775,12 @@ SIGN_CONVENTION_REPAIR_MANIFEST_SCHEMA = (
 SIGN_CONVENTION_REPAIR_RECEIPT_SCHEMA = (
     "imas-codex.sign-convention-document-repair-receipt.v1"
 )
+COCOS_TRANSFORMATION_REPAIR_MANIFEST_SCHEMA = (
+    "imas-codex.cocos-transformation-metadata-repair-manifest.v1"
+)
+COCOS_TRANSFORMATION_REPAIR_RECEIPT_SCHEMA = (
+    "imas-codex.cocos-transformation-metadata-repair-receipt.v1"
+)
 _SIGN_CONVENTION_TEXT_RE = re.compile(r"\bsign\s+convention\b", re.IGNORECASE)
 _LOWERCASE_SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
@@ -4398,6 +4404,414 @@ def repair_invariant_sign_convention_documents(
                     "manifest_sha256": computed_hash,
                     "change_id": change_rows[0]["change_id"],
                     "excluded_regeneration_ids": excluded,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if owns:
+            client.close()
+
+
+def _cocos_transformation_repair_authority(
+    query_handle: Any,
+    name_id: str,
+    expected_before: str,
+    expected_after: str,
+    reason: str,
+) -> dict[str, Any]:
+    from imas_codex.standard_names.graph_ops import (  # noqa: PLC0415
+        _eligible_derived_parent_unit_children,
+    )
+
+    rows = query_handle.query(
+        """
+        // COCOS transformation metadata repair authority
+        OPTIONAL MATCH (sn:StandardName {id: $name_id})
+        CALL (sn) {
+          OPTIONAL MATCH (child:StandardName)-[edge:HAS_PARENT]->(sn)
+          RETURN collect(CASE WHEN child IS NULL THEN null ELSE {
+            id: child.id,
+            element_id: elementId(child),
+            edge_element_id: elementId(edge),
+            name_stage: child.name_stage,
+            unit: child.unit,
+            cocos: child.cocos_transformation_type,
+            op_kind: edge.operator_kind
+          } END) AS child_data
+        }
+        RETURN elementId(sn) AS element_id,
+               sn.documentation AS documentation,
+               sn.docs_stage AS docs_stage,
+               sn.name_stage AS name_stage,
+               sn.origin AS origin,
+               sn.cocos_transformation_type AS transformation_type,
+               sn.cocos AS cocos,
+               sn.claimed_at IS NOT NULL AS has_claimed_at,
+               sn.claim_token IS NOT NULL AS has_claim_token,
+               CASE WHEN sn IS NULL THEN [] ELSE
+                 [(sn)-[edge:HAS_COCOS]->(convention:COCOS) |
+                   {element_id: elementId(edge), cocos_id: convention.id}]
+               END AS cocos_edges,
+               child_data
+        """,
+        name_id=name_id,
+    )
+    if len(rows) != 1:
+        raise SignConventionRepairConflict(
+            "COCOS transformation authority did not return exactly one row"
+        )
+    row = dict(rows[0])
+    documentation = row.get("documentation")
+    edges = sorted(
+        (dict(edge) for edge in row.get("cocos_edges") or []),
+        key=lambda edge: (str(edge["cocos_id"]), str(edge["element_id"])),
+    )
+    children = sorted(
+        (dict(child) for child in row.get("child_data") or []),
+        key=lambda child: (str(child["id"]), str(child["edge_element_id"])),
+    )
+    eligible = _eligible_derived_parent_unit_children(name_id, children)
+    child_classes = sorted(
+        {str(child["cocos"]) for child in eligible if child.get("cocos") is not None}
+    )
+    refusals: list[str] = []
+    if row.get("element_id") is None:
+        refusals.append("standard name does not exist")
+    if row.get("name_stage") != "accepted":
+        refusals.append("standard name is not accepted")
+    if row.get("docs_stage") != "accepted":
+        refusals.append("documentation is not accepted")
+    if row.get("has_claimed_at") or row.get("has_claim_token"):
+        refusals.append("standard name has an active claim")
+    if not isinstance(documentation, str):
+        refusals.append("documentation is unavailable")
+    if row.get("transformation_type") != expected_before:
+        refusals.append(
+            "stored transformation type does not match expected before-state"
+        )
+    if row.get("cocos") != 17:
+        refusals.append("scalar COCOS authority is not exactly 17")
+    if len(edges) != 1 or edges[0].get("cocos_id") != 17:
+        refusals.append("HAS_COCOS authority is not exactly one edge to COCOS 17")
+    if not children:
+        refusals.append("structural child closure is empty")
+    if child_classes != [expected_after]:
+        refusals.append(
+            "eligible structural children do not resolve uniquely to expected after-state"
+        )
+    manifest = {
+        "schema": COCOS_TRANSFORMATION_REPAIR_MANIFEST_SCHEMA,
+        "operation": "repair_structural_cocos_transformation_metadata",
+        "reason": reason,
+        "name_id": name_id,
+        "element_id": row.get("element_id"),
+        "origin": row.get("origin"),
+        "name_stage": row.get("name_stage"),
+        "docs_stage": row.get("docs_stage"),
+        "has_claimed_at": bool(row.get("has_claimed_at")),
+        "has_claim_token": bool(row.get("has_claim_token")),
+        "documentation_sha256": (
+            _sha256_text(documentation) if isinstance(documentation, str) else None
+        ),
+        "documentation_chars": (
+            len(documentation) if isinstance(documentation, str) else None
+        ),
+        "transformation_type_before": row.get("transformation_type"),
+        "transformation_type_after": expected_after,
+        "cocos": row.get("cocos"),
+        "cocos_edges": edges,
+        "children": children,
+        "eligible_child_ids": sorted(str(child["id"]) for child in eligible),
+        "eligible_child_classes": child_classes,
+        "refusals": refusals,
+    }
+    return manifest
+
+
+@retry_on_deadlock()
+def repair_structural_cocos_transformation_metadata(
+    name_id: str,
+    *,
+    expected_before: str,
+    expected_after: str,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Preview or apply one signed structural COCOS metadata correction.
+
+    The manifest binds the accepted documentation bytes, target graph identity,
+    COCOS edge, and complete direct-child closure. Apply locks that closure,
+    re-derives the same manifest, and changes only the transformation scalar.
+    """
+    from imas_codex.graph.client import GraphClient  # noqa: PLC0415
+    from imas_codex.standard_names.graph_ops import (  # noqa: PLC0415
+        _authority_payload_hash,
+        _TransactionQuery,
+    )
+
+    if not name_id.strip():
+        raise ValueError("COCOS transformation repair requires a target identity")
+    if not expected_before.strip() or not expected_after.strip():
+        raise ValueError("COCOS transformation repair requires both metadata states")
+    if expected_before == expected_after:
+        raise ValueError(
+            "COCOS transformation repair requires a changed metadata state"
+        )
+    if not reason.strip():
+        raise ValueError("COCOS transformation repair requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _LOWERCASE_SHA256_RE.fullmatch(
+        manifest_sha256
+    ):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    event_id = (
+        f"sn-change:cocos-transformation-metadata-repair:{manifest_sha256}"
+        if manifest_sha256
+        else None
+    )
+    owns = gc is None
+    client: Any = GraphClient() if owns else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query_handle.query(
+                        """
+                        // COCOS transformation metadata repair replay
+                        OPTIONAL MATCH (change:StandardNameChange {id: $event_id})
+                        RETURN change.to_name AS postconditions_json
+                        """,
+                        event_id=event_id,
+                    )
+                    postconditions_json = (
+                        replay_rows[0].get("postconditions_json")
+                        if replay_rows
+                        else None
+                    )
+                    if postconditions_json is not None:
+                        recorded = json.loads(postconditions_json)
+                        current = query_handle.query(
+                            """
+                            // COCOS transformation metadata repair replay postconditions
+                            MATCH (sn:StandardName {id: $name_id})
+                            RETURN sn.cocos_transformation_type AS transformation_type,
+                                   sn.cocos AS cocos,
+                                   sn.documentation AS documentation,
+                                   [(sn)-[edge:HAS_COCOS]->(convention:COCOS) | {
+                                     element_id: elementId(edge),
+                                     cocos_id: convention.id
+                                   }] AS cocos_edges
+                            """,
+                            name_id=name_id,
+                        )
+                        if len(current) != 1 or any(
+                            (
+                                current[0].get(key) != value
+                                if key != "documentation_sha256"
+                                else _sha256_text(current[0]["documentation"]) != value
+                            )
+                            for key, value in recorded.items()
+                        ):
+                            raise SignConventionRepairConflict(
+                                "recorded COCOS transformation repair lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": COCOS_TRANSFORMATION_REPAIR_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "changed": 0,
+                            "manifest_sha256": manifest_sha256,
+                            "model_spend_usd": 0.0,
+                        }
+
+                manifest = _cocos_transformation_repair_authority(
+                    query_handle,
+                    name_id,
+                    expected_before,
+                    expected_after,
+                    reason,
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                if apply and computed_hash != manifest_sha256:
+                    raise SignConventionRepairConflict(
+                        "fresh COCOS transformation manifest does not match signed hash"
+                    )
+                if manifest["refusals"]:
+                    transaction.rollback()
+                    return {
+                        "schema": COCOS_TRANSFORMATION_REPAIR_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "changed": 0,
+                        "refusals": manifest["refusals"],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                        "model_spend_usd": 0.0,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": COCOS_TRANSFORMATION_REPAIR_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "changed": 0,
+                        "would_change": 1,
+                        "refusals": [],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                        "model_spend_usd": 0.0,
+                    }
+
+                element_ids = [manifest["element_id"]] + [
+                    child["element_id"] for child in manifest["children"]
+                ]
+                locked = query_handle.query(
+                    """
+                    // COCOS transformation metadata repair lock
+                    UNWIND $element_ids AS expected
+                    MATCH (node) WHERE elementId(node) = expected
+                    SET node.id = node.id
+                    RETURN collect(elementId(node)) AS element_ids
+                    """,
+                    element_ids=element_ids,
+                )
+                if sorted(locked[0].get("element_ids") or []) != sorted(element_ids):
+                    raise SignConventionRepairConflict(
+                        "COCOS transformation authority changed while locking"
+                    )
+                locked_manifest = _cocos_transformation_repair_authority(
+                    query_handle,
+                    name_id,
+                    expected_before,
+                    expected_after,
+                    reason,
+                )
+                if (
+                    locked_manifest["refusals"]
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise SignConventionRepairConflict(
+                        "COCOS transformation authority changed while acquiring locks"
+                    )
+
+                updated = query_handle.query(
+                    """
+                    // COCOS transformation metadata compare-and-set
+                    MATCH (sn:StandardName {id: $name_id})
+                    WHERE elementId(sn) = $element_id
+                      AND sn.name_stage = 'accepted'
+                      AND sn.docs_stage = 'accepted'
+                      AND sn.claimed_at IS NULL
+                      AND sn.claim_token IS NULL
+                      AND sn.documentation = $documentation
+                      AND sn.cocos_transformation_type = $expected_before
+                      AND sn.cocos = 17
+                    MATCH (sn)-[edge:HAS_COCOS]->(:COCOS {id: 17})
+                    WHERE elementId(edge) = $edge_element_id
+                    SET sn.cocos_transformation_type = $expected_after
+                    RETURN sn.id AS id
+                    """,
+                    name_id=name_id,
+                    element_id=manifest["element_id"],
+                    documentation=query_handle.query(
+                        """
+                        MATCH (sn:StandardName {id: $name_id})
+                        RETURN sn.documentation AS documentation
+                        """,
+                        name_id=name_id,
+                    )[0]["documentation"],
+                    expected_before=expected_before,
+                    expected_after=expected_after,
+                    edge_element_id=manifest["cocos_edges"][0]["element_id"],
+                )
+                if updated != [{"id": name_id}]:
+                    raise SignConventionRepairConflict(
+                        "COCOS transformation metadata compare-and-set changed"
+                    )
+                current = query_handle.query(
+                    """
+                    // COCOS transformation metadata repair postconditions
+                    MATCH (sn:StandardName {id: $name_id})
+                    RETURN sn.cocos_transformation_type AS transformation_type,
+                           sn.cocos AS cocos,
+                           sn.documentation AS documentation,
+                           [(sn)-[edge:HAS_COCOS]->(convention:COCOS) | {
+                             element_id: elementId(edge),
+                             cocos_id: convention.id
+                           }] AS cocos_edges
+                    """,
+                    name_id=name_id,
+                )
+                postconditions = {
+                    "transformation_type": expected_after,
+                    "cocos": 17,
+                    "documentation_sha256": manifest["documentation_sha256"],
+                    "cocos_edges": manifest["cocos_edges"],
+                }
+                if len(current) != 1 or any(
+                    (
+                        current[0].get(key) != value
+                        if key != "documentation_sha256"
+                        else _sha256_text(current[0]["documentation"]) != value
+                    )
+                    for key, value in postconditions.items()
+                ):
+                    raise SignConventionRepairConflict(
+                        "COCOS transformation metadata repair postconditions failed"
+                    )
+                change_rows = query_handle.query(
+                    """
+                    // COCOS transformation metadata repair durable receipt
+                    CREATE (change:StandardNameChange {
+                      id: $event_id,
+                      from_name: $expected_before,
+                      to_name: $postconditions_json,
+                      operation: 'repair_structural_cocos_transformation_metadata',
+                      reason: $reason,
+                      origin: 'deterministic_metadata_audit',
+                      run_id: $run_id,
+                      changed_at: datetime(),
+                      internal: true,
+                      manifest_sha256: $manifest_sha256})
+                    WITH change
+                    MATCH (sn:StandardName {id: $name_id})
+                    MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN change.id AS change_id
+                    """,
+                    event_id=(
+                        "sn-change:cocos-transformation-metadata-repair:"
+                        f"{computed_hash}"
+                    ),
+                    expected_before=expected_before,
+                    postconditions_json=json.dumps(
+                        postconditions, sort_keys=True, separators=(",", ":")
+                    ),
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                    name_id=name_id,
+                )
+                if len(change_rows) != 1:
+                    raise SignConventionRepairConflict(
+                        "COCOS transformation repair receipt was not written exactly once"
+                    )
+                transaction.commit()
+                return {
+                    "schema": COCOS_TRANSFORMATION_REPAIR_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "changed": 1,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_id": change_rows[0]["change_id"],
+                    "documentation_changed": False,
+                    "model_spend_usd": 0.0,
                 }
             except BaseException:
                 if not transaction.closed:
