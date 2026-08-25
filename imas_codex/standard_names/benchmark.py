@@ -451,6 +451,10 @@ async def score_with_reviewer(
     reviewer_model: str,
     target: str = "names",
     reasoning_effort: str | None = None,
+    *,
+    temperature: float | None = None,
+    seed: int | None = None,
+    rendered_message_hashes: list[str] | None = None,
 ) -> tuple[list[dict], float]:
     """Score candidates using the production-fidelity review pipeline.
 
@@ -465,6 +469,8 @@ async def score_with_reviewer(
 
     Returns (reviews, total_cost) where reviews is a list of dicts with:
     name, quality_tier, score, and per-dimension scores keyed ``<dim>_score``.
+    When supplied, ``rendered_message_hashes`` receives one SHA-256 digest for
+    each exact system/user message pair sent to the provider.
     """
     from imas_codex.discovery.base.llm import acall_llm_structured
     from imas_codex.graph.client import GraphClient
@@ -632,6 +638,8 @@ async def score_with_reviewer(
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ]
+                if rendered_message_hashes is not None:
+                    rendered_message_hashes.append(_rendered_messages_hash(messages))
                 async with _docs_sem:
                     try:
                         result, cost, _ = await acall_llm_structured(
@@ -640,6 +648,8 @@ async def score_with_reviewer(
                             response_model=response_model,
                             service="standard-names",
                             reasoning_effort=review_effort,
+                            temperature=temperature,
+                            seed=seed,
                             max_retries=2,
                         )
                     except Exception as e:
@@ -699,6 +709,8 @@ async def score_with_reviewer(
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ]
+            if rendered_message_hashes is not None:
+                rendered_message_hashes.append(_rendered_messages_hash(messages))
 
             try:
                 result, cost, _ = await acall_llm_structured(
@@ -707,6 +719,8 @@ async def score_with_reviewer(
                     response_model=response_model,
                     service="standard-names",
                     reasoning_effort=review_effort,
+                    temperature=temperature,
+                    seed=seed,
                     max_retries=2,
                 )
                 total_reviewer_cost += cost
@@ -725,6 +739,18 @@ async def score_with_reviewer(
                 logger.warning("Reviewer scoring failed for batch: %s", e)
 
     return all_reviews, total_reviewer_cost
+
+
+def _rendered_messages_hash(messages: list[dict[str, Any]]) -> str:
+    """Hash the exact JSON-compatible messages submitted to a reviewer."""
+    payload = json.dumps(
+        messages,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 async def score_descriptions(

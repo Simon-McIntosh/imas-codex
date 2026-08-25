@@ -19,7 +19,7 @@ from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from imas_codex.standard_names import benchmark, benchmark_roles
 from imas_codex.standard_names.advisory_panel import (
@@ -31,6 +31,24 @@ ReviewerScorer = Callable[
     [list[dict[str, Any]], str, str, str | None],
     Awaitable[tuple[list[dict[str, Any]], float]],
 ]
+
+ADVISORY_CANDIDATE_TEMPERATURE = 0.0
+
+
+class CandidateScorer(Protocol):
+    """Production-context scorer with an explicit decoding envelope."""
+
+    def __call__(
+        self,
+        candidates: list[dict[str, Any]],
+        reviewer_model: str,
+        target: str,
+        reasoning_effort: str | None,
+        *,
+        temperature: float,
+        seed: int,
+        rendered_message_hashes: list[str],
+    ) -> Awaitable[tuple[list[dict[str, Any]], float]]: ...
 
 
 @dataclass(frozen=True)
@@ -64,6 +82,9 @@ class FrozenBenchmarkReport:
     """Reproducible benchmark inputs, outputs, provenance, and local costs."""
 
     candidate_model: str
+    candidate_temperature: float
+    candidate_seed: int
+    candidate_rendered_message_hashes: tuple[str, ...]
     seed: int
     sample_size: int
     population_size: int
@@ -142,7 +163,7 @@ async def run_frozen_advisory_benchmark(
     candidate_reasoning_effort: str | None = None,
     reviewer_models: Sequence[str] | None = None,
     disagreement_threshold: float | None = None,
-    candidate_scorer: ReviewerScorer | None = None,
+    candidate_scorer: CandidateScorer | None = None,
     panel_scorer: ReviewerScorer | None = None,
     captured_provenance: benchmark.BenchmarkProvenance | None = None,
     created_at: str | None = None,
@@ -161,6 +182,7 @@ async def run_frozen_advisory_benchmark(
     _validate_run_arguments(
         population=population,
         sample_size=sample_size,
+        seed=seed,
         candidate_model=candidate_model,
         authorized_cost_ceiling=authorized_cost_ceiling,
         source_provenance=source_provenance,
@@ -179,12 +201,16 @@ async def run_frozen_advisory_benchmark(
     _validate_row_names(row_names)
     ordered_input_hash = _ordered_rows_hash(frozen_rows)
 
+    candidate_message_hashes: list[str] = []
     scorer = candidate_scorer or _score_with_production_context
     candidate_task = scorer(
         copy.deepcopy(list(frozen_rows)),
         candidate_model,
         "names",
         candidate_reasoning_effort,
+        temperature=ADVISORY_CANDIDATE_TEMPERATURE,
+        seed=seed,
+        rendered_message_hashes=candidate_message_hashes,
     )
     panel_task = adjudicate_with_production_panel(
         copy.deepcopy(frozen_rows),
@@ -200,6 +226,7 @@ async def run_frozen_advisory_benchmark(
     )
 
     candidate_cost = _validate_cost(candidate_cost, "candidate")
+    _validate_rendered_message_hashes(candidate_message_hashes, len(frozen_rows))
     candidate_by_name = _index_candidate_judgments(candidate_judgments, row_names)
     result_rows = _assemble_result_rows(
         frozen_rows,
@@ -217,6 +244,9 @@ async def run_frozen_advisory_benchmark(
     provenance = captured_provenance or benchmark.BenchmarkProvenance.capture()
     report = FrozenBenchmarkReport(
         candidate_model=candidate_model,
+        candidate_temperature=ADVISORY_CANDIDATE_TEMPERATURE,
+        candidate_seed=seed,
+        candidate_rendered_message_hashes=tuple(candidate_message_hashes),
         seed=seed,
         sample_size=len(frozen_rows),
         population_size=len(frozen_population),
@@ -248,6 +278,10 @@ async def _score_with_production_context(
     model: str,
     target: str,
     reasoning_effort: str | None,
+    *,
+    temperature: float,
+    seed: int,
+    rendered_message_hashes: list[str],
 ) -> tuple[list[dict[str, Any]], float]:
     """Use the benchmark scorer that renders the production review context."""
     return await benchmark.score_with_reviewer(
@@ -255,6 +289,9 @@ async def _score_with_production_context(
         model,
         target=target,
         reasoning_effort=reasoning_effort,
+        temperature=temperature,
+        seed=seed,
+        rendered_message_hashes=rendered_message_hashes,
     )
 
 
@@ -262,6 +299,7 @@ def _validate_run_arguments(
     *,
     population: Sequence[Mapping[str, Any]],
     sample_size: int,
+    seed: int,
     candidate_model: str,
     authorized_cost_ceiling: float,
     source_provenance: Mapping[str, Any],
@@ -274,6 +312,8 @@ def _validate_run_arguments(
         raise ValueError(
             "sample_size cannot exceed the supplied frozen population size"
         )
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TypeError("seed must be an integer")
     if not isinstance(candidate_model, str) or not candidate_model.strip():
         raise ValueError("candidate_model must be a non-empty string")
     _validate_cost(authorized_cost_ceiling, "authorized ceiling")
@@ -288,6 +328,20 @@ def _validate_row_names(row_names: tuple[str, ...]) -> None:
         raise ValueError("every sampled row must resolve to a non-empty standard name")
     if len(set(row_names)) != len(row_names):
         raise ValueError("sampled row standard names must be unique")
+
+
+def _validate_rendered_message_hashes(hashes: list[str], row_count: int) -> None:
+    expected_batches = math.ceil(row_count / 10)
+    if len(hashes) != expected_batches:
+        raise ValueError(
+            "candidate did not checkpoint every rendered message batch; "
+            f"expected={expected_batches}, actual={len(hashes)}"
+        )
+    if any(
+        len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest)
+        for digest in hashes
+    ):
+        raise ValueError("candidate returned an invalid rendered-message SHA-256")
 
 
 def _index_candidate_judgments(

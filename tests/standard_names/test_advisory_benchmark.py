@@ -62,9 +62,31 @@ def _scorer(
         reviewer_model: str,
         target: str,
         reasoning_effort: str | None,
+        *,
+        temperature: float | None = None,
+        seed: int | None = None,
+        rendered_message_hashes: list[str] | None = None,
     ) -> tuple[list[dict[str, Any]], float]:
         assert target == "names"
         assert reasoning_effort == "medium"
+        if reviewer_model == "local/candidate":
+            assert temperature == 0.0
+            assert seed is not None
+            assert rendered_message_hashes is not None
+            rendered_messages = [
+                {"role": "system", "content": "frozen review fixture"},
+                {
+                    "role": "user",
+                    "content": json.dumps(candidates, sort_keys=True),
+                },
+            ]
+            rendered_message_hashes.append(
+                advisory_benchmark.benchmark._rendered_messages_hash(rendered_messages)
+            )
+        else:
+            assert temperature is None
+            assert seed is None
+            assert rendered_message_hashes is None
         calls.append((reviewer_model, tuple(copy.deepcopy(candidates))))
         offset = (
             0.0
@@ -90,14 +112,16 @@ async def _run(
     path: Path,
     *,
     seed: int = 17,
+    sample_size: int = 3,
     scorer=None,
     source_provenance: dict[str, Any] | None = None,
 ):
     calls: list[tuple[str, tuple[dict[str, Any], ...]]] = []
     selected_scorer = scorer or _scorer(calls)
+    selected_panel_scorer = _scorer(calls) if scorer is not None else selected_scorer
     report = await run_frozen_advisory_benchmark(
         POPULATION,
-        sample_size=3,
+        sample_size=sample_size,
         seed=seed,
         candidate_model="local/candidate",
         report_path=path,
@@ -108,7 +132,7 @@ async def _run(
         reviewer_models=REVIEWERS,
         disagreement_threshold=0.02,
         candidate_scorer=selected_scorer,
-        panel_scorer=selected_scorer,
+        panel_scorer=selected_panel_scorer,
         captured_provenance=PROVENANCE,
         created_at="2026-08-25T00:00:00+00:00",
     )
@@ -126,6 +150,10 @@ async def test_fixed_seed_freezes_domain_balanced_order_and_distinct_hashes(
     assert first.result_rows == second.result_rows
     assert first.ordered_input_hash == second.ordered_input_hash
     assert first.ordered_result_hash == second.ordered_result_hash
+    assert (
+        first.candidate_rendered_message_hashes
+        == second.candidate_rendered_message_hashes
+    )
     assert first.ordered_input_hash != first.ordered_result_hash
     assert {row["physics_domain"] for row in first.input_rows} == {
         "equilibrium",
@@ -134,6 +162,31 @@ async def test_fixed_seed_freezes_domain_balanced_order_and_distinct_hashes(
     }
     assert all(batch == first.input_rows for _, batch in first_calls)
     assert first_calls == second_calls
+
+
+@pytest.mark.asyncio
+async def test_candidate_request_pins_decoding_and_hashes_same_rendered_row(
+    tmp_path: Path,
+) -> None:
+    first, _ = await _run(
+        tmp_path / "candidate-first.json", seed=20260825, sample_size=1
+    )
+    second, _ = await _run(
+        tmp_path / "candidate-second.json", seed=20260825, sample_size=1
+    )
+
+    assert first.candidate_temperature == 0.0
+    assert first.candidate_seed == 20260825
+    assert second.candidate_temperature == 0.0
+    assert second.candidate_seed == 20260825
+    assert len(first.candidate_rendered_message_hashes) == 1
+    assert (
+        first.candidate_rendered_message_hashes
+        == second.candidate_rendered_message_hashes
+    )
+    assert json.loads((tmp_path / "candidate-first.json").read_text())[
+        "candidate_rendered_message_hashes"
+    ] == list(first.candidate_rendered_message_hashes)
 
 
 @pytest.mark.asyncio
@@ -246,8 +299,13 @@ async def test_partial_candidate_evidence_fails_before_publication(
         reviewer_model: str,
         target: str,
         reasoning_effort: str | None,
+        *,
+        temperature: float,
+        seed: int,
+        rendered_message_hashes: list[str],
     ) -> tuple[list[dict[str, Any]], float]:
-        del reviewer_model, target, reasoning_effort
+        del reviewer_model, target, reasoning_effort, temperature, seed
+        rendered_message_hashes.append("0" * 64)
         return [{"name": candidates[0]["standard_name"], "score": 0.8}], 0.0
 
     destination = tmp_path / "partial.json"
