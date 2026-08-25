@@ -11,7 +11,8 @@ Cypher.  The mutation registry contains ``set_properties``, ``delete``,
 ``delete_relationship`` for source-target reconciliation,
 ``add_relationship`` for structural-source revival or one unbound ordinary-source
 attachment, their exact delete/add/set combination for ordinary-source migration,
-and ``recompute_projection`` for an exact structural reparent or parent release.
+``restore_semantic_mirror`` for scalar and backing-projection restoration, and
+``recompute_projection`` for an exact structural reparent or parent release.
 The semantic guard registry contains last-producing-source,
 structural-legitimacy, and out-of-allowlist-immutability.
 """
@@ -136,6 +137,14 @@ _INELIGIBLE_SOURCE_GUARDS = (
     _SIGNED_LIFECYCLE,
     "permitted-orphan-hand-off",
     _COLLATERAL_IMMUTABILITY,
+)
+
+_SEMANTIC_MIRROR_ADAPTER = "semantic-mirror-repair"
+_SEMANTIC_MIRROR_MUTATION = "restore-semantic-mirror"
+_SEMANTIC_MIRROR_GUARDS = (
+    "sole-live-target-authority",
+    "exact-upstream-backing",
+    "out-of-allowlist-immutability",
 )
 
 _DD_RESIDUE_RELEASE_OPERATION = "release_legacy_dd_source_lifecycle"
@@ -5925,6 +5934,320 @@ def _apply_ineligible_source_retirement(
             client.close()
 
 
+def _apply_semantic_mirror_repair(
+    source_ids: list[str],
+    *,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Repair scalar and upstream projections from sole live-edge authority."""
+    from imas_codex.standard_names.graph_ops import (
+        _PROJECTED_SEMANTIC_SOURCE_TYPES,
+        SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA,
+        SemanticMirrorRepairConflict,
+        _authority_payload_hash,
+        _lock_semantic_mirror_repair_authority,
+        _semantic_mirror_repair_authority,
+        _semantic_mirror_repair_counts,
+        _TransactionQuery,
+    )
+
+    requested = sorted(set(source_ids))
+    if not requested:
+        raise ValueError("semantic mirror repair requires at least one source id")
+    if len(requested) != len(source_ids):
+        raise ValueError("semantic mirror repair requires unique source ids")
+    if not reason.strip():
+        raise ValueError("semantic mirror repair requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    event_id = (
+        f"sn-change:semantic-mirror-repair:{manifest_sha256}"
+        if manifest_sha256
+        else None
+    )
+    own = gc is None
+    client: Any = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query_handle.query(
+                        """
+                        OPTIONAL MATCH (change:StandardNameChange {id: $event_id})
+                        RETURN change.to_name AS target_json
+                        """,
+                        event_id=event_id,
+                    )
+                    target_json = (
+                        replay_rows[0].get("target_json") if replay_rows else None
+                    )
+                    if target_json is not None:
+                        expected_targets = json.loads(target_json)
+                        if sorted(expected_targets) != requested:
+                            raise SemanticMirrorRepairConflict(
+                                "recorded repair covers a different source set"
+                            )
+                        current_rows = query_handle.query(
+                            """
+                            UNWIND $rows AS expected
+                            MATCH (source:StandardNameSource {id: expected.source_id})
+                            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->
+                              (target:StandardName)
+                            WHERE NOT coalesce(target.name_stage, '') IN
+                              ['superseded', 'exhausted', 'contested']
+                            WITH expected, source,
+                                 collect(DISTINCT target.id) AS target_ids
+                            OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->
+                              (backing)
+                            OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->
+                              (mapped:StandardName)
+                            WITH expected, source, target_ids,
+                                 collect(DISTINCT mapped.id) AS mapped_ids
+                            RETURN collect({source_id: expected.source_id,
+                              source_type: source.source_type,
+                              scalar: source.produced_sn_id,
+                              target_ids: target_ids,
+                              mapped_ids: mapped_ids,
+                              expected_target: expected.target_id}) AS rows
+                            """,
+                            rows=[
+                                {"source_id": source_id, "target_id": target_id}
+                                for source_id, target_id in expected_targets.items()
+                            ],
+                        )
+                        current = current_rows[0].get("rows") if current_rows else []
+                        if len(current) != len(expected_targets) or any(
+                            row["target_ids"] != [row["expected_target"]]
+                            or row["scalar"] != row["expected_target"]
+                            or (
+                                row["source_type"] in _PROJECTED_SEMANTIC_SOURCE_TYPES
+                                and row["expected_target"] not in row["mapped_ids"]
+                            )
+                            for row in current
+                        ):
+                            raise SemanticMirrorRepairConflict(
+                                "recorded repair has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "manifest_sha256": manifest_sha256,
+                        }
+
+                manifest, actions, refusals, already_clean = (
+                    _semantic_mirror_repair_authority(query_handle, requested, reason)
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = _semantic_mirror_repair_counts(
+                    requested, actions, refusals, already_clean
+                )
+                if apply and computed_hash != manifest_sha256:
+                    raise SemanticMirrorRepairConflict(
+                        "fresh semantic-mirror manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not actions:
+                    transaction.rollback()
+                    return {
+                        "schema": SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA,
+                        "outcome": "already_clean",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": [],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": 1,
+                        "counts": counts,
+                        "refusals": [],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                _lock_semantic_mirror_repair_authority(query_handle, manifest)
+                locked_manifest, locked_actions, locked_refusals, locked_clean = (
+                    _semantic_mirror_repair_authority(query_handle, requested, reason)
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise SemanticMirrorRepairConflict(
+                        "semantic-mirror authority changed while acquiring locks"
+                    )
+                actions = locked_actions
+                already_clean = locked_clean
+                scalar_rows = [action for action in actions if action["scalar_change"]]
+                if scalar_rows:
+                    scalar_updates = query_handle.query(
+                        """
+                        UNWIND $rows AS expected
+                        MATCH (source:StandardNameSource {id: expected.source_id})
+                        WHERE elementId(source) = expected.source_element_id
+                          AND ((source.produced_sn_id IS NULL
+                                AND expected.prior_scalar_target IS NULL)
+                               OR source.produced_sn_id =
+                                  expected.prior_scalar_target)
+                          AND source.claimed_at IS NULL
+                          AND source.claim_token IS NULL
+                          AND EXISTS {
+                            (source)-[:PRODUCED_NAME]->(:StandardName {
+                              id: expected.target_id})
+                          }
+                        SET source.produced_sn_id = expected.target_id
+                        RETURN collect(source.id) AS ids
+                        """,
+                        rows=scalar_rows,
+                    )
+                    if sorted(scalar_updates[0].get("ids") or []) != sorted(
+                        row["source_id"] for row in scalar_rows
+                    ):
+                        raise SemanticMirrorRepairConflict(
+                            "source scalar compare-and-set changed"
+                        )
+
+                projection_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        **addition,
+                    }
+                    for action in actions
+                    for addition in action["projection_additions"]
+                ]
+                if projection_rows:
+                    projection_updates = query_handle.query(
+                        """
+                        UNWIND $rows AS expected
+                        MATCH (source:StandardNameSource {id: expected.source_id})
+                        MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+                        WHERE elementId(backing) = expected.backing_element_id
+                          AND source.produced_sn_id = expected.target_id
+                          AND source.claimed_at IS NULL
+                          AND source.claim_token IS NULL
+                        MATCH (target:StandardName {id: expected.target_id})
+                        WHERE elementId(target) = expected.target_element_id
+                          AND NOT EXISTS {
+                            (backing)-[:HAS_STANDARD_NAME]->(target)
+                          }
+                        CREATE (backing)-[:HAS_STANDARD_NAME]->(target)
+                        RETURN collect(source.id) AS ids
+                        """,
+                        rows=projection_rows,
+                    )
+                    if sorted(projection_updates[0].get("ids") or []) != sorted(
+                        row["source_id"] for row in projection_rows
+                    ):
+                        raise SemanticMirrorRepairConflict(
+                            "backing projection compare-and-set changed"
+                        )
+
+                resolutions = [*actions, *already_clean]
+                expected_targets = {
+                    row["source_id"]: row["target_id"] for row in resolutions
+                }
+                change_rows = query_handle.query(
+                    """
+                    MERGE (change:StandardNameChange {id: $event_id})
+                    ON CREATE SET change.from_name = $before_json,
+                                  change.to_name = $target_json,
+                                  change.operation =
+                                    'repair_scalar_projection_mismatches',
+                                  change.reason = $reason,
+                                  change.origin =
+                                    'semantic_source_reconciliation',
+                                  change.run_id = $run_id,
+                                  change.changed_at = datetime(),
+                                  change.internal = true,
+                                  change.manifest_sha256 = $manifest_sha256
+                    WITH change
+                    UNWIND $target_ids AS target_id
+                    MATCH (target:StandardName {id: target_id})
+                    MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN DISTINCT change.id AS change_id
+                    """,
+                    event_id=f"sn-change:semantic-mirror-repair:{computed_hash}",
+                    before_json=json.dumps(
+                        {
+                            action["source_id"]: {
+                                "produced_sn_id": action["prior_scalar_target"],
+                                "projection_missing": bool(
+                                    action["projection_additions"]
+                                ),
+                            }
+                            for action in actions
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    target_json=json.dumps(
+                        expected_targets, sort_keys=True, separators=(",", ":")
+                    ),
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                    target_ids=sorted(set(expected_targets.values())),
+                )
+                if len(change_rows) != 1:
+                    raise SemanticMirrorRepairConflict(
+                        "semantic-mirror receipt was not written exactly once"
+                    )
+                transaction.commit()
+                return {
+                    "schema": SEMANTIC_MIRROR_REPAIR_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": 1,
+                    "sources_reconciled": len(actions),
+                    "scalars_changed": len(scalar_rows),
+                    "projections_added": len(projection_rows),
+                    "counts": counts,
+                    "refusals": [],
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_id": change_rows[0]["change_id"],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 @retry_on_deadlock()
 def apply_signed_manifest(
     authority_path: str | Path | dict[str, Any],
@@ -5953,6 +6276,31 @@ def apply_signed_manifest(
     authorizes only the hash: participant closure, collateral rows, and counter
     baselines are always read again inside this invocation.
     """
+    if authority_adapter == _SEMANTIC_MIRROR_ADAPTER:
+        if (
+            legacy_args
+            or not isinstance(authority_path, Sequence)
+            or isinstance(authority_path, str | bytes)
+        ):
+            raise SignedManifestAuthorityError(
+                "semantic mirror repair requires an exact source-id sequence"
+            )
+        if mutation_kind != _SEMANTIC_MIRROR_MUTATION:
+            raise SignedManifestAuthorityError(
+                "semantic mirror repair requires its exact closed mutation program"
+            )
+        if guard_set != _SEMANTIC_MIRROR_GUARDS:
+            raise SignedManifestAuthorityError(
+                "semantic mirror repair requires its exact deterministic guard set"
+            )
+        return _apply_semantic_mirror_repair(
+            list(authority_path),
+            reason=reason,
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+            run_id=run_id,
+            gc=gc,
+        )
     if authority_adapter == _INELIGIBLE_SOURCE_ADAPTER:
         if (
             legacy_args
