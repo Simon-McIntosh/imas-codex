@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-commits" content="2ec2f04e,faaa985f">
 <meta name="plan-artifacts" content="docs/evidence/isn-locus-vocabulary-rotation/locus-adjudication.md,docs/evidence/isn-locus-vocabulary-rotation/coordinate-base-convention.md">
 <meta name="plan-impl" content="0.67">
@@ -99,14 +99,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="locus-warranted" data-choice="add-token" data-by="Simon McIntosh" data-when="2026-08-25">
+<div class="r-dec" data-key="locus-warranted" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Is a field-map-grid locus token warranted in the closed ISN vocabulary?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="add-token">Warranted — add it and rotate</button>
+      <button class="r-opt" data-value="add-token">Warranted — add it and rotate</button>
       <button class="r-opt" data-value="different-identity">Not a locus — the correct identity names something else</button>
       <button class="r-opt" data-value="permanent-refusal">Not warranted — the row stays a settled refusal</button>
       </p>
-    <p class="r-dec-rat">Warranted, locked by the lead on the adjudication evidence. The field-map grid is a computational sampling structure rather than a measurement place, but ISN&#x27;s locus registry also carries entity owners, so of_field_map_grid expresses the DD ownership relation without misclassifying the coordinates as measurement positions. The token resolves a measured family of three DD coordinate paths (r, z, phi under .../field_map/grid), not a single row: family_count 3 and beyond_target 2 behind a schema sanity count of 61,366/61,366/61,366 with a firing positive control on the phi path, and the only other grid structure, tf/field_map/grid, contributes 0 coordinate children. None of the 181 runtime locus tokens under ISN 0.8.0rc67 contains grid or map, and all ten swept near misses denote a different object: probes and coils are hardware, pedestal positions are plasma locations, coordinate_system is the reference frame rather than the discrete support, and measurement_position asserts an observation that never occurred. The strict parser independently rejected all three intended identities, and its nearest candidates for the toroidal one were toroidal_flux_coordinate and its gradient, which would substitute a magnetic-flux coordinate for a geometric axis and change the physics. The alternative to rotating is leaving r and z unnamed and phi asserting a measurement position the Data Dictionary does not carry. The physical-base spelling for the r leaf is NOT settled by this decision: the lead has questioned major_radius_of_field_map_grid against radial_coordinate_of_field_map_grid on family-symmetry grounds, and the base token is being measured against established corpus convention before anything is added to ISN.</p>
+    <p class="r-dec-rat">REOPENED by the lead on 2026-08-25, before any ISN change was made. The disposition had been locked to add-token on the adjudication&#x27;s evidence; reading locus_registry.yml itself before touching the fork surfaced a governing curation policy the adjudication never saw, because it derived its evidence from get_grammar_context() at runtime, which serves tokens and definitions but not the YAML&#x27;s own policy comments. The policy states that tokens must describe physics-meaningful loci and NOT DD structural artifacts, that discretization framework tokens are not physics positions, and that atomic tokens are preferred over long compounds. A field_map_grid is a three-dimensional discretization structure, arguably a DD structural artifact, and a long compound, so three of the four bullets point against it. Measured against the registry source: of 160 tokens, 89 entity-typed, NO token containing grid, mesh, ggd or map exists at all, which reads as deliberate exclusion rather than an accidental gap. The only precedent for a non-material entity is exactly one token, coordinate_system, and a reference frame is not a discretization. This does NOT disturb the separately settled base spelling: radial_coordinate is correct for the r leaf under either outcome, since coordinate_axes.yml defines the pattern as radial_coordinate_of_&lt;locus&gt; and only the owner half is in question. The live options are therefore narrower than the plan&#x27;s original three: admit the token against its own policy on thin precedent, or treat the three DD coordinate paths as a settled refusal on the ground that discretization structure belongs in DD provenance rather than in a Standard Name.</p>
     </div>
 </section>
 
