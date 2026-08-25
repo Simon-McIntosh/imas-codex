@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -46,6 +47,8 @@ from imas_codex.graph.models import (
     RepairRowIdentity,
     RepairSelection,
 )
+
+logger = logging.getLogger(__name__)
 
 SIGNED_MANIFEST_SCHEMA = "imas-codex.signed-repair-manifest.v1"
 SIGNED_MANIFEST_RECEIPT_SCHEMA = "imas-codex.signed-repair-receipt.v1"
@@ -120,6 +123,13 @@ _STRUCTURAL_EDGE_MUTATION = "recompute-canonical-structural-edges"
 _STRUCTURAL_EDGE_GUARDS = (
     "exact-request-scope",
     "canonical-structural-derivation",
+    _COLLATERAL_IMMUTABILITY,
+)
+
+_NORMALIZATION_PEEL_ADAPTER = "normalization-peel-unit-repair"
+_NORMALIZATION_PEEL_MUTATION = "clear-normalization-peel-parent-unit"
+_NORMALIZATION_PEEL_GUARDS = (
+    "corrected-normalization-peel-unit-authority",
     _COLLATERAL_IMMUTABILITY,
 )
 
@@ -262,6 +272,40 @@ def _apply_structural_edge_reconcile(gc: Any, name_ids: list[str]) -> int:
         expand_closure=False,
     )
     return len(requested)
+
+
+def _apply_normalization_peel_unit_repair(gc: Any) -> list[str]:
+    """Clear dimensionless units inherited only from normalization children."""
+    rows = gc.query(
+        """
+        MATCH (sn:StandardName {unit: '1', origin: 'derived'})
+        WHERE NOT any(t IN split(sn.id, '_')
+                      WHERE t IN ['normalized', 'normalised'])
+          AND sn.validation_issues IS NOT NULL
+          AND any(issue IN sn.validation_issues
+                  WHERE issue CONTAINS 'name_unit_consistency_check')
+        MATCH (c)-[:HAS_PARENT]->(sn)
+        WITH sn, [k IN collect(c) WHERE k.unit IS NOT NULL] AS unit_kids
+        WHERE all(k IN unit_kids
+                  WHERE k.unit = '1'
+                    AND any(t IN split(k.id, '_')
+                            WHERE t IN ['normalized', 'normalised']))
+        OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(:Unit {id: '1'})
+        DELETE r
+        SET sn.unit = null
+        RETURN sn.id AS id
+        ORDER BY id
+        """
+    )
+    repaired = [r["id"] for r in rows]
+    if repaired:
+        logger.info(
+            "repair_normalization_peel_parent_units: cleared mis-inherited "
+            "unit '1' on %d parent(s): %s",
+            len(repaired),
+            ", ".join(repaired),
+        )
+    return repaired
 
 
 @dataclass
@@ -6615,6 +6659,28 @@ def apply_signed_manifest(
                 "structural-edge reconciliation requires a name-id list"
             )
         return _apply_structural_edge_reconcile(graph_client, name_ids)
+    if authority_adapter == _NORMALIZATION_PEEL_ADAPTER:
+        if authority_path != {} or len(legacy_args) != 1:
+            raise SignedManifestAuthorityError(
+                "normalization-peel unit repair requires a graph client"
+            )
+        if mutation_kind != _NORMALIZATION_PEEL_MUTATION:
+            raise SignedManifestAuthorityError(
+                "normalization-peel unit repair requires its exact mutation program"
+            )
+        if guard_set != _NORMALIZATION_PEEL_GUARDS:
+            raise SignedManifestAuthorityError(
+                "normalization-peel unit repair requires its exact deterministic guard set"
+            )
+        if not apply:
+            raise SignedManifestAuthorityError(
+                "normalization-peel unit repair always applies inside its invocation"
+            )
+        if gc is not None or client_factory is not None:
+            raise SignedManifestAuthorityError(
+                "normalization-peel unit repair receives its graph client positionally"
+            )
+        return _apply_normalization_peel_unit_repair(legacy_args[0])
     if authority_adapter == _LIFECYCLELESS_STUB_ADAPTER:
         if legacy_args or authority_path != {}:
             raise SignedManifestAuthorityError(
