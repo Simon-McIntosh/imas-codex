@@ -122,7 +122,7 @@ class TestIdempotentDoubleCharge:
 
 class TestPerNameApportionment:
     def test_per_name_apportionment_correct(self):
-        """1 LLMCost with sn_ids=[a,b], cost=1.0 → each gets 0.5."""
+        """One cost row over two Standard Names apportions 0.5 to each."""
         from imas_codex.standard_names.graph_ops import (
             aggregate_spend_per_name,
             create_sn_run_open,

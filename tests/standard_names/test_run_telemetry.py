@@ -84,6 +84,7 @@ class TestLLMCostPersistence:
             assert kwargs["llm_tokens_out"] == 200
             assert kwargs["phase"] == "generate_name"
             assert kwargs["pool"] == "compose"  # generate_name maps to compose
+            assert kwargs["standard_name_ids"] == ["test:electron_temperature"]
             assert kwargs["llm_model"] == "openrouter/anthropic/claude-sonnet-4.6"
 
             # Should return a deterministic id

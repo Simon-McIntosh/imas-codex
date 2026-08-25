@@ -46,7 +46,6 @@ def _make_node(
         "kind": "scalar",
         "unit": "eV",
         "physics_domain": "test",
-        "docs_review_resolution_method": "quorum_consensus",
         **kwargs,
     }
 
@@ -93,7 +92,7 @@ def _make_gc_filtering(all_nodes: list[dict]) -> MagicMock:
                     not requires_docs
                     or (
                         n.get("docs_stage") == "accepted"
-                        and n.get("docs_review_resolution_method") is not None
+                        and n.get("_has_winning_docs_review", True)
                         and n.get("docs_review_quorum_shortfall") is None
                     )
                 )
@@ -354,8 +353,8 @@ class TestQuorumShortfallIsNotExportable:
         assert "docs_review_resolution_method" not in cypher
         assert "docs_review_quorum_shortfall" not in cypher
 
-    def test_missing_docs_resolution_is_excluded_from_full_export(self) -> None:
-        nodes = [_make_node("legacy_docs", docs_review_resolution_method=None)]
+    def test_missing_docs_review_authority_is_excluded_from_full_export(self) -> None:
+        nodes = [_make_node("unreviewed_docs", _has_winning_docs_review=False)]
         mock_gc = _make_gc_filtering(nodes)
         with patch(_GC_PATH) as mock_graph:
             mock_graph.return_value.__enter__ = MagicMock(return_value=mock_gc)

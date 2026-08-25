@@ -27,7 +27,6 @@ def _candidate(name: str, **overrides) -> dict:
         "validation_status": "valid",
         "review_quorum_shortfall": None,
         "docs_stage": "accepted",
-        "docs_review_resolution_method": "quorum_consensus",
         "docs_review_quorum_shortfall": None,
         "reviewer_score_name": 0.95,
         "description": f"Description for {name}.",

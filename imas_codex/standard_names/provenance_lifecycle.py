@@ -976,7 +976,7 @@ def refresh_renamed_source_mirrors(gc: Any, renames: list[dict[str, str]]) -> in
         WITH sn, source
         OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
         FOREACH (_ IN CASE WHEN revision IS NULL THEN [] ELSE [1] END |
-          SET revision.sn_id = sn.id)
+          SET revision.standard_name_id = sn.id)
         RETURN count(DISTINCT source) AS refreshed
         """,
         renames=renames,

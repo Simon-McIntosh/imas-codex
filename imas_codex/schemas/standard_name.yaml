@@ -1225,14 +1225,6 @@ classes:
           review only.
       reviewer_model_docs:
         description: LLM model that produced the most recent docs-axis review.
-      docs_review_resolution_method:
-        description: >-
-          How the reviewer chain reached the most recent docs-axis score:
-          ``quorum_consensus`` (both blind seats agreed),
-          ``authoritative_escalation`` (the escalator seat resolved their
-          dispute), ``max_cycles_reached`` (no seat resolved it), or
-          ``single_review`` (fewer seats scored than the chain defines).
-        range: string
       docs_review_quorum_shortfall:
         description: >-
           Why the most recent docs-axis score was not acted on. Null on every
@@ -2254,7 +2246,7 @@ classes:
         description: >-
           Composite key (sn_id#rev-N) where N is the revision number.
         required: true
-      sn_id:
+      standard_name_id:
         description: >-
           StandardName id this revision belongs to. Denormalised for query
           convenience; the authoritative link is the DOCS_REVISION_OF edge.
@@ -3562,9 +3554,9 @@ classes:
         description: Pipeline phase (generate, regen, enrich, review_names, review_docs).
       cycle:
         description: Review cycle (c0, c1, c2) or null for non-review phases.
-      sn_ids:
+      standard_name_ids:
         multivalued: true
-        description: StandardName ids touched by this LLM call. Per-name cost share = llm_cost / size(sn_ids).
+        description: StandardName ids touched by this LLM call. Per-name cost share = llm_cost / size(standard_name_ids).
       batch_id:
         description: Groups retries within one logical batch.
       overspend:

@@ -562,6 +562,7 @@ class TestRefineDocsStageMachine:
         _, tx = self._call_persist()
         cypher: str = tx.run.call_args.args[0]
         assert "DocsRevision" in cypher
+        assert "rev.standard_name_id" in cypher
 
     def test_cypher_creates_docs_revision_of_edge(self) -> None:
         """Cypher creates DOCS_REVISION_OF edge from SN to snapshot node."""
