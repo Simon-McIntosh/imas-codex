@@ -52,7 +52,7 @@ class TestOrderingUnaryPrefix:
         ]
 
         result = order_entries_by_hierarchy(entries, edges)
-        names = [e["name"] for e in result]
+        names = [e["name"] for e in result.entries]
         assert names == [
             "temperature",
             "maximum_of_temperature",
@@ -86,7 +86,7 @@ class TestOrderingProjection:
         ]
 
         result = order_entries_by_hierarchy(entries, edges)
-        names = [e["name"] for e in result]
+        names = [e["name"] for e in result.entries]
         assert names == [
             "magnetic_field",
             "x_magnetic_field",
@@ -120,7 +120,7 @@ class TestOrderingBinary:
         ]
 
         result = order_entries_by_hierarchy(entries, edges)
-        names = [e["name"] for e in result]
+        names = [e["name"] for e in result.entries]
         # Alpha tie-break: density before pressure
         assert names == [
             "density",
@@ -156,7 +156,7 @@ class TestOrderingUncertainty:
         ]
 
         result = order_entries_by_hierarchy(entries, edges)
-        names = [e["name"] for e in result]
+        names = [e["name"] for e in result.entries]
         assert names == [
             "temperature",
             "lower_uncertainty_of_temperature",
@@ -191,7 +191,7 @@ class TestOrderingMixed:
         ]
 
         result = order_entries_by_hierarchy(entries, edges)
-        names = [e["name"] for e in result]
+        names = [e["name"] for e in result.entries]
 
         # temperature first (sole root), then all children alpha-sorted
         assert names[0] == "temperature"
@@ -229,7 +229,7 @@ class TestOrderingOrphan:
         result = order_entries_by_hierarchy(
             entries, edges, cross_domain_parent_ids=cross_domain
         )
-        names = [e["name"] for e in result]
+        names = [e["name"] for e in result.entries]
 
         # Clean roots first (alpha_base, beta_base), then orphan
         assert names == ["alpha_base", "beta_base", "cross_domain_wrapper"]
@@ -260,8 +260,12 @@ class TestStabilityClusterReassignment:
             ("maximum_of_temperature", "temperature", "HAS_PARENT"),
         ]
 
-        result_v1 = [e["name"] for e in order_entries_by_hierarchy(entries_v1, edges)]
-        result_v2 = [e["name"] for e in order_entries_by_hierarchy(entries_v2, edges)]
+        result_v1 = [
+            e["name"] for e in order_entries_by_hierarchy(entries_v1, edges).entries
+        ]
+        result_v2 = [
+            e["name"] for e in order_entries_by_hierarchy(entries_v2, edges).entries
+        ]
 
         assert result_v1 == result_v2
 
@@ -292,8 +296,12 @@ class TestStabilityPropertyPermutation:
             ("maximum_of_temperature", "temperature", "HAS_PARENT"),
         ]
 
-        result_v1 = [e["name"] for e in order_entries_by_hierarchy(entries_v1, edges)]
-        result_v2 = [e["name"] for e in order_entries_by_hierarchy(entries_v2, edges)]
+        result_v1 = [
+            e["name"] for e in order_entries_by_hierarchy(entries_v1, edges).entries
+        ]
+        result_v2 = [
+            e["name"] for e in order_entries_by_hierarchy(entries_v2, edges).entries
+        ]
 
         assert result_v1 == result_v2
 
@@ -608,23 +616,117 @@ class TestCanonicalKeyOrder:
 
 
 class TestOrderingCycleDetection:
-    """OrderingError raised for cycles."""
+    """Cycle participants are named and withheld without losing acyclic rows."""
 
-    def test_cycle_raises(self) -> None:
+    def test_two_node_cycle_withholds_only_cycle_participants(self) -> None:
         from imas_codex.standard_names.catalog_ordering import (
-            OrderingError,
             order_entries_by_hierarchy,
         )
 
         entries = [
             {"name": "a"},
             {"name": "b"},
+            {"name": "child_of_cycle"},
+            {"name": "independent"},
         ]
-        # Mutual dependency → cycle
         edges = [
             ("a", "b", "HAS_PARENT"),
             ("b", "a", "HAS_PARENT"),
+            ("child_of_cycle", "a", "HAS_PARENT"),
         ]
 
-        with pytest.raises(OrderingError, match="unemitted"):
-            order_entries_by_hierarchy(entries, edges)
+        result = order_entries_by_hierarchy(entries, edges)
+
+        assert [entry["name"] for entry in result.entries] == [
+            "child_of_cycle",
+            "independent",
+        ]
+        assert [exclusion.name for exclusion in result.exclusions] == ["a", "b"]
+        assert all(
+            exclusion.relationships
+            == (
+                ("a", "b", "HAS_PARENT"),
+                ("b", "a", "HAS_PARENT"),
+            )
+            for exclusion in result.exclusions
+        )
+
+    def test_export_ledgers_cycle_and_writes_packet(self, tmp_path: Path) -> None:
+        from imas_codex.standard_names.export import run_export
+
+        population = [
+            {
+                "id": name,
+                "name_stage": "accepted",
+                "validation_status": "valid",
+                "review_quorum_shortfall": None,
+                "docs_stage": "accepted",
+                "docs_review_quorum_shortfall": None,
+                "reviewer_score_name": 0.95,
+                "description": f"Description for {name}.",
+                "documentation": f"Documentation for {name}.",
+                "kind": "scalar",
+                "unit": "1",
+                "physics_domain": "general",
+                "links": [],
+            }
+            for name in ("a", "b", "independent")
+        ]
+
+        class EmptyGraphClient:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def query(self, cypher: str, **params):
+                return []
+
+        with (
+            patch(
+                "imas_codex.standard_names.export._fetch_export_population",
+                return_value=population,
+            ),
+            patch(
+                "imas_codex.graph.client.GraphClient",
+                return_value=EmptyGraphClient(),
+            ),
+            patch(
+                "imas_codex.standard_names.export._validate_entry",
+                side_effect=lambda entry: entry,
+            ),
+            patch(
+                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                return_value=(
+                    [("a", "b", "HAS_PARENT"), ("b", "a", "HAS_PARENT")],
+                    set(),
+                ),
+            ),
+            patch("imas_codex.standard_names.export._write_domain_yaml") as write_yaml,
+        ):
+            report = run_export(
+                tmp_path,
+                skip_gate=True,
+                force=True,
+                include_sources=False,
+            )
+
+        assert report.exported_names == ["independent"]
+        assert report.exported_count == 1
+        cycle_records = [
+            record
+            for record in report.exclusion_records
+            if record.reason == "hierarchy_ordering_cycle"
+        ]
+        assert [record.standard_name_id for record in cycle_records] == ["a", "b"]
+        assert all("a -[HAS_PARENT]-> b" in record.detail for record in cycle_records)
+        assert all("b -[HAS_PARENT]-> a" in record.detail for record in cycle_records)
+        accounting_gate = next(
+            gate for gate in report.gate_results if gate.gate == "exclusion_accounting"
+        )
+        assert accounting_gate.passed
+        assert (tmp_path / "catalog.yml").is_file()
+        assert (tmp_path / ".export_report.json").is_file()
+        written_entries = write_yaml.call_args.args[2]
+        assert [entry["name"] for entry in written_entries] == ["independent"]
