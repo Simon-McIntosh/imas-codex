@@ -3902,9 +3902,11 @@ def _materialize_derived_parent_rows(
                 parent.origin = 'derived',
                 parent.kind = $kind,
                 parent.unit = coalesce($unit, parent.unit),
-                parent.cocos_transformation_type =
-                    coalesce($cocos_transformation_type,
-                             parent.cocos_transformation_type),
+                parent.cocos_transformation_type = $cocos_transformation_type,
+                parent.cocos = CASE
+                    WHEN $cocos_transformation_type IS NULL THEN null
+                    ELSE parent.cocos
+                END,
                 parent.physics_domain =
                     coalesce($physics_domain, parent.physics_domain),
                 parent.source_domains = CASE
@@ -3952,6 +3954,16 @@ def _materialize_derived_parent_rows(
                 parent.is_geometric_coordinate =
                     coalesce(parent.is_geometric_coordinate,
                              $is_geometric_coordinate)
+            __PARENT_SCOPE__
+            CALL (parent) {
+                OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)
+                WITH collect(stored_cocos) AS stored_cocos_edges
+                FOREACH (stored_cocos IN CASE
+                    WHEN $cocos_transformation_type IS NULL
+                    THEN stored_cocos_edges ELSE []
+                END | DELETE stored_cocos)
+                RETURN size(stored_cocos_edges) AS stored_cocos_edge_count
+            }
             __PARENT_SCOPE__
             MERGE (sns:StandardNameSource {id: $source_node_id})
             ON CREATE SET sns.created_at = datetime(),
@@ -4078,9 +4090,11 @@ def _materialize_derived_parent_rows_batched(
             parent.origin = 'derived',
             parent.kind = row.kind,
             parent.unit = coalesce(row.unit, parent.unit),
-            parent.cocos_transformation_type =
-                coalesce(row.cocos_transformation_type,
-                         parent.cocos_transformation_type),
+            parent.cocos_transformation_type = row.cocos_transformation_type,
+            parent.cocos = CASE
+                WHEN row.cocos_transformation_type IS NULL THEN null
+                ELSE parent.cocos
+            END,
             parent.physics_domain =
                 coalesce(row.physics_domain, parent.physics_domain),
             parent.source_domains = CASE
@@ -4112,6 +4126,16 @@ def _materialize_derived_parent_rows_batched(
             parent.is_geometric_coordinate =
                 coalesce(parent.is_geometric_coordinate,
                          row.is_geometric_coordinate)
+        WITH parent, row
+        CALL (parent, row) {
+            OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)
+            WITH collect(stored_cocos) AS stored_cocos_edges
+            FOREACH (stored_cocos IN CASE
+                WHEN row.cocos_transformation_type IS NULL
+                THEN stored_cocos_edges ELSE []
+            END | DELETE stored_cocos)
+            RETURN size(stored_cocos_edges) AS stored_cocos_edge_count
+        }
         MERGE (source:StandardNameSource {id: row.source_node_id})
           ON CREATE SET source.created_at = datetime(), source.attempt_count = 0
         SET source.status = 'composed',
