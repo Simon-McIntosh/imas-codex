@@ -192,6 +192,21 @@ _DD_RESIDUE_RELEASE_PROPERTIES = {
     "composed_at": None,
 }
 
+_REWIRE_RELOCATION_RETIRE_OPERATION = "retire_unauthorized_has_parent_relocations"
+_CURRENT_STRUCTURAL_DERIVATION = "current-structural-derivation"
+_DERIVABLE_PARENT_PATH = "derivable-parent-path-preservation"
+_REWIRE_RELOCATION_RETIRE_GUARDS = {
+    _CURRENT_STRUCTURAL_DERIVATION,
+    _DERIVABLE_PARENT_PATH,
+    _COLLATERAL_IMMUTABILITY,
+}
+_GUARD_KINDS.update(
+    {
+        _CURRENT_STRUCTURAL_DERIVATION: RepairGuardKind.semantic_authority.value,
+        _DERIVABLE_PARENT_PATH: RepairGuardKind.semantic_authority.value,
+    }
+)
+
 
 class SignedManifestAuthorityError(ValueError):
     """The authority bytes or typed repair program are invalid."""
@@ -937,6 +952,26 @@ def _validate_supersede_successor_program(
         )
 
 
+def _validate_rewire_relocation_retirement_authority(
+    operation_id: str,
+    rows: Sequence[_LoadedRow],
+    receipt_policy: Mapping[str, Any],
+) -> None:
+    """Keep successor-rewire cleanup behind one closed structural program."""
+    selected = [row for row in rows if _is_rewire_relocation_retirement(row)]
+    if not selected and operation_id != _REWIRE_RELOCATION_RETIRE_OPERATION:
+        return
+    if (
+        operation_id != _REWIRE_RELOCATION_RETIRE_OPERATION
+        or len(selected) != len(rows)
+        or not selected
+        or receipt_policy.get("operation") != _REWIRE_RELOCATION_RETIRE_OPERATION
+    ):
+        raise SignedManifestAuthorityError(
+            "successor-rewire retirement requires its exact closed structural program"
+        )
+
+
 def _canonical_bytes(value: object) -> bytes:
     return json.dumps(
         value,
@@ -1235,6 +1270,9 @@ def _load_authority(
     if not isinstance(operation_id, str) or not operation_id.strip():
         raise SignedManifestAuthorityError("operation_id must be non-empty")
     _validate_dd_residue_release_authority(operation_id, loaded_rows, receipt_policy)
+    _validate_rewire_relocation_retirement_authority(
+        operation_id, loaded_rows, receipt_policy
+    )
     artifact_projection = {
         **data,
         "authority_digests": [str(item["id"]) for item in digest_rows] or None,
@@ -2225,6 +2263,13 @@ def _is_structural_release(row: _LoadedRow) -> bool:
     )
 
 
+def _is_rewire_relocation_retirement(row: _LoadedRow) -> bool:
+    return (
+        _is_structural_reparent(row)
+        and _guard_names(row) == _REWIRE_RELOCATION_RETIRE_GUARDS
+    )
+
+
 def _signed_supersede_successor(mutation: Mapping[str, Any]) -> str | None:
     if str(mutation["kind"]) != RepairMutationKind.supersede.value:
         return None
@@ -2256,7 +2301,13 @@ def _structural_release_authority(authority: _Authority) -> bool:
 
 def _all_or_nothing(authority: _Authority) -> bool:
     return bool(authority.data.get("all_or_nothing")) or (
-        _structural_reparent_authority(authority)
+        (
+            _structural_reparent_authority(authority)
+            and not all(
+                _is_rewire_relocation_retirement(row)
+                for row in _runtime_authority_rows(authority)
+            )
+        )
         or _structural_release_authority(authority)
     )
 
@@ -2356,6 +2407,8 @@ def _structural_reparent_refusal(query: _Query, action: dict[str, Any]) -> str |
     row: _LoadedRow = action["row"]
     if not _is_structural_reparent(row):
         return None
+    if _is_rewire_relocation_retirement(row):
+        return None
     mutation = row.mutations[0]
     arguments = dict(mutation["arguments"])
     snapshots = action["participant_snapshots"]
@@ -2434,6 +2487,118 @@ def _structural_reparent_refusal(query: _Query, action: dict[str, Any]) -> str |
     action["participant_digests"].append(
         {
             "participant_id": "structural-reparent-child-authority",
+            "sha256": _digest(signed_child_state),
+        }
+    )
+    action["structural_reparent_child_state"] = signed_child_state
+    return None
+
+
+def _rewire_relocation_retirement_refusal(
+    query: _Query, action: dict[str, Any]
+) -> str | None:
+    """Admit only an unauthorized tip with its exact derivable replacement."""
+    row: _LoadedRow = action["row"]
+    if not _is_rewire_relocation_retirement(row):
+        return None
+
+    from imas_codex.standard_names.derivation import derive_edges
+
+    mutation = row.mutations[0]
+    arguments = dict(mutation["arguments"])
+    child_id = str(arguments["start_id"])
+    old_parent_id = str(arguments["old_end_id"])
+    new_parent_id = str(arguments["new_end_id"])
+    relationship_properties = {
+        key: value
+        for key, value in dict(arguments["properties"]).items()
+        if value is not None
+    }
+    derived = [
+        edge for edge in derive_edges(child_id) if edge.edge_type == "HAS_PARENT"
+    ]
+    if any(
+        edge.to_name == old_parent_id
+        and {key: value for key, value in edge.props.items() if value is not None}
+        == relationship_properties
+        for edge in derived
+    ):
+        return "current derivation still authorizes incumbent HAS_PARENT tip"
+    if not any(
+        edge.to_name == new_parent_id
+        and {key: value for key, value in edge.props.items() if value is not None}
+        == relationship_properties
+        for edge in derived
+    ):
+        return "removal would leave a derivable HAS_PARENT path absent"
+
+    snapshots = action["participant_snapshots"]
+    child_snapshot = snapshots[child_id]
+    old_parent_snapshot = snapshots[old_parent_id]
+    new_parent_snapshot = snapshots[new_parent_id]
+    relationship_snapshot = snapshots[str(mutation["participant_id"])]
+    child_properties = child_snapshot["properties"]
+    if child_properties.get("name_stage") == "superseded" or child_properties.get(
+        "status"
+    ) in {"deprecated", "superseded"}:
+        return "successor-rewire child lifecycle is not live"
+
+    closure_rows = query.query(
+        """
+        MATCH (child:StandardName), (old:StandardName), (new:StandardName)
+        WHERE elementId(child) = $child_element_id
+          AND elementId(old) = $old_parent_element_id
+          AND elementId(new) = $new_parent_element_id
+        RETURN properties(child) AS child_properties,
+               [(child)-[parent:HAS_PARENT]->(current:StandardName) | {
+                 relationship_id: elementId(parent),
+                 relationship_properties: properties(parent),
+                 parent_element_id: elementId(current),
+                 parent_id: current.id
+               }] AS parents,
+               [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(child) | {
+                 source_element_id: elementId(source),
+                 source_id: source.id,
+                 source_properties: properties(source),
+                 binding_element_id: elementId(binding),
+                 binding_properties: properties(binding)
+               }] AS producers
+        """,
+        child_element_id=child_snapshot["element_id"],
+        old_parent_element_id=old_parent_snapshot["element_id"],
+        new_parent_element_id=new_parent_snapshot["element_id"],
+    )
+    closure = dict(closure_rows[0]) if closure_rows else {}
+    parents = sorted(
+        (dict(item) for item in closure.get("parents") or []),
+        key=lambda item: (str(item["parent_id"]), str(item["relationship_id"])),
+    )
+    producers = sorted(
+        (dict(item) for item in closure.get("producers") or []),
+        key=lambda item: (str(item["source_id"]), str(item["binding_element_id"])),
+    )
+    expected_parent = {
+        "relationship_id": relationship_snapshot["element_id"],
+        "relationship_properties": dict(arguments["properties"]),
+        "parent_element_id": old_parent_snapshot["element_id"],
+        "parent_id": old_parent_id,
+    }
+    if (
+        relationship_snapshot.get("relationship_type") != "HAS_PARENT"
+        or relationship_snapshot.get("start_element_id") != child_snapshot["element_id"]
+        or relationship_snapshot.get("end_element_id")
+        != old_parent_snapshot["element_id"]
+        or relationship_snapshot.get("properties") != arguments["properties"]
+        or parents != [expected_parent]
+    ):
+        return "signed successor-rewire closure does not match exact incumbent parent"
+    signed_child_state = {
+        "child_properties": closure.get("child_properties") or {},
+        "producers": producers,
+    }
+    action["participant_digests"].append(
+        {
+            "participant_id": "successor-rewire-child-authority",
             "sha256": _digest(signed_child_state),
         }
     )
@@ -3265,6 +3430,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
             refusal = _dd_residue_release_refusal(query, action)
         if refusal is None:
             refusal = _orphan_guard_refusal(query, action)
+        if refusal is None:
+            refusal = _rewire_relocation_retirement_refusal(query, action)
         if refusal is None:
             refusal = _structural_reparent_refusal(query, action)
         if refusal is None:
