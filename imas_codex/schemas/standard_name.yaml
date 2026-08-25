@@ -2244,7 +2244,7 @@ classes:
       id:
         identifier: true
         description: >-
-          Composite key (sn_id#rev-N) where N is the revision number.
+          Composite key (standard_name_id#rev-N) where N is the revision number.
         required: true
       standard_name_id:
         description: >-
