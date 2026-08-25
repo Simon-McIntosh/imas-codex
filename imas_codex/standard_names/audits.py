@@ -13,6 +13,8 @@ cocos_specificity_check.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import re
 from collections.abc import Mapping
@@ -20,6 +22,8 @@ from functools import cache, lru_cache
 from typing import Any
 
 import numpy as np
+
+from imas_codex.discovery.base.claims import retry_on_deadlock
 
 logger = logging.getLogger(__name__)
 
@@ -3763,3 +3767,642 @@ def find_removed_dd_sources(*, gc=None) -> list[dict[str, Any]]:
     finally:
         if owns:
             gc.close()
+
+
+SIGN_CONVENTION_REPAIR_MANIFEST_SCHEMA = (
+    "imas-codex.sign-convention-document-repair-manifest.v1"
+)
+SIGN_CONVENTION_REPAIR_RECEIPT_SCHEMA = (
+    "imas-codex.sign-convention-document-repair-receipt.v1"
+)
+_SIGN_CONVENTION_TEXT_RE = re.compile(r"\bsign\s+convention\b", re.IGNORECASE)
+_LOWERCASE_SHA256_RE = re.compile(r"[0-9a-f]{64}")
+
+
+class SignConventionRepairConflict(RuntimeError):
+    """The signed document-repair closure changed before mutation."""
+
+
+def _sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
+def _strip_final_sign_convention_paragraph(
+    documentation: str,
+) -> tuple[str, str, str]:
+    """Remove exactly one final sign-convention paragraph.
+
+    Returns ``(kept_prefix, paragraph_separator, removed_paragraph)``.  The
+    prefix is byte-for-byte unchanged.  Refusing any other shape prevents a
+    broad prose rewrite from hiding inside this deterministic repair.
+    """
+    separators = list(re.finditer(r"\n[ \t]*\n", documentation))
+    paragraphs = re.split(r"\n[ \t]*\n", documentation)
+    sign_paragraphs = [
+        index
+        for index, paragraph in enumerate(paragraphs)
+        if _SIGN_CONVENTION_TEXT_RE.search(paragraph)
+    ]
+    if sign_paragraphs != [len(paragraphs) - 1] or not separators:
+        raise ValueError(
+            "documentation must contain exactly one final sign-convention paragraph"
+        )
+    separator = separators[-1]
+    kept = documentation[: separator.start()]
+    removed = documentation[separator.end() :]
+    if not kept or not removed:
+        raise ValueError("sign-convention paragraph removal would empty the document")
+    return kept, documentation[separator.start() : separator.end()], removed
+
+
+def _sign_convention_repair_authority(
+    query_handle: Any,
+    name_ids: list[str],
+    metadata_clear_ids: set[str],
+    excluded_ids: list[str],
+    reason: str,
+) -> tuple[
+    dict[str, Any],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    list[dict[str, str]],
+]:
+    rows = query_handle.query(
+        """
+        // sign-convention repair authority
+        UNWIND $name_ids AS requested_id
+        OPTIONAL MATCH (sn:StandardName {id: requested_id})
+        RETURN requested_id,
+               elementId(sn) AS element_id,
+               sn.documentation AS documentation,
+               sn.docs_stage AS docs_stage,
+               sn.name_stage AS name_stage,
+               sn.cocos_transformation_type AS transformation_type,
+               sn.cocos AS cocos,
+               sn.claimed_at IS NOT NULL AS has_claimed_at,
+               sn.claim_token IS NOT NULL AS has_claim_token,
+               CASE WHEN sn IS NULL THEN [] ELSE
+                 [(sn)-[edge:HAS_COCOS]->(convention:COCOS) |
+                   {element_id: elementId(edge), cocos_id: convention.id}]
+               END AS cocos_edges
+        ORDER BY requested_id
+        """,
+        name_ids=name_ids,
+    )
+    participants: list[dict[str, Any]] = []
+    actions: list[dict[str, Any]] = []
+    already_clean: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for raw in rows:
+        row = dict(raw)
+        requested_id = str(row["requested_id"])
+        documentation = row.get("documentation")
+        edges = sorted(
+            (dict(edge) for edge in row.get("cocos_edges") or []),
+            key=lambda edge: (str(edge["cocos_id"]), str(edge["element_id"])),
+        )
+        participant = {
+            "id": requested_id,
+            "element_id": row.get("element_id"),
+            "docs_stage": row.get("docs_stage"),
+            "name_stage": row.get("name_stage"),
+            "transformation_type": row.get("transformation_type"),
+            "cocos": row.get("cocos"),
+            "has_claimed_at": bool(row.get("has_claimed_at")),
+            "has_claim_token": bool(row.get("has_claim_token")),
+            "cocos_edges": edges,
+            "documentation_sha256": (
+                _sha256_text(documentation) if isinstance(documentation, str) else None
+            ),
+            "documentation_chars": (
+                len(documentation) if isinstance(documentation, str) else None
+            ),
+        }
+        participants.append(participant)
+        refusal: str | None = None
+        if row.get("element_id") is None:
+            refusal = "standard name does not exist"
+        elif row.get("docs_stage") != "accepted":
+            refusal = "documentation is not accepted"
+        elif row.get("has_claimed_at") or row.get("has_claim_token"):
+            refusal = "standard name has an active claim"
+        elif row.get("transformation_type") != "one_like":
+            refusal = "transformation type is not the diagnosed invariant class"
+        elif row.get("cocos") != 17:
+            refusal = "scalar COCOS authority is not exactly 17"
+        elif len(edges) != 1 or edges[0].get("cocos_id") != 17:
+            refusal = "HAS_COCOS authority is not exactly one edge to COCOS 17"
+        elif not isinstance(documentation, str):
+            refusal = "documentation is unavailable"
+
+        has_sign_convention = bool(
+            isinstance(documentation, str)
+            and _SIGN_CONVENTION_TEXT_RE.search(documentation)
+        )
+        if refusal is None and not has_sign_convention:
+            already_clean.append(
+                {
+                    "id": requested_id,
+                    "element_id": row["element_id"],
+                    "documentation_sha256": _sha256_text(documentation),
+                    "documentation_chars": len(documentation),
+                    "transformation_type": row["transformation_type"],
+                    "cocos": row["cocos"],
+                    "cocos_ids": [edge["cocos_id"] for edge in edges],
+                }
+            )
+            continue
+        if refusal is None:
+            try:
+                kept, separator, removed = _strip_final_sign_convention_paragraph(
+                    documentation
+                )
+            except ValueError as exc:
+                refusal = str(exc)
+        if refusal is not None:
+            refusals.append({"id": requested_id, "reason": refusal})
+            continue
+
+        clear_metadata = requested_id in metadata_clear_ids
+        removed_suffix = separator + removed
+        actions.append(
+            {
+                "id": requested_id,
+                "element_id": row["element_id"],
+                "documentation_before": documentation,
+                "documentation_after": kept,
+                "documentation_before_sha256": _sha256_text(documentation),
+                "documentation_after_sha256": _sha256_text(kept),
+                "documentation_chars_before": len(documentation),
+                "documentation_chars_after": len(kept),
+                "character_delta": len(removed_suffix),
+                "removed_paragraph_chars": len(removed),
+                "paragraph_separator_chars": len(separator),
+                "removed_suffix": removed_suffix,
+                "removed_suffix_sha256": _sha256_text(removed_suffix),
+                "prefix_preserved": documentation.startswith(kept)
+                and documentation[len(kept) :] == removed_suffix,
+                "clear_transformation_metadata": clear_metadata,
+                "prior_transformation_type": row["transformation_type"],
+                "prior_cocos": row["cocos"],
+                "prior_cocos_edges": edges,
+            }
+        )
+
+    action_manifest = [
+        {
+            key: value
+            for key, value in action.items()
+            if key
+            not in {
+                "documentation_before",
+                "documentation_after",
+                "removed_suffix",
+            }
+        }
+        for action in actions
+    ]
+    manifest = {
+        "schema": SIGN_CONVENTION_REPAIR_MANIFEST_SCHEMA,
+        "operation": "repair_invariant_sign_convention_documents",
+        "reason": reason,
+        "name_ids": name_ids,
+        "metadata_clear_ids": sorted(metadata_clear_ids),
+        "excluded_regeneration_ids": excluded_ids,
+        "participants": participants,
+        "actions": action_manifest,
+        "already_clean": already_clean,
+        "refusals": sorted(refusals, key=lambda item: (item["id"], item["reason"])),
+    }
+    return manifest, actions, already_clean, manifest["refusals"]
+
+
+def _sign_convention_repair_counts(
+    name_ids: list[str],
+    actions: list[dict[str, Any]],
+    already_clean: list[dict[str, Any]],
+    refusals: list[dict[str, str]],
+    metadata_clear_ids: set[str],
+) -> dict[str, int | float]:
+    return {
+        "requested": len(name_ids),
+        "admitted": len(actions),
+        "already_clean": len(already_clean),
+        "covered": len(actions) + len(already_clean),
+        "refused": len(refusals),
+        "documents_to_strip": len(actions),
+        "documents_only": len(actions) - len(metadata_clear_ids),
+        "metadata_to_clear": len(metadata_clear_ids),
+        "total_character_delta": sum(action["character_delta"] for action in actions),
+        "maximum_character_delta": max(
+            (action["character_delta"] for action in actions), default=0
+        ),
+        "model_spend_usd": 0.0,
+    }
+
+
+def _sign_convention_postconditions(
+    query_handle: Any,
+    actions: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    rows = query_handle.query(
+        """
+        // sign-convention repair postconditions
+        UNWIND $name_ids AS requested_id
+        OPTIONAL MATCH (sn:StandardName {id: requested_id})
+        RETURN requested_id,
+               sn.documentation AS documentation,
+               sn.cocos_transformation_type AS transformation_type,
+               sn.cocos AS cocos,
+               CASE WHEN sn IS NULL THEN [] ELSE
+                 [(sn)-[:HAS_COCOS]->(convention:COCOS) | convention.id]
+               END AS cocos_ids
+        ORDER BY requested_id
+        """,
+        name_ids=[action["id"] for action in actions],
+    )
+    expected = {action["id"]: action for action in actions}
+    failures: list[dict[str, str]] = []
+    if len(rows) != len(actions):
+        failures.append({"id": "*", "reason": "postcondition row count changed"})
+        return failures
+    for raw in rows:
+        row = dict(raw)
+        action = expected.get(str(row["requested_id"]))
+        if action is None:
+            failures.append(
+                {"id": str(row["requested_id"]), "reason": "unexpected target row"}
+            )
+            continue
+        if row.get("documentation") != action["documentation_after"]:
+            failures.append(
+                {"id": action["id"], "reason": "documentation postcondition failed"}
+            )
+        if action["clear_transformation_metadata"]:
+            if (
+                row.get("transformation_type") is not None
+                or row.get("cocos") is not None
+                or row.get("cocos_ids")
+            ):
+                failures.append(
+                    {
+                        "id": action["id"],
+                        "reason": "metadata clear postcondition failed",
+                    }
+                )
+        elif (
+            row.get("transformation_type") != action["prior_transformation_type"]
+            or row.get("cocos") != action["prior_cocos"]
+            or row.get("cocos_ids") != [17]
+        ):
+            failures.append(
+                {"id": action["id"], "reason": "invariant metadata changed"}
+            )
+    return failures
+
+
+@retry_on_deadlock()
+def repair_invariant_sign_convention_documents(
+    name_ids: list[str],
+    *,
+    metadata_clear_ids: list[str],
+    excluded_regeneration_ids: list[str],
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Preview or atomically strip unsupported sign-convention paragraphs.
+
+    The preview signs exact document hashes, graph element identities, COCOS
+    state, and per-document character deltas.  Apply re-derives that complete
+    closure under write locks and refuses drift.  Metadata is cleared only for
+    the explicitly authorized subset; the regeneration-required identities are
+    recorded in the receipt and cannot enter the mutation cohort.
+    """
+    from imas_codex.graph.client import GraphClient  # noqa: PLC0415
+    from imas_codex.standard_names.graph_ops import (  # noqa: PLC0415
+        _authority_payload_hash,
+        _TransactionQuery,
+    )
+
+    requested = sorted(set(name_ids))
+    metadata_clear = set(metadata_clear_ids)
+    excluded = sorted(set(excluded_regeneration_ids))
+    if not requested or len(requested) != len(name_ids):
+        raise ValueError("sign-convention repair requires unique target ids")
+    if len(metadata_clear) != len(metadata_clear_ids):
+        raise ValueError("metadata-clear ids must be unique")
+    if not metadata_clear <= set(requested):
+        raise ValueError("metadata-clear ids must be a subset of target ids")
+    if set(requested) & set(excluded):
+        raise ValueError("regeneration-required identities cannot be repair targets")
+    if not excluded:
+        raise ValueError("regeneration-required identities must be named")
+    if not reason.strip():
+        raise ValueError("sign-convention repair requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _LOWERCASE_SHA256_RE.fullmatch(
+        manifest_sha256
+    ):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    event_id = (
+        f"sn-change:sign-convention-document-repair:{manifest_sha256}"
+        if manifest_sha256
+        else None
+    )
+    owns = gc is None
+    client: Any = GraphClient() if owns else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query_handle.query(
+                        """
+                        // sign-convention repair replay
+                        OPTIONAL MATCH (change:StandardNameChange {id: $event_id})
+                        RETURN change.to_name AS postconditions_json
+                        """,
+                        event_id=event_id,
+                    )
+                    postconditions_json = (
+                        replay_rows[0].get("postconditions_json")
+                        if replay_rows
+                        else None
+                    )
+                    if postconditions_json is not None:
+                        recorded = json.loads(postconditions_json)
+                        if sorted(recorded) != requested:
+                            raise SignConventionRepairConflict(
+                                "recorded repair covers a different target set"
+                            )
+                        current = query_handle.query(
+                            """
+                            // sign-convention repair replay postconditions
+                            UNWIND $name_ids AS requested_id
+                            MATCH (sn:StandardName {id: requested_id})
+                            RETURN requested_id,
+                                   sn.documentation AS documentation,
+                                   sn.cocos_transformation_type AS transformation_type,
+                                   sn.cocos AS cocos,
+                                   [(sn)-[:HAS_COCOS]->(c:COCOS) | c.id] AS cocos_ids
+                            ORDER BY requested_id
+                            """,
+                            name_ids=requested,
+                        )
+                        if len(current) != len(requested) or any(
+                            _sha256_text(row["documentation"])
+                            != recorded[row["requested_id"]]["documentation_sha256"]
+                            or row.get("transformation_type")
+                            != recorded[row["requested_id"]]["transformation_type"]
+                            or row.get("cocos")
+                            != recorded[row["requested_id"]]["cocos"]
+                            or row.get("cocos_ids")
+                            != recorded[row["requested_id"]]["cocos_ids"]
+                            for row in current
+                        ):
+                            raise SignConventionRepairConflict(
+                                "recorded repair has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": SIGN_CONVENTION_REPAIR_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "changed": 0,
+                            "manifest_sha256": manifest_sha256,
+                            "model_spend_usd": 0.0,
+                            "excluded_regeneration_ids": excluded,
+                        }
+
+                manifest, actions, already_clean, refusals = (
+                    _sign_convention_repair_authority(
+                        query_handle, requested, metadata_clear, excluded, reason
+                    )
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = _sign_convention_repair_counts(
+                    requested, actions, already_clean, refusals, metadata_clear
+                )
+                if apply and computed_hash != manifest_sha256:
+                    raise SignConventionRepairConflict(
+                        "fresh sign-convention manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGN_CONVENTION_REPAIR_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                        "excluded_regeneration_ids": excluded,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGN_CONVENTION_REPAIR_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "changed": 0,
+                        "would_change": len(actions),
+                        "counts": counts,
+                        "refusals": [],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                        "excluded_regeneration_ids": excluded,
+                    }
+
+                locked = query_handle.query(
+                    """
+                    // sign-convention repair lock
+                    UNWIND $element_ids AS expected
+                    MATCH (sn:StandardName) WHERE elementId(sn) = expected
+                    SET sn.documentation = sn.documentation
+                    RETURN collect(elementId(sn)) AS element_ids
+                    """,
+                    element_ids=[
+                        participant["element_id"]
+                        for participant in manifest["participants"]
+                    ],
+                )
+                if sorted(locked[0].get("element_ids") or []) != sorted(
+                    participant["element_id"]
+                    for participant in manifest["participants"]
+                ):
+                    raise SignConventionRepairConflict(
+                        "document target set changed while locking"
+                    )
+                (
+                    locked_manifest,
+                    locked_actions,
+                    locked_clean,
+                    locked_refusals,
+                ) = _sign_convention_repair_authority(
+                    query_handle, requested, metadata_clear, excluded, reason
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise SignConventionRepairConflict(
+                        "sign-convention authority changed while acquiring locks"
+                    )
+                actions = locked_actions
+                already_clean = locked_clean
+
+                updated = query_handle.query(
+                    """
+                    // sign-convention repair documentation mutation
+                    UNWIND $rows AS expected
+                    MATCH (sn:StandardName {id: expected.id})
+                    WHERE elementId(sn) = expected.element_id
+                      AND sn.docs_stage = 'accepted'
+                      AND sn.claimed_at IS NULL
+                      AND sn.claim_token IS NULL
+                      AND sn.documentation = expected.documentation_before
+                    SET sn.documentation = expected.documentation_after
+                    RETURN collect(sn.id) AS ids
+                    """,
+                    rows=actions,
+                )
+                if sorted(updated[0].get("ids") or []) != sorted(
+                    action["id"] for action in actions
+                ):
+                    raise SignConventionRepairConflict(
+                        "documentation compare-and-set changed"
+                    )
+
+                metadata_actions = [
+                    action
+                    for action in actions
+                    if action["clear_transformation_metadata"]
+                ]
+                if metadata_actions:
+                    cleared = query_handle.query(
+                        """
+                        // sign-convention repair metadata mutation
+                        UNWIND $rows AS expected
+                        MATCH (sn:StandardName {id: expected.id})
+                        WHERE elementId(sn) = expected.element_id
+                          AND sn.cocos_transformation_type =
+                              expected.prior_transformation_type
+                          AND sn.cocos = expected.prior_cocos
+                        MATCH (sn)-[edge:HAS_COCOS]->(:COCOS {id: 17})
+                        WHERE elementId(edge) =
+                              expected.prior_cocos_edges[0].element_id
+                        SET sn.cocos_transformation_type = null,
+                            sn.cocos = null
+                        DELETE edge
+                        RETURN collect(sn.id) AS ids
+                        """,
+                        rows=metadata_actions,
+                    )
+                    if sorted(cleared[0].get("ids") or []) != sorted(metadata_clear):
+                        raise SignConventionRepairConflict(
+                            "metadata compare-and-clear changed"
+                        )
+
+                postcondition_failures = _sign_convention_postconditions(
+                    query_handle, actions
+                )
+                if postcondition_failures:
+                    raise SignConventionRepairConflict(
+                        "repair postconditions failed: "
+                        + json.dumps(postcondition_failures, sort_keys=True)
+                    )
+
+                removed_suffixes = {
+                    action["id"]: action["removed_suffix"] for action in actions
+                }
+                postconditions = {
+                    action["id"]: {
+                        "documentation_sha256": action["documentation_after_sha256"],
+                        "transformation_type": (
+                            None
+                            if action["clear_transformation_metadata"]
+                            else action["prior_transformation_type"]
+                        ),
+                        "cocos": (
+                            None
+                            if action["clear_transformation_metadata"]
+                            else action["prior_cocos"]
+                        ),
+                        "cocos_ids": (
+                            [] if action["clear_transformation_metadata"] else [17]
+                        ),
+                    }
+                    for action in actions
+                }
+                postconditions.update(
+                    {
+                        row["id"]: {
+                            "documentation_sha256": row["documentation_sha256"],
+                            "transformation_type": row["transformation_type"],
+                            "cocos": row["cocos"],
+                            "cocos_ids": row["cocos_ids"],
+                        }
+                        for row in already_clean
+                    }
+                )
+                change_rows = query_handle.query(
+                    """
+                    // sign-convention repair durable receipt
+                    CREATE (change:StandardNameChange {
+                      id: $event_id,
+                      from_name: $removed_suffixes_json,
+                      to_name: $postconditions_json,
+                      operation: 'repair_invariant_sign_convention_documents',
+                      reason: $reason,
+                      origin: 'deterministic_documentation_audit',
+                      run_id: $run_id,
+                      changed_at: datetime(),
+                      internal: true,
+                      manifest_sha256: $manifest_sha256})
+                    WITH change
+                    UNWIND $name_ids AS name_id
+                    MATCH (sn:StandardName {id: name_id})
+                    MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN DISTINCT change.id AS change_id
+                    """,
+                    event_id=f"sn-change:sign-convention-document-repair:{computed_hash}",
+                    removed_suffixes_json=json.dumps(
+                        removed_suffixes, sort_keys=True, separators=(",", ":")
+                    ),
+                    postconditions_json=json.dumps(
+                        postconditions, sort_keys=True, separators=(",", ":")
+                    ),
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                    name_ids=[action["id"] for action in actions],
+                )
+                if len(change_rows) != 1:
+                    raise SignConventionRepairConflict(
+                        "repair receipt was not written exactly once"
+                    )
+                transaction.commit()
+                return {
+                    "schema": SIGN_CONVENTION_REPAIR_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "changed": len(actions),
+                    "counts": counts,
+                    "refusals": [],
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_id": change_rows[0]["change_id"],
+                    "excluded_regeneration_ids": excluded,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if owns:
+            client.close()
