@@ -1,0 +1,1123 @@
+{
+  "axis": "names",
+  "bad_count": 20,
+  "dictionary_provenance": {
+    "data_dictionary_version": "4.1.1",
+    "standard_names_dictionary_version": "0.8.0rc67"
+  },
+  "domain_count": 18,
+  "good_count": 20,
+  "implementation_provenance": {
+    "codex_commit": "26c9fcf7",
+    "codex_version": "5.3.0rc7.dev1480+g5cb1eff12.d20260822"
+  },
+  "row_count": 40,
+  "rows": [
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Major-radius coordinate R of the declared reference position of a neutral beam injector in the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "The major-radius coordinate locates the declared reference position of a neutral beam injector by its perpendicular distance from the toroidal symmetry axis.\n\n$$\nR_{\\rm ref}=\\sqrt{x_{\\rm ref}^{2}+y_{\\rm ref}^{2}}\n$$\n\nwhere $R_{\\rm ref}$ is the major-radius coordinate and $x_{\\rm ref}$ and $y_{\\rm ref}$ are the horizontal Cartesian coordinates of the reference position in the right-handed $(\\hat{x},\\hat{y},\\hat{z})$ basis, with $\\hat{z}=\\hat{Z}$. In the right-handed cylindrical $(R,\\phi,Z)$ frame, this is the $R$ coordinate. Together with the [vertical coordinate of the neutral beam injector](name:vertical_coordinate_of_neutral_beam_injector), it locates the reference position in the horizontal-vertical plane.",
+      "id": "radial_coordinate_of_neutral_beam_injector",
+      "kind": "scalar",
+      "label": 1,
+      "name": "radial_coordinate_of_neutral_beam_injector",
+      "path": "summary/heating_current_drive/nbi/position/r/value",
+      "physics_domain": "auxiliary_heating",
+      "provenance": {
+        "candidate_identity": "radial_coordinate_of_neutral_beam_injector",
+        "pair_index": 0,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/heating_current_drive/nbi/position/r/value"
+      },
+      "source_id": "dd:summary/heating_current_drive/nbi/position/r/value",
+      "source_paths": [
+        "dd:summary/heating_current_drive/nbi/position/r/value"
+      ],
+      "standard_name": "radial_coordinate_of_neutral_beam_injector",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "semantic_mismatch",
+      "description": "Major-radius coordinate R of the declared reference position of a neutral beam injector in the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "The major-radius coordinate locates the declared reference position of a neutral beam injector by its perpendicular distance from the toroidal symmetry axis.\n\n$$\nR_{\\rm ref}=\\sqrt{x_{\\rm ref}^{2}+y_{\\rm ref}^{2}}\n$$\n\nwhere $R_{\\rm ref}$ is the major-radius coordinate and $x_{\\rm ref}$ and $y_{\\rm ref}$ are the horizontal Cartesian coordinates of the reference position in the right-handed $(\\hat{x},\\hat{y},\\hat{z})$ basis, with $\\hat{z}=\\hat{Z}$. In the right-handed cylindrical $(R,\\phi,Z)$ frame, this is the $R$ coordinate. Together with the [vertical coordinate of the neutral beam injector](name:vertical_coordinate_of_neutral_beam_injector), it locates the reference position in the horizontal-vertical plane.",
+      "id": "current_of_divertor_tile",
+      "kind": "scalar",
+      "label": 0,
+      "name": "current_of_divertor_tile",
+      "path": "summary/heating_current_drive/nbi/position/r/value",
+      "physics_domain": "auxiliary_heating",
+      "provenance": {
+        "candidate_identity": "radial_coordinate_of_neutral_beam_injector",
+        "corruption": "semantic_mismatch",
+        "pair_index": 0,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/heating_current_drive/nbi/position/r/value"
+      },
+      "source_id": "dd:summary/heating_current_drive/nbi/position/r/value",
+      "source_paths": [
+        "dd:summary/heating_current_drive/nbi/position/r/value"
+      ],
+      "standard_name": "current_of_divertor_tile",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Carbon density at the divertor target is the local number density of carbon ions in the plasma immediately adjacent to a divertor target surface, evaluated at the entrance to the electrostatic sheath. It is summed over C1+ through C6+ and excludes neutral carbon atoms and carbon-bearing neutral molecules.",
+      "documentation": "Carbon density at the divertor target is the local number density of carbon ions in the plasma immediately adjacent to a divertor target surface, evaluated at the entrance to the electrostatic sheath. It is the carbon-specific member of [density_at_divertor_target](name:density_at_divertor_target) and the carbon ionic specialization of ion_density_at_divertor_target.\n\nThe charge-state-summed carbon ion density is defined by summing the densities of the positive carbon ionization states:\n\n$$\nn_{\\mathrm{C},t} = \\sum_{q=1}^{6} n_{\\mathrm{C}^{q+},t}\n$$\n\nwhere $n_{\\mathrm{C},t}$ is the carbon ion density at the divertor target, $n_{\\mathrm{C}^{q+},t}$ is the density of carbon ions with charge state $q$ at the same locus, and $q=1$ and $q=6$ denote singly ionized and fully stripped carbon, respectively.\n\nThe sum includes carbon ions from $\\mathrm{C}^{1+}$ through $\\mathrm{C}^{6+}$, excludes neutral carbon atoms and carbon-bearing neutral molecules, and counts particles rather than ionic charge. It contributes as a species-resolved component of [total_ion_density_at_divertor_target](name:total_ion_density_at_divertor_target), which aggregates ion particle densities over species without charge-state weighting.",
+      "id": "carbon_density_at_divertor_target",
+      "kind": "scalar",
+      "label": 1,
+      "name": "carbon_density_at_divertor_target",
+      "path": "summary/local/divertor_target/n_i/carbon/value",
+      "physics_domain": "divertor_physics",
+      "provenance": {
+        "candidate_identity": "carbon_density_at_divertor_target",
+        "pair_index": 1,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/local/divertor_target/n_i/carbon/value"
+      },
+      "source_id": "dd:summary/local/divertor_target/n_i/carbon/value",
+      "source_paths": [
+        "dd:summary/local/divertor_target/n_i/carbon/value"
+      ],
+      "standard_name": "carbon_density_at_divertor_target",
+      "unit": "m^-3"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "vacuous",
+      "description": "Carbon density at the divertor target is the local number density of carbon ions in the plasma immediately adjacent to a divertor target surface, evaluated at the entrance to the electrostatic sheath. It is summed over C1+ through C6+ and excludes neutral carbon atoms and carbon-bearing neutral molecules.",
+      "documentation": "Carbon density at the divertor target is the local number density of carbon ions in the plasma immediately adjacent to a divertor target surface, evaluated at the entrance to the electrostatic sheath. It is the carbon-specific member of [density_at_divertor_target](name:density_at_divertor_target) and the carbon ionic specialization of ion_density_at_divertor_target.\n\nThe charge-state-summed carbon ion density is defined by summing the densities of the positive carbon ionization states:\n\n$$\nn_{\\mathrm{C},t} = \\sum_{q=1}^{6} n_{\\mathrm{C}^{q+},t}\n$$\n\nwhere $n_{\\mathrm{C},t}$ is the carbon ion density at the divertor target, $n_{\\mathrm{C}^{q+},t}$ is the density of carbon ions with charge state $q$ at the same locus, and $q=1$ and $q=6$ denote singly ionized and fully stripped carbon, respectively.\n\nThe sum includes carbon ions from $\\mathrm{C}^{1+}$ through $\\mathrm{C}^{6+}$, excludes neutral carbon atoms and carbon-bearing neutral molecules, and counts particles rather than ionic charge. It contributes as a species-resolved component of [total_ion_density_at_divertor_target](name:total_ion_density_at_divertor_target), which aggregates ion particle densities over species without charge-state weighting.",
+      "id": "density_at_divertor_target",
+      "kind": "scalar",
+      "label": 0,
+      "name": "density_at_divertor_target",
+      "path": "summary/local/divertor_target/n_i/carbon/value",
+      "physics_domain": "divertor_physics",
+      "provenance": {
+        "candidate_identity": "carbon_density_at_divertor_target",
+        "corruption": "vacuous",
+        "pair_index": 1,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/local/divertor_target/n_i/carbon/value"
+      },
+      "source_id": "dd:summary/local/divertor_target/n_i/carbon/value",
+      "source_paths": [
+        "dd:summary/local/divertor_target/n_i/carbon/value"
+      ],
+      "standard_name": "density_at_divertor_target",
+      "unit": "m^-3"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Flux-surface-averaged number density of boron, including neutral atoms and all ionization states, evaluated on the plasma boundary.",
+      "documentation": "The quantity is the boron particle number density averaged over the last closed magnetic flux surface at the plasma boundary. It includes neutral boron and all ionic charge states through fully stripped B5+, rather than selecting a single charge state. It is the flux-surface-averaged counterpart of [boron density at the plasma boundary](name:boron_density_at_plasma_boundary).\n\n$$\n\\langle n_{\\mathrm B}\\rangle_{\\psi_b} = \\frac{\\displaystyle\\oint_{\\psi=\\psi_b} n_{\\mathrm B}\\,\\frac{dS}{|\\nabla\\psi|}}{\\displaystyle\\oint_{\\psi=\\psi_b} \\frac{dS}{|\\nabla\\psi|}}\n$$\n\nHere $n_{\\mathrm B}$ is the local total boron particle number density, $\\psi$ is the poloidal-flux surface label, $\\psi_b$ identifies the plasma-boundary surface, and $dS$ is its surface element. The result is an average over the complete surface, not the density at a selected point or for a selected ionization state.",
+      "id": "flux_surface_averaged_boron_density_at_plasma_boundary",
+      "kind": "scalar",
+      "label": 1,
+      "name": "flux_surface_averaged_boron_density_at_plasma_boundary",
+      "path": "summary/local/separatrix_average/n_i/boron/value",
+      "physics_domain": "edge_plasma_physics",
+      "provenance": {
+        "candidate_identity": "flux_surface_averaged_boron_density_at_plasma_boundary",
+        "pair_index": 2,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/local/separatrix_average/n_i/boron/value"
+      },
+      "source_id": "dd:summary/local/separatrix_average/n_i/boron/value",
+      "source_paths": [
+        "dd:summary/local/separatrix_average/n_i/boron/value"
+      ],
+      "standard_name": "flux_surface_averaged_boron_density_at_plasma_boundary",
+      "unit": "m^-3"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "noncanonical_order",
+      "description": "Flux-surface-averaged number density of boron, including neutral atoms and all ionization states, evaluated on the plasma boundary.",
+      "documentation": "The quantity is the boron particle number density averaged over the last closed magnetic flux surface at the plasma boundary. It includes neutral boron and all ionic charge states through fully stripped B5+, rather than selecting a single charge state. It is the flux-surface-averaged counterpart of [boron density at the plasma boundary](name:boron_density_at_plasma_boundary).\n\n$$\n\\langle n_{\\mathrm B}\\rangle_{\\psi_b} = \\frac{\\displaystyle\\oint_{\\psi=\\psi_b} n_{\\mathrm B}\\,\\frac{dS}{|\\nabla\\psi|}}{\\displaystyle\\oint_{\\psi=\\psi_b} \\frac{dS}{|\\nabla\\psi|}}\n$$\n\nHere $n_{\\mathrm B}$ is the local total boron particle number density, $\\psi$ is the poloidal-flux surface label, $\\psi_b$ identifies the plasma-boundary surface, and $dS$ is its surface element. The result is an average over the complete surface, not the density at a selected point or for a selected ionization state.",
+      "id": "boundary_plasma_at_density_boron_averaged_surface_flux",
+      "kind": "scalar",
+      "label": 0,
+      "name": "boundary_plasma_at_density_boron_averaged_surface_flux",
+      "path": "summary/local/separatrix_average/n_i/boron/value",
+      "physics_domain": "edge_plasma_physics",
+      "provenance": {
+        "candidate_identity": "flux_surface_averaged_boron_density_at_plasma_boundary",
+        "corruption": "noncanonical_order",
+        "pair_index": 2,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/local/separatrix_average/n_i/boron/value"
+      },
+      "source_id": "dd:summary/local/separatrix_average/n_i/boron/value",
+      "source_paths": [
+        "dd:summary/local/separatrix_average/n_i/boron/value"
+      ],
+      "standard_name": "boundary_plasma_at_density_boron_averaged_surface_flux",
+      "unit": "m^-3"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Signed rotation of an elliptical beam cross-section’s principal axis relative to the local transverse basis attached to a beam-tracing propagation path.",
+      "documentation": "The tilt angle specifies the orientation of a selected principal axis of the elliptical cross-section associated with a beam-tracing beam, relative to the beam’s transverse basis. It describes ellipse orientation rather than the beam’s propagation direction, which is characterized separately by the [poloidal angle of the beam-tracing beam](name:poloidal_angle_of_beam_tracing_beam).\n\nThe principal-axis direction is defined by\n\n$$\n\\hat{\\mathbf a} = \\cos\\alpha\\,\\hat{\\mathbf e}_1 + \\sin\\alpha\\,\\hat{\\mathbf e}_2\n$$\n\nwhere $\\alpha$ is the tilt angle, $\\hat{\\mathbf a}$ is the selected principal-axis unit vector, and $(\\hat{\\mathbf e}_1,\\hat{\\mathbf e}_2,\\hat{\\mathbf e}_\\parallel)$ is the local right-handed beam frame, with $\\hat{\\mathbf e}_\\parallel$ aligned with propagation. Because an ellipse is unchanged when a principal axis is reversed, the angle is defined modulo $\\pi$; selecting the other principal axis changes the reference by $\\pi/2$.\n\nSign convention: Positive when the selected principal axis rotates from $\\hat{\\mathbf e}_1$ toward $\\hat{\\mathbf e}_2$ according to the right-handed orientation about $\\hat{\\mathbf e}_\\parallel$.",
+      "id": "tilt_angle_of_beam_tracing_beam",
+      "kind": "scalar",
+      "label": 1,
+      "name": "tilt_angle_of_beam_tracing_beam",
+      "path": "ec_launchers/beam/spot/angle",
+      "physics_domain": "electromagnetic_wave_diagnostics",
+      "provenance": {
+        "candidate_identity": "tilt_angle_of_beam_tracing_beam",
+        "pair_index": 3,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "ec_launchers/beam/spot/angle"
+      },
+      "source_id": "dd:ec_launchers/beam/spot/angle",
+      "source_paths": [
+        "dd:ec_launchers/beam/spot/angle",
+        "dd:ece/channel/beam/phase/angle",
+        "dd:ece/channel/beam/spot/angle",
+        "dd:ece/channel/beam_tracing/beam/phase/angle",
+        "dd:ece/channel/beam_tracing/beam/spot/angle",
+        "dd:waves/coherent_wave/beam_tracing/beam/phase/angle",
+        "dd:waves/coherent_wave/beam_tracing/beam/spot/angle"
+      ],
+      "standard_name": "tilt_angle_of_beam_tracing_beam",
+      "unit": "rad"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "semantic_mismatch",
+      "description": "Signed rotation of an elliptical beam cross-section’s principal axis relative to the local transverse basis attached to a beam-tracing propagation path.",
+      "documentation": "The tilt angle specifies the orientation of a selected principal axis of the elliptical cross-section associated with a beam-tracing beam, relative to the beam’s transverse basis. It describes ellipse orientation rather than the beam’s propagation direction, which is characterized separately by the [poloidal angle of the beam-tracing beam](name:poloidal_angle_of_beam_tracing_beam).\n\nThe principal-axis direction is defined by\n\n$$\n\\hat{\\mathbf a} = \\cos\\alpha\\,\\hat{\\mathbf e}_1 + \\sin\\alpha\\,\\hat{\\mathbf e}_2\n$$\n\nwhere $\\alpha$ is the tilt angle, $\\hat{\\mathbf a}$ is the selected principal-axis unit vector, and $(\\hat{\\mathbf e}_1,\\hat{\\mathbf e}_2,\\hat{\\mathbf e}_\\parallel)$ is the local right-handed beam frame, with $\\hat{\\mathbf e}_\\parallel$ aligned with propagation. Because an ellipse is unchanged when a principal axis is reversed, the angle is defined modulo $\\pi$; selecting the other principal axis changes the reference by $\\pi/2$.\n\nSign convention: Positive when the selected principal axis rotates from $\\hat{\\mathbf e}_1$ toward $\\hat{\\mathbf e}_2$ according to the right-handed orientation about $\\hat{\\mathbf e}_\\parallel$.",
+      "id": "neoclassical_tearing_mode_phase",
+      "kind": "scalar",
+      "label": 0,
+      "name": "neoclassical_tearing_mode_phase",
+      "path": "ec_launchers/beam/spot/angle",
+      "physics_domain": "electromagnetic_wave_diagnostics",
+      "provenance": {
+        "candidate_identity": "tilt_angle_of_beam_tracing_beam",
+        "corruption": "semantic_mismatch",
+        "pair_index": 3,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "ec_launchers/beam/spot/angle"
+      },
+      "source_id": "dd:ec_launchers/beam/spot/angle",
+      "source_paths": [
+        "dd:ec_launchers/beam/spot/angle",
+        "dd:ece/channel/beam/phase/angle",
+        "dd:ece/channel/beam/spot/angle",
+        "dd:ece/channel/beam_tracing/beam/phase/angle",
+        "dd:ece/channel/beam_tracing/beam/spot/angle",
+        "dd:waves/coherent_wave/beam_tracing/beam/phase/angle",
+        "dd:waves/coherent_wave/beam_tracing/beam/spot/angle"
+      ],
+      "standard_name": "neoclassical_tearing_mode_phase",
+      "unit": "rad"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Ratio of the vertical to horizontal semi-axes of a nested magnetic flux surface’s poloidal cross-section, independent of its overall size.",
+      "documentation": "Elongation is the shape ratio of an individual nested magnetic flux surface, describing how extended its poloidal cross-section is vertically relative to horizontally.\n\nFor a given flux surface, the elongation is defined by\n\n$$\n\\kappa = \\frac{a_v}{a_h}\n$$\n\nwhere $\\kappa$ is the elongation, $a_v$ is the vertical semi-axis of the poloidal cross-section, and $a_h$ is its horizontal semi-axis.\n\nThe quantity applies separately to each nested magnetic flux surface and is a shape ratio rather than an integrated, summed, or averaged quantity. It is not restricted to the outermost surface; the distinct [elongation of the plasma boundary](name:elongation_of_plasma_boundary) refers specifically to the last closed plasma boundary.\n\nThe [radial derivative of elongation of a flux surface] describes the change of $\\kappa$ across nested surfaces, whereas this quantity gives the elongation at one surface.",
+      "id": "elongation_of_flux_surface",
+      "kind": "scalar",
+      "label": 1,
+      "name": "elongation_of_flux_surface",
+      "path": "equilibrium/time_slice/profiles_1d/elongation",
+      "physics_domain": "equilibrium",
+      "provenance": {
+        "candidate_identity": "elongation_of_flux_surface",
+        "pair_index": 4,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "equilibrium/time_slice/profiles_1d/elongation"
+      },
+      "source_id": "dd:equilibrium/time_slice/profiles_1d/elongation",
+      "source_paths": [
+        "dd:equilibrium/time_slice/profiles_1d/elongation",
+        "dd:gyrokinetics_local/flux_surface/elongation"
+      ],
+      "standard_name": "elongation_of_flux_surface",
+      "unit": "1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "vacuous",
+      "description": "Ratio of the vertical to horizontal semi-axes of a nested magnetic flux surface’s poloidal cross-section, independent of its overall size.",
+      "documentation": "Elongation is the shape ratio of an individual nested magnetic flux surface, describing how extended its poloidal cross-section is vertically relative to horizontally.\n\nFor a given flux surface, the elongation is defined by\n\n$$\n\\kappa = \\frac{a_v}{a_h}\n$$\n\nwhere $\\kappa$ is the elongation, $a_v$ is the vertical semi-axis of the poloidal cross-section, and $a_h$ is its horizontal semi-axis.\n\nThe quantity applies separately to each nested magnetic flux surface and is a shape ratio rather than an integrated, summed, or averaged quantity. It is not restricted to the outermost surface; the distinct [elongation of the plasma boundary](name:elongation_of_plasma_boundary) refers specifically to the last closed plasma boundary.\n\nThe [radial derivative of elongation of a flux surface] describes the change of $\\kappa$ across nested surfaces, whereas this quantity gives the elongation at one surface.",
+      "id": "of_flux_surface",
+      "kind": "scalar",
+      "label": 0,
+      "name": "of_flux_surface",
+      "path": "equilibrium/time_slice/profiles_1d/elongation",
+      "physics_domain": "equilibrium",
+      "provenance": {
+        "candidate_identity": "elongation_of_flux_surface",
+        "corruption": "vacuous",
+        "pair_index": 4,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "equilibrium/time_slice/profiles_1d/elongation"
+      },
+      "source_id": "dd:equilibrium/time_slice/profiles_1d/elongation",
+      "source_paths": [
+        "dd:equilibrium/time_slice/profiles_1d/elongation",
+        "dd:gyrokinetics_local/flux_surface/elongation"
+      ],
+      "standard_name": "of_flux_surface",
+      "unit": "1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Cumulative pre-breakdown inventory of deuterated methane (CD4), weighted by ten equivalent electrons per molecule rather than reported as a molecular count.",
+      "documentation": "This quantity is the cumulative amount of deuterated methane introduced during the plasma prefill phase, expressed as an equivalent-electron inventory. It represents neutral CD4 molecules before plasma breakdown, not the post-breakdown gas-injection inventory.\n\nThe equivalent-electron count is defined by\n\n$$\nN_{e,\\rm eq}^{\\rm prefill} = \\int_{t_0}^{t_b} \\dot{N}_{e,\\rm eq}^{\\rm CD_4}(t)\\,dt = 10N_{\\rm CD_4}^{\\rm prefill}\n$$\n\nwhere $N_{e,\\rm eq}^{\\rm prefill}$ is the accumulated equivalent-electron inventory, $\\dot{N}_{e,\\rm eq}^{\\rm CD_4}$ is the [deuterated methane source rate](name:deuterated_methane_source_rate), $t_0$ and $t_b$ delimit prefill before breakdown, and $N_{\\rm CD_4}^{\\rm prefill}$ is the accumulated number of CD4 molecules. The factor ten is the total electron count of one fully ionizable CD4 molecule. The species-resolved quantity contributes to the [accumulated total prefill gas count](name:accumulated_total_prefill_gas_count), which sums equivalent-electron inventories across gas species.",
+      "id": "accumulated_deuterated_methane_prefill_count",
+      "kind": "scalar",
+      "label": 1,
+      "name": "accumulated_deuterated_methane_prefill_count",
+      "path": "summary/gas_injection_prefill/methane_deuterated/value",
+      "physics_domain": "general",
+      "provenance": {
+        "candidate_identity": "accumulated_deuterated_methane_prefill_count",
+        "pair_index": 5,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/gas_injection_prefill/methane_deuterated/value"
+      },
+      "source_id": "dd:summary/gas_injection_prefill/methane_deuterated/value",
+      "source_paths": [
+        "dd:summary/gas_injection_prefill/methane_deuterated/value"
+      ],
+      "standard_name": "accumulated_deuterated_methane_prefill_count",
+      "unit": "1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "noncanonical_order",
+      "description": "Cumulative pre-breakdown inventory of deuterated methane (CD4), weighted by ten equivalent electrons per molecule rather than reported as a molecular count.",
+      "documentation": "This quantity is the cumulative amount of deuterated methane introduced during the plasma prefill phase, expressed as an equivalent-electron inventory. It represents neutral CD4 molecules before plasma breakdown, not the post-breakdown gas-injection inventory.\n\nThe equivalent-electron count is defined by\n\n$$\nN_{e,\\rm eq}^{\\rm prefill} = \\int_{t_0}^{t_b} \\dot{N}_{e,\\rm eq}^{\\rm CD_4}(t)\\,dt = 10N_{\\rm CD_4}^{\\rm prefill}\n$$\n\nwhere $N_{e,\\rm eq}^{\\rm prefill}$ is the accumulated equivalent-electron inventory, $\\dot{N}_{e,\\rm eq}^{\\rm CD_4}$ is the [deuterated methane source rate](name:deuterated_methane_source_rate), $t_0$ and $t_b$ delimit prefill before breakdown, and $N_{\\rm CD_4}^{\\rm prefill}$ is the accumulated number of CD4 molecules. The factor ten is the total electron count of one fully ionizable CD4 molecule. The species-resolved quantity contributes to the [accumulated total prefill gas count](name:accumulated_total_prefill_gas_count), which sums equivalent-electron inventories across gas species.",
+      "id": "count_prefill_methane_deuterated_accumulated",
+      "kind": "scalar",
+      "label": 0,
+      "name": "count_prefill_methane_deuterated_accumulated",
+      "path": "summary/gas_injection_prefill/methane_deuterated/value",
+      "physics_domain": "general",
+      "provenance": {
+        "candidate_identity": "accumulated_deuterated_methane_prefill_count",
+        "corruption": "noncanonical_order",
+        "pair_index": 5,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/gas_injection_prefill/methane_deuterated/value"
+      },
+      "source_id": "dd:summary/gas_injection_prefill/methane_deuterated/value",
+      "source_paths": [
+        "dd:summary/gas_injection_prefill/methane_deuterated/value"
+      ],
+      "standard_name": "count_prefill_methane_deuterated_accumulated",
+      "unit": "1"
+    },
+    {
+      "data_type": "metadata",
+      "defect": "",
+      "description": "Timestamp locating the onset of plasma breakdown, defined by plasma initiation and the beginning of discharge-current flow.",
+      "documentation": "This quantity identifies the instant at which plasma breakdown begins: plasma is initiated and discharge current starts to flow.\n\nIt applies specifically to the onset of the plasma-breakdown phase in a discharge. It is an event timestamp, not an elapsed duration, period, or time assigned to a later phase of the discharge.\n\nThe [pulse duration](name:pulse_duration) uses this breakdown instant as its starting point and measures the subsequent confined-plasma interval; therefore, this quantity and pulse duration represent distinct timing concepts.",
+      "id": "breakdown_initial_time",
+      "kind": "metadata",
+      "label": 1,
+      "name": "breakdown_initial_time",
+      "path": "summary/time_breakdown/value",
+      "physics_domain": "machine_operations",
+      "provenance": {
+        "candidate_identity": "breakdown_initial_time",
+        "pair_index": 6,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/time_breakdown/value"
+      },
+      "source_id": "dd:summary/time_breakdown/value",
+      "source_paths": [
+        "dd:summary/time_breakdown/value"
+      ],
+      "standard_name": "breakdown_initial_time",
+      "unit": "s"
+    },
+    {
+      "data_type": "metadata",
+      "defect": "semantic_mismatch",
+      "description": "Timestamp locating the onset of plasma breakdown, defined by plasma initiation and the beginning of discharge-current flow.",
+      "documentation": "This quantity identifies the instant at which plasma breakdown begins: plasma is initiated and discharge current starts to flow.\n\nIt applies specifically to the onset of the plasma-breakdown phase in a discharge. It is an event timestamp, not an elapsed duration, period, or time assigned to a later phase of the discharge.\n\nThe [pulse duration](name:pulse_duration) uses this breakdown instant as its starting point and measures the subsequent confined-plasma interval; therefore, this quantity and pulse duration represent distinct timing concepts.",
+      "id": "thomson_scattering_laser_pulse_energy_at_outlet",
+      "kind": "metadata",
+      "label": 0,
+      "name": "thomson_scattering_laser_pulse_energy_at_outlet",
+      "path": "summary/time_breakdown/value",
+      "physics_domain": "machine_operations",
+      "provenance": {
+        "candidate_identity": "breakdown_initial_time",
+        "corruption": "semantic_mismatch",
+        "pair_index": 6,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/time_breakdown/value"
+      },
+      "source_id": "dd:summary/time_breakdown/value",
+      "source_paths": [
+        "dd:summary/time_breakdown/value"
+      ],
+      "standard_name": "thomson_scattering_laser_pulse_energy_at_outlet",
+      "unit": "s"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Vertical coordinate of a shunt is the signed Z coordinate of the shunt's second terminal point in the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "Vertical coordinate of a shunt is the signed vertical position of the shunt's second terminal point in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height. It is the projection of that terminal position onto the vertical basis direction.\n\nThe coordinate is defined by the projection of the terminal position vector:\n\n$$\nZ_2 = \\mathbf{r}_2 \\cdot \\hat{Z}\n$$\n\nwhere $\\mathbf{r}_2$ is the position vector of the shunt's second terminal point measured from the origin of the right-handed cylindrical $(R, \\phi, Z)$ frame, and $\\hat{Z}$ is the vertical basis vector.\n\nThis quantity specifies only the vertical component of the second terminal point position. It does not specify the terminal's major-radius coordinate, toroidal angle, shunt length, orientation, resistance, or current; the corresponding major-radius coordinate is the [radial coordinate of shunt](name:radial_coordinate_of_shunt).",
+      "id": "vertical_coordinate_of_shunt",
+      "kind": "scalar",
+      "label": 1,
+      "name": "vertical_coordinate_of_shunt",
+      "path": "magnetics/shunt/position/second_point/z",
+      "physics_domain": "magnetic_field_diagnostics",
+      "provenance": {
+        "candidate_identity": "vertical_coordinate_of_shunt",
+        "pair_index": 7,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "magnetics/shunt/position/second_point/z"
+      },
+      "source_id": "dd:magnetics/shunt/position/second_point/z",
+      "source_paths": [
+        "dd:magnetics/shunt/position/second_point/z"
+      ],
+      "standard_name": "vertical_coordinate_of_shunt",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "vacuous",
+      "description": "Vertical coordinate of a shunt is the signed Z coordinate of the shunt's second terminal point in the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "Vertical coordinate of a shunt is the signed vertical position of the shunt's second terminal point in the right-handed cylindrical $(R, \\phi, Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height. It is the projection of that terminal position onto the vertical basis direction.\n\nThe coordinate is defined by the projection of the terminal position vector:\n\n$$\nZ_2 = \\mathbf{r}_2 \\cdot \\hat{Z}\n$$\n\nwhere $\\mathbf{r}_2$ is the position vector of the shunt's second terminal point measured from the origin of the right-handed cylindrical $(R, \\phi, Z)$ frame, and $\\hat{Z}$ is the vertical basis vector.\n\nThis quantity specifies only the vertical component of the second terminal point position. It does not specify the terminal's major-radius coordinate, toroidal angle, shunt length, orientation, resistance, or current; the corresponding major-radius coordinate is the [radial coordinate of shunt](name:radial_coordinate_of_shunt).",
+      "id": "coordinate_of_shunt",
+      "kind": "scalar",
+      "label": 0,
+      "name": "coordinate_of_shunt",
+      "path": "magnetics/shunt/position/second_point/z",
+      "physics_domain": "magnetic_field_diagnostics",
+      "provenance": {
+        "candidate_identity": "vertical_coordinate_of_shunt",
+        "corruption": "vacuous",
+        "pair_index": 7,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "magnetics/shunt/position/second_point/z"
+      },
+      "source_id": "dd:magnetics/shunt/position/second_point/z",
+      "source_paths": [
+        "dd:magnetics/shunt/position/second_point/z"
+      ],
+      "standard_name": "coordinate_of_shunt",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Euclidean length of the alpha-side of a ferritic element’s oblique parallelogram cross-section, measured in the poloidal plane of the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "The quantity is the non-negative Euclidean length of the alpha-side, the designated inclined edge of a ferritic element’s oblique parallelogram cross-section. It is the alpha-side-specific component of [length of a ferritic element], rather than the length of an unspecified cross-sectional edge.\n\nFor endpoints $(R_1,Z_1)$ and $(R_2,Z_2)$ of the alpha-side in the poloidal plane,\n\n$$\nL_\\alpha = \\sqrt{(R_2-R_1)^2+(Z_2-Z_1)^2}\n$$\n\nwhere $R_i$ are major-radius coordinates and $Z_i$ are vertical coordinates, both in meters, in the right-handed cylindrical $(R,\\phi,Z)$ frame. The toroidal coordinate is fixed for this poloidal cross-sectional length. The quantity is a magnitude and is therefore non-negative.",
+      "id": "major_length_of_ferritic_element",
+      "kind": "scalar",
+      "label": 1,
+      "name": "major_length_of_ferritic_element",
+      "path": "ferritic/object/axisymmetric/oblique/length_alpha",
+      "physics_domain": "magnetic_field_systems",
+      "provenance": {
+        "candidate_identity": "major_length_of_ferritic_element",
+        "pair_index": 8,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "ferritic/object/axisymmetric/oblique/length_alpha"
+      },
+      "source_id": "dd:ferritic/object/axisymmetric/oblique/length_alpha",
+      "source_paths": [
+        "dd:ferritic/object/axisymmetric/oblique/length_alpha"
+      ],
+      "standard_name": "major_length_of_ferritic_element",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "noncanonical_order",
+      "description": "Euclidean length of the alpha-side of a ferritic element’s oblique parallelogram cross-section, measured in the poloidal plane of the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "The quantity is the non-negative Euclidean length of the alpha-side, the designated inclined edge of a ferritic element’s oblique parallelogram cross-section. It is the alpha-side-specific component of [length of a ferritic element], rather than the length of an unspecified cross-sectional edge.\n\nFor endpoints $(R_1,Z_1)$ and $(R_2,Z_2)$ of the alpha-side in the poloidal plane,\n\n$$\nL_\\alpha = \\sqrt{(R_2-R_1)^2+(Z_2-Z_1)^2}\n$$\n\nwhere $R_i$ are major-radius coordinates and $Z_i$ are vertical coordinates, both in meters, in the right-handed cylindrical $(R,\\phi,Z)$ frame. The toroidal coordinate is fixed for this poloidal cross-sectional length. The quantity is a magnitude and is therefore non-negative.",
+      "id": "element_ferritic_of_length_major",
+      "kind": "scalar",
+      "label": 0,
+      "name": "element_ferritic_of_length_major",
+      "path": "ferritic/object/axisymmetric/oblique/length_alpha",
+      "physics_domain": "magnetic_field_systems",
+      "provenance": {
+        "candidate_identity": "major_length_of_ferritic_element",
+        "corruption": "noncanonical_order",
+        "pair_index": 8,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "ferritic/object/axisymmetric/oblique/length_alpha"
+      },
+      "source_id": "dd:ferritic/object/axisymmetric/oblique/length_alpha",
+      "source_paths": [
+        "dd:ferritic/object/axisymmetric/oblique/length_alpha"
+      ],
+      "standard_name": "element_ferritic_of_length_major",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Vorticity is the curl of the plasma bulk velocity field, measuring the signed local angular rotation of fluid elements. It is the parent quantity for radial, toroidal, vertical, and field-aligned projections of that curl.",
+      "documentation": "Vorticity is the curl of the plasma bulk velocity field and represents the local rotational content of the single-fluid plasma flow. For solid-body rotation it is twice the angular-velocity vector of a fluid element.\n\nThe vorticity field $\\boldsymbol{\\omega}$ is defined by the curl of the plasma bulk velocity field:\n\n$$\n\\boldsymbol{\\omega} = \\nabla \\times \\mathbf{v}\n$$\n\nwhere $\\boldsymbol{\\omega}$ is the vorticity field, $\\mathbf{v}$ is the [plasma bulk velocity], and $\\nabla \\times$ is the curl operator with right-handed orientation.\n\nThe scope is the local magnetohydrodynamic plasma bulk-flow field at a point in the plasma. The bare name carries no surface, volume, time, species, or charge-state aggregation. It is not vorticity magnitude, flow shear, strain rate, divergence, or magnetic-field-line twist.\n\nThe unqualified quantity is the parent for scalar directional projections of the same curl. [Radial vorticity](name:radial_vorticity), [toroidal vorticity](name:toroidal_vorticity), and [vertical vorticity](name:vertical_vorticity) are projections onto $\\hat{R}$, $\\hat{\\phi}$, and $\\hat{Z}$ in the right-handed cylindrical $(R, \\phi, Z)$ frame, respectively; [parallel vorticity](name:parallel_vorticity) is the projection along the local magnetic-field direction. The bare name does not designate a poloidal projection.\n\nSign convention: Positive when $\\boldsymbol{\\omega}$ has a positive projection on the stated scalar direction: $+\\hat{R}$, $+\\hat{\\phi}$, or $+\\hat{Z}$ in the right-handed cylindrical $(R, \\phi, Z)$ frame, or the local magnetic-field direction for a field-aligned projection.",
+      "id": "vorticity",
+      "kind": "scalar",
+      "label": 1,
+      "name": "vorticity",
+      "path": "mhd/ggd/vorticity/values",
+      "physics_domain": "magnetohydrodynamics",
+      "provenance": {
+        "candidate_identity": "vorticity",
+        "pair_index": 9,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "mhd/ggd/vorticity/values"
+      },
+      "source_id": "dd:mhd/ggd/vorticity/values",
+      "source_paths": [
+        "dd:mhd/ggd/vorticity/values"
+      ],
+      "standard_name": "vorticity",
+      "unit": "s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "semantic_mismatch",
+      "description": "Vorticity is the curl of the plasma bulk velocity field, measuring the signed local angular rotation of fluid elements. It is the parent quantity for radial, toroidal, vertical, and field-aligned projections of that curl.",
+      "documentation": "Vorticity is the curl of the plasma bulk velocity field and represents the local rotational content of the single-fluid plasma flow. For solid-body rotation it is twice the angular-velocity vector of a fluid element.\n\nThe vorticity field $\\boldsymbol{\\omega}$ is defined by the curl of the plasma bulk velocity field:\n\n$$\n\\boldsymbol{\\omega} = \\nabla \\times \\mathbf{v}\n$$\n\nwhere $\\boldsymbol{\\omega}$ is the vorticity field, $\\mathbf{v}$ is the [plasma bulk velocity], and $\\nabla \\times$ is the curl operator with right-handed orientation.\n\nThe scope is the local magnetohydrodynamic plasma bulk-flow field at a point in the plasma. The bare name carries no surface, volume, time, species, or charge-state aggregation. It is not vorticity magnitude, flow shear, strain rate, divergence, or magnetic-field-line twist.\n\nThe unqualified quantity is the parent for scalar directional projections of the same curl. [Radial vorticity](name:radial_vorticity), [toroidal vorticity](name:toroidal_vorticity), and [vertical vorticity](name:vertical_vorticity) are projections onto $\\hat{R}$, $\\hat{\\phi}$, and $\\hat{Z}$ in the right-handed cylindrical $(R, \\phi, Z)$ frame, respectively; [parallel vorticity](name:parallel_vorticity) is the projection along the local magnetic-field direction. The bare name does not designate a poloidal projection.\n\nSign convention: Positive when $\\boldsymbol{\\omega}$ has a positive projection on the stated scalar direction: $+\\hat{R}$, $+\\hat{\\phi}$, or $+\\hat{Z}$ in the right-handed cylindrical $(R, \\phi, Z)$ frame, or the local magnetic-field direction for a field-aligned projection.",
+      "id": "upper_wavelength_of_filter",
+      "kind": "scalar",
+      "label": 0,
+      "name": "upper_wavelength_of_filter",
+      "path": "mhd/ggd/vorticity/values",
+      "physics_domain": "magnetohydrodynamics",
+      "provenance": {
+        "candidate_identity": "vorticity",
+        "corruption": "semantic_mismatch",
+        "pair_index": 9,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "mhd/ggd/vorticity/values"
+      },
+      "source_id": "dd:mhd/ggd/vorticity/values",
+      "source_paths": [
+        "dd:mhd/ggd/vorticity/values"
+      ],
+      "standard_name": "upper_wavelength_of_filter",
+      "unit": "s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Net coolant mass throughput per unit time across a flow boundary, applicable to cooling loops and plant-component fluid ports.",
+      "documentation": "Coolant mass flow rate is the net rate at which coolant crosses a defined flow boundary. It represents fluid throughput rather than a thermodynamic state or an energy-transfer quantity.\n\nThe instantaneous rate is defined by\n\n$$\n\\dot{m}_c(t) = \\frac{dM_c(t)}{dt}\n$$\n\nwhere $\\dot{m}_c(t)$ is the coolant mass flow rate, $M_c(t)$ is the cumulative net coolant mass that has crossed the boundary, $t$ is time, and the subscript $c$ denotes coolant.\n\nThe quantity applies to the coolant stream as a whole, with its mass contributions aggregated into one net rate. It is generic with respect to the flow boundary: no particular inlet, outlet, cooling loop, or plant component is implied. It excludes coolant temperature, enthalpy change, transit time, and deposited thermal power.\n\nThis quantity is the time-rate derivative of [coolant mass](name:coolant_mass), so it describes transport of mass rather than the amount of coolant present. When inlet and outlet states are specified, [coolant_temperature_at_inlet](name:coolant_temperature_at_inlet) and [coolant_temperature_at_outlet](name:coolant_temperature_at_outlet) provide the corresponding thermal states for an enthalpy balance; the mass flow rate itself is not that balance or its resulting power.\n\nSign convention: Positive when net coolant transport is in the adopted positive flow direction across the defined boundary.",
+      "id": "ratio_of_coolant_mass_to_time",
+      "kind": "scalar",
+      "label": 1,
+      "name": "ratio_of_coolant_mass_to_time",
+      "path": "balance_of_plant/power_plant/system/component/port/mass_flow",
+      "physics_domain": "mechanical_measurement_diagnostics",
+      "provenance": {
+        "candidate_identity": "ratio_of_coolant_mass_to_time",
+        "pair_index": 10,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "balance_of_plant/power_plant/system/component/port/mass_flow"
+      },
+      "source_id": "dd:balance_of_plant/power_plant/system/component/port/mass_flow",
+      "source_paths": [
+        "dd:balance_of_plant/power_plant/system/component/port/mass_flow",
+        "dd:calorimetry/cooling_loop/mass_flow",
+        "dd:calorimetry/group/component/mass_flow"
+      ],
+      "standard_name": "ratio_of_coolant_mass_to_time",
+      "unit": "kg.s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "vacuous",
+      "description": "Net coolant mass throughput per unit time across a flow boundary, applicable to cooling loops and plant-component fluid ports.",
+      "documentation": "Coolant mass flow rate is the net rate at which coolant crosses a defined flow boundary. It represents fluid throughput rather than a thermodynamic state or an energy-transfer quantity.\n\nThe instantaneous rate is defined by\n\n$$\n\\dot{m}_c(t) = \\frac{dM_c(t)}{dt}\n$$\n\nwhere $\\dot{m}_c(t)$ is the coolant mass flow rate, $M_c(t)$ is the cumulative net coolant mass that has crossed the boundary, $t$ is time, and the subscript $c$ denotes coolant.\n\nThe quantity applies to the coolant stream as a whole, with its mass contributions aggregated into one net rate. It is generic with respect to the flow boundary: no particular inlet, outlet, cooling loop, or plant component is implied. It excludes coolant temperature, enthalpy change, transit time, and deposited thermal power.\n\nThis quantity is the time-rate derivative of [coolant mass](name:coolant_mass), so it describes transport of mass rather than the amount of coolant present. When inlet and outlet states are specified, [coolant_temperature_at_inlet](name:coolant_temperature_at_inlet) and [coolant_temperature_at_outlet](name:coolant_temperature_at_outlet) provide the corresponding thermal states for an enthalpy balance; the mass flow rate itself is not that balance or its resulting power.\n\nSign convention: Positive when net coolant transport is in the adopted positive flow direction across the defined boundary.",
+      "id": "of_coolant_mass_to_time",
+      "kind": "scalar",
+      "label": 0,
+      "name": "of_coolant_mass_to_time",
+      "path": "balance_of_plant/power_plant/system/component/port/mass_flow",
+      "physics_domain": "mechanical_measurement_diagnostics",
+      "provenance": {
+        "candidate_identity": "ratio_of_coolant_mass_to_time",
+        "corruption": "vacuous",
+        "pair_index": 10,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "balance_of_plant/power_plant/system/component/port/mass_flow"
+      },
+      "source_id": "dd:balance_of_plant/power_plant/system/component/port/mass_flow",
+      "source_paths": [
+        "dd:balance_of_plant/power_plant/system/component/port/mass_flow",
+        "dd:calorimetry/cooling_loop/mass_flow",
+        "dd:calorimetry/group/component/mass_flow"
+      ],
+      "standard_name": "of_coolant_mass_to_time",
+      "unit": "kg.s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Nuclear proton count of the fast ion species detected in charge exchange spectroscopy, uniquely identifying the element independently of its ionization state.",
+      "documentation": "The fast ion atomic number $Z_n$ is the number of protons in the nucleus of the energetic (non-thermal) ion species observed via Fast Ion Charge eXchange (FICX) spectroscopy. As an intrinsic nuclear property, $Z_n$ is invariant with respect to ionization state and unambiguously identifies the element: $Z_n = 1$ for hydrogen isotopes (deuterium, tritium), $Z_n = 2$ for helium (alpha particles), $Z_n = 6$ for carbon, and $Z_n = 74$ for tungsten.\n\nThis quantity is the fast-ion-population counterpart of [ion_atomic_number], which gives the same nuclear property for a general ion species. It is physically distinct from [fast_ion_charge](name:fast_ion_atomic_number), which specifies the ionic charge state $Z_\\text{ion}$ — the net charge arising from electron removal — and which can vary for the same element at different ionization conditions. Together with [fast_ion_mass](name:ion_atomic_mass), the atomic number fully characterizes the fast ion species entering the spectral interpretation of FICX emission.\n\nIn charge exchange diagnostics, the fast ion species is identified prior to line inversion; $Z_n$ is an integer-valued input parameter rather than a derived measurement, taking values from 1 (hydrogenic fast ions in D-T plasmas) to the atomic number of the heaviest injected impurity species.",
+      "id": "fast_ion_atomic_number",
+      "kind": "scalar",
+      "label": 1,
+      "name": "fast_ion_atomic_number",
+      "path": "charge_exchange/channel/ion_fast/z_ion",
+      "physics_domain": "particle_measurement_diagnostics",
+      "provenance": {
+        "candidate_identity": "fast_ion_atomic_number",
+        "pair_index": 11,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "charge_exchange/channel/ion_fast/z_ion"
+      },
+      "source_id": "dd:charge_exchange/channel/ion_fast/z_ion",
+      "source_paths": [
+        "dd:charge_exchange/channel/ion_fast/z_ion"
+      ],
+      "standard_name": "fast_ion_atomic_number",
+      "unit": "1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "noncanonical_order",
+      "description": "Nuclear proton count of the fast ion species detected in charge exchange spectroscopy, uniquely identifying the element independently of its ionization state.",
+      "documentation": "The fast ion atomic number $Z_n$ is the number of protons in the nucleus of the energetic (non-thermal) ion species observed via Fast Ion Charge eXchange (FICX) spectroscopy. As an intrinsic nuclear property, $Z_n$ is invariant with respect to ionization state and unambiguously identifies the element: $Z_n = 1$ for hydrogen isotopes (deuterium, tritium), $Z_n = 2$ for helium (alpha particles), $Z_n = 6$ for carbon, and $Z_n = 74$ for tungsten.\n\nThis quantity is the fast-ion-population counterpart of [ion_atomic_number], which gives the same nuclear property for a general ion species. It is physically distinct from [fast_ion_charge](name:fast_ion_atomic_number), which specifies the ionic charge state $Z_\\text{ion}$ — the net charge arising from electron removal — and which can vary for the same element at different ionization conditions. Together with [fast_ion_mass](name:ion_atomic_mass), the atomic number fully characterizes the fast ion species entering the spectral interpretation of FICX emission.\n\nIn charge exchange diagnostics, the fast ion species is identified prior to line inversion; $Z_n$ is an integer-valued input parameter rather than a derived measurement, taking values from 1 (hydrogenic fast ions in D-T plasmas) to the atomic number of the heaviest injected impurity species.",
+      "id": "number_atomic_ion_fast",
+      "kind": "scalar",
+      "label": 0,
+      "name": "number_atomic_ion_fast",
+      "path": "charge_exchange/channel/ion_fast/z_ion",
+      "physics_domain": "particle_measurement_diagnostics",
+      "provenance": {
+        "candidate_identity": "fast_ion_atomic_number",
+        "corruption": "noncanonical_order",
+        "pair_index": 11,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "charge_exchange/channel/ion_fast/z_ion"
+      },
+      "source_id": "dd:charge_exchange/channel/ion_fast/z_ion",
+      "source_paths": [
+        "dd:charge_exchange/channel/ion_fast/z_ion"
+      ],
+      "standard_name": "number_atomic_ion_fast",
+      "unit": "1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Gas source rate at midplane due to gas injection is the non-negative total unweighted rate at which neutral gas particles are injected by gas valves assigned to the vessel equatorial midplane. It is not an electron-equivalent or charge-weighted rate.",
+      "documentation": "Gas source rate at midplane due to gas injection is the instantaneous total unweighted source rate of neutral gas particles injected by gas-injection valves assigned to the vessel equatorial midplane. It counts injected neutral gas particles themselves, not electron-equivalent particles, charge-weighted particles, or particles produced by later plasma or wall interactions.\n\nFor the set of midplane injection valves, the total rate is the sum of the individual unweighted valve particle throughputs:\n\n$$\n\\dot{N}_{\\mathrm{mid}}^{\\mathrm{gas\\,inj}} = \\sum_{k \\in \\mathcal{M}_{\\mathrm{mid}}} \\dot{N}_k\n$$\n\nwhere $\\dot{N}_{\\mathrm{mid}}^{\\mathrm{gas\\,inj}}$ is the gas source rate at midplane due to gas injection, $\\mathcal{M}_{\\mathrm{mid}}$ is the set of gas-injection valves assigned to the vessel equatorial midplane, and $\\dot{N}_k$ is the unweighted neutral-particle throughput of valve $k$.\n\nThe total includes all gas-injection valves in the midplane group and excludes upper, lower, wall, recycling, pumping, ionization, and transport contributions. It is not additive with regional gas-source quantities that use an electron-equivalent or charge-weighted convention. Its time integral is the corresponding [accumulated total gas count at midplane due to gas injection](name:accumulated_total_gas_count_at_midplane_due_to_gas_injection).",
+      "id": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+      "kind": "scalar",
+      "label": 1,
+      "name": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+      "path": "summary/gas_injection_rates/midplane/value",
+      "physics_domain": "plant_systems",
+      "provenance": {
+        "candidate_identity": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+        "pair_index": 12,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/gas_injection_rates/midplane/value"
+      },
+      "source_id": "dd:summary/gas_injection_rates/midplane/value",
+      "source_paths": [
+        "dd:summary/gas_injection_rates/midplane/value"
+      ],
+      "standard_name": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+      "unit": "s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "semantic_mismatch",
+      "description": "Gas source rate at midplane due to gas injection is the non-negative total unweighted rate at which neutral gas particles are injected by gas valves assigned to the vessel equatorial midplane. It is not an electron-equivalent or charge-weighted rate.",
+      "documentation": "Gas source rate at midplane due to gas injection is the instantaneous total unweighted source rate of neutral gas particles injected by gas-injection valves assigned to the vessel equatorial midplane. It counts injected neutral gas particles themselves, not electron-equivalent particles, charge-weighted particles, or particles produced by later plasma or wall interactions.\n\nFor the set of midplane injection valves, the total rate is the sum of the individual unweighted valve particle throughputs:\n\n$$\n\\dot{N}_{\\mathrm{mid}}^{\\mathrm{gas\\,inj}} = \\sum_{k \\in \\mathcal{M}_{\\mathrm{mid}}} \\dot{N}_k\n$$\n\nwhere $\\dot{N}_{\\mathrm{mid}}^{\\mathrm{gas\\,inj}}$ is the gas source rate at midplane due to gas injection, $\\mathcal{M}_{\\mathrm{mid}}$ is the set of gas-injection valves assigned to the vessel equatorial midplane, and $\\dot{N}_k$ is the unweighted neutral-particle throughput of valve $k$.\n\nThe total includes all gas-injection valves in the midplane group and excludes upper, lower, wall, recycling, pumping, ionization, and transport contributions. It is not additive with regional gas-source quantities that use an electron-equivalent or charge-weighted convention. Its time integral is the corresponding [accumulated total gas count at midplane due to gas injection](name:accumulated_total_gas_count_at_midplane_due_to_gas_injection).",
+      "id": "helium_4_density_at_internal_transport_barrier",
+      "kind": "scalar",
+      "label": 0,
+      "name": "helium_4_density_at_internal_transport_barrier",
+      "path": "summary/gas_injection_rates/midplane/value",
+      "physics_domain": "plant_systems",
+      "provenance": {
+        "candidate_identity": "total_gas_source_rate_at_midplane_due_to_gas_injection",
+        "corruption": "semantic_mismatch",
+        "pair_index": 12,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/gas_injection_rates/midplane/value"
+      },
+      "source_id": "dd:summary/gas_injection_rates/midplane/value",
+      "source_paths": [
+        "dd:summary/gas_injection_rates/midplane/value"
+      ],
+      "standard_name": "helium_4_density_at_internal_transport_barrier",
+      "unit": "s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Signed x coordinate of the geometric center of a diagnostic aperture, measured from the origin of its right-handed camera Cartesian (x, y, z) frame.",
+      "documentation": "This quantity locates the geometric center of a diagnostic aperture along the x axis of its right-handed camera Cartesian basis $(\\hat{x},\\hat{y},\\hat{z})$. It is a signed geometric position, not an aperture dimension or orientation.\n\nThe coordinate is defined by\n\n$$\nx_A = (\\mathbf{r}_A - \\mathbf{r}_0) \\cdot \\hat{x}\n$$\n\nwhere $\\mathbf{r}_A$ is the position of the aperture center, $\\mathbf{r}_0$ is the frame origin, $\\hat{x}$ is the unit vector along the x axis, and $x_A$ is measured in m. The corresponding [y coordinate of the diagnostic aperture](name:y_coordinate_of_diagnostic_aperture) uses the same origin and camera basis; this quantity is distinct from cylindrical radial and vertical aperture coordinates.\n\nSign convention: Positive when the aperture center lies in the direction of increasing x from the frame origin.",
+      "id": "x_coordinate_of_diagnostic_aperture",
+      "kind": "scalar",
+      "label": 1,
+      "name": "x_coordinate_of_diagnostic_aperture",
+      "path": "camera_ir/channel/camera/pinhole/x",
+      "physics_domain": "plasma_wall_interactions",
+      "provenance": {
+        "candidate_identity": "x_coordinate_of_diagnostic_aperture",
+        "pair_index": 13,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "camera_ir/channel/camera/pinhole/x"
+      },
+      "source_id": "dd:camera_ir/channel/camera/pinhole/x",
+      "source_paths": [
+        "dd:camera_ir/channel/camera/pinhole/x"
+      ],
+      "standard_name": "x_coordinate_of_diagnostic_aperture",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "vacuous",
+      "description": "Signed x coordinate of the geometric center of a diagnostic aperture, measured from the origin of its right-handed camera Cartesian (x, y, z) frame.",
+      "documentation": "This quantity locates the geometric center of a diagnostic aperture along the x axis of its right-handed camera Cartesian basis $(\\hat{x},\\hat{y},\\hat{z})$. It is a signed geometric position, not an aperture dimension or orientation.\n\nThe coordinate is defined by\n\n$$\nx_A = (\\mathbf{r}_A - \\mathbf{r}_0) \\cdot \\hat{x}\n$$\n\nwhere $\\mathbf{r}_A$ is the position of the aperture center, $\\mathbf{r}_0$ is the frame origin, $\\hat{x}$ is the unit vector along the x axis, and $x_A$ is measured in m. The corresponding [y coordinate of the diagnostic aperture](name:y_coordinate_of_diagnostic_aperture) uses the same origin and camera basis; this quantity is distinct from cylindrical radial and vertical aperture coordinates.\n\nSign convention: Positive when the aperture center lies in the direction of increasing x from the frame origin.",
+      "id": "coordinate_of_diagnostic_aperture",
+      "kind": "scalar",
+      "label": 0,
+      "name": "coordinate_of_diagnostic_aperture",
+      "path": "camera_ir/channel/camera/pinhole/x",
+      "physics_domain": "plasma_wall_interactions",
+      "provenance": {
+        "candidate_identity": "x_coordinate_of_diagnostic_aperture",
+        "corruption": "vacuous",
+        "pair_index": 13,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "camera_ir/channel/camera/pinhole/x"
+      },
+      "source_id": "dd:camera_ir/channel/camera/pinhole/x",
+      "source_paths": [
+        "dd:camera_ir/channel/camera/pinhole/x"
+      ],
+      "standard_name": "coordinate_of_diagnostic_aperture",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Local volumetric rate of neutron production from deuterium-deuterium fusion reactions, giving the spatial distribution of D-D neutron emission per unit volume at each point in the plasma.",
+      "documentation": "The deuterium-deuterium neutron emissivity $\\varepsilon_{DD}$ is the local number of neutrons produced per unit volume per unit time from D-D fusion reactions. Only the neutron-emitting D-D branch contributes, so this quantity is the local source of prompt fusion neutrons from deuterium-deuterium reactions that produce a neutron.\n\nFor identical deuterium reactants, the branch emissivity is given by:\n\n$$\n\\varepsilon_{DD} = \\frac{1}{2} n_D^2 \\langle \\sigma v \\rangle_{DD,n}\n$$\n\nwhere $\\varepsilon_{DD}$ is the deuterium-deuterium neutron emissivity, $n_D$ is the local deuterium reactant number density, $\\sigma$ is the fusion cross-section for the neutron-emitting D-D branch, $v$ is the relative speed of the deuterium reactants, and $\\langle \\sigma v \\rangle_{DD,n}$ is the velocity average of $\\sigma v$ over the local reactant distributions. The factor $1/2$ avoids double-counting unordered pairs of identical deuterium reactants.\n\nThe scope is the D-D reaction channel at a plasma location, aggregated over all deuterium reactant charge states and kinetic populations that contribute to the local neutron-emitting D-D branch unless a component-resolved quantity is specified. It excludes the proton-emitting D-D branch, subsequent D-T neutron production involving tritium born from D-D reactions, and the [deuterium-tritium neutron emissivity due to fusion](name:deuterium_tritium_emissivity_due_to_fusion). The reaction-pair label deuterium_deuterium denotes two deuterium reactants; it is not a charge-state-resolved fuel-state quantity.\n\nIntegrating $\\varepsilon_{DD}$ over a plasma volume gives the D-D contribution to the global [neutron flux](name:neutron_flux) for the same reactant population, and weighting that contribution by the branch neutron energy gives its contribution to [total neutron power]. When reactant populations are resolved, the corresponding global neutron production can be decomposed into [thermal neutron flux](name:total_neutron_source_rate_due_to_thermal_fusion), [beam-thermal neutron flux], and [beam-beam neutron flux] contributions; those are population decompositions of the volume-integrated source, not separate definitions of the local D-D emissivity. Together with [deuterium-tritium neutron emissivity due to fusion](name:deuterium_tritium_emissivity_due_to_fusion), this quantity is a reaction-channel-specific member of [neutron emissivity due to fusion](name:emissivity_due_to_fusion).",
+      "id": "deuterium_deuterium_emissivity_due_to_fusion",
+      "kind": "scalar",
+      "label": 1,
+      "name": "deuterium_deuterium_emissivity_due_to_fusion",
+      "path": "neutron_diagnostic/reconstructed_emissivity/emissivity_dd",
+      "physics_domain": "radiation_measurement_diagnostics",
+      "provenance": {
+        "candidate_identity": "deuterium_deuterium_emissivity_due_to_fusion",
+        "pair_index": 14,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "neutron_diagnostic/reconstructed_emissivity/emissivity_dd"
+      },
+      "source_id": "dd:neutron_diagnostic/reconstructed_emissivity/emissivity_dd",
+      "source_paths": [
+        "dd:neutron_diagnostic/reconstructed_emissivity/emissivity_dd"
+      ],
+      "standard_name": "deuterium_deuterium_emissivity_due_to_fusion",
+      "unit": "m^-3.s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "noncanonical_order",
+      "description": "Local volumetric rate of neutron production from deuterium-deuterium fusion reactions, giving the spatial distribution of D-D neutron emission per unit volume at each point in the plasma.",
+      "documentation": "The deuterium-deuterium neutron emissivity $\\varepsilon_{DD}$ is the local number of neutrons produced per unit volume per unit time from D-D fusion reactions. Only the neutron-emitting D-D branch contributes, so this quantity is the local source of prompt fusion neutrons from deuterium-deuterium reactions that produce a neutron.\n\nFor identical deuterium reactants, the branch emissivity is given by:\n\n$$\n\\varepsilon_{DD} = \\frac{1}{2} n_D^2 \\langle \\sigma v \\rangle_{DD,n}\n$$\n\nwhere $\\varepsilon_{DD}$ is the deuterium-deuterium neutron emissivity, $n_D$ is the local deuterium reactant number density, $\\sigma$ is the fusion cross-section for the neutron-emitting D-D branch, $v$ is the relative speed of the deuterium reactants, and $\\langle \\sigma v \\rangle_{DD,n}$ is the velocity average of $\\sigma v$ over the local reactant distributions. The factor $1/2$ avoids double-counting unordered pairs of identical deuterium reactants.\n\nThe scope is the D-D reaction channel at a plasma location, aggregated over all deuterium reactant charge states and kinetic populations that contribute to the local neutron-emitting D-D branch unless a component-resolved quantity is specified. It excludes the proton-emitting D-D branch, subsequent D-T neutron production involving tritium born from D-D reactions, and the [deuterium-tritium neutron emissivity due to fusion](name:deuterium_tritium_emissivity_due_to_fusion). The reaction-pair label deuterium_deuterium denotes two deuterium reactants; it is not a charge-state-resolved fuel-state quantity.\n\nIntegrating $\\varepsilon_{DD}$ over a plasma volume gives the D-D contribution to the global [neutron flux](name:neutron_flux) for the same reactant population, and weighting that contribution by the branch neutron energy gives its contribution to [total neutron power]. When reactant populations are resolved, the corresponding global neutron production can be decomposed into [thermal neutron flux](name:total_neutron_source_rate_due_to_thermal_fusion), [beam-thermal neutron flux], and [beam-beam neutron flux] contributions; those are population decompositions of the volume-integrated source, not separate definitions of the local D-D emissivity. Together with [deuterium-tritium neutron emissivity due to fusion](name:deuterium_tritium_emissivity_due_to_fusion), this quantity is a reaction-channel-specific member of [neutron emissivity due to fusion](name:emissivity_due_to_fusion).",
+      "id": "fusion_to_due_emissivity_deuterium_deuterium",
+      "kind": "scalar",
+      "label": 0,
+      "name": "fusion_to_due_emissivity_deuterium_deuterium",
+      "path": "neutron_diagnostic/reconstructed_emissivity/emissivity_dd",
+      "physics_domain": "radiation_measurement_diagnostics",
+      "provenance": {
+        "candidate_identity": "deuterium_deuterium_emissivity_due_to_fusion",
+        "corruption": "noncanonical_order",
+        "pair_index": 14,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "neutron_diagnostic/reconstructed_emissivity/emissivity_dd"
+      },
+      "source_id": "dd:neutron_diagnostic/reconstructed_emissivity/emissivity_dd",
+      "source_paths": [
+        "dd:neutron_diagnostic/reconstructed_emissivity/emissivity_dd"
+      ],
+      "standard_name": "fusion_to_due_emissivity_deuterium_deuterium",
+      "unit": "m^-3.s^-1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "The vertical coordinate of each point on a plasma-facing component boundary outline is the signed height in the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "The vertical outline coordinate is the signed height $Z$ of each boundary-contour point belonging to a plasma-facing component. It describes the component boundary in the right-handed cylindrical $(R, \\phi, Z)$ frame.\n\nFor outline point $i$, the coordinate is defined by\n\n$$\nZ_i = \\mathbf{r}_i \\cdot \\hat{\\mathbf{Z}}\n$$\n\nwhere $Z_i$ is the vertical coordinate of point $i$, $\\mathbf{r}_i$ is that point's position vector relative to the cylindrical coordinate origin, and $\\hat{\\mathbf{Z}}$ is the unit vector in the vertical direction. The quantity applies pointwise to one component boundary outline and is not an average, extremum, centroid coordinate, or integrated geometric measure. A closed outline does not repeat its first point as a closing point.\n\nThis coordinate has the same geometric meaning as the corresponding outline coordinate for a limiter tile or divertor tile, such as [vertical outline of limiter tile](name:vertical_outline_of_limiter_tile) and [vertical outline of divertor tile](name:vertical_outline_of_divertor_tile), but its locus is the plasma-facing component boundary in general.\n\nSign convention: Positive when $Z_i$ increases in the $+\\hat{\\mathbf{Z}}$ direction of the right-handed cylindrical $(R, \\phi, Z)$ frame.",
+      "id": "vertical_outline_of_plasma_facing_component",
+      "kind": "scalar",
+      "label": 1,
+      "name": "vertical_outline_of_plasma_facing_component",
+      "path": "wall/description_2d/mobile/unit/outline/z",
+      "physics_domain": "structural_components",
+      "provenance": {
+        "candidate_identity": "vertical_outline_of_plasma_facing_component",
+        "pair_index": 15,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "wall/description_2d/mobile/unit/outline/z"
+      },
+      "source_id": "dd:wall/description_2d/mobile/unit/outline/z",
+      "source_paths": [
+        "dd:wall/description_2d/mobile/unit/outline/z"
+      ],
+      "standard_name": "vertical_outline_of_plasma_facing_component",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "semantic_mismatch",
+      "description": "The vertical coordinate of each point on a plasma-facing component boundary outline is the signed height in the right-handed cylindrical (R, φ, Z) frame.",
+      "documentation": "The vertical outline coordinate is the signed height $Z$ of each boundary-contour point belonging to a plasma-facing component. It describes the component boundary in the right-handed cylindrical $(R, \\phi, Z)$ frame.\n\nFor outline point $i$, the coordinate is defined by\n\n$$\nZ_i = \\mathbf{r}_i \\cdot \\hat{\\mathbf{Z}}\n$$\n\nwhere $Z_i$ is the vertical coordinate of point $i$, $\\mathbf{r}_i$ is that point's position vector relative to the cylindrical coordinate origin, and $\\hat{\\mathbf{Z}}$ is the unit vector in the vertical direction. The quantity applies pointwise to one component boundary outline and is not an average, extremum, centroid coordinate, or integrated geometric measure. A closed outline does not repeat its first point as a closing point.\n\nThis coordinate has the same geometric meaning as the corresponding outline coordinate for a limiter tile or divertor tile, such as [vertical outline of limiter tile](name:vertical_outline_of_limiter_tile) and [vertical outline of divertor tile](name:vertical_outline_of_divertor_tile), but its locus is the plasma-facing component boundary in general.\n\nSign convention: Positive when $Z_i$ increases in the $+\\hat{\\mathbf{Z}}$ direction of the right-handed cylindrical $(R, \\phi, Z)$ frame.",
+      "id": "z_first_measurement_direction_unit_vector_of_strain_gauge",
+      "kind": "scalar",
+      "label": 0,
+      "name": "z_first_measurement_direction_unit_vector_of_strain_gauge",
+      "path": "wall/description_2d/mobile/unit/outline/z",
+      "physics_domain": "structural_components",
+      "provenance": {
+        "candidate_identity": "vertical_outline_of_plasma_facing_component",
+        "corruption": "semantic_mismatch",
+        "pair_index": 15,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "wall/description_2d/mobile/unit/outline/z"
+      },
+      "source_id": "dd:wall/description_2d/mobile/unit/outline/z",
+      "source_paths": [
+        "dd:wall/description_2d/mobile/unit/outline/z"
+      ],
+      "standard_name": "z_first_measurement_direction_unit_vector_of_strain_gauge",
+      "unit": "m"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Signed component of the total magnetic induction resolved along the local equilibrium magnetic-field direction, distinguishing field-aligned strength from cylindrical-axis projections.",
+      "documentation": "The parallel magnetic field $B_\\\\parallel$ is the component of the total [magnetic induction](name:magnetic_field) resolved along the local equilibrium magnetic-field direction. It represents field-aligned magnetic strength rather than a projection onto a fixed cylindrical axis.\n\nThe defining projection is\n\n$$\nB_\\\\parallel = \\\\mathbf{B} \\\\cdot \\\\hat{\\\\mathbf{b}}_0, \\\\qquad \\\\hat{\\\\mathbf{b}}_0 = \\\\frac{\\\\mathbf{B}_0}{|\\\\mathbf{B}_0|}\n$$\n\nwhere $\\\\mathbf{B}$ is the total magnetic induction, $\\\\mathbf{B}_0$ is the local equilibrium magnetic induction, and $\\\\hat{\\\\mathbf{b}}_0$ is the corresponding field-line unit vector. This total-field component is distinct from the [parallel wave magnetic field](name:parallel_wave_magnetic_field), which is restricted to an oscillatory wave perturbation, and from the [parallel magnetic vector potential](name:parallel_magnetic_vector_potential), which projects a different physical quantity.\n\nSign convention: Positive when the total magnetic induction points along the local equilibrium magnetic-field direction.",
+      "id": "parallel_magnetic_field",
+      "kind": "scalar",
+      "label": 1,
+      "name": "parallel_magnetic_field",
+      "path": "edge_profiles/ggd/b_field/parallel",
+      "physics_domain": "transport",
+      "provenance": {
+        "candidate_identity": "parallel_magnetic_field",
+        "pair_index": 16,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "edge_profiles/ggd/b_field/parallel"
+      },
+      "source_id": "dd:edge_profiles/ggd/b_field/parallel",
+      "source_paths": [
+        "dd:edge_profiles/ggd/b_field/parallel",
+        "dd:plasma_profiles/ggd/b_field/parallel"
+      ],
+      "standard_name": "parallel_magnetic_field",
+      "unit": "T"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "vacuous",
+      "description": "Signed component of the total magnetic induction resolved along the local equilibrium magnetic-field direction, distinguishing field-aligned strength from cylindrical-axis projections.",
+      "documentation": "The parallel magnetic field $B_\\\\parallel$ is the component of the total [magnetic induction](name:magnetic_field) resolved along the local equilibrium magnetic-field direction. It represents field-aligned magnetic strength rather than a projection onto a fixed cylindrical axis.\n\nThe defining projection is\n\n$$\nB_\\\\parallel = \\\\mathbf{B} \\\\cdot \\\\hat{\\\\mathbf{b}}_0, \\\\qquad \\\\hat{\\\\mathbf{b}}_0 = \\\\frac{\\\\mathbf{B}_0}{|\\\\mathbf{B}_0|}\n$$\n\nwhere $\\\\mathbf{B}$ is the total magnetic induction, $\\\\mathbf{B}_0$ is the local equilibrium magnetic induction, and $\\\\hat{\\\\mathbf{b}}_0$ is the corresponding field-line unit vector. This total-field component is distinct from the [parallel wave magnetic field](name:parallel_wave_magnetic_field), which is restricted to an oscillatory wave perturbation, and from the [parallel magnetic vector potential](name:parallel_magnetic_vector_potential), which projects a different physical quantity.\n\nSign convention: Positive when the total magnetic induction points along the local equilibrium magnetic-field direction.",
+      "id": "magnetic_field",
+      "kind": "scalar",
+      "label": 0,
+      "name": "magnetic_field",
+      "path": "edge_profiles/ggd/b_field/parallel",
+      "physics_domain": "transport",
+      "provenance": {
+        "candidate_identity": "parallel_magnetic_field",
+        "corruption": "vacuous",
+        "pair_index": 16,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "edge_profiles/ggd/b_field/parallel"
+      },
+      "source_id": "dd:edge_profiles/ggd/b_field/parallel",
+      "source_paths": [
+        "dd:edge_profiles/ggd/b_field/parallel",
+        "dd:plasma_profiles/ggd/b_field/parallel"
+      ],
+      "standard_name": "magnetic_field",
+      "unit": "T"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Gyro-Bohm-normalized radial gyrocenter energy flux at a flux surface, with radial meaning the R component in the right-handed cylindrical (R, φ, Z) frame, due to perturbed parallel vector-potential fluctuations.",
+      "documentation": "Gyro-Bohm-normalized radial gyrocenter energy flux at a flux surface due to the perturbed parallel vector potential is the dimensionless contribution to gyrocenter energy transport from the magnetic-flutter velocity generated by $\\delta A_\\parallel$. The radial component is the $R$ component in the right-handed cylindrical $(R,\\phi,Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height; the flux surface is a magnetic surface labeled by the flux coordinate $\\psi$. It isolates this electromagnetic channel from electrostatic transport and from the contribution associated with the perturbed parallel magnetic field.\n\nFor a spectral representation, the aggregate species-summed contribution is defined by the flux-surface and time average of the energy-weighted gyrocenter perturbation contracted with the $\\delta A_\\parallel$ radial-flutter velocity:\n\n$$\nQ_{A_\\parallel}^{\\mathrm{norm}} =\n\\frac{1}{Q_\\mathrm{gB}}\n\\left\\langle\n\\sum_s \\sum_{\\mathbf{k}_\\perp}\n\\operatorname{Re}\\!\\left[\n\\int d^3v\\, \\frac{m_s v^2}{2}\\,\n\\delta f_{s,\\mathbf{k}_\\perp}^{*}\\,\nv_{R,s,\\mathbf{k}_\\perp}^{(A_\\parallel)}\n\\right]\n\\right\\rangle_{\\psi,t}\n$$\n\nwhere $Q_{A_\\parallel}^{\\mathrm{norm}}$ is this normalized flux, $Q_\\mathrm{gB}=n_\\mathrm{ref}T_\\mathrm{ref}v_{\\mathrm{th},\\mathrm{ref}}(\\rho_\\mathrm{ref}/a_\\mathrm{ref})^2$ is the positive gyro-Bohm reference energy flux, $n_\\mathrm{ref}$ is the reference particle density, $T_\\mathrm{ref}$ is the reference thermal energy per particle, $v_{\\mathrm{th},\\mathrm{ref}}$ is the reference thermal speed, $\\rho_\\mathrm{ref}$ is the reference gyroradius, and $a_\\mathrm{ref}$ is the reference minor radius. The index $s$ labels kinetic species, $\\mathbf{k}_\\perp$ labels perpendicular-to-the-magnetic-field wave-number components, $\\delta f_{s,\\mathbf{k}_\\perp}$ is the corresponding perturbed gyrocenter distribution, $v_{R,s,\\mathbf{k}_\\perp}^{(A_\\parallel)}$ is the $R$ component of the magnetic-flutter velocity associated with $\\delta A_\\parallel$, $\\operatorname{Re}$ selects the in-phase flux-carrying part of the bilinear product, and $\\langle\\cdot\\rangle_{\\psi,t}$ denotes averaging on the magnetic flux surface labeled by $\\psi$ and over the turbulence time interval.\n\nThe wave-number sum denotes the aggregate flux at the flux surface rather than a mode-resolved contribution. The quantity includes only the $\\delta A_\\parallel$ part of the radial magnetic-flutter transport channel, excluding electrostatic $E\\times B$ energy flux, magnetic-compression transport from $\\delta B_\\parallel$, and field-energy terms not carried by gyrocenter kinetic energy. If the gyrocenter variables are expressed in a rotating plasma reference frame, both factors in the bilinear product are interpreted in that same reference frame.\n\nSign convention: Positive when the net gyrocenter energy flux component is in the $+\\hat{R}$ direction, away from the machine symmetry axis, in the right-handed cylindrical $(R,\\phi,Z)$ frame.",
+      "id": "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_vector_potential",
+      "kind": "scalar",
+      "label": 1,
+      "name": "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_vector_potential",
+      "path": "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel",
+      "physics_domain": "turbulence",
+      "provenance": {
+        "candidate_identity": "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_vector_potential",
+        "pair_index": 17,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel"
+      },
+      "source_id": "dd:gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel",
+      "source_paths": [
+        "dd:gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum_rotating_frame/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_4d/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_5d/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_5d_rotating_frame/energy_a_field_parallel"
+      ],
+      "standard_name": "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_vector_potential",
+      "unit": "1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "noncanonical_order",
+      "description": "Gyro-Bohm-normalized radial gyrocenter energy flux at a flux surface, with radial meaning the R component in the right-handed cylindrical (R, φ, Z) frame, due to perturbed parallel vector-potential fluctuations.",
+      "documentation": "Gyro-Bohm-normalized radial gyrocenter energy flux at a flux surface due to the perturbed parallel vector potential is the dimensionless contribution to gyrocenter energy transport from the magnetic-flutter velocity generated by $\\delta A_\\parallel$. The radial component is the $R$ component in the right-handed cylindrical $(R,\\phi,Z)$ frame, where $R$ is major radius, $\\phi$ is toroidal angle, and $Z$ is vertical height; the flux surface is a magnetic surface labeled by the flux coordinate $\\psi$. It isolates this electromagnetic channel from electrostatic transport and from the contribution associated with the perturbed parallel magnetic field.\n\nFor a spectral representation, the aggregate species-summed contribution is defined by the flux-surface and time average of the energy-weighted gyrocenter perturbation contracted with the $\\delta A_\\parallel$ radial-flutter velocity:\n\n$$\nQ_{A_\\parallel}^{\\mathrm{norm}} =\n\\frac{1}{Q_\\mathrm{gB}}\n\\left\\langle\n\\sum_s \\sum_{\\mathbf{k}_\\perp}\n\\operatorname{Re}\\!\\left[\n\\int d^3v\\, \\frac{m_s v^2}{2}\\,\n\\delta f_{s,\\mathbf{k}_\\perp}^{*}\\,\nv_{R,s,\\mathbf{k}_\\perp}^{(A_\\parallel)}\n\\right]\n\\right\\rangle_{\\psi,t}\n$$\n\nwhere $Q_{A_\\parallel}^{\\mathrm{norm}}$ is this normalized flux, $Q_\\mathrm{gB}=n_\\mathrm{ref}T_\\mathrm{ref}v_{\\mathrm{th},\\mathrm{ref}}(\\rho_\\mathrm{ref}/a_\\mathrm{ref})^2$ is the positive gyro-Bohm reference energy flux, $n_\\mathrm{ref}$ is the reference particle density, $T_\\mathrm{ref}$ is the reference thermal energy per particle, $v_{\\mathrm{th},\\mathrm{ref}}$ is the reference thermal speed, $\\rho_\\mathrm{ref}$ is the reference gyroradius, and $a_\\mathrm{ref}$ is the reference minor radius. The index $s$ labels kinetic species, $\\mathbf{k}_\\perp$ labels perpendicular-to-the-magnetic-field wave-number components, $\\delta f_{s,\\mathbf{k}_\\perp}$ is the corresponding perturbed gyrocenter distribution, $v_{R,s,\\mathbf{k}_\\perp}^{(A_\\parallel)}$ is the $R$ component of the magnetic-flutter velocity associated with $\\delta A_\\parallel$, $\\operatorname{Re}$ selects the in-phase flux-carrying part of the bilinear product, and $\\langle\\cdot\\rangle_{\\psi,t}$ denotes averaging on the magnetic flux surface labeled by $\\psi$ and over the turbulence time interval.\n\nThe wave-number sum denotes the aggregate flux at the flux surface rather than a mode-resolved contribution. The quantity includes only the $\\delta A_\\parallel$ part of the radial magnetic-flutter transport channel, excluding electrostatic $E\\times B$ energy flux, magnetic-compression transport from $\\delta B_\\parallel$, and field-energy terms not carried by gyrocenter kinetic energy. If the gyrocenter variables are expressed in a rotating plasma reference frame, both factors in the bilinear product are interpreted in that same reference frame.\n\nSign convention: Positive when the net gyrocenter energy flux component is in the $+\\hat{R}$ direction, away from the machine symmetry axis, in the right-handed cylindrical $(R,\\phi,Z)$ frame.",
+      "id": "potential_vector_parallel_perturbed_to_due_surface_flux_at_flux_energy_gyrocenter_radial_normalized",
+      "kind": "scalar",
+      "label": 0,
+      "name": "potential_vector_parallel_perturbed_to_due_surface_flux_at_flux_energy_gyrocenter_radial_normalized",
+      "path": "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel",
+      "physics_domain": "turbulence",
+      "provenance": {
+        "candidate_identity": "normalized_radial_gyrocenter_energy_flux_at_flux_surface_due_to_perturbed_parallel_vector_potential",
+        "corruption": "noncanonical_order",
+        "pair_index": 17,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel"
+      },
+      "source_id": "dd:gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel",
+      "source_paths": [
+        "dd:gyrokinetics_local/non_linear/fluxes_1d_rotating_frame/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_2d_k_x_k_y_sum_rotating_frame/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_2d_k_x_sum_rotating_frame/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_3d_k_x_sum/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_4d/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_5d/energy_a_field_parallel",
+        "dd:gyrokinetics_local/non_linear/fluxes_5d_rotating_frame/energy_a_field_parallel"
+      ],
+      "standard_name": "potential_vector_parallel_perturbed_to_due_surface_flux_at_flux_energy_gyrocenter_radial_normalized",
+      "unit": "1"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Coherent-wave power absorbed per unit volume by the nonthermal fast-ion population for one toroidal Fourier mode, summed over all included fast-ion charge states.",
+      "documentation": "Per-toroidal-mode fast-ion power density is the local rate of energy transfer from a coherent electromagnetic wave to the nonthermal fast-ion population, resolved by toroidal Fourier mode and aggregated over included charge states. It is a modal component of the [fast-ion power density](name:fast_ion_power_density), distinct from power transferred to thermal ions, electrons, or other channels.\n\nThe charge-state aggregation is defined by\n\n$$\nP_{\\mathrm{fast},n_\\phi}(\\mathbf{x}) = \\sum_q P_{\\mathrm{fast},q,n_\\phi}(\\mathbf{x})\n$$\n\nwhere $P_{\\mathrm{fast},n_\\phi}(\\mathbf{x})$ is the modal power density, $P_{\\mathrm{fast},q,n_\\phi}(\\mathbf{x})$ is the corresponding quantity for charge state $q$, $n_\\phi$ is the toroidal Fourier mode number, and $\\mathbf{x}$ is the local plasma position. The charge-state-resolved contribution is represented by [per-toroidal-mode fast-ion charge-state power density](name:per_toroidal_mode_fast_ion_charge_state_power_density). Under the adopted Fourier normalization, summing the modal contributions over $n_\\phi$ recovers the [fast-ion power density](name:fast_ion_power_density).",
+      "id": "per_toroidal_mode_fast_ion_power_density",
+      "kind": "scalar",
+      "label": 1,
+      "name": "per_toroidal_mode_fast_ion_power_density",
+      "path": "waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi",
+      "physics_domain": "auxiliary_heating",
+      "provenance": {
+        "candidate_identity": "per_toroidal_mode_fast_ion_power_density",
+        "pair_index": 18,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi"
+      },
+      "source_id": "dd:waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi",
+      "source_paths": [
+        "dd:waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi",
+        "dd:waves/coherent_wave/profiles_2d/ion/power_density_fast_n_phi"
+      ],
+      "standard_name": "per_toroidal_mode_fast_ion_power_density",
+      "unit": "W.m^-3"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "semantic_mismatch",
+      "description": "Coherent-wave power absorbed per unit volume by the nonthermal fast-ion population for one toroidal Fourier mode, summed over all included fast-ion charge states.",
+      "documentation": "Per-toroidal-mode fast-ion power density is the local rate of energy transfer from a coherent electromagnetic wave to the nonthermal fast-ion population, resolved by toroidal Fourier mode and aggregated over included charge states. It is a modal component of the [fast-ion power density](name:fast_ion_power_density), distinct from power transferred to thermal ions, electrons, or other channels.\n\nThe charge-state aggregation is defined by\n\n$$\nP_{\\mathrm{fast},n_\\phi}(\\mathbf{x}) = \\sum_q P_{\\mathrm{fast},q,n_\\phi}(\\mathbf{x})\n$$\n\nwhere $P_{\\mathrm{fast},n_\\phi}(\\mathbf{x})$ is the modal power density, $P_{\\mathrm{fast},q,n_\\phi}(\\mathbf{x})$ is the corresponding quantity for charge state $q$, $n_\\phi$ is the toroidal Fourier mode number, and $\\mathbf{x}$ is the local plasma position. The charge-state-resolved contribution is represented by [per-toroidal-mode fast-ion charge-state power density](name:per_toroidal_mode_fast_ion_charge_state_power_density). Under the adopted Fourier normalization, summing the modal contributions over $n_\\phi$ recovers the [fast-ion power density](name:fast_ion_power_density).",
+      "id": "parallel_counter_passing_fast_particle_pressure",
+      "kind": "scalar",
+      "label": 0,
+      "name": "parallel_counter_passing_fast_particle_pressure",
+      "path": "waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi",
+      "physics_domain": "auxiliary_heating",
+      "provenance": {
+        "candidate_identity": "per_toroidal_mode_fast_ion_power_density",
+        "corruption": "semantic_mismatch",
+        "pair_index": 18,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi"
+      },
+      "source_id": "dd:waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi",
+      "source_paths": [
+        "dd:waves/coherent_wave/profiles_1d/ion/power_density_fast_n_phi",
+        "dd:waves/coherent_wave/profiles_2d/ion/power_density_fast_n_phi"
+      ],
+      "standard_name": "parallel_counter_passing_fast_particle_pressure",
+      "unit": "W.m^-3"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "",
+      "description": "Number density of helium-4 ions in the plasma immediately adjacent to a divertor target, summed over singly and doubly ionized helium-4 charge states and excluding neutral helium-4 atoms.",
+      "documentation": "Helium-4 density at the divertor target is the local number density of ionized helium with mass number 4 in the plasma immediately adjacent to the material target surface. It is summed over the two ionization stages — singly ionized $\\text{He}^{1+}$ and fully stripped $\\text{He}^{2+}$ — and excludes neutral helium-4 atoms, consistent with the [density_at_divertor_target](name:density_at_divertor_target) convention that ionic species are summed over all charge states.\n\nThe charge-state-summed density is defined as:\n\n$$\nn_{\\text{He-4}} = n_{\\text{He}^{1+}} + n_{\\text{He}^{2+}}\n$$\n\nwhere $n_{\\text{He}^{1+}}$ and $n_{\\text{He}^{2+}}$ are the number densities of the individual charge states. In deuterium–tritium burning plasmas, helium-4 is the dominant fusion ash originating from thermalized alpha particles; its concentration at the divertor target directly reflects the efficiency of ash exhaust by the divertor pumping system. Insufficient helium removal causes ash accumulation and progressive fuel dilution in the core. The quantity is inferred from spectroscopic or charge-exchange recombination measurements in the divertor region. The analogous helium isotope quantity at this surface is [helium_3_density_at_divertor_target](name:helium_3_density_at_divertor_target); complementary helium-4 profiles at other locations are given by [helium_4_density_at_magnetic_axis](name:helium_4_density_at_magnetic_axis) and [helium_4_density_at_plasma_boundary](name:flux_surface_averaged_helium_4_density_at_plasma_boundary).",
+      "id": "helium_4_density_at_divertor_target",
+      "kind": "scalar",
+      "label": 1,
+      "name": "helium_4_density_at_divertor_target",
+      "path": "summary/local/divertor_target/n_i/helium_4/value",
+      "physics_domain": "divertor_physics",
+      "provenance": {
+        "candidate_identity": "helium_4_density_at_divertor_target",
+        "pair_index": 19,
+        "row_role": "good",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/local/divertor_target/n_i/helium_4/value"
+      },
+      "source_id": "dd:summary/local/divertor_target/n_i/helium_4/value",
+      "source_paths": [
+        "dd:summary/local/divertor_target/n_i/helium_4/value"
+      ],
+      "standard_name": "helium_4_density_at_divertor_target",
+      "unit": "m^-3"
+    },
+    {
+      "data_type": "scalar",
+      "defect": "vacuous",
+      "description": "Number density of helium-4 ions in the plasma immediately adjacent to a divertor target, summed over singly and doubly ionized helium-4 charge states and excluding neutral helium-4 atoms.",
+      "documentation": "Helium-4 density at the divertor target is the local number density of ionized helium with mass number 4 in the plasma immediately adjacent to the material target surface. It is summed over the two ionization stages — singly ionized $\\text{He}^{1+}$ and fully stripped $\\text{He}^{2+}$ — and excludes neutral helium-4 atoms, consistent with the [density_at_divertor_target](name:density_at_divertor_target) convention that ionic species are summed over all charge states.\n\nThe charge-state-summed density is defined as:\n\n$$\nn_{\\text{He-4}} = n_{\\text{He}^{1+}} + n_{\\text{He}^{2+}}\n$$\n\nwhere $n_{\\text{He}^{1+}}$ and $n_{\\text{He}^{2+}}$ are the number densities of the individual charge states. In deuterium–tritium burning plasmas, helium-4 is the dominant fusion ash originating from thermalized alpha particles; its concentration at the divertor target directly reflects the efficiency of ash exhaust by the divertor pumping system. Insufficient helium removal causes ash accumulation and progressive fuel dilution in the core. The quantity is inferred from spectroscopic or charge-exchange recombination measurements in the divertor region. The analogous helium isotope quantity at this surface is [helium_3_density_at_divertor_target](name:helium_3_density_at_divertor_target); complementary helium-4 profiles at other locations are given by [helium_4_density_at_magnetic_axis](name:helium_4_density_at_magnetic_axis) and [helium_4_density_at_plasma_boundary](name:flux_surface_averaged_helium_4_density_at_plasma_boundary).",
+      "id": "4_density_at_divertor_target",
+      "kind": "scalar",
+      "label": 0,
+      "name": "4_density_at_divertor_target",
+      "path": "summary/local/divertor_target/n_i/helium_4/value",
+      "physics_domain": "divertor_physics",
+      "provenance": {
+        "candidate_identity": "helium_4_density_at_divertor_target",
+        "corruption": "vacuous",
+        "pair_index": 19,
+        "row_role": "bad",
+        "seed": 20260825,
+        "selection": "accepted-valid-documented-unit-source-bound",
+        "source_path": "summary/local/divertor_target/n_i/helium_4/value"
+      },
+      "source_id": "dd:summary/local/divertor_target/n_i/helium_4/value",
+      "source_paths": [
+        "dd:summary/local/divertor_target/n_i/helium_4/value"
+      ],
+      "standard_name": "4_density_at_divertor_target",
+      "unit": "m^-3"
+    }
+  ],
+  "rows_sha256": "216e738a7ffbb7ae54b13e7e45f2fc5b1f99d34caba8b644621a931891fdae23",
+  "schema": "advisory-paired-corpus",
+  "schema_version": 1,
+  "seed": 20260825,
+  "source_extraction": {
+    "candidate_count": 1894,
+    "candidate_domain_count": 18,
+    "eligibility": "accepted-valid-documented-unit-source-bound",
+    "extracted_on": "2026-08-25",
+    "query": "MATCH (sn:StandardName {\n        name_stage: 'accepted', validation_status: 'valid'\n    })\n    WHERE sn.description IS NOT NULL\n      AND sn.documentation IS NOT NULL\n      AND size(sn.documentation) > 40\n      AND sn.unit IS NOT NULL\n      AND size(coalesce(sn.source_paths, [])) > 0\n    RETURN\n      sn.id             AS name,\n      sn.description    AS description,\n      sn.documentation  AS documentation,\n      sn.unit           AS unit,\n      sn.kind           AS kind,\n      sn.physics_domain AS physics_domain,\n      sn.source_paths   AS source_paths\n    ORDER BY sn.id",
+    "query_sha256": "d8feb6a5205123509edc8b93b58ee39514d091b7531fa4e7298430a352bc831e"
+  }
+}
