@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="isn-locus-vocabulary-rotation">
   <meta name="plan-title" content="A Locus The Grammar Will Not Spell">
   <meta name="plan-summary" content="One owner/geometry row cannot be repaired here: its replacement identity fails strict grammar because the locus token does not exist in ISN.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="3.0">
   <meta name="plan-capability-version" content="1.0">
@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="2ec2f04e">
-<meta name="plan-artifacts" content="docs/evidence/isn-locus-vocabulary-rotation/locus-adjudication.md">
-<meta name="plan-impl" content="0.33">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="2ec2f04e,faaa985f">
+<meta name="plan-artifacts" content="docs/evidence/isn-locus-vocabulary-rotation/locus-adjudication.md,docs/evidence/isn-locus-vocabulary-rotation/coordinate-base-convention.md">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
   <main class="plan-doc">
@@ -122,6 +122,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260825T141822953635-n-locusadjudicate" data-who="impl-locusadj" data-when="2026-08-25T14:26:46Z">
     <div class="r-comment-body"><p>Adjudication delivered: recommends WARRANTED. Field-map grid is a computational representation rather than a measurement place, but is a distinct entity owner suitable for of_field_map_grid. Family is 3 DD coordinate paths (r, z, phi), 2 beyond the target row, schema sanity 61366/61366/61366 with exact phi positive control 1. Runtime get_grammar_context under ISN 0.8.0rc67 returned 181 loci with field_map_grid absent, zero grid/map tokens, and 10 semantic near misses all non-equivalent; strict parsing rejected all 3 intended identities. No graph mutation: StandardNameChange 8524 and PRODUCED_NAME 5315 unchanged before and after.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T150357556109-n-basetoken" data-who="impl-basetoken" data-when="2026-08-25T15:11:37Z">
+    <div class="r-comment-body"><p>Base settled as radial_coordinate, overturning the adjudication's major_radius proposal for the r leaf. Accepted census 29 radial_coordinate_of_* against 0 major_radius_of_*, behind schema sanity 2302/2302/2302 and a controlled zero: 6 major_radius_of_* rows exist under the same prefix scan but all are superseded or quarantined. Decisive finding: major_radius is not a registered base at all - ISN 0.8.0rc67 carries 175 physical and 35 geometric bases, radial_coordinate is geometric, radius is physical, major_radius is in neither - so the adjudication's own strict-parse rejection for 'no matching physical base or geometry carrier' was reporting the missing BASE, not the missing locus. No conflation risk: accepted radial_coordinate_of_electron_cyclotron_launcher_mirror describes a major-radius coordinate in cylindrical R/phi/Z and binds dd:ec_launchers/mirror/geometry/sphere_centre/r, while normalized minor-radius and flux-coordinate tokens carry the other meanings explicitly. DD target row is exactly 1, text 'Major radius (R) coordinate of grid.', HAS_UNIT m. Family symmetry wins the spelling with no semantic loss. Final three: radial_coordinate_of_field_map_grid, vertical_coordinate_of_field_map_grid, toroidal_coordinate_of_field_map_grid. Real runtime 442s against a 35m budget; the reported overrun is an artifact of late observation, not a slow run.</p></div>
 </div>
 </section>
 </main>

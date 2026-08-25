@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T17:58:01",
+  "updated": "2026-08-25T18:21:32",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -225,9 +225,11 @@
         "id": "impl-basetoken",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03973-36c3-7d93-8d7f-5f9c07d6d62d",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03973-36c3-7d93-8d7f-5f9c07d6d62d"
+        },
         "created": "2026-08-25"
       },
       {
@@ -32273,9 +32275,134 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T150357556109-n-basetoken",
+        "plan": "isn-locus-vocabulary-rotation",
+        "section": "\u00a73",
+        "node": "n-basetoken",
+        "node_definition": {
+          "done_when": "The adjudication proposed major_radius_of_field_map_grid for the r leaf but vertical_coordinate_of_field_map_grid and toroidal_coordinate_of_field_map_grid for z and phi, and that asymmetry must be resolved before anything is added to ISN. Establish from measurement, never from memory: how many accepted StandardName identities use each of the candidate bases for a cylindrical-R-like coordinate of an owning entity, reporting exact counts with the schema sanity count that proves each figure real rather than a plausible zero from a wrong property name, and citing representative names on both sides including radial_coordinate_of_electron_cyclotron_launcher_mirror and any accepted major_radius_of_* identity. Then determine whether ISN carries major_radius and radial_coordinate as SEPARATE physical bases and, if so, whether the corpus uses that separation to distinguish cylindrical R measured from the machine axis from a minor-radius or flux-surface radial coordinate; derive the available base tokens from get_grammar_context() rather than assuming. State whether the DD leaf b_field_non_axisymmetric/time_slice/field_map/grid/r, described as Major radius, is a cylindrical R, quoting the DD text and its unit. Close with the exact three identities to add, each with the reason its base was chosen, and state explicitly whether family symmetry or semantic precision won and why the loser was rejected. If the two candidate bases turn out to be semantically interchangeable in this corpus, say so plainly rather than manufacturing a distinction. No ISN change, no pyproject pin bump, no graph mutation, and no new StandardName.",
+          "estimated_hours": 0.7,
+          "goal": "Settle the physical-base token for the three field-map-grid coordinate identities against measured corpus convention.",
+          "id": "n-basetoken",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T150357556109-n-basetoken/manifest.md",
+          "plan": "isn-locus-vocabulary-rotation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "docs/evidence/isn-locus-vocabulary-rotation/coordinate-base-convention.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-basetoken",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T15:04:06Z",
+        "completed_at": "2026-08-25T15:11:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 451,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 451,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "1b36a2b186bd47dc589f8aeb1c4c88215c105849",
+        "commits": [
+          "faaa985f"
+        ],
+        "changed_lines": {
+          "added": 133,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T150357556109-n-basetoken/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03973-36c3-7d93-8d7f-5f9c07d6d62d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2357248,
+            "cached_input_tokens_cumulative": 2357248,
+            "input_tokens": 2494009,
+            "input_tokens_cumulative": 2494009,
+            "output_tokens": 15453,
+            "output_tokens_cumulative": 15453,
+            "reasoning_output_tokens": 3816,
+            "reasoning_output_tokens_cumulative": 3816
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1232,
+              "log_age_seconds": 393,
+              "log_fresh": true,
+              "manifest_commits": [
+                "78d3c6c75fe81b7d8ba638faa0448843f5704f68"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T144323649624-n-snhealthcensus/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T144323649624-n-snhealthcensus --gate <verdict> --commit 78d3c6c75fe81b7d8ba638faa0448843f5704f68",
+              "node": "n-snhealthcensus",
+              "phase": "starting",
+              "plan": "sn-graph-wide-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T144323649624-n-snhealthcensus",
+              "terminal_age_seconds": 431,
+              "terminal_at": "2026-08-25T14:56:51Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s8-20260825a/n-snhealthcensus"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 920
+    "_version": 922
   }
 }

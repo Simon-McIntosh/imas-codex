@@ -6,9 +6,9 @@
   <meta name="docs-project"   content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-embedding-coverage-gate">
-  <meta name="plan-title"     content="A Gate Aimed At Work Still In Flight">
-  <meta name="plan-summary"   content="The coverage assertion demands an exact zero across all names including drafted ones, so it fails on work in flight and is downgraded every run.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-title" content="A Gate Aimed At Work Still In Flight">
+  <meta name="plan-summary" content="The coverage assertion demands an exact zero across all names including drafted ones, so it fails on work in flight and is downgraded every run.">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
@@ -21,7 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="3261c40e">
+<meta name="plan-artifacts" content="docs/evidence/sn-embedding-coverage-gate/coverage-shortfall.md">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -140,10 +143,10 @@
 <div class="r-dec" data-key="gate-a-disposition" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Should the coverage assertion be scoped to accepted identities rather than all StandardName nodes?</p>
     <p class="r-dec-opts">
-          <button class="r-opt" data-value="scope-to-accepted">Scope it to accepted identities and keep the exact zero</button>
-          <button class="r-opt" data-value="keep-and-fix">Keep the scope and clear all 26 mid-pipeline gaps</button>
-          <button class="r-opt" data-value="relax-threshold">Relax to a percentage across all nodes</button>
-        </p>
+      <button class="r-opt" data-value="scope-to-accepted">Scope it to accepted identities and keep the exact zero</button>
+      <button class="r-opt" data-value="keep-and-fix">Keep the scope and clear all 26 mid-pipeline gaps</button>
+      <button class="r-opt" data-value="relax-threshold">Relax to a percentage across all nodes</button>
+      </p>
     <p class="r-dec-rat"></p>
     </div>
 </section>
@@ -159,7 +162,7 @@
 
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260825T141822953561-n-coveragemeasure" data-who="impl-coverage" data-when="2026-08-25T14:33:06Z">
-    <div class="r-comment-body"><p>Shortfall measured and the gate&#x27;s real assertion recovered. WEST export survivor accepted coverage 363/363 with 0 embedding gaps and 0 description gaps; current WEST cohort 385/385 with 0 and 0; whole accepted corpus 2301/2302 embedded - exactly 1 embedding gap (ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude, real description, null embedding) and 0 description gaps. Gate A asserts embedded_at non-null with embedding-null count equal to zero, an exact threshold not a percentage; its named result was 26, split 0 embedding gaps and 26 description gaps, all on non-accepted rows. ZERO affected accepted identities lie in the 369 WEST survivor set. radial_coordinate_of_reflector is drafted/docs-pending with no description or embedding despite embedded_at; it exemplifies the 26-row description-gap class but NOT the accepted embedding-only gap. Dangling links 296 at export against 292 in the current exact-set graph source across 211 source identities, with a firing positive control. Schema sanity 4658 candidates, 4658/4658 ids, 4632 description, 4630 embedding, 4656 embedded_at, 3054 links.</p></div>
+    <div class="r-comment-body"><p>Shortfall measured and the gate's real assertion recovered. WEST export survivor accepted coverage 363/363 with 0 embedding gaps and 0 description gaps; current WEST cohort 385/385 with 0 and 0; whole accepted corpus 2301/2302 embedded - exactly 1 embedding gap (ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude, real description, null embedding) and 0 description gaps. Gate A asserts embedded_at non-null with embedding-null count equal to zero, an exact threshold not a percentage; its named result was 26, split 0 embedding gaps and 26 description gaps, all on non-accepted rows. ZERO affected accepted identities lie in the 369 WEST survivor set. radial_coordinate_of_reflector is drafted/docs-pending with no description or embedding despite embedded_at; it exemplifies the 26-row description-gap class but NOT the accepted embedding-only gap. Dangling links 296 at export against 292 in the current exact-set graph source across 211 source identities, with a firing positive control. Schema sanity 4658 candidates, 4658/4658 ids, 4632 description, 4630 embedding, 4656 embedded_at, 3054 links.</p></div>
 </div>
 </section>
 </main>

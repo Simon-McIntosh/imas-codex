@@ -6,7 +6,7 @@
   <meta name="docs-project"   content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-relocation-retirement-apply">
-  <meta name="plan-title"     content="Edges The Derivation Never Asked For">
+  <meta name="plan-title" content="Edges The Derivation Never Asked For">
   <meta name="plan-summary" content="Apply the proved signed program retiring unauthorized HAS_PARENT relocations. Prevention has landed; the 78 predate it and still break the export.">
   <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
@@ -21,9 +21,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="a495fb07,b926b8dd,b7820f7c">
-<meta name="plan-artifacts" content="docs/evidence/sn-graph-wide-integrity/rewire-reconcile-program.md,docs/evidence/sn-relocation-retirement-apply/production-apply.md,docs/evidence/archive/sn-relocation-retirement-apply-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_rewire_relocation_retire.py">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="b7820f7c">
+<meta name="plan-artifacts" content="docs/evidence/sn-relocation-retirement-apply/production-apply.md">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -73,6 +73,19 @@
     </p>
 
     <h2 id="s3">&sect;3 &mdash; What the apply must do that the proof did not</h2>
+    <p class="landed-summary">
+      <span class="badge badge-shipped">&#10003; landed 2026-08-25</span>
+      Applied in production, commit <code>b7820f7c</code>. Fresh same-invocation derivation
+      found <strong>73</strong> live unauthorized rows, not the projected 78 &mdash; so
+      deriving inside the applying invocation was load-bearing, not ceremony. 72 admitted,
+      1 refused; collateral held at SHA-256 <code>ea87d5dc</code> across 1,411 external rows
+      before, after and after a write-free replay. Stale qualifier pairs 52 &rarr; 0.
+      Post-apply unauthorized class <strong>1</strong> (the refusal), behind schema sanity
+      counts. The ordering-cycle participant set went from the two spectral signal-to-noise
+      identities to <strong>empty</strong>: both released from the export withheld set.
+      Full record:
+      <a href="/imas-codex/evidence/sn-relocation-retirement-apply/production-apply">production apply</a>.
+    </p>
     <p>
       The program was proved on a disposable graph and deliberately never touched
       production. The apply owes three things the proof could not provide:
@@ -116,6 +129,11 @@
     <div class="r-fu-body"><p>Derive and hash the manifest inside the applying invocation rather than reusing the projection. Record admitted and refused counts with verbatim reasons, recover receipts by <code>run_id</code> plus digest, replay write-free, and re-measure the unauthorized class afterwards with the schema sanity counts that prove the zero. Confirm the two export-cycle identities are released.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-relocation-retirement-apply</pre>
     <p class="r-fu-outcome">done — no followup. Applied in production 2026-08-25 at commit b7820f7c under authority built and hashed inside the applying invocation. Fresh derivation found 73 live unauthorized rows, NOT the projected 78, which is the plan's own warning holding: the 78 was a projection over a prior census and the apply was required to derive its own. 72 admitted, 1 refused verbatim — ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude on 'signed successor-rewire closure does not match exact incumbent parent', left live by design. 72 receipts recovered by run_id plus manifest digest dc82dfb3 only, never by operation name. Stale qualifier pairs 52 to 0 of 711; external non-cohort HAS_PARENT collateral 1,411 rows at digest ea87d5dc unchanged before, after and after replay; replay already_applied at changed 0 and persistent_writes 0. Post-apply class reads 1, the refusal, with schema sanity 4,658/4,658 on id and name_stage and 1,485/1,485 on HAS_PARENT triples. The chain closes here: the export ordering-cycle participant set went from the two spectral SNR identities to EMPTY, releasing both from the WEST withheld set, so this plan's downstream barrier is down and nothing awaits another plan.</p>
+    </article>
+<article class="r-fu" data-id="f-srra-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-identity-adjudication-residue" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Give the one refused relocation row an owning plan before any further apply</h4>
+    <div class="r-fu-body"><p>Pointer, not work. The signed apply declined one row with the verbatim reason <em>signed successor-rewire closure does not match exact incumbent parent</em>: <code>ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude</code> to <code>parallel_bulk_ion_velocity</code>, replacement <code>parallel_ion_velocity</code>. The refusal is correct and this plan's scope closed without it, under the plan's own rule that refusals are outcomes rather than obstacles. But the exact-closure question it raises has no owning plan yet. The nearest candidate is <code>sn-identity-adjudication-residue</code>, whose character of work matches; its declared scope is two specific semantic rows and its title names that count, so admitting a third is a scope change rather than a fit. Owner is a lead decision: extend that plan, or open a new one. Never bypass the refusal to make a later apply pass.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-identity-adjudication-residue</pre>
     </article>
 </section>
 
