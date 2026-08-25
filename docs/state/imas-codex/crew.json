@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T18:34:12",
+  "updated": "2026-08-25T18:36:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1010,8 +1010,12 @@
         "id": "impl-provguard",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-23"
+        "session_id": "01a039c4-e4d5-7923-9280-1e4875e2faa9",
+        "created": "2026-08-23",
+        "sessions": {
+          "gpt-5.6-sol": "01a039c4-e4d5-7923-9280-1e4875e2faa9"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "impl-quarcensus",
@@ -32715,9 +32719,86 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T145759424551-n-importwriteguard",
+        "plan": "sn-origin-provenance-backfill",
+        "section": "\u00a74",
+        "node": "n-importwriteguard",
+        "node_definition": {
+          "done_when": "the catalog import write path can no longer set, clear or overwrite origin or status on an existing StandardName while remaining able to record imported_at and catalog_commit_sha; a new test fails against the unguarded path and passes after the guard, reproducing the exact damage shape of an import clearing origin on an already-generated identity; every pre-existing test touching the catalog import path stays green byte-unchanged; tests/graph/test_cypher_property_check.py stays green; docs/evidence/sn-origin-provenance-backfill/import-write-guard.md records the refused write, the code location guarded, and the before-and-after test counts; no production graph is contacted",
+          "estimated_hours": null,
+          "goal": "The catalog import path loses the ability to clear or overwrite origin and status on an existing StandardName",
+          "id": "n-importwriteguard",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T145759424551-n-importwriteguard/manifest.md",
+          "plan": "sn-origin-provenance-backfill",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_import_write_guard.py",
+            "docs/evidence/sn-origin-provenance-backfill/import-write-guard.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-provguard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:58:05Z",
+        "completed_at": "2026-08-25T15:04:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 386,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 386,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "0575f4e6acad284d5d44d32f4eef90a83bc8da40",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T145759424551-n-importwriteguard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0396d-b4eb-7eb1-b2ca-c2cb39bd6dfd",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 925
+    "_version": 927
   }
 }

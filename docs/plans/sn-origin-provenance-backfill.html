@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -180,6 +180,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260825T151803141135-n-mergewriteguard" data-who="impl-provguard" data-when="2026-08-25T15:22:59Z">
     <div class="r-comment-body"><p>Both catalog-approval sites guarded: 0 sn.origin assignments at merge.py:554-560 and :978-988; catalog provenance still recorded; generated origin=pipeline, model, generated_at, chain_length=3 survive both paths; 89 to 91 passed via 2 new regressions; cypher property check green</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260825T145759424551-n-importwriteguard" data-who="impl-provguard" data-when="2026-08-25T15:04:31Z">
+    <div class="r-comment-body"><p>Stopped and superseded before implementation. The node was aimed at graph_ops.py on the assumption that the catalog import path cleared origin there; measurement showed the edit path never writes StandardName.origin and the overwrite is at merge.py:554-560 and :978-988. Superseded by n-mergewriteguard, which guarded both real sites at commit 8545a717. No work lost - the node had not started implementing</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260825T1640-writerisgone" data-who="reckon-ship" data-when="2026-08-25T16:40:00+00:00">
+    <div class="r-comment-body">THE IMPORT WRITER NO LONGER EXISTS, and that reframes §4's prevention argument. A repo-wide search finds NO code that writes imported_at or catalog_commit_sha — yet 2,104 nodes carry imported_at and 2,053 carry catalog_commit_sha, so a writer demonstrably existed and has been deleted rather than fixed. The 2026-07-04T21:21:17.079Z import was almost certainly an ad-hoc recovery script, which is consistent with all five counterexamples sharing one instant and one commit sha. Consequences, in order of usefulness. FIRST, the specific damage cannot recur from that path because the path is gone — which is also why merge.py was the only live sn.origin writer findable in the tree, and why the guard that mattered turned out to be the catalog-APPROVAL one rather than an import one. n-mergewriteguard at 8545a717 closed a live hole: approval was relabelling pipeline-generated names as catalog_edit, including names merely ratified unchanged. SECOND, a stronger guard was written and is preserved rather than lost. The superseded n-importwriteguard node had already implemented record_catalog_import_provenance before it was stopped — a positive ALLOW-LIST boundary that reduces caller payloads to identity plus commit sha before reaching Cypher, generates timestamps in Neo4j, and matches existing nodes rather than creating them, so origin and status are structurally unreachable through it even when a caller supplies those keys. Its 56-line test asserts the SHAPE rather than the behaviour: MATCH present, MERGE absent, and assigned_properties equal to exactly {imported_at, catalog_commit_sha}. That is a whitelist proof and it is a better artifact than the removal-of-two-SET-statements that shipped. Preserved at /home/ITER/mcintos/.config/reckon/crew/reports/import-provenance-allowlist.patch with its test alongside. NOT LANDED, deliberately: with the old writer deleted it currently has no caller, and landing an uncalled function is dead code. The promote rename is restructuring precisely this surface right now, so the decision of whether promote should route its catalog-provenance stamping through that boundary belongs to that node's landing rather than to a speculative merge now.</div>
 </div>
 </section>
 </main>
