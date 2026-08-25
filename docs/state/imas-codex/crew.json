@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:44:07",
+  "updated": "2026-08-25T10:46:46",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -29756,9 +29756,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T083346749641-n-ddresidueapply",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-ddresidueapply",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-graph-wide-integrity/dd-residue-apply.md records a preview, apply and replay of release_legacy_dd_source_lifecycle over exactly dd:ntms/time_slice/mode dd:summary/pedestal_fits and dd:waves/coherent_wave, with the authority built and hashed INSIDE the applying invocation; it states admitted and refused counts with verbatim reasons, receipts recovered by their own run_id and manifest digest rather than by an operation-name query, replay at changed=0 and persistent_writes=0, and a post-apply live census of the no-live-target class showing the DD partition at zero with the schema sanity counts that prove that zero is real; any refusal is recorded and NOT worked around, and the 36 derived transient rows are left untouched",
+          "estimated_hours": null,
+          "goal": "The three legacy DD residues released in production through the proved closed release program",
+          "id": "n-ddresidueapply",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T083346749641-n-ddresidueapply/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-graph-wide-integrity/dd-residue-apply.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-residue",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:34:06Z",
+        "completed_at": "2026-08-25T08:46:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 747,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 747,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "4191991457a68938c5eb6e44b69902b8dfe2a7e1",
+        "commits": [
+          "930940ed",
+          "881573bd"
+        ],
+        "changed_lines": {
+          "added": 161,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T083346749641-n-ddresidueapply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037ea-ac01-7933-a15d-2b9d06ea4bd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5118208,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5345986,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 25532,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 6754
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 867
+    "_version": 868
   }
 }
