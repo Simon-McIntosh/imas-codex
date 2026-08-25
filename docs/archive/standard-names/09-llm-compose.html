@@ -70,7 +70,7 @@ LLM compose pattern using <code>acall_llm_structured()</code>.</p>
 <h2 id="approach">Approach</h2>
 <h3 id="phase-1a-schema-provider-system">Phase 1a: Schema Provider System</h3>
 <p>Create <code>imas_codex/standard_names/schema_providers.py</code> implementing the 3-tier caching
-design from <code>plans/research/standard-names/06-schema-provider-design.md</code>.</p>
+design from <code>docs/research/06-schema-provider-design.html</code>.</p>
 <p><strong>Tier 1: Process-lifetime (static, ~15KB)</strong></p>
 <p>These import directly from <code>imas_standard_names</code> and are cached with
 <code>@lru_cache(maxsize=1)</code>. They never change during a pipeline run.</p>

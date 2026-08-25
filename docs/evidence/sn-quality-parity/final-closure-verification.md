@@ -150,7 +150,7 @@ not complete at implementation 1.0.
   and **1** outstanding, and resolved all **32** cited file/line ranges.
 - Reckon's typed `read_plan` call failed before returning this plan because the
   unrelated nested resource path
-  `research/standard-names/01-current-state-standard-names.html` violates the
+  `docs/research/01-current-state-standard-names.html` violates the
   typed-resource path contract. The complete canonical plan HTML was therefore
   read directly from this dispatched checkout. This is the same read-path
   limitation recorded by the earlier two-plan closure verification

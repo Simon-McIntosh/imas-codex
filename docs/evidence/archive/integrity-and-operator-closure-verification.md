@@ -206,7 +206,7 @@ that at `docs/plans/sn-repair-operator-consolidation.html:360-361`. The stored
   newly regrown exact-zero classes.
 - The Reckon `read_plan` endpoint failed before returning this plan because an
   unrelated nested research path violates the typed-resource path contract:
-  `research/standard-names/01-current-state-standard-names.html`. The complete
+  `docs/research/01-current-state-standard-names.html`. The complete
   canonical HTML for both plans was therefore read directly from this checkout.
   No plan or index state was edited.
 - No disposable-Neo4j graph cases were rerun in this node; those 10 cases are
