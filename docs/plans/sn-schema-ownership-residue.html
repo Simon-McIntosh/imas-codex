@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-codex">
+<meta name="plan-slug" content="sn-schema-ownership-residue">
+<meta name="reckon-type" content="plan">
+<title>sn-schema-ownership-residue</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Three Properties the Schema and the Graph Disagree About">
+<meta name="plan-summary" content="The property audit built for the identity convention measured three places where LinkML and the live graph name different owners for the same data, and deliberately refused to settle any of them because choosing an owner needs a graph migration plus ingestion and query changes. All three currently sit in the permanent runtime-property allowance, which is honest but is not a decision.">
+<meta name="plan-status" content="draft">
+<meta name="plan-roi" content="mid">
+<meta name="plan-effort" content="M">
+<meta name="plan-sprint" content="S10">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-informs" content="sn-graph-identity-convention">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="2">
+</head>
+<body>
+<main class="plan-doc">
+
+  <section>
+    <h2>§1 — Measured, not suspected</h2>
+    <p>The static property audit built for the identity convention checked 13,517 property
+    occurrences across the repository and adjudicated every one. Three of its permanent
+    allowances are not really allowances: they are places where the schema and the live graph
+    name different owners for the same data, and the audit recorded them as such rather than
+    blessing or breaking either side.</p>
+    <table>
+      <caption>The disagreement, with live coverage on both sides</caption>
+      <thead><tr><th>Property</th><th>What the graph holds</th><th>What LinkML declares</th></tr></thead>
+      <tbody>
+        <tr><td><code>related_ids</code></td>
+          <td><code>CodeChunk</code>, 4,826 of 271,460</td>
+          <td><code>CodeExample</code>, 0 of 69,746; the declared <code>CodeChunk</code>
+          alternatives <code>references_imas</code> and <code>data_references</code> both read
+          0 of 271,460</td></tr>
+        <tr><td><code>embed_failed_at</code></td>
+          <td><code>CodeChunk</code>, 1,649 of 271,460, written and consumed by the embed
+          worker</td>
+          <td>nothing — an operational marker with no declaration</td></tr>
+        <tr><td><code>patterns_found</code></td>
+          <td><code>FacilityPath</code>, 0 of 275,315</td>
+          <td>declared and correct; the query was repaired onto it and awaits data</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>§2 — Why the identity plan refused to settle it</h2>
+    <p>Repairing a working query into a zero-coverage one is the exact harm that audit exists
+    to prevent, so a reader pointed at a populated undeclared property must not be
+    mechanically moved onto a declared empty one. Every candidate substitution measured zero.
+    The alternative — declaring the runtime property in LinkML — expands durable schema
+    authority to cover operational state, which is a different decision with different
+    consequences.</p>
+    <p>Both real fixes require a graph migration plus ingestion and query changes together.
+    That is a scope this plan owns and the identity plan did not.</p>
+  </section>
+
+  <section>
+    <h2>§3 — What done looks like</h2>
+    <p>Each of the three gets an owner, and the code, data and schema agree on it. The measure
+    is the same in every case and it is not &ldquo;the tests pass&rdquo;: after the change, the
+    property the code queries must have non-zero live coverage, and the property it stopped
+    querying must be gone rather than merely unused. A migration that leaves both readable is
+    a rename that did not happen.</p>
+    <p><code>patterns_found</code> is the cheap one and may need no migration at all. It needs
+    path discovery to run and populate it, after which the repaired query stops being a schema
+    correction awaiting data and starts being a fix.</p>
+  </section>
+
+
+</main>
+</body>
+</html>

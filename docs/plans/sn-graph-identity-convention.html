@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-graph-identity-convention">
   <meta name="plan-title" content="One Way to Name an Identity in the Graph">
   <meta name="plan-summary" content="Four silent-zero query failures in one session traced to one schema carrying three foreign-key spellings and two spellings of one axis. Unify the convention, make a misspelled property fail closed instead of returning a plausible empty result, and replace the five duplicated presence tests with one shared eligibility determination — each change specified test-first.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="37">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-version" content="39">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="81b2e435,f26e610a,f19eecee,3c1eb690,5d40dde9,619521b1,6c1344c3,5323146c,3b281efc,de0733cf,66382bcf,8e6516be,1e665160,efcba091,23c4b55a">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-identity-convention-landed.html,docs/evidence/sn-graph-identity-convention/reuse-map.md,docs/evidence/sn-graph-identity-convention/baseline-green.md">
 </head>
@@ -414,10 +414,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sgic-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship sn-graph-identity-convention" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgic-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship sn-graph-identity-convention" data-resolved-at="2026-08-25T02:24:09+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the silent-null footgun test-first, detector before rename</h4>
     <div class="r-fu-body"><p>Run the four changes in the order §8 fixes: the static Cypher-property check first so its value is proven against the un-renamed tree, then the axis spelling, then the single eligibility determination, then the foreign-key convention. Every change is a specification node writing failing tests before an implementation node makes them pass. No node starts until the concurrent release-readiness session reports quiescent with <code>graph_ops.py</code> committed and the suite green at that head.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-identity-convention</pre>
+    <p class="r-fu-outcome">Delivered in the order §8 fixed, and the ordering paid for itself. The static Cypher-property check landed first and immediately found 79 genuine silent zeros in production code — seven of them filtering StandardName.name, which is incident 1 from §1 still running, in six modules. Then the axis, at 10,720 rows migrated with coverage held at 25,098; then the foreign key, at DocsRevision 3,200 plus LLMCost 32,834 with the retired field removed rather than renamed, which dissolved §6b's strip path as work; then the 79-defect repair, 72 by repair and 7 by re-adjudication; then the guidance last, from the landed state, with a LinkML-derived test so it cannot drift again. Both specification tests passed WITHOUT being modified, which is the only evidence that distinguishes a behaviour-preserving rename from a rename whose tests were updated to match it. Continues in sn-schema-ownership-residue: three properties the graph populates but LinkML does not declare, or declares on a different owner, each left explicit rather than silently blessed or silently broken.</p>
+    </article>
+<article class="r-fu" data-id="f-sgic-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-schema-ownership-residue" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide who owns three properties the schema and the graph disagree about</h4>
+    <div class="r-fu-body">Pointer only: the work belongs to sn-schema-ownership-residue. This plan measured the disagreement and deliberately refused to settle it, because choosing an owner needs a graph migration plus ingestion and query changes. CodeChunk.related_ids holds 4,826 of 271,460 rows while LinkML declares related_ids on CodeExample at 0 of 69,746 and both declared CodeChunk alternatives read 0 of 271,460. CodeChunk.embed_failed_at holds 1,649 of 271,460 with the embed worker as both writer and consumer, undeclared. FacilityPath.patterns_found is declared and correct but empty at 0 of 275,315, awaiting data. All three sit in the permanent runtime-property allowance today, which is honest but is not a decision.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-schema-ownership-residue</pre>
     </article>
 </section>
 
@@ -514,6 +520,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20260825T004953060596-n-fullsuitebaseline" data-who="test-fullsuite" data-when="2026-08-25T01:03:48Z">
     <div class="r-comment-body"><p>First full default selection: 11 failed, 11,956 passed over 12,109 outcomes; all 11 are credentialless graph access in one unmarked file</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20260825T010623061833-n-unmarkedgraphtests" data-who="impl-unmarkedgraph" data-when="2026-08-25T01:25:21Z">
+    <div class="r-comment-body"><p>11 manifest-dependent tests marked, 20 credential-free left unmarked; the 11 original credentialless failures are gone; qualified on one unrelated remote-services timeout</p></div>
 </div>
 </section>
 </main>

@@ -147,6 +147,54 @@
     land in order, detector first, so the static property check proves its own value against
     the un-renamed tree before either rename can hide behind it.</p>
   </section>
+
+  <section id="programme">
+    <h2>What the whole plan landed</h2>
+    <p>Four changes plus a repair the detector itself created. Every migration was measured
+    on both sides, because the failure this plan exists to fix is a mis-set key that returns
+    a clean empty result instead of an error.</p>
+    <table>
+      <caption>Changes, with the measure that closed each</caption>
+      <thead><tr><th>Change</th><th>Commit</th><th>Measure</th></tr></thead>
+      <tbody>
+        <tr><td>B &mdash; the detector</td><td><code>5323146c</code></td>
+          <td>13,517 property occurrences checked, 0 violations, 4,376 itemised allowlist
+          entries; 379 raw findings adjudicated into 79 defects, 299 runtime allowances,
+          1 resolution limitation</td></tr>
+        <tr><td>A &mdash; the axis</td><td><code>8e6516be</code></td>
+          <td>specification passes unmodified; 10,720 rows migrated, old 10,720&nbsp;&rarr;&nbsp;0,
+          new 0&nbsp;&rarr;&nbsp;10,720, coverage held at 25,098</td></tr>
+        <tr><td>C &mdash; the foreign key</td><td><code>23c4b55a</code></td>
+          <td>specification passes unmodified; DocsRevision 3,200 and LLMCost 32,834 migrated;
+          the retired field 2,151&nbsp;&rarr;&nbsp;0 with its clearing function removed</td></tr>
+        <tr><td>&sect;10 &mdash; the repair</td>
+          <td><code>66382bcf</code>, <code>de0733cf</code>, <code>1e665160</code></td>
+          <td>all 79 defects closed: 25 + 16 + 38, of which 72 by repair and 7 by
+          re-adjudication</td></tr>
+        <tr><td>F &mdash; the guidance</td><td><code>926b8401</code></td>
+          <td>10 retired spellings removed, 0 remaining across a 9-file LinkML-derived scan,
+          negative fixture proves reintroduction fails</td></tr>
+      </tbody>
+    </table>
+    <p><strong>&sect;8 sequenced the detector first so it would prove its value against the
+    un-renamed tree, and that is exactly what happened.</strong> Seven of the 79 filtered
+    <code>StandardName.name</code> &mdash; a property no standard-name class declares &mdash;
+    which is incident 1 from &sect;1, still live in six modules, silently returning empty
+    results. The plan did not merely describe its own failure class; it found it running.</p>
+    <p><strong>Two results were refusals, and they matter as much as the repairs.</strong>
+    Seven occurrences were <em>not</em> repaired: their property is undeclared but holds real
+    rows (<code>related_ids</code> 4,826 of 271,460; <code>embed_failed_at</code> 1,649 of
+    271,460) while every declared alternative measures zero. Turning a working query into a
+    zero-coverage one is the harm the audit exists to prevent, so they were re-adjudicated
+    rather than broken. One repair whose target <em>is</em> empty
+    (<code>patterns_found</code> 0 of 275,315) is disclosed as a schema correction awaiting
+    data rather than counted as a fix.</p>
+    <p><strong>Coverage that was hidden.</strong> The narrower selection this plan verified
+    against reports 7,218 tests; the full default selection reports 12,109 outcomes. The
+    difference was <code>torch</code>, declared only in the test extra and absent from this
+    checkout, so roughly 4,900 tests could not run at all. It is installed, and eleven tests
+    that reached live graph authority without the graph marker now carry it.</p>
+  </section>
 </main>
 </body>
 </html>
