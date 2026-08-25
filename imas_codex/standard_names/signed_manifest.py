@@ -115,6 +115,14 @@ _ERROR_SIBLING_GUARDS = (
     _COLLATERAL_IMMUTABILITY,
 )
 
+_STRUCTURAL_EDGE_ADAPTER = "structural-edge-reconcile"
+_STRUCTURAL_EDGE_MUTATION = "recompute-canonical-structural-edges"
+_STRUCTURAL_EDGE_GUARDS = (
+    "exact-request-scope",
+    "canonical-structural-derivation",
+    _COLLATERAL_IMMUTABILITY,
+)
+
 _DUAL_AUTHORITY_ADAPTER = "dual-authority-retirement"
 _DUAL_AUTHORITY_MUTATION = "release-and-supersede"
 _AUTHORITY_JOIN = "authority-join"
@@ -217,6 +225,43 @@ class _Authority:
     receipt_policy: dict[str, Any]
     file_sha256: str
     payload_sha256: str
+
+
+def _apply_structural_edge_reconcile(gc: Any, name_ids: list[str]) -> int:
+    """Reconcile the canonical structural edges for an exact name partition."""
+    from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+
+    requested = list(dict.fromkeys(name_ids))
+    if any(not name_id for name_id in requested):
+        raise ValueError("name_ids must contain only non-empty StandardName ids")
+    if not requested:
+        return 0
+
+    rows = list(
+        gc.query(
+            """
+            UNWIND $ids AS requested
+            OPTIONAL MATCH (sn:StandardName {id: requested})
+            RETURN requested AS id,
+                   CASE WHEN sn IS NULL THEN false ELSE true END AS exists
+            """,
+            ids=requested,
+        )
+    )
+    present = {str(row["id"]) for row in rows if row.get("exists")}
+    missing = sorted(set(requested) - present)
+    if missing:
+        raise ValueError(
+            "cannot reconcile structural edges for missing StandardName ids: "
+            + ", ".join(repr(name_id) for name_id in missing)
+        )
+
+    _write_standard_name_edges(
+        gc,
+        [{"id": name_id} for name_id in requested],
+        expand_closure=False,
+    )
+    return len(requested)
 
 
 @dataclass
@@ -6543,6 +6588,33 @@ def apply_signed_manifest(
     authorizes only the hash: participant closure, collateral rows, and counter
     baselines are always read again inside this invocation.
     """
+    if authority_adapter == _STRUCTURAL_EDGE_ADAPTER:
+        if authority_path != {} or len(legacy_args) != 2:
+            raise SignedManifestAuthorityError(
+                "structural-edge reconciliation requires a graph client and name ids"
+            )
+        if mutation_kind != _STRUCTURAL_EDGE_MUTATION:
+            raise SignedManifestAuthorityError(
+                "structural-edge reconciliation requires its canonical mutation program"
+            )
+        if guard_set != _STRUCTURAL_EDGE_GUARDS:
+            raise SignedManifestAuthorityError(
+                "structural-edge reconciliation requires its exact deterministic guard set"
+            )
+        if not apply:
+            raise SignedManifestAuthorityError(
+                "structural-edge reconciliation always applies inside its invocation"
+            )
+        if gc is not None or client_factory is not None:
+            raise SignedManifestAuthorityError(
+                "structural-edge reconciliation receives its graph client positionally"
+            )
+        graph_client, name_ids = legacy_args
+        if not isinstance(name_ids, list):
+            raise SignedManifestAuthorityError(
+                "structural-edge reconciliation requires a name-id list"
+            )
+        return _apply_structural_edge_reconcile(graph_client, name_ids)
     if authority_adapter == _LIFECYCLELESS_STUB_ADAPTER:
         if legacy_args or authority_path != {}:
             raise SignedManifestAuthorityError(
