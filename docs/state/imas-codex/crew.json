@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:24:03",
+  "updated": "2026-08-25T10:25:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1612,6 +1612,15 @@
         "role": "test",
         "session_id": "01a03471-a0b7-7f91-b148-090da0d3324b",
         "created": "2026-08-24"
+      },
+      {
+        "id": "test-parityclosure2",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
       },
       {
         "id": "test-quiescence",
@@ -29165,9 +29174,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T081524480843-n-scalarmirrorrepair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-scalarmirrorrepair",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-graph-wide-integrity/scalar-mirror-repair.md records a preview, apply and replay of repair_scalar_projection_mismatches over exactly the three scalar-mismatch source ids, with the authority derived INSIDE the applying invocation rather than carried from any earlier node; it states admitted and refused counts with verbatim refusal reasons, the receipt rows recovered by their own run_id and manifest digest rather than by an operation-name query, replay at changed=0 and persistent_writes=0, and a post-apply live census showing the scalar-mismatch class at zero with the schema sanity count that proves that zero is real; if any row refuses, the refusal is recorded and NOT worked around",
+          "estimated_hours": null,
+          "goal": "The three scalar-mirror rows repaired in production through the existing signed scalar operator under fresh sole-live authority",
+          "id": "n-scalarmirrorrepair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T081524480843-n-scalarmirrorrepair/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-graph-wide-integrity/scalar-mirror-repair.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-signrescore",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:15:38Z",
+        "completed_at": "2026-08-25T08:24:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 540,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 540,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "66685405db9c6564e78df4c7c9492a1745ee84ce",
+        "commits": [
+          "6136a25e",
+          "ff65074f"
+        ],
+        "changed_lines": {
+          "added": 151,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T081524480843-n-scalarmirrorrepair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037fd-3fa2-7f91-9df2-2b69987508a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4321024,
+            "cached_input_tokens_cumulative": 4321024,
+            "input_tokens": 4498095,
+            "input_tokens_cumulative": 4498095,
+            "output_tokens": 21192,
+            "output_tokens_cumulative": 21192,
+            "reasoning_output_tokens": 5851,
+            "reasoning_output_tokens_cumulative": 5851
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 857
+    "_version": 859
   }
 }

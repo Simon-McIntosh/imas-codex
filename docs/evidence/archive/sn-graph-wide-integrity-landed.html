@@ -493,6 +493,68 @@
       <a href="/imas-codex/evidence/sn-graph-wide-integrity/regression-root-cause">regression root cause</a>.
     </p>
   </section>
+
+  <section id="genuine-residue-repaired">
+    <h2>The scalar class reaches zero, and the reconcile can no longer regrow what a repair releases</h2>
+    <p>
+      The producer question was answered before either repair ran, and it changed the
+      order of the work. One ordinary-run maintenance chain explains the
+      <em>recurrence</em> class: <code>rederive_structural_edges</code> calls
+      <code>_write_standard_name_edges</code> at startup and post-drain and
+      deterministically re-MERGEs the governed-deleted qualifier edge, so that edge
+      recurs <strong>because the parse still desires it</strong> — deleting it a second
+      time is futile by construction, not merely unwise. It explains neither DD class;
+      the three legacy residues trace to a parent materialization predating
+      <code>3b74745e</code> that current code no longer emits.
+    </p>
+    <table>
+      <caption>Genuine residue: state at close of this wave</caption>
+      <thead><tr><th>Class</th><th>Found</th><th>Now</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Scalar mirror mismatches</td><td>3</td><td><strong>0</strong></td><td>signed repair, production, commit <code>6136a25e</code></td></tr>
+        <tr><td>Terminal-predecessor regrowth</td><td>reproducible</td><td><strong>refused</strong></td><td>guard, commit <code>99a91692</code></td></tr>
+        <tr><td>Legacy DD residues</td><td>3</td><td>3</td><td>closed release program in progress</td></tr>
+        <tr><td>Qualifier edge</td><td>1</td><td>1</td><td>parse verdict pending; edge deletion is futile</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Two process rules that earlier waves broke were honoured here, and they are
+      the reason the result can be trusted.</strong> The manifest digest
+      <code>0a88f540</code> was derived <em>inside</em> the applying invocation rather
+      than carried from an earlier node, so no fixed cohort could be overtaken by an
+      intervening authorized transaction. And the receipt was recovered by its own
+      <code>run_id</code> plus manifest digest, never by an operation-name query — the
+      exact probe that made a committed dual-bound transaction read as a clean refusal on
+      2026-08-21.
+    </p>
+    <p>
+      Replay returned <code>already_applied</code> at <code>changed=0</code>,
+      <code>persistent_writes=0</code>; <code>StandardNameChange</code> moved 8,516 →
+      8,517 with <code>LLMCost</code> unmoved at 34,104; and the post-apply and
+      post-replay censuses are both zero with sanity proved at 4,656/4,656 and
+      9,668/9,668.
+    </p>
+    <p>
+      <strong>The repaired rows carry a semantic result, not just a mechanical one.</strong>
+      <code>dd:plasma_profiles/ggd/mass_density/values</code> now mirrors
+      <code>total_plasma_mass_density</code> rather than <code>mass_density</code> — the
+      direction both the aggregation-vocabulary challenge and the self-describing-name
+      principle pointed at, since the unqualified spelling carried its aggregation only in
+      prose. The mirror repair and the naming adjudication agree rather than conflict. The
+      other two are <code>radial_ion_momentum_source</code> and
+      <code>plasma_electrical_conductivity</code>.
+    </p>
+    <p>
+      The guard is proved by <em>reproduction</em>: <code>derived:conductivity</code> reads
+      0 bindings, 1 after deliberately running the unguarded path, 0 after cleanup, and 0
+      after the guarded reconcile — and both predicates repeat atomically at write time,
+      not only at selection, so a cohort that changes under the preview is refused rather
+      than applied. Records:
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/recurring-producer-diagnosis">producer diagnosis</a>,
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/scalar-mirror-repair">scalar mirror repair</a>,
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/orphan-parent-guard">orphan-parent guard</a>.
+    </p>
+  </section>
 </main>
 </body>
 </html>
