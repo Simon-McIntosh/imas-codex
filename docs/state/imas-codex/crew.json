@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:40:47",
+  "updated": "2026-08-25T09:07:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -220,6 +220,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-benchcalib",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "impl-benchgates",
@@ -1620,6 +1627,13 @@
         "role": "test",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "test-westrc",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "verify-a",
@@ -27933,6 +27947,6 @@
       }
     ],
     "holds": [],
-    "_version": 823
+    "_version": 825
   }
 }
