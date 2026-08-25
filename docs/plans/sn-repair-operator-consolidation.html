@@ -22,11 +22,11 @@
   <title>One Signed Repair Operator | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="19">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="20">
 <meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c,c9460262,ca993b9e,0baf8d09,bd34e963,eec3e20b">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py,tests/standard_names/test_error_sibling_reconcile_graph.py">
-<meta name="plan-impl" content="0.98">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -359,6 +359,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260822-sprint-clause-discharged" data-who="reckon-ship" data-when="2026-08-22T02:10:00+00:00">
     <div class="r-comment-body"><p><strong>The S8 clause is discharged and this plan returns to unscheduled backlog, which is where its own §7 says it belongs between triggers.</strong> S8 asked for the ten operators characterised in one table, a generic envelope parameterised by mutation kind and guard set reading its preview and counters inside the applying invocation, three operators migrated with the delete kind available as a parameter, and each bespoke function deleted as its migration landed. All of that landed, and the sprint clause anticipated in its own wording that the plan would stay active with seven operators unmigrated.</p><p>What the sprint actually produced went past that clause, because the integrity programme kept demanding mutation kinds the envelope did not yet have. The registry grew from four kinds to <strong>six</strong> across three closed branch programs - source-target reconciliation, structural-source revival, and ordinary-source migration - each with its own disposable-graph suite, and every one of them was pulled into existence by a real repair that refused rather than by a refactor. That is the plan's thesis holding under load: three new defect classes cost three closed branches under one envelope instead of three bespoke operators at roughly 500 lines each.</p><p>Two findings worth carrying forward. <strong>The one-artifact-per-invocation shape is a real ergonomic hazard</strong>: two independent live nodes each burned both permitted attempts on hand-rolled <code>RepairAuthorityArtifact</code> JSON before <code>authbuilder</code> gave callers a validated emitter, and the read-existing lock survived that addition with all four committed artifacts still loading on their original bytes and pinned digests. <strong>And §8's ordering was worth its delay</strong>: the suite built against live code hours before the peel-unit migration is the only reason its single changed verdict was countable rather than an unexplained diff.</p><p>The open <code>serialization-retirement</code> decision stays open, and honestly so. This sprint ran every production apply strictly serialized and never gathered evidence that disjoint row sets cannot corrupt each other's collateral proof, so there is nothing here that would justify lifting the constraint. Seven operators remain unmigrated; the natural trigger is unchanged - the next integrity class that would otherwise need another operator, or the WEST catalog release landing.</p></div>
+</div>
+<div class="r-comment" data-section="§1" data-id="c-20260825T0532-closureverify" data-who="reckon-ship" data-when="2026-08-25T05:32:00+00:00">
+    <div class="r-comment-body">Closure verification landed — commit ee35347e, artifact docs/evidence/archive/integrity-and-operator-closure-verification.md; gate is-this-plan-actually-complete FAILED. 4 of 8 declared deliverables are outstanding and SEVEN OF TEN class-by-class migrations remain, along with their bespoke deletions, their equivalence gates, the disjoint-collateral proof and an open serialization decision. The focused operator-contract selection is green at 21 passed and the live integrity ratchets at 4 passed, so what exists works — there is simply much less of it than the number implied. THE NUMBER WAS THE PROBLEM: impl 0.98 was a DISCHARGED SPRINT-CLAUSE MARKER, not remaining-work arithmetic, so it read as two percent left when the truth is seven of ten migrations. Corrected to 0.5 for 4 of 8 deliverables. A plan whose title promises one signed operator instead of twenty-two cannot be near-complete with seven consolidations unstarted, and this plan had no open followups either, so nothing in its own state contradicted the misleading fraction.</div>
 </div>
 </section>
 </main>

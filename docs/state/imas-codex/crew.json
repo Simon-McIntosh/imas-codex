@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T06:39:35",
+  "updated": "2026-08-25T06:49:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1527,7 +1527,7 @@
         "id": "test-s8closure",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
+        "session_id": "01a03735-6a1c-77c0-b640-8716647ea732",
         "created": "2026-08-25"
       },
       {
@@ -27206,9 +27206,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T043712518942-n-integrityoperatorclosure",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a71",
+        "node": "n-integrityoperatorclosure",
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s8closure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T04:37:22Z",
+        "completed_at": "2026-08-25T04:48:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 688,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 688,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "495b697e0ef70da51cfe54b6848ae4d9323cf6db",
+        "commits": [
+          "ee35347e"
+        ],
+        "changed_lines": {
+          "added": 233,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T043712518942-n-integrityoperatorclosure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03735-6a1c-77c0-b640-8716647ea732",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9564672,
+            "cached_input_tokens_cumulative": 9564672,
+            "input_tokens": 9827956,
+            "input_tokens_cumulative": 9827956,
+            "output_tokens": 27517,
+            "output_tokens_cumulative": 27517,
+            "reasoning_output_tokens": 11348,
+            "reasoning_output_tokens_cumulative": 11348
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 798
+    "_version": 800
   }
 }
