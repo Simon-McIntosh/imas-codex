@@ -178,19 +178,27 @@ class TestDescriptionEmbeddingCoverage:
     """
 
     @pytest.mark.parametrize("label", get_description_embeddable_labels())
-    def test_description_embedding_coverage(self, graph_client, label, label_counts):
-        """Nodes that have been through the embed step should retain embeddings.
+    def test_description_embedding_coverage(
+        self, graph_client, label, label_counts, schema
+    ):
+        """Shippable nodes that have been through embedding retain their vectors.
 
         Uses ``embedded_at`` to distinguish processed vs unprocessed nodes.
+        Labels with an acceptance lifecycle are scoped to accepted nodes; labels
+        without that schema field retain the graph-wide coverage assertion.
         Skips when no nodes exist or the embed step has not run for this label.
         """
 
         if not label_counts.get(label):
             pytest.skip(f"No {label} nodes in graph")
 
+        slots = schema.get_all_slots(label)
+        accepted_scope = (
+            " AND n.name_stage = 'accepted'" if "name_stage" in slots else ""
+        )
         result = graph_client.query(
             f"MATCH (n:{label}) "
-            f"WHERE n.embedded_at IS NOT NULL AND n.embedding IS NULL "
+            f"WHERE n.embedded_at IS NOT NULL AND n.embedding IS NULL{accepted_scope} "
             f"RETURN count(n) AS corrupted"
         )
         corrupted = result[0]["corrupted"] if result else 0
@@ -199,7 +207,7 @@ class TestDescriptionEmbeddingCoverage:
             # Check that at least some embeddings exist (embed step has run)
             check = graph_client.query(
                 f"MATCH (n:{label}) "
-                f"WHERE n.embedded_at IS NOT NULL "
+                f"WHERE n.embedded_at IS NOT NULL{accepted_scope} "
                 f"RETURN count(n) AS attempted"
             )
             attempted = check[0]["attempted"] if check else 0
