@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T09:59:47",
+  "updated": "2026-08-25T10:09:03",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1556,9 +1556,11 @@
         "id": "test-cocosmismatch",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a037e8-6468-79e1-b1e5-acd6b7d02bc6",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a037e8-6468-79e1-b1e5-acd6b7d02bc6"
+        },
         "created": "2026-08-25"
       },
       {
@@ -28532,9 +28534,160 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T074807899479-n-sourcedispositionmigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "n-sourcedispositionmigrate",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-srcmigrate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:48:13Z",
+        "completed_at": "2026-08-25T08:04:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 966,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 966,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "14d3cdccf7a757966160225aadad4238d99ca83b",
+        "commits": [
+          "2afcccec",
+          "53d185e6"
+        ],
+        "changed_lines": {
+          "added": 564,
+          "removed": 397,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T074807899479-n-sourcedispositionmigrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037e4-26db-7dc3-9fde-72555699038b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5436416,
+            "cached_input_tokens_cumulative": 5436416,
+            "input_tokens": 5636921,
+            "input_tokens_cumulative": 5636921,
+            "output_tokens": 23088,
+            "output_tokens_cumulative": 23088,
+            "reasoning_output_tokens": 6968,
+            "reasoning_output_tokens_cumulative": 6968
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T075246291246-n-cocosauthoritymismatch",
+        "plan": "sn-quality-parity",
+        "section": "\u00a75",
+        "node": "n-cocosauthoritymismatch",
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-cocosmismatch",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:52:51Z",
+        "completed_at": "2026-08-25T08:08:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 962,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 962,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ac21fcb22ed954a72576155a86adec406b742111",
+        "commits": [
+          "d947a875214844f0dd039de8a56d73509f74c800"
+        ],
+        "changed_lines": {
+          "added": 176,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T075246291246-n-cocosauthoritymismatch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037e8-6468-79e1-b1e5-acd6b7d02bc6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9251584,
+            "cached_input_tokens_cumulative": 9251584,
+            "input_tokens": 9588692,
+            "input_tokens_cumulative": 9588692,
+            "output_tokens": 33616,
+            "output_tokens_cumulative": 33616,
+            "reasoning_output_tokens": 11525,
+            "reasoning_output_tokens_cumulative": 11525
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 844
+    "_version": 847
   }
 }
