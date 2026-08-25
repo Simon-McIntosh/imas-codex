@@ -28,8 +28,9 @@ protocol so tests can substitute a stub.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
+from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.standard_names.grammar_adapter import (
     compose_canonical_ir,
     parse_canonical_name,
@@ -382,3 +383,185 @@ def recompute_parent_kind(name: str, gc: _TopologyProbe) -> str:
     if "real_part" in name or "imaginary_part" in name:
         return "complex"
     return "scalar"
+
+
+def _replay_described_parent_authorities(gc: _TopologyProbe) -> dict[str, Any]:
+    """Authorize accepted, described parents grounded by accepted children."""
+    from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+
+    candidates = list(
+        gc.query(
+            """
+            MATCH (parent:StandardName)
+            WHERE parent.name_stage = 'accepted'
+              AND parent.origin = 'derived'
+              AND parent.validation_status = 'valid'
+              AND parent.reviewer_score_name IS NULL
+              AND parent.description IS NOT NULL
+              AND parent.description <> $placeholder
+              AND NOT (parent)-[:HAS_STRUCTURAL_AUTHORITY]->(
+                :StructuralNameAuthority)
+            RETURN parent.id AS id
+            ORDER BY parent.id
+            """,
+            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        )
+    )
+    replayed: list[dict[str, Any]] = []
+    refused: list[dict[str, Any]] = []
+    for candidate in candidates:
+        parent_id = str(candidate["id"])
+        locked = list(
+            gc.query(
+                """
+                MATCH (parent:StandardName {id: $parent_id})
+                SET parent._structural_authority_replay_lock = true
+                REMOVE parent._structural_authority_replay_lock
+                WITH parent
+                WHERE parent.name_stage = 'accepted'
+                  AND parent.origin = 'derived'
+                  AND parent.validation_status = 'valid'
+                  AND parent.reviewer_score_name IS NULL
+                  AND parent.description IS NOT NULL
+                  AND parent.description <> $placeholder
+                  AND NOT (parent)-[:HAS_STRUCTURAL_AUTHORITY]->(
+                    :StructuralNameAuthority)
+                RETURN count(parent) AS locked
+                """,
+                parent_id=parent_id,
+                placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+            )
+        )
+        if not locked or int(locked[0].get("locked") or 0) != 1:
+            refused.append(
+                {
+                    "parent_id": parent_id,
+                    "reason": "eligibility changed before authority replay",
+                    "live_child_ids": [],
+                }
+            )
+            continue
+
+        snapshot = graph_ops._structural_authority_snapshot(gc, parent_id)
+        if snapshot is None:
+            refused.append(
+                {
+                    "parent_id": parent_id,
+                    "reason": "parent disappeared before authority replay",
+                    "live_child_ids": [],
+                }
+            )
+            continue
+        children = list(snapshot.get("children") or [])
+        live_child_ids = [str(child["id"]) for child in children]
+        accepted_child_ids = [
+            str(child["id"])
+            for child in children
+            if child.get("name_stage") == "accepted"
+        ]
+        if not accepted_child_ids:
+            refused.append(
+                {
+                    "parent_id": parent_id,
+                    "reason": "no accepted children",
+                    "live_child_ids": live_child_ids,
+                }
+            )
+            continue
+
+        accepted_child_element_ids = [
+            str(child["element_id"])
+            for child in children
+            if child.get("name_stage") == "accepted"
+        ]
+        grounding_lock = list(
+            gc.query(
+                """
+                UNWIND $child_element_ids AS child_element_id
+                MATCH (child:StandardName)
+                WHERE elementId(child) = child_element_id
+                  AND child.name_stage = 'accepted'
+                SET child._structural_authority_grounding_lock = true
+                REMOVE child._structural_authority_grounding_lock
+                RETURN count(child) AS locked
+                """,
+                child_element_ids=accepted_child_element_ids,
+            )
+        )
+        if not grounding_lock or int(grounding_lock[0].get("locked") or 0) != len(
+            accepted_child_element_ids
+        ):
+            refused.append(
+                {
+                    "parent_id": parent_id,
+                    "reason": "accepted child grounding changed before replay",
+                    "live_child_ids": live_child_ids,
+                }
+            )
+            continue
+
+        record = graph_ops._structural_authority_record(snapshot, accepting=False)
+        if not graph_ops._persist_structural_authority(
+            gc,
+            record,
+            parent_updates={},
+        ):
+            raise graph_ops.StructuralAuthorityConflict(
+                f"derived parent {parent_id!r} changed before authority replay"
+            )
+        replayed.append(
+            {
+                "parent_id": parent_id,
+                "authority_id": record["id"],
+                "child_ids": list(record["child_ids"]),
+                "accepted_child_ids": accepted_child_ids,
+            }
+        )
+
+    return {
+        "schema": "imas-codex.described-parent-authority-replay",
+        "candidate_count": len(candidates),
+        "replayed_count": len(replayed),
+        "refused_count": len(refused),
+        "replayed": replayed,
+        "refused": refused,
+    }
+
+
+@retry_on_deadlock()
+def replay_described_parent_authorities(
+    *, gc: _TopologyProbe | None = None
+) -> dict[str, Any]:
+    """Write structural authority for already-accepted described parents.
+
+    The historical marker is not treated as authority. Eligibility is derived
+    from the current accepted lifecycle, valid state, real description, and
+    exact live child closure. At least one child must itself be accepted; a
+    parent grounded only by non-accepted children is reported without mutation.
+
+    Each successful row reuses the same signed, content-addressed authority
+    record as parent enrichment. Selection, parent locking, child snapshot, and
+    authority persistence share one transaction when this function owns the
+    graph client. An injected query handle is intended for tests or a
+    caller-owned transaction.
+    """
+    if gc is not None:
+        return _replay_described_parent_authorities(gc)
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import _TransactionQuery
+
+    with GraphClient() as client, client.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            result = _replay_described_parent_authorities(
+                _TransactionQuery(transaction)
+            )
+            transaction.commit()
+            return result
+        except Exception:
+            transaction.rollback()
+            raise
