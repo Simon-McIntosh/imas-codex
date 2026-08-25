@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:16:27",
+  "updated": "2026-08-25T10:20:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -443,9 +443,11 @@
         "id": "impl-decodingpin",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a037fe-32e0-7a13-b94a-fdf6ddd496c1",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a037fe-32e0-7a13-b94a-fdf6ddd496c1"
+        },
         "created": "2026-08-25"
       },
       {
@@ -1078,9 +1080,11 @@
         "id": "impl-signfinal",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a037f7-ef55-7fa2-a43b-2e9ecf6cb557",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a037f7-ef55-7fa2-a43b-2e9ecf6cb557"
+        },
         "created": "2026-08-25"
       },
       {
@@ -28973,9 +28977,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T080940064739-n-signresidualrepair",
+        "plan": "sn-quality-parity",
+        "section": "\u00a75",
+        "node": "n-signresidualrepair",
+        "node_definition": {
+          "done_when": "the graph-wide sign gate rescored over every accepted document reports 0 failures, the 17 stored-agrees identities are repaired by exact-hash governed documentation edits at zero model cost with each delta bounded to the removed final paragraph, magnetic_field is repaired by a signed compare-and-set metadata change from one_like to b0_like with its documentation left byte-identical, and the manifest reports the before and after failure counts, the two repair-route counts and the model spend which must be zero",
+          "estimated_hours": 1.0,
+          "goal": "Take the accepted-document conditional sign gate to zero failures using each identity's own repair route rather than one blanket edit",
+          "id": "n-signresidualrepair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T080940064739-n-signresidualrepair/manifest.md",
+          "plan": "sn-quality-parity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/audits.py",
+            "docs/evidence/sn-quality-parity/sign-residual-repair.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-signfinal",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:09:49Z",
+        "completed_at": "2026-08-25T08:19:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 578,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 578,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "32e3dd4219405a02a4349a746c08a81c7fd14b11",
+        "commits": [
+          "4c1542ba38d17fb0d634cefe27c601cf3ff4d8f6"
+        ],
+        "changed_lines": {
+          "added": 499,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T080940064739-n-signresidualrepair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037f7-ef55-7fa2-a43b-2e9ecf6cb557",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5829888,
+            "cached_input_tokens_cumulative": 5829888,
+            "input_tokens": 6029973,
+            "input_tokens_cumulative": 6029973,
+            "output_tokens": 21222,
+            "output_tokens_cumulative": 21222,
+            "reasoning_output_tokens": 3969,
+            "reasoning_output_tokens_cumulative": 3969
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 853
+    "_version": 856
   }
 }
