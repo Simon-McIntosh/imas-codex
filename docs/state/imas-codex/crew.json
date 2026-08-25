@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T16:11:22",
+  "updated": "2026-08-25T17:05:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -222,6 +222,15 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-basetoken",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-benchcalib",
         "harness": "codex",
         "role": "implement",
@@ -392,6 +401,17 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a03743-4a67-7322-a507-e7f9964ab607",
+        "created": "2026-08-25"
+      },
+      {
+        "id": "impl-coverage",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03949-99d0-78a1-bf5c-6375e4a06212",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03949-99d0-78a1-bf5c-6375e4a06212"
+        },
         "created": "2026-08-25"
       },
       {
@@ -785,6 +805,17 @@
         "created": "2026-08-19"
       },
       {
+        "id": "impl-locusadj",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03949-9901-7861-b532-713fee2caa20",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03949-9901-7861-b532-713fee2caa20"
+        },
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-machretarget",
         "harness": "codex",
         "role": "implement",
@@ -853,6 +884,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-originrule",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03949-9a92-74c2-b5ad-9616bd5d9577",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03949-9a92-74c2-b5ad-9616bd5d9577"
+        },
+        "created": "2026-08-25"
       },
       {
         "id": "impl-orphan",
@@ -1059,6 +1101,17 @@
         "role": "implement",
         "session_id": "01a02439-ee5f-7833-af36-d9d7fbaeb353",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-retireapply",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03949-9975-7860-ac0c-f149e860c9b4",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03949-9975-7860-ac0c-f149e860c9b4"
+        },
+        "created": "2026-08-25"
       },
       {
         "id": "impl-retiremigrate",
@@ -1500,6 +1553,17 @@
           "gpt-5.6-sol": "01a025de-5232-7f31-8e5a-fe204215a48c"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "inv-residualreuse",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a03949-9389-7643-bf9a-6739ebb50037",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03949-9389-7643-bf9a-6739ebb50037"
+        },
+        "created": "2026-08-25"
       },
       {
         "id": "inv-reusemap-rel",
@@ -31410,9 +31474,561 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T141822953635-n-locusadjudicate",
+        "plan": "isn-locus-vocabulary-rotation",
+        "section": "\u00a72",
+        "node": "n-locusadjudicate",
+        "node_definition": {
+          "done_when": "Answer three questions from measurement rather than memory. First, whether a field map grid is a physical locus at all under the Data Dictionary, or whether the correct identity for dd:b_field_non_axisymmetric/time_slice/field_map/grid/phi names something else and the locus framing is itself the mistake. Second, how many DD paths beyond that one row need the same token, reported as a count with the query that produced it and the schema sanity count proving the figure real, because a token resolving a family is a stronger case than one added for a single row. Third, the near-miss candidate set derived from get_grammar_context() rather than memory, naming each near-miss locus token and the reason it fails, since a token duplicating an existing one damages the vocabulary more than the gap does. Close with a recommendation among warranted, not-a-locus, and not-warranted, with its reason. Never order ISN versions as strings: rc9 sorts above rc65 lexically. This node makes no ISN change, no pyproject pin bump, and no graph mutation.",
+          "estimated_hours": 1.0,
+          "goal": "Adjudicate whether a field-map-grid locus token is warranted in the closed ISN vocabulary, recommending one of the plan's three dispositions with its evidence.",
+          "id": "n-locusadjudicate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953635-n-locusadjudicate/manifest.md",
+          "plan": "isn-locus-vocabulary-rotation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/isn-locus-vocabulary-rotation/locus-adjudication.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-locusadj",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:18:38Z",
+        "completed_at": "2026-08-25T14:26:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 488,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 488,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d2edae90904734b08cee4a35a21b55f507c285be",
+        "commits": [
+          "2ec2f04e"
+        ],
+        "changed_lines": {
+          "added": 148,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953635-n-locusadjudicate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03949-9901-7861-b532-713fee2caa20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3213056,
+            "cached_input_tokens_cumulative": 3213056,
+            "input_tokens": 3357277,
+            "input_tokens_cumulative": 3357277,
+            "output_tokens": 17870,
+            "output_tokens_cumulative": 17870,
+            "reasoning_output_tokens": 4810,
+            "reasoning_output_tokens_cumulative": 4810
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T141822953928-n-originrule",
+        "plan": "sn-origin-provenance-backfill",
+        "section": "\u00a73",
+        "node": "n-originrule",
+        "node_definition": {
+          "done_when": "Explain the source_types anomaly first: it sits at 0.98 in the null cohort matching catalog_edit at 1.00 against pipeline at 0.08, so state which of the two readings holds \u2014 that it is not the catalog marker it appears to be, or that the null cohort has mixed provenance and the import markers are absent for another reason \u2014 and give the measurement that decides between them. Then assert the rule against answers already held: it must re-derive origin=catalog_edit for the 1,372 accepted catalog_edit identities and origin=pipeline for the 426 accepted pipeline identities, with the misclassification count reported and required to be zero before the rule is trusted. Every count carries the schema sanity count proving the property exists, because a wrong property name returns a clean plausible zero. This node writes no origin value and no status value. If the anomaly cannot be explained, the deliverable is a refusal with its reason, not a rule.",
+          "estimated_hours": 1.0,
+          "goal": "Produce a validated origin-derivation rule, or a refusal, for the 1,091 identities that declare no origin.",
+          "id": "n-originrule",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953928-n-originrule/manifest.md",
+          "plan": "sn-origin-provenance-backfill",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-origin-provenance-backfill/origin-rule-validation.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-originrule",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:18:38Z",
+        "completed_at": "2026-08-25T14:27:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 530,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 530,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d2edae90904734b08cee4a35a21b55f507c285be",
+        "commits": [
+          "37e4b467"
+        ],
+        "changed_lines": {
+          "added": 116,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953928-n-originrule/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03949-9a92-74c2-b5ad-9616bd5d9577",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2975488,
+            "cached_input_tokens_cumulative": 2975488,
+            "input_tokens": 3123068,
+            "input_tokens_cumulative": 3123068,
+            "output_tokens": 15717,
+            "output_tokens_cumulative": 15717,
+            "reasoning_output_tokens": 4774,
+            "reasoning_output_tokens_cumulative": 4774
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T141822953638-n-reusemap",
+        "plan": "sn-origin-provenance-backfill",
+        "section": "\u00a71",
+        "node": "n-reusemap",
+        "node_definition": {
+          "done_when": "Search capability-shaped rather than filename-shaped, and cover five capabilities: signed repair-authority manifest build and apply; property-presence census over StandardName cohorts; description-embedding presence measurement and re-embedding; release-gate definition with threshold recovery; and ISN grammar-context vocabulary access. For each, name the concrete module, symbol, and test that already provides it, with a one-line fitness verdict, and verify by reading the cited path that every named symbol actually exists there rather than trusting its name. Report as a count how many of the five have an existing provider and how many are absent, stating an absent capability explicitly rather than omitting it. Read only: this node writes no code and mutates nothing.",
+          "estimated_hours": 0.5,
+          "goal": "Produce a reuse map naming the machinery already in this repository that the wave's measurement and apply nodes should consume rather than rebuild.",
+          "id": "n-reusemap",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953638-n-reusemap/manifest.md",
+          "plan": "sn-origin-provenance-backfill",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/residual-wave-reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "inv-residualreuse",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-25T14:18:36Z",
+        "completed_at": "2026-08-25T14:24:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 337,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 337,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "d2edae90904734b08cee4a35a21b55f507c285be",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953638-n-reusemap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03949-9389-7643-bf9a-6739ebb50037",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2990080,
+            "cached_input_tokens_cumulative": 2990080,
+            "input_tokens": 3171380,
+            "input_tokens_cumulative": 3171380,
+            "output_tokens": 12344,
+            "output_tokens_cumulative": 12344,
+            "reasoning_output_tokens": 3034,
+            "reasoning_output_tokens_cumulative": 3034
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260823T092453383925-n-reusemap",
+          "root_run_id": "r-20260823T092453383925-n-reusemap"
+        },
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "redispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T141822953482-n-retireapply",
+        "plan": "sn-relocation-retirement-apply",
+        "section": "\u00a73",
+        "node": "n-retireapply",
+        "node_definition": {
+          "done_when": "The signed manifest is derived and hashed inside the same invocation that applies it, never reusing the prior read-only projection or its retained per-row parent maps. Report admitted and refused row counts with the verbatim reason for every refusal, treating a refusal as a recorded outcome rather than a failure. Recover receipts by run_id plus manifest digest and never by an operation-name query. Prove collateral with a digest narrowed to a dimension this node owns so it cannot be measuring a concurrent session's writes. Replay write-free. Re-measure the unauthorized non-self class afterwards and report it with the schema sanity count that proves the figure is real rather than a zero from a wrong property name, alongside the stale qualifier pair census whose live value was 52. Confirm explicitly whether spectral_signal_to_noise_ratio_of_spectrometer_channel and logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel are released from the export withheld set.",
+          "estimated_hours": 1.0,
+          "goal": "Apply the unauthorized HAS_PARENT relocation retirement to the production graph under authority derived inside the applying invocation.",
+          "id": "n-retireapply",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953482-n-retireapply/manifest.md",
+          "plan": "sn-relocation-retirement-apply",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-relocation-retirement-apply/production-apply.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-retireapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:18:38Z",
+        "completed_at": "2026-08-25T14:35:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1012,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1012,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d2edae90904734b08cee4a35a21b55f507c285be",
+        "commits": [
+          "b7820f7c400718363a6a781f837a948481cb4208"
+        ],
+        "changed_lines": {
+          "added": 117,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953482-n-retireapply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03949-9975-7860-ac0c-f149e860c9b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12446208,
+            "cached_input_tokens_cumulative": 12446208,
+            "input_tokens": 12690508,
+            "input_tokens_cumulative": 12690508,
+            "output_tokens": 27790,
+            "output_tokens_cumulative": 27790,
+            "reasoning_output_tokens": 4313,
+            "reasoning_output_tokens_cumulative": 4313
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T141822953561-n-coveragemeasure",
+        "plan": "sn-embedding-coverage-gate",
+        "section": "\u00a72",
+        "node": "n-coveragemeasure",
+        "node_definition": {
+          "done_when": "Report how many accepted identities lack a description embedding over BOTH the WEST release set and the whole accepted corpus, each figure carrying the schema sanity count that proves it is real rather than a zero from a wrong property name. Separate the shortfall into identities missing an embedding on a real description, which is a pipeline gap fixable by deterministic re-embedding at no provider cost, from identities missing the description itself, which needs generation plus review; report those counts separately because their costs and owners differ and must not be summed. Recover what Gate A actually asserted and the threshold it failed against from the WEST export run artifacts rather than re-deriving the shortfall from scratch. State how many affected identities are inside the WEST release set. Diagnose radial_coordinate_of_reflector specifically, which is withheld for having neither description nor embedding, and state whether its cause explains the class. Count the 296 dangling links pruned at final-set export at their source in the graph rather than at export. This node changes no gate threshold, runs no re-embedding, and mutates no graph state.",
+          "estimated_hours": 1.0,
+          "goal": "Measure the description-embedding coverage shortfall, separated into embedding gaps versus description gaps, so Gate A's disposition can be decided against a number.",
+          "id": "n-coveragemeasure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953561-n-coveragemeasure/manifest.md",
+          "plan": "sn-embedding-coverage-gate",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-embedding-coverage-gate/coverage-shortfall.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-coverage",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:18:38Z",
+        "completed_at": "2026-08-25T14:33:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 868,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 868,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d2edae90904734b08cee4a35a21b55f507c285be",
+        "commits": [
+          "3261c40ecf9c43c6ba8f2a6159564d336f72207e"
+        ],
+        "changed_lines": {
+          "added": 164,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T141822953561-n-coveragemeasure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03949-99d0-78a1-bf5c-6375e4a06212",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9375232,
+            "cached_input_tokens_cumulative": 9375232,
+            "input_tokens": 9612565,
+            "input_tokens_cumulative": 9612565,
+            "output_tokens": 22901,
+            "output_tokens_cumulative": 22901,
+            "reasoning_output_tokens": 6662,
+            "reasoning_output_tokens_cumulative": 6662
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T144323649624-n-snhealthcensus",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-snhealthcensus",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-graph-wide-integrity/sn-health-census.md reports, measured live and timestamped: SCORE - the count of StandardName by name_stage and by docs_stage, the distribution of reviewer_score_name and reviewer_score_docs over accepted names including min, median and count below 0.85, and the count accepted on the name axis but not the docs axis; PROVENANCE - counts by origin including null, how many null-origin names are live and accepted, and the count of accepted names with no producing StandardNameSource; STABILITY - the live count for each of no-live-target, produced_sn_id scalar mismatch, upstream projection mismatch, multiple-live-target, and unauthorized HAS_PARENT relocation tips not authorized by current derive_edges output, each stated as a number. EVERY reported zero must be accompanied by its schema sanity count proving the property exists and the candidate set is non-empty, and the report must carry at least one POSITIVE CONTROL - a query in the same pass whose non-zero result proves the instrument can see what it reports absent - naming explicitly what it controlled for. Read-only; no graph mutation",
+          "estimated_hours": null,
+          "goal": "A current health census of the Standard Name corpus across score, provenance and stability",
+          "id": "n-snhealthcensus",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T144323649624-n-snhealthcensus/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/sn-graph-wide-integrity/sn-health-census.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-finalcensus",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:43:30Z",
+        "completed_at": "2026-08-25T14:57:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 839,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 839,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "72ebf606b507ce1a23eac7534cafef71d55d2150",
+        "commits": [
+          "78d3c6c7",
+          "deab9ac9"
+        ],
+        "changed_lines": {
+          "added": 246,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T144323649624-n-snhealthcensus/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03960-5947-7b73-b4d4-f11be401ae17",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9243392,
+            "cached_input_tokens_cumulative": 9243392,
+            "input_tokens": 9488313,
+            "input_tokens_cumulative": 9488313,
+            "output_tokens": 30029,
+            "output_tokens_cumulative": 30029,
+            "reasoning_output_tokens": 9461,
+            "reasoning_output_tokens_cumulative": 9461
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 901
+    "_version": 918
   }
 }
