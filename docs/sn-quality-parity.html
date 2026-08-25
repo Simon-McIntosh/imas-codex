@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa,3d0bb831,a1b4b1f8,e9530012,3946bd26">
 <meta name="plan-artifacts" content="docs/evidence/sn-quality-parity/closure-audit.md,docs/evidence/sn-quality-parity/sign-convention-diagnosis.md,docs/evidence/sn-quality-parity/west-docs-resumed-refresh.md,docs/evidence/sn-quality-parity/west-docs-second-tranche.md">
 </head>
@@ -303,10 +303,11 @@
     <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
     <p class="r-fu-outcome">Delivered, with two of its named gates deliberately dropped by a lead decision. The holdout exists: 85 immutable DD-path/catalog-documentation pairs on one pinned catalog commit, disjoint from the curated prompt examples at both identity and split-key level with an empty intersection proven by test. The objective content scorer exists: nine gates, discriminating (catalog row 10/10 against a stub 4/10 on the original ten-gate vector). The evidence loop ran end to end four times, production-faithfully after the harness was found to bypass graph enrichment. Standing result, nine gates, off-holdout, production-enriched: 0.9748 against a catalog reference of 0.8876, with eight of nine gates at or above the curated standard. The phases this followup listed were mostly already shipped when it was written — the currency audit reclassified 43 claims as 22 landed, 7 superseded, 9 contradicted, 5 open — and its 'typical values' and 'measurement' gates were excluded by the docs-content-gates decision as ungrounded filler. Chain continues in f-west-docs-refresh.</p>
     </article>
-<article class="r-fu" data-id="f-west-docs-refresh" data-status="open" data-written-by="portfolio-review-2026-08-12" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship sn-quality-parity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-west-docs-refresh" data-status="resolved" data-written-by="portfolio-review-2026-08-12" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship sn-quality-parity" data-resolved-at="2026-08-25T03:48:29+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Apply the improved docs standard to the WEST cohort ahead of human review</h4>
     <div class="r-fu-body">Once the holdout benchmark shows the new template/context beats baseline, run the scoped docs refresh over the WEST cohort only (~350 names) through the existing generate_docs/review_docs pools with a hard cost cap, so the reviewer packet carries catalog-quality documentation. Names whose refreshed docs fail quorum follow the ordinary refine path. This is the sole bulk regeneration the docs-regen-scope decision authorizes.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
+    <p class="r-fu-outcome">Delivered across two tranches for USD 27.28 of the USD 150 authorised, and the cohort reached stop_reason=no_eligible_work rather than a cost or time cap, which is the difference between draining and stopping. Tranche one refreshed 130 identities with 129 accepted; tranche two took 18 more with 14 accepted; cohort docs-accepted moved 202 to 216 against an unchanged cardinality of 234, with 130 of 130 prior DocsRevision snapshots written first so the whole thing is reversible. Names failing quorum followed the ordinary refine path exactly as the locked sequencing requires and none was hand-accepted. Both tranches keyed their census on StandardName.id and RE-MEASURED that key rather than inheriting it: 4,666 of 4,666 carry id and zero carry name, so a name-keyed census would have returned a clean empty cohort reading as nothing to do. 18 identities are deferred by name. The remaining thread is a graph-wide sign-gate rescore, which is only meaningful once the release docs drain reaches no-eligible-work.</p>
     </article>
 </section>
   <section data-reckon="decisions" id="decisions" class="r-decisions">
