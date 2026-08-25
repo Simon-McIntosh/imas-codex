@@ -35,6 +35,11 @@ _ADJUDICATION_REASONS = {
         "permanent runtime-property allowance: repository Cypher writes this "
         "coordination or operational property without declaring it in LinkML"
     ),
+    "transient_lock": (
+        "adjudicated transient set-then-remove lock idiom: Cypher writes and "
+        "removes this marker in one statement to acquire a node write lock "
+        "without persisting graph data"
+    ),
     "limitation": (
         "permanent checker limitation: this untyped alias reference precedes a "
         "later binding to the reported label in the same composite literal"
@@ -196,6 +201,9 @@ imas_codex/standard_names/signed_manifest.py|StandardName|quarantine_reason|1786
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|authority_rows_sha256|3556,4181
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|detached_target_ids|4179
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|source_id|4178
+[transient_lock]
+imas_codex/standard_names/parents.py|StandardName|_structural_authority_replay_lock|421,422
+imas_codex/standard_names/parents.py|StandardName|_structural_authority_grounding_lock|487,488
 [limitation]
 imas_codex/graph/temp_neo4j.py|Facility|facility_id|552
 """.strip()
