@@ -9,7 +9,7 @@
   <meta name="plan-title" content="DSv4 Advisory Review Benchmark and Recovery Triage">
   <meta name="plan-summary" content="Make the review benchmark discriminate: production reviewer panel as the benchmark judge, domain-balanced calibration anchors, grammar sub-dimension scoring. Then benchmark the free local DSv4 model and, once its gates pass, run a zero-mutation graph-wide advisory census whose flags prioritize the exhausted-tail rescores and quality triage — advisory only, never authority.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.65">
+  <meta name="plan-impl" content="0.7">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,8 +23,8 @@
 <meta name="plan-depends-on" content="sn-pipeline-recovery">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="14">
-<meta name="plan-commits" content="1519e1c5,aa553671,edb57f02,a1f98d21">
+<meta name="plan-version" content="16">
+<meta name="plan-commits" content="1519e1c5,aa553671,edb57f02,a1f98d21,7ceeb5cf">
 <meta name="plan-artifacts" content="docs/evidence/sn-benchmark-evolution/reuse-map.md,docs/evidence/sn-benchmark-evolution/benchmark-gate-run.md,imas_codex/standard_names/advisory_panel.py,imas_codex/standard_names/advisory_benchmark.py">
 </head>
 <body>
@@ -145,6 +145,12 @@
 </div>
 <div class="r-comment" data-section="§3" data-id="c-20260825T0400-benchgate" data-who="reckon-ship" data-when="2026-08-25T04:00:00+00:00">
     <div class="r-comment-body">n-benchmarkgaterun landed as a REFUSAL — commit a1f98d21; gate benchmark-gates NOT-RUN; measure USD 0.000000 of a USD 25 ceiling with no provider call made; artifact docs/evidence/sn-benchmark-evolution/benchmark-gate-run.md. THE REFUSAL IS THE RESULT AND IT IS THE RIGHT ONE. Two exact conditions are unmet at this revision. First, there is no committed admissible frozen advisory population: the legacy inventory holds 51 positive slots of which only 20 are populated and 31 are still TODO, plus 20 negatives, and the reuse map explicitly rejects it as the frozen batch. Second, no numeric threshold exists for ANY of the five measures the plan names — critical-defect recall, clean-name false-positive rate, calibration, repeatability, hosted-quorum agreement — and the runner defines no gate calculation or within-run repeatability protocol. Gates with no numbers cannot pass or fail. Running anyway would have manufactured the very authority the locked 6A decision makes the census conditional on, so the worker declined and the census is recorded as NOT AUTHORIZED rather than left ambiguous. This is where the plan actually stops, and it stops on a decision rather than on effort: choosing those thresholds decides what quality bar permits a zero-mutation sweep of the whole graph, which is the lead's call. The runner and the panel adapter are built, tested and waiting; what they lack is a bar to measure against and a population to measure.</div>
+</div>
+<div class="r-comment" data-section="§3" data-id="c-20260825T0545-corpusrecovery" data-who="reckon-ship" data-when="2026-08-25T05:45:00+00:00">
+    <div class="r-comment-body">n-benchcorpusrecovery landed — commit 7ceeb5cf; gate five-questions-answered-with-evidence passed; artifact docs/evidence/sn-benchmark-evolution/corpus-recovery-assessment.md. THE BLOCKER IS A MEASUREMENT, NOT A DECISION, which changes what this plan needs from the lead. (1) The 31 stubs lack a DD path, an expected identity, a unit AND provenance — all four, on all 31 — so they were never partially filled and there is nothing to complete. (2) The graph can rebuild the population at ZERO extraction cost, with 1,894 replacement candidates across 18 current domains, but should not refill obsolete slots literally. (3) The reuse map's rejection is fatal for the legacy file AS GOLD AUTHORITY and fixable for the benchmark by replacement: only 9 of the 20 populated positives are still accepted, valid, exactly bound and unit-matched. (4) Every one of the five gates is DERIVABLE from a two-pass weakest-hosted-seat envelope. Provisional graph-history bounds are recall ≥0.8114, clean FPR ≤0.2472, Brier ≤0.2441, repeatability ≥0.7143, quorum agreement ≥0.6945 — recorded but explicitly NOT admitted as authority, because the historical cohort is circular and selection-biased, and deriving a bar from the population it will judge is not a measurement. (5) Cheapest runnable route: freeze 20 good plus 20 deterministic bad rows, calibrate the hosted panel twice, then run the candidate — 36 batch calls at USD 1.402 mean and USD 2.588 p95. A live dry construction also surfaced a real defect the builder must fail closed on: plasma_resistance came back UNCHANGED under the vacuous corruption at seed 20260825, so a bad row can be identical to its good row. The census stays NOT AUTHORIZED until the controlled corpus and its derived gates exist.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T043732549572-n-benchcorpusrecovery" data-who="test-benchcorpus" data-when="2026-08-25T04:51:21Z">
+    <div class="r-comment-body"><p>Corpus recoverable by replacement at USD 0 extraction (1,894 candidates); only 9 of 20 populated positives still valid; all five gates derivable from a two-pass weakest-seat envelope but historical bounds are circular and cannot authorize; cheapest route USD 1.40 mean / USD 2.59 p95</p></div>
 </div>
 </section>
 </main>
