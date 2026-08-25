@@ -14,11 +14,14 @@ count reports its own key coverage in the same breath:
 repl("print(query('MATCH (n:StandardName) RETURN count(n) AS candidates, count(n.id) AS with_key'))")
 ```
 
-If `with_key` is 0 while `candidates` is not, the key is wrong. Identity property
-names are **not uniform across labels** — `StandardName.id`,
-`StandardNameReview.standard_name_id`, `DocsRevision.sn_id`, `LLMCost.sn_ids` — and no
-standard-name class has a `name` property at all. Traversal direction likewise comes
-from the LinkML slot, not from the English relationship name: it is
+If `with_key` is 0 while `candidates` is not, the key is wrong. A
+`StandardName` uses `id`; generic scalar references to it use
+`standard_name_id`, and generic multivalued references use
+`standard_name_ids`. No standard-name class has a `name` property. Confirm the
+slot with `schema_for()` before writing the query, even when the convention
+suggests the answer, because semantically specific relationship slots retain
+their own names. Traversal direction likewise comes from the LinkML slot, not
+from the English relationship name: it is
 `(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)`, not the reverse. The full
 per-label and per-relationship tables are in
 [`imas_codex/standard_names/AGENTS.md`](../imas_codex/standard_names/AGENTS.md#graph-identity-and-joins),
