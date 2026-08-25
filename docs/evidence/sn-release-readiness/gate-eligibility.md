@@ -140,3 +140,13 @@ gone.
 
 All paths above are relative to the node run envelope under
 `~/.config/reckon/crew/runs/r-20260824T044819667709-n-gateeligibility/`.
+
+
+---
+
+**Correction, 2026-08-25.** The present-tense claims in this record about
+`docs_review_resolution_method` no longer hold. Commit `23c4b55a` deleted the field
+together with its clearing function and every writer, and
+`project_docs_review_resolution_method` returns zero hits across `imas_codex/`. Read
+the assertions above as describing the state at the time of measurement, which they
+recorded correctly, not as current behaviour. The measurements themselves stand.

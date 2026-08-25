@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:09:38",
+  "updated": "2026-08-25T10:11:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -28694,9 +28694,102 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T075514503898-n-recurringproducer",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a74",
+        "node": "n-recurringproducer",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-graph-wide-integrity/recurring-producer-diagnosis.md names, for each of the 3 scalar-mirror rows, the 3 DD no-live-target rows dd:ntms/time_slice/mode dd:summary/pedestal_fits dd:waves/coherent_wave, and the HAS_PARENT edge from spectral_signal_to_noise_ratio_of_spectrometer_channel to logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel carrying operator_kind=qualifier, the code path that last wrote it and whether one producer explains more than one class, stating explicitly whether reconcile_orphan_parent_sources can regrow a terminal predecessor through a migrated derived source, and carrying the live measurement timestamp plus the schema sanity counts that prove each reported zero is a real zero",
+          "estimated_hours": null,
+          "goal": "A producer diagnosis naming what re-creates graph relationships that a governed repair already removed",
+          "id": "n-recurringproducer",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T075514503898-n-recurringproducer/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/sn-graph-wide-integrity/recurring-producer-diagnosis.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-residue",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:55:20Z",
+        "completed_at": "2026-08-25T08:11:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 945,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 945,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "5e7b5f1920f50ce95e73cee81f4e47356585977a",
+        "commits": [
+          "15900415",
+          "06d6ad7e"
+        ],
+        "changed_lines": {
+          "added": 183,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T075514503898-n-recurringproducer/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037ea-ac01-7933-a15d-2b9d06ea4bd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7383552,
+            "cached_input_tokens_cumulative": 7383552,
+            "input_tokens": 7774151,
+            "input_tokens_cumulative": 7774151,
+            "output_tokens": 29280,
+            "output_tokens_cumulative": 29280,
+            "reasoning_output_tokens": 9247,
+            "reasoning_output_tokens_cumulative": 9247
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 848
+    "_version": 849
   }
 }

@@ -108,3 +108,13 @@ Durable export reports:
 
 No LLM function was called, no review was rerun, and no review score,
 timestamp, documentation string, lifecycle stage, or identity was changed.
+
+
+---
+
+**Correction, 2026-08-25.** The present-tense claims in this record about
+`docs_review_resolution_method` no longer hold. Commit `23c4b55a` deleted the field
+together with its clearing function and every writer, and
+`project_docs_review_resolution_method` returns zero hits across `imas_codex/`. Read
+the assertions above as describing the state at the time of measurement, which they
+recorded correctly, not as current behaviour. The measurements themselves stand.
