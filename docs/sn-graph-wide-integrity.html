@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-graph-wide-integrity">
   <meta name="plan-title" content="Graph-Wide Standard Name Semantic Integrity and Exact Recovery">
   <meta name="plan-summary" content="Repair the measured semantic-integrity worklist so every live name is fed only by sources that genuinely measure it: the WEST-blocking subset from §2 first, then the dual-bound sources, gated detaches, and proven mis-attachments surfaced by the 2026-08-11 recovery follow-on. Exact instruments, ordinary quorum, reversible transactions — no new manifest machinery.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="279">
-<meta name="plan-impl" content="0.778">
+<meta name="plan-version" content="280">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html,docs/evidence/sn-graph-wide-integrity/sprint-closing-census.md,docs/evidence/sn-graph-wide-integrity/final-merge-verification.md,docs/evidence/sn-graph-wide-integrity/remaining-repair-reuse-map.md,docs/evidence/sn-graph-wide-integrity/regression-repair-reuse-map.md,docs/evidence/sn-graph-wide-integrity/attachment-target-joint-review.md,docs/evidence/sn-graph-wide-integrity/score-consuming-transition.md,docs/evidence/sn-graph-wide-integrity/dual-bound-residue-adjudication.md,docs/evidence/sn-graph-wide-integrity/dual-bound-residue-apply.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-residue-adjudication.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-residue-apply.md,docs/evidence/sn-graph-wide-integrity/remaining-attachment-apply.md,docs/evidence/sn-graph-wide-integrity/structural-source-revival-apply.md,docs/evidence/sn-graph-wide-integrity/bare-structural-census.md,docs/evidence/sn-graph-wide-integrity/parent-provenance-seed.md,docs/evidence/sn-graph-wide-integrity/scalar-mirror-reconcile.md,docs/evidence/sn-graph-wide-integrity/compose-writer-mismatch.md,docs/evidence/sn-graph-wide-integrity/attachment-admission-persist.md,docs/evidence/sn-graph-wide-integrity/rc66-fresh-draw.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-disposition.md,docs/evidence/sn-graph-wide-integrity/unsourced-name-adjudication.md,docs/evidence/archive/integrity-and-operator-closure-verification.md,tests/graph/test_sn_integrity_ratchets.py,tests/standard_names/test_source_target_reconciliation.py,tests/standard_names/test_structural_source_revival.py,tests/standard_names/test_ordinary_source_migration.py,tests/standard_names/test_repair_authority_builder.py,tests/standard_names/test_geometry_base_projection.py,imas_codex/standard_names/repair_authority.py">
-<meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
+<meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal,sn-relocation-retirement-apply,sn-identity-adjudication-residue,isn-locus-vocabulary-rotation">
 <meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966,fe00ec3e,a5a83b20,df48be0f,aba3ce7b,25d8dd37,77bc45c2,07c33345,e7aa5872,cdb0c870,5c4a5c0f,714d49a6,46bb0c12,e60707c4,166ce552,153e7e00,2821d795,47d98c1b,d493e7f8,fbf5a3b1,0a9e66d7,587a61f6,283e0f52,4dd90939,6ccd0fd7,1ea2a645,2d000336,7a1ba143,bdd6a7a2,a9ad85b1,571de682,59e08949,3e9a1cdc,4187eeff,0539a4e5,c15c9816,3e878aa0,2e24cbe6,6b812ee5,f093f57c,25c4c35e,c7457d13,4f82f006,1d50f3f8,89f84942,508e4e14,57f12be9,764bb8ca,58d165f4,329ece5f,1440ac70,4a475d9b,4faf195f,2f4ec391,d82e0be6,5a74cbf8,f82f34c1">
 <meta name="plan-effort-hours" content="16.0">
 </head>
@@ -420,6 +420,25 @@
         auditable. Do not feed the superseded all-delete cohort to any mutator.
       </p>
     </div>
+
+    <section id="s8-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">&#10003; landed 2026-08-25</span>
+        <h2>&sect;8 landed &mdash; both regressions closed, the residual re-homed</h2>
+      </header>
+      <p class="landed-summary">
+        Both classes reached zero: no-live-target 39 &rarr; <strong>0 of 5,054</strong>
+        (3 DD residues released, 36 transient rows demonstrated clear at 36/36) and
+        scalar mirror 3 &rarr; <strong>0</strong>. The producer behind the recurrence was
+        found and guarded &mdash; an orphan-parent reconcile regrowing terminal
+        predecessors (<code>99a91692</code>) and a successor rewire relocating edges onto
+        tips the lossless parser never derives (<code>b926b8dd</code>), the latter
+        measured at <strong>78 pairs, 0 of 78 authorized</strong>. Retirement program
+        proved at <code>a495fb07</code>; its production apply and the three semantic rows
+        are owned by sprint S12. Full record:
+        <a href="/imas-codex/evidence/archive/sn-graph-wide-integrity-landed">cumulative evidence</a>.
+      </p>
+    </section>
 
     <h2 id="s8">§8 — Governed repairs that do not hold, and the producer behind them</h2>
     <p>
@@ -1327,6 +1346,12 @@ Done-when (ordered)
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
     <p class="r-fu-outcome">Rotation complete under lead authorization. ISN v0.8.0rc66 (6dd6eae) admits wave_diagnostic_channel, polarizer, pellet_fragment and active_spatial_resolution_zone, and refuses field_map_grid as a discretization artifact per the registry curation policy; ISN suite 1,996 passed / 0 failed; both codex pyproject declarations and uv.lock bumped and verified live at 0.8.0rc66. The second half needed no vocabulary at all: the line-integrated electron-density constraint weight already exists as the accepted, valid equilibrium_weight_of_interferometer_beam, resolved by ordinary compose after this followup was written. The receiver-channel rename is unblocked grammatically but failed closed on dd:refractometer/channel/frequencies at status='stale'; that retry is carried in the plan's Remaining executable work under stale-source lifecycle, not here. The rotation also exposed that the codex pin was several ISN commits stale, so seven prompts plus sn_review_criteria.yaml and sn_composition_rules.yaml were teaching a cross-sectional identity the grammar rejects; 15 files corrected and both affected accepted names renamed through ordinary review at score 1.00.</p>
     </article>
+<article class="r-fu" data-id="f-sgwi-successors" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship S12" data-resolved-at="2026-08-25T12:32:42+00:00" data-resolved-by="">
+    <h4 class="r-fu-title">The residual is owned by S12, not by this plan</h4>
+    <div class="r-fu-body"><p>Seven of nine declared rows closed on live measurement. The three that remain are each blocked on semantic authority this plan does not hold, and each now has an owning plan in sprint S12 rather than sitting as an open row on a completed plan.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship S12</pre>
+    <p class="r-fu-outcome">done — no followup on this plan; the residual is owned by S12. Seven of nine declared rows closed on live measurement at the 09:15 census, including BOTH unrecorded regressions: no-live-target 0 of 5,054 and sole-live scalar mismatch 0, having been 39 and 3. The three remaining rows each have an owning plan: the dual-bound momentum-flux spelling and the reflector centre-of-curvature split go to sn-identity-adjudication-residue; the field-map-grid locus, which is the one item leaving this repository, goes to isn-locus-vocabulary-rotation; and the 78 unauthorized relocations discovered here go to sn-relocation-retirement-apply with their program already proved at a495fb07 and prevention landed at b926b8dd. Keeping this plan open on an ISN vocabulary outcome and two ordinary reviews would make it a container for other plans' work, which hides that work rather than tracking it.</p>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -2163,6 +2188,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s8" data-id="c-20260825T1002-rewirereconcileprogram" data-who="reckon-ship" data-when="2026-08-25T10:02:00+00:00">
     <div class="r-comment-body">Rewire reconciliation program landed — commit a495fb07, gate passed, 1 test added, artifact docs/evidence/sn-graph-wide-integrity/rewire-reconcile-program.md. retire_unauthorized_has_parent_relocations is registered as a CLOSED program under build_repair_authority and apply_signed_manifest — no bespoke operator, which is the consolidation this sprint just finished paying for arriving in time to be used by the repair that needed it. Guards: current-derivation, derivable-parent-path, collateral-immutability. THE TWO REFUSALS ARE THE NODE, not the admit. A program that only proved it removes the bad edge would pass its happy path while being a blanket delete, so both negatives carry their own fixture: the legitimate maximum_of_electron_temperature → electron_temperature edge refuses with the verbatim reason 'current derivation still authorizes incumbent HAS_PARENT tip', and a replacement that would omit the exact derivable parent refuses with 'removal would leave a derivable HAS_PARENT path absent'. The six-hop spectral relocation is admitted and RESTORED to signal_to_noise_ratio_of_spectrometer_channel — the tip the lossless parser actually derives. Measure: disposable preview 3 authority rows = 1 admitted + 2 refused; apply changed=1 with receipt_rows=1; replay write-free at changed=0, persistent_writes=0. ONE HONESTY NOTE THE NODE MADE ITSELF, and it is the right instinct: the predicate projects to 78 admitted / 0 refused over the PRIOR read-only census, and the manifest states plainly that this is a projection over retained per-row parent/property maps rather than a fresh production preview. The production apply is a separate node and must derive its own authority inside the applying invocation, as every apply in this plan has. Production was neither queried nor mutated here; the fixture required the ephemeral marker and rejected the resolved project URI.</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260825T1240-shipped" data-who="reckon-ship" data-when="2026-08-25T12:40:00+00:00">
+    <div class="r-comment-body">SHIPPED at impl 1.0 on the lead's direction, with the residual moved to owning plans in sprint S12 rather than held open here. The closing position, all measured live rather than carried forward: 7 of 9 declared rows CLOSED — no-live-target 0 of 5,054, sole-live scalar mismatch 0, projection mismatch 0, accepted strict-grammar failures 0 of 2,295 under rc67, unsourced 4 of 4 dispositioned, structurally bare 0 childful, and the shared signed envelope verified on 36 of 36 live receipt rows plus 14 of 14 builder tests. Both classes the closure verification called UNRECORDED REGRESSIONS reached zero: the 39 no-live-target rows partitioned as 3 genuine DD residues released in production plus 36 transient rows DEMONSTRATED clear at 36 of 36 rather than argued clear, and the 3 scalar mirrors repaired under authority derived inside the applying invocation. THE THREE REMAINING ROWS ARE NOT UNFINISHED WORK OF THIS PLAN, and that is why it ships rather than staying open. Each is blocked on semantic authority this plan does not hold and each now has an owner: the dual-bound momentum-flux spelling and the reflector local-origin-versus-centre-of-curvature split are physics adjudications routed to sn-identity-adjudication-residue; toroidal_coordinate_of_field_map_grid is absent AND fails strict rc67 parsing, so it needs an ISN vocabulary rotation and leaves this repository entirely. Holding a completed plan open on three items it cannot act on would make it a container for other plans' work — the pattern that hides work rather than tracking it, since a completed plan is excluded from every roadmap open path. A LATE FINDING THIS PLAN OWNS BUT DOES NOT CLOSE: the qualifier-edge investigation measured 78 non-self MERGE pairs with 0 of 78 tips authorized by current derivation — a systematic rewire defect rather than the single damaged row it was raised as. Prevention landed here at b926b8dd and the retirement program is proved at a495fb07; only the production apply remains, and it is the sole residual item with no external dependency. Cumulative record: docs/evidence/archive/sn-graph-wide-integrity-landed.html.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

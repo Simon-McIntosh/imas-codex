@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T12:02:25",
+  "updated": "2026-08-25T14:23:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -881,9 +881,11 @@
         "id": "impl-pathsweep",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03860-164c-77d2-a6f7-3e462f7faf85",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03860-164c-77d2-a6f7-3e462f7faf85"
+        },
         "created": "2026-08-25"
       },
       {
@@ -31000,9 +31002,106 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T100331224609-n-typedpathsweep",
+        "plan": "typed-resource-path-contract",
+        "section": "",
+        "node": "n-typedpathsweep",
+        "node_definition": {
+          "done_when": "All 34 nested research documents are moved with git mv to docs/research/ keeping each document its existing basename unchanged, which is collision-free against that directory; all 106 references across 43 files are rewritten, INCLUDING referrers under docs/archive/ and docs/evidence/, and any file directly inside docs/evidence/archive/ is recognised as LEGAL at two segments and is not flattened; the plan-informs edge SET is enumerated before and after and proved IDENTICAL element by element, not merely equal in cardinality, because an unchanged total can hide a dropped edge paired with a spuriously added one; no reference anywhere in the tree resolves to a missing file, proved by resolving every one; read_plan is demonstrated returning a real plan for at least three distinct slugs where it currently raises; and a guard test walks the documentation tree applying reckon's OWN imported TYPE_ROOTS rather than any local restatement of it, lists every offending path on failure, and is PROVED to fail on a deliberately nested fixture rather than merely reporting zero against a clean tree - a guard that has only ever seen a clean tree is indistinguishable from a guard that cannot see. Do not widen the reckon contract and do not strip reckon-type from any document; the locked decision is flatten.",
+          "estimated_hours": 2.0,
+          "goal": "Bring all 34 nested research documents back under the typed-resource path contract by flattening them directly into docs/research/, rewrite every reference to them, and install a guard that fails closed when a new violation appears.",
+          "id": "n-typedpathsweep",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T100331224609-n-typedpathsweep/manifest.md",
+          "plan": "typed-resource-path-contract",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "docs/research/",
+            "docs/plans/",
+            "docs/evidence/",
+            "docs/archive/",
+            "tests/docs/test_documentation_layout.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-pathsweep",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T10:03:35Z",
+        "completed_at": "2026-08-25T12:21:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 8294,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "94bcfa11b29a70c276508872af40659be72953df",
+        "commits": [
+          "651d2367efbcf8ef657a9cd04e727692ecc99425",
+          "ce2e7678a2774db9579cc91e182dd9b4ef7e4daa"
+        ],
+        "changed_lines": {
+          "added": 160,
+          "removed": 112,
+          "files": 63
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T100331224609-n-typedpathsweep/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03860-164c-77d2-a6f7-3e462f7faf85",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3670528,
+            "cached_input_tokens_cumulative": 3670528,
+            "input_tokens": 3901250,
+            "input_tokens_cumulative": 3901250,
+            "output_tokens": 12456,
+            "output_tokens_cumulative": 12456,
+            "reasoning_output_tokens": 3002,
+            "reasoning_output_tokens_cumulative": 3002
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 890
+    "_version": 892
   }
 }
