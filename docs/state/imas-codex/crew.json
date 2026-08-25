@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T11:26:22",
+  "updated": "2026-08-25T11:37:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1186,7 +1186,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02491-990e-7782-8a69-99e52e68fc88",
-        "created": "2026-08-21"
+        "created": "2026-08-21",
+        "sessions": {
+          "gpt-5.6-sol": "01a0383f-fe64-75a2-80be-04989b7c7fd6"
+        }
       },
       {
         "id": "impl-structreplay",
@@ -30524,9 +30527,104 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T092825019429-n-structuraledgemigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "n-structuraledgemigrate",
+        "node_definition": {
+          "done_when": "tests/standard_names/test_structural_edge_reconcile_graph.py passes byte-unchanged against the migrated operator showing identical admitted and refused identities, verbatim refusal reasons, identical return values and write-free replay, including the requested-partition-only case, deduplication, the empty-request integer 0, and both exact preflight errors raised BEFORE any graph mutation; the adapter delegates to the canonical structural writer and does NOT introduce a second derivation, so the rewire authorization guard landed at commit b926b8dd still refuses an unauthorized successor tip after the migration, proved by a test; the string 'def reconcile_structural_edges_for_standard_names' is absent from imas_codex/standard_names/graph_ops.py; tests/graph/test_cypher_property_check.py stays green; docs/evidence/sn-repair-operator-consolidation/structural-edge-migration.md records the counts and a byte-equivalence proof of the relocated core",
+          "estimated_hours": null,
+          "goal": "reconcile_structural_edges_for_standard_names running as a fixed partial of apply_signed_manifest with its bespoke body deleted",
+          "id": "n-structuraledgemigrate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T092825019429-n-structuraledgemigrate/manifest.md",
+          "plan": "sn-repair-operator-consolidation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/standard_names/signed_manifest.py",
+            "docs/evidence/sn-repair-operator-consolidation/structural-edge-migration.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-structedgesuite",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:28:32Z",
+        "completed_at": "2026-08-25T09:37:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 513,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 513,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "a8af5730c75ccb69413a8ca424e61dd1dd561157",
+        "commits": [
+          "9447cd5d",
+          "13430164"
+        ],
+        "changed_lines": {
+          "added": 152,
+          "removed": 48,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T092825019429-n-structuraledgemigrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0383f-fe64-75a2-80be-04989b7c7fd6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3945216,
+            "cached_input_tokens_cumulative": 3945216,
+            "input_tokens": 4118677,
+            "input_tokens_cumulative": 4118677,
+            "output_tokens": 15722,
+            "output_tokens_cumulative": 15722,
+            "reasoning_output_tokens": 2397,
+            "reasoning_output_tokens_cumulative": 2397
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 881
+    "_version": 883
   }
 }
