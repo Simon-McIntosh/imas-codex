@@ -31,6 +31,12 @@ env/
 ENV/
 .env/
 .venv/
+# Also match a bare .venv symlink: a detached worktree points at the root
+# environment rather than building its own, and a trailing-slash pattern
+# matches directories only, so the symlink would otherwise show as untracked
+# in every worktree.
+.venv
+venv
 .tox/
 
 #secrets
