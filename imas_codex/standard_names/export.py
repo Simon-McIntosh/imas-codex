@@ -1797,6 +1797,8 @@ def run_export(
     exported_names: list[str] = []
     validation_failures = 0
     invalid_candidate_ids: list[str] = []
+    ordering_exclusion_records: list[ExclusionRecord] = []
+    ordering_excluded_names: set[str] = set()
     all_candidate_names = {c["id"] for c in candidates}
 
     with GraphClient() as gc:
@@ -1874,7 +1876,39 @@ def run_export(
                 domain_entries[primary].append(entry_dict)
             exported_names.append(cand["id"])
 
-        # ── 5a. Resolve links/computed refs against the final set ──
+        # ── 5a. Order entries and withhold hierarchy cycles ───────
+        # A malformed relationship must not prevent every acyclic identity
+        # from reaching the packet. Cycle participants are removed before
+        # link pruning so the final projection cannot retain references to an
+        # identity the exclusion ledger withholds.
+        for d, entries in sorted(domain_entries.items()):
+            entry_names = {e.get("name") or e.get("id", "") for e in entries}
+            edges, cross_domain_ids = _fetch_ordering_edges_for_domain(
+                gc, d, entry_names
+            )
+            ordering = order_entries_by_hierarchy(
+                entries,
+                edges,
+                cross_domain_parent_ids=cross_domain_ids,
+            )
+            domain_entries[d] = list(ordering.entries)
+            for exclusion in ordering.exclusions:
+                ordering_excluded_names.add(exclusion.name)
+                ordering_exclusion_records.append(
+                    ExclusionRecord(
+                        standard_name_id=exclusion.name,
+                        stage="catalog_ordering",
+                        reason="hierarchy_ordering_cycle",
+                        detail=exclusion.detail,
+                    )
+                )
+                logger.error(
+                    "Withholding %s from catalog export: %s",
+                    exclusion.name,
+                    exclusion.detail,
+                )
+
+        # ── 5b. Resolve links/computed refs against the final set ──
         # The published set is now known. Drop internal (name:) doc links
         # whose target isn't published (renamed, dropped below score, or
         # rejected by ISN validation after gate time); external http(s)
@@ -1909,20 +1943,11 @@ def run_export(
                 unresolved[:20],
             )
 
-        # ── 5b. Order entries per domain and write files ────────
+        # ── 5c. Write ordered domain files ──────────────────────
         codex_sha = _get_codex_commit_sha()
 
         for d, entries in sorted(domain_entries.items()):
-            entry_names = {e.get("name") or e.get("id", "") for e in entries}
-            edges, cross_domain_ids = _fetch_ordering_edges_for_domain(
-                gc, d, entry_names
-            )
-            ordered = order_entries_by_hierarchy(
-                entries,
-                edges,
-                cross_domain_parent_ids=cross_domain_ids,
-            )
-            _write_domain_yaml(staging_path, d, ordered)
+            _write_domain_yaml(staging_path, d, entries)
 
     # Dedup: a candidate with multiple physics_domain values is enumerated
     # by the candidate loop once per domain, but ``domain_entries[primary]``
@@ -1932,7 +1957,7 @@ def run_export(
     seen: set[str] = set()
     deduped: list[str] = []
     for nm in exported_names:
-        if nm in seen:
+        if nm in seen or nm in ordering_excluded_names:
             continue
         seen.add(nm)
         deduped.append(nm)
@@ -1949,6 +1974,7 @@ def run_export(
             )
             for name in invalid_candidate_ids
         ]
+        + ordering_exclusion_records
     )
 
     accounting_gate = _run_exclusion_accounting_gate(report, population_ids)
