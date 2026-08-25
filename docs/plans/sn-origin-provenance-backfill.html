@@ -6,158 +6,165 @@
   <meta name="docs-project"   content="imas-codex">
   <meta name="reckon-type"    content="plan">
   <meta name="plan-slug"      content="sn-origin-provenance-backfill">
-  <meta name="plan-title"     content="A Thousand Names That Will Not Say What They Are">
-  <meta name="plan-summary"   content="1,091 names declare no origin, 278 live and accepted, so no regeneration can be scoped safely. Backfill by measured rule, gated on the marker that disagrees.">
+  <meta name="plan-title"     content="An Import Wiped Provenance, And The Evidence To Rebuild It Survived">
+  <meta name="plan-summary"   content="A catalog import cleared origin on 1,091 identities and relabelled others. Recover it from surviving generation evidence, then close the path that allowed it.">
   <meta name="plan-status"    content="draft">
   <meta name="plan-roi"       content="high">
-  <meta name="plan-effort-hours" content="3.0">
+  <meta name="plan-effort-hours" content="4.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
   <meta name="plan-sprint"    content="S12">
   <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-blocks"    content="sn-regeneration-decision">
-  <title>Origin Provenance Backfill | imas-codex</title>
+  <title>Origin Provenance Recovery | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
 <body>
   <main class="plan-doc">
 
-    <h2 id="s1">&sect;1 &mdash; The residue was never the constraint</h2>
+    <h2 id="s1">&sect;1 &mdash; This is damage from one import, not an absence of stamping</h2>
     <p>
-      The graph-wide integrity programme drove every tracked defect class to zero or to a
-      named refusal, and the strategic question that followed was whether to stop
-      repairing and instead delete and regenerate names and documentation from their
-      sources. That question was framed as waiting on the residue getting small enough.
-      <strong>It is not waiting on that. The residue is already small.</strong> It is
-      waiting on 1,091 identities that will not say what they are.
+      A <code>catalog.yaml</code> import was used to recover catalog state. It was a
+      footgun: it cleared generation provenance on the identities it touched and
+      relabelled others, and the damage is still in the graph. Every earlier reading of
+      this cohort &mdash; including two in this plan's own history &mdash; described it as
+      provenance that <em>was never written</em>. That was wrong. It was written and then
+      destroyed, which is why recovery is the right verb and backfill is not.
     </p>
-    <table>
-      <caption>Origin declaration across 4,658 <code>StandardName</code> nodes, measured 2026-08-25</caption>
-      <thead><tr><th>Cohort</th><th>Count</th><th>What it means for a regeneration</th></tr></thead>
-      <tbody>
-        <tr><td><code>origin=catalog_edit</code></td><td><strong>2,096</strong></td><td>Human-edited and protected by <code>filter_protected()</code>; <strong>2,031 carry accepted documentation</strong>. Destroying these destroys curated work.</td></tr>
-        <tr><td><code>origin=pipeline</code></td><td>1,240</td><td>Regenerable by construction.</td></tr>
-        <tr><td><code>origin=derived</code></td><td>231</td><td>Structural parents, minted rather than authored.</td></tr>
-        <tr><td><code>origin IS NULL</code></td><td><strong>1,091</strong></td><td><strong>Unknown.</strong> 278 of them are live and accepted.</td></tr>
-      </tbody>
-    </table>
-    <p>
-      <strong>The 278 are what make the strategy unpriceable.</strong> A regeneration
-      scoped by <code>origin</code> must decide what to do with a live, accepted name that
-      declares no origin, and there are only two options: treat it as pipeline output and
-      risk destroying human curation, or treat it as a protected edit and silently retain
-      stale generated text. Neither is knowable from the data as it stands, so the
-      strategic choice cannot be made honestly at any residue count.
-    </p>
-    <p>
-      A second axis fails the same way: <strong>978 names carry a null
-      <code>status</code></strong>, the ISN lifecycle field, which is 1.00 present in
-      <code>catalog_edit</code> and 0.01 in <code>pipeline</code>. Same story, same
-      likely fix, and it should not be a separate campaign.
-    </p>
-
-    <h2 id="s2">&sect;2 &mdash; The evidence says this is a rule, not an adjudication</h2>
-    <p>
-      The obvious plan &mdash; queue 278 live accepted identities for human disposition
-      &mdash; is the wrong plan, and a property-presence comparison across the three
-      accepted cohorts says why. Measured over <code>catalog_edit</code> 1,372,
-      <code>pipeline</code> 426 and <code>null</code> 278:
-    </p>
-    <table>
-      <caption>Marker presence by cohort (fraction of nodes carrying the property)</caption>
-      <thead><tr><th>Marker</th><th><code>catalog_edit</code></th><th><code>pipeline</code></th><th><code>NULL</code></th></tr></thead>
-      <tbody>
-        <tr><td><code>imported_at</code></td><td>1.00</td><td>0.01</td><td><strong>0.00</strong></td></tr>
-        <tr><td><code>catalog_commit_sha</code></td><td>0.98</td><td>0.01</td><td><strong>0.00</strong></td></tr>
-        <tr><td><code>model</code></td><td>0.18</td><td>1.00</td><td><strong>0.98</strong></td></tr>
-        <tr><td><code>generated_at</code></td><td>0.18</td><td>1.00</td><td><strong>0.98</strong></td></tr>
-        <tr><td><code>chain_length</code></td><td>0.30</td><td>1.00</td><td><strong>0.98</strong></td></tr>
-        <tr><td><code>source_types</code></td><td>1.00</td><td>0.08</td><td><strong>0.98</strong> &larr; disagrees</td></tr>
-      </tbody>
-    </table>
-    <p>
-      The null cohort carries the <em>generative</em> fingerprint at 0.98 across three
-      independent markers, and carries <strong>no catalog-import fingerprint at
-      all</strong> &mdash; <code>imported_at</code> and <code>catalog_commit_sha</code>
-      both at 0.00 against 1.00 and 0.98 in <code>catalog_edit</code>. A name that was
-      never imported from the catalog cannot be a catalog edit. So on the evidence these
-      are pipeline names whose origin was simply never stamped, the backfill is a rule
-      rather than a judgement call, and the cost falls by an order of magnitude.
-    </p>
-
-    <h2 id="s3">&sect;3 &mdash; One marker disagrees, and that decides the gate</h2>
     <div class="card" style="border-left:4px solid #c33; padding-left:12px;">
       <p>
-        <code>source_types</code> sits at <strong>0.98 in the null cohort</strong>,
-        matching <code>catalog_edit</code> at 1.00 against <code>pipeline</code> at 0.08.
-        One marker points the other way, and a rule keyed on it reaches the
-        <em>opposite</em> conclusion from the same data.
+        <strong>Two framing errors to retire, because both sent earlier work in the wrong
+        direction.</strong>
       </p>
       <p>
-        <strong>So explaining <code>source_types</code> is a gate, not a footnote.</strong>
-        Either it is not the catalog marker it appears to be, or the null cohort has mixed
-        provenance and the import markers are absent for some other reason. Both readings
-        are consistent with what has been measured, and they imply different backfills. If
-        the rule and the anomaly disagree, the rule is not yet understood and must not be
-        run.
+        <strong>1. <code>source_types=['dd']</code> is not a provenance defect.</strong>
+        1,085 of the 1,091 carry it, and the pipeline's only input is DD paths &mdash; so
+        <code>['dd']</code> is the normal case, not a symptom. It records the SOURCE KIND.
+        <code>origin</code> records the EDITORIAL AXIS: whether a human shaped the
+        identity. Treating one as evidence about the other conflated two orthogonal
+        things and produced a &ldquo;cohort that will not declare itself&rdquo; out of
+        names that are declaring exactly what they should.
       </p>
       <p>
-        This is deliberately strict because the failure would be silent. A backfill that
-        stamps <code>origin=pipeline</code> on a genuine human edit does not error; it
-        removes that name's protection from every future regeneration, and nothing
-        downstream would report it.
+        <strong>2. Import markers are not an inverse of editorial origin.</strong> A rule
+        keyed on <code>imported_at</code>/<code>catalog_commit_sha</code> failed its
+        positive control at 5 of 426, and the five counterexamples
+        &mdash; <code>electron_density</code>,
+        <code>normalized_toroidal_flux_coordinate</code>, <code>safety_factor</code>,
+        <code>toroidal_magnetic_field</code>,
+        <code>vertical_coordinate_of_camera</code> &mdash; all share
+        <strong>one</strong> <code>imported_at</code> of
+        <code>2026-07-04T21:21:17.079Z</code> and <strong>one</strong>
+        <code>catalog_commit_sha</code> <code>a2f8831c…</code>. That is not five scattered
+        errors; it is a single dated event leaving its fingerprint. The marker fails
+        because it records <em>that the import happened</em>, never <em>what the identity
+        was before it</em>.
       </p>
     </div>
 
-    <h2 id="s4">&sect;4 &mdash; Prove the rule on answers already held</h2>
+    <h2 id="s2">&sect;2 &mdash; The evidence to rebuild it survived the import</h2>
     <p>
-      A rule that classifies unknowns cannot be validated against those unknowns. It can
-      be validated against the cohorts whose origin is already declared:
-      <strong>assert the rule re-derives <code>catalog_edit</code> for the 1,372 and
-      <code>pipeline</code> for the 426 before it is trusted on the 278.</strong> Any
-      misclassification in that control is a defect in the rule, discovered for free.
+      The import cleared <code>origin</code> and <code>status</code>, but it did not clear
+      the traces of generation. Measured across the accepted cohorts:
+    </p>
+    <table>
+      <caption>Generation-evidence presence by declared origin</caption>
+      <thead><tr><th>Marker</th><th><code>catalog_edit</code> (1,372)</th><th><code>pipeline</code> (426)</th><th><code>NULL</code> (278)</th></tr></thead>
+      <tbody>
+        <tr><td><code>model</code></td><td>0.18</td><td>1.00</td><td><strong>0.98</strong></td></tr>
+        <tr><td><code>generated_at</code></td><td>0.18</td><td>1.00</td><td><strong>0.98</strong></td></tr>
+        <tr><td><code>chain_length</code></td><td>0.30</td><td>1.00</td><td><strong>0.98</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>The null cohort still carries its generative fingerprint at 0.98 across
+      three independent markers.</strong> These identities know they were generated; only
+      the field that says so was cleared. Recovery is therefore a derivation from evidence
+      the graph already holds, not an inference from absence.
     </p>
     <p>
-      This is a positive control on a <em>rule</em> rather than on a scan, and it is the
-      generalisation of a lesson that cost two sessions repeatedly on 2026-08-25: an
-      instrument that fires is not an instrument that is aimed. Making the rule re-derive
-      answers already held is how aim gets proved rather than assumed.
+      <strong>And the same table undercuts a number this project has been quoting,
+      including in the sprint that authored this plan.</strong> Between 18% and 30% of
+      accepted <code>catalog_edit</code> identities carry a generation model, a generation
+      timestamp or a refine chain. Those were produced by the pipeline and relabelled. So
+      &ldquo;2,096 human-curated identities&rdquo; is an overcount of unknown size, and
+      every argument resting on it &mdash; including the case against regenerating
+      &mdash; rests on a figure that has not been measured properly.
     </p>
     <p>
-      The <strong>705 superseded</strong> null-origin names are handled separately.
-      Historical lineage does not need the same treatment and sweeping them in would
-      inflate the cohort under mutation for no benefit.
+      Richer evidence exists beyond those three fields and should be used where they are
+      absent: <code>LLMCost</code> carries <code>standard_name_ids</code>, so any identity
+      that ever cost a provider call is pipeline-generated by construction; and review
+      records, <code>DocsRevision</code> chains and <code>REFINED_FROM</code> lineage each
+      independently witness generation.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; Recover, and prove it on the answers already held</h2>
+    <p>
+      The rule must be keyed on generation evidence rather than on import markers, and it
+      must clear the same bar the marker rule failed: <strong>re-derive the declared origin
+      of all 1,798 accepted controls with zero misclassifications</strong> before it is
+      trusted on anything undeclared. That control is what caught the previous attempt
+      after its one contradicting signal had resolved in its favour, so it stays.
+    </p>
+    <p>
+      Two properties make this rule more likely to clear it. It keys on evidence the import
+      did not touch, so the 2026-07-04 event does not confound it. And it has a
+      one-directional guarantee the marker rule lacked: an <code>LLMCost</code> row
+      linking an identity is proof of generation, never of authorship.
+    </p>
+    <p>
+      The 705 superseded nulls stay out of scope &mdash; historical lineage needs no origin
+      to be safe &mdash; and <code>status</code>, cleared by the same import and null on
+      978 identities, is recovered in the same pass.
+    </p>
+
+    <h2 id="s4">&sect;4 &mdash; Close the footgun, or this recurs</h2>
+    <p>
+      Recovery without prevention buys one clean measurement and the next import undoes it.
+      This programme has already met that exact pattern twice today: a
+      <code>HAS_PARENT</code> edge a governed repair had removed was live again because
+      the producer was never guarded, and the fix that held was the guard rather than the
+      second deletion.
+    </p>
+    <p>
+      So the import path must lose the ability to clear or overwrite
+      <code>origin</code> and <code>status</code> on an existing <code>StandardName</code>.
+      A catalog round-trip is entitled to record <em>that it happened</em> &mdash;
+      <code>imported_at</code> and <code>catalog_commit_sha</code> are legitimate &mdash;
+      and entitled to nothing else on the editorial axis. An import that can silently
+      relabel a generated identity as human-curated is a data-loss path wearing the
+      costume of a recovery tool.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
       <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="backfill-method" data-choice="measured-rule-with-anomaly-gate" data-by="reckon-ship" data-when="2026-08-25">
-        <p class="r-dec-q">How should the 1,091 undeclared origins be settled?</p>
+      <div class="r-dec" data-key="derivation-evidence" data-choice="generation-evidence-not-import-markers" data-by="Simon McIntosh" data-when="2026-08-25">
+        <p class="r-dec-q">What evidence should origin be recovered from?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="measured-rule-with-anomaly-gate">Measured rule, gated on explaining the anomaly</button>
-          <button class="r-opt" data-value="human-adjudication">Queue the 278 live accepted for human disposition</button>
-          <button class="r-opt" data-value="assume-pipeline">Stamp the null cohort pipeline and move on</button>
+          <button class="r-opt" data-value="generation-evidence-not-import-markers">Surviving generation evidence</button>
+          <button class="r-opt" data-value="import-markers">Catalog-import markers</button>
+          <button class="r-opt" data-value="human-adjudication">Per-identity human adjudication</button>
         </p>
-        <p class="r-dec-rat">Measured rule. The import fingerprint is absent at 0.00 across the whole null cohort while the generative fingerprint is present at 0.98, and a name never imported from the catalog cannot be a catalog edit — so this is decidable from evidence rather than requiring judgement per identity. Human adjudication of 278 identities is expensive and would produce the same answer the markers already give. Stamping without explaining source_types is rejected: one marker contradicts the rule, and a wrong stamp silently removes a human edit's protection from every future regeneration with nothing downstream reporting it.</p>
+        <p class="r-dec-rat">Generation evidence. Import markers already failed their positive control at 5 of 426, and the five counterexamples share one imported_at and one catalog_commit_sha — so the marker records that an import occurred, never what the identity was beforehand, and cannot be an inverse of editorial origin. Generation evidence survived the import at 0.98 across three independent markers in the affected cohort, is untouched by the 2026-07-04 event, and carries a one-directional guarantee the markers lack: an LLMCost row is proof of generation and never of authorship. Human adjudication is rejected as unnecessary for identities that still carry their own generative fingerprint.</p>
       </div>
-      <div class="r-dec" data-key="superseded-scope" data-choice="separate" data-by="reckon-ship" data-when="2026-08-25">
-        <p class="r-dec-q">Are the 705 superseded null-origin names in scope?</p>
+      <div class="r-dec" data-key="import-write-authority" data-choice="import-may-not-touch-editorial-axis" data-by="Simon McIntosh" data-when="2026-08-25">
+        <p class="r-dec-q">What may a catalog import write on an existing identity?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="separate">Handle separately</button>
-          <button class="r-opt" data-value="together">Backfill with the live cohort</button>
+          <button class="r-opt" data-value="import-may-not-touch-editorial-axis">Import provenance only; never origin or status</button>
+          <button class="r-opt" data-value="import-may-set-origin">Import may set origin as it does today</button>
         </p>
-        <p class="r-dec-rat">Separately. Historical lineage does not need a declared origin to be safe from regeneration, since a superseded name is not a regeneration target. Including them would quadruple the cohort under mutation for no decision benefit.</p>
+        <p class="r-dec-rat">Import provenance only. A catalog round-trip is entitled to record that it happened via imported_at and catalog_commit_sha, and entitled to nothing on the editorial axis. The current path cleared origin and status on 1,091 identities and left five generated names carrying catalog markers, which is data loss rather than recovery. Recovery without this guard buys one clean measurement before the next import undoes it — the same lesson the HAS_PARENT rewire taught today, where the guard held and the second deletion would not have.</p>
       </div>
     </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
       <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-sopb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-origin-provenance-backfill">
-        <h4 class="r-fu-title">Explain source_types, prove the rule on the known cohorts, then backfill origin and status</h4>
-        <div class="r-fu-body"><p>Gate order matters: <code>source_types</code> is explained first, then the rule is asserted to re-derive <code>catalog_edit</code> on 1,372 and <code>pipeline</code> on 426, and only then does it run on the 278 live accepted and the wider 1,091. The 978 null <code>status</code> values fold into the same node. The 705 superseded are excluded. No stamp is written while the anomaly is unexplained.</p></div>
+      <article class="r-fu" data-id="f-sopb-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-origin-provenance-backfill">
+        <h4 class="r-fu-title">Recover origin and status from generation evidence, then close the import write path</h4>
+        <div class="r-fu-body"><p>Derive from generation evidence, prove zero misclassifications on the 1,798 accepted controls before touching anything undeclared, and measure how many <code>catalog_edit</code> identities carry a generative fingerprint so the human-curated figure stops being quoted unmeasured. Then remove the import path's ability to clear or overwrite <code>origin</code> and <code>status</code>, with a test that fails if it can.</p></div>
         <pre class="r-fu-prompt">/reckon-ship sn-origin-provenance-backfill</pre>
       </article>
     </section>
