@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="281">
+<meta name="plan-version" content="282">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -2194,6 +2194,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20260825T144323649624-n-snhealthcensus" data-who="test-finalcensus" data-when="2026-08-25T14:57:29Z">
     <div class="r-comment-body"><p>Live SN health census 14:51:53Z. SCORE: name-accepted 2,302 with reviewer_score_name median 0.98125 and 14 below 0.85; reviewer_score_docs median 0.91875 with 30 below 0.85; 30 name-accepted but not docs-accepted. PROVENANCE: origins null 1,091 / catalog_edit 2,096 / pipeline 1,240 / derived 231; null-origin live 345 and accepted 278; 4 accepted with no source. STABILITY: 5 of 5,054 sources no live target (REGRESSION from zero), 0 of 5,048 scalar mismatch, 0 of 4,576 upstream mismatch, 1 multiple-live-target, 1 unauthorized relocation remaining. Positive control 1,473 derive_edges exact matches</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20260825T151846068553-n-stabilityresidue" data-who="test-quiescence" data-when="2026-08-25T15:30:48Z">
+    <div class="r-comment-body"><p>10 of 10 stability rows named and dispositioned: 5 repairable-by-existing-program, 5 needs-new-authority, 0 expected-transient. The 5 no-live-target rows are genuine DD lifecycle residue not the derived transient class (partition DD=5 derived=0), all entering 09:43:19Z-09:44:37Z when run c51460c7 drove targets exhausted via stop_refine_name_attempt; exact-id reconcile_source_status_liveness is the existing repair and no new operator is warranted. Dual-bound row last-producer-blocked; 4 accepted unsourced retain recorded holds. Sanity 4658/4658 and 9668/9668, PRODUCED_NAME 5315/5315 with reverse 0 as directional positive control</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

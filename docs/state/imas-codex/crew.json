@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T18:21:32",
+  "updated": "2026-08-25T18:34:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1054,6 +1054,15 @@
         "role": "implement",
         "session_id": "01a023e9-431b-77e1-a420-9c2d8010cd1d",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-reembedgap",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
       },
       {
         "id": "impl-refineband",
@@ -32400,9 +32409,315 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T151846068553-n-stabilityresidue",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-stabilityresidue",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-graph-wide-integrity/stability-residue.md names each of the 5 semantic sources with no live target, the 1 multiple-live-target source and the 4 accepted identities with no producing source, and for each states its exact id, when and by which write path it entered that state, and a disposition of repairable-by-existing-program, needs-new-authority, or expected-transient; it must state whether the 5 no-live-target rows are the transient derived class the liveness settlement clears or genuine residue, deciding that by their origin and source_type partition rather than by count; every reported zero carries its schema sanity count and the report carries a positive control naming what it controlled for; read-only, no graph mutation",
+          "estimated_hours": null,
+          "goal": "A diagnosis and disposition for every remaining stability row in the Standard Name graph",
+          "id": "n-stabilityresidue",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T151846068553-n-stabilityresidue/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/sn-graph-wide-integrity/stability-residue.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-quiescence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T15:18:54Z",
+        "completed_at": "2026-08-25T15:30:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 714,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 714,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "692c208ae4f72370cba74c23629d69b77d78c84a",
+        "commits": [
+          "55967261"
+        ],
+        "changed_lines": {
+          "added": 141,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T151846068553-n-stabilityresidue/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0381a-8dd5-7dd1-9cf1-08e9af092669",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 292352,
+            "cached_input_tokens_cumulative": 6638848,
+            "input_tokens": 519093,
+            "input_tokens_cumulative": 7083855,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 23180,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 7176
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1268,
+              "log_age_seconds": 560,
+              "log_fresh": true,
+              "manifest_commits": [
+                "a7483d13071a47fa4ccdd76c5dd7ee5436023b17"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T145736650094-n-originrecovery/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T145736650094-n-originrecovery --gate <verdict> --commit a7483d13071a47fa4ccdd76c5dd7ee5436023b17",
+              "node": "n-originrecovery",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T145736650094-n-originrecovery",
+              "terminal_age_seconds": 582,
+              "terminal_at": "2026-08-25T15:09:10Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-originrecovery"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 886,
+              "log_age_seconds": 434,
+              "log_fresh": true,
+              "manifest_commits": [
+                "faaa985f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T150357556109-n-basetoken/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T150357556109-n-basetoken --gate <verdict> --commit faaa985f",
+              "node": "n-basetoken",
+              "phase": "starting",
+              "plan": "isn-locus-vocabulary-rotation",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T150357556109-n-basetoken",
+              "terminal_age_seconds": 452,
+              "terminal_at": "2026-08-25T15:11:19Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12-20260825b/n-basetoken"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T155837298440-n-ledgerderivation",
+        "plan": "sn-origin-provenance-backfill",
+        "section": "\u00a73",
+        "node": "n-ledgerderivation",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-origin-provenance-backfill/ledger-derivation.md states the exact misclassification count of a rule deriving origin from the origin of each identity's most recent StandardNameChange ordered by changed_at, against all 1,798 accepted controls with zero required; the count of the 1,091 null-origin identities holding at least one StandardNameChange row and therefore derivable at all; the ledger coverage gap as the count of accepted identities with no change row of any kind; and whether the five counterexamples sharing imported_at 2026-07-04T21:21:17.079Z carry change rows explaining their declared pipeline origin. Every reported zero carries its schema sanity count and the report carries a positive control naming what it controlled for. Read-only, no graph mutation",
+          "estimated_hours": null,
+          "goal": "A verdict on deriving origin from the ordered change ledger rather than from the denormalized scalar",
+          "id": "n-ledgerderivation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T155837298440-n-ledgerderivation/manifest.md",
+          "plan": "sn-origin-provenance-backfill",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/sn-origin-provenance-backfill/ledger-derivation.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-signrescore",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T15:58:43Z",
+        "completed_at": "2026-08-25T16:07:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 497,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 497,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "2b61f6f55db8ce7650ba0c3e12c8606f27cf3bb7",
+        "commits": [
+          "39289698"
+        ],
+        "changed_lines": {
+          "added": 134,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T155837298440-n-ledgerderivation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a039a5-38b5-7082-a901-146aedd4b631",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3442688,
+            "cached_input_tokens_cumulative": 3442688,
+            "input_tokens": 3595433,
+            "input_tokens_cumulative": 3595433,
+            "output_tokens": 20307,
+            "output_tokens_cumulative": 20307,
+            "reasoning_output_tokens": 7266,
+            "reasoning_output_tokens_cumulative": 7266
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1175,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 3275,
+              "log_age_seconds": 2823,
+              "log_fresh": false,
+              "manifest_commits": [
+                "faaa985f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T150357556109-n-basetoken/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T150357556109-n-basetoken --gate <verdict> --commit faaa985f",
+              "node": "n-basetoken",
+              "phase": "starting",
+              "plan": "isn-locus-vocabulary-rotation",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T150357556109-n-basetoken",
+              "terminal_age_seconds": 2841,
+              "terminal_at": "2026-08-25T15:11:19Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12-20260825b/n-basetoken"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 2387,
+              "log_age_seconds": 1672,
+              "log_fresh": false,
+              "manifest_commits": [
+                "55967261"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T151846068553-n-stabilityresidue/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T151846068553-n-stabilityresidue --gate <verdict> --commit 55967261",
+              "node": "n-stabilityresidue",
+              "phase": "starting",
+              "plan": "sn-graph-wide-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T151846068553-n-stabilityresidue",
+              "terminal_age_seconds": 1699,
+              "terminal_at": "2026-08-25T15:30:21Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-stabilityresidue"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 922
+    "_version": 925
   }
 }
