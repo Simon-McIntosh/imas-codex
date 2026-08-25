@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-regeneration-decision">
+  <meta name="plan-title"     content="Regenerate Or Keep Repairing, Decided On A Number">
+  <meta name="plan-summary"   content="Settle whether to delete and regenerate names and docs from sources, on a stated threshold rather than a feeling, once origin is declared.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="2.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-risk" content="critical">
+  <meta name="plan-sprint"    content="S12">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-origin-provenance-backfill">
+  <title>Regeneration Decision | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&sect;1 &mdash; Stop cycling means make the call, not grind it down</h2>
+    <p>
+      Two sessions on 2026-08-25 spent a day repairing residues row by row. Most of that
+      work was correct and some of it was durable prevention, but the pattern it settled
+      into &mdash; measure a class, repair it, find the producer, repair that &mdash; is
+      a cycle that terminates only when someone decides it should. This plan exists to
+      make that decision explicitly, on a number, once the number can be trusted.
+    </p>
+    <p>
+      <strong>It cannot be made yet, and the reason is not cost.</strong> 1,091
+      identities declare no <code>origin</code>, 278 of them live and accepted, so a
+      regeneration scoped by origin cannot distinguish protected human curation from
+      regenerable pipeline output. That is
+      <a href="/imas-codex/plans/sn-origin-provenance-backfill">the prerequisite</a>, and
+      until it lands this plan has nothing to weigh.
+    </p>
+
+    <h2 id="s2">&sect;2 &mdash; What regeneration would and would not clear</h2>
+    <p>
+      The instinct behind the strategy is that a clean regenerate from sources beats an
+      endless repair queue. That is right about mechanical residue and wrong about
+      semantic residue, and the distinction decides how much regeneration is actually
+      worth.
+    </p>
+    <table>
+      <caption>Residual as measured 2026-08-25, by whether a regenerate clears it</caption>
+      <thead><tr><th>Residual</th><th>Count</th><th>Cleared by regeneration?</th></tr></thead>
+      <tbody>
+        <tr><td>Unauthorized <code>HAS_PARENT</code> relocations</td><td>78</td><td><strong>Not applicable</strong> &mdash; a rewire artifact, not a naming defect, already prevented at source and retired by its own signed program</td></tr>
+        <tr><td>Dual-bound source with a single-producer loser</td><td>1</td><td><strong>No.</strong> Regeneration re-derives the same two candidate spellings from the same source and poses the identical question</td></tr>
+        <tr><td>Owner/geometry identity gaps</td><td>2</td><td><strong>No.</strong> One needs an ISN vocabulary token that does not exist; the other needs a reviewed surface-versus-local-centre distinction</td></tr>
+        <tr><td>Stale generated documentation</td><td>see &sect;3</td><td><strong>Yes</strong> &mdash; this is what regeneration is actually for</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>So regeneration is not a way to clear the semantic residue.</strong> The
+      three remaining identity rows are questions about physics and vocabulary; a
+      regenerate produces them again, from the same sources, in the same form. Framing
+      the strategy as "get the residue small then regenerate to clear the rest" would
+      therefore buy nothing for exactly the rows that are hardest.
+    </p>
+    <p>
+      What regeneration <em>is</em> worth is freshness: documentation and naming produced
+      under current prompts, current grammar and current review criteria rather than
+      accumulated across many rotations. That is a real benefit and it should be priced as
+      such rather than as defect clearance.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; The threshold this plan must state</h2>
+    <p>
+      A decision made on a feeling gets re-litigated. This plan produces a written
+      threshold and applies it once. The quantities it needs, all of which become
+      measurable after the origin backfill:
+    </p>
+    <ul>
+      <li><strong>Regenerable population</strong> &mdash; identities with
+        <code>origin=pipeline</code> after backfill, which is the true scope of any
+        regenerate.</li>
+      <li><strong>Protected population</strong> &mdash; <code>origin=catalog_edit</code>
+        and the accepted documentation they carry, currently 2,096 and 2,031, which a
+        regenerate must exclude rather than rebuild.</li>
+      <li><strong>Cost per identity</strong> &mdash; measured, not estimated: compose is
+        free on the local seat and review is the paid axis, so the figure is dominated by
+        quorum draws.</li>
+      <li><strong>Defects a regenerate would clear</strong> &mdash; stale documentation
+        against current criteria, which is the only category it genuinely fixes.</li>
+      <li><strong>Defects it would reintroduce</strong> &mdash; the honest counterweight,
+        since every past rotation produced its own residue and there is no reason to
+        assume the next one will not.</li>
+    </ul>
+    <p>
+      The last item deserves weight. This programme's own history is a sequence of
+      generations each leaving defects the next had to repair. A regenerate that is not
+      priced against the residue it will itself create is an optimistic forecast rather
+      than a decision.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">&sect;</span> Decisions</h2>
+      <div class="r-dec" data-key="regenerate-scope" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">If regeneration proceeds, what is its scope?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="pipeline-only">Only origin=pipeline identities, protecting every catalog edit</button>
+          <button class="r-opt" data-value="docs-only">Documentation only, retaining all existing names</button>
+          <button class="r-opt" data-value="full">Everything not carrying catalog release provenance</button>
+          <button class="r-opt" data-value="none">No regeneration; continue targeted repair</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="semantic-residue-expectation" data-choice="regeneration-does-not-clear-identity-questions" data-by="reckon-ship" data-when="2026-08-25">
+        <p class="r-dec-q">Should regeneration be expected to clear the remaining identity rows?</p>
+        <p class="r-dec-rat">No, and this is recorded now so it is not assumed later. The dual-bound spelling choice, the field-map-grid locus and the reflector surface-versus-local-centre split are questions about physics and vocabulary, not artifacts of a particular generation. A regenerate re-derives each from the same source and poses the identical question. Regeneration is priced on freshness of documentation and naming under current criteria, never on clearing these three.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">&sect;</span> Followups</h2>
+      <article class="r-fu" data-id="f-srd-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-regeneration-decision">
+        <h4 class="r-fu-title">Measure the five quantities and put the scope choice to the lead with a recommendation</h4>
+        <div class="r-fu-body"><p>Blocked until origin is declared. Then measure the regenerable and protected populations, the measured cost per identity, what a regenerate clears, and what it would reintroduce — and present the scope decision with a recommendation and arguments rather than a menu.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-regeneration-decision</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

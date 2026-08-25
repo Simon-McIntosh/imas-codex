@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-identity-adjudication-residue">
+  <meta name="plan-title"     content="Two Questions No Pipeline Can Answer For Us">
+  <meta name="plan-summary"   content="The last two semantic rows are physics questions, not defects: which momentum-flux spelling survives, and whether a reflector centre is surface or origin.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort-hours" content="3.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S12">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="isn-locus-vocabulary-rotation">
+  <title>Identity Adjudication Residue | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&sect;1 &mdash; Why these two survived everything else</h2>
+    <p>
+      The graph-wide integrity programme drove seven of nine declared classes to a
+      measured zero. These two rows survived not because they were hard to find or
+      expensive to repair, but because <strong>every available repair would have been a
+      guess about physics</strong>, and the fail-closed guards correctly refused to make
+      it. Both are recorded refusals re-verified live on 2026-08-25 rather than carried
+      forward from an earlier census.
+    </p>
+    <p>
+      Recording that plainly matters for the regeneration strategy: a delete-and-regenerate
+      does not clear these. It re-derives the same candidates from the same sources and
+      poses the identical questions.
+    </p>
+
+    <h2 id="s2">&sect;2 &mdash; The dual-bound momentum flux</h2>
+    <p>
+      <code>dd:plasma_transport/model/ggd/neutral/state/momentum/flux/radial</code> feeds
+      two live targets: <code>radial_neutral_internal_state_momentum_flux</code> and
+      <code>radial_neutral_state_momentum_flux</code>. The single-valued
+      <code>PRODUCED_NAME</code> invariant is locked, so one must go &mdash; and the
+      losing candidate <strong>still has exactly one producing source, this one</strong>,
+      so releasing it strips its last producer and the guard refuses.
+    </p>
+    <p>
+      <strong>The guard is defending something, and the history says so.</strong> A
+      comparable adjudication on this plan chose <code>mass_density</code> over
+      <code>total_plasma_mass_density</code> by testing DD prose for a
+      &ldquo;total&rdquo; qualifier, which cannot settle a naming question; the reasoning
+      was overturned, and the scalar repair later moved that mirror to
+      <code>total_plasma_mass_density</code>. A last-producer refusal is evidence about
+      the adjudication, not merely an obstacle to it.
+    </p>
+    <p>
+      So the work is to decide which identity the source genuinely realizes &mdash;
+      whether <code>internal_state</code> carries meaning the shorter spelling drops, or
+      is a redundant peel &mdash; and then either supply an authoritative producer for the
+      survivor or adjudicate the loser's disposition explicitly. Not to route around the
+      refusal.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; The reflector centre</h2>
+    <p>
+      <code>dd:spectrometer_x_ray_crystal/channel/reflector/centre/phi</code> still solely
+      targets <code>toroidal_angle_of_measurement_position</code>. The distinction it
+      needs does not exist as an identity: DD 4.1.1 makes <code>centre</code> the
+      local-frame origin while <code>sphere_centre</code> is the centre of curvature, and
+      the only toroidal reflector identity in the graph,
+      <code>toroidal_coordinate_of_reflector</code>, is produced by that distinct
+      <code>sphere_centre</code> source.
+    </p>
+    <p>
+      Binding both to one identity would conflate a local frame origin with a centre of
+      curvature &mdash; the same class of error as the geometry-cardinality confusions this
+      programme has already adjudicated once. The repair is a reviewed identity split
+      through the sanctioned <code>sn edit</code> path, so the new identity earns its
+      acceptance from a fresh quorum score like any other.
+    </p>
+    <p>
+      This row also carries a related known gap worth resolving in the same pass:
+      <code>radial_coordinate_of_reflector</code> has no description and no embedding at
+      all, which is why it withholds from release rather than failing any semantic check.
+    </p>
+
+    <h2 id="s4">&sect;4 &mdash; Through the pipeline, never around it</h2>
+    <p>
+      Both rows are fixed by proposing a change and letting review score it, never by a
+      Cypher <code>SET</code> and never by a direct accept. <code>sn edit</code> with a
+      mandatory reason is the only sanctioned path: the reason reaches the reviewer as
+      intent context so a deliberate change is not penalised for differing from a prior
+      variant, and review still scores independently and can reject it.
+    </p>
+    <p>
+      Acceptance is earned only through a fresh RD-quorum score. If a proposed identity
+      does not clear the bar, that is a result to record rather than a threshold to lower.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">&sect;</span> Decisions</h2>
+      <div class="r-dec" data-key="momentum-flux-identity" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which identity does the neutral-state radial momentum flux source realize?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="internal-state">radial_neutral_internal_state_momentum_flux — internal_state carries meaning</button>
+          <button class="r-opt" data-value="plain-state">radial_neutral_state_momentum_flux — internal_state is a redundant peel</button>
+          <button class="r-opt" data-value="both-legitimate">Both are legitimate and the fan-out invariant needs revisiting</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="reflector-split" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How should the reflector centre be distinguished from the centre of curvature?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="new-local-origin-identity">A new reviewed identity for the local-frame origin</button>
+          <button class="r-opt" data-value="qualify-existing">Qualify the existing reflector coordinate identity</button>
+          <button class="r-opt" data-value="permanent-refusal">Neither — the row stays a settled refusal</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">&sect;</span> Followups</h2>
+      <article class="r-fu" data-id="f-siar-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-identity-adjudication-residue">
+        <h4 class="r-fu-title">Adjudicate both identities on physics, then propose them through sn edit</h4>
+        <div class="r-fu-body"><p>Adjudicate on DD semantics and catalog convention rather than on which spelling is shorter or which refusal is easier to clear. Then propose through <code>sn edit</code> with a mandatory reason and let review score independently. Resolve <code>radial_coordinate_of_reflector</code>'s missing description and embedding in the same pass.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-identity-adjudication-residue</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

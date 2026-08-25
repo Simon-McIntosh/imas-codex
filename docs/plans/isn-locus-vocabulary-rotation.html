@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="isn-locus-vocabulary-rotation">
+  <meta name="plan-title"     content="A Locus The Grammar Will Not Spell">
+  <meta name="plan-summary"   content="One owner/geometry row cannot be repaired here: its replacement identity fails strict grammar because the locus token does not exist in ISN.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort-hours" content="3.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S12">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-blocks"    content="sn-identity-adjudication-residue">
+  <title>ISN Locus Vocabulary Rotation | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&sect;1 &mdash; The one row that leaves this repository</h2>
+    <p>
+      Of everything the graph-wide integrity programme could not close, exactly one item
+      is blocked by a vocabulary that this repository does not own. The source
+      <code>dd:b_field_non_axisymmetric/time_slice/field_map/grid/phi</code> still targets
+      <code>toroidal_angle_of_measurement_position</code>, which does not describe it. The
+      identity it should carry is a toroidal coordinate of the field-map grid, and that
+      name cannot be written: <strong><code>toroidal_coordinate_of_field_map_grid</code>
+      is absent from the graph AND fails strict parsing under ISN 0.8.0rc67</strong>,
+      because <code>field_map_grid</code> is not a locus token the closed grammar admits.
+    </p>
+    <p>
+      <strong>This is a real gap rather than a naming preference.</strong> The rule that
+      all grammar segments are closed is exactly what makes the composer trustworthy, and
+      the correct response to a genuine missing token is to rotate the vocabulary on the
+      ISN side, never to invent a spelling locally or substitute a nearest-fitting locus
+      that would assert semantics the Data Dictionary does not carry.
+    </p>
+
+    <h2 id="s2">&sect;2 &mdash; Establish that the token is warranted before adding it</h2>
+    <p>
+      A closed vocabulary stays useful only if additions are justified rather than
+      convenient, and this project has recorded the opposite error too &mdash; valid
+      candidates wrongly dismissed on a quick read. So the first work is adjudication, not
+      implementation:
+    </p>
+    <ul>
+      <li><strong>Is the locus real?</strong> A field map grid is a computational
+        sampling structure. Establish from the DD whether it is a physical locus at all,
+        or whether the correct identity names something else entirely and the locus
+        framing is the mistake.</li>
+      <li><strong>How many identities need it?</strong> One row motivates this plan.
+        Measure whether other DD paths under field-map or similar grid structures need
+        the same token, because a token added for a single row is a weaker case than one
+        that resolves a family.</li>
+      <li><strong>Does an existing token already cover it?</strong> Derive the candidate
+        set from <code>get_grammar_context()</code> rather than memory, and state why each
+        near-miss fails. A token that duplicates an existing one damages the vocabulary
+        more than the gap does.</li>
+    </ul>
+    <p>
+      If adjudication concludes the token is not warranted, that is a valid outcome and
+      the owner/geometry row stays a recorded refusal permanently, with its reason
+      upgraded from &ldquo;awaiting vocabulary&rdquo; to a settled semantic judgement.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; The rotation, and the two places the pin lives</h2>
+    <p>
+      If warranted, the mechanical path is known and documented: add the token on the ISN
+      fork, cut a release candidate, and bump the dependency in this repository &mdash;
+      where the pin <strong>appears twice in <code>pyproject.toml</code></strong> and both
+      occurrences must move together. A partial bump produces a grammar snapshot that
+      disagrees with the installed package, which is a failure mode this programme has
+      already met: an ISN pin bump does not by itself resync the graph's grammar snapshot,
+      and scoped runs skip that sync.
+    </p>
+    <p>
+      So the rotation is not complete when the dependency resolves. It is complete when
+      the graph's grammar snapshot carries the new token, the previously unspellable
+      identity parses strictly, and the owner/geometry source can be migrated onto it
+      through the ordinary sanctioned path rather than a bespoke repair.
+    </p>
+    <p>
+      One caution recorded from this programme's own history: never order ISN versions as
+      strings. <code>rc9</code> sorts above <code>rc65</code> lexically, and a comparison
+      that gets this wrong silently serves stale vocabulary while reporting success.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">&sect;</span> Decisions</h2>
+      <div class="r-dec" data-key="locus-warranted" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Is a field-map-grid locus token warranted in the closed ISN vocabulary?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="add-token">Warranted — add it and rotate</button>
+          <button class="r-opt" data-value="different-identity">Not a locus — the correct identity names something else</button>
+          <button class="r-opt" data-value="permanent-refusal">Not warranted — the row stays a settled refusal</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">&sect;</span> Followups</h2>
+      <article class="r-fu" data-id="f-ilvr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship isn-locus-vocabulary-rotation">
+        <h4 class="r-fu-title">Adjudicate whether the locus is warranted, then rotate if it is</h4>
+        <div class="r-fu-body"><p>Adjudication first, derived from <code>get_grammar_context()</code> rather than memory, covering whether the locus is real, how many identities need it, and why each near-miss token fails. Only if warranted: add on the ISN fork, cut an RC, bump BOTH pin occurrences in <code>pyproject.toml</code>, and verify the graph grammar snapshot actually carries the token rather than assuming the dependency bump synced it.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship isn-locus-vocabulary-rotation</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

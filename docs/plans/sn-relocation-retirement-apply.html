@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-relocation-retirement-apply">
+  <meta name="plan-title"     content="Seventy-Eight Edges The Derivation Never Asked For">
+  <meta name="plan-summary"   content="Apply the proved signed program retiring unauthorized HAS_PARENT relocations. Prevention has landed; the 78 predate it and still break the export.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="2.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S12">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Relocation Retirement Apply | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&sect;1 &mdash; Built, proved, and not yet applied</h2>
+    <p>
+      This is the only item in the graph-wide residual with <strong>no external
+      dependency</strong>. Everything needed already exists in <code>main</code>:
+    </p>
+    <ul>
+      <li><strong>The diagnosis</strong> &mdash; the parser is lossless and never
+        proposes the relocated tip. <code>_rewire_has_parent_off_superseded</code> walks
+        each edge through a six-hop <code>REFINED_FROM</code> chain onto a tip the current
+        derivation does not authorize.</li>
+      <li><strong>The prevention</strong> &mdash; commit <code>b926b8dd</code> guards the
+        rewire; an unauthorized successor tip gets 0 rewires while a legitimate
+        <code>unary_prefix</code> tip still rewires once. Migration 6 proved the guard
+        survives the structural-edge operator moving onto the shared envelope.</li>
+      <li><strong>The retirement program</strong> &mdash; commit <code>a495fb07</code>,
+        <code>retire_unauthorized_has_parent_relocations</code>, a closed program under
+        <code>build_repair_authority</code> and <code>apply_signed_manifest</code>.</li>
+    </ul>
+    <p>
+      What remains is one production apply. The measured class is <strong>78 non-self
+      MERGE pairs with 0 of 78 tips authorized</strong> by current
+      <code>derive_edges</code> output, alongside a live census of 52 stale qualifier
+      pairs.
+    </p>
+
+    <h2 id="s2">&sect;2 &mdash; It is a release barrier, not only a hygiene item</h2>
+    <p>
+      Two of the 78 are the pair that aborts the WEST catalog export on a hierarchy cycle:
+      <code>spectral_signal_to_noise_ratio_of_spectrometer_channel</code> &rarr;
+      <code>logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel</code>
+      carrying <code>operator_kind: qualifier</code>. The export was made to complete by
+      isolating strongly-connected components and withholding their members, so the
+      release is no longer blocked outright &mdash; but those identities are withheld
+      rather than repaired, and the underlying edge is still wrong.
+    </p>
+    <p>
+      <strong>A governed reversibility receipt records that exact edge as already removed
+      once, and it is live again.</strong> That is what makes this a producer story rather
+      than a data story, and it is why prevention landed before any retirement was
+      attempted: a second deletion without the guard would have been undone the same way
+      the first was. With the guard in place, retirement is now durable.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; What the apply must do that the proof did not</h2>
+    <p>
+      The program was proved on a disposable graph and deliberately never touched
+      production. The apply owes three things the proof could not provide:
+    </p>
+    <ul>
+      <li><strong>Fresh authority derived inside the applying invocation.</strong> The
+        78-row figure is a projection over the prior read-only census and its retained
+        per-row parent maps, and the node's own manifest says so. It is not a production
+        preview. This programme has been overtaken three times by cohorts fixed before an
+        intervening authorized transaction, and the rule that fixed it is to build and
+        hash the manifest in the same invocation that applies it.</li>
+      <li><strong>Receipts recovered by <code>run_id</code> and manifest digest.</strong>
+        Never by an operation-name query. A committed dual-bound transaction once read as
+        a clean refusal because the recovery probe looked up the wrong key.</li>
+      <li><strong>A collateral proof that does not overlap concurrent writes.</strong> If
+        another session is writing an axis, the digest covering that axis is measuring
+        their work, not this repair. Narrow to a dimension this node owns.</li>
+    </ul>
+    <p>
+      Refusals are outcomes, not obstacles. A row the program declines &mdash; because
+      current derivation still authorizes its incumbent tip, or because removal would
+      leave a derivable parent path absent &mdash; is recorded and left alone.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">&sect;</span> Decisions</h2>
+      <div class="r-dec" data-key="apply-scope" data-choice="whole-measured-class" data-by="reckon-ship" data-when="2026-08-25">
+        <p class="r-dec-q">Apply to the whole unauthorized class, or only the two export-blocking rows?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="whole-measured-class">The whole class the fresh preview admits</button>
+          <button class="r-opt" data-value="export-blockers-only">Only the two rows blocking the export</button>
+        </p>
+        <p class="r-dec-rat">The whole class. The two export-blocking rows are not special — they are the two members of the class that happened to form a cycle an exporter noticed. Repairing only those leaves 76 edges the current derivation does not authorize, each of which can surface later as another cycle, another withheld identity, or another wrong parent in a released catalog. The guard makes retirement durable, and the same signed apply costs the same whether it carries 2 rows or 78.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">&sect;</span> Followups</h2>
+      <article class="r-fu" data-id="f-srra-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-relocation-retirement-apply">
+        <h4 class="r-fu-title">Preview, apply and replay the retirement in production under fresh same-invocation authority</h4>
+        <div class="r-fu-body"><p>Derive and hash the manifest inside the applying invocation rather than reusing the projection. Record admitted and refused counts with verbatim reasons, recover receipts by <code>run_id</code> plus digest, replay write-free, and re-measure the unauthorized class afterwards with the schema sanity counts that prove the zero. Confirm the two export-cycle identities are released.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-relocation-retirement-apply</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

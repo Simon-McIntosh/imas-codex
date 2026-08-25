@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-embedding-coverage-gate">
+  <meta name="plan-title"     content="A Release Gate That Failed And Was Made Advisory">
+  <meta name="plan-summary"   content="Gate A, description-embedding coverage, failed at export and was downgraded to advisory rather than fixed. Decide that deliberately before an RC.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="2.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S12">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Embedding Coverage Gate | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&sect;1 &mdash; A gate that fails and is downgraded has stopped being a gate</h2>
+    <p>
+      At final-set export of the WEST packet, <strong>Gate A &mdash; description-embedding
+      coverage &mdash; FAILED and was downgraded to advisory</strong>, alongside 296
+      dangling links pruned and 295 Gate B advisories. The export completed on that basis.
+    </p>
+    <p>
+      Downgrading a failing gate to let a run finish is sometimes correct and sometimes
+      the moment a release stops meaning anything, and the difference is whether the
+      downgrade was <em>decided</em> or merely <em>expedient</em>. This plan exists to make
+      it a decision, because the next thing that consumes this export is a release
+      candidate, and a gate nobody chose to relax is a gate nobody is enforcing.
+    </p>
+    <p>
+      The gate is not decorative. Description embeddings are what semantic search over
+      standard names resolves against, so an identity shipping without one is present in
+      the catalog and invisible to the search that is meant to find it. This programme has
+      already met one instance by name: <code>radial_coordinate_of_reflector</code>
+      withholds from release for having no description and no embedding at all &mdash; not
+      because it failed a semantic check, but because there was nothing to check.
+    </p>
+
+    <h2 id="s2">&sect;2 &mdash; Establish the number before arguing about the threshold</h2>
+    <p>
+      The downgrade is recorded; the shortfall is not. Before any decision:
+    </p>
+    <ul>
+      <li><strong>How many accepted identities lack a description embedding</strong>, over
+        the release set and over the whole accepted corpus, with the schema sanity count
+        that proves the figure is real rather than a property-name miss.</li>
+      <li><strong>Do they lack the embedding, or the description?</strong> A missing
+        embedding on a real description is a pipeline gap fixable by re-embedding at no
+        provider cost. A missing description is a content gap needing generation and
+        review. These have different costs and different owners and must not be counted
+        together.</li>
+      <li><strong>What did Gate A actually assert</strong>, and what threshold did it fail
+        against? A gate whose measure is not written down cannot be honestly relaxed or
+        honestly enforced.</li>
+      <li><strong>Are any of them in the WEST release set?</strong> A coverage shortfall
+        entirely outside the shipped identities is a different problem from one inside it.</li>
+    </ul>
+    <p>
+      Related and worth measuring in the same pass: the <strong>296 dangling links pruned
+      at export</strong>. Pruning at export means the shipped artifact is clean while the
+      graph is not, so those links are still wrong wherever they came from.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; The three honest outcomes</h2>
+    <p>
+      Only three endings are legitimate, and all of them are better than an unexamined
+      advisory:
+    </p>
+    <ul>
+      <li><strong>Fix the coverage</strong> and restore the gate to enforcing. Correct if
+        the shortfall is mostly missing embeddings on real descriptions, since
+        re-embedding is deterministic and free.</li>
+      <li><strong>Relax the gate deliberately</strong>, with the new threshold written
+        down and the reason recorded, so a future reader knows the release shipped under a
+        chosen bar rather than an abandoned one.</li>
+      <li><strong>Withhold the affected identities</strong> from the release set with named
+        reasons, which is the policy bar this programme already applies to 45 other
+        withheld rows.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">&sect;</span> Decisions</h2>
+      <div class="r-dec" data-key="gate-a-disposition" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What happens to Gate A before a release candidate?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="fix-and-enforce">Fix the coverage and restore it to enforcing</button>
+          <button class="r-opt" data-value="relax-deliberately">Relax it to a written threshold with a recorded reason</button>
+          <button class="r-opt" data-value="withhold-affected">Withhold the affected identities with named reasons</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">&sect;</span> Followups</h2>
+      <article class="r-fu" data-id="f-secg-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-embedding-coverage-gate">
+        <h4 class="r-fu-title">Measure the coverage shortfall, split embedding gaps from description gaps, then decide the gate</h4>
+        <div class="r-fu-body"><p>Measure over the release set and the whole accepted corpus with sanity counts proving each figure. Split missing embeddings on real descriptions (deterministic, free to fix) from missing descriptions (generation plus review). Recover what Gate A asserted and against what threshold. Count how many affected identities are inside the WEST set, and measure the 296 pruned dangling links at their source rather than at export.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-embedding-coverage-gate</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>
