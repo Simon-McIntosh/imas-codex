@@ -25210,12 +25210,21 @@ def find_orphan_parent_source_candidates(
                 """
                 MATCH (parent:StandardName)
                 WHERE NOT ( (:StandardNameSource)-[:PRODUCED_NAME]->(parent) )
+                  AND NOT coalesce(parent.name_stage, '') IN
+                    ['superseded', 'exhausted', 'contested']
                 OPTIONAL MATCH (structural_source:StandardNameSource {
                   id: 'derived:' + parent.id
                 })
                 WITH parent, structural_source
                 WHERE structural_source IS NULL
                    OR structural_source.status <> 'stale'
+                WITH parent, structural_source
+                WHERE structural_source IS NULL OR NOT EXISTS {
+                  MATCH (structural_source)-[:PRODUCED_NAME]->(bound)
+                  WHERE bound <> parent
+                    AND NOT coalesce(bound.name_stage, '') IN
+                      ['superseded', 'exhausted', 'contested']
+                }
                 MATCH (child)-[:HAS_PARENT]->(parent)
                 WITH parent,
                      count(child) AS total_children,
@@ -25308,9 +25317,12 @@ def reconcile_orphan_parent_sources(
     This decouples source-seeding from the acceptance path. For every parent with
     at least one child, all children composed, and no ``PRODUCED_NAME`` source, it
     materializes the structural source + ``PRODUCED_NAME`` without a DD
-    realization edge. It is origin-, stage-, and operator-kind-agnostic — the
-    parent already exists and passed admission; this only records provenance and
-    NEVER mutates the parent's ``name_stage`` / ``origin`` / ``description``.
+    realization edge. It is origin- and operator-kind-agnostic, but only a live
+    parent may receive provenance. The canonical ``derived:<name>`` source must
+    also be unbound or bound only to this parent; a source migrated to another
+    live target is current authority for that target and must never be reused to
+    revive its terminal predecessor. This only records provenance and NEVER
+    mutates the parent's ``name_stage`` / ``origin`` / ``description``.
     Idempotent: a parent that gains a source drops out of the selector. A stale
     structural source is a lifecycle tombstone and is never rebound implicitly;
     an explicit lifecycle transition must make it eligible first. Childless
@@ -25350,8 +25362,19 @@ def reconcile_orphan_parent_sources(
                   id: $source_node_id
                 })
                 WITH parent, existing_source
-                WHERE existing_source IS NULL
-                   OR existing_source.status <> 'stale'
+                WHERE NOT coalesce(parent.name_stage, '') IN
+                        ['superseded', 'exhausted', 'contested']
+                  AND NOT EXISTS {
+                    MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(parent)
+                  }
+                  AND (existing_source IS NULL
+                       OR existing_source.status <> 'stale')
+                  AND (existing_source IS NULL OR NOT EXISTS {
+                    MATCH (existing_source)-[:PRODUCED_NAME]->(bound)
+                    WHERE bound <> parent
+                      AND NOT coalesce(bound.name_stage, '') IN
+                        ['superseded', 'exhausted', 'contested']
+                  })
                 MERGE (sns:StandardNameSource {id: $source_node_id})
                   ON CREATE SET sns.created_at = datetime(), sns.attempt_count = 0
                 SET sns.status = coalesce(sns.status, 'composed'),
@@ -25408,8 +25431,14 @@ def reconcile_orphan_parent_sources_batched(
         })
         WITH collect(requested_item) AS requested_items,
              count(CASE WHEN stale_source.status = 'stale' THEN 1 END)
-               AS stale_source_count
-        WHERE stale_source_count = 0
+               AS stale_source_count,
+             count(CASE WHEN EXISTS {
+               MATCH (stale_source)-[:PRODUCED_NAME]->(bound_target)
+               WHERE bound_target.id <> requested_item.parent_id
+                 AND NOT coalesce(bound_target.name_stage, '') IN
+                   ['superseded', 'exhausted', 'contested']
+             } THEN 1 END) AS conflicting_binding_count
+        WHERE stale_source_count = 0 AND conflicting_binding_count = 0
         UNWIND requested_items AS item
         MATCH (parent:StandardName {id: item.parent_id})
         WHERE parent.name_stage = 'accepted'
