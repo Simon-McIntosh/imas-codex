@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:30:26",
+  "updated": "2026-08-25T08:34:44",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -708,7 +708,7 @@
         "id": "impl-lockadjudicate",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a0379b-a97d-77e2-99d0-dbec9a5c8f4c",
         "created": "2026-08-25"
       },
       {
@@ -27700,9 +27700,89 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T062854960485-n-lockidiomadjudicate",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a710",
+        "node": "n-lockidiomadjudicate",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-lockadjudicate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T06:29:03Z",
+        "completed_at": "2026-08-25T06:34:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 328,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 328,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "a3eb8e859993b6f0c4a076ae754934d53d3d430a",
+        "commits": [
+          "9dc9d052"
+        ],
+        "changed_lines": {
+          "added": 8,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T062854960485-n-lockidiomadjudicate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0379b-a97d-77e2-99d0-dbec9a5c8f4c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3176704,
+            "cached_input_tokens_cumulative": 3176704,
+            "input_tokens": 3336541,
+            "input_tokens_cumulative": 3336541,
+            "output_tokens": 10062,
+            "output_tokens_cumulative": 10062,
+            "reasoning_output_tokens": 3751,
+            "reasoning_output_tokens_cumulative": 3751
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "watch_override": {
+          "arming_line": "reckon crew watch --project imas-codex",
+          "requested": true,
+          "watcher_live": false
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/graph/test_cypher_property_check.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 818
+    "_version": 820
   }
 }
