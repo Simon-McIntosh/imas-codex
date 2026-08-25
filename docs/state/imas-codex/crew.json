@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:46:46",
+  "updated": "2026-08-25T10:51:54",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -243,9 +243,11 @@
         "id": "impl-benchrerun",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0380c-b097-7152-ba61-ad8451491948",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a0380c-b097-7152-ba61-ad8451491948"
+        },
         "created": "2026-08-25"
       },
       {
@@ -842,7 +844,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0241f-9e66-76e2-8fd6-e6de72dee101",
-        "created": "2026-08-21"
+        "created": "2026-08-21",
+        "sessions": {
+          "gpt-5.6-sol": "01a03818-91a6-71b0-9975-6257f78929ee"
+        }
       },
       {
         "id": "impl-owner",
@@ -1647,7 +1652,10 @@
         "harness": "codex",
         "role": "test",
         "session_id": "01a03479-1937-7b00-ae8c-c4edb856db69",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a0381a-8dd5-7dd1-9cf1-08e9af092669"
+        }
       },
       {
         "id": "test-readiness",
@@ -29849,9 +29857,101 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T083220762235-n-benchmarkrerun",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a72",
+        "node": "n-benchmarkrerun",
+        "node_definition": {
+          "done_when": "the result record states each of the five gates with its derived threshold, measured value and verdict against the prior run's 1.000, 0.275, 0.0978, 0.825 and 0.800, reports the rendered-message hashes proving prompt equality across passes, states the actual USD spent against the 10 ceiling, and answers in one sentence whether the graph-wide advisory census is now authorised, and the manifest repeats the five verdicts and the spend",
+          "estimated_hours": 0.8,
+          "goal": "Re-measure the five benchmark gates now that candidate decoding is pinned, so the repeatability figure reflects the model rather than an unpinned sampler, under a hard USD 10 ceiling",
+          "id": "n-benchmarkrerun",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T083220762235-n-benchmarkrerun/manifest.md",
+          "plan": "sn-benchmark-evolution",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-benchmark-evolution/benchmark-pinned-rerun.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-benchrerun",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:32:30Z",
+        "completed_at": "2026-08-25T08:51:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1123,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1123,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "625a90cf05a461a7c52564b28301d665a457ddfc",
+        "commits": [
+          "4a0fbd7ab1508bccd3a80f24a079f1e801d974f7"
+        ],
+        "changed_lines": {
+          "added": 114,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T083220762235-n-benchmarkrerun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0380c-b097-7152-ba61-ad8451491948",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7397120,
+            "cached_input_tokens_cumulative": 7397120,
+            "input_tokens": 7566734,
+            "input_tokens_cumulative": 7566734,
+            "output_tokens": 20123,
+            "output_tokens_cumulative": 20123,
+            "reasoning_output_tokens": 3184,
+            "reasoning_output_tokens_cumulative": 3184
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 868
+    "_version": 872
   }
 }
