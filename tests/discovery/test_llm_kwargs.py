@@ -31,6 +31,48 @@ class NestedResponse(BaseModel):
     metadata: dict[str, str]
 
 
+def test_request_seed_is_additive_and_reaches_local_provider(monkeypatch):
+    """Omitting seed preserves kwargs; an explicit seed reaches the endpoint."""
+    from imas_codex.discovery.base import llm
+
+    base = {
+        "model": "hosted_vllm/advisory-candidate",
+        "api_key": "test-key",
+        "messages": [{"role": "user", "content": "Return JSON."}],
+        "response_format": None,
+        "max_tokens": 100,
+        "temperature": 0.0,
+        "timeout": 30,
+        "api_base": "http://local.test/v1",
+    }
+    omitted = llm._build_kwargs(**base)
+    explicit_none = llm._build_kwargs(**base, seed=None)
+    seeded = llm._build_kwargs(**base, seed=20260825)
+
+    assert omitted == explicit_none
+    assert "seed" not in omitted
+    assert seeded == {**omitted, "seed": 20260825}
+
+    captured: dict[str, object] = {}
+
+    class _Completions:
+        async def create(self, **kwargs):
+            captured.update(kwargs)
+            return object()
+
+    class _Client:
+        class _Chat:
+            completions = _Completions()
+
+        chat = _Chat()
+
+    monkeypatch.setattr(llm, "_get_local_client", lambda *_: _Client())
+    import asyncio
+
+    asyncio.run(llm._acompletion_local(seeded))
+    assert captured["seed"] == 20260825
+
+
 def test_is_pydantic_model_class():
     assert _is_pydantic_model(DummyResponse) is True
 

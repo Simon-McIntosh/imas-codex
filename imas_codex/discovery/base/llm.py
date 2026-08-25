@@ -139,6 +139,8 @@ async def _acompletion_local(kwargs: dict[str, Any]) -> Any:
         call_kwargs["max_tokens"] = kwargs["max_tokens"]
     if kwargs.get("temperature") is not None:
         call_kwargs["temperature"] = kwargs["temperature"]
+    if kwargs.get("seed") is not None:
+        call_kwargs["seed"] = kwargs["seed"]
     if kwargs.get("timeout") is not None:
         call_kwargs["timeout"] = kwargs["timeout"]
     if kwargs.get("response_format") is not None:
@@ -1904,6 +1906,7 @@ def _build_kwargs(
     temperature: float | None,
     timeout: int | None,
     *,
+    seed: int | None = None,
     service: str = "untagged",
     api_base: str | None = None,
     api_key_override: str | None = None,
@@ -2046,6 +2049,10 @@ def _build_kwargs(
             logger.debug("Clamping temperature=0.0 → None for GPT-5.x model %s", model)
         else:
             kwargs["temperature"] = temperature
+    if seed is not None:
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise TypeError("seed must be an integer or None")
+        kwargs["seed"] = seed
 
     # Per-service X-Title for OpenRouter dashboard visibility.
     # Client extra_headers shallow-replaces proxy config extra_headers,
@@ -2106,6 +2113,7 @@ def call_llm_structured(
     max_tokens: int | None = None,
     output_token_ceiling: int | None = None,
     temperature: float | None = None,
+    seed: int | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
@@ -2129,6 +2137,7 @@ def call_llm_structured(
         output_token_ceiling: Immutable retry ceiling for a pre-priced request.
             Legacy callers leave this unset and retain adaptive length retries.
         temperature: Sampling temperature (None = model default).
+        seed: Provider request seed (None omits the field entirely).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
         retry_base_delay: Base delay for exponential backoff (seconds).
@@ -2156,6 +2165,7 @@ def call_llm_structured(
         max_tokens,
         temperature,
         timeout,
+        seed=seed,
         service=service,
         reasoning_effort=reasoning_effort,
     )
@@ -2281,6 +2291,7 @@ async def acall_llm_structured(
     max_tokens: int | None = None,
     output_token_ceiling: int | None = None,
     temperature: float | None = None,
+    seed: int | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
@@ -2301,6 +2312,7 @@ async def acall_llm_structured(
         output_token_ceiling: Immutable retry ceiling for a pre-priced request.
             Legacy callers leave this unset and retain adaptive length retries.
         temperature: Sampling temperature (None = model default).
+        seed: Provider request seed (None omits the field entirely).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
         retry_base_delay: Base delay for exponential backoff (seconds).
@@ -2333,6 +2345,7 @@ async def acall_llm_structured(
         max_tokens,
         temperature,
         timeout,
+        seed=seed,
         service=service,
         reasoning_effort=reasoning_effort,
     )
@@ -2934,6 +2947,7 @@ def call_llm(
     *,
     max_tokens: int | None = None,
     temperature: float | None = None,
+    seed: int | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
@@ -2950,6 +2964,7 @@ def call_llm(
         response_format: Optional Pydantic model for structured output.
         max_tokens: Max output tokens (None = model-family default).
         temperature: Sampling temperature (None = model default).
+        seed: Provider request seed (None omits the field entirely).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
         retry_base_delay: Base delay for exponential backoff (seconds).
@@ -2974,6 +2989,7 @@ def call_llm(
         max_tokens,
         temperature,
         timeout,
+        seed=seed,
         service=service,
     )
 
@@ -3021,6 +3037,7 @@ async def acall_llm(
     *,
     max_tokens: int | None = None,
     temperature: float | None = None,
+    seed: int | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
@@ -3037,6 +3054,7 @@ async def acall_llm(
         response_format: Optional Pydantic model for structured output.
         max_tokens: Max output tokens (None = model-family default).
         temperature: Sampling temperature (None = model default).
+        seed: Provider request seed (None omits the field entirely).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
         retry_base_delay: Base delay for exponential backoff (seconds).
@@ -3061,6 +3079,7 @@ async def acall_llm(
         max_tokens,
         temperature,
         timeout,
+        seed=seed,
         service=service,
     )
 
