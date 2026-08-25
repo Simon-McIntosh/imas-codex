@@ -8826,6 +8826,10 @@ def _sanitize_doc_text(text: str | None) -> str | None:
     return text
 
 
+# This matcher parses an already-resolved Markdown link into both its visible
+# label and its target so the accept gate can compare their meanings.
+# ``find_name_references`` owns reference discovery instead; it intentionally
+# returns only identity/span/syntax and does not expose a Markdown link's label.
 _DOC_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
 _DOC_TEXT_UNSET = object()
 
