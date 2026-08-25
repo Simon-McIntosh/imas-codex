@@ -468,9 +468,11 @@ def test_rename_mirror_refresh_separates_updates_from_matches() -> None:
     revision_match = cypher.index(
         "OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(revision:DocsRevision)"
     )
+    revision_update = cypher.index("SET revision.standard_name_id = sn.id")
 
     assert "WITH sn, source" in cypher[source_update:review_match]
     assert "WITH sn, source" in cypher[review_update:revision_match]
+    assert revision_update > revision_match
 
 
 @pytest.mark.graph

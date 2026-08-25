@@ -9539,7 +9539,6 @@ _DOCS_REVIEW_VOLATILE_ITEM_FIELDS = frozenset(
         "reviewer_comments_docs",
         "reviewer_comments_per_dim_docs",
         "reviewer_model_docs",
-        "docs_review_resolution_method",
         "docs_review_quorum_shortfall",
         "docs_review_quorum_shortfall_at",
         "reviewed_docs_at",

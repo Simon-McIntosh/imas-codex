@@ -6146,7 +6146,6 @@ def docs_review_eligibility_params() -> dict[str, list[str]]:
     return {
         "docs_review_winning_methods": sorted(winning),
         "docs_review_non_winning_methods": sorted(non_winning),
-        "docs_review_resolution_methods": sorted(winning | non_winning),
     }
 
 
@@ -6283,105 +6282,6 @@ def docs_review_property_coverage(gc: Any | None = None) -> dict[str, int]:
             + ", ".join(sorted(set(missing)))
         )
     return coverage
-
-
-@retry_on_deadlock()
-def project_docs_review_resolution_methods() -> list[dict[str, str]]:
-    """Mirror winning docs-review methods onto already accepted names.
-
-    Only accepted names with accepted documentation and a reachable winning
-    docs review are candidates. A group containing the canonical reviewer is
-    preferred; recency and stable ids break ties. The write revalidates graph
-    eligibility and changes the mirror only when its selected value differs,
-    making replay idempotent.
-
-    Returns one receipt row per mutation with the Standard Name id, source
-    review group, source review id, and mirrored resolution method.
-    """
-    eligibility_params = docs_review_eligibility_params()
-    winner_query = _docs_review_winner_query_body()
-    with GraphClient() as gc:
-        candidates = list(
-            gc.query(
-                f"""
-                MATCH (sn:StandardName)
-                WHERE sn.name_stage = 'accepted'
-                  AND sn.docs_stage = 'accepted'
-                CALL {{
-                    WITH sn
-                    {winner_query}
-                }}
-                RETURN sn.id AS standard_name_id,
-                       winner.review_group_id AS review_group_id,
-                       winner.review_id AS review_id,
-                       winner.resolution_method AS resolution_method
-                ORDER BY standard_name_id
-                """,
-                **eligibility_params,
-            )
-            or []
-        )
-        if not candidates:
-            return []
-        rows = gc.query(
-            f"""
-            UNWIND $candidates AS candidate
-            MATCH (sn:StandardName {{id: candidate.standard_name_id}})
-            WHERE sn.name_stage = 'accepted'
-              AND sn.docs_stage = 'accepted'
-            CALL {{
-                WITH sn
-                {winner_query}
-            }}
-            WITH sn, candidate, winner
-            WHERE winner.review_group_id = candidate.review_group_id
-              AND winner.review_id = candidate.review_id
-              AND coalesce(sn.docs_review_resolution_method, '')
-                  <> candidate.resolution_method
-            SET sn.docs_review_resolution_method = candidate.resolution_method
-            RETURN sn.id AS standard_name_id,
-                   candidate.review_group_id AS review_group_id,
-                   candidate.review_id AS review_id,
-                   candidate.resolution_method AS resolution_method
-            ORDER BY standard_name_id
-            """,
-            candidates=candidates,
-            **eligibility_params,
-        )
-    return [dict(row) for row in rows or []]
-
-
-@retry_on_deadlock()
-def clear_non_winning_docs_review_resolution_methods(
-    standard_name_ids: list[str],
-) -> list[dict[str, str]]:
-    """Clear mirrors for named rows carrying a reachable non-winning method.
-
-    This is a compare-and-set repair owned by the same module as the mirror.
-    It never changes review history, scores, timestamps, or lifecycle stages.
-    """
-    if not standard_name_ids:
-        return []
-    with GraphClient() as gc:
-        rows = gc.query(
-            f"""
-            UNWIND $standard_name_ids AS standard_name_id
-            MATCH (sn:StandardName {{id: standard_name_id}})
-            WHERE sn.name_stage = 'accepted'
-              AND sn.docs_stage = 'accepted'
-              AND NOT ({docs_review_eligibility_where()})
-              AND sn.docs_review_resolution_method
-                  IN $docs_review_resolution_methods
-            WITH sn, sn.docs_review_resolution_method AS cleared_method
-            SET sn.docs_review_resolution_method = null
-            RETURN sn.id AS standard_name_id,
-                   cleared_method AS cleared_method
-            ORDER BY standard_name_id
-            """,
-            standard_name_ids=standard_name_ids,
-            **docs_review_eligibility_params(),
-        )
-    return [dict(row) for row in rows or []]
 
 
 def write_name_review_results(
@@ -13914,7 +13814,7 @@ def record_llm_cost(
             pool: $pool,
             event_type: $event_type,
             cycle: $cycle,
-            sn_ids: $sn_ids,
+            standard_name_ids: $standard_name_ids,
             batch_id: $batch_id,
             overspend: $overspend,
             llm_model: $llm_model,
@@ -13938,7 +13838,7 @@ def record_llm_cost(
         "pool": _normalize_pool(phase),
         "event_type": phase,
         "cycle": cycle,
-        "sn_ids": sn_ids_clean,
+        "standard_name_ids": sn_ids_clean,
         "batch_id": batch_id,
         "overspend": round(overspend, 6),
         "llm_model": model,
@@ -13996,17 +13896,18 @@ def aggregate_spend_per_phase(run_id: str) -> dict[str, float]:
 def aggregate_spend_per_name(run_id: str) -> dict[str, float]:
     """Return ``{sn_id: apportioned_cost}`` for a run.
 
-    Per-name cost share is ``llm_cost / size(sn_ids)`` — each name
-    in the ``sn_ids`` list gets an equal share.  Rows with an empty
-    ``sn_ids`` list are skipped (for example, audit calls with no names).
+    Per-name cost share is ``llm_cost / size(standard_name_ids)`` — each name
+    in the ``standard_name_ids`` list gets an equal share. Rows with an empty
+    list are skipped (for example, audit calls with no names).
     """
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (c:LLMCost {run_id: $run_id})
-            WHERE size(c.sn_ids) > 0
-            UNWIND c.sn_ids AS sn_id
-            RETURN sn_id, sum(c.llm_cost / size(c.sn_ids)) AS apportioned
+            WHERE size(c.standard_name_ids) > 0
+            UNWIND c.standard_name_ids AS sn_id
+            RETURN sn_id,
+                   sum(c.llm_cost / size(c.standard_name_ids)) AS apportioned
             """,
             run_id=run_id,
         )
@@ -14016,9 +13917,10 @@ def aggregate_spend_per_name(run_id: str) -> dict[str, float]:
 def update_sn_per_phase_costs(run_id: str) -> int:
     """Push aggregated per-name costs into ``StandardName.llm_cost_*`` fields.
 
-    For each ``LLMCost`` row in the run, apportions ``llm_cost / size(sn_ids)``
-    to each name, grouped by phase.  Then writes the per-phase totals and the
-    overall ``llm_cost`` onto the ``StandardName`` node.
+    For each ``LLMCost`` row in the run, apportions
+    ``llm_cost / size(standard_name_ids)`` to each name, grouped by phase.
+    Then writes the per-phase totals and overall ``llm_cost`` onto the
+    ``StandardName`` node.
 
     Returns:
         Number of ``StandardName`` nodes updated.
@@ -14028,10 +13930,10 @@ def update_sn_per_phase_costs(run_id: str) -> int:
         rows = gc.query(
             """
             MATCH (c:LLMCost {run_id: $run_id})
-            WHERE size(c.sn_ids) > 0
-            UNWIND c.sn_ids AS sn_id
+            WHERE size(c.standard_name_ids) > 0
+            UNWIND c.standard_name_ids AS sn_id
             RETURN sn_id, c.phase AS phase,
-                   sum(c.llm_cost / size(c.sn_ids)) AS apportioned
+                   sum(c.llm_cost / size(c.standard_name_ids)) AS apportioned
             """,
             run_id=run_id,
         )
@@ -15883,7 +15785,6 @@ def persist_reviewed_docs(
                 sn.reviewer_comments_docs     = $comments,
                 sn.reviewer_comments_per_dim_docs = $comments_per_dim_json,
                 sn.reviewer_model_docs        = $model,
-                sn.docs_review_resolution_method = $resolution_method,
                 sn.docs_review_quorum_shortfall = $quorum_shortfall,
                 sn.docs_review_quorum_shortfall_at =
                     CASE WHEN $quorum_shortfall IS NULL THEN null ELSE datetime() END,
@@ -16012,7 +15913,6 @@ FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
         sn.reviewer_comments_docs = null,
         sn.reviewer_comments_per_dim_docs = null,
         sn.reviewer_model_docs = null,
-        sn.docs_review_resolution_method = null,
         sn.docs_review_quorum_shortfall = null,
         sn.docs_review_quorum_shortfall_at = null,
         sn.reviewed_docs_at = null,
@@ -24519,7 +24419,7 @@ def persist_refined_docs(
                              $sn_id + '#rev-' + toString(cur_chain) AS rev_id
                         MERGE (rev:DocsRevision {id: rev_id})
                         ON CREATE SET
-                          rev.sn_id                          = $sn_id,
+                          rev.standard_name_id                = $sn_id,
                           rev.revision_number                = cur_chain,
                           rev.description                    = $cur_desc,
                           rev.documentation                  = $cur_doc,
@@ -24687,7 +24587,7 @@ def reset_standard_name_docs(
                 id: sn.id + '#rev-' + toString(revision_number)
               })
               SET
-                rev.sn_id                          = sn.id,
+                rev.standard_name_id                = sn.id,
                 rev.revision_number                = revision_number,
                 rev.description                    = coalesce(sn.description, ''),
                 rev.documentation                  = coalesce(sn.documentation, ''),

@@ -48,7 +48,9 @@ def _assert_shared_eligibility(cypher: str, params: dict) -> None:
 def test_winning_methods_are_derived_from_schema() -> None:
     params = graph_ops.docs_review_eligibility_params()
 
-    assert set(params["docs_review_resolution_methods"]) == {
+    assert set(params["docs_review_winning_methods"]) | set(
+        params["docs_review_non_winning_methods"]
+    ) == {
         "authoritative_escalation",
         "max_cycles_reached",
         "quorum_consensus",
@@ -158,40 +160,6 @@ def test_stranded_promotion_uses_shared_traversal() -> None:
 
     docs_query, params = graph.calls[1]
     _assert_shared_eligibility(docs_query, params)
-
-
-def test_mirror_selection_compare_and_set_and_clear_share_eligibility() -> None:
-    candidate = {
-        "standard_name_id": "thermal_density",
-        "review_group_id": "docs-group",
-        "review_id": "review-one",
-        "resolution_method": "quorum_consensus",
-    }
-    projection_graph = _Graph([[candidate], []])
-    with patch.object(graph_ops, "GraphClient", return_value=projection_graph):
-        assert graph_ops.project_docs_review_resolution_methods() == []
-
-    selection_query, selection_params = projection_graph.calls[0]
-    assert graph_ops._docs_review_winner_query_body() in selection_query
-    assert selection_params == graph_ops.docs_review_eligibility_params()
-    mutation_query, mutation_params = projection_graph.calls[1]
-    assert graph_ops._docs_review_winner_query_body() in mutation_query
-    assert (
-        mutation_params["docs_review_winning_methods"]
-        == selection_params["docs_review_winning_methods"]
-    )
-
-    clear_graph = _Graph([[]])
-    with patch.object(graph_ops, "GraphClient", return_value=clear_graph):
-        assert (
-            graph_ops.clear_non_winning_docs_review_resolution_methods(
-                ["thermal_density"]
-            )
-            == []
-        )
-    clear_query, clear_params = clear_graph.calls[0]
-    _assert_shared_eligibility(clear_query, clear_params)
-    assert "docs_review_resolution_method IS NOT NULL" not in clear_query
 
 
 def test_property_coverage_requires_plural_axis_and_every_filtered_property() -> None:

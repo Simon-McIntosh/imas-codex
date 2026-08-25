@@ -46,7 +46,7 @@ class _FakeGraph:
             and n.get("reviewer_score_docs", 0.0) >= min_score
             and n.get("name_stage") == "accepted"
             and (n.get("validation_status") or "") != "quarantined"
-            and n.get("docs_review_resolution_method") is not None
+            and n.get("_has_winning_docs_review", False)
             and n.get("docs_review_quorum_shortfall") is None
         )
 
@@ -123,7 +123,7 @@ class TestDocsAxis:
                 "name_stage": "accepted",
                 "docs_stage": "reviewed",
                 "reviewer_score_docs": 0.8,
-                "docs_review_resolution_method": "quorum_consensus",
+                "_has_winning_docs_review": True,
             }
         ]
         out = _run(nodes, min_score=0.7)
@@ -137,7 +137,7 @@ class TestDocsAxis:
                 "name_stage": "accepted",
                 "docs_stage": "reviewed",
                 "reviewer_score_docs": 0.5,
-                "docs_review_resolution_method": "quorum_consensus",
+                "_has_winning_docs_review": True,
             }
         ]
         out = _run(nodes, min_score=0.7)
@@ -150,7 +150,7 @@ class TestDocsAxis:
                 "name_stage": "accepted",
                 "docs_stage": "reviewed",
                 "reviewer_score_docs": 0.9,
-                "docs_review_resolution_method": "single_review",
+                "_has_winning_docs_review": True,
                 "docs_review_quorum_shortfall": "review carried no resolution method",
             }
         ]
@@ -168,7 +168,7 @@ class TestIdempotency:
                 "name_stage": "accepted",
                 "docs_stage": "reviewed",
                 "reviewer_score_docs": 0.9,
-                "docs_review_resolution_method": "quorum_consensus",
+                "_has_winning_docs_review": True,
             },
         ]
         first = _run(nodes, min_score=0.7)
@@ -343,7 +343,7 @@ class TestFakeMirrorsProduction:
                     reviewer_score_docs=1.0,
                     name_stage="accepted",
                     validation_status=None,
-                    docs_review_resolution_method="quorum_consensus",
+                    _has_winning_docs_review=True,
                     docs_review_quorum_shortfall=None,
                 )
                 self.read: set[str] = set()

@@ -257,7 +257,7 @@ class TestRecordLLMCost:
             )
             assert spend_id  # should still return a valid id
             kwargs = mock_gc.query.call_args[1]
-            assert kwargs["sn_ids"] == []
+            assert kwargs["standard_name_ids"] == []
         finally:
             patcher.stop()
 
@@ -322,7 +322,7 @@ class TestAggregateSpendPerPhase:
 
 class TestAggregateSpendPerName:
     def test_apportions_cost(self):
-        """A $1.00 cost with sn_ids=[a, b] → each gets $0.50."""
+        """A $1.00 cost over two Standard Names gives each $0.50."""
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = [
             {"sn_id": "a", "apportioned": 0.50},
@@ -336,13 +336,13 @@ class TestAggregateSpendPerName:
 
             # Verify the Cypher uses UNWIND + division
             cypher = mock_gc.query.call_args[0][0]
-            assert "UNWIND c.sn_ids AS sn_id" in cypher
-            assert "size(c.sn_ids)" in cypher
+            assert "UNWIND c.standard_name_ids AS sn_id" in cypher
+            assert "size(c.standard_name_ids)" in cypher
         finally:
             patcher.stop()
 
-    def test_skips_empty_sn_ids(self):
-        """Rows with empty sn_ids should be excluded from apportionment."""
+    def test_skips_empty_standard_name_ids(self):
+        """Rows with no Standard Names should be excluded from apportionment."""
         patcher, mock_gc = _mock_gc_ctx()
         mock_gc.query.return_value = []
         try:
@@ -352,7 +352,7 @@ class TestAggregateSpendPerName:
             assert result == {}
 
             cypher = mock_gc.query.call_args[0][0]
-            assert "WHERE size(c.sn_ids) > 0" in cypher
+            assert "WHERE size(c.standard_name_ids) > 0" in cypher
         finally:
             patcher.stop()
 

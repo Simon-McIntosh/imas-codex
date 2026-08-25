@@ -520,7 +520,7 @@ def test_docs_acceptance_requires_canonical_quorum_authority(
     assert bool(write_kwargs["quorum_shortfall"]) is has_shortfall
     assert write_kwargs["resolution_method"] == resolution_method
     cypher = gc.query.call_args_list[1].args[0]
-    assert "docs_review_resolution_method" in cypher
+    assert "docs_review_resolution_method" not in cypher
     assert "docs_review_quorum_shortfall_at" in cypher
 
 

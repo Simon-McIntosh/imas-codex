@@ -30,7 +30,6 @@ def _candidate(name: str, score: float) -> dict:
         "validation_status": "valid",
         "review_quorum_shortfall": None,
         "docs_stage": "accepted",
-        "docs_review_resolution_method": "quorum_consensus",
         "docs_review_quorum_shortfall": None,
         "reviewer_score_name": score,
         "description": f"Description for {name}.",
