@@ -1,11 +1,10 @@
 # Semantic-source regression root-cause diagnosis
 
-NEEDS-HELP: the live cohort is fully enumerated and partitioned, but the secondary per-target change-ledger join failed twice before it could independently confirm the inferred batched writer for the 36 derived transient rows.
+## Receipt corroboration result
 
-- tried: Captured the live semantic-source invariant cohort with full source, binding, target-stage, backing, projection, and structural-child detail; traced the applicable writers and reconcilers in source; then attempted a change-ledger join for every derived target. The first join selected the wrong JSON container and the corrected join selected a field present only in the invariant rows, so both exited before querying Neo4j.
-- options: Re-run the join using the already-proven `violations` allowlist; accept the timestamp-plus-code-path attribution below; or add an explicit `writer_operation` receipt to structural materialization so future diagnoses require no inference.
-- leaning: Accept the timestamp-plus-code-path attribution for this diagnosis. The 36 source nodes form one 185 ms creation burst, carry the exact structural-source shape emitted by the batched materializer, and have childful terminal targets; no competing current writer has that combination.
-- cost-if-wrong: Only the “producing write path” label and the 36-row transient classification must be re-audited. The source ids, statuses, partitions, target stages, verdict counts for the three DD residues and three scalar mismatches, schema sanity, and repair-route conclusions remain independently measured.
+The receipt-level probe used the inferred structural-source creation window, **2026-08-25T02:44:15.000Z inclusive through 02:44:16.000Z exclusive**, without joining individual targets. It found **0 `StandardNameChange` rows**, hence **0 `run_id` groups**, **0 run/manifest receipt keys**, and no materializer receipt that can be matched by its own `run_id` and manifest digest. This is a schema-proven zero: the graph contained 8,514 `StandardNameChange` candidates, 8,504 with `changed_at`, 3,334 with `run_id`, and 800 with `manifest_sha256` at **2026-08-25T07:55:29.849986Z**. The receipt mechanism exists elsewhere in the ledger, but did not record this batch.
+
+The exact structural batch writer is therefore not recoverable from a durable receipt. The 36-row attribution remains an explicitly labelled timestamp-and-code-path inference; the accepted row census, transient verdicts, and repair boundary do not depend on choosing between the current structural batch writer variants. The measured follow-on is to stamp durable writer-operation receipts, including `run_id` and manifest digest, on structural `StandardNameSource` materialization.
 
 ## Quantitative result
 
@@ -43,7 +42,7 @@ The machine-readable capture is
 
 The following path labels are used in the row tables.
 
-- **Structural batch, then terminalization**: `_materialize_derived_parent_rows_batched` executes `STRUCTURAL_CLOSURE_BATCH_MATERIALIZE`, creates or reuses `derived:<parent>`, stamps it `composed`, sets `produced_sn_id=parent.id`, and merges the binding. The 36 rows were created from `02:44:15.080Z` through `02:44:15.265Z`, all with `batch_key=derived_parent`, and all have live structural children. Their targets subsequently became `exhausted` or `superseded`. `reconcile_source_status_liveness` is the existing settlement path: it drops terminal edges, clears the scalar, and returns a composed/attached source with no live target to `extracted`. This is expected intermediate state, not a new attachment decision.
+- **Structural batch, then terminalization**: this is a timestamp-and-code-path inference to the structural batch family. `_materialize_derived_parent_rows_batched` (`STRUCTURAL_CLOSURE_BATCH_MATERIALIZE`) and `reconcile_orphan_parent_sources_batched` (`STRUCTURAL_CLOSURE_BATCH_SEED_SOURCES`) can both create or reuse `derived:<parent>`, stamp it `composed`, set `produced_sn_id=parent.id`, and merge the binding. Both write a `StandardNameChange` only when supplied an optional `event_by_parent`; neither synthesizes a recoverable run/manifest receipt for the batch. The 36 rows were created from `02:44:15.080Z` through `02:44:15.265Z`, all with `batch_key=derived_parent`, and all have live structural children. Their targets subsequently became `exhausted` or `superseded`. `reconcile_source_status_liveness` is the existing settlement path: it drops terminal edges, clears the scalar, and returns a composed/attached source with no live target to `extracted`. This is expected intermediate state, not a new attachment decision.
 - **Legacy parent materializer using a DD identity**: the three DD rows were created on 2026-07-31 with `batch_key=derived_parent` but ids `dd:<container path>`, each with one exact `FROM_DD_PATH` backing and no `PRODUCED_NAME` edge. Current `_derived_parent_source_metadata` explicitly forbids that identity collapse and emits `derived:<parent>` without a DD realization edge. These are genuine historical residue, not structural transient state.
 - **Dual-binding lifecycle transition**: the mass-density and radial-momentum sources were named standing dual-binding refusals before this measurement. Their scalar-selected target is now `exhausted` while the other edge targets an accepted name. The target lifecycle changed without atomically updating the source scalar, leaving a durable sole-live mismatch.
 - **Atomic refine followed by structural regrowth**: `persist_refined_name` recorded `conductivity` to `plasma_electrical_conductivity` through `source_migration_manifest` at 2026-08-23T15:56:28.552Z. The current source once again has both predecessor and successor edges and selects the superseded predecessor. The only current structural recovery writer that can reuse `derived:conductivity`, preserve `status=composed`, reset the scalar to the parent, and merge the predecessor edge is `reconcile_orphan_parent_sources`. This is genuine regrowth, not an unfinished atomic refine.
@@ -118,14 +117,15 @@ The reuse map's single 39-row no-live mutation cohort is too broad after root-ca
 
 The corrected execution boundary is therefore **3 scalar repairs + 3 DD no-live releases**, with the 36 derived rows required to settle through ordinary liveness reconciliation before a postflight invariant census.
 
-## Evidence and remaining proof gap
+## Evidence and receipt observability
 
 Evidence inputs used:
 
 - Live census and zero sanity: `logs/live-regression-detail.json` in this node's durable run directory.
 - Scalar target and change detail: `logs/scalar-lineage.json` in the same directory.
+- Receipt-window result and its schema sanity: `logs/materializer-receipt-window.json` in the same directory.
 - Baseline measurement: `docs/evidence/archive/integrity-and-operator-closure-verification.md`.
 - Repair comparison: `docs/evidence/sn-graph-wide-integrity/regression-repair-reuse-map.md`.
 - Earlier named dual-binding state: `docs/evidence/sn-graph-wide-integrity/ratchet-regrowth-triage.md`.
 
-The unresolved proof is narrow: the cohort-wide change-ledger join did not complete, so the 36-row batched-writer attribution is inferred from their exact creation burst and current writer semantics rather than corroborated by a per-target change receipt. The graph currently does not stamp a writer operation on `StandardNameSource`, which is why this attribution requires inference at all.
+The exact-window receipt query completed successfully and established the negative finding: no change row exists to group by `run_id`, and therefore no receipt-owned run/manifest key exists to resolve. The 36-row structural-batch attribution is consequently inferred from the 185 ms creation burst, structural source shape, and current writer semantics. It is not represented as receipt-proven. This measured observability gap does not alter any row verdict or authorize a mutation.
