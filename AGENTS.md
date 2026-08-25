@@ -408,6 +408,32 @@ MATCH (n:<Label>) RETURN count(n) AS candidates, count(n.<prop>) AS with_prop
 empty. The same applies to `count(DISTINCT n.<prop>)`, which returns 0 over a
 non-existent property without complaint.
 
+**Prove the instrument FIRES, then prove it is AIMED — they are different checks
+and only the first is cheap.** Failing closed and carrying a positive control both
+establish that a scan can find the thing it reports absent; neither establishes that
+it was pointed at the right thing. Measured across two sessions on 2026-08-25, five
+scans returned clean, plausible, wrong answers, and every one of them fired
+correctly:
+
+| The scan asked about | The question actually asked |
+|---|---|
+| `imas_codex/ids/graph_ops.py`, 490 lines, by basename | `standard_names/graph_ops.py`, 24,491 lines |
+| an invented list of typed roots | reckon's declared `TYPE_ROOTS` |
+| `followup-status="open"` | `data-status="open"` |
+| a receipt found by operation name | the receipt's own `run_id` + manifest digest |
+| a literal `def name` | a public name installed dynamically |
+
+Each returned a number. The basename glob found a real file and counted its real
+lines; it answered a real question nobody had asked. **So add a positive control —
+one row that must fire, in the same run, against the same pattern — and then say out
+loud what the instrument is pointed at.** A control proves it can see; only naming
+the target catches an instrument aimed one field, one path, or one file to the left.
+
+Note the direction of the error, because it decides whether review saves you: a
+literal-`def` scan reporting six operators absent reads as a *cleaner* result than
+the truth. **The failure mode that flatters you is the one that survives review**,
+since nobody interrogates good news.
+
 **Standard Name identity keys follow one convention — still check, never
 guess.** A `StandardName` uses `id` because it is the identity itself. Every
 declared generic foreign key to a `StandardName` uses `standard_name_id` when
