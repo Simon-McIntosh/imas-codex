@@ -131,6 +131,23 @@ _CATALOG_DISPOSITION_GUARDS = (
     _COLLATERAL_IMMUTABILITY,
 )
 
+_DD_RESIDUE_RELEASE_OPERATION = "release_legacy_dd_source_lifecycle"
+_DD_RESIDUE_SOURCE_IDS = frozenset(
+    {
+        "dd:ntms/time_slice/mode",
+        "dd:summary/pedestal_fits",
+        "dd:waves/coherent_wave",
+    }
+)
+_DD_RESIDUE_RELEASE_PROPERTIES = {
+    "status": "extracted",
+    "attempt_count": 0,
+    "claimed_at": None,
+    "claim_token": None,
+    "produced_sn_id": None,
+    "composed_at": None,
+}
+
 
 class SignedManifestAuthorityError(ValueError):
     """The authority bytes or typed repair program are invalid."""
@@ -185,6 +202,91 @@ class _Preview:
     collateral: list[dict[str, str]]
 
 
+def _validate_dd_residue_release_authority(
+    operation_id: str,
+    rows: Sequence[_LoadedRow],
+    receipt_policy: Mapping[str, Any],
+) -> None:
+    """Keep the historical DD lifecycle release closed to its exact cohort."""
+    if operation_id != _DD_RESIDUE_RELEASE_OPERATION:
+        return
+
+    source_ids = {str(row.identity.get("source_id") or "") for row in rows}
+    valid_rows = all(
+        row.id == row.identity.get("source_id")
+        and row.identity.get("kind") == "source"
+        and row.identity.get("target_id") is None
+        and len(
+            [
+                participant
+                for participant in row.participants
+                if participant.get("kind") == RepairParticipantKind.node.value
+                and participant.get("graph_label") == "StandardNameSource"
+                and participant.get("id") == row.id
+            ]
+        )
+        == 1
+        and sum(
+            participant.get("kind") == RepairParticipantKind.node.value
+            and participant.get("graph_label") == "StandardNameSource"
+            for participant in row.participants
+        )
+        == 1
+        and sum(
+            participant.get("kind") == RepairParticipantKind.node.value
+            and participant.get("graph_label") == "StandardName"
+            for participant in row.participants
+        )
+        == sum(
+            participant.get("kind") == RepairParticipantKind.relationship.value
+            and participant.get("graph_label") == "PRODUCED_NAME"
+            for participant in row.participants
+        )
+        and len(
+            [
+                mutation
+                for mutation in row.mutations
+                if mutation.get("kind") == RepairMutationKind.set_properties.value
+                and mutation.get("participant_id") == row.id
+                and mutation.get("arguments", {}).get("properties")
+                == _DD_RESIDUE_RELEASE_PROPERTIES
+            ]
+        )
+        == 1
+        and {
+            str(mutation["participant_id"])
+            for mutation in row.mutations
+            if mutation.get("kind") == RepairMutationKind.delete_relationship.value
+        }
+        == {
+            str(participant["id"])
+            for participant in row.participants
+            if participant.get("kind") == RepairParticipantKind.relationship.value
+            and participant.get("graph_label") == "PRODUCED_NAME"
+        }
+        and all(
+            mutation.get("kind")
+            in {
+                RepairMutationKind.delete_relationship.value,
+                RepairMutationKind.set_properties.value,
+            }
+            for mutation in row.mutations
+        )
+        and _guard_names(row) == {_LAST_PRODUCER, _COLLATERAL_IMMUTABILITY}
+        and row.orphan_policy == "refuse"
+        for row in rows
+    )
+    if (
+        source_ids != _DD_RESIDUE_SOURCE_IDS
+        or len(rows) != len(_DD_RESIDUE_SOURCE_IDS)
+        or not valid_rows
+        or receipt_policy.get("operation") != _DD_RESIDUE_RELEASE_OPERATION
+    ):
+        raise SignedManifestAuthorityError(
+            "legacy DD lifecycle release requires its exact closed source cohort"
+        )
+
+
 def _validate_source_target_reconciliation_program(
     row_id: str,
     identity: dict[str, Any],
@@ -200,6 +302,17 @@ def _validate_source_target_reconciliation_program(
     if not relationship_deletes or any(
         mutation["kind"] == RepairMutationKind.add_relationship.value
         for mutation in mutations
+    ):
+        return
+    if (
+        identity.get("source_id") in _DD_RESIDUE_SOURCE_IDS
+        and identity.get("target_id") is None
+        and any(
+            mutation.get("kind") == RepairMutationKind.set_properties.value
+            and mutation.get("arguments", {}).get("properties")
+            == _DD_RESIDUE_RELEASE_PROPERTIES
+            for mutation in mutations
+        )
     ):
         return
 
@@ -1006,6 +1119,7 @@ def _load_authority(
     operation_id = data.get("operation_id")
     if not isinstance(operation_id, str) or not operation_id.strip():
         raise SignedManifestAuthorityError("operation_id must be non-empty")
+    _validate_dd_residue_release_authority(operation_id, loaded_rows, receipt_policy)
     artifact_projection = {
         **data,
         "authority_digests": [str(item["id"]) for item in digest_rows] or None,
@@ -2048,6 +2162,80 @@ def _is_unbound_source_attachment(row: _LoadedRow) -> bool:
     ] and str(row.identity.get("source_id") or "").startswith("dd:")
 
 
+def _is_dd_residue_release(row: _LoadedRow) -> bool:
+    source_id = str(row.identity.get("source_id") or "")
+    return (
+        source_id in _DD_RESIDUE_SOURCE_IDS
+        and row.identity.get("target_id") is None
+        and any(
+            mutation.get("kind") == RepairMutationKind.set_properties.value
+            and mutation.get("arguments", {}).get("properties")
+            == _DD_RESIDUE_RELEASE_PROPERTIES
+            for mutation in row.mutations
+        )
+    )
+
+
+def _dd_residue_release_refusal(query: _Query, action: dict[str, Any]) -> str | None:
+    """Require an unclaimed legacy DD source with no live target."""
+    row: _LoadedRow = action["row"]
+    if not _is_dd_residue_release(row):
+        return None
+    source_id = str(row.identity["source_id"])
+    source_snapshot = action["participant_snapshots"][source_id]
+    properties = source_snapshot["properties"]
+    if (
+        properties.get("source_type") != "dd"
+        or source_id != f"dd:{properties.get('source_id')}"
+        or properties.get("status") not in {"composed", "attached"}
+        or properties.get("claimed_at") is not None
+        or properties.get("claim_token") is not None
+    ):
+        return "legacy DD source lifecycle does not match release authority"
+
+    current = query.query(
+        """
+        MATCH (source:StandardNameSource)
+        WHERE elementId(source) = $source_element_id
+        OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(target:StandardName)
+        RETURN [item IN collect(CASE WHEN binding IS NULL THEN null ELSE {
+          relationship_id: elementId(binding),
+          target_element_id: elementId(target),
+          target_id: target.id,
+          target_live: NOT (coalesce(target.name_stage, '') IN
+            ['superseded', 'exhausted', 'contested'])
+            AND NOT (coalesce(target.status, '') IN
+              ['deprecated', 'superseded'])
+        } END) WHERE item IS NOT NULL] AS bindings
+        """,
+        source_element_id=source_snapshot["element_id"],
+    )
+    bindings = list(current[0].get("bindings") or []) if current else []
+    if any(bool(binding.get("target_live")) for binding in bindings):
+        return "source still has a live target"
+
+    declared = sorted(
+        (
+            str(snapshot["element_id"]),
+            str(snapshot["end_element_id"]),
+            str(snapshot["end_id"]),
+        )
+        for snapshot in action["participant_snapshots"].values()
+        if snapshot.get("relationship_type") == "PRODUCED_NAME"
+    )
+    observed = sorted(
+        (
+            str(binding["relationship_id"]),
+            str(binding["target_element_id"]),
+            str(binding["target_id"]),
+        )
+        for binding in bindings
+    )
+    if declared != observed:
+        return "signed legacy DD source target closure changed"
+    return None
+
+
 def _structural_reparent_refusal(query: _Query, action: dict[str, Any]) -> str | None:
     """Require one exact live parent edge and preserve the child's authority."""
     row: _LoadedRow = action["row"]
@@ -2468,7 +2656,7 @@ def _source_target_reconciliation_refusal(
 ) -> str | None:
     """Require one signed survivor over the complete live target closure."""
     row: _LoadedRow = action["row"]
-    if _is_ordinary_source_migration(row):
+    if _is_ordinary_source_migration(row) or _is_dd_residue_release(row):
         return None
     if not any(
         mutation["kind"] == RepairMutationKind.delete_relationship.value
@@ -2958,6 +3146,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
                 for participant_id, snapshot in sorted(snapshots.items())
             ],
         }
+        if refusal is None:
+            refusal = _dd_residue_release_refusal(query, action)
         if refusal is None:
             refusal = _orphan_guard_refusal(query, action)
         if refusal is None:
