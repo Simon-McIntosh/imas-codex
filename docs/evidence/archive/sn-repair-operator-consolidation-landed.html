@@ -194,6 +194,38 @@
           <td>migrated, bespoke body deleted</td>
         </tr>
         <tr>
+          <td><code>reconcile_lifecycleless_standard_name_stubs</code></td>
+          <td>Suite 26/26 byte-unchanged. Mixed cohort materialize 1 / delete 1 / rebind 1
+              / refused 0 with exactly 3 receipts plus 1 source-reset retry; accepted-sibling
+              delete 1 admitted; complete rollback and BOTH late-CAS races refuse write-free.
+              Four branches registered as an exact ordered closed registry, so arbitrary
+              deletion and arbitrary Cypher are unreachable. Core identical at 9,969 bytes,
+              SHA-256 <code>2e941157</code>.</td>
+          <td><code>0e058a4c</code></td>
+          <td>migrated, bespoke body deleted</td>
+        </tr>
+        <tr>
+          <td><code>reconcile_structural_edges_for_standard_names</code></td>
+          <td>Suite 11/11 plus 2/2 rename-cascade. Requested cohort 3 admitted with the
+              NON-requested stale edge preserved; duplicate request 3 copies / 1 change;
+              empty request returns integer <code>0</code>; both preflight errors verbatim
+              before mutation. <strong>Guard preserved:</strong> unauthorized six-hop tip 0
+              rewires, authorized <code>unary_prefix</code> tip 1 rewire, after migration.
+              Core identical at 1,005 bytes, SHA-256 <code>ebec6302</code>.</td>
+          <td><code>9447cd5d</code></td>
+          <td>migrated, bespoke body deleted</td>
+        </tr>
+        <tr>
+          <td><code>repair_normalization_peel_parent_units</code></td>
+          <td>Suite 7/7. Mixed cohort 2 admitted / 4 refused; the corrected null-unit-child
+              case still admits, so the pre-adjudication every-child predicate is not
+              reinstated; three isolated non-admissions return exact empty lists; replay
+              projects 2 sorted ids then an empty list on byte-identical state. Core
+              identical at 1,127 bytes, SHA-256 <code>74d180c0</code>.</td>
+          <td><code>846cfaf0</code></td>
+          <td>migrated, bespoke body deleted</td>
+        </tr>
+        <tr>
           <td><code>retire_signed_dual_authority_targets</code></td>
           <td>Suite 5/5 byte-unchanged. Clean cohort 19 sources, 20 binding/projection
               pairs, 16 identities, 0 refusals, 16 receipts. Out-of-authority: 18 retained,
@@ -235,6 +267,44 @@
       showed the live hazard is state changing between preview and apply.
       Full record:
       <a href="/imas-codex/evidence/sn-repair-operator-consolidation/dual-authority-migration">dual-authority migration</a>.
+    </p>
+  </section>
+
+  <section id="ten-of-ten">
+    <h2>Ten of ten, and the verification that says so has a positive control</h2>
+    <p>
+      Every one of the ten targeted operators now reaches the graph through
+      <code>apply_signed_manifest</code>, and no bespoke implementation survives. The
+      claim is checked fail-closed rather than by a grep that returns nothing: a scan
+      that locates <code>def apply_signed_manifest</code> <em>in the same pass</em> —
+      proving the pattern can find a definition — reports <strong>0 of 10</strong> bespoke
+      defs across <code>graph_ops.py</code>, <code>provenance_lifecycle.py</code> and
+      <code>signed_manifest.py</code>.
+    </p>
+    <p>
+      That control is not ceremony. Six of the ten install their legacy public name
+      dynamically, so a naive search for the literal string reports them absent <em>for
+      the wrong reason</em>. Without a row that fires, an all-zero result is
+      indistinguishable from a broken pattern — which is the same failure that produced a
+      2.5× over-count of path violations and three silent followup zeros elsewhere in this
+      programme on the same day.
+    </p>
+    <p>
+      <strong>Each migration carried its own equivalence gate, and each relocation was
+      proved rather than asserted.</strong> Byte-identical transaction cores at 18,878 /
+      17,200 / 14,358 / 9,969 / 1,005 / 1,127 bytes, every suite byte-unchanged, every
+      refusal reason verbatim, every replay write-free. Two gates guarded regressions that
+      a reasonable migration would have introduced: the ineligible-source operator keeps a
+      deliberate orphan hand-off where reusing the neighbouring last-producer guard would
+      have read as safer, and the structural-edge operator delegates to the single
+      canonical writer so the rewire authorization guard stays load-bearing instead of
+      intact-but-bypassed.
+    </p>
+    <p>
+      Serialization is settled by lead decision as keep-strict-serialization, so the
+      disjoint-collateral proof is unnecessary rather than outstanding. Its reopen
+      condition is recorded on the decision: measured evidence that apply-transaction time
+      actually dominates.
     </p>
   </section>
 </main>

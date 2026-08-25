@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T11:37:17",
+  "updated": "2026-08-25T11:46:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -882,7 +882,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02491-cd8f-7a42-93e1-f0291c47de3d",
-        "created": "2026-08-21"
+        "created": "2026-08-21",
+        "sessions": {
+          "gpt-5.6-sol": "01a03848-da99-7871-9ba9-e05135fee5e3"
+        }
       },
       {
         "id": "impl-persistquery",
@@ -30622,9 +30625,104 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T093805784758-n-peelunitmigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "n-peelunitmigrate",
+        "node_definition": {
+          "done_when": "tests/standard_names/test_normalization_peel_unit_repair_graph.py passes byte-unchanged against the migrated operator showing identical admitted and refused identities, verbatim refusal reasons, identical sorted repaired-id return projection and write-free replay; the CORRECTED normalization-peel predicate is preserved so a null-unit child is still ADMITTED and the pre-adjudication every-child predicate is not reinstated, proved by the suite case that makes that one-row distinction visible; the string 'def repair_normalization_peel_parent_units' is absent from imas_codex/standard_names/graph_ops.py; tests/graph/test_cypher_property_check.py stays green; docs/evidence/sn-repair-operator-consolidation/peel-unit-migration.md records admitted and refused counts plus a byte-equivalence proof of the relocated core",
+          "estimated_hours": null,
+          "goal": "repair_normalization_peel_parent_units running as a fixed partial of apply_signed_manifest with its bespoke body deleted",
+          "id": "n-peelunitmigrate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T093805784758-n-peelunitmigrate/manifest.md",
+          "plan": "sn-repair-operator-consolidation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/standard_names/signed_manifest.py",
+            "docs/evidence/sn-repair-operator-consolidation/peel-unit-migration.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-peelunitsuite",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:38:13Z",
+        "completed_at": "2026-08-25T09:46:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 509,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 509,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "14c7f963dfbaea0acc9204a5296df186670784f1",
+        "commits": [
+          "846cfaf0",
+          "8f4761c2"
+        ],
+        "changed_lines": {
+          "added": 143,
+          "removed": 52,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T093805784758-n-peelunitmigrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03848-da99-7871-9ba9-e05135fee5e3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4412416,
+            "cached_input_tokens_cumulative": 4412416,
+            "input_tokens": 4588744,
+            "input_tokens_cumulative": 4588744,
+            "output_tokens": 17454,
+            "output_tokens_cumulative": 17454,
+            "reasoning_output_tokens": 3191,
+            "reasoning_output_tokens_cumulative": 3191
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 883
+    "_version": 885
   }
 }
