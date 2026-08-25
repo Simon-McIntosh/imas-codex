@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.92">
+  <meta name="plan-impl" content="0.94">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -18,13 +18,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S9">
-<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-modified" content="2026-08-25">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="55">
-<meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa">
+<meta name="plan-version" content="57">
+<meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa,3d0bb831">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/doc_links.py,imas_codex/standard_names/benchmark_reference.py,imas_codex/standard_names/graph_ops.py,imas_codex/standard_names/AGENTS.md,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_revision_snapshots.py,tests/standard_names/test_doc_links.py,docs/evidence/sn-quality-parity/west-docs-eligible.md,docs/evidence/sn-quality-parity/west-docs-tranche-completion.md,docs/evidence/sn-quality-parity/west-docs-tranche-refresh.md,docs/evidence/sn-quality-parity/dimensional-gate-calibration.md,docs/evidence/sn-quality-parity/paired-arm-current-gates.md,docs/evidence/sn-quality-parity/integration-check-final.md,docs/figures/sn-quality-parity/claim-disposition.svg">
 </head>
 <body>
@@ -519,6 +519,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260824T214445551052-n-goldenrefresh" data-who="impl-goldenrefresh" data-when="2026-08-24T21:50:39Z">
     <div class="r-comment-body"><p>Golden capture refreshed; 1 failed 9 passed to 10 passed; diff exactly 5 additions 0 deletions, all blank lines in the COCOS conditional region</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T004843133372-n-cocosmetadataclear" data-who="impl-cocosclear" data-when="2026-08-25T01:05:25Z">
+    <div class="r-comment-body"><p>An authoritative null now clears the stale transformation type and its edge; 35 of 35 diagnosed rows would clear on recompute; 2 failed to 2 passed, suite 6,729 passed</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-20260823-keying-instruction" data-who="reckon-ship" data-when="2026-08-23T15:46:00+00:00">
     <div class="r-comment-body"><p><strong>n-keyingdoc landed — commit <code>523a369e</code>, merged <code>9468164a</code>; gate schema-tests-green PASSED.</strong> Measure: schema-focused selection over <code>tests/standard_names/</code> exits 0 with 0 failures; the new section greps 5 <code>StandardName</code> references against a required 3; live census <strong>4,525 nodes, 4,525 carrying <code>id</code>, 0 carrying <code>name</code></strong>. Artifact: <code>imas_codex/standard_names/AGENTS.md</code>, 30 lines.</p><p><strong>The recurring defect this closes is a silent one, and it cost two sessions today.</strong> No class in the standard-names schema declares a <code>name</code> attribute — <code>StandardName.id</code> <em>is</em> the snake_case identity (<code>schemas/standard_name.yaml:868-892</code>), and <code>StandardNameSource.id</code> is <code>source_type:source_id</code> as <code>dd:&lt;path&gt;</code> or <code>signals:&lt;facility&gt;:&lt;signal-id&gt;</code> (<code>2795-2823</code>). So <code>MATCH (sn:StandardName {name: $x})</code> is valid Cypher that returns zero rows without erroring, because a missing property evaluates to null and a non-true predicate drops the row. A peer session joining the refine cohort on <code>s.name</code> got zero rows and nearly reported it as a clean no-overlap result; the real overlap was 20 identities. The section states both keys with citations, puts the correct and silent-null joins side by side, and carries a coverage query that fails closed — so a zero-row join has to be shown to be real before it is believed.</p></div>
 </div>
@@ -548,6 +551,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 </div>
 <div class="r-comment" data-section="§5" data-id="c-20260824T2155-goldenrefresh" data-who="reckon-ship" data-when="2026-08-24T21:55:00+00:00">
     <div class="r-comment-body">n-goldenrefresh landed — commit a241b0aa; gate golden-matches-template passed; measure '1 failed, 9 passed in 11.11s' becomes '10 passed in 7.08s', with the capture diff exactly 5 additions and 0 deletions across 1 scoped file. All five are blank rendered lines inside the COCOS sensitivity conditional region immediately before the output schema, so no instruction content moved — which is the check that distinguishes refreshing a stale capture from quietly re-recording a changed prompt. This closes an orchestration miss rather than a code defect: the prompt-condition node's done-when should have required the golden refresh in the same beat, and because it did not, the stale capture surfaced as an unrelated failure inside a concurrent repair node and cost that node a NEEDS-HELP round trip.</div>
+</div>
+<div class="r-comment" data-section="§5" data-id="c-20260825T0130-cocosclear" data-who="reckon-ship" data-when="2026-08-25T01:30:00+00:00">
+    <div class="r-comment-body">n-cocosmetadataclear landed — commit 3d0bb831; gate metadata-can-retract passed; measure the regression goes '2 failed in 9.94s' → '2 passed in 6.35s' and the standard-names suite is green at '6729 passed, 8 skipped, 299 deselected'. This closes the SECOND of the two producing causes the sign diagnosis found. An authoritative null was being swallowed by coalesce, so a structural authority that recomputed to nothing left the previous transformation class standing — metadata that could assert but never retract. Both persistence paths now assign the recomputed value directly, and a null clears the scalar mirror AND every HAS_COCOS edge atomically in the same statement, while a non-null recomputation still writes and leaves the convention metadata intact. Live impact measured before any stock repair: all 35 diagnosed stale rows still recompute to null, still hold stale transformation metadata, and all 35 still carry a HAS_COCOS edge, so the corrected persistence clears exactly the 35 the diagnosis predicted. The Cypher was EXPLAIN-validated against the live graph in both single-row and batched form without mutating anything, which is the right way to check a clearing statement before letting it near 35 real rows. With both producers closed, the 281-row stock repair can run without regenerating the defect behind itself.</div>
 </div>
 </section>
 </main>
