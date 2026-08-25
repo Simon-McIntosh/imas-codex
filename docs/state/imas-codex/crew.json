@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:54:05",
+  "updated": "2026-08-25T11:01:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -30044,9 +30044,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T084727718944-n-transientclearance",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-transientclearance",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-graph-wide-integrity/transient-clearance.md records a before census of the 36 derived no-live-target rows, the exact reconcile or liveness-settlement invocation run against production, and an after census taken once that reconcile has SETTLED rather than mid-run, with the schema sanity counts proving each reported figure; it states per-row whether each of the 36 cleared or persisted, and if any persist it says so plainly and reclassifies them as genuine residue rather than defending the transient label; the 3 already-released DD rows and every other class stay untouched, evidenced by an unchanged snapshot digest",
+          "estimated_hours": null,
+          "goal": "A demonstration of whether the 36 derived no-live-target rows actually clear after a settled reconcile, or persist and are therefore not transient",
+          "id": "n-transientclearance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T084727718944-n-transientclearance/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-graph-wide-integrity/transient-clearance.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-quiescence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:47:38Z",
+        "completed_at": "2026-08-25T09:00:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 792,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 792,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5936f83ff0a314b03e9d28c2d1116d0265c1095c",
+        "commits": [
+          "daae56bf",
+          "57318213"
+        ],
+        "changed_lines": {
+          "added": 219,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T084727718944-n-transientclearance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0381a-8dd5-7dd1-9cf1-08e9af092669",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6346496,
+            "cached_input_tokens_cumulative": 6346496,
+            "input_tokens": 6564762,
+            "input_tokens_cumulative": 6564762,
+            "output_tokens": 30715,
+            "output_tokens_cumulative": 30715,
+            "reasoning_output_tokens": 9935,
+            "reasoning_output_tokens_cumulative": 9935
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 873
+    "_version": 874
   }
 }

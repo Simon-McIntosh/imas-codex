@@ -513,7 +513,8 @@
       <tbody>
         <tr><td>Scalar mirror mismatches</td><td>3</td><td><strong>0</strong></td><td>signed repair, production, commit <code>6136a25e</code></td></tr>
         <tr><td>Terminal-predecessor regrowth</td><td>reproducible</td><td><strong>refused</strong></td><td>guard, commit <code>99a91692</code></td></tr>
-        <tr><td>Legacy DD residues</td><td>3</td><td>3</td><td>closed release program in progress</td></tr>
+        <tr><td>Legacy DD residues</td><td>3</td><td><strong>0</strong></td><td>signed release, production, commit <code>930940ed</code></td></tr>
+        <tr><td>Derived transient rows</td><td>36</td><td><strong>0</strong></td><td>liveness settlement, 36/36 cleared, commit <code>daae56bf</code></td></tr>
         <tr><td>Qualifier relocations</td><td>1 known</td><td><strong>78 measured</strong></td><td>rewire guard needed; 0 of 78 tips authorized by current derivation</td></tr>
       </tbody>
     </table>
@@ -596,6 +597,50 @@
       edge <code>logarithm_of_*</code> → <code>spectral_*</code> carries
       <code>operator_kind=unary_prefix</code> and is untouched. Record:
       <a href="/imas-codex/evidence/sn-graph-wide-integrity/qualifier-parse-verdict">qualifier parse verdict</a>.
+    </p>
+  </section>
+
+  <section id="both-regressions-closed">
+    <h2>Both unrecorded regressions reach zero, and the inference became a measurement</h2>
+    <p>
+      The closure verification named two <em>unrecorded regressions</em>: 39 sources with
+      no live target and 3 scalar-mirror mismatches. Both classes now read zero.
+    </p>
+    <table>
+      <caption>The two regression classes, from the verification's figures to live zero</caption>
+      <thead><tr><th>Class</th><th>Verification</th><th>Partitioned</th><th>Now</th></tr></thead>
+      <tbody>
+        <tr><td>Scalar mirror</td><td>3</td><td>3 genuine</td><td><strong>0</strong></td></tr>
+        <tr><td>No live target</td><td>39</td><td>3 DD genuine + 36 transient</td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>The 36-row transient claim was the weakest link in this wave, and it was
+      settled by demonstration rather than defended.</strong> Its attribution could not be
+      corroborated by receipt — the structural materializer writes none, measured at 0
+      change rows, 0 <code>run_id</code> groups and 0 manifest keys in the exact creation
+      window — so it stood only as a timestamp-and-code-path inference. Rather than argue
+      it, the settlement was run over the 36 <em>enumerated</em> ids with instructions to
+      reclassify any survivor as genuine residue. <strong>36 of 36 cleared, 0
+      persisted.</strong> The inference was right, and it is now a measurement.
+    </p>
+    <p>
+      Every row is now <code>extracted</code> with <code>attempt_count</code> 0, null
+      claim, null scalar and zero bindings; the immediate exact replay returned all eight
+      mutation counters at zero; authored <code>PRODUCED_NAME</code> edges moved 5,351 →
+      5,315; and the 3 released DD rows were untouched, with the DD digest
+      <code>3cd20102</code> and the 9,632-row collateral source digest
+      <code>7efc5983</code> both unmoved.
+    </p>
+    <p>
+      <strong>One method note worth more than the result.</strong> A concurrent docs-only
+      run moved <code>docs_stage</code> inside the applying window, so the harness
+      <em>discarded its own over-broad docs-axis digest</em> and proved collateral on the
+      9,632 non-cohort source rows it actually owned. A harness that trusted its first
+      instrument would have reported a false collateral change and impugned a clean
+      repair. Records:
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/dd-residue-apply">DD residue apply</a>,
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/transient-clearance">transient clearance</a>.
     </p>
   </section>
 </main>
