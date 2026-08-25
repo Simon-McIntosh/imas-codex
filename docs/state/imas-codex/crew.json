@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:15:26",
+  "updated": "2026-08-25T10:16:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -438,6 +438,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-decodingpin",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
       },
       {
         "id": "impl-detachmigrate",
@@ -28870,9 +28879,103 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T080912469613-n-spellingcurrency",
+        "plan": "sn-guidance-spelling-currency",
+        "section": "\u00a73",
+        "node": "n-spellingcurrency",
+        "node_definition": {
+          "done_when": "imas_codex/schemas/standard_name.yaml no longer describes DocsRevision.id using the retired sn_id token; every schema reference in imas_codex/standard_names/AGENTS.md cites class and slot name rather than a line range, and each named slot is verified present in the schema by grep; the tokens produced_sn_id and terminal_sn_id are unchanged in count across the repository; no Python parameter, variable, dataclass field or UNWIND row key named sn_id or sn_ids is renamed; tests/graph/test_cypher_property_check.py and tests/graph/test_guidance_matches_schema.py both stay green",
+          "estimated_hours": null,
+          "goal": "Guidance and schema prose that name only spellings the schema currently declares",
+          "id": "n-spellingcurrency",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T080912469613-n-spellingcurrency/manifest.md",
+          "plan": "sn-guidance-spelling-currency",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/schemas/standard_name.yaml",
+            "imas_codex/standard_names/AGENTS.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "doc-identityguidance",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:09:23Z",
+        "completed_at": "2026-08-25T08:15:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 382,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 382,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a0d58b9695f2ab3a8db6e57f6861c0eb7784bb04",
+        "commits": [
+          "2ae0d885",
+          "1d8e3e45"
+        ],
+        "changed_lines": {
+          "added": 75,
+          "removed": 75,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T080912469613-n-spellingcurrency/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037f7-882d-7ee2-8c30-577f40bf0281",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1793536,
+            "cached_input_tokens_cumulative": 1793536,
+            "input_tokens": 1909400,
+            "input_tokens_cumulative": 1909400,
+            "output_tokens": 13603,
+            "output_tokens_cumulative": 13603,
+            "reasoning_output_tokens": 2712,
+            "reasoning_output_tokens_cumulative": 2712
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 851
+    "_version": 853
   }
 }

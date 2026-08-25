@@ -4,22 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-guidance-spelling-currency">
-  <meta name="plan-title"     content="Pointers That No Longer Resolve After The Key Migration">
-  <meta name="plan-summary"   content="The foreign-key migration left pointers behind rather than spellings: three cited line anchors now resolve to unrelated slots, the schema's own prose still names a retired key, and two evidence records describe a deleted field as a live mirror. Correct them, and cite class and slot instead of line numbers.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="mid">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-guidance-spelling-currency">
+  <meta name="plan-title" content="Pointers That No Longer Resolve After The Key Migration">
+  <meta name="plan-summary" content="The foreign-key migration left pointers behind rather than spellings: three cited line anchors now resolve to unrelated slots, the schema&#x27;s own prose still names a retired key, and two evidence records describe a deleted field as a live mirror. Correct them, and cite class and slot instead of line numbers.">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="1.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S9">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-informs"   content="sn-graph-identity-convention">
+  <meta name="plan-sprint" content="S9">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-informs" content="sn-graph-identity-convention">
   <title>Guidance Spelling Currency | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="2ae0d885">
+<meta name="plan-artifacts" content="imas_codex/schemas/standard_name.yaml,imas_codex/standard_names/AGENTS.md,docs/evidence/archive/sn-guidance-spelling-currency-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -138,26 +143,35 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="pointer-style" data-choice="class-and-slot" data-by="reckon-ship" data-when="2026-08-25">
-        <p class="r-dec-q">How should guidance reference a schema slot?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="class-and-slot">Class and slot name, greppable</button>
-          <button class="r-opt" data-value="repin-lines">Re-pin the line numbers</button>
-        </p>
-        <p class="r-dec-rat">Class and slot. The line anchors rotted within hours of a single rename that shifted them about twenty lines, and a pointer a reader cannot grep is worse than no pointer because they cannot tell whether they are missing context or chasing a ghost. Re-pinning restores the pointers and schedules the same failure.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="pointer-style" data-choice="class-and-slot" data-by="reckon-ship" data-when="2026-08-25">
+    <p class="r-dec-q">How should guidance reference a schema slot?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="class-and-slot">Class and slot name, greppable</button>
+      <button class="r-opt" data-value="repin-lines">Re-pin the line numbers</button>
+      </p>
+    <p class="r-dec-rat">Class and slot. The line anchors rotted within hours of a single rename that shifted them about twenty lines, and a pointer a reader cannot grep is worse than no pointer because they cannot tell whether they are missing context or chasing a ghost. Re-pinning restores the pointers and schedules the same failure.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-gsc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25">
-        <h4 class="r-fu-title">Correct the schema description and replace the rotted anchors with class-and-slot references</h4>
-        <div class="r-fu-body"><p>Fix <code>standard_name.yaml:2247</code> and the three rotted anchors in <code>imas_codex/standard_names/AGENTS.md</code>. Leave every <code>produced_sn_id</code>, <code>terminal_sn_id</code>, and Python-namespace <code>sn_id</code> untouched. The gate is that no cited anchor fails to resolve and the schema declares no retired spelling in its own prose.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship sn-guidance-spelling-currency</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-gsc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="2026-08-25T08:17:59+00:00" data-resolved-by="">
+    <h4 class="r-fu-title">Correct the schema description and replace the rotted anchors with class-and-slot references</h4>
+    <div class="r-fu-body"><p>Fix <code>standard_name.yaml:2247</code> and the three rotted anchors in <code>imas_codex/standard_names/AGENTS.md</code>. Leave every <code>produced_sn_id</code>, <code>terminal_sn_id</code>, and Python-namespace <code>sn_id</code> untouched. The gate is that no cited anchor fails to resolve and the schema declares no retired spelling in its own prose.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-guidance-spelling-currency</pre>
+    <p class="r-fu-outcome">done — no followup. Landed at commit 2ae0d885, gate passed. DocsRevision.id now describes standard_name_id#rev-N, so the schema's own prose no longer names a key it retired. The guidance file carries ZERO standard_name.yaml line-number anchors: all three rotted pointers were replaced with class-and-slot references rather than re-pinned, and 71 of 71 schema references resolve against the current LinkML classes with zero missing. The scope fence held exactly — produced_sn_id unchanged at 1403 occurrences and terminal_sn_id at 14, measured before and after, and no Python parameter, local, dataclass field or UNWIND row key renamed. test_cypher_property_check and test_guidance_matches_schema green at 5/5. The chain closes here for this plan: the only remaining items are the two present-tense stale-field assertions in docs/evidence/sn-release-readiness/gate-eligibility.md and docs-mirror-projection.md, which are foreign-owner — they belong to sn-release-readiness and that plan's session has accepted them. Past-tense measurement records citing the retired field are correct as records and were deliberately left alone.</p>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T080912469613-n-spellingcurrency" data-who="doc-identityguidance" data-when="2026-08-25T08:15:45Z">
+    <div class="r-comment-body"><p>Schema prose and guidance anchors current: DocsRevision.id now describes standard_name_id#rev-N; AGENTS.md carries zero line-number anchors and 71/71 class-and-slot references resolve; protected tokens unchanged at produced_sn_id 1403 and terminal_sn_id 14; no Python-namespace token renamed; test_cypher_property_check and test_guidance_matches_schema green at 5/5</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260825T0816-spellingcurrency" data-who="reckon-ship" data-when="2026-08-25T08:16:00+00:00">
+    <div class="r-comment-body">Pointer style changed, not just the pointers — commit 2ae0d885. The durable measure: 71 of 71 cited schema references resolved against the current LinkML classes and attributes, and the file now contains no line-number anchor at all. Three of five had rotted within hours of one rename that shifted the schema by about twenty lines, so re-pinning would have restored the pointers and scheduled the identical failure at the next slot insertion. A reader can now grep every reference. Equally important is what did not move: this node was fenced against the 318 bare sn_id tokens in graph_ops.py and 190 in workers.py, and the protected declared slots came through unchanged at produced_sn_id 1403 and terminal_sn_id 14 — measured before and after, not assumed.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

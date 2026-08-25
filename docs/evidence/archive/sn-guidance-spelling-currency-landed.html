@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-guidance-spelling-currency-landed">
+  <meta name="plan-title" content="Pointer Currency After The Key Migration — Landed">
+  <meta name="plan-evidence-for" content="sn-guidance-spelling-currency">
+  <meta name="plan-verifies" content="sn-guidance-spelling-currency#s3">
+  <title>Pointer Currency Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <section id="anchors-replaced-not-repinned">
+      <h2>Every schema pointer now cites a slot, and 71 of 71 resolve</h2>
+      <p>
+        Landed 2026-08-25 at commit <code>2ae0d885</code>. Two files changed and nothing
+        else: <code>imas_codex/schemas/standard_name.yaml</code> and
+        <code>imas_codex/standard_names/AGENTS.md</code>.
+      </p>
+      <table>
+        <caption>Before and after, measured rather than asserted</caption>
+        <thead><tr><th>Quantity</th><th>Before</th><th>After</th></tr></thead>
+        <tbody>
+          <tr><td>Line-number anchors into the schema</td><td>5 cited, 3 rotted</td><td><strong>0</strong></td></tr>
+          <tr><td>Class-and-slot references resolving to a live slot</td><td>—</td><td><strong>71 of 71</strong>, 0 missing</td></tr>
+          <tr><td><code>DocsRevision.id</code> prose</td><td><code>(sn_id#rev-N)</code></td><td><code>(standard_name_id#rev-N)</code></td></tr>
+          <tr><td><code>produced_sn_id</code> occurrences (protected)</td><td>1403</td><td>1403</td></tr>
+          <tr><td><code>terminal_sn_id</code> occurrences (protected)</td><td>14</td><td>14</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>The pointers were replaced, not re-pinned, and that is the whole
+        result.</strong> Three of the five had rotted within hours of a single rename
+        that shifted the schema by roughly twenty lines:
+        <code>3014-3021</code> cited for <code>produced_sn_id</code> resolved to
+        <code>provenance</code>, <code>3346-3349</code> for <code>terminal_sn_id</code>
+        to <code>before_closure_hash</code>, and <code>2995-2999</code> to unrelated
+        <code>vocab_gap</code> prose. Restoring the numbers would have fixed the symptom
+        and scheduled the identical failure at the next slot insertion. A class-and-slot
+        reference survives any edit that does not rename the slot, and a reader can grep
+        it.
+      </p>
+      <p>
+        <strong>What did not move matters as much as what did.</strong> The migration rule
+        covers <em>declared generic foreign keys</em> only, so
+        <code>produced_sn_id</code> and <code>terminal_sn_id</code> are correct and were
+        fenced out — their counts were measured before and after rather than assumed. The
+        318 bare <code>sn_id</code> tokens in <code>graph_ops.py</code> and 190 in
+        <code>workers.py</code> are Python parameters, locals, dataclass fields and UNWIND
+        row keys: a different namespace, untouched. A sweep that "unified the foreign key"
+        without that fence would have produced an enormous diff, changed no graph
+        behaviour, and put the hottest writers at risk.
+      </p>
+      <p>
+        <code>tests/graph/test_cypher_property_check.py</code> and
+        <code>tests/graph/test_guidance_matches_schema.py</code> green at 5 of 5.
+      </p>
+    </section>
+
+    <section id="what-a-spelling-check-cannot-see">
+      <h2>A pointer is not a spelling, and the distinction was worth getting right</h2>
+      <p>
+        This work was first raised as a shipped plan having landed with a false done-when
+        clause. <strong>That charge did not hold and was withdrawn.</strong> The clause
+        covers spellings under <code>AGENTS.md</code>, <code>agents/</code> and
+        <code>imas_codex/**/AGENTS.md</code>, and those files are free of
+        <code>sn_id</code>, <code>sn_ids</code>,
+        <code>docs_review_resolution_method</code> and the plural axis token; where they
+        name <code>produced_sn_id</code> and <code>terminal_sn_id</code> they are correct,
+        because both are still declared.
+      </p>
+      <p>
+        What rotted was a pointer, and a spelling grep cannot see a line number by
+        construction. The real defect is narrower and more useful: the measure was
+        narrower than the standing rule it served, which already requires that a cited
+        anchor be opened and confirmed to exist. The schema's own prose was never in the
+        scanned set at all — it is neither an <code>AGENTS.md</code> nor under
+        <code>agents/</code>, yet it is the authority every other file cites.
+      </p>
+    </section>
+
+  </main>
+</body>
+</html>
