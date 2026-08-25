@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.92">
+  <meta name="plan-impl" content="0.98">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="74">
 <meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa,3d0bb831,a1b4b1f8,e9530012,3946bd26,18fc3c10,d947a875,4c1542ba">
 <meta name="plan-artifacts" content="docs/evidence/sn-quality-parity/closure-audit.md,docs/evidence/sn-quality-parity/sign-convention-diagnosis.md,docs/evidence/sn-quality-parity/west-docs-resumed-refresh.md,docs/evidence/sn-quality-parity/west-docs-second-tranche.md">
 </head>
@@ -309,6 +309,11 @@
     <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
     <p class="r-fu-outcome">Delivered across two tranches for USD 27.28 of the USD 150 authorised, and the cohort reached stop_reason=no_eligible_work rather than a cost or time cap, which is the difference between draining and stopping. Tranche one refreshed 130 identities with 129 accepted; tranche two took 18 more with 14 accepted; cohort docs-accepted moved 202 to 216 against an unchanged cardinality of 234, with 130 of 130 prior DocsRevision snapshots written first so the whole thing is reversible. Names failing quorum followed the ordinary refine path exactly as the locked sequencing requires and none was hand-accepted. Both tranches keyed their census on StandardName.id and RE-MEASURED that key rather than inheriting it: 4,666 of 4,666 carry id and zero carry name, so a name-keyed census would have returned a clean empty cohort reading as nothing to do. 18 identities are deferred by name. The remaining thread is a graph-wide sign-gate rescore, which is only meaningful once the release docs drain reaches no-eligible-work.</p>
     </article>
+<article class="r-fu" data-id="f-wqp-namegate" data-status="open" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Disposition the 28 name-gated WEST family identities</h4>
+    <div class="r-fu-body">The WEST family-only documentation cohort holds at 28 non-accepted because those rows are gated on the NAME axis, not the documentation axis: docs_stage=pending sits behind name_stage=reviewed, which is the documented GENERATE_DOCS cross-gate behaving correctly, so the documentation refresh route cannot reach them by construction. Disposition each of the 28 by its name-axis state through sanctioned routes only - ordinary refine where attempts remain, sn rescore where a structurally sound name exhausted on quorum variance - and leave genuinely contested identities withheld with a named reason. Never hand-accept. Ceiling USD 40 against the authorised USD 150, of which USD 71.22 is already spent.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
+    </article>
 </section>
   <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -558,6 +563,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260825T082438898163-n-parityfinalclosure" data-who="test-parityclosure2" data-when="2026-08-25T08:34:10Z">
     <div class="r-comment-body"><p>sn-quality-parity NOT complete: 11 of 12 deliverables landed, 1 outstanding; the 18 deferred and the 198 family identities are outstanding scope, not residue; 381 of 416 docs-accepted</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260825T084423107172-n-westfamilyremint" data-who="impl-westremint" data-when="2026-08-25T09:19:58Z">
+    <div class="r-comment-body"><p>Exact 416-row ledger: 371 ship, 45 named withholds; non-accepted 35 to 32 overall and 7 to 4 direct while family-only held at 28; 194/196 through ordinary quorum, 196/196 snapshots, USD 34.27 of 50 and 71.22 of 150</p></div>
 </div>
 <div class="r-comment" data-section="§6" data-id="c-20260824T1600-parityclosure" data-who="reckon-ship" data-when="2026-08-24T16:02:00+00:00">
     <div class="r-comment-body">n-parityclosure landed — commit 22cf6c3d, merged at 875af5c7; gate closure-audit-completeness passed; measure 4 deliverable rows, 3 landed, 1 outstanding, with focused suites at 31 passed 0 failed; artifact docs/evidence/sn-quality-parity/closure-audit.md. LANDED: both §5 physics gates and the not_evaluable tri-state, but as QUALIFIED diagnostics, and the qualification is the result rather than a caveat. Scored over live accepted documents the conditional sign gate reads 100 pass / 281 fail / 2,346 not_evaluable, and every one of the 281 failures is an invariant quantity whose document states a convention it should not carry — a real defect population the gate found rather than a gate error. The dimensional gate reads 10 pass / 143 fail / 2,574 not_evaluable, which vindicates the tri-state: a boolean vector would have scored those 2,574 abstentions as failures and made every mean over the gate uninterpretable. The metadata boundary holds at 0 COCOS-number and 0 transform-label leaks across 2,727 accepted documents. OUTSTANDING: §6, the WEST cohort refresh, measured on exact identities rather than on the campaign's own report — 175 of 175 original accepted rows live but only 44 carrying a post-start revision and 131 without, the mid-loop cohort still 22 accepted / 6 reviewed / 7 pending / 1 exhausted, and 13 of the 20 concurrent-refinement exclusions now holding lineage successors that are all docs-pending with only 6 successor names accepted. impl corrected from 0.98 to 4 of 5 executable nodes; the two qualified findings are graph-wide remediation work this node was fenced out of.</div>
