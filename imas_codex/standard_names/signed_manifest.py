@@ -24,6 +24,7 @@ import json
 import re
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -145,6 +146,15 @@ _SEMANTIC_MIRROR_GUARDS = (
     "sole-live-target-authority",
     "exact-upstream-backing",
     "out-of-allowlist-immutability",
+)
+
+_LIFECYCLELESS_STUB_ADAPTER = "lifecycleless-stub-reconcile"
+_LIFECYCLELESS_STUB_MUTATION = "reconcile-lifecycleless-stub"
+_LIFECYCLELESS_STUB_PROGRAMS = (
+    "materialize-derived-parent",
+    "delete-dead-link-stub",
+    "rebind-source",
+    "refused",
 )
 
 _DD_RESIDUE_RELEASE_OPERATION = "release_legacy_dd_source_lifecycle"
@@ -6248,6 +6258,263 @@ def _apply_semantic_mirror_repair(
             client.close()
 
 
+def _apply_lifecycleless_stub_reconcile(
+    *,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Reconcile one hash-bound lifecycle-less StandardName cohort atomically."""
+    from imas_codex.standard_names.graph_ops import (
+        _LIFECYCLELESS_STUB_LOCK_QUERY,
+        _READ_LIFECYCLELESS_STUBS_QUERY,
+        LIFECYCLELESS_STUB_RECEIPT_SCHEMA,
+        LifecyclelessStubConflict,
+        _authority_payload_hash,
+        _delete_derived_parent_nodes,
+        _lifecycleless_stub_manifest,
+        _materialize_derived_parent_rows,
+        _partition_lifecycleless_stub_rows,
+        _reconcile_spurious_stub_source_scalars,
+    )
+
+    if apply and not manifest_sha256:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            adapter = _TransactionQuery(transaction)
+            try:
+                list(transaction.run(_LIFECYCLELESS_STUB_LOCK_QUERY))
+                rows = [
+                    dict(record)
+                    for record in transaction.run(_READ_LIFECYCLELESS_STUBS_QUERY)
+                ]
+                from imas_codex.standard_names.parents import (
+                    is_admissible_parent_name,
+                )
+
+                admission_by_id = {
+                    str(row["id"]): is_admissible_parent_name(str(row["id"]), adapter)
+                    for row in rows
+                    if row.get("child_data")
+                }
+                partitions = _partition_lifecycleless_stub_rows(
+                    rows, admission_by_id=admission_by_id
+                )
+                manifest = _lifecycleless_stub_manifest(partitions)
+                computed_hash = _authority_payload_hash(manifest)
+                counts = {key: len(value) for key, value in partitions.items()}
+
+                if apply and not rows:
+                    replay = list(
+                        transaction.run(
+                            "MATCH (change:StandardNameChange "
+                            "{manifest_sha256: $manifest_sha256}) "
+                            "RETURN count(change) AS changes",
+                            manifest_sha256=manifest_sha256,
+                        )
+                    )
+                    if replay and int(replay[0]["changes"]) > 0:
+                        transaction.rollback()
+                        return {
+                            "schema": LIFECYCLELESS_STUB_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "counts": counts,
+                            "manifest": None,
+                            "manifest_sha256": manifest_sha256,
+                        }
+                if apply and manifest_sha256 != computed_hash:
+                    raise LifecyclelessStubConflict(
+                        "manifest SHA-256 does not match the fresh lifecycle-less cohort"
+                    )
+                if partitions["refused"]:
+                    reasons = "; ".join(
+                        f"{row['id']}: {row['refusal_reason']}"
+                        for row in partitions["refused"]
+                    )
+                    raise LifecyclelessStubConflict(
+                        f"lifecycle-less cohort has incomplete authority: {reasons}"
+                    )
+
+                reason = (
+                    "exact lifecycle-less StandardName stub reconciliation "
+                    f"[{computed_hash}]"
+                )
+                from imas_codex.standard_names.provenance_lifecycle import (
+                    reset_standard_name_sources,
+                )
+
+                reconciled_sources = _reconcile_spurious_stub_source_scalars(
+                    transaction, partitions
+                )
+
+                reset_rows = [
+                    source
+                    for row in partitions["rebind-source"]
+                    for source in row["dd_sources"]
+                ]
+                reset_count = 0
+                if reset_rows:
+                    reset_result = reset_standard_name_sources(
+                        adapter,
+                        reset_rows,
+                        manifest_id=f"lifecycleless-stub:{computed_hash}",
+                        reason=reason,
+                        dry_run=False,
+                        _transactional=True,
+                    )
+                    reset_count = int(reset_result["applied"])
+
+                materialization_rows = [
+                    row
+                    for action in (
+                        "materialize-as-derived-parent",
+                        "rebind-source",
+                    )
+                    for row in partitions[action]
+                    if row.get("child_data")
+                ]
+                for row in materialization_rows:
+                    row["parent_id"] = row["id"]
+                    row["bootstrap_edges"] = [
+                        {
+                            "from_name": child["id"],
+                            "to_name": row["id"],
+                            "operator": child.get("operator"),
+                            "operator_kind": child.get("op_kind"),
+                            "role": child.get("role"),
+                            "separator": child.get("separator"),
+                            "axis": child.get("axis"),
+                            "shape": child.get("shape"),
+                            "expected_name_stage": child.get("name_stage"),
+                            "expected_unit": child.get("unit"),
+                            "expected_cocos": child.get("cocos"),
+                            "expected_physics_domain": child.get("physics_domain"),
+                            "expected_kind": child.get("kind"),
+                        }
+                        for child in row["child_data"]
+                    ]
+                materialization_events = [
+                    {
+                        "parent_id": row["id"],
+                        "event": {
+                            "id": f"sn-change:stub-materialize:{computed_hash}:{row['id']}",
+                            "from_name": row["id"],
+                            "to_name": row["id"],
+                            "operation": "materialize_derived_parent",
+                            "reason": reason,
+                            "origin": "pipeline_cleanup",
+                            "changed_at": datetime.now(UTC).isoformat(),
+                            "internal": True,
+                            "manifest_sha256": computed_hash,
+                        },
+                    }
+                    for row in materialization_rows
+                ]
+                materialized = _materialize_derived_parent_rows(
+                    adapter,
+                    materialization_rows,
+                    bootstrap_missing=True,
+                )
+                if materialized != len(materialization_events):
+                    raise LifecyclelessStubConflict(
+                        "derived-parent authority changed before materialization"
+                    )
+                if materialization_events:
+                    event_rows = list(
+                        transaction.run(
+                            "UNWIND $items AS item "
+                            "MATCH (parent:StandardName {id: item.parent_id}) "
+                            "CREATE (change:StandardNameChange) "
+                            "SET change = item.event "
+                            "CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change) "
+                            "RETURN count(change) AS changes",
+                            items=materialization_events,
+                        )
+                    )
+                    if not event_rows or int(event_rows[0]["changes"]) != materialized:
+                        raise LifecyclelessStubConflict(
+                            "materialization ledger cardinality changed"
+                        )
+
+                deletion_rows = [
+                    (action, row)
+                    for action in (
+                        "delete-as-dead-link-stub",
+                        "rebind-source",
+                    )
+                    for row in partitions[action]
+                    if not row.get("child_data")
+                ]
+                deleted_ids = [row["id"] for _, row in deletion_rows]
+                deletion_producer_ids = {
+                    row["id"]: (
+                        []
+                        if action == "rebind-source"
+                        else list(row.get("producer_ids") or ())
+                    )
+                    for action, row in deletion_rows
+                }
+                deleted = _delete_derived_parent_nodes(
+                    adapter,
+                    deleted_ids,
+                    manifest_sha256=computed_hash,
+                    reason=reason,
+                    expected_producer_ids_by_parent=deletion_producer_ids,
+                )
+                if deleted != len(deleted_ids):
+                    raise LifecyclelessStubConflict(
+                        "stub deletion cardinality changed before mutation"
+                    )
+                target_ids = [row["id"] for row in rows]
+                remaining = list(
+                    transaction.run(
+                        "MATCH (stub:StandardName) WHERE stub.id IN $ids "
+                        "AND stub.name_stage IS NULL AND stub.status IS NULL "
+                        "AND stub.origin IS NULL RETURN collect(stub.id) AS ids",
+                        ids=target_ids,
+                    )
+                )
+                if remaining and remaining[0]["ids"]:
+                    raise LifecyclelessStubConflict(
+                        "postflight found signed lifecycle-less rows still present"
+                    )
+
+                changed = materialized + deleted
+                if apply:
+                    transaction.commit()
+                else:
+                    transaction.rollback()
+                return {
+                    "schema": LIFECYCLELESS_STUB_RECEIPT_SCHEMA,
+                    "outcome": "applied" if apply else "would_apply",
+                    "dry_run": not apply,
+                    "changed": changed if apply else 0,
+                    "would_change": changed,
+                    "sources_reset": reset_count,
+                    "sources_reconciled": reconciled_sources,
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "postflight_verified": True,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 @retry_on_deadlock()
 def apply_signed_manifest(
     authority_path: str | Path | dict[str, Any],
@@ -6276,6 +6543,24 @@ def apply_signed_manifest(
     authorizes only the hash: participant closure, collateral rows, and counter
     baselines are always read again inside this invocation.
     """
+    if authority_adapter == _LIFECYCLELESS_STUB_ADAPTER:
+        if legacy_args or authority_path != {}:
+            raise SignedManifestAuthorityError(
+                "lifecycle-less stub reconciliation requires its closed authority"
+            )
+        if mutation_kind != _LIFECYCLELESS_STUB_MUTATION:
+            raise SignedManifestAuthorityError(
+                "lifecycle-less stub reconciliation requires its exact mutation program"
+            )
+        if guard_set != _LIFECYCLELESS_STUB_PROGRAMS:
+            raise SignedManifestAuthorityError(
+                "lifecycle-less stub reconciliation requires all four named programs"
+            )
+        return _apply_lifecycleless_stub_reconcile(
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+            gc=gc,
+        )
     if authority_adapter == _SEMANTIC_MIRROR_ADAPTER:
         if (
             legacy_args
