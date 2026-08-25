@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T09:48:38",
+  "updated": "2026-08-25T09:59:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1105,7 +1105,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02678-af11-7c21-9878-a1e4660165dc",
-        "created": "2026-08-21"
+        "created": "2026-08-21",
+        "sessions": {
+          "gpt-5.6-sol": "01a037e4-26db-7dc3-9fde-72555699038b"
+        }
       },
       {
         "id": "impl-srcrecon",
@@ -1550,6 +1553,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "test-cocosmismatch",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
+      },
+      {
         "id": "test-dimcalib",
         "harness": "codex",
         "role": "test",
@@ -1592,11 +1604,23 @@
         "created": "2026-08-24"
       },
       {
+        "id": "test-repeatability",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
+      },
+      {
         "id": "test-residue",
         "harness": "codex",
         "role": "test",
         "session_id": "01a03481-89b5-73c1-8dda-7554b20e2241",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a037ea-ac01-7933-a15d-2b9d06ea4bd0"
+        }
       },
       {
         "id": "test-s8closure",
@@ -28431,9 +28455,86 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T073510172408-n-regressiondiagnosis",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a74",
+        "node": "n-regressiondiagnosis",
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s8closure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:35:19Z",
+        "completed_at": "2026-08-25T07:59:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1451,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1451,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "4b5a7294766ee4d4a1f3b324dadcb51b64908f78",
+        "commits": [
+          "126191b0",
+          "d47535b1",
+          "512a2c59"
+        ],
+        "changed_lines": {
+          "added": 131,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T073510172408-n-regressiondiagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037d8-5488-7143-aed1-3c5d4e222d16",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3365632,
+            "cached_input_tokens_cumulative": 3365632,
+            "input_tokens": 3659656,
+            "input_tokens_cumulative": 3659656,
+            "output_tokens": 13642,
+            "output_tokens_cumulative": 13642,
+            "reasoning_output_tokens": 5059,
+            "reasoning_output_tokens_cumulative": 5059
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 839
+    "_version": 844
   }
 }

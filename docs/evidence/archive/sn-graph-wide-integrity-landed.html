@@ -439,6 +439,60 @@
     that classified a shatter-cone identity as a token miss needs diagnosis rather than another
     draw.</p>
   </section>
+
+  <section id="regrown-classes-repartitioned">
+    <h2>The regrown classes are six genuine rows, and the receipt that would prove the rest does not exist</h2>
+    <p>
+      Measured live 2026-08-25T07:38:54.592Z, every zero proved before it was believed:
+      StandardName 4,656/4,656 carrying <code>name_stage</code>; StandardNameSource
+      9,668/9,668 carrying <code>status</code> and <code>source_type</code>; 5,351
+      authored <code>PRODUCED_NAME</code> edges all carrying target id and stage, with
+      0 reverse edges.
+    </p>
+    <table>
+      <caption>The 42 regrown rows, partitioned by producing write path</caption>
+      <thead><tr><th>Class</th><th>Rows</th><th>Verdict</th><th>Repair route</th></tr></thead>
+      <tbody>
+        <tr><td>derived, no live target</td><td>36</td><td>expected transient</td><td>existing liveness settlement</td></tr>
+        <tr><td>DD, no live target</td><td>3</td><td>genuine residue</td><td>signed release only</td></tr>
+        <tr><td>scalar mirror</td><td>3</td><td>genuine regression</td><td>existing signed scalar repair</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The three DD identities are <code>dd:ntms/time_slice/mode</code>,
+      <code>dd:summary/pedestal_fits</code> and <code>dd:waves/coherent_wave</code>.
+      <strong>No new bespoke operator is required for any of the three routes</strong> —
+      which is what makes the corrected boundary cheaper than the closure verification's
+      reading of it.
+    </p>
+    <p>
+      <strong>The closing census went stale by counting the transient class without its
+      partition.</strong> That is this plan's own doctrine — <em>measure classes with
+      their partition, after the reconcile settles</em> — catching a reading taken
+      against it, one section of this same record having already established that
+      unsourced-structural is a transient state.
+    </p>
+    <p>
+      <strong>The corroboration returned a decisive negative, and it is worth more than
+      the corroboration would have been.</strong> Asked to prove the 36-row batch
+      attribution by the receipt's own <code>run_id</code> and manifest digest — this
+      plan's binding recovery rule — the exact creation window returned 0 change rows,
+      0 <code>run_id</code> groups, 0 manifest keys and 0 matches, against sane totals
+      of 8,514 candidate rows with 8,504 carrying <code>changed_at</code>. The
+      structural materializer therefore writes <strong>no recoverable receipt</strong>,
+      and the attribution stays an inference <em>by measurement</em> rather than by
+      omission.
+    </p>
+    <p>
+      <strong>That exposes a wider gap in the ledger itself:</strong> only
+      <strong>3,334 of 8,514</strong> change rows carry a <code>run_id</code> and only
+      <strong>800 of 8,514</strong> carry a manifest digest. The rule this plan binds
+      every recovery to is thus inapplicable to most of its own ledger — a governance
+      gap on the creation side to set beside the deletion-side invariant recorded in
+      §4b. Full record:
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/regression-root-cause">regression root cause</a>.
+    </p>
+  </section>
 </main>
 </body>
 </html>
