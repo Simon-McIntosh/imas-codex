@@ -187,26 +187,30 @@ def run_embedding_preflight(names: list[dict[str, Any]]) -> EmbeddingReport:
             needs_embed, text_field="description", embedding_field="embedding"
         )
 
-        with GraphClient() as gc:
-            gc.query(
-                """
-                UNWIND $batch AS b
-                MATCH (sn:StandardName {id: b.id})
-                SET sn.embedding = b.embedding,
-                    sn.review_input_hash = b.hash,
-                    sn.embedded_at = datetime()
-                """,
-                batch=[
-                    {
-                        "id": item["id"],
-                        "embedding": item.get("embedding"),
-                        "hash": item["_hash"],
-                    }
-                    for item in needs_embed
-                ],
-            )
+        embedded_items = [
+            item for item in needs_embed if item.get("embedding") is not None
+        ]
+        if embedded_items:
+            with GraphClient() as gc:
+                gc.query(
+                    """
+                    UNWIND $batch AS b
+                    MATCH (sn:StandardName {id: b.id})
+                    SET sn.embedding = b.embedding,
+                        sn.review_input_hash = b.hash,
+                        sn.embedded_at = datetime()
+                    """,
+                    batch=[
+                        {
+                            "id": item["id"],
+                            "embedding": item["embedding"],
+                            "hash": item["_hash"],
+                        }
+                        for item in embedded_items
+                    ],
+                )
 
-        report.refreshed_count = len(needs_embed)
+        report.refreshed_count = len(embedded_items)
         logger.info(
             "Embedding preflight: refreshed %d (%d missing, %d stale)",
             report.refreshed_count,
