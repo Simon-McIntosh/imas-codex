@@ -27,14 +27,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.edit import EditPlan
-from imas_codex.standard_names.merge import (
+from imas_codex.standard_names.promote import (
     MergeChange,
     MergeReport,
     read_pr_changes,
     run_merge,
 )
 
-MERGE = "imas_codex.standard_names.merge"
+MERGE = "imas_codex.standard_names.promote"
 
 
 # ---------------------------------------------------------------------------
@@ -411,7 +411,7 @@ class TestResolveMergedPr:
         return SimpleNamespace(returncode=rc, stdout=_json.dumps(payload), stderr=err)
 
     def test_resolves_merged_pr(self):
-        from imas_codex.standard_names.merge import resolve_merged_pr
+        from imas_codex.standard_names.promote import resolve_merged_pr
 
         payload = {
             "number": 7,
@@ -422,7 +422,7 @@ class TestResolveMergedPr:
             "baseRefName": "main",
         }
         with patch(
-            "imas_codex.standard_names.merge.subprocess.run",
+            "imas_codex.standard_names.promote.subprocess.run",
             return_value=self._gh_result(payload),
         ):
             r = resolve_merged_pr("https://github.com/o/r/pull/7")
@@ -431,12 +431,12 @@ class TestResolveMergedPr:
         assert r.head_ref == "review/v0.2.0rc65"
 
     def test_unmerged_pr_rejected(self):
-        from imas_codex.standard_names.merge import resolve_merged_pr
+        from imas_codex.standard_names.promote import resolve_merged_pr
 
         payload = {"number": 7, "state": "OPEN", "mergeCommit": None}
         with (
             patch(
-                "imas_codex.standard_names.merge.subprocess.run",
+                "imas_codex.standard_names.promote.subprocess.run",
                 return_value=self._gh_result(payload),
             ),
             pytest.raises(ValueError, match="not merged"),
@@ -444,11 +444,11 @@ class TestResolveMergedPr:
             resolve_merged_pr("https://github.com/o/r/pull/7")
 
     def test_gh_failure_surfaces(self):
-        from imas_codex.standard_names.merge import resolve_merged_pr
+        from imas_codex.standard_names.promote import resolve_merged_pr
 
         with (
             patch(
-                "imas_codex.standard_names.merge.subprocess.run",
+                "imas_codex.standard_names.promote.subprocess.run",
                 return_value=self._gh_result({}, rc=1, err="no auth"),
             ),
             pytest.raises(ValueError, match="gh pr view failed"),
@@ -470,7 +470,7 @@ class TestBatchLabelledVersionRoundTrip:
     """
 
     def test_merge_tag_name_keeps_the_label(self):
-        from imas_codex.standard_names.merge import merge_tag_name
+        from imas_codex.standard_names.promote import merge_tag_name
 
         assert (
             merge_tag_name("review/v0.2.0rc65+west-task-2e")
@@ -478,13 +478,13 @@ class TestBatchLabelledVersionRoundTrip:
         )
 
     def test_plain_and_release_branches_are_unaffected(self):
-        from imas_codex.standard_names.merge import merge_tag_name
+        from imas_codex.standard_names.promote import merge_tag_name
 
         assert merge_tag_name("review/v0.2.0rc65") == "v0.2.0rc65"
         assert merge_tag_name("release/v1.0.0") == "v1.0.0"
 
     def test_resolve_merged_pr_carries_a_labelled_head_ref(self):
-        from imas_codex.standard_names.merge import resolve_merged_pr
+        from imas_codex.standard_names.promote import resolve_merged_pr
 
         payload = {
             "number": 9,
@@ -498,7 +498,7 @@ class TestBatchLabelledVersionRoundTrip:
         from types import SimpleNamespace
 
         with patch(
-            "imas_codex.standard_names.merge.subprocess.run",
+            "imas_codex.standard_names.promote.subprocess.run",
             return_value=SimpleNamespace(
                 returncode=0, stdout=_json.dumps(payload), stderr=""
             ),
@@ -512,7 +512,7 @@ class TestBatchLabelledVersionRoundTrip:
             _format_tag,
             _freeze_review_artifact,
         )
-        from imas_codex.standard_names.merge import merge_tag_name
+        from imas_codex.standard_names.promote import merge_tag_name
         from imas_codex.standard_names.sources_manifest import load_names_file
 
         tag = _format_tag(0, 2, 0, 65, build="west_task_2e")

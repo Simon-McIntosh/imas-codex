@@ -55,6 +55,9 @@ logger = logging.getLogger(__name__)
 #: Catalog fields whose change is a docs-axis edit.
 _DOCS_FIELDS = ("documentation", "description")
 
+#: Editorial outcomes recorded when catalog review grants approval.
+_APPROVAL_OUTCOMES = frozenset({"unchanged_ratification", "content_edit"})
+
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -557,10 +560,23 @@ def override_approve_contested(
             SET sn.name_stage = 'approved',
                 sn.contested_resolution = $reason,
                 sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime())
+            CREATE (change:StandardNameChange {
+              id: 'sn-change:' + randomUUID(),
+              from_name: sn.id,
+              to_name: sn.id,
+              operation: $editorial_outcome,
+              reason: $reason,
+              origin: $change_origin,
+              changed_at: datetime(),
+              internal: true
+            })
+            CREATE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
             RETURN sn.id AS id
             """,
             name=name,
             reason=reason,
+            editorial_outcome="content_edit",
+            change_origin="catalog_override",
         )
         return bool(rows)
     finally:
@@ -768,6 +784,7 @@ def run_merge(
                         catalog_pr_number=int(catalog_pr_number),
                         catalog_pr_url=str(catalog_pr_url),
                         catalog_merge_commit_sha=str(catalog_merge_commit_sha),
+                        editorial_outcome="content_edit",
                         gc=gc,
                     )
                 if disposition == "accepted":
@@ -822,6 +839,7 @@ def run_merge(
                     catalog_pr_number=int(catalog_pr_number),
                     catalog_pr_url=str(catalog_pr_url),
                     catalog_merge_commit_sha=str(catalog_merge_commit_sha),
+                    editorial_outcome="unchanged_ratification",
                     gc=gc,
                 ):
                     report.auto_approved.append(nid)
@@ -970,11 +988,18 @@ def mark_catalog_name_approved(
     catalog_pr_number: int,
     catalog_pr_url: str,
     catalog_merge_commit_sha: str,
+    editorial_outcome: str = "unchanged_ratification",
     gc: GraphClient,
 ) -> bool:
-    """Promote an accepted name using complete merged-PR evidence only."""
+    """Promote an accepted name and record its catalog editorial outcome."""
     if catalog_pr_number <= 0 or not catalog_pr_url or not catalog_merge_commit_sha:
         raise ValueError("complete merged catalog PR metadata is required")
+    if editorial_outcome not in _APPROVAL_OUTCOMES:
+        raise ValueError(f"unknown catalog editorial outcome: {editorial_outcome!r}")
+    change_reason = (
+        f"Catalog PR {catalog_pr_number} recorded the {editorial_outcome} "
+        "editorial outcome."
+    )
     rows = gc.query(
         """
         MATCH (sn:StandardName {id: $name})
@@ -985,12 +1010,26 @@ def mark_catalog_name_approved(
             sn.catalog_pr_url = $pr_url,
             sn.catalog_merge_commit_sha = $merge_commit,
             sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime())
+        CREATE (change:StandardNameChange {
+          id: 'sn-change:' + randomUUID(),
+          from_name: sn.id,
+          to_name: sn.id,
+          operation: $editorial_outcome,
+          reason: $change_reason,
+          origin: $change_origin,
+          changed_at: datetime(),
+          internal: true
+        })
+        CREATE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
         RETURN sn.id AS id
         """,
         name=name,
         pr_number=catalog_pr_number,
         pr_url=catalog_pr_url,
         merge_commit=catalog_merge_commit_sha,
+        editorial_outcome=editorial_outcome,
+        change_reason=change_reason,
+        change_origin="catalog_promotion",
     )
     return bool(rows)
 

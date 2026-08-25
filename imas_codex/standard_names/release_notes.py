@@ -112,7 +112,7 @@ def collect_catalog_changes(
     the same YAML reader as :mod:`merge`, so the evidence the notes model sees
     is exactly what ``sn merge`` will later act on.
     """
-    from imas_codex.standard_names.merge import _git, _parse_entries
+    from imas_codex.standard_names.promote import _git, _parse_entries
 
     isnc = Path(isnc_path)
     listing = _git(["diff", "--name-only", base_ref, "--", "standard_names"], isnc)

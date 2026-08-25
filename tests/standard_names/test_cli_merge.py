@@ -7,9 +7,9 @@ from unittest.mock import patch
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
-from imas_codex.standard_names.merge import MergeReport
+from imas_codex.standard_names.promote import MergeReport
 
-MOCK_TARGET = "imas_codex.standard_names.merge.run_merge"
+MOCK_TARGET = "imas_codex.standard_names.promote.run_merge"
 
 
 def test_sn_merge_forwards_flags_and_reports():

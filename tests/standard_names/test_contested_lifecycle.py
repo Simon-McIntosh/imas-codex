@@ -16,8 +16,8 @@ from types import SimpleNamespace
 import pytest
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import merge as merge_mod
-from imas_codex.standard_names.merge import (
+from imas_codex.standard_names import promote as merge_mod
+from imas_codex.standard_names.promote import (
     MergeChange,
     list_contested,
     override_approve_contested,
@@ -231,7 +231,7 @@ def test_contested_child_not_live_for_enrich(clean):
 
 @pytest.mark.graph
 def test_undo_merge_demotes_and_reverts(clean):
-    from imas_codex.standard_names.merge import undo_merge
+    from imas_codex.standard_names.promote import undo_merge
 
     approved = f"{PREFIX}_undo_approved"
     other_pr = f"{PREFIX}_undo_other_pr"

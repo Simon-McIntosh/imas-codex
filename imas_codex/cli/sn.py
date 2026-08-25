@@ -3678,7 +3678,7 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
 def sn_status(family_seed: str | None, show_contested: bool) -> None:
     """Show standard name statistics."""
     if show_contested:
-        from imas_codex.standard_names.merge import list_contested
+        from imas_codex.standard_names.promote import list_contested
 
         rows = list_contested()
         if not rows:
@@ -4996,7 +4996,7 @@ def sn_merge(
     from rich.table import Table
 
     from imas_codex.settings import get_sn_isnc_dir
-    from imas_codex.standard_names.merge import (
+    from imas_codex.standard_names.promote import (
         delete_fold_back_tag,
         has_contract_tag,
         merge_tag_name,
@@ -5228,7 +5228,7 @@ def sn_approve(name: str, override: bool, reason: str) -> None:
     wording but it failed the compliance re-review. `--override` accepts the
     human wording deliberately; the justification is stored on the node.
     """
-    from imas_codex.standard_names.merge import override_approve_contested
+    from imas_codex.standard_names.promote import override_approve_contested
 
     if override_approve_contested(name, reason=reason):
         console.print(f"[green]✓ {name} → approved[/green] (override: {reason})")
@@ -5254,7 +5254,7 @@ def sn_revert(name: str, reason: str) -> None:
     Discards the reviewer edit that failed re-review and returns the name to the
     accepted state so it rejoins a future review batch unchanged.
     """
-    from imas_codex.standard_names.merge import revert_contested
+    from imas_codex.standard_names.promote import revert_contested
 
     if revert_contested(name, reason=reason):
         console.print(f"[green]✓ {name} → accepted[/green] (reverted: {reason})")
