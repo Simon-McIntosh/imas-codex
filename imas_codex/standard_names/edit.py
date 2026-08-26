@@ -2,7 +2,7 @@
 
 ``imas-codex sn edit <sn>`` lets a human or agent attach a proposal to a
 ``StandardName`` that rides the normal generate → review → score pipeline
-instead of hand-editing graph text directly.  Three modes:
+instead of hand-editing graph text directly. Four modes:
 
 - **hint** — a steering direction is injected into generate/refine prompts;
   the pipeline still composes the candidate.  Re-enters at ``generate``.
@@ -10,6 +10,9 @@ instead of hand-editing graph text directly.  Three modes:
   into name review.  Re-enters at ``review_name``.
 - **docs** — full replacement documentation skips generation and rides
   straight into docs review.  Re-enters at ``review_docs``.
+- **kind** — an exact in-place structural repair derived from the unchanged
+  identity, validated through ISN, previewed before an explicit apply, and
+  recorded without changing already-reviewed wording or lifecycle stages.
 
 Locked decisions (see the SN edit-engine plan):
 
@@ -98,6 +101,7 @@ from imas_codex.standard_names.graph_ops import (
     persist_refined_name,
     reset_standard_name_docs,
 )
+from imas_codex.standard_names.kind_derivation import derive_kind
 
 #: name_stage values eligible for a direct rename (superseded is handled
 #: separately: eligible only when it has no successor; the stages below the
@@ -750,6 +754,205 @@ def reclassify_domain(
             origin="catalog_edit",
         )
         return result
+
+
+def _validate_kind_candidate(name: str, kind: str, unit: str | None) -> list[str]:
+    """Return hard pinned-ISN findings for one proposed kind assignment."""
+    try:
+        from imas_standard_names.models import create_standard_name_entry
+        from imas_standard_names.validation import run_semantic_checks
+
+        from imas_codex.standard_names.kind_derivation import to_isn_kind
+
+        candidate: dict[str, str] = {
+            "name": name,
+            "kind": to_isn_kind(kind),
+        }
+        if unit:
+            candidate["unit"] = unit
+        elif kind != "metadata":
+            return [f"{kind} entry requires an authoritative unit"]
+        entry = create_standard_name_entry(candidate, name_only=True)
+        return [
+            issue
+            for issue in run_semantic_checks({name: entry})
+            if " WARNING - " not in issue and " INFO - " not in issue
+        ]
+    except Exception as exc:  # ISN exposes parse and model-validation failures.
+        return [str(exc)]
+
+
+def reclassify_kind(
+    name: str,
+    kind: str,
+    *,
+    reason: str,
+    override_edits: bool = False,
+    apply: bool = False,
+    gc: GraphClient | None = None,
+) -> dict[str, Any]:
+    """Repair one stored structural kind through a validated, audited CAS.
+
+    Kind is mechanically derived from the unchanged identity, so callers may
+    only request the value returned by :func:`derive_kind`. The default is a
+    zero-write preview; ``apply=True`` is an explicit second step. Reviewed
+    wording and lifecycle stages are preserved because neither changes, while
+    catalog-owned fields retain the standard ``--override-edits`` protection.
+    """
+    from imas_codex.standard_names.protection import filter_protected
+
+    name = (name or "").strip()
+    requested_kind = (kind or "").strip()
+    reason = (reason or "").strip()
+    if not name:
+        return {"ok": False, "reason": "a standard name is required"}
+    if not reason:
+        return {"ok": False, "reason": "--reason is mandatory for a kind repair"}
+
+    derived_kind = derive_kind(name)
+    if requested_kind != derived_kind:
+        return {
+            "ok": False,
+            "reason": (
+                f"requested kind {requested_kind!r} disagrees with "
+                f"derive_kind({name!r})={derived_kind!r}"
+            ),
+        }
+
+    owns_gc = gc is None
+    if gc is None:
+        gc = GraphClient()
+    try:
+        rows = list(
+            gc.query(
+                """
+                // KIND_RECLASSIFY_FETCH
+                MATCH (n:StandardName {id: $id})
+                RETURN n.kind AS kind, n.unit AS unit, n.origin AS origin,
+                       n.name_stage AS name_stage, n.docs_stage AS docs_stage,
+                       n.validation_status AS validation_status
+                """,
+                id=name,
+            )
+        )
+        if not rows:
+            return {"ok": False, "reason": f"standard name {name!r} not found"}
+        before = dict(rows[0])
+
+        protected_names = (
+            {name}
+            if before.get("origin") == "catalog_edit"
+            or before.get("name_stage") == "approved"
+            else set()
+        )
+        filtered, skipped = filter_protected(
+            [{"id": name, "kind": requested_kind}],
+            override=override_edits,
+            protected_names=protected_names,
+        )
+        if skipped or "kind" not in filtered[0]:
+            return {
+                "ok": False,
+                "reason": (
+                    f"{name!r} has a catalog-protected kind; pass "
+                    "--override-edits to authorize this exact field repair"
+                ),
+            }
+
+        hard_findings = _validate_kind_candidate(
+            name, requested_kind, before.get("unit")
+        )
+        if hard_findings:
+            return {
+                "ok": False,
+                "reason": "pinned ISN rejected the proposed kind: "
+                + "; ".join(hard_findings),
+                "hard_findings": hard_findings,
+            }
+
+        result: dict[str, Any] = {
+            "ok": True,
+            "name": name,
+            "from_kind": before.get("kind"),
+            "to_kind": requested_kind,
+            "unit": before.get("unit"),
+            "name_stage": before.get("name_stage"),
+            "docs_stage": before.get("docs_stage"),
+            "validation_status": before.get("validation_status"),
+            "dry_run": not apply,
+            "noop": before.get("kind") == requested_kind,
+            "hard_findings": [],
+        }
+        if not apply or result["noop"]:
+            return result
+
+        change_id = f"sn-change:{uuid.uuid4()}"
+        changed_at = _now_iso()
+        run_id = "sn-edit-kind-" + datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+        applied_rows = list(
+            gc.query(
+                """
+                // KIND_RECLASSIFY_APPLY
+                MATCH (n:StandardName {id: $id})
+                WHERE n.kind = $from_kind
+                  AND (n.unit = $unit
+                       OR (n.unit IS NULL AND $unit IS NULL))
+                  AND (n.name_stage = $name_stage
+                       OR (n.name_stage IS NULL AND $name_stage IS NULL))
+                  AND (n.docs_stage = $docs_stage
+                       OR (n.docs_stage IS NULL AND $docs_stage IS NULL))
+                  AND (n.validation_status = $validation_status
+                       OR (n.validation_status IS NULL
+                           AND $validation_status IS NULL))
+                SET n.kind = $to_kind
+                CREATE (change:StandardNameChange {
+                  id: $change_id,
+                  from_name: $id,
+                  to_name: $id,
+                  operation: 'reclassify_kind',
+                  reason: $reason,
+                  origin: 'catalog_edit',
+                  run_id: $run_id,
+                  changed_at: datetime($changed_at),
+                  internal: true
+                })
+                MERGE (n)-[:HAS_INTERNAL_CHANGE]->(change)
+                RETURN n.kind AS kind, n.unit AS unit,
+                       n.name_stage AS name_stage, n.docs_stage AS docs_stage,
+                       n.validation_status AS validation_status,
+                       change.id AS change_id
+                """,
+                id=name,
+                from_kind=before.get("kind"),
+                to_kind=requested_kind,
+                unit=before.get("unit"),
+                name_stage=before.get("name_stage"),
+                docs_stage=before.get("docs_stage"),
+                validation_status=before.get("validation_status"),
+                change_id=change_id,
+                reason=reason,
+                run_id=run_id,
+                changed_at=changed_at,
+            )
+        )
+        if len(applied_rows) != 1:
+            return {
+                "ok": False,
+                "reason": "kind repair compare-and-set lost; graph state changed",
+            }
+        applied_row = dict(applied_rows[0])
+        result.update(
+            dry_run=False,
+            change_id=applied_row["change_id"],
+            unit=applied_row["unit"],
+            name_stage=applied_row["name_stage"],
+            docs_stage=applied_row["docs_stage"],
+            validation_status=applied_row["validation_status"],
+        )
+        return result
+    finally:
+        if owns_gc:
+            gc.close()
 
 
 _FOLD_LIVE_STAGES = frozenset(
@@ -2344,7 +2547,7 @@ def _apply_rename(
         old_name=refine_root_old,
         new_name=refine_root_new,
         description=root_row.get("description") or "",
-        kind=root_row.get("kind") or "scalar",
+        kind=derive_kind(refine_root_new),
         unit=successor_unit,
         physics_domain=root_row.get("physics_domain"),
         tags=root_row.get("tags") or [],

@@ -6140,6 +6140,16 @@ def _render_inline_review_outcome(outcome: Any) -> None:
     ),
 )
 @click.option(
+    "--kind",
+    "kind_value",
+    type=click.Choice(["scalar", "vector", "tensor", "complex", "metadata"]),
+    default=None,
+    help=(
+        "Repair the unchanged identity's structural kind. The value must match "
+        "derive_kind(identity); defaults to a zero-write preview."
+    ),
+)
+@click.option(
     "--reason",
     default=None,
     help=(
@@ -6218,11 +6228,18 @@ def _render_inline_review_outcome(outcome: Any) -> None:
     is_flag=True,
     help="Preview the plan (and cascade, if any) without writing to the graph.",
 )
+@click.option(
+    "--apply",
+    "apply_changes",
+    is_flag=True,
+    help="Apply a validated --kind preview. Only valid with --kind.",
+)
 def sn_edit(
     standard_name: str,
     hint: str | None,
     rename_value: str | None,
     docs_value: str | None,
+    kind_value: str | None,
     reason: str | None,
     axis: str | None,
     scope_value: str | None,
@@ -6231,6 +6248,7 @@ def sn_edit(
     stage_only: bool,
     cost_limit: float,
     dry_run: bool,
+    apply_changes: bool,
 ) -> None:
     """Attach a steered edit proposal to STANDARD_NAME and review it inline.
 
@@ -6260,6 +6278,7 @@ def sn_edit(
             ("hint", hint),
             ("rename", rename_value),
             ("docs", docs_value),
+            ("kind", kind_value),
         )
         if val
     ]
@@ -6270,6 +6289,42 @@ def sn_edit(
         )
     if not reason or not reason.strip():
         raise click.UsageError("sn edit requires --reason")
+
+    if apply_changes and kind_value is None:
+        raise click.UsageError("--apply is only valid with --kind")
+    if apply_changes and dry_run:
+        raise click.UsageError("--apply and --dry-run are mutually exclusive")
+
+    if kind_value is not None:
+        if any((axis, scope_value, stage_only)):
+            raise click.UsageError(
+                "--kind is an exact in-place repair; --axis, --scope, and "
+                "--stage-only do not apply"
+            )
+        from imas_codex.standard_names.edit import reclassify_kind
+
+        result = reclassify_kind(
+            standard_name,
+            kind_value,
+            reason=reason,
+            override_edits=override_edits,
+            apply=apply_changes,
+        )
+        if not result.get("ok"):
+            raise click.UsageError(result.get("reason", "kind repair refused"))
+        if result.get("noop"):
+            click.echo(
+                f"{result['name']} already has kind={result['to_kind']} — no change"
+            )
+            return
+        verb = "reclassified" if apply_changes else "would reclassify"
+        click.echo(
+            f"{verb} {result['name']}: {result['from_kind']} → "
+            f"{result['to_kind']} (unit={result['unit']}, hard_findings=0)"
+        )
+        if result.get("change_id"):
+            click.echo(f"change: {result['change_id']}")
+        return
 
     scope = None
     if scope_value is not None:
