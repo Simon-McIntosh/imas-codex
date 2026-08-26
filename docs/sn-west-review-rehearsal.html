@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2308,6 +2308,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T212931985843-n-west-export-readiness-gate" data-who="test-westexport" data-when="2026-08-26T21:48:13Z">
     <div class="r-comment-body"><p>Packet NOT releasable and the gate proved why: exporter runs run_semantic_checks per single-entry catalog before full-set link pruning, wrongly excluding 350/408 (4 emitted; breakdown_initial_time excluded only for a singleton-dangling pulse_duration link); bare radial_coordinate misclassified invalid_catalog_entry because origin is null despite a source-free derived producer; broad gate real exit 1 in 224s (13 empty-description corpus rows); dry-run correctly refused on approved-baseline additivity; ISNC clean, no remote effects</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T214919184002-n-export-fullset-validation" data-who="impl-exportpolicy" data-when="2026-08-26T21:56:27Z">
+    <div class="r-comment-body"><p>run_semantic_checks now executes exactly once over the full candidate set after emitted-set pruning (cross-linked pair emits 2/2 with 1 invocation); structural_parent keyed on source-free derived provenance so the null-origin scaffold classifies correctly while a DD-backed bad entry still excludes; accounting exact in all 6 fixtures</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
