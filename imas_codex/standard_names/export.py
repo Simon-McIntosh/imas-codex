@@ -390,6 +390,9 @@ def _fetch_export_population(
     WHERE {name_predicate}
     WITH sn,
          EXISTS {{
+             MATCH (:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+         }} AS has_dd_source_binding,
+         EXISTS {{
              MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
              WHERE review.review_axis = 'docs'
          }} AS has_docs_review,
@@ -400,6 +403,7 @@ def _fetch_export_population(
         .*,
         unit: coalesce(u.id, sn.unit),
         cocos: c.id,
+        _has_dd_source_binding: has_dd_source_binding,
         _has_docs_review: has_docs_review,
         _has_winning_docs_review: has_winning_docs_review
     }} AS record
@@ -438,6 +442,23 @@ def _classify_export_population(
                     stage="release_authority",
                     reason=reason,
                     detail=detail,
+                )
+            )
+            continue
+
+        has_dd_source_binding = candidate.get("_has_dd_source_binding")
+        if has_dd_source_binding is None:
+            has_dd_source_binding = bool(candidate.get("source_paths"))
+        if candidate.get("origin") == "derived" and not has_dd_source_binding:
+            excluded.append(
+                ExclusionRecord(
+                    standard_name_id=candidate_id,
+                    stage="export_policy",
+                    reason="structural_parent",
+                    detail=(
+                        "derived hierarchy scaffold has no Data Dictionary source "
+                        "binding"
+                    ),
                 )
             )
             continue
