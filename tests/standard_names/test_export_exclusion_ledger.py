@@ -151,25 +151,60 @@ def test_export_refuses_when_ledger_does_not_close(tmp_path: Path) -> None:
     assert not (tmp_path / "catalog.yml").exists()
 
 
-def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
+def test_export_withholds_source_free_structural_parent(tmp_path: Path) -> None:
     population = [
-        _candidate("radial_coordinate", unit="m"),
-        _candidate("radial_coordinate_of_line_of_sight", unit="m"),
+        _candidate(
+            "radial_coordinate",
+            origin="derived",
+            source_paths=[],
+            _has_dd_source_binding=False,
+            unit="m",
+        )
     ]
 
     report = _run_fixture_export(tmp_path, population, validate_entries=True)
     rows = {row["reason"]: row for row in report.to_dict()["exclusion_ledger"]}
 
     assert report.all_gates_passed
-    assert report.total_candidates == 2
-    assert report.exported_count == 1
-    assert report.exported_names == ["radial_coordinate_of_line_of_sight"]
+    assert report.total_candidates == 1
+    assert report.exported_count == 0
+    assert report.validation_failures == 0
+    assert rows["structural_parent"]["identities"] == ["radial_coordinate"]
+    assert report.exported_count + sum(row["count"] for row in rows.values()) == 1
+
+
+def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
+    population = [
+        _candidate(
+            "radial_coordinate",
+            origin="derived",
+            source_paths=["dd:equilibrium/time_slice/profiles_1d/rho_tor"],
+            _has_dd_source_binding=True,
+            unit="m",
+        ),
+    ]
+
+    report = _run_fixture_export(tmp_path, population, validate_entries=True)
+    rows = {row["reason"]: row for row in report.to_dict()["exclusion_ledger"]}
+
+    assert report.all_gates_passed
+    assert report.total_candidates == 1
+    assert report.exported_count == 0
     assert rows["invalid_catalog_entry"]["identities"] == ["radial_coordinate"]
-    assert report.exported_count + sum(row["count"] for row in rows.values()) == 2
+    assert "structural_parent" not in rows
+    assert report.exported_count + sum(row["count"] for row in rows.values()) == 1
 
 
 def test_export_keeps_catalog_semantic_advisories(tmp_path: Path) -> None:
-    population = [_candidate("radial_coordinate_of_line_of_sight", unit="m")]
+    population = [
+        _candidate(
+            "radial_coordinate_of_line_of_sight",
+            origin="derived",
+            source_paths=["dd:camera_ir/channel/line_of_sight/first_point/r"],
+            _has_dd_source_binding=True,
+            unit="m",
+        )
+    ]
 
     with patch(
         "imas_standard_names.validation.run_semantic_checks",
