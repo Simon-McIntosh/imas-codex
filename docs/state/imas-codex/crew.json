@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T21:02:42",
+  "updated": "2026-08-26T22:45:52",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -304,9 +304,11 @@
         "id": "impl-breakdownkind",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03f75-6a4e-7cb1-ad76-8f64839e3dd0",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03f75-6a4e-7cb1-ad76-8f64839e3dd0"
+        },
         "created": "2026-08-26"
       },
       {
@@ -641,9 +643,11 @@
         "id": "impl-exportpolicy",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c"
+        },
         "created": "2026-08-26"
       },
       {
@@ -35276,9 +35280,214 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T190352495144-n-breakdown-kind-operator",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-breakdown-kind-operator",
+        "node_definition": {
+          "done_when": "The sn edit surface gains an exact governed kind-reclassification route (with reason, dry-run-first, protected-field respect) and the rename writer stops copying a predecessor kind when derive_kind disagrees (the proven root cause at edit.py:2343-2348 and graph_ops.py:16418-16435); both are TDD-covered in a focused test file; the operator is then applied to the live breakdown_initial_time (reason recorded, kind metadata to scalar, unit s preserved, stages re-earned through review only if the route demands it \u2014 never a hand-accept) and a pinned-ISN single-entry probe on the live node returns zero hard findings; graph mutation proven confined to breakdown_initial_time by before/after counts in the report; paid spend within the earlier 5 USD cap; focused tests captured once to a persistent log exit 0; ruff clean; local conventional commit with body; no push",
+          "estimated_hours": null,
+          "goal": "A governed kind-reclassification operator lands breakdown_initial_time as a quantitative scalar",
+          "id": "n-breakdown-kind-operator",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190352495144-n-breakdown-kind-operator/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/edit.py",
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_sn_edit_kind.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/breakdown-time-kind-repair.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-breakdownkind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T19:04:13Z",
+        "completed_at": "2026-08-26T19:16:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 743,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 743,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5e8b5b29a83e8290fdd1e89e7f4b27d1f1afb841",
+        "commits": [
+          "29cd65ea"
+        ],
+        "changed_lines": {
+          "added": 517,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_edit_kind.py (+19 edit CLI regression)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190352495144-n-breakdown-kind-operator/test-sn-edit-kind.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190352495144-n-breakdown-kind-operator/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-6a4e-7cb1-ad76-8f64839e3dd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10052096,
+            "cached_input_tokens_cumulative": 10052096,
+            "input_tokens": 10312048,
+            "input_tokens_cumulative": 10312048,
+            "output_tokens": 26433,
+            "output_tokens_cumulative": 26433,
+            "reasoning_output_tokens": 5484,
+            "reasoning_output_tokens_cumulative": 5484
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T190357654654-n-structural-parent-export-policy",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-structural-parent-export-policy",
+        "node_definition": {
+          "done_when": "The export candidate builder withholds any identity with origin='derived' and zero DD source bindings (pure hierarchy scaffolding) under a new dedicated exclusion reason (e.g. structural_parent) BEFORE catalog model and semantic validation, preserving exact emitted-plus-excluded accounting; a derived parent that still carries DD bindings continues through validation unchanged (a bare one still lands invalid_catalog_entry), and locus-qualified accepted names are unaffected; focused tests cover all three cases plus accounting closure; focused test run captured once to a persistent log with exit 0; ruff clean on owned paths; local conventional commit with subject and body; no graph access, no push",
+          "estimated_hours": null,
+          "goal": "Derived structural parents are excluded from catalog export by policy rather than by semantic failure",
+          "id": "n-structural-parent-export-policy",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190357654654-n-structural-parent-export-policy/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_exclusion_ledger.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-exportpolicy",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T19:04:17Z",
+        "completed_at": "2026-08-26T19:09:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 334,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 334,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "5e8b5b29a83e8290fdd1e89e7f4b27d1f1afb841",
+        "commits": [
+          "6f385c7097e0c0c56d312833a959493f8b76f3c3"
+        ],
+        "changed_lines": {
+          "added": 63,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_export_exclusion_ledger.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190357654654-n-structural-parent-export-policy/logs/focused-export-policy.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190357654654-n-structural-parent-export-policy/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3779328,
+            "cached_input_tokens_cumulative": 3779328,
+            "input_tokens": 3935878,
+            "input_tokens_cumulative": 3935878,
+            "output_tokens": 10941,
+            "output_tokens_cumulative": 10941,
+            "reasoning_output_tokens": 3560,
+            "reasoning_output_tokens_cumulative": 3560
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 980
+    "_version": 984
   }
 }

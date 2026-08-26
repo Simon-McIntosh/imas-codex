@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="58">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70">
 </head>
 <body>
   <main class="plan-doc">
@@ -2290,6 +2290,15 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T163248603522-n-breakdown-time-kind-repair" data-who="impl-breakdownkind" data-when="2026-08-26T16:40:07Z">
     <div class="r-comment-body"><p>Blocked correctly at its fence: root cause proven (July human rename copied metadata kind from predecessor initial_plasma_breakdown_time; edit.py:2343-2348 / graph_ops.py:16418-16435; derive_kind returns scalar; ISN probe validates scalar+s with 0 findings; graph writes 0, spend 0) — repair needs a governed kind operator outside the report-only scope; continued by n-breakdown-kind-operator on the same member</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T190352495144-n-breakdown-kind-operator" data-who="impl-breakdownkind" data-when="2026-08-26T19:16:36Z">
+    <div class="r-comment-body"><p>Governed sn edit --kind route landed and applied: live breakdown_initial_time metadata-&gt;scalar with unit s preserved, stages intact, pinned-ISN hard findings 0, CAS receipt sn-change:494883d8, identity count unchanged 4658, spend 0 USD; rename/refine writers now derive successor kind</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T190357654654-n-structural-parent-export-policy" data-who="impl-exportpolicy" data-when="2026-08-26T19:09:51Z">
+    <div class="r-comment-body"><p>Source-free derived scaffolding excluded under structural_parent before validation; DD-bound bare derived still invalid_catalog_entry; locus-qualified emitted; accounting exact; 5/5 tests</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260826-kind-and-policy-landed" data-who="reckon-ship" data-when="2026-08-26T20:55:00Z">
+    <div class="r-comment-body">Two repairs landed and merged (de2d1333): (1) governed sn edit --kind route (29cd65ea) applied to breakdown_initial_time: kind metadata to scalar with unit s preserved, stages intact, pinned-ISN hard findings 0, receipt sn-change:494883d8, spend $0; the rename/refine writers now derive successor kind instead of copying the predecessor's (the proven root cause of the July inheritance). (2) structural_parent export policy (6f385c70): source-free derived scaffolding is withheld by design before validation, DD-bound bare parents still land invalid_catalog_entry, accounting exact. Radial redistribution is mid-flight and safe: all 9 bad DD bindings governedly reset to extracted with durable hints (bare-parent PRODUCED_NAME already 0, positive control 4664), iron successor accepted 0.9875, spend $0.06; the final scoped drain is blocked on the local DSv4-flash compose endpoint, relaunched under the lead's operator authority as serve job 1258322 (deepseek-v4-flash-2x, port 18800). 35 accepted docs still link the bare parent: a follow-on docs pass after the drain.</div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
