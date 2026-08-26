@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:56:51",
+  "updated": "2026-08-27T00:14:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -35782,9 +35782,98 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T215710257750-n-west-export-readiness-gate2",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-export-readiness-gate2",
+        "node_definition": {
+          "done_when": "reports/west-export-readiness.md updated against current code (b002cbc6 merged): (1) fresh accounted production export for west_production_dd_paths with exact arithmetic, per-reason exclusion ledger, zero unaccounted, confirmation that breakdown_initial_time EMITS and bare radial_coordinate is withheld as structural_parent; (2) full pinned-ISN validation over the complete emitted set with zero hard findings and the dangling-link prune count for non-emitted references recorded (the ~34 radial_coordinate doc links named as pruned or resolved); (3) the full sn release --batch west_production_dd_paths --dry-run preflight to a real exit with the frozen artifact path recorded and the additivity guard's verdict stated; every zero carries a positive control; no graph writes, no remote branch, tag, or PR; note the 13 known empty-description corpus rows as out-of-batch context, not gate failures, unless any belongs to the WEST batch",
+          "estimated_hours": null,
+          "goal": "A current accounted WEST export packet proven releasable by fresh gate evidence after the full-set validation repair",
+          "id": "n-west-export-readiness-gate2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T215710257750-n-west-export-readiness-gate2/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-export-readiness.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-westexport",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T21:57:18Z",
+        "completed_at": "2026-08-26T22:13:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 995,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 995,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "ead36edda3c1ade4b2179f78273c849fc4f1d88e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T215710257750-n-west-export-readiness-gate2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ffa-8713-7082-a25a-caca24d450b2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 9430784,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 9788647,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 24955,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 5459
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 990
+    "_version": 991
   }
 }

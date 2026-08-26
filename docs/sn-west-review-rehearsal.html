@@ -16,8 +16,8 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="62">
+<meta name="plan-modified" content="2026-08-27">
+<meta name="plan-version" content="63">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2311,6 +2311,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T214919184002-n-export-fullset-validation" data-who="impl-exportpolicy" data-when="2026-08-26T21:56:27Z">
     <div class="r-comment-body"><p>run_semantic_checks now executes exactly once over the full candidate set after emitted-set pruning (cross-linked pair emits 2/2 with 1 invocation); structural_parent keyed on source-free derived provenance so the null-origin scaffold classifies correctly while a DD-backed bad entry still excludes; accounting exact in all 6 fixtures</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T215710257750-n-west-export-readiness-gate2" data-who="test-westexport" data-when="2026-08-26T22:13:53Z">
+    <div class="r-comment-body"><p>Export core green: 408=332+76 exact, breakdown_initial_time emits, bare radial_coordinate structural_parent, 0 hard findings over 332, 367 links pruned, 34 radial links accounted (30 pruned + 2 withheld + 2 out-of-cohort), 13 empty-description rows proven out-of-batch. Dry-run real exit 1: staging drops the approved baseline (2017/2223 missing, 206 byte-changed, 0 unchanged) so the additivity guard correctly refuses — staging must carry non-batch approved entries byte-for-byte</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
