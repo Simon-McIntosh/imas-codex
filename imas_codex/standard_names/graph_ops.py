@@ -16325,6 +16325,17 @@ def persist_refined_name(
             f"Refine produced identical name '{new_name}' — "
             f"cannot create self-referential REFINED_FROM edge"
         )
+    from imas_codex.standard_names.kind_derivation import derive_kind
+
+    derived_kind = derive_kind(new_name)
+    if derived_kind != kind:
+        logger.info(
+            "Refined successor %s kind corrected from %s to %s",
+            new_name,
+            kind,
+            derived_kind,
+        )
+    kind = derived_kind
     new_chain_length = old_chain_length + 1
 
     inherit_open_edit = (
