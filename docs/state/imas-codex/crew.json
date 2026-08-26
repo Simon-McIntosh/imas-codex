@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T21:30:37",
+  "updated": "2026-08-26T15:45:13",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1641,8 +1641,12 @@
         "id": "inv-reusemap-rel",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "created": "2026-08-23"
+        "session_id": "01a03e38-408d-7853-801c-8fe86f310d1f",
+        "created": "2026-08-23",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e38-408d-7853-801c-8fe86f310d1f"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "inv-stall",
@@ -1685,6 +1689,15 @@
         "role": "investigate",
         "session_id": "01a00b77-49b1-7230-8705-4f587cc2d769",
         "created": "2026-08-16"
+      },
+      {
+        "id": "inv-west-rc-readiness",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "inv-westcohort",
@@ -1734,6 +1747,17 @@
         "role": "implement",
         "session_id": "01a023e9-a537-7aa0-a603-2b8f7a9ea38d",
         "created": "2026-08-21"
+      },
+      {
+        "id": "rev-west-upstream",
+        "harness": "codex",
+        "role": "review",
+        "session_id": "01a03e39-4e09-74e1-8b13-b615b5bd7637",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e39-4e09-74e1-8b13-b615b5bd7637"
+        },
+        "created": "2026-08-26"
       },
       {
         "id": "scout-bench",
@@ -1939,6 +1963,28 @@
         "role": "test",
         "session_id": "01a0377a-2ff5-7de0-a0e9-f9b874365b16",
         "created": "2026-08-25"
+      },
+      {
+        "id": "test-west-rc-gates",
+        "harness": "codex",
+        "role": "test",
+        "session_id": "01a03e38-f174-78d1-a635-b143dbac160e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e38-f174-78d1-a635-b143dbac160e"
+        },
+        "created": "2026-08-26"
+      },
+      {
+        "id": "test-west-rc-release",
+        "harness": "codex",
+        "role": "test",
+        "session_id": "01a03e40-7a6a-70a0-8935-df1f9e9907a6",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e40-7a6a-70a0-8935-df1f9e9907a6"
+        },
+        "created": "2026-08-26"
       },
       {
         "id": "test-westcensus",
@@ -33809,9 +33855,497 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T131736683308-n-west-rc-reuse-map",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-west-rc-reuse-map",
+        "node_definition": {
+          "done_when": "The manifest names every relevant CLI command, module, symbol, test, artifact, and fitness verdict and proves whether new machinery is required",
+          "estimated_hours": 0.5,
+          "goal": "Produce a reuse map covering the existing Click release workflow for both WEST fork RC and additive upstream paths",
+          "id": "n-west-rc-reuse-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-reuse-map.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "inv-reusemap-rel",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T13:17:48Z",
+        "completed_at": "2026-08-26T13:26:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 505,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 505,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "16857b091b07a35af8e30d8e7169ff2838cdd810",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-reuse-map.md",
+        "scope_changed": false,
+        "session_id": "01a03e38-408d-7853-801c-8fe86f310d1f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3666432,
+            "cached_input_tokens_cumulative": 3666432,
+            "input_tokens": 3850887,
+            "input_tokens_cumulative": 3850887,
+            "output_tokens": 16688,
+            "output_tokens_cumulative": 16688,
+            "reasoning_output_tokens": 6508,
+            "reasoning_output_tokens_cumulative": 6508
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 68578,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 70678,
+              "log_age_seconds": 69688,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 69711,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T131815757161-n-west-rc-live-gates",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-rc-live-gates",
+        "node_definition": {
+          "done_when": "The report proves all 355 manifest sources partition with residual 0, parse failures 0, unit failures 0, accepted embedding gaps 0, export ambiguities 0, exclusion-accounting issues 0, unsafe live claims 0, correct fork remotes and gh authentication, and a release-CLI preflight exit 0 or records HOLD",
+          "estimated_hours": 1.0,
+          "goal": "Produce a fail-closed release-gate report for the current WEST fork RC packet",
+          "id": "n-west-rc-live-gates",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-live-gates.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-live-gates.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-west-rc-gates",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:18:33Z",
+        "completed_at": "2026-08-26T13:41:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1355,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1355,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "16857b091b07a35af8e30d8e7169ff2838cdd810",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-live-gates.md",
+        "scope_changed": false,
+        "session_id": "01a03e38-f174-78d1-a635-b143dbac160e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12975360,
+            "cached_input_tokens_cumulative": 12975360,
+            "input_tokens": 13391757,
+            "input_tokens_cumulative": 13391757,
+            "output_tokens": 33160,
+            "output_tokens_cumulative": 33160,
+            "reasoning_output_tokens": 9362,
+            "reasoning_output_tokens_cumulative": 9362
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 68624,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 70724,
+              "log_age_seconds": 69734,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 69756,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T131846395540-n-west-upstream-additivity-review",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-west-upstream-additivity-review",
+        "node_definition": {
+          "done_when": "The report scores six required invariants with source and test citations: RC batch targets fork, final batch targets upstream, all review branches push only to fork, approved baseline remains byte-identical, no direct upstream-main push exists, and merge tagging follows graph fold-back; unresolved invariant count must be 0 for PASS",
+          "estimated_hours": 0.75,
+          "goal": "Produce an independent design-verification report for the additive upstream catalog workflow",
+          "id": "n-west-upstream-additivity-review",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-upstream-additivity-review.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-upstream-additivity-review.md"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "rev-west-upstream",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-26T13:18:57Z",
+        "completed_at": "2026-08-26T13:24:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 359,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 359,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "16857b091b07a35af8e30d8e7169ff2838cdd810",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-upstream-additivity-review.md",
+        "scope_changed": false,
+        "session_id": "01a03e39-4e09-74e1-8b13-b615b5bd7637",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2237184,
+            "cached_input_tokens_cumulative": 2237184,
+            "input_tokens": 2391305,
+            "input_tokens_cumulative": 2391305,
+            "output_tokens": 11883,
+            "output_tokens_cumulative": 11883,
+            "reasoning_output_tokens": 4679,
+            "reasoning_output_tokens_cumulative": 4679
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 68648,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 70748,
+              "log_age_seconds": 69758,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 69780,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T132636292045-n-west-workflow-contract-tests",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-west-workflow-contract-tests",
+        "node_definition": {
+          "done_when": "The report records the exact focused pytest command and exit status, scores the six workflow invariants against executed tests plus source traces, and reports unresolved invariant count; PASS requires zero unresolved and zero failed tests",
+          "estimated_hours": 0.75,
+          "goal": "Run the existing focused Click release contract suite and produce fresh evidence for fork routing, upstream targeting, additive export, and fold-back tagging without creating any PR or release",
+          "id": "n-west-workflow-contract-tests",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-workflow-contract-tests.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-workflow-contract-tests.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-west-rc-release",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T13:26:47Z",
+        "completed_at": "2026-08-26T13:31:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 298,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 298,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "16857b091b07a35af8e30d8e7169ff2838cdd810",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-workflow-contract-tests.md",
+        "scope_changed": false,
+        "session_id": "01a03e40-7a6a-70a0-8935-df1f9e9907a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1965056,
+            "cached_input_tokens_cumulative": 1965056,
+            "input_tokens": 2137031,
+            "input_tokens_cumulative": 2137031,
+            "output_tokens": 10056,
+            "output_tokens_cumulative": 10056,
+            "reasoning_output_tokens": 3670,
+            "reasoning_output_tokens_cumulative": 3670
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 69117,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 71217,
+              "log_age_seconds": 70227,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 70250,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest command",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 946
+    "_version": 958
   }
 }
