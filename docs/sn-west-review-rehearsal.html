@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2314,6 +2314,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T215710257750-n-west-export-readiness-gate2" data-who="test-westexport" data-when="2026-08-26T22:13:53Z">
     <div class="r-comment-body"><p>Export core green: 408=332+76 exact, breakdown_initial_time emits, bare radial_coordinate structural_parent, 0 hard findings over 332, 367 links pruned, 34 radial links accounted (30 pruned + 2 withheld + 2 out-of-cohort), 13 empty-description rows proven out-of-batch. Dry-run real exit 1: staging drops the approved baseline (2017/2223 missing, 206 byte-changed, 0 unchanged) so the additivity guard correctly refuses — staging must carry non-batch approved entries byte-for-byte</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T221455375332-n-approved-baseline-preservation" data-who="impl-relseams" data-when="2026-08-26T22:24:18Z">
+    <div class="r-comment-body"><p>Staging preserves the approved baseline: 0 missing, 0 protected byte-changes, 2017 unchanged, 206 batch-overlap deltas allowed; guard refuses missing batch overlap, missing non-batch entry, and mutated non-batch entry; the observed 2017/206/0 failure shape reproduced as a fixture; 35 tests exit 0</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>

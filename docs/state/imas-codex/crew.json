@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T00:14:38",
+  "updated": "2026-08-27T00:24:34",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -35871,9 +35871,112 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T221455375332-n-approved-baseline-preservation",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-approved-baseline-preservation",
+        "node_definition": {
+          "done_when": "The review-batch staging assembly (catalog_release/export seam) carries every entry of the ISNC checkout's existing approved catalog that is NOT a batch identity through to staging byte-for-byte, and writes batch identities from the fresh export (batch-name overlaps with the legacy catalog are the review delta and are allowed to differ); the additivity guard's acceptance shape matches the locked contract exactly: missing approved entries = 0, byte-changed restricted to batch identities, and it still refuses when any non-batch approved entry mutates or disappears; the 2026-08-26 gate2 failure shape (2017 missing, 206 byte-changed, 0 unchanged of 2223) is reproduced as a failing fixture before the fix and passes after; focused tests captured once to a persistent log exit 0; ruff clean on owned paths; local conventional commit with body; no graph writes, no push, no remote effects",
+          "estimated_hours": null,
+          "goal": "Review staging preserves the existing approved catalog byte-for-byte alongside the batch",
+          "id": "n-approved-baseline-preservation",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T221455375332-n-approved-baseline-preservation/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_review_release.py",
+            "tests/standard_names/test_export_exclusion_ledger.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relseams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T22:15:03Z",
+        "completed_at": "2026-08-26T22:24:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 555,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 555,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a94600ec2522d194117fd07d2e6ea1ce45923c58",
+        "commits": [
+          "cef237dbe7a67d21ca2456b0cf079b1633704ac1"
+        ],
+        "changed_lines": {
+          "added": 366,
+          "removed": 69,
+          "files": 3
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_review_release.py tests/standard_names/test_export_exclusion_ledger.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T221455375332-n-approved-baseline-preservation/logs/focused-tests-current.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T221455375332-n-approved-baseline-preservation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3119104,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3480643,
+            "output_tokens": 1751,
+            "output_tokens_cumulative": 17426,
+            "reasoning_output_tokens": 982,
+            "reasoning_output_tokens_cumulative": 5325
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 991
+    "_version": 992
   }
 }
