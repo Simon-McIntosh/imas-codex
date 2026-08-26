@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T22:45:52",
+  "updated": "2026-08-26T23:28:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1130,9 +1130,11 @@
         "id": "impl-radialrebind",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03f75-8b1f-7f32-9c9d-7ec0d6215e11",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03f75-8b1f-7f32-9c9d-7ec0d6215e11"
+        },
         "created": "2026-08-26"
       },
       {
@@ -35485,9 +35487,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T190402781448-n-radial-binding-redistribution",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-radial-binding-redistribution",
+        "node_definition": {
+          "done_when": "Each of the nine recorded PRODUCED_NAME bindings into radial_coordinate reaches a recorded terminal disposition through sanctioned instruments and SCOPED pipeline runs only: the four sources with emitted qualified children rebound by resetting each source to recompose from its own DD path with review acceptance re-earned; the iron_core annulus source resolved through its superseded child's successor; the pf_passive and pf_plasma sources driven through their recorded lifecycle instruments; the two grid sources quarantined as documented non-nameable with a recorded refusal reason stating grids and ordinates are never named. The report proves PRODUCED_NAME into radial_coordinate is 0 with a positive control, lists all nine dispositions, enumerates accepted docs linking radial_coordinate, and records paid spend from SNRun/LLMCost under a hard 60 USD cap",
+          "estimated_hours": null,
+          "goal": "No DD source produces the bare radial_coordinate parent",
+          "id": "n-radial-binding-redistribution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190402781448-n-radial-binding-redistribution/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/radial-binding-redistribution.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-radialrebind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T19:04:21Z",
+        "completed_at": "2026-08-26T21:27:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 8608,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "5e8b5b29a83e8290fdd1e89e7f4b27d1f1afb841",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "exact nine-path scoped drain to no_eligible_work + final live graph gate (9/9 terminal, 0 bare bindings, 0 scalar-edge mismatches)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190402781448-n-radial-binding-redistribution/logs/radial-source-drain-retry.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T190402781448-n-radial-binding-redistribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-8b1f-7f32-9c9d-7ec0d6215e11",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8965888,
+            "cached_input_tokens_cumulative": 8965888,
+            "input_tokens": 9191057,
+            "input_tokens_cumulative": 9191057,
+            "output_tokens": 22949,
+            "output_tokens_cumulative": 22949,
+            "reasoning_output_tokens": 7146,
+            "reasoning_output_tokens_cumulative": 7146
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 984
+    "_version": 986
   }
 }
