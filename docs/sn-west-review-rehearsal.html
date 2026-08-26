@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-west-review-rehearsal">
   <meta name="plan-title" content="WEST Expert Review Preparation and Human Disposition">
-  <meta name="plan-summary" content="HOLD (2026-08-26): WEST has 33 exclusions and no full preflight; the fork/upstream additivity contract has three unresolved invariants. No RC or PR.">
+  <meta name="plan-summary" content="Fork RC authorized: 408 = 375 emitted + 33 explicit withholds; zero hard CLI/export failures. Fork only; upstream PR remains held for additivity assert.">
   <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="44">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2256,6 +2256,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T131815757161-n-west-rc-live-gates" data-who="test-west-rc-gates" data-when="2026-08-26T13:41:08Z">
     <div class="r-comment-body"><p>WEST release HOLD: 355/355 sources accounted, 375/408 identities emitted, 33 explicit exclusions including breakdown_initial_time validation rejection, broad check timeout, and no full CLI preflight.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T135726965661-n-west-current-release-authority" data-who="inv-reusemap-rel" data-when="2026-08-26T14:03:18Z">
+    <div class="r-comment-body"><p>Confirmed zero current hard CLI/export failures; fork release is mechanically cuttable and awaits only explicit authority adjudication.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260826-west-fork-release-authority" data-who="reckon-ship" data-when="2026-08-26T14:04:00Z">
+    <div class="r-comment-body"><p><strong>Fork release authority adjudicated.</strong> The lead explicitly classified the old dry-run, broad-timeout, and worker-provisioning concerns as non-blocking for the fork rehearsal. The newer production export supersedes the old hierarchy-cycle abort and accounts for the complete 408-identity cohort as 375 emitted plus 33 explicit withholds, with zero current hard CLI/export failures. Authority is limited to the configured fork batch RC; no upstream PR or final release is authorized.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
