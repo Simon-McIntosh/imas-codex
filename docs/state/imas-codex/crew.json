@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T17:15:22",
+  "updated": "2026-08-26T18:21:13",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1884,9 +1884,11 @@
         "id": "test-gatevalidity",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03e99-8550-72c0-9c24-0af0d578618a",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e99-8550-72c0-9c24-0af0d578618a"
+        },
         "created": "2026-08-26"
       },
       {
@@ -2037,9 +2039,11 @@
         "id": "test-westobjections",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03e92-813a-7640-9fe1-6c565b84541e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e92-813a-7640-9fe1-6c565b84541e"
+        },
         "created": "2026-08-26"
       },
       {
@@ -34855,9 +34859,197 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T145617184568-n-west-objection-adjudication",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-objection-adjudication",
+        "node_definition": {
+          "done_when": "reports/west-objection-adjudication.md classifies radial_coordinate, breakdown_initial_time, each of the 8 canonical-locus advisories (explicitly testing whether the vertical_coordinate_of_primary_x_point advisory is a validator no-op bug against the ISN validator source), plus one sampled identity from each of the four lifecycle exclusion classes (documentation_not_accepted 14, invalid_validation_status 11, name_review_quorum_shortfall 3, resolution_unrecorded 4), each with live-graph evidence (name_stage/docs_stage/validation_status/reviewer scores), an ISN catalog-validator source citation file:line for every semantic rule applied, a check that the nine DD bindings under radial_coordinate resolve to emitted child names so withholding the parent breaks no emitted hierarchy link, and one recommendation per item; every graph zero carries a positive control in the same run",
+          "estimated_hours": null,
+          "goal": "A per-item verdict report classifying every withheld or flagged WEST export identity as SN defect, validator defect, or correct lifecycle withhold",
+          "id": "n-west-objection-adjudication",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145617184568-n-west-objection-adjudication/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-objection-adjudication.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-westobjections",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:56:22Z",
+        "completed_at": "2026-08-26T15:15:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1146,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1146,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "c93ac23995642fd3716cf1f6f7a4c867efdda977",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "ISN 0.8.0rc67 parser/model/semantic probe 9/9 + full 375-entry staging validation + live Cypher 14/14 targets with 4658 positive control",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145617184568-n-west-objection-adjudication/logs/full-staging-isn-validation.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145617184568-n-west-objection-adjudication/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e92-813a-7640-9fe1-6c565b84541e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12639488,
+            "cached_input_tokens_cumulative": 12639488,
+            "input_tokens": 13082672,
+            "input_tokens_cumulative": 13082672,
+            "output_tokens": 36185,
+            "output_tokens_cumulative": 36185,
+            "reasoning_output_tokens": 9792,
+            "reasoning_output_tokens_cumulative": 9792
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T150352316305-n-release-gate-test-validity",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-release-gate-test-validity",
+        "node_definition": {
+          "done_when": "reports/west-gate-test-validity.md gives a per-check verdict (real-invariant | tautological | vacuous-passes-without-exercising-claim | missing-negative | oracle-defect) for: the ISN catalog semantic validator rules that produced the radial_coordinate rejection and the 8 canonical-locus advisories (file:line in the pinned imas-standard-names source, explicitly ruling on why vertical_coordinate_of_primary_x_point was advised to rewrite to itself); the codex export exclusion-ledger suite tests/standard_names/test_export_exclusion_ledger.py at its worktree base; the focused Click release suite that previously reported 15/15 while three negative/byte-identity contracts were never executed (name which passing tests carry no negative counterpart); and the staging validator path that emits the advisories. Verdicts on executable suites are backed by at least 4 recorded mutation spot-checks run in this worktree (break the claimed invariant in a scratch copy, run the suite once to a persistent log, record whether it fails); every claimed defect carries file:line; read-only outside the report and scratch copies inside the worktree",
+          "estimated_hours": null,
+          "goal": "A validity verdict on every test and validator rule that gates the WEST fork RC, so a release hold can be traced to a real invariant rather than a defective check",
+          "id": "n-release-gate-test-validity",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150352316305-n-release-gate-test-validity/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-gate-test-validity.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-gatevalidity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T15:04:02Z",
+        "completed_at": "2026-08-26T15:17:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 834,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 834,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "2b8cb8c4cec706acc45f3282da7efc5c66590a6b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "5 recorded mutation spot-checks over export-ledger, Click release, staging transport suites at base 2b8cb8c4",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150352316305-n-release-gate-test-validity/logs/mutation-semantic-bypass.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T150352316305-n-release-gate-test-validity/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e99-8550-72c0-9c24-0af0d578618a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8783872,
+            "cached_input_tokens_cumulative": 8783872,
+            "input_tokens": 9104235,
+            "input_tokens_cumulative": 9104235,
+            "output_tokens": 25524,
+            "output_tokens_cumulative": 25524,
+            "reasoning_output_tokens": 6084,
+            "reasoning_output_tokens_cumulative": 6084
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run the suite",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 969
+    "_version": 973
   }
 }
