@@ -20,7 +20,10 @@ from imas_codex.standard_names.catalog_release import (
     run_release,
     run_review_release,
 )
-from imas_codex.standard_names.export import approved_baseline_delta
+from imas_codex.standard_names.export import (
+    approved_baseline_delta,
+    assemble_review_catalog,
+)
 
 
 def _git(*args, cwd):
@@ -281,9 +284,7 @@ def test_approved_baseline_guard_refuses_non_batch_drift(
     assert expected_error in str(exc.value)
 
 
-def test_approved_baseline_guard_requires_batch_overlap_from_fresh_export(
-    tmp_path,
-):
+def test_approved_baseline_guard_requires_every_approved_identity(tmp_path):
     approved = tmp_path / "approved"
     staging = tmp_path / "staging"
     _write_domain_catalog(approved, "- name: batch_name\n  unit: A\n")
@@ -295,6 +296,69 @@ def test_approved_baseline_guard_requires_batch_overlap_from_fresh_export(
             staging,
             batch_names=["batch_name"],
         )
+
+
+def test_review_assembly_retains_withheld_approved_batch_overlaps(tmp_path):
+    approved = tmp_path / "approved"
+    staging = tmp_path / "staging"
+    approved_names = [f"approved_{index:03d}" for index in range(229)]
+    emitted_names = approved_names[:206]
+    baseline = "".join(
+        f"- name: {name}\n  description: approved {name}\n" for name in approved_names
+    )
+    fresh = "".join(
+        f"- name: {name}\n  description: fresh {name}\n" for name in emitted_names
+    )
+    _write_domain_catalog(approved, baseline)
+    _write_domain_catalog(staging, fresh)
+    (staging / "catalog.yml").write_text(
+        "catalog_name: t\n"
+        "candidate_count: 229\n"
+        "published_count: 206\n"
+        "domains_included:\n"
+        "- equilibrium\n",
+        encoding="utf-8",
+    )
+
+    before = approved_baseline_delta(approved, staging)
+    assert len(before.missing) == 23
+    assert len(before.byte_changed) == 206
+    assert len(before.unchanged) == 0
+
+    assembly = assemble_review_catalog(
+        approved,
+        staging,
+        batch_names=approved_names,
+    )
+
+    assert assembly.baseline_count == 229
+    assert assembly.staged_count_before == 206
+    assert assembly.staged_count_after == 229
+    assert assembly.batch_entries_written == 206
+    assert assembly.baseline_entries_added == 23
+    assert assembly.emitted_batch_names == tuple(emitted_names)
+
+    after = approved_baseline_delta(approved, staging)
+    assert len(after.missing) == 0
+    assert len(after.byte_changed) == 206
+    assert len(after.unchanged) == 23
+    protected_after = approved_baseline_delta(
+        approved,
+        staging,
+        batch_names=list(assembly.emitted_batch_names),
+    )
+    assert len(protected_after.missing) == 0
+    assert len(protected_after.byte_changed) == 0
+    assert len(protected_after.unchanged) == 23
+    _assert_approved_entries_unchanged(
+        approved,
+        staging,
+        batch_names=list(assembly.emitted_batch_names),
+    )
+
+    manifest = yaml.safe_load((staging / "catalog.yml").read_text(encoding="utf-8"))
+    assert manifest["candidate_count"] == 229
+    assert manifest["published_count"] == 229
 
 
 def test_review_assembly_reproduces_and_closes_sparse_baseline_failure(

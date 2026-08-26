@@ -1169,7 +1169,7 @@ def run_review_release(
     try:
         from imas_codex.standard_names.export import assemble_review_catalog
 
-        assemble_review_catalog(
+        assembly = assemble_review_catalog(
             isnc_path,
             staging_dir,
             batch_names=report.names,
@@ -1177,7 +1177,7 @@ def run_review_release(
         _assert_approved_entries_unchanged(
             isnc_path,
             staging_dir,
-            batch_names=report.names,
+            batch_names=list(assembly.emitted_batch_names),
         )
     except Exception as exc:
         report.errors.append(f"approved baseline check failed: {exc}")
