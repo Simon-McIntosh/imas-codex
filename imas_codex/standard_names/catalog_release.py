@@ -46,6 +46,9 @@ class ReleaseReport:
     export_count: int = 0
     files_copied: int = 0
     commit_sha: str | None = None
+    branch: str = ""
+    pr_number: int | None = None
+    pr_url: str | None = None
     pushed: bool = False
     dry_run: bool = False
     errors: list[str] = field(default_factory=list)
@@ -58,6 +61,9 @@ class ReleaseReport:
             "export_count": self.export_count,
             "files_copied": self.files_copied,
             "commit_sha": self.commit_sha,
+            "branch": self.branch,
+            "pr_number": self.pr_number,
+            "pr_url": self.pr_url,
             "pushed": self.pushed,
             "dry_run": self.dry_run,
             "errors": self.errors,
@@ -537,6 +543,11 @@ def run_release(
     dry_run: bool = False,
     skip_export: bool = False,
     export_kwargs: dict[str, Any] | None = None,
+    exporter: Any | None = None,
+    publisher: Any | None = None,
+    pr_creator: Any | None = None,
+    upstream_repo: str | None = None,
+    fork_owner: str | None = None,
 ) -> ReleaseReport:
     """Run the full catalog release workflow.
 
@@ -584,8 +595,12 @@ def run_release(
         staging_dir = get_sn_staging_dir()
 
     is_rc = not final
-    effective_remote = remote or (_FINAL_REMOTE if final else _RC_REMOTE)
+    version_remote = remote or (_FINAL_REMOTE if final else _RC_REMOTE)
+    effective_remote = _RC_REMOTE if final else version_remote
     report.remote = effective_remote
+    exporter = exporter or _default_exporter
+    publisher = publisher or _default_publisher
+    pr_creator = pr_creator or _gh_pr_create
 
     # ── Pre-flight checks ──────────────────────────────────
     logger.info("Pre-flight checks on %s", isnc_path)
@@ -605,7 +620,7 @@ def run_release(
         return report
 
     try:
-        warnings = _check_synced(isnc_path, effective_remote, strict=not dry_run)
+        warnings = _check_synced(isnc_path, version_remote, strict=not dry_run)
         for w in warnings:
             logger.warning(w)
     except ValueError as exc:
@@ -614,7 +629,7 @@ def run_release(
 
     # ── Compute version ────────────────────────────────────
     # Fetch tags from remote before computing version
-    _run_git("fetch", "--tags", effective_remote, cwd=isnc_path)
+    _run_git("fetch", "--tags", version_remote, cwd=isnc_path)
 
     try:
         git_tag, version = compute_next_version(isnc_path, bump, final=final)
@@ -633,8 +648,6 @@ def run_release(
 
     # ── Auto-export ────────────────────────────────────────
     if not skip_export:
-        from imas_codex.standard_names.export import run_export
-
         staging_dir.mkdir(parents=True, exist_ok=True)
 
         kwargs: dict[str, Any] = {
@@ -646,7 +659,7 @@ def run_release(
 
         logger.info("Exporting to %s", staging_dir)
         try:
-            export_report = run_export(**kwargs)
+            export_report = exporter(**kwargs)
             report.export_count = export_report.exported_count
 
             if not export_report.all_gates_passed:
@@ -669,11 +682,18 @@ def run_release(
             )
             return report
 
-    # ── Publish (copy staging → ISNC) ─────────────────────
-    from imas_codex.standard_names.publish import run_publish
+    if final:
+        report.branch = f"release/{git_tag}"
+        if not dry_run:
+            branch_result = _run_git("checkout", "-b", report.branch, cwd=isnc_path)
+            if branch_result.returncode != 0:
+                report.errors.append(
+                    f"Failed to create branch {report.branch}: {branch_result.stderr}"
+                )
+                return report
 
     logger.info("Publishing to %s", isnc_path)
-    pub_report = run_publish(
+    pub_report = publisher(
         staging_dir=str(staging_dir),
         isnc_path=str(isnc_path),
         push=False,  # We handle push ourselves (with tag)
@@ -692,11 +712,62 @@ def run_release(
     report.commit_sha = pub_report.commit_sha
 
     if dry_run:
-        logger.info(
-            "[dry-run] Would tag %s and push to %s",
-            git_tag,
-            effective_remote,
-        )
+        if final:
+            logger.info(
+                "[dry-run] Would push %s to the fork and open an upstream PR",
+                report.branch,
+            )
+        else:
+            logger.info(
+                "[dry-run] Would tag %s and push to %s",
+                git_tag,
+                effective_remote,
+            )
+        return report
+
+    if final:
+        push_result = _run_git("push", effective_remote, report.branch, cwd=isnc_path)
+        if push_result.returncode != 0:
+            report.errors.append(
+                f"Failed to push {report.branch} to {effective_remote}: "
+                f"{push_result.stderr}"
+            )
+            return report
+        report.pushed = True
+
+        if upstream_repo is None:
+            slug = _github_slug(isnc_path, _FINAL_REMOTE)
+            if slug is None:
+                report.errors.append(
+                    "cannot derive the upstream PR repository from the "
+                    "ISNC checkout's 'upstream' remote"
+                )
+                return report
+            upstream_repo = f"{slug[0]}/{slug[1]}"
+        if fork_owner is None:
+            slug = _github_slug(isnc_path, _RC_REMOTE)
+            if slug is None:
+                report.errors.append(
+                    "cannot derive the fork owner from the ISNC checkout's "
+                    "'origin' remote"
+                )
+                return report
+            fork_owner = slug[0]
+        try:
+            report.pr_number, report.pr_url = pr_creator(
+                branch=report.branch,
+                base="main",
+                title=message,
+                body=(
+                    f"Catalog release candidate for `{git_tag}`. The version "
+                    "tag is created only after the merged catalog is folded "
+                    "back into the graph."
+                ),
+                repo=upstream_repo,
+                head_owner=fork_owner,
+            )
+        except Exception as exc:
+            report.errors.append(f"gh pr create failed: {exc}")
         return report
 
     # If publish created no commit (no changes), still tag and push
@@ -908,6 +979,72 @@ def _gh_pr_create(
     return number, url
 
 
+def _catalog_entry_bytes(catalog_root: Path) -> dict[str, bytes]:
+    """Return each catalog entry exactly as encoded inside its domain YAML.
+
+    YAML node marks let the release seam compare the serialized mapping rather
+    than a parsed-and-reformatted approximation. The identity is global across
+    domain files, so duplicates are a hard catalog error.
+    """
+    import yaml
+    from yaml.nodes import MappingNode, ScalarNode, SequenceNode
+
+    entries: dict[str, bytes] = {}
+    standard_names = catalog_root / "standard_names"
+    if not standard_names.is_dir():
+        return entries
+    for path in sorted(standard_names.glob("*.yml")):
+        text = path.read_text(encoding="utf-8")
+        root = yaml.compose(text)
+        if root is None:
+            continue
+        nodes = root.value if isinstance(root, SequenceNode) else [root]
+        for node in nodes:
+            if not isinstance(node, MappingNode):
+                raise ValueError(f"{path}: catalog entry is not a YAML mapping")
+            name = None
+            for key_node, value_node in node.value:
+                if (
+                    isinstance(key_node, ScalarNode)
+                    and key_node.value == "name"
+                    and isinstance(value_node, ScalarNode)
+                ):
+                    name = value_node.value
+                    break
+            if not name:
+                raise ValueError(f"{path}: catalog entry has no scalar name")
+            if name in entries:
+                raise ValueError(f"duplicate catalog entry identity: {name}")
+            entries[name] = text[node.start_mark.index : node.end_mark.index].encode(
+                "utf-8"
+            )
+    return entries
+
+
+def _assert_approved_entries_unchanged(isnc_path: Path, staging_dir: Path) -> None:
+    """Fail when an additive review export changes its approved baseline."""
+    approved = _catalog_entry_bytes(isnc_path)
+    if not approved:
+        return
+    candidate = _catalog_entry_bytes(staging_dir)
+    missing = sorted(approved.keys() - candidate.keys())
+    changed = sorted(
+        name
+        for name, baseline in approved.items()
+        if name in candidate and candidate[name] != baseline
+    )
+    if missing or changed:
+        details = []
+        if missing:
+            details.append(f"missing={missing}")
+        if changed:
+            details.append(f"byte_changed={changed}")
+        raise ValueError(
+            "approved catalog baseline changed during additive review export: "
+            + "; ".join(details)
+        )
+
+
 def run_review_release(
     isnc_path: Path,
     focus_file: str | Path,
@@ -959,8 +1096,15 @@ def run_review_release(
 
         staging_dir = get_sn_staging_dir()
     staging_dir = Path(staging_dir)
-    effective_remote = remote or _RC_REMOTE
+    effective_remote = _RC_REMOTE
     report.remote = effective_remote
+    if remote and remote != _RC_REMOTE:
+        logger.warning(
+            "Ignoring review-branch transport override %r; branches always "
+            "push to the fork remote %r",
+            remote,
+            _RC_REMOTE,
+        )
 
     exporter = exporter or _default_exporter
     publisher = publisher or _default_publisher
@@ -1061,6 +1205,11 @@ def run_review_release(
         )
     except Exception as exc:
         report.errors.append(f"export failed: {exc}")
+        return report
+    try:
+        _assert_approved_entries_unchanged(isnc_path, staging_dir)
+    except Exception as exc:
+        report.errors.append(f"approved baseline check failed: {exc}")
         return report
 
     if dry_run:

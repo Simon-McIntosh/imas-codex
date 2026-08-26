@@ -15,7 +15,7 @@ import pytest
 import yaml
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.catalog_release import run_review_release
+from imas_codex.standard_names.catalog_release import run_release, run_review_release
 
 
 def _git(*args, cwd):
@@ -103,6 +103,20 @@ def _write_names_focus(tmp_path, *, name="demo-batch", filename="batch.yaml"):
     return p
 
 
+def _add_upstream_remote(isnc_repo: Path, tmp_path: Path) -> Path:
+    upstream = tmp_path / "upstream.git"
+    _git("init", "--bare", "-b", "main", str(upstream), cwd=tmp_path)
+    _git("remote", "add", "upstream", str(upstream), cwd=isnc_repo)
+    _git("push", "upstream", "main", cwd=isnc_repo)
+    return upstream
+
+
+def _write_domain_catalog(root: Path, text: str) -> None:
+    standard_names = root / "standard_names"
+    standard_names.mkdir(parents=True, exist_ok=True)
+    (standard_names / "equilibrium.yml").write_text(text, encoding="utf-8")
+
+
 def test_review_release_full_flow(isnc_repo, tmp_path):
     focus = _write_names_focus(tmp_path)
     reviews = tmp_path / "reviews"
@@ -149,6 +163,146 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     # The review branch exists in the checkout.
     branches = _git("branch", cwd=isnc_repo).stdout
     assert "review/v0.1.0rc1+demo-batch" in branches
+
+
+def test_review_branch_transport_ignores_upstream_remote(isnc_repo, tmp_path):
+    """An upstream PR target cannot redirect branch transport upstream."""
+    upstream = _add_upstream_remote(isnc_repo, tmp_path)
+    focus = _write_names_focus(tmp_path)
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Review batch demo",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        remote="upstream",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        pr_target="upstream",
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert report.remote == "origin"
+    assert (
+        report.branch
+        in _git("ls-remote", "--heads", "origin", report.branch, cwd=isnc_repo).stdout
+    )
+    assert (
+        _git(
+            "ls-remote", "--heads", str(upstream), report.branch, cwd=isnc_repo
+        ).stdout.strip()
+        == ""
+    )
+
+
+@pytest.mark.parametrize(
+    ("approved_entry", "expected_error"),
+    [
+        ("- name: approved_name\n  unit: A\n", None),
+        ("- name: approved_name\n  unit: kA\n", "byte_changed=['approved_name']"),
+    ],
+)
+def test_review_export_preserves_approved_entry_bytes(
+    isnc_repo, tmp_path, approved_entry, expected_error
+):
+    """Approved mappings are compared as serialized bytes before publication."""
+    baseline = "- name: approved_name\n  unit: A\n"
+    _write_domain_catalog(isnc_repo, baseline)
+    _git("add", "standard_names/equilibrium.yml", cwd=isnc_repo)
+    _git("commit", "-m", "approved baseline", cwd=isnc_repo)
+    _git("push", "origin", "main", cwd=isnc_repo)
+    focus = _write_names_focus(tmp_path)
+
+    def exporter(*, staging_dir, force, review_batch, **_kwargs):
+        root = Path(staging_dir)
+        _write_domain_catalog(
+            root,
+            approved_entry + "- name: plasma_current\n  unit: A\n",
+        )
+        (root / "catalog.yml").write_text("catalog_name: t\n", encoding="utf-8")
+        return SimpleNamespace(exported_count=2)
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Review batch demo",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=exporter,
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+
+    if expected_error is None:
+        assert report.errors == [], report.errors
+    else:
+        assert any(expected_error in error for error in report.errors)
+
+
+def test_plain_final_uses_fork_branch_and_defers_tag(isnc_repo, tmp_path):
+    """A final opens an upstream PR without pushing main or creating a tag."""
+    upstream = _add_upstream_remote(isnc_repo, tmp_path)
+    _git("tag", "v0.1.0rc1", cwd=isnc_repo)
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    (staging / "catalog.yml").write_text("catalog_name: t\n", encoding="utf-8")
+    upstream_main_before = _git(
+        "rev-parse", "refs/remotes/upstream/main", cwd=isnc_repo
+    ).stdout.strip()
+
+    def publisher(*, staging_dir, isnc_path, push, dry_run, allow_dirty):
+        (Path(isnc_path) / "catalog.yml").write_text(
+            "catalog_name: final\n", encoding="utf-8"
+        )
+        _git("add", "catalog.yml", cwd=isnc_path)
+        _git("commit", "-m", "publish final candidate", cwd=isnc_path)
+        sha = _git("rev-parse", "HEAD", cwd=isnc_path).stdout.strip()
+        return SimpleNamespace(errors=[], commit_sha=sha, files_copied=1)
+
+    report = run_release(
+        isnc_repo,
+        "Final catalog review",
+        staging_dir=staging,
+        final=True,
+        remote="upstream",
+        skip_export=True,
+        publisher=publisher,
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert report.branch == "release/v0.1.0"
+    assert report.remote == "origin"
+    assert report.pr_url == "https://github.com/example-org/example-catalog/pull/42"
+    assert (
+        report.branch
+        in _git("ls-remote", "--heads", "origin", report.branch, cwd=isnc_repo).stdout
+    )
+    assert (
+        _git(
+            "ls-remote", "--heads", str(upstream), report.branch, cwd=isnc_repo
+        ).stdout.strip()
+        == ""
+    )
+    assert (
+        _git(
+            "ls-remote", str(upstream), "refs/heads/main", cwd=isnc_repo
+        ).stdout.split()[0]
+        == upstream_main_before
+    )
+    assert "v0.1.0" not in _git("tag", cwd=isnc_repo).stdout.splitlines()
+    assert (
+        _git("ls-remote", "--tags", "origin", "v0.1.0", cwd=isnc_repo).stdout.strip()
+        == ""
+    )
 
 
 def test_review_release_dry_run_no_push_no_pr(isnc_repo, tmp_path):
