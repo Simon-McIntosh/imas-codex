@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="55">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2284,6 +2284,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260826-objection-adjudication-verdicts" data-who="reckon-ship" data-when="2026-08-26T16:30:00Z">
     <div class="r-comment-body">Adjudication + gate-validity audits landed (report-only nodes, both promoted). CONVERGENT VERDICTS: (1) all 8 canonical-locus advisories are CODEX ORACLE DEFECTS — ISN registry permits of, every spelling parses and round-trips exactly, and vertical_coordinate_of_primary_x_point rewrites to itself because the heuristic replaces literal _of_x_point inside _of_primary_x_point; the advisories must never hold an RC. (2) bare radial_coordinate is a REAL pinned-ISN invariant (semantic.py:226-259, no exemption at :59-68, mutation-verified) — but withholding it is not free: only 4/9 of its DD bindings resolve to emitted qualified children, 5/9 unresolved. (3) breakdown_initial_time is a REAL SN defect (kind=metadata + unit=s contradicts ISN models.py:814-846); repair requires a governed graph edit, currently HELD by the lead's no-mutation instruction. (4) The 32 other withholds are correct fail-closed lifecycle exclusions. Mutation audit: semantic-bypass, accounting-bypass and advisory-escalation checks all fail their targets (real tests); the transport blindness it found at base 2b8cb8c4 was already closed by 84a4550b; export-description content remains untested (minor). Reports: crew/reports/west-objection-adjudication.md, west-gate-test-validity.md.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T162345265853-n-canonical-locus-oracle-repair" data-who="impl-locusoracle" data-when="2026-08-26T16:32:14Z">
+    <div class="r-comment-body"><p>All 8 recorded canonical-locus false advisories now produce zero findings; positive control still fires; extent/coordinate vocab derived from pinned ISN at runtime; no-op rewrites suppressed; 9/9 tests</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T163248603522-n-breakdown-time-kind-repair" data-who="impl-breakdownkind" data-when="2026-08-26T16:40:07Z">
+    <div class="r-comment-body"><p>Blocked correctly at its fence: root cause proven (July human rename copied metadata kind from predecessor initial_plasma_breakdown_time; edit.py:2343-2348 / graph_ops.py:16418-16435; derive_kind returns scalar; ISN probe validates scalar+s with 0 findings; graph writes 0, spend 0) — repair needs a governed kind operator outside the report-only scope; continued by n-breakdown-kind-operator on the same member</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>

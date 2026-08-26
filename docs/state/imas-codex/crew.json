@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T18:21:13",
+  "updated": "2026-08-26T21:02:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -299,6 +299,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-breakdownkind",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "impl-bulksample",
@@ -629,6 +638,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-exportpolicy",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
+      {
         "id": "impl-facilityprop",
         "harness": "codex",
         "role": "implement",
@@ -849,6 +867,17 @@
           "gpt-5.6-sol": "01a03949-9901-7861-b532-713fee2caa20"
         },
         "created": "2026-08-25"
+      },
+      {
+        "id": "impl-locusoracle",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03ee2-98de-72a2-9c6d-db8f59694f36",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ee2-98de-72a2-9c6d-db8f59694f36"
+        },
+        "created": "2026-08-26"
       },
       {
         "id": "impl-locusreadj",
@@ -1092,6 +1121,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-radialrebind",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "impl-readinessresidual",
@@ -35047,9 +35085,200 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260826T162345265853-n-canonical-locus-oracle-repair",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-canonical-locus-oracle-repair",
+        "node_definition": {
+          "done_when": "The canonical_locus heuristic in imas_codex/standard_names (audits.py/publish.py, wherever the coordinate/extent inference lives) no longer emits an advisory for a spelling the pinned ISN registry itself permits, and can never emit a suggestion byte-identical to the input name (the no-op class: it replaced literal _of_x_point inside _of_primary_x_point); a regression test file carries all 8 recorded advisory cases (toroidal_coordinate_of_line_of_sight, vertical_coordinate_of_detector_pixel, poloidal_length_of_flux_surface, vertical_coordinate_of_geometric_axis, vertical_coordinate_of_magnetic_axis, vertical_coordinate_of_measurement_position, vertical_coordinate_of_primary_x_point, vertical_coordinate_of_strike_point) asserting zero advisories, plus at least one positive case proving the check still fires where ISN genuinely requires the at-locus form (derive it from the ISN grammar, never hardcode ISN vocabulary in codex per AGENTS.md); focused test run captured once to a persistent log with exit 0; ruff clean on owned paths; local conventional commit with subject and body; no graph access, no push",
+          "estimated_hours": null,
+          "goal": "The canonical-locus staging check stops advising rewrites the ISN grammar does not require",
+          "id": "n-canonical-locus-oracle-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T162345265853-n-canonical-locus-oracle-repair/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/standard_names/audits.py",
+            "imas_codex/standard_names/publish.py",
+            "tests/standard_names/test_canonical_locus_advisories.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-locusoracle",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T16:23:52Z",
+        "completed_at": "2026-08-26T16:32:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 502,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 502,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "915a86adaff7df5fd3f6c0859c62288d1dfb46ae",
+        "commits": [
+          "98b80ccb"
+        ],
+        "changed_lines": {
+          "added": 126,
+          "removed": 8,
+          "files": 3
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_canonical_locus_advisories.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T162345265853-n-canonical-locus-oracle-repair/logs/focused-canonical-locus.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T162345265853-n-canonical-locus-oracle-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ee2-98de-72a2-9c6d-db8f59694f36",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6231040,
+            "cached_input_tokens_cumulative": 6231040,
+            "input_tokens": 6436669,
+            "input_tokens_cumulative": 6436669,
+            "output_tokens": 18348,
+            "output_tokens_cumulative": 18348,
+            "reasoning_output_tokens": 5477,
+            "reasoning_output_tokens_cumulative": 5477
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T163248603522-n-breakdown-time-kind-repair",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-breakdown-time-kind-repair",
+        "node_definition": {
+          "done_when": "Root cause recorded: which write path stored kind=metadata on breakdown_initial_time (live node carries kind=metadata, unit=s, accepted/accepted/valid, scores 0.925/0.975; source dd:summary/time_breakdown/value; ISN models.py:814-846 forbids unit on metadata). Repair applied through sanctioned instruments ONLY \u2014 sn edit with a reason plus source recompose/review, or a tested code-path fix if the kind assignment is a code defect; NEVER a hand Cypher SET on kind/name/docs and NEVER a hand-accept; do NOT drop the unit to make the metadata variant validate (adjudication recommendation: correct to a quantitative scalar time with unit s). After repair the live node carries the corrected quantitative kind with unit s and stages re-earned through review where the edit path requires; a single-identity export probe through create_standard_name_entry plus run_semantic_checks returns zero hard findings; graph mutation is proven confined to breakdown_initial_time and its source by before/after StandardNameChange and identity counts recorded in the report; paid review spend capped at 5 USD",
+          "estimated_hours": null,
+          "goal": "breakdown_initial_time validates as a quantitative time entry through the governed pipeline",
+          "id": "n-breakdown-time-kind-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T163248603522-n-breakdown-time-kind-repair/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/breakdown-time-kind-repair.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-breakdownkind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T16:32:56Z",
+        "completed_at": "2026-08-26T16:40:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 431,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 431,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "915a86adaff7df5fd3f6c0859c62288d1dfb46ae",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T163248603522-n-breakdown-time-kind-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03eea-e5cd-7a13-a740-63a6866b5ba8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4915456,
+            "cached_input_tokens_cumulative": 4915456,
+            "input_tokens": 5131285,
+            "input_tokens_cumulative": 5131285,
+            "output_tokens": 14917,
+            "output_tokens_cumulative": 14917,
+            "reasoning_output_tokens": 4585,
+            "reasoning_output_tokens_cumulative": 4585
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 973
+    "_version": 980
   }
 }
