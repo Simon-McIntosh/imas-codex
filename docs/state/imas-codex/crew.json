@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T23:28:06",
+  "updated": "2026-08-26T23:48:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2078,6 +2078,17 @@
         "role": "test",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "test-westexport",
+        "harness": "codex",
+        "role": "test",
+        "session_id": "01a03ffa-8713-7082-a25a-caca24d450b2",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03ffa-8713-7082-a25a-caca24d450b2"
+        },
+        "created": "2026-08-26"
       },
       {
         "id": "test-westobjections",
@@ -35581,9 +35592,98 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T212931985843-n-west-export-readiness-gate",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-export-readiness-gate",
+        "node_definition": {
+          "done_when": "reports/west-export-readiness.md records, against the current graph at or after imas-codex 7e4947a2: (1) a fresh accounted production export for batch token west_production_dd_paths with exact emitted-plus-excluded arithmetic, the exclusion ledger broken down by reason including the new structural_parent class, zero unaccounted candidates, and confirmation that breakdown_initial_time now emits and bare radial_coordinate is withheld as structural_parent (not invalid_catalog_entry); (2) full pinned-ISN validation over every emitted entry: catalog model load, run_semantic_checks, structural checks, with zero hard findings and the dangling-link prune count for references to non-emitted identities recorded (the 35 radial_coordinate doc links must prune or resolve safely, named explicitly); (3) the broad graph/corpus check run to a REAL exit status (compute node or raised timeout, never the 300 s login-node kill; record node, duration, exit); (4) the full sn release --batch west_production_dd_paths --dry-run preflight run with authority over its catalog/staging writes, exit status and the frozen artifact path recorded, noting the leftover v0.3.0rc1+west-task-2e artifact from the failed attempt if it interferes; every zero carries a positive control; no graph writes, no remote branch, tag, or PR",
+          "estimated_hours": null,
+          "goal": "A current accounted WEST export packet proven releasable by fresh gate evidence",
+          "id": "n-west-export-readiness-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T212931985843-n-west-export-readiness-gate/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-export-readiness.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-westexport",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T21:29:37Z",
+        "completed_at": "2026-08-26T21:48:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1116,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1116,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "7e4947a22b54c5355a56860411baffc03dbd75fd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T212931985843-n-west-export-readiness-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03ffa-8713-7082-a25a-caca24d450b2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10662656,
+            "cached_input_tokens_cumulative": 10662656,
+            "input_tokens": 11093436,
+            "input_tokens_cumulative": 11093436,
+            "output_tokens": 29027,
+            "output_tokens_cumulative": 29027,
+            "reasoning_output_tokens": 11160,
+            "reasoning_output_tokens_cumulative": 11160
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 986
+    "_version": 989
   }
 }
