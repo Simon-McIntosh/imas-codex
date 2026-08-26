@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="67">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="69">
+<meta name="plan-impl" content="0.85">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
@@ -2244,9 +2244,15 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     <p class="r-fu-outcome">Superseded by measurement: the 2026-08-16 gate manifest (receipts/standard-names/portfolio-census-2026-08-16/west-gate-manifest.json, sha a613ecb7) proves gm1/gm5/gm6 are composed onto accepted, docs-accepted, valid names and the 14-source residual no longer exists as claimed. The live residual is the 49-row worklist: 21 non-docs rows executed under sn-graph-wide-integrity f-sgwi-west-blocking, 28 docs drains folded into the S9 WEST docs refresh (sn-quality-parity f-west-docs-refresh). The standing policy holds: sanctioned instruments only, sn rescore for exhausted names, never a hand-accept.</p>
     </article>
-<article class="r-fu" data-id="f-west-rc-readiness-repair" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship sn-west-review-rehearsal" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-west-rc-readiness-repair" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-26" data-recommends-skill="/reckon-ship sn-west-review-rehearsal" data-resolved-at="2026-08-26T23:21:39+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Clear the packet and release-contract HOLDs before another fork RC attempt</h4>
     <div class="r-fu-body"><p>Repair <code>breakdown_initial_time</code> through the governed ISN/catalog boundary; adjudicate the 32 other explicit exclusions; obtain a real broad graph/corpus exit status; and run the full batch dry-run with authority over its catalog/staging writes. In the existing Click release seams, enforce fork-only review-branch transport even when <code>--remote</code> is supplied, add byte-level proof that approved entries are unchanged by approved-plus-batch export, and route plain finals through fork branch → upstream PR → fold-back-owned tag with no release-time upstream-main push. Use <code>west_production_dd_paths</code> as the operational batch token. Do not open an upstream PR while clearing these gates.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
+    <p class="r-fu-outcome">All packet and release-contract HOLDs cleared through eleven dispatched nodes and four readiness gates, and the fork RC is LIVE: v0.3.0rc1+west-task-2e minted at catalog review commit 0fcf7d80, fork PR https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/1 open, upstream untouched, artifact frozen (sha 75669434, 408 names). breakdown_initial_time repaired through the new governed sn edit --kind route; the 8 canonical-locus advisories proven codex oracle defects and silenced at source; bare radial_coordinate withheld as structural_parent with all 9 DD bindings redistributed or quarantined (grids and ordinates are never named); export validates the full candidate set (not singletons); approved baseline preserved byte-for-byte (2223: 0 missing, 23 withheld overlaps retained); full dry-run exit 0; pinned-ISN 0 hard findings over 2349 staged identities. The absent release-time tag is correct per locked D-final-shape (tag = fold-back receipt owned by sn merge). Continued by f-west-stages-3-6.</p>
+    </article>
+<article class="r-fu" data-id="f-west-stages-3-6" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-27" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Human review of fork PR #1, then fold-back, freeze-check and unwind (stages 3-6)</h4>
+    <div class="r-fu-body">Stage 3 is the human touch point this rehearsal exists to exercise: review https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/1 in the gh UI, make one good and one deliberately non-compliant edit to two batch entries, merge. Then sn merge --pr <url> (exercises the graph-merged: fold-back tag, the tag's first live creation per D-final-shape), verify contested/approved routing, freeze-check with an unscoped sn run, and sn merge --undo to unwind. Before act 2 (--final): repair the sn-release-notes seat, which omitted its required title in 5/5 attempts so the static-fallback PR body published; judge and fix the prompt or schema so the first upstream PR carries a grounded body.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     </article>
 </section>
@@ -2326,6 +2332,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T224509269389-n-west-export-readiness-gate4" data-who="test-westexport" data-when="2026-08-26T23:00:01Z">
     <div class="r-comment-body"><p>Full release preflight EXIT 0 (348s): 408=332 emitted+76 excluded exact (15 docs + 10 validation + 3 quorum + 4 resolution + 44 structural_parent); breakdown_initial_time emits; bare radial_coordinate structural_parent; approved baseline 2223 preserved (229 overlaps = 206 fresh + 23 retained byte-exact, 0 missing, 0 out-of-batch byte changes, 1994 non-batch byte-exact); pinned-ISN over all 2349 staged identities 0 hard findings; would mint v0.3.0rc1+west-task-2e</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T230057971450-n-west-fork-rc-cut" data-who="impl-relseams" data-when="2026-08-26T23:19:51Z">
+    <div class="r-comment-body"><p>Fork RC LIVE: minted v0.3.0rc1+west-task-2e, fork PR #1 open (review branch 0fcf7d80, 20 files +21864/-9160), catalog.yml export_scope=review review_batch=408, artifact frozen sha 75669434, upstream fully untouched. The absent release-time tag is CORRECT per locked D-final-shape (tag is the fold-back receipt owned by sn merge); the node spec's RC-tag expectation was stale July wording, adjudicated by the coordinator. Release-notes seat failed its title contract 5/5 and the static fallback published: seat-quality followup recorded</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
