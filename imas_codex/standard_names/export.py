@@ -393,6 +393,20 @@ def _fetch_export_population(
              MATCH (:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
          }} AS has_dd_source_binding,
          EXISTS {{
+             MATCH (producer:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+             WHERE producer.source_type = 'derived'
+               AND NOT EXISTS {{
+                   MATCH (producer)-[:FROM_DD_PATH]->(:IMASNode)
+               }}
+         }} AS has_derived_producer,
+         EXISTS {{
+             MATCH (producer:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+             WHERE coalesce(producer.source_type, '') <> 'derived'
+                OR EXISTS {{
+                    MATCH (producer)-[:FROM_DD_PATH]->(:IMASNode)
+                }}
+         }} AS has_non_derived_producer,
+         EXISTS {{
              MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
              WHERE review.review_axis = 'docs'
          }} AS has_docs_review,
@@ -404,6 +418,8 @@ def _fetch_export_population(
         unit: coalesce(u.id, sn.unit),
         cocos: c.id,
         _has_dd_source_binding: has_dd_source_binding,
+        _has_derived_producer: has_derived_producer,
+        _has_non_derived_producer: has_non_derived_producer,
         _has_docs_review: has_docs_review,
         _has_winning_docs_review: has_winning_docs_review
     }} AS record
@@ -446,18 +462,37 @@ def _classify_export_population(
             )
             continue
 
+        source_paths = candidate.get("source_paths") or []
         has_dd_source_binding = candidate.get("_has_dd_source_binding")
         if has_dd_source_binding is None:
-            has_dd_source_binding = bool(candidate.get("source_paths"))
-        if candidate.get("origin") == "derived" and not has_dd_source_binding:
+            has_dd_source_binding = any(
+                not str(source_path).startswith("derived:")
+                for source_path in source_paths
+            )
+        has_derived_producer = candidate.get("_has_derived_producer")
+        if has_derived_producer is None:
+            has_derived_producer = any(
+                str(source_path).startswith("derived:") for source_path in source_paths
+            )
+        has_non_derived_producer = candidate.get("_has_non_derived_producer")
+        if has_non_derived_producer is None:
+            has_non_derived_producer = any(
+                not str(source_path).startswith("derived:")
+                for source_path in source_paths
+            )
+        if (
+            not has_dd_source_binding
+            and has_derived_producer
+            and not has_non_derived_producer
+        ):
             excluded.append(
                 ExclusionRecord(
                     standard_name_id=candidate_id,
                     stage="export_policy",
                     reason="structural_parent",
                     detail=(
-                        "derived hierarchy scaffold has no Data Dictionary source "
-                        "binding"
+                        "hierarchy scaffold has no Data Dictionary source binding "
+                        "and only derived producers"
                     ),
                 )
             )
@@ -992,13 +1027,8 @@ def _fetch_deprecation_stubs(
     return []
 
 
-def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
-    """Validate an entry dict against the ISN catalog authority.
-
-    Returns the validated model_dump dict on success, or None if validation
-    fails. Callers must handle None returns — invalid entries are excluded
-    from the export.
-    """
+def _entry_model(entry_dict: dict[str, Any]) -> Any:
+    """Build the strict ISN model selected by an entry's quantity kind."""
     from imas_standard_names.models import (
         StandardNameComplexEntry,
         StandardNameMetadataEntry,
@@ -1015,25 +1045,18 @@ def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
         "complex": StandardNameComplexEntry,
         "metadata": StandardNameMetadataEntry,
     }.get(kind, StandardNameScalarEntry)
+    return model_cls.model_validate(entry_dict)
+
+
+def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
+    """Validate one entry's shape against its strict ISN catalog model.
+
+    Catalog-wide semantic checks are deliberately separate because reference
+    validity and pairwise rules require the complete emitted identity set.
+    """
 
     try:
-        entry = model_cls.model_validate(entry_dict)
-        from imas_standard_names.validation import run_semantic_checks
-
-        semantic_issues = run_semantic_checks({entry.name: entry})
-        hard_issues: list[str] = []
-        for issue in semantic_issues:
-            if " WARNING - " in issue or " INFO - " in issue:
-                logger.warning("ISN catalog advisory for '%s': %s", entry.name, issue)
-            else:
-                hard_issues.append(issue)
-        if hard_issues:
-            logger.warning(
-                "ISN catalog semantics rejected '%s': %s",
-                entry.name,
-                "; ".join(hard_issues),
-            )
-            return None
+        entry = _entry_model(entry_dict)
         return entry.model_dump(mode="json")
     except Exception as exc:
         logger.warning(
@@ -1042,6 +1065,39 @@ def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
             exc,
         )
         return None
+
+
+def _catalog_semantic_failures(
+    domain_entries: dict[str, list[dict[str, Any]]],
+) -> dict[str, list[str]]:
+    """Run one semantic pass over the complete assembled catalog projection."""
+    from imas_standard_names.validation import run_semantic_checks
+
+    entries: dict[str, Any] = {}
+    for domain_values in domain_entries.values():
+        for entry_dict in domain_values:
+            probe = {
+                key: value
+                for key, value in entry_dict.items()
+                if key not in _GRAPH_ONLY_RENDERED_FIELDS
+                and key not in _ISN_UNSUPPORTED_FIELDS
+            }
+            entry = _entry_model(probe)
+            entries[entry.name] = entry
+
+    failures: dict[str, list[str]] = {}
+    for issue in run_semantic_checks(entries):
+        owner, separator, _ = issue.partition(":")
+        if not separator or owner not in entries:
+            raise RuntimeError(
+                f"ISN catalog semantic finding has no candidate identity owner: {issue}"
+            )
+        if " WARNING - " in issue or " INFO - " in issue:
+            logger.warning("ISN catalog advisory for '%s': %s", owner, issue)
+            continue
+        failures.setdefault(owner, []).append(issue)
+
+    return failures
 
 
 # =============================================================================
@@ -1832,8 +1888,7 @@ def run_export(
 
     domain_entries: dict[str, list[dict[str, Any]]] = defaultdict(list)
     exported_names: list[str] = []
-    validation_failures = 0
-    invalid_candidate_ids: list[str] = []
+    invalid_candidates: dict[str, str] = {}
     ordering_exclusion_records: list[ExclusionRecord] = []
     ordering_excluded_names: set[str] = set()
     all_candidate_names = {c["id"] for c in candidates}
@@ -1861,8 +1916,9 @@ def run_export(
             # Validate against ISN model — invalid entries are excluded.
             validated = _validate_entry(entry_dict)
             if validated is None:
-                validation_failures += 1
-                invalid_candidate_ids.append(cand["id"])
+                invalid_candidates[cand["id"]] = (
+                    "entry failed validation against the ISN catalog model"
+                )
                 continue
             entry_dict = validated
 
@@ -1961,12 +2017,43 @@ def run_export(
         pruned_count, pruned_examples = _prune_dangling_links(
             domain_entries, published_names
         )
+
+        semantic_failures = _catalog_semantic_failures(domain_entries)
+        if semantic_failures:
+            for name, issues in semantic_failures.items():
+                invalid_candidates[name] = "; ".join(issues)
+                logger.warning(
+                    "ISN catalog semantics rejected '%s': %s",
+                    name,
+                    invalid_candidates[name],
+                )
+            for catalog_domain, entries in domain_entries.items():
+                domain_entries[catalog_domain] = [
+                    entry
+                    for entry in entries
+                    if entry.get("name") not in semantic_failures
+                ]
+
+            published_names = {
+                entry.get("name")
+                for entries in domain_entries.values()
+                for entry in entries
+                if entry.get("name")
+            }
+            additional_count, additional_examples = _prune_dangling_links(
+                domain_entries, published_names
+            )
+            pruned_count += additional_count
+            pruned_examples.extend(
+                additional_examples[: max(0, 20 - len(pruned_examples))]
+            )
+
         report.pruned_links = pruned_count
-        if pruned_count:
+        if report.pruned_links:
             logger.warning(
                 "Pruned %d dangling internal link(s) whose targets are not "
                 "published; examples: %s",
-                pruned_count,
+                report.pruned_links,
                 pruned_examples,
             )
         # arguments[]/error_variants[] are derived from graph edges and must
@@ -1994,7 +2081,7 @@ def run_export(
     seen: set[str] = set()
     deduped: list[str] = []
     for nm in exported_names:
-        if nm in seen or nm in ordering_excluded_names:
+        if nm in seen or nm in ordering_excluded_names or nm in invalid_candidates:
             continue
         seen.add(nm)
         deduped.append(nm)
@@ -2007,9 +2094,9 @@ def run_export(
                 standard_name_id=name,
                 stage="catalog_validation",
                 reason="invalid_catalog_entry",
-                detail="entry failed validation against the ISN catalog model",
+                detail=detail,
             )
-            for name in invalid_candidate_ids
+            for name, detail in invalid_candidates.items()
         ]
         + ordering_exclusion_records
     )
@@ -2058,9 +2145,9 @@ def run_export(
         report.exported_count,
         staging_path,
     )
-    if validation_failures:
+    if invalid_candidates:
         logger.warning(
             "%d name(s) excluded by ISN validation — check logs for details",
-            validation_failures,
+            len(invalid_candidates),
         )
     return report
