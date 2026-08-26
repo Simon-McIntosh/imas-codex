@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:03:28",
+  "updated": "2026-08-26T16:16:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -341,6 +341,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-catalog-semantic-filter",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03e6a-d1e0-7292-9d74-0871b56df500",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e6a-d1e0-7292-9d74-0871b56df500"
+        },
+        "created": "2026-08-26"
       },
       {
         "id": "impl-catapply",
@@ -1508,6 +1519,15 @@
         "role": "implement",
         "session_id": "01a028cd-119e-7e23-a72d-dd36ac452797",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-west-fork-release",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "impl-westdocs",
@@ -34473,6 +34493,6 @@
       }
     ],
     "holds": [],
-    "_version": 959
+    "_version": 962
   }
 }
