@@ -68,6 +68,7 @@ class ReviewCatalogAssembly:
     staged_count_after: int
     baseline_entries_added: int
     batch_entries_written: int
+    emitted_batch_names: tuple[str, ...]
 
 
 # Default COCOS convention for the catalog manifest
@@ -1476,30 +1477,24 @@ def assemble_review_catalog(
 ) -> ReviewCatalogAssembly:
     """Carry the approved baseline into a review export without reserializing it.
 
-    Non-batch approved entries are authoritative byte-for-byte. Batch identities
-    are authoritative in the fresh staging export and may therefore replace an
-    approved entry of the same name. Fresh non-batch entries absent from the
-    approved checkout are retained as additive graph-approved entries.
+    Approved entries are authoritative byte-for-byte unless the fresh export
+    contains the same batch identity. A withheld batch candidate therefore
+    retains its approved mapping, while an emitted batch identity replaces it.
+    Fresh non-batch entries absent from the approved checkout are retained as
+    additive graph-approved entries.
     """
     approved = _catalog_entry_records(approved_root)
     staged = _catalog_entry_records(staging_root)
     batch = set(batch_names)
 
-    selected: list[CatalogEntryRecord] = []
-    selected_names: set[str] = set()
-    for record in approved.values():
-        if record.name in batch:
-            continue
-        selected.append(record)
-        selected_names.add(record.name)
+    selected = dict(approved)
     for record in staged.values():
-        if record.name in selected_names:
+        if record.name in approved and record.name not in batch:
             continue
-        selected.append(record)
-        selected_names.add(record.name)
+        selected[record.name] = record
 
     by_domain: dict[str, list[CatalogEntryRecord]] = {}
-    for record in selected:
+    for record in selected.values():
         by_domain.setdefault(record.domain, []).append(record)
 
     standard_names = staging_root / "standard_names"
@@ -1519,8 +1514,9 @@ def assemble_review_catalog(
                 content.extend(b"\n")
         (standard_names / f"{domain}.yml").write_bytes(bytes(content))
 
-    baseline_added = sum(
-        1 for name in approved if name not in batch and name not in staged
+    baseline_added = sum(1 for name in approved if name not in staged)
+    candidate_baseline_added = sum(
+        1 for name in approved if name not in staged and name not in batch
     )
     manifest_path = staging_root / "catalog.yml"
     if manifest_path.is_file():
@@ -1531,7 +1527,9 @@ def assemble_review_catalog(
         manifest["published_count"] = len(selected)
         prior_candidate_count = manifest.get("candidate_count")
         if isinstance(prior_candidate_count, int):
-            manifest["candidate_count"] = prior_candidate_count + baseline_added
+            manifest["candidate_count"] = (
+                prior_candidate_count + candidate_baseline_added
+            )
         manifest_path.write_text(
             yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8"
         )
@@ -1542,6 +1540,7 @@ def assemble_review_catalog(
         staged_count_after=len(selected),
         baseline_entries_added=baseline_added,
         batch_entries_written=sum(1 for name in staged if name in batch),
+        emitted_batch_names=tuple(sorted(set(staged) & batch)),
     )
 
 
