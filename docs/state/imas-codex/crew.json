@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T17:02:43",
+  "updated": "2026-08-26T17:15:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1143,9 +1143,11 @@
         "id": "impl-relseams",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f"
+        },
         "created": "2026-08-26"
       },
       {
@@ -34751,9 +34753,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260826T145621958074-n-west-release-transport-contract",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-west-release-transport-contract",
+        "node_definition": {
+          "done_when": "Focused tests in tests/standard_names/test_review_release.py prove three negative invariants with exit 0 captured once to a persistent log: a batch release given --remote upstream still pushes the review branch to the fork remote and never to upstream; the approved-plus-batch export asserts byte-identity of the approved baseline and fails loudly on any approved-entry mutation; the plain --final path performs no release-time upstream-main push and creates no release-time tag (fork branch then upstream PR only, the tag stays owned by the fold-back per the locked final-release-shape decision). Both owned source paths linted; local conventional commit with body; no push",
+          "estimated_hours": null,
+          "goal": "Release-branch transport in the Click release seams obeys the locked PR-then-tag contract",
+          "id": "n-west-release-transport-contract",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145621958074-n-west-release-transport-contract/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_review_release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relseams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:56:33Z",
+        "completed_at": "2026-08-26T15:04:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 498,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 498,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c93ac23995642fd3716cf1f6f7a4c867efdda977",
+        "commits": [
+          "84a4550b0598c4ed5ddc11b3fa9d8c62fad61be5"
+        ],
+        "changed_lines": {
+          "added": 344,
+          "removed": 23,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_review_release.py; pytest tests/standard_names/test_cli_release.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145621958074-n-west-release-transport-contract/logs/focused-tests.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T145621958074-n-west-release-transport-contract/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5042176,
+            "cached_input_tokens_cumulative": 5042176,
+            "input_tokens": 5250900,
+            "input_tokens_cumulative": 5250900,
+            "output_tokens": 15675,
+            "output_tokens_cumulative": 15675,
+            "reasoning_output_tokens": 4343,
+            "reasoning_output_tokens_cumulative": 4343
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 967
+    "_version": 969
   }
 }

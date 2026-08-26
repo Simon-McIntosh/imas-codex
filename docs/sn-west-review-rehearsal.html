@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-26">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="50">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18">
+<meta name="plan-commits" content="2220dd18,84a4550b">
 </head>
 <body>
   <main class="plan-doc">
@@ -2299,6 +2299,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260826T131736683308-n-west-rc-reuse-map" data-who="inv-reusemap-rel" data-when="2026-08-26T13:26:13Z">
     <div class="r-comment-body"><p>Mapped the existing Click release pipeline: 7 capabilities reusable as-is, one requires a narrow guard/test extension, and the operational token is west_production_dd_paths.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260826T145621958074-n-west-release-transport-contract" data-who="impl-relseams" data-when="2026-08-26T15:04:51Z">
+    <div class="r-comment-body"><p>Three negative transport invariants proven: --remote upstream still pushes review branch to fork only; approved baseline byte-identity asserted (byte_changed error before branch/publish); plain final leaves upstream main untouched, creates no release-time tag, opens upstream PR from fork branch. 25+15 tests, exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260826-release-transport-contract-landed" data-who="reckon-ship" data-when="2026-08-26T15:15:00Z">
+    <div class="r-comment-body">n-west-release-transport-contract landed — commit 84a4550b, merged 5044f59f; gate passed (25 focused + 15 CLI release tests, exit 0, 4 negative-invariant tests added). The three open release-contract holds from the 2026-08-26 workflow assert are closed with proofs: a batch given --remote upstream still creates its review branch only on the fork and never on upstream; approved-plus-batch staging fails with a named byte_changed error before branch or publish when any approved entry mutates; a plain --final leaves upstream main at its exact pre-release SHA, creates no local or remote release-time tag, and opens the upstream PR from a fork-hosted release branch — the tag remains owned by fold-back per the locked final-release-shape decision.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131846395540-n-west-upstream-additivity-review" data-who="rev-west-upstream" data-when="2026-08-26T13:24:56Z">
     <div class="r-comment-body"><p>Workflow HOLD: fork-only branch transport and plain-final PR-then-tag are contradicted by source, and approved-byte identity is unproven.</p></div>
