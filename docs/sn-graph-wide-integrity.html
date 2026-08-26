@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="282">
+<meta name="plan-version" content="283">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -2197,6 +2197,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20260825T151846068553-n-stabilityresidue" data-who="test-quiescence" data-when="2026-08-25T15:30:48Z">
     <div class="r-comment-body"><p>10 of 10 stability rows named and dispositioned: 5 repairable-by-existing-program, 5 needs-new-authority, 0 expected-transient. The 5 no-live-target rows are genuine DD lifecycle residue not the derived transient class (partition DD=5 derived=0), all entering 09:43:19Z-09:44:37Z when run c51460c7 drove targets exhausted via stop_refine_name_attempt; exact-id reconcile_source_status_liveness is the existing repair and no new operator is warranted. Dual-bound row last-producer-blocked; 4 accepted unsourced retain recorded holds. Sanity 4658/4658 and 9668/9668, PRODUCED_NAME 5315/5315 with reverse 0 as directional positive control</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20260825T163434923393-n-ddliverepair" data-who="test-quiescence" data-when="2026-08-25T16:42:11Z">
+    <div class="r-comment-body"><p>no-live-target 5 to 0. Cohort re-derived at the mutation boundary as DD 5/derived 0/other 0; preview 5 admitted 0 refused; apply orphaned_reset=5, terminal edges/projections/source_paths dropped 5 each; replay all eight counters zero. Postflight 0 with sanity 4658/4658 and 9668/9668, authored edges 5310/5310, reverse 0. Protected digest 27f1bd67 unchanged across the dual-bound row and four accepted-unsourced holds; StandardNameChange 8596 and LLMCost 34914 unchanged</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
