@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="65">
+<meta name="plan-version" content="66">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2320,6 +2320,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260826T222449631351-n-west-export-readiness-gate3" data-who="test-westexport" data-when="2026-08-26T22:39:01Z">
     <div class="r-comment-body"><p>One residual: assembler removes all 229 approved batch overlaps and restores only the 206 freshly emitted, so 23 approved-but-withheld batch candidates go missing; all else green (408=332+76 exact, pinned validation 0 hard over 332, 1994 non-batch byte-identical, ISNC clean, would mint v0.3.0rc1+west-task-2e)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260826T223939335201-n-withheld-overlap-retention" data-who="impl-relseams" data-when="2026-08-26T22:44:26Z">
+    <div class="r-comment-body"><p>229 overlaps resolve as 206 fresh replacements + 23 byte-exact retained approved copies + 0 missing; guard proves 0 missing / 0 protected byte-changes; published_count 206 to 229 without candidate double-count; 30 tests exit 0</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
