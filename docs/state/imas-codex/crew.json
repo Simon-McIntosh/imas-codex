@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-26T16:16:42",
+  "updated": "2026-08-26T17:02:43",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1140,6 +1140,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-relseams",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
+      {
         "id": "impl-reparentprog",
         "harness": "codex",
         "role": "implement",
@@ -1870,6 +1879,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "test-gatevalidity",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
+      },
+      {
         "id": "test-mergeverify",
         "harness": "codex",
         "role": "test",
@@ -2012,6 +2030,15 @@
         "role": "test",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "test-westobjections",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-26"
       },
       {
         "id": "test-westrc",
@@ -34490,9 +34517,243 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T173907453065-n-protectionexposure",
+        "plan": "sn-origin-provenance-backfill",
+        "section": "\u00a71",
+        "node": "n-protectionexposure",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-origin-provenance-backfill/protection-exposure.md states the count of identities filter_protected currently shields (origin=catalog_edit or name_stage=approved) that carry NO evidence of human or catalog editorial action, and the count carrying such evidence that filter_protected does NOT shield, naming every member of that second set exactly since those are what a pipeline write could overwrite; it states which evidence it accepted as editorial action and why; and it concludes whether the 1,091 null-origin identities create real exposure or none. Every reported zero carries its schema sanity count and the report carries a positive control naming what it controlled for. Read-only, no graph mutation",
+          "estimated_hours": null,
+          "goal": "A verdict on whether any identity is protected that should not be, or unprotected that should be",
+          "id": "n-protectionexposure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+          "plan": "sn-origin-provenance-backfill",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "docs/evidence/sn-origin-provenance-backfill/protection-exposure.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-residue",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T17:39:47Z",
+        "completed_at": "2026-08-25T17:56:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 990,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 990,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "af5d13a94125c3ef2840dbe037e8db8900dcacd8",
+        "commits": [
+          "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+        ],
+        "changed_lines": {
+          "added": 499,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only GraphClient census + evidence-to-measurement assertion suite + 4658-row digest before/after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/logs/evidence-verification.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037ea-ac01-7933-a15d-2b9d06ea4bd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5699584,
+            "cached_input_tokens_cumulative": 8847616,
+            "input_tokens": 5646854,
+            "input_tokens_cumulative": 9116639,
+            "output_tokens": 9870,
+            "output_tokens_cumulative": 34911,
+            "reasoning_output_tokens": 3981,
+            "reasoning_output_tokens_cumulative": 10833
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260826T141254865928-n-export-semantic-exclusion",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-export-semantic-exclusion",
+        "node_definition": {
+          "done_when": "The export path applies the public ISN catalog semantic validator to each candidate after Pydantic model validation, treats WARNING and INFO findings as advisories, excludes every candidate with a hard semantic issue as invalid_catalog_entry, preserves exact emitted-plus-excluded accounting, and proves with a focused test that bare radial_coordinate is withheld while a valid locus-qualified coordinate is emitted. Run the affected export and publish tests once to a persistent log, format and lint only the two owned paths, commit them locally with a conventional subject and explanatory body, and report commit SHA, test command, exit status, and log path.",
+          "estimated_hours": 0.75,
+          "goal": "Make catalog-semantic rejection an accounted export exclusion before publish.",
+          "id": "n-export-semantic-exclusion",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-semantic-exclusion.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_exclusion_ledger.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-semantic-exclusion.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-catalog-semantic-filter",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-26T14:13:02Z",
+        "completed_at": "2026-08-26T14:56:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2635,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2635,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "d0ad42ce098fbcb684bc83b738a766dd3f71df1e",
+        "commits": [
+          "2220dd185dfa415be28288d4e8ac686379ab080f"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_export_exclusion_ledger.py tests/standard_names/test_publish_transport_only.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260826T141254865928-n-export-semantic-exclusion/logs/export-publish-tests-resumed.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-semantic-exclusion.md",
+        "scope_changed": false,
+        "session_id": "01a03e6a-d1e0-7292-9d74-0871b56df500",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 735744,
+            "cached_input_tokens_cumulative": 735744,
+            "input_tokens": 746273,
+            "input_tokens_cumulative": 746273,
+            "output_tokens": 2431,
+            "output_tokens_cumulative": 2431,
+            "reasoning_output_tokens": 561,
+            "reasoning_output_tokens_cumulative": 561
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 71893,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 73993,
+              "log_age_seconds": 73003,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "complete",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 73026,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 962
+    "_version": 967
   }
 }
