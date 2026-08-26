@@ -79,7 +79,7 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
        repo. Surfacing the issues here means we catch broken names at
        publish time, not at release time.
     3. **Pipeline-specific checks** — public ISN advisory aliases and
-       structurally proven field-at-position relation violations, applied
+       conservatively proven field-at-position relation findings, applied
        across the whole staging set by ``canonical_locus_check``.
 
     Returns a list of error strings (empty if valid).
@@ -169,9 +169,9 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
 
         if canonical_issues:
             logger.warning(
-                "staging-validate found %d canonical-locus / preposition "
-                "violations — these names should be regenerated under the "
-                "tightened compose/review prompts. Continuing release "
+                "staging-validate found %d grammar-backed locus / preposition "
+                "advisories — these names should be reviewed against the "
+                "installed ISN grammar. Continuing release "
                 "(advisory only).",
                 len(canonical_issues),
             )

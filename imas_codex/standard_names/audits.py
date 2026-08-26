@@ -175,16 +175,47 @@ _EVALUATED_QUANTITY_FIELDS = ("subject", "population", "orbit")
 _AXIS_FIELDS = ("component", "coordinate")
 
 
+@lru_cache(maxsize=1)
+def _isn_directional_extent_bases() -> frozenset[str]:
+    """Return registered bases whose lexical head denotes path length.
+
+    A component prefix on one of these scalar bases selects the direction in
+    which an intrinsic extent is measured; it does not turn the extent into a
+    field evaluated at its locus.  The token universe comes from ISN's public
+    grammar context so new compound length bases inherit the same semantics
+    without a codex-owned vocabulary table.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+
+        sections = get_grammar_context().get("vocabulary_sections", ())
+        physical_bases = next(
+            section.get("tokens", ())
+            for section in sections
+            if section.get("segment") == "physical_base"
+        )
+        return frozenset(
+            str(token)
+            for token in physical_bases
+            if str(token).split("_")[-1] == "length"
+        )
+    except (StopIteration, TypeError, AttributeError) as exc:
+        logger.debug("Could not derive ISN directional extent bases: %s", exc)
+        return frozenset()
+
+
 def _has_field_evaluation_structure(name: str) -> bool:
     """Return whether public parse fields prove a quantity is field-like.
 
     ISN currently publishes the geometry-vs-position distinction but does not
     classify every physical base as an evaluated field or an intrinsic
     property.  Subject and population qualifiers are nevertheless unambiguous
-    field-evaluation structure, and so is an axis token that projects the
-    quantity.  Reading those public parse fields preserves a conservative
-    deterministic gate without copying either the physical-base or qualifier
-    vocabularies into codex.
+    field-evaluation structure.  An axis token proves the same only when it
+    projects a physical quantity: a coordinate carrier locates the locus
+    itself, while a component of a scalar extent selects the direction in
+    which that intrinsic geometry is measured.  Reading those public parse
+    fields preserves a conservative deterministic gate without copying either
+    the physical-base or qualifier vocabularies into codex.
 
     A section-plane token does not project the quantity.  It names the plane a
     scalar geometric extent is taken in, which is an intrinsic property of the
@@ -203,6 +234,10 @@ def _has_field_evaluation_structure(name: str) -> bool:
     ):
         return True
     if getattr(parsed, "section_plane", None) is not None:
+        return False
+    if getattr(parsed, "geometric_base", None) is not None:
+        return False
+    if getattr(parsed, "physical_base", None) in _isn_directional_extent_bases():
         return False
     return any(getattr(parsed, field, None) is not None for field in _AXIS_FIELDS)
 
@@ -3113,6 +3148,8 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
             and _has_field_evaluation_structure(name)
         ):
             corrected = name.replace(f"_of_{locus_token}", f"_at_{locus_token}")
+            if corrected == name:
+                return []
             return [
                 f"audit:canonical_locus_check: name '{name}' has field-evaluation "
                 f"structure but uses intrinsic-geometry relation '_of_'. "
