@@ -979,66 +979,26 @@ def _gh_pr_create(
     return number, url
 
 
-def _catalog_entry_bytes(catalog_root: Path) -> dict[str, bytes]:
-    """Return each catalog entry exactly as encoded inside its domain YAML.
-
-    YAML node marks let the release seam compare the serialized mapping rather
-    than a parsed-and-reformatted approximation. The identity is global across
-    domain files, so duplicates are a hard catalog error.
-    """
-    import yaml
-    from yaml.nodes import MappingNode, ScalarNode, SequenceNode
-
-    entries: dict[str, bytes] = {}
-    standard_names = catalog_root / "standard_names"
-    if not standard_names.is_dir():
-        return entries
-    for path in sorted(standard_names.glob("*.yml")):
-        text = path.read_text(encoding="utf-8")
-        root = yaml.compose(text)
-        if root is None:
-            continue
-        nodes = root.value if isinstance(root, SequenceNode) else [root]
-        for node in nodes:
-            if not isinstance(node, MappingNode):
-                raise ValueError(f"{path}: catalog entry is not a YAML mapping")
-            name = None
-            for key_node, value_node in node.value:
-                if (
-                    isinstance(key_node, ScalarNode)
-                    and key_node.value == "name"
-                    and isinstance(value_node, ScalarNode)
-                ):
-                    name = value_node.value
-                    break
-            if not name:
-                raise ValueError(f"{path}: catalog entry has no scalar name")
-            if name in entries:
-                raise ValueError(f"duplicate catalog entry identity: {name}")
-            entries[name] = text[node.start_mark.index : node.end_mark.index].encode(
-                "utf-8"
-            )
-    return entries
-
-
-def _assert_approved_entries_unchanged(isnc_path: Path, staging_dir: Path) -> None:
+def _assert_approved_entries_unchanged(
+    isnc_path: Path,
+    staging_dir: Path,
+    *,
+    batch_names: list[str],
+) -> None:
     """Fail when an additive review export changes its approved baseline."""
-    approved = _catalog_entry_bytes(isnc_path)
-    if not approved:
-        return
-    candidate = _catalog_entry_bytes(staging_dir)
-    missing = sorted(approved.keys() - candidate.keys())
-    changed = sorted(
-        name
-        for name, baseline in approved.items()
-        if name in candidate and candidate[name] != baseline
+    from imas_codex.standard_names.export import approved_baseline_delta
+
+    delta = approved_baseline_delta(
+        isnc_path,
+        staging_dir,
+        batch_names=batch_names,
     )
-    if missing or changed:
+    if delta.missing or delta.byte_changed:
         details = []
-        if missing:
-            details.append(f"missing={missing}")
-        if changed:
-            details.append(f"byte_changed={changed}")
+        if delta.missing:
+            details.append(f"missing={list(delta.missing)}")
+        if delta.byte_changed:
+            details.append(f"byte_changed={list(delta.byte_changed)}")
         raise ValueError(
             "approved catalog baseline changed during additive review export: "
             + "; ".join(details)
@@ -1207,7 +1167,18 @@ def run_review_release(
         report.errors.append(f"export failed: {exc}")
         return report
     try:
-        _assert_approved_entries_unchanged(isnc_path, staging_dir)
+        from imas_codex.standard_names.export import assemble_review_catalog
+
+        assemble_review_catalog(
+            isnc_path,
+            staging_dir,
+            batch_names=report.names,
+        )
+        _assert_approved_entries_unchanged(
+            isnc_path,
+            staging_dir,
+            batch_names=report.names,
+        )
     except Exception as exc:
         report.errors.append(f"approved baseline check failed: {exc}")
         return report

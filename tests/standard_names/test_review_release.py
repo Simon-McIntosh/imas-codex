@@ -15,7 +15,12 @@ import pytest
 import yaml
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names.catalog_release import run_release, run_review_release
+from imas_codex.standard_names.catalog_release import (
+    _assert_approved_entries_unchanged,
+    run_release,
+    run_review_release,
+)
+from imas_codex.standard_names.export import approved_baseline_delta
 
 
 def _git(*args, cwd):
@@ -200,16 +205,16 @@ def test_review_branch_transport_ignores_upstream_remote(isnc_repo, tmp_path):
 
 
 @pytest.mark.parametrize(
-    ("approved_entry", "expected_error"),
+    "approved_entry",
     [
-        ("- name: approved_name\n  unit: A\n", None),
-        ("- name: approved_name\n  unit: kA\n", "byte_changed=['approved_name']"),
+        "- name: approved_name\n  unit: A\n",
+        "- name: approved_name\n  unit: kA\n",
     ],
 )
-def test_review_export_preserves_approved_entry_bytes(
-    isnc_repo, tmp_path, approved_entry, expected_error
+def test_review_export_restores_approved_entry_bytes(
+    isnc_repo, tmp_path, approved_entry
 ):
-    """Approved mappings are compared as serialized bytes before publication."""
+    """Fresh graph serialization cannot replace a non-batch approved mapping."""
     baseline = "- name: approved_name\n  unit: A\n"
     _write_domain_catalog(isnc_repo, baseline)
     _git("add", "standard_names/equilibrium.yml", cwd=isnc_repo)
@@ -240,10 +245,143 @@ def test_review_export_preserves_approved_entry_bytes(
         **_PR_TARGET,
     )
 
-    if expected_error is None:
-        assert report.errors == [], report.errors
-    else:
-        assert any(expected_error in error for error in report.errors)
+    assert report.errors == [], report.errors
+    assert approved_baseline_delta(
+        isnc_repo,
+        tmp_path / "staging",
+        batch_names=["plasma_current", "poloidal_flux"],
+    ).unchanged == ("approved_name",)
+
+
+@pytest.mark.parametrize(
+    ("candidate", "expected_error"),
+    [
+        ("", "missing=['approved_name']"),
+        (
+            "- name: approved_name\n  unit: kA\n",
+            "byte_changed=['approved_name']",
+        ),
+    ],
+)
+def test_approved_baseline_guard_refuses_non_batch_drift(
+    tmp_path, candidate, expected_error
+):
+    approved = tmp_path / "approved"
+    staging = tmp_path / "staging"
+    _write_domain_catalog(approved, "- name: approved_name\n  unit: A\n")
+    _write_domain_catalog(staging, candidate)
+
+    with pytest.raises(ValueError, match="approved catalog baseline changed") as exc:
+        _assert_approved_entries_unchanged(
+            approved,
+            staging,
+            batch_names=["batch_name"],
+        )
+
+    assert expected_error in str(exc.value)
+
+
+def test_approved_baseline_guard_requires_batch_overlap_from_fresh_export(
+    tmp_path,
+):
+    approved = tmp_path / "approved"
+    staging = tmp_path / "staging"
+    _write_domain_catalog(approved, "- name: batch_name\n  unit: A\n")
+    _write_domain_catalog(staging, "")
+
+    with pytest.raises(ValueError, match=r"missing=\['batch_name'\]"):
+        _assert_approved_entries_unchanged(
+            approved,
+            staging,
+            batch_names=["batch_name"],
+        )
+
+
+def test_review_assembly_reproduces_and_closes_sparse_baseline_failure(
+    isnc_repo, tmp_path
+):
+    """A sparse batch export carries the complete approved baseline forward."""
+    approved_names = [f"approved_{index:04d}" for index in range(2223)]
+    batch_names = approved_names[:206]
+    baseline = "".join(
+        f"- name: {name}\n  description: baseline {name}\n" for name in approved_names
+    )
+    _write_domain_catalog(isnc_repo, baseline)
+    _git("add", "standard_names/equilibrium.yml", cwd=isnc_repo)
+    _git("commit", "-m", "approved baseline", cwd=isnc_repo)
+    _git("push", "origin", "main", cwd=isnc_repo)
+
+    focus = tmp_path / "sparse-batch.yaml"
+    focus.write_text(
+        yaml.safe_dump(
+            {
+                "kind": "sn_names",
+                "schema_version": 1,
+                "name": "sparse-batch",
+                "names": batch_names,
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+    observed = {}
+
+    def exporter(*, staging_dir, force, review_batch, **_kwargs):
+        root = Path(staging_dir)
+        fresh_batch = "".join(
+            f"- name: {name}\n  description: fresh {name}\n" for name in review_batch
+        )
+        _write_domain_catalog(root, fresh_batch)
+        (root / "catalog.yml").write_text(
+            "catalog_name: t\n"
+            "candidate_count: 206\n"
+            "published_count: 206\n"
+            "domains_included:\n"
+            "- equilibrium\n",
+            encoding="utf-8",
+        )
+        observed["before"] = approved_baseline_delta(isnc_repo, root)
+        return SimpleNamespace(exported_count=len(review_batch))
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Review sparse batch",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=exporter,
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    before = observed["before"]
+    assert len(before.missing) == 2017
+    assert len(before.byte_changed) == 206
+    assert len(before.unchanged) == 0
+
+    after = approved_baseline_delta(isnc_repo, tmp_path / "staging")
+    assert len(after.missing) == 0
+    assert len(after.byte_changed) == 206
+    assert len(after.unchanged) == 2017
+    protected_after = approved_baseline_delta(
+        isnc_repo,
+        tmp_path / "staging",
+        batch_names=batch_names,
+    )
+    assert len(protected_after.missing) == 0
+    assert len(protected_after.byte_changed) == 0
+    assert len(protected_after.unchanged) == 2017
+
+    manifest = yaml.safe_load(
+        (tmp_path / "staging" / "catalog.yml").read_text(encoding="utf-8")
+    )
+    assert manifest["candidate_count"] == 2223
+    assert manifest["published_count"] == 2223
+    assert manifest["domains_included"] == ["equilibrium"]
 
 
 def test_plain_final_uses_fork_branch_and_defers_tag(isnc_repo, tmp_path):

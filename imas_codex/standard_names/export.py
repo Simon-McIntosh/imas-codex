@@ -39,6 +39,37 @@ from imas_codex.standard_names.provenance_lifecycle import (
 
 logger = logging.getLogger(__name__)
 
+
+@dataclass(frozen=True)
+class CatalogEntryRecord:
+    """One catalog list item with its serialized representation intact."""
+
+    name: str
+    domain: str
+    mapping_bytes: bytes
+    item_bytes: bytes
+
+
+@dataclass(frozen=True)
+class ApprovedBaselineDelta:
+    """Serialized-entry comparison between an approved catalog and staging."""
+
+    missing: tuple[str, ...]
+    byte_changed: tuple[str, ...]
+    unchanged: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ReviewCatalogAssembly:
+    """Counts produced while combining approved baseline and review entries."""
+
+    baseline_count: int
+    staged_count_before: int
+    staged_count_after: int
+    baseline_entries_added: int
+    batch_entries_written: int
+
+
 # Default COCOS convention for the catalog manifest
 _DEFAULT_COCOS_CONVENTION = 17
 
@@ -1355,6 +1386,163 @@ def _unresolved_computed_refs(
 # =============================================================================
 # File writing
 # =============================================================================
+
+
+def _catalog_entry_records(catalog_root: Path) -> dict[str, CatalogEntryRecord]:
+    """Read catalog entries without normalizing their serialized mappings."""
+    from yaml.nodes import MappingNode, ScalarNode, SequenceNode
+
+    records: dict[str, CatalogEntryRecord] = {}
+    standard_names = catalog_root / "standard_names"
+    if not standard_names.is_dir():
+        return records
+
+    for path in sorted(standard_names.glob("*.yml")):
+        text = path.read_text(encoding="utf-8")
+        root = yaml.compose(text)
+        if root is None:
+            continue
+        if not isinstance(root, SequenceNode):
+            raise ValueError(f"{path}: domain catalog is not a YAML sequence")
+        for node in root.value:
+            if not isinstance(node, MappingNode):
+                raise ValueError(f"{path}: catalog entry is not a YAML mapping")
+            name = None
+            for key_node, value_node in node.value:
+                if (
+                    isinstance(key_node, ScalarNode)
+                    and key_node.value == "name"
+                    and isinstance(value_node, ScalarNode)
+                ):
+                    name = value_node.value
+                    break
+            if not name:
+                raise ValueError(f"{path}: catalog entry has no scalar name")
+            if name in records:
+                raise ValueError(f"duplicate catalog entry identity: {name}")
+
+            line_start = text.rfind("\n", 0, node.start_mark.index) + 1
+            item_prefix = text[line_start : node.start_mark.index]
+            if not re.fullmatch(r"\s*-\s+", item_prefix):
+                raise ValueError(
+                    f"{path}: catalog entry {name!r} is not a block-list item"
+                )
+            records[name] = CatalogEntryRecord(
+                name=name,
+                domain=path.stem,
+                mapping_bytes=text[node.start_mark.index : node.end_mark.index].encode(
+                    "utf-8"
+                ),
+                item_bytes=text[line_start : node.end_mark.index].encode("utf-8"),
+            )
+    return records
+
+
+def approved_baseline_delta(
+    approved_root: Path,
+    candidate_root: Path,
+    *,
+    batch_names: list[str] | tuple[str, ...] = (),
+) -> ApprovedBaselineDelta:
+    """Require all approved identities while protecting non-batch bytes."""
+    approved = _catalog_entry_records(approved_root)
+    candidate = _catalog_entry_records(candidate_root)
+    protected_names = sorted(set(approved) - set(batch_names))
+    missing = tuple(name for name in sorted(approved) if name not in candidate)
+    byte_changed = tuple(
+        name
+        for name in protected_names
+        if name in candidate
+        and candidate[name].mapping_bytes != approved[name].mapping_bytes
+    )
+    unchanged = tuple(
+        name
+        for name in protected_names
+        if name in candidate
+        and candidate[name].mapping_bytes == approved[name].mapping_bytes
+    )
+    return ApprovedBaselineDelta(
+        missing=missing,
+        byte_changed=byte_changed,
+        unchanged=unchanged,
+    )
+
+
+def assemble_review_catalog(
+    approved_root: Path,
+    staging_root: Path,
+    *,
+    batch_names: list[str],
+) -> ReviewCatalogAssembly:
+    """Carry the approved baseline into a review export without reserializing it.
+
+    Non-batch approved entries are authoritative byte-for-byte. Batch identities
+    are authoritative in the fresh staging export and may therefore replace an
+    approved entry of the same name. Fresh non-batch entries absent from the
+    approved checkout are retained as additive graph-approved entries.
+    """
+    approved = _catalog_entry_records(approved_root)
+    staged = _catalog_entry_records(staging_root)
+    batch = set(batch_names)
+
+    selected: list[CatalogEntryRecord] = []
+    selected_names: set[str] = set()
+    for record in approved.values():
+        if record.name in batch:
+            continue
+        selected.append(record)
+        selected_names.add(record.name)
+    for record in staged.values():
+        if record.name in selected_names:
+            continue
+        selected.append(record)
+        selected_names.add(record.name)
+
+    by_domain: dict[str, list[CatalogEntryRecord]] = {}
+    for record in selected:
+        by_domain.setdefault(record.domain, []).append(record)
+
+    standard_names = staging_root / "standard_names"
+    standard_names.mkdir(parents=True, exist_ok=True)
+    for path in standard_names.glob("*.yml"):
+        path.unlink()
+    for domain, records in sorted(by_domain.items()):
+        header = (
+            f"# Domain: {domain}\n"
+            f"# Entries: {len(records)}\n"
+            "# Ordering: approved baseline followed by fresh review entries\n"
+        ).encode()
+        content = bytearray(header)
+        for record in records:
+            content.extend(record.item_bytes)
+            if not record.item_bytes.endswith(b"\n"):
+                content.extend(b"\n")
+        (standard_names / f"{domain}.yml").write_bytes(bytes(content))
+
+    baseline_added = sum(
+        1 for name in approved if name not in batch and name not in staged
+    )
+    manifest_path = staging_root / "catalog.yml"
+    if manifest_path.is_file():
+        manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict):
+            raise ValueError(f"{manifest_path}: manifest is not a YAML mapping")
+        manifest["domains_included"] = sorted(by_domain)
+        manifest["published_count"] = len(selected)
+        prior_candidate_count = manifest.get("candidate_count")
+        if isinstance(prior_candidate_count, int):
+            manifest["candidate_count"] = prior_candidate_count + baseline_added
+        manifest_path.write_text(
+            yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8"
+        )
+
+    return ReviewCatalogAssembly(
+        baseline_count=len(approved),
+        staged_count_before=len(staged),
+        staged_count_after=len(selected),
+        baseline_entries_added=baseline_added,
+        batch_entries_written=sum(1 for name in staged if name in batch),
+    )
 
 
 def _write_domain_yaml(
