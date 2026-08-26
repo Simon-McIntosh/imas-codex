@@ -4435,13 +4435,19 @@ def sn_preview(
     "--final",
     "is_final",
     is_flag=True,
-    help="Finalize current RC to stable release. Pushes to upstream by default.",
+    help=(
+        "Finalize the current RC through a fork-hosted release branch and "
+        "upstream PR. The stable tag is created later by sn merge."
+    ),
 )
 @click.option(
     "--remote",
     type=str,
     default=None,
-    help="Git remote to push to (default: origin for RC, upstream for final)",
+    help=(
+        "Git remote used for release-state reads. Review and final release "
+        "branches always push to origin; this cannot redirect transport upstream."
+    ),
 )
 @click.option(
     "--isnc",
@@ -4606,10 +4612,9 @@ def sn_release(
     """Release standard names to the ISNC catalog.
 
     \b
-    Auto-exports from graph, publishes to ISNC, tags, and pushes.
-    RC releases go to origin (fork) by default; final releases
-    go to upstream. The state machine follows the same pattern
-    as codex and ISN releases.
+    Auto-exports from graph and publishes to ISNC. RC releases retain the
+    direct tag flow. Final releases push a release branch to the fork and open
+    an upstream PR; the stable tag is owned by the later graph fold-back.
 
     \b
     Use ACTION 'status' to show current ISNC release state:
@@ -4865,11 +4870,24 @@ def sn_release(
     table.add_row("exported", str(report.export_count))
     table.add_row("files copied", str(report.files_copied))
     table.add_row("commit SHA", report.commit_sha or "(no changes)")
+    if report.branch:
+        table.add_row("release branch", report.branch)
+    if report.pr_url:
+        table.add_row("PR", report.pr_url)
     table.add_row("pushed", "yes" if report.pushed else "no")
     table.add_row("dry run", "yes" if report.dry_run else "no")
     console.print(table)
 
-    if report.pushed:
+    if report.pr_url:
+        console.print(
+            f"\n[green]✓ Release branch {report.branch} → {report.remote}; "
+            f"upstream PR {report.pr_url}[/green]"
+        )
+        console.print(
+            f"[dim]Tag {report.git_tag} remains deferred until sn merge folds "
+            "the merged catalog back into the graph.[/dim]"
+        )
+    elif report.pushed:
         console.print(f"\n[green]✓ Released {report.git_tag} → {report.remote}[/green]")
     elif report.dry_run:
         console.print(
