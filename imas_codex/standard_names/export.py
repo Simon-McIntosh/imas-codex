@@ -972,7 +972,7 @@ def _fetch_deprecation_stubs(
 
 
 def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
-    """Validate an entry dict against the ISN StandardNameEntry model.
+    """Validate an entry dict against the ISN catalog authority.
 
     Returns the validated model_dump dict on success, or None if validation
     fails. Callers must handle None returns — invalid entries are excluded
@@ -997,6 +997,22 @@ def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
 
     try:
         entry = model_cls.model_validate(entry_dict)
+        from imas_standard_names.validation import run_semantic_checks
+
+        semantic_issues = run_semantic_checks({entry.name: entry})
+        hard_issues: list[str] = []
+        for issue in semantic_issues:
+            if " WARNING - " in issue or " INFO - " in issue:
+                logger.warning("ISN catalog advisory for '%s': %s", entry.name, issue)
+            else:
+                hard_issues.append(issue)
+        if hard_issues:
+            logger.warning(
+                "ISN catalog semantics rejected '%s': %s",
+                entry.name,
+                "; ".join(hard_issues),
+            )
+            return None
         return entry.model_dump(mode="json")
     except Exception as exc:
         logger.warning(

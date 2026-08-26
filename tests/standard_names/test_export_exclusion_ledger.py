@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
@@ -40,30 +41,47 @@ def _candidate(name: str, **overrides) -> dict:
     return candidate
 
 
-def _run_fixture_export(staging_dir: Path, population: list[dict]):
-    with (
-        patch(
-            "imas_codex.standard_names.export._fetch_export_population",
-            return_value=population,
-        ),
-        patch(
-            "imas_codex.graph.client.GraphClient",
-            return_value=_ReadOnlyGraphClient(),
-        ),
-        patch(
-            "imas_codex.standard_names.export._validate_entry",
-            side_effect=lambda entry: entry,
-        ),
-        patch(
-            "imas_codex.standard_names.export._fetch_deprecation_stubs",
-            return_value=[],
-        ),
-        patch(
-            "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
-            return_value=([], set()),
-        ),
-        patch("imas_codex.standard_names.export._write_domain_yaml"),
-    ):
+def _run_fixture_export(
+    staging_dir: Path,
+    population: list[dict],
+    *,
+    validate_entries: bool = False,
+):
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.export._fetch_export_population",
+                return_value=population,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.graph.client.GraphClient",
+                return_value=_ReadOnlyGraphClient(),
+            )
+        )
+        if not validate_entries:
+            stack.enter_context(
+                patch(
+                    "imas_codex.standard_names.export._validate_entry",
+                    side_effect=lambda entry: entry,
+                )
+            )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.export._fetch_deprecation_stubs",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.export._fetch_ordering_edges_for_domain",
+                return_value=([], set()),
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.standard_names.export._write_domain_yaml")
+        )
         return run_export(
             staging_dir,
             skip_gate=True,
@@ -131,3 +149,37 @@ def test_export_refuses_when_ledger_does_not_close(tmp_path: Path) -> None:
         for issue in accounting_gate.issues
     )
     assert not (tmp_path / "catalog.yml").exists()
+
+
+def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
+    population = [
+        _candidate("radial_coordinate", unit="m"),
+        _candidate("radial_coordinate_of_line_of_sight", unit="m"),
+    ]
+
+    report = _run_fixture_export(tmp_path, population, validate_entries=True)
+    rows = {row["reason"]: row for row in report.to_dict()["exclusion_ledger"]}
+
+    assert report.all_gates_passed
+    assert report.total_candidates == 2
+    assert report.exported_count == 1
+    assert report.exported_names == ["radial_coordinate_of_line_of_sight"]
+    assert rows["invalid_catalog_entry"]["identities"] == ["radial_coordinate"]
+    assert report.exported_count + sum(row["count"] for row in rows.values()) == 2
+
+
+def test_export_keeps_catalog_semantic_advisories(tmp_path: Path) -> None:
+    population = [_candidate("radial_coordinate_of_line_of_sight", unit="m")]
+
+    with patch(
+        "imas_standard_names.validation.run_semantic_checks",
+        return_value=[
+            "radial_coordinate_of_line_of_sight: WARNING - advisory warning",
+            "radial_coordinate_of_line_of_sight: INFO - advisory information",
+        ],
+    ):
+        report = _run_fixture_export(tmp_path, population, validate_entries=True)
+
+    assert report.all_gates_passed
+    assert report.exported_names == ["radial_coordinate_of_line_of_sight"]
+    assert report.exclusion_records == []
