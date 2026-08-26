@@ -155,9 +155,11 @@ def test_export_withholds_source_free_structural_parent(tmp_path: Path) -> None:
     population = [
         _candidate(
             "radial_coordinate",
-            origin="derived",
-            source_paths=[],
+            origin=None,
+            source_paths=["derived:radial_coordinate"],
             _has_dd_source_binding=False,
+            _has_derived_producer=True,
+            _has_non_derived_producer=False,
             unit="m",
         )
     ]
@@ -177,9 +179,11 @@ def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
     population = [
         _candidate(
             "radial_coordinate",
-            origin="derived",
+            origin=None,
             source_paths=["dd:equilibrium/time_slice/profiles_1d/rho_tor"],
             _has_dd_source_binding=True,
+            _has_derived_producer=False,
+            _has_non_derived_producer=True,
             unit="m",
         ),
     ]
@@ -195,6 +199,40 @@ def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
     assert report.exported_count + sum(row["count"] for row in rows.values()) == 1
 
 
+def test_export_validates_cross_links_against_full_catalog(tmp_path: Path) -> None:
+    from imas_standard_names.validation import run_semantic_checks
+
+    population = [
+        _candidate(
+            "electron_density",
+            unit="m^-3",
+            links=["name:ion_density"],
+        ),
+        _candidate(
+            "ion_density",
+            unit="m^-3",
+            links=["name:electron_density"],
+        ),
+    ]
+
+    with patch(
+        "imas_standard_names.validation.run_semantic_checks",
+        wraps=run_semantic_checks,
+    ) as semantic_checks:
+        report = _run_fixture_export(tmp_path, population, validate_entries=True)
+
+    assert semantic_checks.call_count == 1
+    assert set(semantic_checks.call_args.args[0]) == {
+        "electron_density",
+        "ion_density",
+    }
+    assert report.all_gates_passed
+    assert report.total_candidates == 2
+    assert report.exported_count == 2
+    assert set(report.exported_names) == {"electron_density", "ion_density"}
+    assert report.exclusion_records == []
+
+
 def test_export_keeps_catalog_semantic_advisories(tmp_path: Path) -> None:
     population = [
         _candidate(
@@ -202,6 +240,8 @@ def test_export_keeps_catalog_semantic_advisories(tmp_path: Path) -> None:
             origin="derived",
             source_paths=["dd:camera_ir/channel/line_of_sight/first_point/r"],
             _has_dd_source_binding=True,
+            _has_derived_producer=False,
+            _has_non_derived_producer=True,
             unit="m",
         )
     ]
