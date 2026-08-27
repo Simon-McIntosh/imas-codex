@@ -301,23 +301,18 @@ def _count_phrase(count: int, noun: str) -> str:
     return f"{count} {noun if count == 1 else noun + 's'}"
 
 
-def _dominant_domain(changes: list[dict[str, Any]]) -> str:
-    ranked = sorted(
-        (
-            (
-                sum(
-                    len(change.get(kind, []) or [])
-                    for kind in ("added", "changed", "removed")
-                ),
-                str(change.get("domain") or ""),
-            )
-            for change in changes
-        ),
-        key=lambda item: (-item[0], item[1]),
-    )
-    if not ranked or ranked[0][0] <= 0:
+def _single_changed_domain(changes: list[dict[str, Any]]) -> str:
+    domains = {
+        str(change.get("domain") or "")
+        for change in changes
+        if sum(
+            len(change.get(kind, []) or []) for kind in ("added", "changed", "removed")
+        )
+        > 0
+    }
+    if len(domains) != 1:
         return ""
-    return ranked[0][1].replace("_", " ").replace("-", " ").strip()
+    return domains.pop().replace("_", " ").replace("-", " ").strip()
 
 
 def _facility_label(rc_version: str) -> str:
@@ -329,13 +324,13 @@ def _facility_label(rc_version: str) -> str:
 def review_pr_title(
     *, rc_version: str, changes: list[dict[str, Any]] | None = None
 ) -> str:
-    """Derive a short human title from the batch label and dominant domain."""
+    """Derive a human title at facility or genuine single-domain scope."""
     facility = _facility_label(rc_version)
-    domain = _dominant_domain(changes or [])
+    domain = _single_changed_domain(changes or [])
     if facility and domain:
         return f"{facility} {domain} review batch"
     if facility:
-        return f"{facility} standard names review batch"
+        return f"{facility} review batch"
     if domain:
         return f"{domain.capitalize()} standard names review batch"
     return "Standard names review batch"
@@ -378,7 +373,7 @@ def _static_pr_body(
     dd_gaps: Mapping[str, Any],
 ) -> str:
     facility = _facility_label(rc_version)
-    domain = _dominant_domain(changes)
+    domain = _single_changed_domain(changes)
     scope = " ".join(part for part in (facility, domain) if part) or "standard names"
     counts = _change_counts(changes)
     unmatched = (
@@ -458,7 +453,7 @@ def build_pr_notes(
                 "minted_from": minted_from,
                 "unmatched_count": unmatched_count,
                 "facility": _facility_label(rc_version),
-                "dominant_domain": _dominant_domain(changes),
+                "dominant_domain": _single_changed_domain(changes),
                 "change_counts": counts,
                 "dd_gaps": summary,
             },

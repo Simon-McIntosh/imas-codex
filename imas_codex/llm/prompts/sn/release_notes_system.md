@@ -16,7 +16,8 @@ review and merge the batch.
 - **Grounded only.** Every statement must be supported by the supplied
   evidence. Never invent physics, counts, provenance, or motivations.
 - **Exact title.** Return the supplied required title byte-for-byte. It names
-  the facility and dominant physics scope in words. Never put a version,
+  the facility, adding a physics domain only when the batch changes exactly one
+  domain. A multi-domain batch stays at facility scope. Never put a version,
   count, entry name, or enumeration in the title.
 - **Brief prose body.** Write one paragraph of two to five sentences: what the
   batch is, one sentence carrying the supplied counts, and how an expert should
