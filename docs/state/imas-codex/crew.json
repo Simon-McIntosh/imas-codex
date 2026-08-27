@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:24:27",
+  "updated": "2026-08-27T09:37:36",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -36677,9 +36677,305 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T072522677476-n-approved-materialization",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-approved-materialization",
+        "node_definition": {
+          "done_when": "sn approve --pr, after promoting outcomes to the graph, leaves fork catalog main holding exactly the accumulated approved entries (the merged PR content already on main, minus any entries whose approval was refused/contested at fold-back \u2014 state the mechanism: post-merge correction commit or refusal-to-promote, per the recon gap that fold-back never rewrites catalog main); sn approve --undo restores the pre-fold-back catalog main state alongside the graph unwind; focused tests on the bare-repo fixture prove: a clean fold-back leaves main = approved set; a contested entry's bytes do not survive onto main as approved; undo restores both surfaces; existing graph-merged: tag contract and idempotency unchanged; tests captured once to a persistent log exit 0; ruff clean; local conventional commit with body; no live gh/LLM, no push",
+          "estimated_hours": null,
+          "goal": "The approval fold-back materializes the accumulated approved-only catalog baseline",
+          "id": "n-approved-materialization",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072522677476-n-approved-materialization/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/promote.py",
+            "tests/standard_names/test_sn_approve.py",
+            "tests/standard_names/test_sn_approve_tag.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relseams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:25:29Z",
+        "completed_at": "2026-08-27T07:36:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 660,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 660,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c5a6ac8b64a7d98442f13bf920a41797e43231e3",
+        "commits": [
+          "02898fcd92779d192b994e245515a40bb5c711a6"
+        ],
+        "changed_lines": {
+          "added": 477,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_sn_approve.py tests/standard_names/test_sn_approve_tag.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072522677476-n-approved-materialization/focused-tests.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072522677476-n-approved-materialization/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6902784,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7135799,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 23480,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 10690
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T072547892987-n-merge-spelling-scrub",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-merge-spelling-scrub",
+        "node_definition": {
+          "done_when": "The docstring-only references to the retired sn merge verb in imas_codex/standard_names/edit.py, campaign.py, catalog_import.py, catalog_release.py and catalog_reconcile.py read sn approve (mechanism wording, no changelog prose); rg -i 'sn merge' over imas_codex/ returns zero hits outside genuinely historical strings; the focused import smoke test of the five modules passes once to a persistent log exit 0; ruff clean on the five paths; local conventional commit with body; no behavior change",
+          "estimated_hours": null,
+          "goal": "No retired sn merge spelling survives in source docstrings",
+          "id": "n-merge-spelling-scrub",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072547892987-n-merge-spelling-scrub/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "15m",
+          "write_paths": [
+            "imas_codex/standard_names/edit.py",
+            "imas_codex/standard_names/campaign.py",
+            "imas_codex/standard_names/catalog_import.py",
+            "imas_codex/standard_names/catalog_release.py",
+            "imas_codex/standard_names/catalog_reconcile.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-catalogblank",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:25:57Z",
+        "completed_at": "2026-08-27T07:30:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 296,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 296,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "c5a6ac8b64a7d98442f13bf920a41797e43231e3",
+        "commits": [
+          "def61350cb6e17227738e509e38a8a9df1c9c745"
+        ],
+        "changed_lines": {
+          "added": 7,
+          "removed": 7,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "rg -i 'sn merge' imas_codex (0 hits) + import smoke of 5 modules",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072547892987-n-merge-spelling-scrub/import-smoke.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072547892987-n-merge-spelling-scrub/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a04204-57a9-76e2-92f5-8e76a56e9c11",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2998272,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3193347,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7886,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1688
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T072515581039-n-west-rc-recut",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-rc-recut",
+        "node_definition": {
+          "done_when": "At or after imas-codex c5a6ac8b: the exact live command uv run imas-codex sn release --batch west_production_dd_paths --bump minor -m 'WEST review batch rehearsal' exits 0; the report records the minted RC version (the state machine decides rc1-recut vs rc2 since no tag exists by design \u2014 state which and why), the fork PR URL, and verification that the PR diff is PURE ADDITION (0 modified, 0 deleted files against blank fork main f8af99d1), the emitted entry count (expected 332), catalog.yml export_scope=review + review_batch, the frozen artifact path + sha256 (superseding the committed rc1 artifact if the same identity re-mints \u2014 state its disposition), the PR title and body quoted verbatim with a one-line judgement against the concise-prose contract (short human title in words, 2-5 sentence body, no enumeration); review branch pushed to the FORK only, upstream untouched (verified), NO --final, no tag expected (fold-back owns it); on nonzero exit stop and report without retrying",
+          "estimated_hours": null,
+          "goal": "The WEST review RC is live on the fork as a pure addition over the blank baseline",
+          "id": "n-west-rc-recut",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072515581039-n-west-rc-recut/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-recut.md",
+            "imas_codex/standard_names/manifests/reviews/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-exportpolicy",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:25:21Z",
+        "completed_at": "2026-08-27T07:28:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 197,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 197,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "c5a6ac8b64a7d98442f13bf920a41797e43231e3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072515581039-n-west-rc-recut/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1947648,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2092872,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7275,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1745
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1003
+    "_version": 1006
   }
 }
