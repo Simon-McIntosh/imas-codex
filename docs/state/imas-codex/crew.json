@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T11:42:12",
+  "updated": "2026-08-27T11:43:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -37851,9 +37851,212 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T093801244665-n-recipe-process-updates",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-recipe-process-updates",
+        "node_definition": {
+          "done_when": "The Release Recipe section of imas_codex/standard_names/AGENTS.md is updated with five rulings, each proven present by a recorded grep over the updated file (report lists the five grep commands and their hit lines): agent-authored PR text with fallbacks; decisions-only PR body; facility-level titles for multi-domain batches; operator-owned commit subject; tag-at-approval visibility. One good and one banned example each for PR title and body appear (grep-proven). Wording checked against captured imas-codex sn release --help output quoted in the report. Local conventional commit with body; naming checks recorded exit 0; no push, no graph writes",
+          "estimated_hours": null,
+          "goal": "The release recipe records the lead's process rulings",
+          "id": "n-recipe-process-updates",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093801244665-n-recipe-process-updates/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/recipe-process-updates.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-breakdownkind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:38:07Z",
+        "completed_at": "2026-08-27T09:42:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 259,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 259,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "3abac54666467f9d3e21e5d15062b18c994a165e",
+        "commits": [
+          "c23a96def8888e7ac7ef880dbdf662427890dcec"
+        ],
+        "changed_lines": {
+          "added": 64,
+          "removed": 23,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "5 ruling greps + 4 example greps + sn release --help capture + naming checks",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/recipe-process-updates.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093801244665-n-recipe-process-updates/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-6a4e-7cb1-ad76-8f64839e3dd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2191616,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2411989,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 9357,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2943
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T093040052288-n-catalog-ci-blank-main",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-catalog-ci-blank-main",
+        "node_definition": {
+          "done_when": "Operating on the catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog and fork Simon-McIntosh/imas-standard-names-catalog only (never upstream): (1) the two failing push runs on fork main (Catalog Site / build, Validate Catalog / validate) are read via gh run view --log and their exact failure lines quoted with root cause; (2) both workflows are fixed so a blank additive baseline is first-class healthy \u2014 an empty or absent catalog validates successfully with an explicit blank-baseline notice and the site build succeeds with an empty dataset or skips cleanly, never red; a populated catalog validates and builds as before (state how that is protected); (3) the fix lands on fork main with a conventional commit and both workflows re-run green (record run URLs and conclusions); (4) explicit verdict on the WEST PR: what ref PR #2 checks run against, whether any failing or missing check currently blocks or misleads its review, and the observed PR #2 check states after the fix; no upstream, graph, or imas-codex writes",
+          "estimated_hours": null,
+          "goal": "Catalog CI treats an intentionally blank main as a healthy state",
+          "id": "n-catalog-ci-blank-main",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093040052288-n-catalog-ci-blank-main/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-ci-blank-main.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-catalogblank",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:30:48Z",
+        "completed_at": "2026-08-27T09:42:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 716,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 716,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "b08ab8203023105e57555f28b45bc95e7ae6a3cd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "gh run view on both failing runs + fork-main reruns to success + PR #2 check rollup",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093040052288-n-catalog-ci-blank-main/validate-green-run.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093040052288-n-catalog-ci-blank-main/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a04204-57a9-76e2-92f5-8e76a56e9c11",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1992448,
+            "cached_input_tokens_cumulative": 4990720,
+            "input_tokens": 1989830,
+            "input_tokens_cumulative": 5183177,
+            "output_tokens": 10892,
+            "output_tokens_cumulative": 18778,
+            "reasoning_output_tokens": 4699,
+            "reasoning_output_tokens_cumulative": 6387
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1017
+    "_version": 1019
   }
 }
