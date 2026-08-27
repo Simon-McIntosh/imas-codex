@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:00:28",
+  "updated": "2026-08-27T12:01:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -38148,9 +38148,118 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T095011682473-n-rc-tag-at-cut",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-rc-tag-at-cut",
+        "node_definition": {
+          "done_when": "sn release for a batch RC creates and pushes its version tag to the FORK at cut time on the review-branch head (never upstream), so the RC is visible on the fork Releases page as a historic record; a new flag makes the PR optional so an in-work RC can be tagged and built with no pull request opened (name it in the report and document it in the release recipe section of imas_codex/standard_names/AGENTS.md); the final and stable path is UNCHANGED \u2014 no release-time tag, the tag stays the approval fold-back receipt created by sn approve on the merge commit; sn approve's idempotency guard is re-keyed to the graph-merged receipt shape rather than mere tag existence, so a pre-existing RC tag no longer blocks a fold-back, and sn approve --undo removes only the receipt it created and never an RC tag; focused tests prove all five behaviors on the bare-repo fixture (RC tag created and pushed to fork at cut; PR-less cut succeeds and tags; final path creates no release-time tag; fold-back proceeds despite an existing RC tag; undo leaves the RC tag intact); tests captured once to a persistent log exit 0; ruff clean on owned paths; local conventional commit with body; no live gh, no push of imas-codex, no graph writes",
+          "estimated_hours": null,
+          "goal": "A release candidate is tagged when it is cut, with or without a pull request",
+          "id": "n-rc-tag-at-cut",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T095011682473-n-rc-tag-at-cut/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "imas_codex/standard_names/promote.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_review_release.py",
+            "tests/standard_names/test_sn_approve_tag.py",
+            "imas_codex/standard_names/AGENTS.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relseams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:50:17Z",
+        "completed_at": "2026-08-27T10:00:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 585,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 585,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d17cf6c740cbb0a6cfc375120ef244562618410b",
+        "commits": [
+          "d2b8313f999c364f24db751abdb88251e631e55e"
+        ],
+        "changed_lines": {
+          "added": 260,
+          "removed": 33,
+          "files": 6
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_review_release.py tests/standard_names/test_sn_approve_tag.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T095011682473-n-rc-tag-at-cut/logs/final-focused-tests.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T095011682473-n-rc-tag-at-cut/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 554240,
+            "cached_input_tokens_cumulative": 5398784,
+            "input_tokens": 678969,
+            "input_tokens_cumulative": 5596826,
+            "output_tokens": 7965,
+            "output_tokens_cumulative": 17031,
+            "reasoning_output_tokens": 1377,
+            "reasoning_output_tokens_cumulative": 3078
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1020
+    "_version": 1021
   }
 }
