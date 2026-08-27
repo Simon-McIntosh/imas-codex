@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="70">
+<meta name="plan-version" content="71">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2379,6 +2379,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T132636292045-n-west-workflow-contract-tests" data-who="test-west-rc-release" data-when="2026-08-26T13:31:45Z">
     <div class="r-comment-body"><p>Focused Click tests passed 15/15, but the report overclaimed 6/6 workflow invariants because three required negative/byte-identity contracts were not executed and remain unresolved.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T064746855137-n-catalog-baseline-recon" data-who="test-catalogstate" data-when="2026-08-27T06:57:35Z">
+    <div class="r-comment-body"><p>Upstream main needs NO deletion (0 flat baseline files, no catalog.yml; exporter reads flat files only); fork main holds the legacy 2223 entries in 19 exactly-inventoried paths; approval fold-back never rewrites catalog main (approved-only accumulation is an implementation gap); PR #1 (2349 entries on legacy base 4f218df) must be re-cut from blank main</p></div>
 </div>
 </section>
 </main>
