@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -616,6 +616,14 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
       <button class="r-opt" data-value="use-existing-packet">Release the historic packet now.</button>
       </p>
     <p class="r-dec-rat">Locked by the lead as 11A/12A: hardening and graph-wide delivery precede WEST. The names are not protected and must be regenerated or repaired where the ordinary graph-wide process requires it before human review.</p>
+    </div>
+<div class="r-dec" data-key="additive-baseline-chain" data-choice="blank-main-additive" data-by="Simon McIntosh" data-when="2026-08-27T08:30:00+00:00">
+    <p class="r-dec-q">additive-baseline-chain</p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-27: the catalog mains start BLANK (no legacy full-dump catalog on upstream main, mirrored on the fork). The first PR compares to nothing so everything is an addition; each subsequent PR (a different or overlapping batch prototyped on the fork) targets a main holding only the previously APPROVED entries, so it is again pure addition. Approved entries are collected and integrated between PRs and never show up in later diffs. The legacy 2,223-entry published dump is not the baseline; the 229-overlap/23-retention machinery is retired with it. RC releases continue on the fork with different batch shapes.</p>
+    </div>
+<div class="r-dec" data-key="approve-verb-and-pr-style" data-choice="rename-and-concise" data-by="Simon McIntosh" data-when="2026-08-27T08:30:00+00:00">
+    <p class="r-dec-q">approve-verb-and-pr-style</p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-27: the fold-back workflow is the APPROVAL vector back to the graph and is renamed sn merge to sn approve (greenfield, no alias). PR title and body must state what the batch IS in words: a short concise title plus brief prose, never an enumeration of entries in either. The release-notes seat&#x27;s 5/5 title-contract failure (static fallback published on PR #1) is repaired as part of this contract.</p>
     </div>
 </section>
 
@@ -2252,7 +2260,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-west-stages-3-6" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-27" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Human review of fork PR #1, then fold-back, freeze-check and unwind (stages 3-6)</h4>
-    <div class="r-fu-body">Stage 3 is the human touch point this rehearsal exists to exercise: review https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/1 in the gh UI, make one good and one deliberately non-compliant edit to two batch entries, merge. Then sn merge --pr <url> (exercises the graph-merged: fold-back tag, the tag's first live creation per D-final-shape), verify contested/approved routing, freeze-check with an unscoped sn run, and sn merge --undo to unwind. Before act 2 (--final): repair the sn-release-notes seat, which omitted its required title in 5/5 attempts so the static-fallback PR body published; judge and fix the prompt or schema so the first upstream PR carries a grounded body.</div>
+    <div class="r-fu-body">Stage 3 is the human touch point this rehearsal exists to exercise: review https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/1 in the gh UI, make one good and one deliberately non-compliant edit to two batch entries, merge. Then sn merge --pr <url> (exercises the graph-merged: fold-back tag, the tag's first live creation per D-final-shape), verify contested/approved routing, freeze-check with an unscoped sn run, and sn merge --undo to unwind. Before act 2 (--final): repair the sn-release-notes seat, which omitted its required title in 5/5 attempts so the static-fallback PR body published; judge and fix the prompt or schema so the first upstream PR carries a grounded body.</url></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     </article>
 </section>
