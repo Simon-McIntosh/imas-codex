@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="84">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2362,6 +2362,9 @@ Done-when
 <div class="r-comment" data-section="s3" data-id="c-20260827-additive-rc-live" data-who="reckon-ship" data-when="2026-08-27T08:05:00Z">
     <div class="r-comment-body">The additive-baseline WEST RC is LIVE: v0.3.0rc1+west-task-2e, fork PR https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/2 (head 2a669af8) over blank baseline e1ce1a2: a PURE ADDITION of 18 files (17 domain lists plus catalog.yml), 0 modified, 0 deleted, REVIEWING.md untouched; 332 published of 408 accounted (76 withheld per-reason); PR title 'WEST equilibrium review batch' with a four-sentence prose body, contract-compliant via the deterministic fallback. f-west-stages-3-6 now targets PR #2 (PR #1 was closed as superseded when the fork was re-baselined). The whole additive design landed this session: blank fork main (f8af99d1, legacy dump recoverable at 4f218df), approval-owned baseline materialization with contested-byte removal and undo reversal (02898fcd), sn approve and sn resolve verbs (3ccc5f3a), the PR text contract, and the written release recipe (1f4f17ff plus catalog REVIEWING.md e1ce1a2). Open residue: the LLM notes seat still omits its required title 5/5 (fallback publishes compliantly) and the generated PR body should auto-link REVIEWING.md; both carried in f-west-stages-3-6.</div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260827T084327066642-n-review-site-recon" data-who="test-westobjections" data-when="2026-08-27T08:52:11Z">
+    <div class="r-comment-body"><p>Site machinery mapped: SPA in ISN site/ deployed by catalog workflows; fixed view filters on data.json.review_batch; PR CI currently skips the only build/deploy step; fork Pages live with idempotent pr-&lt;number&gt;/ path support; semantic base/head entry diff is the authoritative preview scope (review_batch = frozen provenance); recommendation: per-PR fork Pages deploy + CI-upserted PR link</p></div>
+</div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
 </div>
@@ -2400,6 +2403,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260827T072531614084-n-release-recipe-docs" data-who="impl-breakdownkind" data-when="2026-08-27T07:43:57Z">
     <div class="r-comment-body"><p>3/3 recipe documents landed: SN AGENTS.md release recipe (three-verb chain, additive baseline, PR text contract, both approval routes, undo semantics), root AGENTS.md corrected as thin pointer, REVIEWING.md on fork catalog main e1ce1a2 (edits welcome, machine-rechecked); all verbs cross-checked against live CLI help; follow-on: auto-link REVIEWING.md in generated PR bodies</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260827T084032410265-n-catalog-commit-message" data-who="impl-relseams" data-when="2026-08-27T08:49:19Z">
+    <div class="r-comment-body"><p>Publisher commit is operator-owned prose: subject 'sn: add &lt;message&gt;', two-line body with counts and RC identity, no enumeration (regression proves no entry/yml names); live PR #2 head rewritten message-only (tree hash identical, diff sha identical before/after), branch force-pushed with lease to fork only; 31 tests exit 0</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131846395540-n-west-upstream-additivity-review" data-who="rev-west-upstream" data-when="2026-08-26T13:24:56Z">
     <div class="r-comment-body"><p>Workflow HOLD: fork-only branch transport and plain-final PR-then-tag are contradicted by source, and approved-byte identity is unproven.</p></div>
