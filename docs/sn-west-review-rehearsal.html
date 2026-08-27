@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="103">
+<meta name="plan-version" content="104">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2397,6 +2397,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260827T103645871755-n-preview-retrigger-input" data-who="impl-citrigger" data-when="2026-08-27T10:51:58Z">
     <div class="r-comment-body"><p>On-demand preview rebuild without touching PR state: workflow_dispatch takes a PR number, resolves base/head via API and runs the shared preview build/deploy/comment steps (fork commit 5068a645). Live dispatch 33064614947 succeeded, preview HTTP 200, comment 5437311459 updated in place, diff digest unchanged, and ZERO new closed/reopened timeline events — the cycling hack is retired</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260827T105910666880-n-act-one-approval-loop" data-who="impl-actone" data-when="2026-08-27T11:04:10Z">
+    <div class="r-comment-body"><p>Correct refusal before any mutation: the undo clause requires restoring a prior RC tag, but PR 2&#x27;s RC was cut before RC-tagging-at-cut landed so no such tag exists; backfilling one would be an improvised repair. Resolved by re-cutting a tagged RC first (which the stale-content issue required anyway); 0 edits, 0 merges, 0 graph writes, $0 spend</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>

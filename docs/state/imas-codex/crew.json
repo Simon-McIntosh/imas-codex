@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:58:42",
+  "updated": "2026-08-27T13:10:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1588,6 +1588,15 @@
         "role": "implement",
         "session_id": "01a03674-63a3-7e91-ba8d-30a274807f59",
         "created": "2026-08-25"
+      },
+      {
+        "id": "impl-upstreambase",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-27"
       },
       {
         "id": "impl-voltadj",
@@ -38739,9 +38748,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T105910666880-n-act-one-approval-loop",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-act-one-approval-loop",
+        "node_definition": {
+          "done_when": "Operational surface: fork Simon-McIntosh/imas-standard-names-catalog and its checkout, plus sanctioned graph writes through sn approve; never upstream. Exercise stages 3 to 6 on open PR 2 and record every observation: (a) make exactly two reviewer edits in the PR branch \u2014 one GOOD edit improving a description's physics wording, and one DELIBERATELY NON-COMPLIANT edit renaming an entry to a spelling the grammar must reject \u2014 commit and push them to the review branch only, naming both identities in the report; (b) merge PR 2 on the fork; (c) run uv run imas-codex sn approve --pr with the merged PR URL and record: how many untouched entries auto-promoted from accepted to approved, that the good edit was re-reviewed and its outcome, that the non-compliant edit landed contested rather than approved, the graph-merged receipt tag created on the merge commit with its exact annotation first line, and that fork main afterwards holds exactly the accumulated approved entries with the contested entry's bytes absent; (d) freeze-check by running uv run imas-codex sn run --only reconcile with no scope and proving no approved name mutated (before/after digest over approved identities); (e) unwind with sn approve --undo for the same PR and prove approvals returned to accepted, the catalog correction reversed, the RC tag restored to its exact prior object, and the receipt tag gone. Paid spend capped at 10 USD and reported. NEVER close or reopen a PR to re-trigger CI. If any step fails, stop and report with the exact failing condition rather than improvising a repair",
+          "estimated_hours": null,
+          "goal": "The approval loop is proven end to end on the fork review PR",
+          "id": "n-act-one-approval-loop",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T105910666880-n-act-one-approval-loop/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/act-one-approval-loop.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-actone",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:59:14Z",
+        "completed_at": "2026-08-27T11:04:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 296,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 296,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "1a32d1806877a5ce9c7bde8d1f735763d3f71a1a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T105910666880-n-act-one-approval-loop/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a042df-beeb-7910-b0af-286d4e38503b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2541824,
+            "cached_input_tokens_cumulative": 2541824,
+            "input_tokens": 2677043,
+            "input_tokens_cumulative": 2677043,
+            "output_tokens": 9724,
+            "output_tokens_cumulative": 9724,
+            "reasoning_output_tokens": 3827,
+            "reasoning_output_tokens_cumulative": 3827
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1029
+    "_version": 1031
   }
 }
