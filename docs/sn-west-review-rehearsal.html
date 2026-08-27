@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="85">
+<meta name="plan-version" content="86">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2409,6 +2409,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260827T084032410265-n-catalog-commit-message" data-who="impl-relseams" data-when="2026-08-27T08:49:19Z">
     <div class="r-comment-body"><p>Publisher commit is operator-owned prose: subject 'sn: add &lt;message&gt;', two-line body with counts and RC identity, no enumeration (regression proves no entry/yml names); live PR #2 head rewritten message-only (tree hash identical, diff sha identical before/after), branch force-pushed with lease to fork only; 31 tests exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260827-pr-body-decisions-only" data-who="reckon-ship" data-when="2026-08-27T10:40:00Z">
+    <div class="r-comment-body">Lead ruling 2026-08-27, tightening the approve-verb-and-pr-style decision: the review PR body must never narrate problems (no lacking-a-linked-name counts, no unresolved-caveat warnings, no missing lists). Issues are parked and resolved BEFORE a PR is cut. The body states what the batch IS (facility, source manifest, published count), states DECISIONS where relevant (for example a set of paths excluded by policy because they are metadata or coordinates: grids and ordinates are never named), and gives the review instruction plus the PR-scoped site link. Current PR #2 body violates this and PR #2 will be superseded by a re-cut once the tail drain, the CI blank-main fix, and the PR-scoped preview site land. The fallback template sentences reporting unlinked source paths and DD caveats must be removed from release_notes and its prompt in the body-rewrite node that follows n-batch-title-scope.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131846395540-n-west-upstream-additivity-review" data-who="rev-west-upstream" data-when="2026-08-26T13:24:56Z">
     <div class="r-comment-body"><p>Workflow HOLD: fork-only branch transport and plain-final PR-then-tag are contradicted by source, and approved-byte identity is unproven.</p></div>
