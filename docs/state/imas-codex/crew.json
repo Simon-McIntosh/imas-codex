@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T10:54:41",
+  "updated": "2026-08-27T11:37:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -795,9 +795,11 @@
         "id": "impl-isnpreview",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0426c-e8f9-7b71-8443-9c8ea24326a3",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a0426c-e8f9-7b71-8443-9c8ea24326a3"
+        },
         "created": "2026-08-27"
       },
       {
@@ -37560,9 +37562,192 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T085502934478-n-west-tail-disposition",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-tail-disposition",
+        "node_definition": {
+          "done_when": "Working from reports/unmatched-source-accounting.md's 27-row inventory, through sanctioned scoped instruments only (sn run --batch west_production_dd_paths gap-only for the drain; the recorded skip mechanism for reasons; never hand-edits): (1) the 17 extracted sources are drained through compose and review to terminal states \u2014 accepted names, recorded refusals, or documented residual with its exact stop reason; local compose endpoint may be down (the GPU serve was released) \u2014 if compose requires it, relaunch deepseek-v4-flash-2x on port 18800 under the standing operator grant, record the serve job id, and cancel it when the drain finishes; (2) the 5 skipped rows with null reasons receive durable recorded refusal reasons consistent with their DD nature (metadata/coordinate/non-nameable class), or are revived into the drain if they are actually nameable; (3) the 2 grid quarantine rows are located in the current accounting and their absence from the frozen 27 explained; final report lists all 27 rows with live state + reason, zero null-reason rows, PRODUCED_NAME positive control, paid spend recorded under a 15 USD cap; graph mutations confined to these sources and their pipeline products",
+          "estimated_hours": null,
+          "goal": "Every unmatched WEST source carries a durable live disposition",
+          "id": "n-west-tail-disposition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T085502934478-n-west-tail-disposition/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-tail-disposition.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-radialrebind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T08:55:06Z",
+        "completed_at": "2026-08-27T09:36:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2468,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2468,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "b08ab8203023105e57555f28b45bc95e7ae6a3cd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "scoped drain to no_eligible_work + final census (27/27 dispositions, 0 null reasons, 4679-edge positive control)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T085502934478-n-west-tail-disposition/logs/final-census.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T085502934478-n-west-tail-disposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-8b1f-7f32-9c9d-7ec0d6215e11",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13857536,
+            "cached_input_tokens_cumulative": 22823424,
+            "input_tokens": 14196142,
+            "input_tokens_cumulative": 23387199,
+            "output_tokens": 8718,
+            "output_tokens_cumulative": 31667,
+            "reasoning_output_tokens": 759,
+            "reasoning_output_tokens_cumulative": 7905
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T085345092922-n-isn-preview-scope",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-isn-preview-scope",
+        "node_definition": {
+          "done_when": "Operating on the ISN fork checkout at /home/ITER/mcintos/Code/imas-standard-names as your operational surface (push to the fork remote only, never upstream): the site dataset build gains a tested preview-scope mode taking a base ref and head ref of a catalog checkout and emitting data.json containing exactly the entries ADDED or EDITED between them (untouched baseline entries excluded from the view; deletions excluded but counted in scope metadata), with review_batch provenance preserved for the fixed-view filter; unit tests prove: a new entry is included, an edited entry is included, an untouched baseline entry is excluded, and the scope-count metadata is exact; the touched module's suite runs once to a persistent log exit 0; conventional commit with body pushed to the ISN fork main; the report records the commit SHA and the exact command line catalog CI must invoke (per the integration point named in reports/review-site-recon.md); no imas-codex or graph writes",
+          "estimated_hours": null,
+          "goal": "The ISN site pipeline builds a dataset scoped to a catalog PR's semantic entry delta",
+          "id": "n-isn-preview-scope",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T085345092922-n-isn-preview-scope/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/isn-preview-scope.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-isnpreview",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T08:53:48Z",
+        "completed_at": "2026-08-27T09:37:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2598,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2598,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5a2e78cb263e08e38cc19defe3f4fb373b0ab2ad",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T085345092922-n-isn-preview-scope/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0426c-e8f9-7b71-8443-9c8ea24326a3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1021696,
+            "cached_input_tokens_cumulative": 1021696,
+            "input_tokens": 1139137,
+            "input_tokens_cumulative": 1139137,
+            "output_tokens": 4296,
+            "output_tokens_cumulative": 4296,
+            "reasoning_output_tokens": 981,
+            "reasoning_output_tokens_cumulative": 981
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1013
+    "_version": 1016
   }
 }

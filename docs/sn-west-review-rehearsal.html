@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="89">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2367,6 +2367,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260827T083901517847-n-unmatched-source-accounting" data-who="test-catalogstate" data-when="2026-08-27T08:53:55Z">
     <div class="r-comment-body"><p>PR untouched (correct refusal): the 27 unmatched split 10 skipped + 17 extracted, but 5 skipped rows carry NULL refusal reasons, all 17 extracted rows have no produced name (8 no historical candidate), historical candidates do not join the current ledger, and the 2 grid quarantines are outside the frozen 27 — no zero-unexplained partition exists yet</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260827T085502934478-n-west-tail-disposition" data-who="impl-radialrebind" data-when="2026-08-27T09:36:14Z">
+    <div class="r-comment-body"><p>All 27 unmatched WEST rows terminal with durable reasons: 5 accepted bindings (join the re-cut), 10 durable policy refusals (zero null reasons after sn retry --skipped 5/5), 4 closed-vocab gaps, 3 bound-exhausted, 5 attempt-cap collisions; grid quarantines explained (bare bindings at freeze time); drain SNRun de025716 stop_reason=no_eligible_work; spend $2.96/$15; compose provenance DSv4-Flash-0731 job 1258593, serve cancelled post-drain</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260827T085345092922-n-isn-preview-scope" data-who="impl-isnpreview" data-when="2026-08-27T09:37:06Z">
+    <div class="r-comment-body"><p>Correct refusal twice: the node was shaped as an operational grant when it is ordinary cross-repo implementation — redispatching in an imas-standard-names worktree with real source/test write paths per its own follow_on</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
