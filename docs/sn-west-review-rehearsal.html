@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2263,10 +2263,11 @@ Done-when
     <div class="r-fu-body">Stage 3 is the human touch point this rehearsal exists to exercise: review https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/1 in the gh UI, make one good and one deliberately non-compliant edit to two batch entries, merge. Then sn merge --pr <url> (exercises the graph-merged: fold-back tag, the tag's first live creation per D-final-shape), verify contested/approved routing, freeze-check with an unscoped sn run, and sn merge --undo to unwind. Before act 2 (--final): repair the sn-release-notes seat, which omitted its required title in 5/5 attempts so the static-fallback PR body published; judge and fix the prompt or schema so the first upstream PR carries a grounded body.</url></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     </article>
-<article class="r-fu" data-id="f-release-recipe-docs" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-27" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-release-recipe-docs" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-27" data-recommends-skill="" data-resolved-at="2026-08-27T07:55:45+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Write the deterministic release recipe into AGENTS.md and the catalog REVIEWING.md</h4>
     <div class="r-fu-body">Lead direction 2026-08-27: future agent runs must be able to follow the exact approved release approach. Author (1) a release-recipe section in imas_codex/standard_names/AGENTS.md: the three-verb chain (sn run --batch / sn release --batch / sn approve --pr), the additive-baseline model (blank main, every PR a pure addition over previously-approved entries only), the commit and PR title/body format contract (short human phrase naming the batch in words, brief prose body, enumeration banned in both), the two integration routes (un-edited batch entries auto-promote accepted-to-approved with PR provenance; edited entries re-enter the pipeline for re-review, pass approved / fail contested, resolved only via sn resolve), and the undo semantics; (2) the root AGENTS.md Release Workflow section updated for the approve rename and additive chain, kept a thin pointer; (3) a reviewer-facing REVIEWING.md in the catalog repo linked from every PR body: edits to names and docs are welcome during review, every edit passes back through the SN pipeline for rule and style conformance, edit for physics meaning and let the machinery hold the style line. Dispatch AFTER n-approve-verb-and-pr-text and n-fork-baseline-blanking land so the recipe documents the settled surface.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
+    <p class="r-fu-outcome">All three recipe documents landed and verified against the live CLI: the Release Recipe section in imas_codex/standard_names/AGENTS.md (three-verb chain, additive baseline, PR text contract with examples, both approval routes, undo semantics), the root AGENTS.md Release Workflow corrected as a thin pointer (merged 1f4f17ff via ac718c67), and REVIEWING.md on fork catalog main (e1ce1a2) telling reviewers edits are welcome and machine-rechecked. Residual auto-linking of REVIEWING.md in generated PR bodies is carried by f-west-stages-3-6.</p>
     </article>
 </section>
 
