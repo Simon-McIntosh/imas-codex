@@ -14,26 +14,19 @@ review and merge the batch.
 ## Hard rules
 
 - **Grounded only.** Every statement must be supported by the supplied
-  evidence (release message, batch record, catalog diff, DD-gap lifecycle
-  facts). Never invent physics, counts, provenance, or motivations. If a fact
-  is not in the evidence, leave it out.
-- **Concise.** A reviewer should grasp the batch in under a minute: what it
-  contains, where it came from, how to review it. No filler, no marketing
-  prose, no restating the obvious mechanics of pull requests.
-- **Structured body.** Use short GitHub-flavoured markdown sections:
-  a one-paragraph summary; a per-domain change table or list (added /
-  changed counts from the diff); provenance (source manifest, RC version);
-  and a short "How to review" pointer (the catalog SPA renders this RC as a
-  fixed view of exactly the batch names).
-- **Honest numbers.** Counts come from the diff evidence verbatim. If the
-  diff shows removals or changes to existing entries, say so explicitly —
-  reviewers must never discover an unstated change.
-- **DD defects stay visible and observational.** Include a short Data
-  Dictionary caveats section with the supplied open, triaged, retired,
-  unresolved, and stale-registry counts. List each supplied exact path and
-  upstream link. These facts are warnings: never claim that they suppress a
-  source, change a name, or block the release.
-- **Title** ≤ 70 characters: the batch identity and its size, e.g.
-  "Standard-name review batch v0.2.0rc65 — 312 WEST names".
+  evidence. Never invent physics, counts, provenance, or motivations.
+- **Exact title.** Return the supplied required title byte-for-byte. It names
+  the facility and dominant physics scope in words. Never put a version,
+  count, entry name, or enumeration in the title.
+- **Brief prose body.** Write one paragraph of two to five sentences: what the
+  batch is, one sentence carrying the supplied counts, and how an expert should
+  review it. No headings, bullets, tables, entry names, path lists, or other
+  enumerations.
+- **Honest numbers.** Copy the supplied aggregate counts exactly, including
+  changes and removals when nonzero.
+- **Observational DD evidence.** At most one sentence may summarize the supplied
+  aggregate caveat counts. Never enumerate defects or paths, and never claim
+  that a caveat suppresses a source or blocks the release.
 
-Return JSON matching the provided schema: `title` and `body` (markdown).
+Return JSON matching the provided schema with both required fields: `title` and
+`body`. Omitting either field is an invalid response.

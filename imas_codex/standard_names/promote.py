@@ -1,4 +1,4 @@
-"""``sn merge`` — fold a reviewed catalog PR back into the graph-ledger.
+"""``sn approve`` — fold a reviewed catalog PR back into the graph ledger.
 
 Reads the catalog-entry diff of a reviewed ISNC pull request against a base
 git ref, matches each changed entry to its graph ``StandardName`` **by id**,
@@ -12,7 +12,7 @@ refine step. The score decides the immediate outcome:
 * ``score >= threshold`` on the name axis → **ACCEPT**: the edit lands via
   ``persist_reviewed_name`` and fires the descendant rename cascade.
 * ``score >= threshold`` on the docs axis → **STAGE FOR REVIEW**: the aggregate
-  merge score is not quorum authority, so the unchanged text is fenced to one
+  approval score is not quorum authority, so the unchanged text is fenced to one
   exact ordinary docs-review scope. It remains unpublished until that full
   configured chain reaches a valid resolution.
 * ``score <  threshold`` → **QUARANTINE + FLAG**: the existing quarantine
@@ -24,7 +24,7 @@ A NAME change rides ``apply_edit``'s **rename mode**, which carries the
 producing-source (``PRODUCED_NAME``) provenance through the rename cascade —
 never delete-and-recreate.
 
-The merge operation itself never invokes a refine pool. Attaching with
+The approval operation itself never invokes a refine pool. Attaching with
 ``refine=False`` additionally stamps the durable review-only marker on the
 node (see :func:`~imas_codex.standard_names.edit.apply_edit`).
 """
@@ -65,7 +65,7 @@ _APPROVAL_OUTCOMES = frozenset({"unchanged_ratification", "content_edit"})
 
 
 @dataclass(frozen=True)
-class MergeChange:
+class ApprovalChange:
     """A single catalog-entry edit extracted from a reviewed PR diff.
 
     Attributes
@@ -90,7 +90,7 @@ class MergeChange:
 
 
 @dataclass
-class MergeOutcome:
+class ApprovalOutcome:
     """Per-proposal outcome record."""
 
     sn_id: str
@@ -102,8 +102,8 @@ class MergeOutcome:
 
 
 @dataclass
-class MergeReport:
-    """Summary of a :func:`run_merge` invocation."""
+class ApprovalReport:
+    """Summary of a :func:`run_approval` invocation."""
 
     threshold: float = DEFAULT_MIN_SCORE
     dry_run: bool = False
@@ -115,7 +115,7 @@ class MergeReport:
     auto_approved: list[str] = field(default_factory=list)
     blocked: list[dict[str, Any]] = field(default_factory=list)
     unmatched: list[str] = field(default_factory=list)
-    outcomes: list[MergeOutcome] = field(default_factory=list)
+    outcomes: list[ApprovalOutcome] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -163,17 +163,17 @@ def _norm(v: Any) -> str:
     return v.strip() if isinstance(v, str) else ("" if v is None else str(v))
 
 
-def read_pr_changes(isnc_dir: str | Path, base_ref: str) -> list[MergeChange]:
+def read_pr_changes(isnc_dir: str | Path, base_ref: str) -> list[ApprovalChange]:
     """Extract catalog-entry edits changed between *base_ref* and the worktree.
 
     Compares each changed ``standard_names/<domain>.y[a]ml`` file against its
     *base_ref* revision, matching entries by their ``name`` (the graph id):
 
     * an entry present in both whose ``documentation``/``description`` differs
-      yields a ``docs`` :class:`MergeChange`;
+      yields a ``docs`` :class:`ApprovalChange`;
     * a removed name paired 1:1 with an added name sharing the same ``unit``
       and ``kind`` (best-effort rename detection) yields a ``name``
-      :class:`MergeChange`.
+      :class:`ApprovalChange`.
 
     Reads the *working tree* for the head side, so a reviewed PR that is
     checked out (committed or not) is compared correctly.
@@ -188,7 +188,7 @@ def read_pr_changes(isnc_dir: str | Path, base_ref: str) -> list[MergeChange]:
         if line.strip().endswith((".yml", ".yaml"))
     ]
 
-    changes: list[MergeChange] = []
+    changes: list[ApprovalChange] = []
     for rel in files:
         base_text = _git(["show", f"{base_ref}:{rel}"], isnc)
         head_path = isnc / rel
@@ -205,7 +205,7 @@ def read_pr_changes(isnc_dir: str | Path, base_ref: str) -> list[MergeChange]:
                 new_v = _norm(head.get(fld))
                 if new_v and new_v != _norm(base.get(fld)):
                     changes.append(
-                        MergeChange(
+                        ApprovalChange(
                             sn_id=name,
                             axis="docs",
                             new_value=head.get(fld),
@@ -228,7 +228,7 @@ def read_pr_changes(isnc_dir: str | Path, base_ref: str) -> list[MergeChange]:
             ]
             if len(candidates) == 1:
                 changes.append(
-                    MergeChange(
+                    ApprovalChange(
                         sn_id=old,
                         axis="name",
                         new_value=candidates[0],
@@ -261,7 +261,7 @@ def _load_review_node(sn_id: str, gc: GraphClient) -> dict[str, Any] | None:
     """Load the fields the review scorer needs for *sn_id*."""
     rows = gc.query(
         """
-        // MERGE_LOAD_REVIEW_NODE
+        // APPROVAL_LOAD_REVIEW_NODE
         MATCH (sn:StandardName {id: $id})
         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
         RETURN sn.id AS id, sn.id AS name, sn.description AS description,
@@ -291,7 +291,7 @@ def _score_proposal(
     node for the configured reviewer models and returns the mean normalised
     score (0–1).  This is a pure scoring pass — it neither transitions the
     node's stage nor enters any refine pool; the accept/quarantine decision
-    is owned by :func:`run_merge`.
+    is owned by :func:`run_approval`.
     """
     import asyncio
 
@@ -329,7 +329,7 @@ def _score_proposal(
                     model=model,
                     grammar_enums=grammar_enums,
                     compose_ctx=compose_ctx,
-                    batch_context="sn-merge",
+                    batch_context="sn-approve",
                     neighborhood=[],
                     audit_findings=[],
                     wlog=wlog,
@@ -338,7 +338,10 @@ def _score_proposal(
             )
         except Exception:
             logger.debug(
-                "merge review scorer failed for %s (%s)", sn_id, model, exc_info=True
+                "approval review scorer failed for %s (%s)",
+                sn_id,
+                model,
+                exc_info=True,
             )
             continue
         items = result.get("_items", [])
@@ -359,7 +362,7 @@ def _clear_claim(sn_id: str, gc: GraphClient) -> None:
     """Clear any stale claim so the accept persist's token guard matches."""
     gc.query(
         """
-        // MERGE_CLEAR_CLAIM
+        // APPROVAL_CLEAR_CLAIM
         MATCH (sn:StandardName {id: $id})
         SET sn.claim_token = null, sn.claimed_at = null
         """,
@@ -390,23 +393,23 @@ def _apply_passing_review(
             sn_id=review_target,
             claim_token="",
             score=score,
-            model="sn-merge",
+            model="sn-approve",
             min_score=threshold,
             run_id=run_id,
             skip_review_node=True,
         )
-        # The merge scorer returns an aggregate score, not the canonical
+        # The approval scorer returns an aggregate score, not the canonical
         # RD-quorum resolution metadata. It therefore cannot grant docs
         # acceptance. The fail-closed persist records that shortfall, then this
         # exact-scope transition parks the unchanged proposal for ordinary
         # review_docs with the configured chain.
         if stage != "reviewed":
             raise RuntimeError(
-                f"docs merge for {review_target!r} bypassed quorum staging "
+                f"docs approval for {review_target!r} bypassed quorum staging "
                 f"(unexpected stage {stage!r})"
             )
         review_run_id = run_id or (
-            "sn-merge-docs-review-" + datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
+            "sn-approve-docs-review-" + datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
         )
         staged = stage_docs_for_rescore(
             review_target,
@@ -423,7 +426,7 @@ def _apply_passing_review(
             sn_id=review_target,
             claim_token="",
             score=score,
-            model="sn-merge",
+            model="sn-approve",
             min_score=threshold,
             run_id=run_id,
             skip_review_node=True,
@@ -433,7 +436,7 @@ def _apply_passing_review(
         )
         if stage != "accepted":
             raise RuntimeError(
-                f"name merge for {review_target!r} did not accept "
+                f"name approval for {review_target!r} did not accept "
                 f"(unexpected stage {stage!r})"
             )
         return "accepted"
@@ -450,7 +453,7 @@ def _quarantine(
     """Flag a below-threshold proposal for human attention.
 
     Sets the existing ``validation_status='quarantined'`` signal, records the
-    merge reason + score, and moves the reviewed axis stage out of both the
+    approval reason + score, and moves the reviewed axis stage out of both the
     review (``'drafted'``) and refine (``'reviewed'``) claim windows so the
     human's wording is never re-reviewed or refined.  The wording itself is
     left untouched.
@@ -465,7 +468,7 @@ def _quarantine(
     score_field = "reviewer_score_name" if axis == "name" else "reviewer_score_docs"
     gc.query(
         f"""
-        // MERGE_QUARANTINE
+        // APPROVAL_QUARANTINE
         MATCH (sn:StandardName {{id: $id}})
         SET sn.validation_status = 'quarantined',
             sn.edit_status = 'rejected',
@@ -495,7 +498,7 @@ def _contest(
     A human deliberately changed the wording but the edited form did not pass
     the rubric, so it is neither published (approved) nor silently reverted:
     ``name_stage='contested'`` freezes it (pool-excluded) pending human
-    adjudication via sn edit / sn approve --override / sn revert.
+    adjudication via sn edit / sn resolve --override / sn revert.
     """
     score_field = "reviewer_score_name" if axis == "name" else "reviewer_score_docs"
     detail = (
@@ -504,7 +507,7 @@ def _contest(
     )
     gc.query(
         f"""
-        // MERGE_CONTEST
+        // APPROVAL_CONTEST
         MATCH (sn:StandardName {{id: $id}})
         SET sn.name_stage = 'contested',
             sn.edit_status = 'rejected',
@@ -542,7 +545,7 @@ def list_contested(gc: GraphClient | None = None) -> list[dict[str, Any]]:
             gc.close()
 
 
-def override_approve_contested(
+def resolve_contested_override(
     name: str, *, reason: str, gc: GraphClient | None = None
 ) -> bool:
     """Force a contested name to 'approved' over the rubric, on the record.
@@ -609,13 +612,13 @@ def revert_contested(name: str, *, reason: str, gc: GraphClient | None = None) -
 
 def _name_exists(sn_id: str, gc: GraphClient) -> bool:
     rows = gc.query(
-        "// MERGE_MATCH_BY_ID\nMATCH (sn:StandardName {id: $id}) RETURN count(sn) AS n",
+        "// APPROVAL_MATCH_BY_ID\nMATCH (sn:StandardName {id: $id}) RETURN count(sn) AS n",
         id=sn_id,
     )
     return bool(rows and rows[0].get("n"))
 
 
-def _reason_for(change: MergeChange) -> str:
+def _reason_for(change: ApprovalChange) -> str:
     axis_word = "name" if change.axis == "name" else "documentation"
     return (
         f"human catalog PR edit — reviewer-approved {axis_word} change folded "
@@ -629,7 +632,7 @@ def _reason_for(change: MergeChange) -> str:
 # ---------------------------------------------------------------------------
 
 
-def run_merge(
+def run_approval(
     *,
     isnc_dir: str | Path,
     base_ref: str,
@@ -640,7 +643,7 @@ def run_merge(
     dry_run: bool = False,
     batch: list[str] | None = None,
     gc: GraphClient | None = None,
-) -> MergeReport:
+) -> ApprovalReport:
     """Fold a reviewed catalog PR back into the graph-ledger.
 
     Parameters
@@ -661,11 +664,11 @@ def run_merge(
 
     Returns
     -------
-    MergeReport
+    ApprovalReport
         The accept / quarantine / blocked / unmatched breakdown.
     """
     thr = DEFAULT_MIN_SCORE if threshold is None else float(threshold)
-    report = MergeReport(threshold=thr, dry_run=dry_run)
+    report = ApprovalReport(threshold=thr, dry_run=dry_run)
 
     approval_values = (
         catalog_pr_number,
@@ -696,7 +699,7 @@ def run_merge(
             if not _name_exists(change.sn_id, gc):
                 report.unmatched.append(change.sn_id)
                 report.outcomes.append(
-                    MergeOutcome(
+                    ApprovalOutcome(
                         sn_id=change.sn_id, axis=change.axis, decision="unmatched"
                     )
                 )
@@ -704,7 +707,7 @@ def run_merge(
 
             if dry_run:
                 report.outcomes.append(
-                    MergeOutcome(
+                    ApprovalOutcome(
                         sn_id=change.sn_id, axis=change.axis, decision="planned"
                     )
                 )
@@ -734,7 +737,7 @@ def run_merge(
             if getattr(plan, "blocked", None):
                 report.blocked.append({"sn_id": change.sn_id, "reason": plan.blocked})
                 report.outcomes.append(
-                    MergeOutcome(
+                    ApprovalOutcome(
                         sn_id=change.sn_id,
                         axis=change.axis,
                         decision="blocked",
@@ -754,7 +757,7 @@ def run_merge(
                     }
                 )
                 report.outcomes.append(
-                    MergeOutcome(
+                    ApprovalOutcome(
                         sn_id=change.sn_id,
                         axis=change.axis,
                         decision="blocked",
@@ -792,7 +795,7 @@ def run_merge(
                 else:
                     report.staged_for_review.append(review_target)
                 report.outcomes.append(
-                    MergeOutcome(
+                    ApprovalOutcome(
                         sn_id=change.sn_id,
                         axis=change.axis,
                         decision=disposition,
@@ -815,7 +818,7 @@ def run_merge(
                     {"sn_id": change.sn_id, "target_id": review_target, "score": score}
                 )
                 report.outcomes.append(
-                    MergeOutcome(
+                    ApprovalOutcome(
                         sn_id=change.sn_id,
                         axis=change.axis,
                         decision="contested",
@@ -844,7 +847,9 @@ def run_merge(
                 ):
                     report.auto_approved.append(nid)
                     report.outcomes.append(
-                        MergeOutcome(sn_id=nid, axis="name", decision="auto_approved")
+                        ApprovalOutcome(
+                            sn_id=nid, axis="name", decision="auto_approved"
+                        )
                     )
         return report
     finally:
@@ -894,7 +899,7 @@ def resolve_merged_pr(pr_url: str) -> ResolvedPr:
     data = json.loads(result.stdout)
     if data.get("state") != "MERGED":
         raise ValueError(
-            f"PR is not merged (state={data.get('state')}) — sn merge runs only "
+            f"PR is not merged (state={data.get('state')}) — sn approve runs only "
             "from an accepted (merged) PR"
         )
     oid = (data.get("mergeCommit") or {}).get("oid")
@@ -910,23 +915,23 @@ def resolve_merged_pr(pr_url: str) -> ResolvedPr:
 
 
 @dataclass
-class UndoReport:
-    """Summary of an :func:`undo_merge` invocation."""
+class UndoApprovalReport:
+    """Summary of an :func:`undo_approval` invocation."""
 
     pr_number: int = 0
     demoted: list[str] = field(default_factory=list)
     contested_reverted: list[str] = field(default_factory=list)
 
 
-def undo_merge(
+def undo_approval(
     *,
     pr_number: int,
     batch: list[str] | None = None,
     gc: GraphClient | None = None,
-) -> UndoReport:
-    """Unwind the graph promotions of a previously folded merge.
+) -> UndoApprovalReport:
+    """Unwind the graph promotions of a previously folded approval.
 
-    The reverse of :func:`run_merge`'s *promotions* — a property-level revert,
+    The reverse of :func:`run_approval`'s *promotions* — a property-level revert,
     not a checkout:
 
     * names ``approved`` by this PR (``catalog_pr_number`` matches) drop back
@@ -940,12 +945,12 @@ def undo_merge(
     node surgery. Full-state rollback is a graph-archive restore
     (``imas-codex graph export`` / ``graph load``), the checkout analogue.
     """
-    report = UndoReport(pr_number=pr_number)
+    report = UndoApprovalReport(pr_number=pr_number)
     owns = gc is None
     if gc is None:
         gc = GraphClient()
     try:
-        resolution = f"merge of catalog PR {pr_number} unwound"
+        resolution = f"approval of catalog PR {pr_number} unwound"
         rows = gc.query(
             """
             MATCH (sn:StandardName {name_stage: 'approved'})
@@ -1080,7 +1085,7 @@ def _git_cp(args: list[str], cwd: str | Path) -> subprocess.CompletedProcess[str
     )
 
 
-def merge_tag_name(head_ref: str) -> str | None:
+def approval_tag_name(head_ref: str) -> str | None:
     """Derive the version tag from a PR's head branch.
 
     Both the batch flow (``review/<rc>``) and the locked plain-final flow
@@ -1099,7 +1104,7 @@ def build_contract_block(
     pr_number: int | None,
     pr_url: str | None,
     batch_artifact: str | None,
-    report: MergeReport,
+    report: ApprovalReport,
     timestamp: str | None = None,
 ) -> str:
     """The deterministic, machine-readable contract lines.
@@ -1211,7 +1216,7 @@ def resolve_tag_remote(
 
 
 def fetch_pr_evidence(pr_url: str) -> dict[str, Any]:
-    """Gather the merge summary's evidence from the PR itself, via ``gh``.
+    """Gather the approval summary's evidence from the PR itself, via ``gh``.
 
     One call returns the PR description, the full conversation (comments +
     reviews), and the commit list (whose first entry locates the review-delta
@@ -1304,11 +1309,11 @@ def _commit_messages_from_evidence(evidence: dict[str, Any]) -> list[str]:
     return out
 
 
-def _default_merge_notes(**kwargs: Any) -> str:
-    """Bind the grounded merge-summary synthesizer (lazy import)."""
-    from imas_codex.standard_names.release_notes import build_merge_notes
+def _default_approval_notes(**kwargs: Any) -> str:
+    """Bind the grounded approval-summary synthesizer (lazy import)."""
+    from imas_codex.standard_names.release_notes import build_approval_notes
 
-    return build_merge_notes(**kwargs)
+    return build_approval_notes(**kwargs)
 
 
 def tag_fold_back(
@@ -1319,14 +1324,14 @@ def tag_fold_back(
     pr_number: int | None,
     pr_url: str | None,
     batch_artifact: str | None,
-    report: MergeReport,
+    report: ApprovalReport,
     remote: str,
     include_notes: bool = True,
     pr_evidence: dict[str, Any] | None = None,
     notes_builder: Any | None = None,
     timestamp: str | None = None,
 ) -> FoldBackTagReport:
-    """Write the fold-back receipt after a successful non-dry merge.
+    """Write the fold-back receipt after a successful non-dry approval.
 
     Builds the deterministic contract block, optionally appends a grounded human
     summary synthesized from the PR (description + conversation + commit messages
@@ -1337,7 +1342,7 @@ def tag_fold_back(
     injectable so the flow is testable with no live GitHub and no live LLM.
     """
     out = FoldBackTagReport()
-    tag = merge_tag_name(head_ref)
+    tag = approval_tag_name(head_ref)
     if not tag:
         out.error = f"cannot derive a version tag from head ref {head_ref!r}"
         return out
@@ -1361,7 +1366,7 @@ def tag_fold_back(
         delta = review_delta_diff(
             isnc_dir, base_oid=base_oid, merge_commit=merge_commit
         )
-        builder = notes_builder or _default_merge_notes
+        builder = notes_builder or _default_approval_notes
         try:
             notes = (
                 builder(
@@ -1374,7 +1379,7 @@ def tag_fold_back(
             )
         except Exception:
             logger.warning(
-                "merge-notes builder raised — writing the deterministic tag block "
+                "approval-notes builder raised — writing the deterministic tag block "
                 "alone",
                 exc_info=True,
             )

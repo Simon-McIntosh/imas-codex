@@ -1,7 +1,7 @@
-"""Tests for ``sn merge`` — fold a reviewed catalog PR back into the ledger.
+"""Tests for ``sn approve`` — fold a reviewed catalog PR back into the ledger.
 
 All graph interaction is MOCKED — these tests never touch Neo4j. They pin
-the orchestration contract of :func:`run_merge`:
+the orchestration contract of :func:`run_approval`:
 
 * a human catalog edit is re-attached like ``sn edit`` (candidate + reason,
   ``origin='human'``, ``refine=False``) via :func:`apply_edit`;
@@ -28,13 +28,13 @@ import pytest
 
 from imas_codex.standard_names.edit import EditPlan
 from imas_codex.standard_names.promote import (
-    MergeChange,
-    MergeReport,
+    ApprovalChange,
+    ApprovalReport,
     read_pr_changes,
-    run_merge,
+    run_approval,
 )
 
-MERGE = "imas_codex.standard_names.promote"
+APPROVAL = "imas_codex.standard_names.promote"
 
 
 # ---------------------------------------------------------------------------
@@ -81,9 +81,9 @@ def _gc_exists(exists: bool = True) -> MagicMock:
 # ---------------------------------------------------------------------------
 
 
-class TestRunMergePassingReviewPath:
+class TestRunApprovalPassingReviewPath:
     def test_docs_edit_attached_like_sn_edit_with_reason(self):
-        change = MergeChange(
+        change = ApprovalChange(
             sn_id="electron_temperature",
             axis="docs",
             new_value="Electron temperature. Revised by reviewer.",
@@ -91,19 +91,21 @@ class TestRunMergePassingReviewPath:
         )
         gc = _gc_exists(True)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=[change]),
-            patch(f"{MERGE}.apply_edit") as m_apply,
-            patch(f"{MERGE}._score_proposal", return_value=0.93) as m_score,
-            patch(f"{MERGE}.persist_reviewed_docs", return_value="reviewed") as m_docs,
+            patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
+            patch(f"{APPROVAL}.apply_edit") as m_apply,
+            patch(f"{APPROVAL}._score_proposal", return_value=0.93) as m_score,
             patch(
-                f"{MERGE}.stage_docs_for_rescore",
+                f"{APPROVAL}.persist_reviewed_docs", return_value="reviewed"
+            ) as m_docs,
+            patch(
+                f"{APPROVAL}.stage_docs_for_rescore",
                 return_value={"ok": True},
             ) as m_stage,
-            patch(f"{MERGE}.mark_catalog_name_approved") as m_approve,
-            patch(f"{MERGE}.persist_reviewed_name") as m_name,
+            patch(f"{APPROVAL}.mark_catalog_name_approved") as m_approve,
+            patch(f"{APPROVAL}.persist_reviewed_name") as m_name,
         ):
             m_apply.return_value = _edit_plan(target="electron_temperature")
-            report = run_merge(
+            report = run_approval(
                 isnc_dir="/tmp/isnc",
                 base_ref="origin/main",
                 threshold=0.85,
@@ -139,19 +141,25 @@ class TestRunMergePassingReviewPath:
         assert report.threshold == 0.85
 
     def test_docs_score_at_threshold_stages_for_quorum(self):
-        change = MergeChange(sn_id="ion_density", axis="docs", new_value="Ion density.")
+        change = ApprovalChange(
+            sn_id="ion_density", axis="docs", new_value="Ion density."
+        )
         gc = _gc_exists(True)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=[change]),
-            patch(f"{MERGE}.apply_edit", return_value=_edit_plan(target="ion_density")),
-            patch(f"{MERGE}._score_proposal", return_value=0.85),
-            patch(f"{MERGE}.persist_reviewed_docs", return_value="reviewed") as m_docs,
+            patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
             patch(
-                f"{MERGE}.stage_docs_for_rescore",
+                f"{APPROVAL}.apply_edit", return_value=_edit_plan(target="ion_density")
+            ),
+            patch(f"{APPROVAL}._score_proposal", return_value=0.85),
+            patch(
+                f"{APPROVAL}.persist_reviewed_docs", return_value="reviewed"
+            ) as m_docs,
+            patch(
+                f"{APPROVAL}.stage_docs_for_rescore",
                 return_value={"ok": True},
             ),
         ):
-            report = run_merge(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
+            report = run_approval(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
         m_docs.assert_called_once()
         assert report.accepted == []
         assert report.staged_for_review == ["ion_density"]
@@ -163,18 +171,20 @@ class TestRunMergePassingReviewPath:
 # ---------------------------------------------------------------------------
 
 
-class TestRunMergeContestPath:
+class TestRunApprovalContestPath:
     def test_low_score_contests_not_accepted_not_refined(self):
-        change = MergeChange(sn_id="ion_density", axis="docs", new_value="Bad docs.")
+        change = ApprovalChange(sn_id="ion_density", axis="docs", new_value="Bad docs.")
         gc = _gc_exists(True)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=[change]),
-            patch(f"{MERGE}.apply_edit", return_value=_edit_plan(target="ion_density")),
-            patch(f"{MERGE}._score_proposal", return_value=0.50),
-            patch(f"{MERGE}.persist_reviewed_docs") as m_docs,
-            patch(f"{MERGE}.persist_reviewed_name") as m_name,
+            patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
+            patch(
+                f"{APPROVAL}.apply_edit", return_value=_edit_plan(target="ion_density")
+            ),
+            patch(f"{APPROVAL}._score_proposal", return_value=0.50),
+            patch(f"{APPROVAL}.persist_reviewed_docs") as m_docs,
+            patch(f"{APPROVAL}.persist_reviewed_name") as m_name,
         ):
-            report = run_merge(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
+            report = run_approval(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
 
         # NOT accepted — no promote path taken.
         m_docs.assert_not_called()
@@ -196,19 +206,19 @@ class TestRunMergeContestPath:
     def test_full_review_runs_but_refine_never_invoked(self):
         """FULL review is exercised; NO refine pool is ever entered."""
         changes = [
-            MergeChange(sn_id="a_name", axis="docs", new_value="Doc A."),
-            MergeChange(sn_id="b_name", axis="docs", new_value="Doc B."),
+            ApprovalChange(sn_id="a_name", axis="docs", new_value="Doc A."),
+            ApprovalChange(sn_id="b_name", axis="docs", new_value="Doc B."),
         ]
         gc = _gc_exists(True)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=changes),
+            patch(f"{APPROVAL}.read_pr_changes", return_value=changes),
             patch(
-                f"{MERGE}.apply_edit",
+                f"{APPROVAL}.apply_edit",
                 side_effect=lambda **k: _edit_plan(target=k["target"]),
             ),
-            patch(f"{MERGE}._score_proposal", side_effect=[0.9, 0.4]) as m_score,
-            patch(f"{MERGE}.persist_reviewed_docs", return_value="reviewed"),
-            patch(f"{MERGE}.stage_docs_for_rescore", return_value={"ok": True}),
+            patch(f"{APPROVAL}._score_proposal", side_effect=[0.9, 0.4]) as m_score,
+            patch(f"{APPROVAL}.persist_reviewed_docs", return_value="reviewed"),
+            patch(f"{APPROVAL}.stage_docs_for_rescore", return_value={"ok": True}),
             patch(
                 "imas_codex.standard_names.graph_ops.claim_refine_name_batch"
             ) as m_rn,
@@ -222,7 +232,7 @@ class TestRunMergeContestPath:
                 "imas_codex.standard_names.workers.process_refine_docs_batch"
             ) as m_prd,
         ):
-            report = run_merge(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
+            report = run_approval(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
 
         # Review scored every matched proposal…
         assert m_score.call_count == 2
@@ -241,27 +251,29 @@ class TestRunMergeContestPath:
 # ---------------------------------------------------------------------------
 
 
-class TestRunMergeNameEdit:
+class TestRunApprovalNameEdit:
     def test_name_edit_routes_through_rename_mode(self):
-        change = MergeChange(
+        change = ApprovalChange(
             sn_id="elongation",
             axis="name",
             new_value="elongation_of_closed_flux_surface",
         )
         gc = _gc_exists(True)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=[change]),
-            patch(f"{MERGE}.apply_edit") as m_apply,
-            patch(f"{MERGE}._score_proposal", return_value=0.95) as m_score,
-            patch(f"{MERGE}.persist_reviewed_name", return_value="accepted") as m_name,
-            patch(f"{MERGE}.persist_reviewed_docs") as m_docs,
+            patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
+            patch(f"{APPROVAL}.apply_edit") as m_apply,
+            patch(f"{APPROVAL}._score_proposal", return_value=0.95) as m_score,
+            patch(
+                f"{APPROVAL}.persist_reviewed_name", return_value="accepted"
+            ) as m_name,
+            patch(f"{APPROVAL}.persist_reviewed_docs") as m_docs,
         ):
             m_apply.return_value = _edit_plan(
                 target="elongation",
                 mode="rename",
                 successor="elongation_of_closed_flux_surface",
             )
-            report = run_merge(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
+            report = run_approval(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
 
         # A NAME change rides rename mode (cascade-carrying), never docs/delete.
         kwargs = m_apply.call_args.kwargs
@@ -280,54 +292,54 @@ class TestRunMergeNameEdit:
 # ---------------------------------------------------------------------------
 
 
-class TestRunMergeEdgeCases:
+class TestRunApprovalEdgeCases:
     def test_unmatched_id_is_reported_without_attaching(self):
-        change = MergeChange(sn_id="ghost_name", axis="docs", new_value="x")
+        change = ApprovalChange(sn_id="ghost_name", axis="docs", new_value="x")
         gc = _gc_exists(False)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=[change]),
-            patch(f"{MERGE}.apply_edit") as m_apply,
-            patch(f"{MERGE}._score_proposal") as m_score,
+            patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
+            patch(f"{APPROVAL}.apply_edit") as m_apply,
+            patch(f"{APPROVAL}._score_proposal") as m_score,
         ):
-            report = run_merge(isnc_dir="/x", base_ref="b", gc=gc)
+            report = run_approval(isnc_dir="/x", base_ref="b", gc=gc)
         m_apply.assert_not_called()
         m_score.assert_not_called()
         assert "ghost_name" in report.unmatched
 
     def test_blocked_edit_is_recorded_and_not_scored(self):
-        change = MergeChange(sn_id="frozen_name", axis="docs", new_value="x")
+        change = ApprovalChange(sn_id="frozen_name", axis="docs", new_value="x")
         gc = _gc_exists(True)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=[change]),
+            patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
             patch(
-                f"{MERGE}.apply_edit",
+                f"{APPROVAL}.apply_edit",
                 return_value=_edit_plan(
                     target="frozen_name", blocked="target ineligible stage"
                 ),
             ),
-            patch(f"{MERGE}._score_proposal") as m_score,
-            patch(f"{MERGE}.persist_reviewed_docs") as m_docs,
+            patch(f"{APPROVAL}._score_proposal") as m_score,
+            patch(f"{APPROVAL}.persist_reviewed_docs") as m_docs,
         ):
-            report = run_merge(isnc_dir="/x", base_ref="b", gc=gc)
+            report = run_approval(isnc_dir="/x", base_ref="b", gc=gc)
         m_score.assert_not_called()
         m_docs.assert_not_called()
         assert any(b["sn_id"] == "frozen_name" for b in report.blocked)
 
     def test_dry_run_attaches_nothing(self):
-        change = MergeChange(sn_id="ion_density", axis="docs", new_value="x")
+        change = ApprovalChange(sn_id="ion_density", axis="docs", new_value="x")
         gc = _gc_exists(True)
         with (
-            patch(f"{MERGE}.read_pr_changes", return_value=[change]),
-            patch(f"{MERGE}.apply_edit") as m_apply,
-            patch(f"{MERGE}._score_proposal") as m_score,
-            patch(f"{MERGE}.persist_reviewed_docs") as m_docs,
+            patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
+            patch(f"{APPROVAL}.apply_edit") as m_apply,
+            patch(f"{APPROVAL}._score_proposal") as m_score,
+            patch(f"{APPROVAL}.persist_reviewed_docs") as m_docs,
         ):
-            report = run_merge(isnc_dir="/x", base_ref="b", dry_run=True, gc=gc)
+            report = run_approval(isnc_dir="/x", base_ref="b", dry_run=True, gc=gc)
         m_apply.assert_not_called()
         m_score.assert_not_called()
         m_docs.assert_not_called()
         assert report.dry_run is True
-        assert isinstance(report, MergeReport)
+        assert isinstance(report, ApprovalReport)
 
 
 # ---------------------------------------------------------------------------
@@ -469,19 +481,19 @@ class TestBatchLabelledVersionRoundTrip:
     side must parse it back out of the branch name unchanged.
     """
 
-    def test_merge_tag_name_keeps_the_label(self):
-        from imas_codex.standard_names.promote import merge_tag_name
+    def test_approval_tag_name_keeps_the_label(self):
+        from imas_codex.standard_names.promote import approval_tag_name
 
         assert (
-            merge_tag_name("review/v0.2.0rc65+west-task-2e")
+            approval_tag_name("review/v0.2.0rc65+west-task-2e")
             == "v0.2.0rc65+west-task-2e"
         )
 
     def test_plain_and_release_branches_are_unaffected(self):
-        from imas_codex.standard_names.promote import merge_tag_name
+        from imas_codex.standard_names.promote import approval_tag_name
 
-        assert merge_tag_name("review/v0.2.0rc65") == "v0.2.0rc65"
-        assert merge_tag_name("release/v1.0.0") == "v1.0.0"
+        assert approval_tag_name("review/v0.2.0rc65") == "v0.2.0rc65"
+        assert approval_tag_name("release/v1.0.0") == "v1.0.0"
 
     def test_resolve_merged_pr_carries_a_labelled_head_ref(self):
         from imas_codex.standard_names.promote import resolve_merged_pr
@@ -512,7 +524,7 @@ class TestBatchLabelledVersionRoundTrip:
             _format_tag,
             _freeze_review_artifact,
         )
-        from imas_codex.standard_names.promote import merge_tag_name
+        from imas_codex.standard_names.promote import approval_tag_name
         from imas_codex.standard_names.sources_manifest import load_names_file
 
         tag = _format_tag(0, 2, 0, 65, build="west_task_2e")
@@ -524,7 +536,7 @@ class TestBatchLabelledVersionRoundTrip:
             unmatched=[],
         )
         branch = f"review/{tag}"
-        rc = merge_tag_name(branch)
+        rc = approval_tag_name(branch)
         # The branch name alone yields the full version, so the artifact is
         # located without recomputing the label from any manifest.
         assert rc == tag == "v0.2.0rc65+west-task-2e"

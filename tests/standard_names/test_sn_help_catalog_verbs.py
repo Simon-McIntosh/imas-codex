@@ -3,7 +3,7 @@
 Verifies that ``preview``, ``release``, and ``edit`` appear as
 subcommands in the ``sn`` group help. The standalone ``export`` verb was
 folded into ``sn release --export-only``; the bulk ``import`` verb was
-removed (superseded by ``sn merge`` / the diff-by-id reconciler).
+removed (superseded by ``sn approve`` / the diff-by-id reconciler).
 """
 
 from __future__ import annotations

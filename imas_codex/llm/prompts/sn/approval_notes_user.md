@@ -1,8 +1,8 @@
 ---
-name: sn/merge_notes_user
-description: Per-merge user prompt for the fold-back tag summary — carries the PR description, conversation, commit messages, and review-delta diff
-used_by: imas_codex.standard_names.release_notes.build_merge_notes
-task: merge_notes
+name: sn/approval_notes_user
+description: Per-approval user prompt for the fold-back tag summary — carries the PR description, conversation, commit messages, and review-delta diff
+used_by: imas_codex.standard_names.release_notes.build_approval_notes
+task: approval_notes
 dynamic: true
 schema_needs: []
 ---

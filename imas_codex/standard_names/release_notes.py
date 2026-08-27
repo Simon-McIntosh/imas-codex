@@ -23,7 +23,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from imas_codex.graph.models import DDGapStatus
 
@@ -33,11 +33,28 @@ logger = logging.getLogger(__name__)
 class PrNotes(BaseModel):
     """Structured PR description returned by the notes model."""
 
-    title: str = Field(description="PR title, <= 70 characters")
-    body: str = Field(description="PR body, GitHub-flavoured markdown")
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(
+        min_length=1,
+        max_length=70,
+        description="Required short human title naming the review batch in words",
+    )
+    body: str = Field(
+        min_length=1,
+        description="A few grounded prose sentences with no entry enumeration",
+    )
+
+    @field_validator("title", "body")
+    @classmethod
+    def _reject_blank_text(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be blank")
+        return value
 
 
-class MergeNotes(BaseModel):
+class ApprovalNotes(BaseModel):
     """Grounded human summary of what review did to a batch, for the fold-back tag."""
 
     summary: str = Field(
@@ -50,7 +67,7 @@ class MergeNotes(BaseModel):
     )
 
 
-def build_merge_notes(
+def build_approval_notes(
     *,
     pr_description: str,
     conversation: list[dict[str, Any]],
@@ -73,9 +90,9 @@ def build_merge_notes(
         from imas_codex.llm.prompt_loader import render_prompt
         from imas_codex.settings import get_model
 
-        system = render_prompt("sn/merge_notes_system", {})
+        system = render_prompt("sn/approval_notes_system", {})
         user = render_prompt(
-            "sn/merge_notes_user",
+            "sn/approval_notes_user",
             {
                 "pr_description": pr_description,
                 "conversation": conversation or [],
@@ -89,13 +106,13 @@ def build_merge_notes(
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            response_model=MergeNotes,
+            response_model=ApprovalNotes,
             service="standard-names",
         )
         return notes.summary.strip()
     except Exception:
         logger.warning(
-            "merge-notes synthesis failed — the fold-back tag keeps its "
+            "approval-notes synthesis failed — the fold-back tag keeps its "
             "deterministic block alone",
             exc_info=True,
         )
@@ -109,8 +126,8 @@ def collect_catalog_changes(
 
     Returns ``[{domain, added: [name], changed: [name], removed: [name]}, …]``
     sorted by domain. Entry-level matching is by ``name`` (the graph id) using
-    the same YAML reader as :mod:`merge`, so the evidence the notes model sees
-    is exactly what ``sn merge`` will later act on.
+    the same YAML reader as :mod:`promote`, so the evidence the notes model sees
+    is exactly what ``sn approve`` will later act on.
     """
     from imas_codex.standard_names.promote import _git, _parse_entries
 
@@ -256,54 +273,128 @@ def unavailable_dd_gap_summary(error: str) -> dict[str, Any]:
     return summary
 
 
-def _static_dd_gap_caveat(summary: Mapping[str, Any]) -> str:
-    """Render exact lifecycle evidence for the deterministic PR fallback."""
+def _dd_gap_sentence(summary: Mapping[str, Any]) -> str:
+    """Render DD lifecycle evidence as one non-enumerating sentence."""
     if not bool(summary.get("available", True)):
         return (
-            "\n\n## Data Dictionary caveats\n\n"
-            "Warning only: linked DD-defect evidence could not be read "
-            f"({summary.get('read_error', 'unknown read failure')}). The release "
-            "continues, but this is not evidence that the batch has zero DD "
-            "caveats."
+            " Linked Data Dictionary caveat evidence could not be read, so this "
+            "batch makes no claim that the caveat count is zero."
         )
-    total = int(summary.get("total", 0) or 0)
-    if not total:
-        return "\n\n## Data Dictionary caveats\n\nNo linked DD defects were reported."
+    if not int(summary.get("total", 0) or 0):
+        return ""
+    return (
+        " Linked Data Dictionary evidence reports "
+        f"{summary.get('unresolved_count', 0)} unresolved and "
+        f"{summary.get('retired_count', 0)} retired caveats; these observations "
+        "are warning-only."
+    )
 
-    lines = [
-        "\n\n## Data Dictionary caveats",
-        "",
+
+def _change_counts(changes: list[dict[str, Any]]) -> dict[str, int]:
+    return {
+        kind: sum(len(change.get(kind, []) or []) for change in changes)
+        for kind in ("added", "changed", "removed")
+    }
+
+
+def _count_phrase(count: int, noun: str) -> str:
+    return f"{count} {noun if count == 1 else noun + 's'}"
+
+
+def _dominant_domain(changes: list[dict[str, Any]]) -> str:
+    ranked = sorted(
         (
-            f"Warning only: {summary.get('unresolved_count', 0)} unresolved, "
-            f"{summary.get('triaged_count', 0)} triaged, "
-            f"{summary.get('retired_count', 0)} retired, and "
-            f"{summary.get('stale_registry_count', 0)} stale registry fact(s). "
-            "These observations do not suppress sources or block this release."
+            (
+                sum(
+                    len(change.get(kind, []) or [])
+                    for kind in ("added", "changed", "removed")
+                ),
+                str(change.get("domain") or ""),
+            )
+            for change in changes
         ),
-    ]
-    for fact in summary.get("facts", []) or []:
-        exact_paths = (
-            ", ".join(f"`{path}`" for path in fact.get("exact_paths", []))
-            or "(no linked exact path)"
-        )
-        upstream = fact.get("upstream_url")
-        suffix = f" — [upstream]({upstream})" if upstream else ""
-        lines.append(
-            f"- `{fact.get('kind')}` / `{fact.get('status')}`: {exact_paths}{suffix}"
-        )
-    return "\n".join(lines)
+        key=lambda item: (-item[0], item[1]),
+    )
+    if not ranked or ranked[0][0] <= 0:
+        return ""
+    return ranked[0][1].replace("_", " ").replace("-", " ").strip()
 
 
-_MODEL_DD_GAP_SECTION_RE = re.compile(
-    r"(?ims)^##[ \t]+Data[ \t]+Dictionary[ \t]+caveats[ \t]*$"
-    r".*?(?=^##[ \t]+|\Z)"
-)
+def _facility_label(rc_version: str) -> str:
+    local = rc_version.partition("+")[2]
+    token = re.split(r"[-_.]", local, maxsplit=1)[0] if local else ""
+    return token.upper() if token.isalpha() else ""
 
 
-def _with_canonical_dd_gap_caveat(model_body: str, summary: Mapping[str, Any]) -> str:
-    """Replace model-authored DD caveats with the deterministic rendering."""
-    without_model_caveats = _MODEL_DD_GAP_SECTION_RE.sub("", model_body).strip()
-    return without_model_caveats + _static_dd_gap_caveat(summary)
+def review_pr_title(
+    *, rc_version: str, changes: list[dict[str, Any]] | None = None
+) -> str:
+    """Derive a short human title from the batch label and dominant domain."""
+    facility = _facility_label(rc_version)
+    domain = _dominant_domain(changes or [])
+    if facility and domain:
+        return f"{facility} {domain} review batch"
+    if facility:
+        return f"{facility} standard names review batch"
+    if domain:
+        return f"{domain.capitalize()} standard names review batch"
+    return "Standard names review batch"
+
+
+_OUTPUT_ENUMERATION_RE = re.compile(r"(?m)^\s*(?:[-*+]\s|\d+[.)]\s|#+\s|\|)")
+_VERSION_RE = re.compile(r"(?i)\bv?\d+\.\d+(?:\.\d+)?(?:rc\d+)?\b")
+
+
+def _validate_pr_notes(
+    notes: Any, *, required_title: str, allowed_numbers: set[int]
+) -> tuple[str, str]:
+    """Reject malformed model output before it can reach PR publication."""
+    title = str(getattr(notes, "title", "") or "").strip()
+    body = str(getattr(notes, "body", "") or "").strip()
+    if not title:
+        raise ValueError("release-notes response omitted the required title")
+    if title != required_title:
+        raise ValueError("release-notes response did not use the required batch title")
+    if "\n" in title or _VERSION_RE.search(title):
+        raise ValueError("release-notes title must name the batch in words")
+    if not body or "\n" in body or _OUTPUT_ENUMERATION_RE.search(body):
+        raise ValueError("release-notes body must be one paragraph of prose")
+    sentence_count = len(re.findall(r"[.!?](?:\s|$)", body))
+    if sentence_count < 2 or sentence_count > 5:
+        raise ValueError("release-notes body must contain two to five sentences")
+    reported_numbers = {int(value) for value in re.findall(r"\b\d+\b", body)}
+    if not reported_numbers <= allowed_numbers:
+        raise ValueError("release-notes body introduced an unsupported count")
+    return title, body
+
+
+def _static_pr_body(
+    *,
+    rc_version: str,
+    batch_size: int,
+    minted_from: str,
+    unmatched_count: int,
+    changes: list[dict[str, Any]],
+    dd_gaps: Mapping[str, Any],
+) -> str:
+    facility = _facility_label(rc_version)
+    domain = _dominant_domain(changes)
+    scope = " ".join(part for part in (facility, domain) if part) or "standard names"
+    counts = _change_counts(changes)
+    unmatched = (
+        f", with {unmatched_count} source paths lacking a linked name"
+        if unmatched_count
+        else ""
+    )
+    return (
+        f"This {scope} review batch contains {batch_size} standard names assembled "
+        f"from {Path(minted_from).name}. "
+        f"The catalog diff contains {_count_phrase(counts['added'], 'addition')}, "
+        f"{_count_phrase(counts['changed'], 'change')}, and "
+        f"{_count_phrase(counts['removed'], 'removal')}{unmatched}. "
+        "Review the fixed batch view and check each entry's wording, units, and "
+        "physics meaning before approving." + _dd_gap_sentence(dd_gaps)
+    )
 
 
 def static_pr_notes(
@@ -312,15 +403,23 @@ def static_pr_notes(
     rc_version: str,
     batch_size: int,
     minted_from: str,
+    unmatched_count: int = 0,
+    changes: list[dict[str, Any]] | None = None,
     dd_gaps: Mapping[str, Any] | None = None,
 ) -> tuple[str, str]:
     """The deterministic fallback title/body (no LLM)."""
-    title = message or f"Standard-name review batch {rc_version}"
-    body = (
-        f"Review batch **{rc_version}** — {batch_size} standard name(s) for "
-        f"first human review.\n\nMinted from `{minted_from}`."
+    del message
+    changes = changes or []
+    summary = dd_gaps or summarize_dd_gap_facts([])
+    title = review_pr_title(rc_version=rc_version, changes=changes)
+    body = _static_pr_body(
+        rc_version=rc_version,
+        batch_size=batch_size,
+        minted_from=minted_from,
+        unmatched_count=unmatched_count,
+        changes=changes,
+        dd_gaps=summary,
     )
-    body += _static_dd_gap_caveat(dd_gaps or summarize_dd_gap_facts([]))
     return title, body
 
 
@@ -344,17 +443,24 @@ def build_pr_notes(
         from imas_codex.llm.prompt_loader import render_prompt
         from imas_codex.settings import get_model
 
+        changes = changes or []
+        summary = dd_gaps or summarize_dd_gap_facts([])
+        title = review_pr_title(rc_version=rc_version, changes=changes)
+        counts = _change_counts(changes)
         system = render_prompt("sn/release_notes_system", {})
         user = render_prompt(
             "sn/release_notes_user",
             {
+                "required_title": title,
                 "message": message,
                 "rc_version": rc_version,
                 "batch_size": batch_size,
                 "minted_from": minted_from,
                 "unmatched_count": unmatched_count,
-                "domains": changes or [],
-                "dd_gaps": dd_gaps or summarize_dd_gap_facts([]),
+                "facility": _facility_label(rc_version),
+                "dominant_domain": _dominant_domain(changes),
+                "change_counts": counts,
+                "dd_gaps": summary,
             },
         )
         notes, _cost, _tokens = call_llm_structured(
@@ -366,9 +472,16 @@ def build_pr_notes(
             response_model=PrNotes,
             service="standard-names",
         )
-        title = notes.title.strip() or message or rc_version
-        summary = dd_gaps or summarize_dd_gap_facts([])
-        return title, _with_canonical_dd_gap_caveat(notes.body, summary)
+        allowed_numbers = {
+            batch_size,
+            unmatched_count,
+            *counts.values(),
+            int(summary.get("unresolved_count", 0) or 0),
+            int(summary.get("retired_count", 0) or 0),
+        }
+        return _validate_pr_notes(
+            notes, required_title=title, allowed_numbers=allowed_numbers
+        )
     except Exception:
         logger.warning(
             "release-notes synthesis failed — using the static PR body",
@@ -379,5 +492,7 @@ def build_pr_notes(
             rc_version=rc_version,
             batch_size=batch_size,
             minted_from=minted_from,
+            unmatched_count=unmatched_count,
+            changes=changes,
             dd_gaps=dd_gaps,
         )

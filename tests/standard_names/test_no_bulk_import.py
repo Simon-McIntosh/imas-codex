@@ -4,7 +4,7 @@ Bulk catalog import (``run_import`` / ``_write_import_entries`` and the
 ``sn import`` CLI verb) was removed because it dropped provenance on every
 round-trip.  It is superseded by:
 
-- ``sn merge`` — folds reviewed curator edits from a merged catalog PR back
+- ``sn approve`` — folds reviewed curator edits from a merged catalog PR back
   into the ledger; and
 - ``catalog_reconcile.reconcile_catalog`` — the diff-by-id reconciler that
   restores the graph from a published catalog (replaying each entry's
@@ -41,7 +41,7 @@ class TestBulkImportRemoved:
 
         assert not hasattr(catalog_import, attr), (
             f"{attr} was removed with bulk import — it must not be re-added. "
-            "Use `sn merge` (PR acceptance) or catalog_reconcile (graph restore)."
+            "Use `sn approve` (PR acceptance) or catalog_reconcile (graph restore)."
         )
 
     def test_import_verb_gone_from_cli(self) -> None:

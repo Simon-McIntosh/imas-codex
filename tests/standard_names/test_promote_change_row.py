@@ -6,7 +6,7 @@ from typing import Any
 
 from imas_codex.standard_names.promote import (
     mark_catalog_name_approved,
-    override_approve_contested,
+    resolve_contested_override,
 )
 
 
@@ -101,7 +101,7 @@ def test_approval_rows_distinguish_ratification_from_content_edit() -> None:
     )
     edited_provenance = _generation_provenance(edited)
 
-    assert override_approve_contested(
+    assert resolve_contested_override(
         "plasma_current", reason="Accept the reviewed content edit.", gc=edited
     )
 

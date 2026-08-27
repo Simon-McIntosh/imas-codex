@@ -473,8 +473,8 @@ token; see [Grammar vocabulary](#grammar-vocabulary).
 | Axis | States | Set by | Notes |
 |---|---|---|---|
 | `name_stage` / `docs_stage` | `pending → drafted → reviewed → {accepted \| refining → drafted \| exhausted \| superseded}` | Pool workers | Cross-pipeline gate: `GENERATE_DOCS` fires only when `name_stage='accepted'`. `refining` reverts to `reviewed` after 600 s (orphan sweep). `chain_length` / `docs_chain_length` track refinement depth (root = 0). `superseded` = predecessor in a `REFINED_FROM` chain; source edges migrate to the latest. |
-| `name_stage` | `pending → drafted → reviewed → accepted` (`refining`/`exhausted`/`superseded` side states) | `sn run` → `sn release --export-only` → `sn merge` | Name-pipeline + catalog round-trip state. |
-| `status` | `draft → published → deprecated` | Catalog PR (`sn merge`) | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
+| `name_stage` | `pending → drafted → reviewed → accepted` (`refining`/`exhausted`/`superseded` side states) | `sn run` → `sn release --export-only` → `sn approve` | Name-pipeline + catalog round-trip state. |
+| `status` | `draft → published → deprecated` | Catalog PR (`sn approve`) | ISN vocabulary lifecycle; pipeline defaults to `draft`. Deprecated names link via `superseded_by` ↔ `deprecates`. |
 | `validation_status` | `pending → valid \| quarantined` | Compose worker | Gates `sn review`, consolidation, and `sn release --export-only`. Critical failures (grammar round-trip, Pydantic, ambiguity) quarantine; semantic warnings stay `valid`. |
 
 **`origin`:** `pipeline` (LLM-generated), `catalog_edit` (human-edited via
@@ -615,7 +615,7 @@ reviewer, but never quarantine.
   all fields — passing `None` preserves existing data. Persists
   `validation_issues` and `validation_layer_summary`. Safe for re-runs:
   imported catalog data is never clobbered by a subsequent `sn run`.
-- **Catalog fold-back (`sn merge`):** reviewed curator edits from a merged
+- **Catalog fold-back (`sn approve`):** reviewed curator edits from a merged
   catalog PR are folded back into the ledger — catalog-owned editorial fields
   are authoritative; graph-only fields (embedding, model, generated_at) are
   preserved. Restoring the graph from a published catalog is a separate
@@ -693,7 +693,7 @@ The graph is authoritative for pipeline state; the catalog (ISNC) is
 authoritative for human-reviewed editorial fields.
 
 ```
-sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages / PR review → PR merged → sn merge
+sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages / PR review → PR merged → sn approve
 ```
 
 1. **`sn release --export-only`** — runs only the export leg: reads validated
@@ -710,7 +710,7 @@ sn release --export-only → sn preview → sn release -m "msg" → GitHub Pages
    scoping flags) first, then `--skip-export`.
 4. **PR review on GitHub** — edits description, documentation, tags, kind,
    links, status, etc. Merged to ISNC main.
-5. **`sn merge`** — folds the reviewed curator edits from the merged catalog
+5. **`sn approve`** — folds the reviewed curator edits from the merged catalog
    PR back into the ledger: catalog-owned editorial fields overwrite the graph
    node and `origin` flips to `catalog_edit` on any name whose
    `PROTECTED_FIELDS` were edited. It attaches to existing names by id and
@@ -941,6 +941,8 @@ through review.
 | `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--stage`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
+| `sn approve` | Fold a merged catalog-review PR back into the graph, re-review edited entries, auto-approve untouched batch entries, and write the fold-back receipt tag. | `--pr`, `--base`, `--batch`, `--threshold`, `--dry-run`, `--undo`, `--notes/--no-notes` |
+| `sn resolve` | Resolve one contested reviewer edit by explicitly overriding the compliance rubric and recording the justification. | name, `--override`, `--reason` |
 | `sn status` | StandardName + StandardNameSource statistics, sibling-family harmonization state | `--family` |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
 | `sn source-hint` | Attach durable, non-authoritative compose steering to one eligible exact DD source; see [Exact-source compose steering](#exact-source-compose-steering). | `--hint`, `--reason` (mandatory), `--replace`, `--dry-run` |
