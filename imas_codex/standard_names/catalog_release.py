@@ -1052,6 +1052,8 @@ def run_review_release(
     llm_notes: bool = False,
     dd_gap_reader: Any | None = None,
     open_pr: bool = True,
+    pr_title: str | None = None,
+    pr_body: str | None = None,
 ) -> ReviewReleaseReport:
     """Mint → freeze → export → branch → tag → optional PR, in one call.
 
@@ -1078,6 +1080,22 @@ def run_review_release(
     report = ReviewReleaseReport(dry_run=dry_run)
     isnc_path = Path(isnc_path)
     reviews_dir = reviews_dir or default_reviews_dir()
+    if (pr_title is None) != (pr_body is None):
+        report.errors.append("PR title and body must be supplied together")
+        return report
+    if pr_title is not None and not open_pr:
+        report.errors.append(
+            "PR title and body cannot be used with PR creation disabled"
+        )
+        return report
+    if pr_title is not None and pr_body is not None:
+        from imas_codex.standard_names.release_notes import validate_pr_text
+
+        try:
+            validate_pr_text(pr_title, pr_body)
+        except ValueError as exc:
+            report.errors.append(f"PR text validation failed: {exc}")
+            return report
     if staging_dir is None:
         from imas_codex.settings import get_sn_staging_dir
 
@@ -1329,9 +1347,13 @@ def run_review_release(
         static_pr_notes,
     )
 
-    if notes_builder is None and llm_notes:
+    if pr_title is not None and pr_body is not None:
+        title, body = pr_title, pr_body
+    elif notes_builder is None and llm_notes:
         notes_builder = build_pr_notes
-    if notes_builder is not None:
+    if pr_title is not None and pr_body is not None:
+        pass
+    elif notes_builder is not None:
         changes = collect_catalog_changes(isnc_path, base_ref="main")
         title, body = notes_builder(
             message=message,

@@ -4512,6 +4512,24 @@ def sn_preview(
     ),
 )
 @click.option(
+    "--pr-title",
+    type=str,
+    default=None,
+    help=(
+        "[--batch] Explicit review PR title. Requires --pr-body-file; the "
+        "validated text takes precedence over generated notes."
+    ),
+)
+@click.option(
+    "--pr-body-file",
+    type=click.Path(exists=True, dir_okay=False, readable=True),
+    default=None,
+    help=(
+        "[--batch] File containing the explicit review PR body. Requires "
+        "--pr-title; validated file bytes are published unchanged."
+    ),
+)
+@click.option(
     "--notes/--no-notes",
     "llm_notes",
     default=True,
@@ -4608,6 +4626,8 @@ def sn_release(
     names_only: bool,
     batch_file: str | None,
     pr_target: str,
+    pr_title: str | None,
+    pr_body_file: str | None,
     llm_notes: bool,
     open_pr: bool,
     export_only: bool,
@@ -4654,12 +4674,16 @@ def sn_release(
       imas-codex sn release --export-only --min-score 0.8 --force
       imas-codex sn release --batch <manifest.yaml> --bump minor -m "WEST batch"
       imas-codex sn release --batch <manifest.yaml> --bump minor --no-pr -m "WEST batch"
+      imas-codex sn release --batch <manifest.yaml> --pr-title "WEST review batch" --pr-body-file pr.md -m "WEST batch"
     """
     from pathlib import Path
 
     from rich.table import Table
 
     from imas_codex.settings import get_sn_isnc_dir, get_sn_staging_dir
+
+    if (pr_title is not None or pr_body_file is not None) and not batch_file:
+        raise click.UsageError("--pr-title and --pr-body-file require --batch")
 
     # ── --export-only: run the graph→staging export leg and stop ──
     # No ISNC / tag / push — just the export, with full export-scoping
@@ -4703,6 +4727,12 @@ def sn_release(
     if batch_file:
         if action is not None:
             raise click.ClickException("--batch does not take an ACTION argument.")
+        if (pr_title is None) != (pr_body_file is None):
+            raise click.UsageError(
+                "--pr-title and --pr-body-file must be supplied together"
+            )
+        if pr_title is not None and not open_pr:
+            raise click.UsageError("--pr-title cannot be combined with --no-pr")
         from imas_codex.standard_names.catalog_release import run_review_release
         from imas_codex.standard_names.sources_manifest import resolve_batch_token
 
@@ -4714,6 +4744,11 @@ def sn_release(
                 "(or reviews/)."
             )
         batch_file = str(resolved_batch)
+        pr_body = (
+            Path(pr_body_file).read_text(encoding="utf-8")
+            if pr_body_file is not None
+            else None
+        )
 
         # auto target: RC batch → fork (safe rehearsal); --final → upstream
         # (the real expert-review PR). A batch is an RC version either way —
@@ -4747,6 +4782,8 @@ def sn_release(
                 pr_target=pr_target,
                 llm_notes=llm_notes,
                 open_pr=open_pr,
+                pr_title=pr_title,
+                pr_body=pr_body,
             )
         except Exception as exc:
             console.print(f"[red]Review-batch error:[/red] {exc}")
