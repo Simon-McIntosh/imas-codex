@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T11:37:18",
+  "updated": "2026-08-27T11:42:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -37745,9 +37745,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T093034122335-n-batch-title-scope",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-batch-title-scope",
+        "node_definition": {
+          "done_when": "The PR title derivation (release_notes.py fallback and the notes-seat prompt contract) names a domain ONLY when the batch is genuinely single-domain; a batch spanning multiple physics domains titles at facility scope (e.g. WEST review batch), with a test asserting the multi-domain case contains no domain token and the single-domain case may carry one; the live fork PR https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/2 is retitled to 'WEST review batch' via gh (title only, body and content untouched, verified); focused tests once to a persistent log exit 0; ruff clean; local conventional commit with body; no push of imas-codex",
+          "estimated_hours": null,
+          "goal": "A multi-domain batch titles at facility level",
+          "id": "n-batch-title-scope",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093034122335-n-batch-title-scope/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "imas_codex/standard_names/release_notes.py",
+            "imas_codex/llm/prompts/sn/release_notes_system.md",
+            "tests/standard_names/test_review_release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-relseams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:30:44Z",
+        "completed_at": "2026-08-27T09:36:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 346,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 346,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "b08ab8203023105e57555f28b45bc95e7ae6a3cd",
+        "commits": [
+          "7b5db266e22341754c9904cf6688eba6a577203c"
+        ],
+        "changed_lines": {
+          "added": 53,
+          "removed": 24,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_review_release.py + PR before/after normalized JSON comparison",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093034122335-n-batch-title-scope/focused-tests-pass.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T093034122335-n-batch-title-scope/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4844544,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4917857,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 9066,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1701
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1016
+    "_version": 1017
   }
 }
