@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="74">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2379,6 +2379,9 @@ Done-when
 <div class="r-comment" data-section="s2" data-id="c-20260826-release-transport-contract-landed" data-who="reckon-ship" data-when="2026-08-26T15:15:00Z">
     <div class="r-comment-body">n-west-release-transport-contract landed — commit 84a4550b, merged 5044f59f; gate passed (25 focused + 15 CLI release tests, exit 0, 4 negative-invariant tests added). The three open release-contract holds from the 2026-08-26 workflow assert are closed with proofs: a batch given --remote upstream still creates its review branch only on the fork and never on upstream; approved-plus-batch staging fails with a named byte_changed error before branch or publish when any approved entry mutates; a plain --final leaves upstream main at its exact pre-release SHA, creates no local or remote release-time tag, and opens the upstream PR from a fork-hosted release branch — the tag remains owned by fold-back per the locked final-release-shape decision.</div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260827T064754359988-n-approve-verb-and-pr-text" data-who="impl-relseams" data-when="2026-08-27T07:21:57Z">
+    <div class="r-comment-body"><p>sn approve owns the fold-back, contested override renamed sn resolve (no collision), merge=0 in command census; PR text contract enforced: exact human title + 2-5 sentence prose, enumerated bodies rejected before publish, matching deterministic fallback; 195 tests exit 0; 5 docstring-only stale mentions left for a scrub node</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131846395540-n-west-upstream-additivity-review" data-who="rev-west-upstream" data-when="2026-08-26T13:24:56Z">
     <div class="r-comment-body"><p>Workflow HOLD: fork-only branch transport and plain-final PR-then-tag are contradicted by source, and approved-byte identity is unproven.</p></div>
 </div>
@@ -2387,6 +2390,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T064746855137-n-catalog-baseline-recon" data-who="test-catalogstate" data-when="2026-08-27T06:57:35Z">
     <div class="r-comment-body"><p>Upstream main needs NO deletion (0 flat baseline files, no catalog.yml; exporter reads flat files only); fork main holds the legacy 2223 entries in 19 exactly-inventoried paths; approval fold-back never rewrites catalog main (approved-only accumulation is an implementation gap); PR #1 (2349 entries on legacy base 4f218df) must be re-cut from blank main</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T065931252011-n-fork-baseline-blanking" data-who="impl-catalogblank" data-when="2026-08-27T07:11:54Z">
+    <div class="r-comment-body"><p>Fork catalog main is the blank additive baseline: PR #1 closed unmerged with the exact supersession comment, review branch deleted, one commit f8af99d1 removed exactly 19 files/2223 legacy entries, 0 flat files + no catalog.yml verified, upstream unchanged at 42e5a2b2 by two read paths, dump recoverable at 4f218df</p></div>
 </div>
 </section>
 </main>

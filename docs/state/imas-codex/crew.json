@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:03:06",
+  "updated": "2026-08-27T09:24:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -36476,9 +36476,210 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T064754359988-n-approve-verb-and-pr-text",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-approve-verb-and-pr-text",
+        "node_definition": {
+          "done_when": "sn merge is renamed sn approve across CLI, module, tests and repo docs (greenfield, no alias left; sn approve --pr / --undo semantics, the graph-merged: fold-back tag contract and idempotency unchanged in behavior \u2014 tag message prefix may stay as-is this pass); the PR text contract per the locked decision: title is a short human phrase naming the batch in words (e.g. facility + physics scope + review batch, derived from the batch label and dominant physics domains, never an enumeration or version string alone), body is a few sentences of grounded prose (what the batch is, one line of counts, how to review) \u2014 enforced for BOTH the LLM notes seat and the static fallback; the notes seat's missing-title defect is root-caused and fixed (schema or prompt) with a test that a response lacking a title is rejected before publish; focused tests captured once to a persistent log exit 0; ruff clean; local conventional commit with body; no live gh or LLM calls in tests; no push",
+          "estimated_hours": null,
+          "goal": "The approval workflow carries its own name and the review PR reads as concise prose",
+          "id": "n-approve-verb-and-pr-text",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T064754359988-n-approve-verb-and-pr-text/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/promote.py",
+            "imas_codex/standard_names/release_notes.py",
+            "imas_codex/cli/sn.py",
+            "imas_codex/llm/prompts/sn/",
+            "imas_codex/schemas/standard_name.yaml",
+            "docs/architecture/standard-names.md",
+            "docs/figures/sn-approval-pipeline/pipeline.svg",
+            "tests/standard_names/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relseams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T06:47:59Z",
+        "completed_at": "2026-08-27T07:21:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2038,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2038,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "0a9e31ebdb309a7cec81344c13231364d68e97e2",
+        "commits": [
+          "3ccc5f3a0a163e39995123e1110ee3f33296e4e9"
+        ],
+        "changed_lines": {
+          "added": 1937,
+          "removed": 1751,
+          "files": 26
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest across all 11 changed SN test modules",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T064754359988-n-approve-verb-and-pr-text/focused-tests-final-after-labels.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T064754359988-n-approve-verb-and-pr-text/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7400192,
+            "cached_input_tokens_cumulative": 15536128,
+            "input_tokens": 7513796,
+            "input_tokens_cumulative": 15915899,
+            "output_tokens": 31637,
+            "output_tokens_cumulative": 48163,
+            "reasoning_output_tokens": 9066,
+            "reasoning_output_tokens_cumulative": 12790
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T065931252011-n-fork-baseline-blanking",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-fork-baseline-blanking",
+        "node_definition": {
+          "done_when": "Operating on the catalog checkout at /home/ITER/mcintos/Code/imas-standard-names-catalog (fork origin Simon-McIntosh/imas-standard-names-catalog; NEVER touch upstream): (1) fork PR https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/1 is closed unmerged with a one-line comment stating it is superseded by the additive-baseline re-cut, and the review/v0.3.0rc1+west-task-2e branch is deleted from the fork; (2) exactly the 19 legacy paths inventoried in reports/catalog-baseline-recon.md (catalog.yml plus the 18 flat standard_names domain YAML files, 2223 entries) are removed from fork main in ONE commit whose body states the additive re-baseline design, pushed to the fork main only; (3) verification recorded: fork main afterward has zero flat standard_names/*.yml entries and no catalog.yml, upstream main SHA unchanged (last known 42e5a2b2 lineage), git history still carries the legacy dump at the pre-blanking SHA which is named in the report; the report records every command; no imas-codex repository or graph writes",
+          "estimated_hours": null,
+          "goal": "The fork catalog main is the blank additive baseline",
+          "id": "n-fork-baseline-blanking",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T065931252011-n-fork-baseline-blanking/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/fork-baseline-blanking.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-catalogblank",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T06:59:35Z",
+        "completed_at": "2026-08-27T07:11:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 739,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 739,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "9b182d14e065ada6314569b2f7a86de51707080e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "final aggregate fork additive-baseline verification (PR state, branch heads, tree census, upstream SHA, recoverability)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fork-baseline-blanking.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T065931252011-n-fork-baseline-blanking/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a04204-57a9-76e2-92f5-8e76a56e9c11",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3667200,
+            "cached_input_tokens_cumulative": 3667200,
+            "input_tokens": 3834018,
+            "input_tokens_cumulative": 3834018,
+            "output_tokens": 19727,
+            "output_tokens_cumulative": 19727,
+            "reasoning_output_tokens": 6647,
+            "reasoning_output_tokens_cumulative": 6647
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1001
+    "_version": 1003
   }
 }
