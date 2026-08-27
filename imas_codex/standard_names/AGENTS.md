@@ -312,6 +312,99 @@ that folds the operators into one base and silently drops the division. An hones
   matters more while the qualifier class is being decomposed into ordered
   binding-depth segments.
 
+## Release recipe
+
+Use one manifest token through the complete catalog-review cycle. Check the
+live `--help` before operating because it is authoritative for optional flags;
+the deterministic chain is:
+
+```bash
+uv run imas-codex sn run --batch <manifest>
+uv run imas-codex sn release --batch <manifest> --bump minor -m "<batch in words>"
+uv run imas-codex sn approve --pr <merged-pr-url>
+```
+
+`sn run --batch` drains the manifest through the ordinary pipeline. The
+gap-only default preserves sources that already have a live accepted or
+approved name. `sn release --batch` freezes the cohort, exports it, pushes the
+review branch to the fork, and opens the review PR. After human review and
+merge, pull catalog `main`, then `sn approve --pr` resolves the merge and frozen
+batch from the URL and folds the result back into the graph.
+
+### Additive baseline
+
+Catalog `main` starts blank and accumulates approved entries only. A review PR
+is therefore a pure addition over the entries approved by earlier PRs; it is
+not a new full-catalog dump. Approval materializes the newly approved entries
+onto `main`. Those entries become part of the next PR's base, so they are
+byte-identical and invisible in later diffs. Accepted-but-unapproved and
+contested entries never enter that baseline. Never restore a legacy catalog
+dump, carry every accepted entry into a review branch, or use an earlier dump
+as the comparison base.
+
+### Commit and PR prose
+
+Commit subjects and PR titles name what the batch is in a short human phrase.
+Their bodies briefly state scope, provenance, and review intent in prose. A PR
+body is one paragraph of two to five grounded sentences. Neither subject/title
+nor body enumerates entry names, paths, domains, or versions; aggregate counts
+may appear in the body when they come from the frozen artifact and catalog
+diff.
+
+Good:
+
+```text
+Commit: sn: add WEST equilibrium review batch
+
+Add the WEST equilibrium names selected for expert review. The entries come
+from the frozen production manifest and remain subject to catalog approval.
+
+PR: WEST equilibrium review batch
+
+This WEST equilibrium review batch contains the frozen cohort selected for
+expert review. The catalog diff contains the measured aggregate additions and
+no removals. Review each entry's physics meaning, wording, and units before
+approving.
+```
+
+Banned:
+
+```text
+Commit / PR: update equilibrium, transport, magnetics: plasma_current,
+electron_temperature, ion_temperature, ...
+
+- plasma_current
+- electron_temperature
+- ion_temperature
+```
+
+The banned form is an inventory rather than a human description of the batch.
+Use the catalog diff for the inventory; do not reproduce it in Git prose.
+
+### Approval routes and undo
+
+`sn approve --pr` has two integration routes:
+
+- An unedited batch entry auto-promotes from `accepted` to `approved` with the
+  PR number, URL, merge commit, and approval time recorded as provenance.
+- A reviewer-edited name or documentation record re-enters the ordinary review
+  pipeline as a human-steered proposal. A passing review becomes `approved`; a
+  failing review becomes `contested` and is frozen for human disposition. Only
+  `sn resolve <name> --override --reason <justification>` may approve a
+  contested result. Never hand-accept it or bypass the recorded reason.
+
+Undo the fold-back with:
+
+```bash
+uv run imas-codex sn approve --undo --pr <merged-pr-url>
+```
+
+Undo removes that PR's approval provenance, returns its auto-approved entries
+to `accepted`, returns its contested entries to `accepted`, and deletes the
+fold-back tag locally and remotely. Accepted human edits remain graph history;
+revert wording through `sn edit`, never by rewriting graph properties. Undo is
+scoped to the named PR and does not disturb approvals owned by another PR.
+
 ## The catalog is not the source of truth
 
 The graph plus the review pipeline is. Catalog-origin names

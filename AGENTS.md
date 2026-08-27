@@ -568,6 +568,14 @@ query('''
 
 ### Release Workflow
 
+**Standard Names catalog releases use a separate additive approval workflow.**
+The operator chain is `sn run --batch` → `sn release --batch` →
+`sn approve --pr`; catalog `main` contains approved entries only, and reviewer
+edits return through the normal review pipeline. The exact commands, review
+routes, prose contract, and undo behavior are in the scoped
+[`standard_names/AGENTS.md`](imas_codex/standard_names/AGENTS.md#release-recipe).
+Do not substitute the software-release commands below for that catalog flow.
+
 The release CLI is state-machine driven from the latest git tag. **Stable** = `vX.Y.Z`, **RC** = `vX.Y.Z-rcN`. RCs target `origin` (fork); finals target `upstream` (iterorganization) — override with `--remote`. RC releases tolerate dirty worktrees; `--final` requires clean.
 
 ```bash
