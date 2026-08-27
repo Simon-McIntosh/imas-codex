@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.promote import mark_catalog_name_approved, run_merge
+from imas_codex.standard_names.promote import mark_catalog_name_approved, run_approval
 from imas_codex.standard_names.provenance_lifecycle import (
     bind_sources_exclusively,
     compact_unapproved_superseded,
@@ -635,7 +635,7 @@ def test_approval_requires_complete_merged_pr_metadata() -> None:
 
 def test_partial_approval_metadata_is_rejected_before_catalog_read(tmp_path) -> None:
     with pytest.raises(ValueError, match="PR number, PR URL, and merge commit"):
-        run_merge(
+        run_approval(
             isnc_dir=tmp_path,
             base_ref="HEAD~1",
             catalog_pr_number=42,

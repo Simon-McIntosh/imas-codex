@@ -1293,7 +1293,7 @@ def _reject_unscoped_accepted_reset(
         "'--batch west_production_dd_paths' resolves to standard_names/manifests/"
         "west_production_dd_paths.yaml and behaves exactly like --focus <that file>. The "
         "same token drives sn release --batch, keeping one batch identity "
-        "across mop-up, release, and merge."
+        "across mop-up, release, and approval."
     ),
 )
 @click.option(
@@ -2055,7 +2055,7 @@ def sn_run(
 
     # --batch <name-or-path>: resolve against the committed manifest homes and
     # feed the file through the same focus machinery — one batch identity
-    # across sn run / sn release / sn merge.
+    # across sn run / sn release / sn approve.
     if batch_name:
         from imas_codex.standard_names.sources_manifest import resolve_batch_token
 
@@ -4437,7 +4437,7 @@ def sn_preview(
     is_flag=True,
     help=(
         "Finalize the current RC through a fork-hosted release branch and "
-        "upstream PR. The stable tag is created later by sn merge."
+        "upstream PR. The stable tag is created later by sn approve."
     ),
 )
 @click.option(
@@ -4884,7 +4884,7 @@ def sn_release(
             f"upstream PR {report.pr_url}[/green]"
         )
         console.print(
-            f"[dim]Tag {report.git_tag} remains deferred until sn merge folds "
+            f"[dim]Tag {report.git_tag} remains deferred until sn approve folds "
             "the merged catalog back into the graph.[/dim]"
         )
     elif report.pushed:
@@ -4897,7 +4897,7 @@ def sn_release(
         console.print(f"\n[green]✓ Tagged {report.git_tag} (not pushed)[/green]")
 
 
-@sn.command("merge")
+@sn.command("approve")
 @click.option(
     "--isnc",
     type=click.Path(),
@@ -4933,7 +4933,7 @@ def sn_release(
 @click.option(
     "--dry-run",
     is_flag=True,
-    help="Report the would-be merge without writing to the graph.",
+    help="Report the would-be approval without writing to the graph.",
 )
 @click.option("--pr-number", type=int, default=None, help="Merged catalog PR number.")
 @click.option("--pr-url", default=None, help="Merged catalog PR URL.")
@@ -4946,7 +4946,7 @@ def sn_release(
     help=(
         "Frozen sn-names batch artifact, by NAME (resolved under "
         "standard_names/manifests/reviews/) or path. Untouched batch names "
-        "auto-promote accepted→approved on merge; edited names still "
+        "auto-promote accepted→approved on approval; edited names still "
         "re-trigger the full review. Auto-located from the PR's review/<rc> "
         "branch when --pr is given."
     ),
@@ -4956,7 +4956,7 @@ def sn_release(
     is_flag=True,
     default=False,
     help=(
-        "Unwind a previously folded merge: names approved by this PR drop back "
+        "Unwind a previously folded approval: names approved by this PR drop back "
         "to accepted (provenance cleared); contested batch names revert to "
         "accepted. Accepted human edits are graph history and are NOT "
         "un-applied — revert wording via sn edit. Also deletes the fold-back "
@@ -4976,7 +4976,7 @@ def sn_release(
         "blocks the fold-back."
     ),
 )
-def sn_merge(
+def sn_approve(
     isnc: str | None,
     pr_ref: str | None,
     base_ref: str | None,
@@ -4993,7 +4993,7 @@ def sn_merge(
 
     \b
     Simplest form — the PR URL is the only input needed:
-      imas-codex sn merge --pr https://github.com/<org>/<catalog>/pull/<n>
+      imas-codex sn approve --pr https://github.com/<org>/<catalog>/pull/<n>
     The PR number, merge commit, diff base (<merge-commit>^1), and the frozen
     batch artifact (from the review/<rc> branch name) are all resolved from it.
     Pull the merged main into the ISNC checkout first.
@@ -5006,7 +5006,7 @@ def sn_merge(
     rename cascade (carrying PRODUCED_NAME provenance). Each proposal is scored
     by the full review pipeline: ≥ threshold → approved; below → contested
     (frozen for human adjudication). Untouched batch names auto-promote
-    accepted→approved. --undo unwinds the promotions of a folded merge.
+    accepted→approved. --undo unwinds the promotions of a folded approval.
     """
     import subprocess as _subprocess
     from pathlib import Path
@@ -5015,14 +5015,14 @@ def sn_merge(
 
     from imas_codex.settings import get_sn_isnc_dir
     from imas_codex.standard_names.promote import (
+        approval_tag_name,
         delete_fold_back_tag,
         has_contract_tag,
-        merge_tag_name,
         resolve_merged_pr,
         resolve_tag_remote,
-        run_merge,
+        run_approval,
         tag_fold_back,
-        undo_merge,
+        undo_approval,
     )
     from imas_codex.standard_names.sources_manifest import load_names_file
 
@@ -5090,13 +5090,13 @@ def sn_merge(
     if undo:
         if not pr_number:
             raise click.UsageError("--undo requires --pr <url> or --pr-number")
-        report = undo_merge(pr_number=pr_number, batch=batch)
-        console.print(f"[green]✓ Merge of PR #{pr_number} unwound[/green]")
+        report = undo_approval(pr_number=pr_number, batch=batch)
+        console.print(f"[green]✓ Approval of PR #{pr_number} unwound[/green]")
         console.print(f"  approved → accepted: {len(report.demoted)}")
         console.print(f"  contested → accepted: {len(report.contested_reverted)}")
         # The fold-back receipt no longer holds — delete the version tag so the
         # tag's absence again means "merged but not folded back".
-        tag = merge_tag_name(resolved_head_ref) if resolved_head_ref else None
+        tag = approval_tag_name(resolved_head_ref) if resolved_head_ref else None
         if tag and has_contract_tag(isnc_path, tag):
             remote = resolve_tag_remote(isnc_path, pr_url or "")
             ok, err = delete_fold_back_tag(isnc_path, tag=tag, remote=remote)
@@ -5113,19 +5113,19 @@ def sn_merge(
     # ── Idempotency guard: refuse a second fold-back ───────────────────
     # A contract tag on the merge commit means this version's PR has already
     # been folded into the graph; re-running would double-promote.
-    fold_tag = merge_tag_name(resolved_head_ref) if resolved_head_ref else None
+    fold_tag = approval_tag_name(resolved_head_ref) if resolved_head_ref else None
     if fold_tag and not dry_run and has_contract_tag(isnc_path, fold_tag):
         console.print(
             f"[red]Refusing:[/red] {fold_tag} already carries the fold-back "
             "contract tag — this PR has been folded back into the graph. "
-            "Use [bold]sn merge --undo[/bold] first to re-fold."
+            "Use [bold]sn approve --undo[/bold] first to re-fold."
         )
         raise SystemExit(1)
 
     if base_ref is None:
         raise click.UsageError("--base is required unless --pr is given")
 
-    console.print("\n[bold]Standard Name Merge[/bold]")
+    console.print("\n[bold]Standard Name Approval[/bold]")
     console.print(f"  ISNC: {isnc_path}")
     console.print(f"  Base ref: {base_ref}")
     if batch is not None:
@@ -5134,7 +5134,7 @@ def sn_merge(
         console.print("  Mode: [yellow]dry run[/yellow]")
     console.print("")
 
-    report = run_merge(
+    report = run_approval(
         isnc_dir=isnc_path,
         base_ref=base_ref,
         threshold=threshold,
@@ -5145,7 +5145,7 @@ def sn_merge(
         batch=batch,
     )
 
-    table = Table(title="Merge Summary")
+    table = Table(title="Approval Summary")
     table.add_column("metric", style="cyan")
     table.add_column("value", style="white")
     table.add_row("changes seen", str(report.changes_seen))
@@ -5168,7 +5168,7 @@ def sn_merge(
     if report.contested:
         console.print(
             f"\n[yellow]⚠ {len(report.contested)} edit(s) contested "
-            "(failed re-review) — resolve with sn edit / sn approve --override / "
+            "(failed re-review) — resolve with sn edit / sn resolve --override / "
             "sn revert.[/yellow]"
         )
     if report.quarantined:
@@ -5221,10 +5221,10 @@ def sn_merge(
             summary = "with summary" if tag_report.notes_included else "contract only"
             console.print(f"  fold-back tag {tag_report.tag} → {remote} ({summary})")
 
-    console.print("\n[green]✓ Merge complete[/green]")
+    console.print("\n[green]✓ Approval complete[/green]")
 
 
-@sn.command("approve")
+@sn.command("resolve")
 @click.argument("name")
 @click.option(
     "--override",
@@ -5238,7 +5238,7 @@ def sn_merge(
     required=True,
     help="Justification recorded in the change ledger (contested_resolution).",
 )
-def sn_approve(name: str, override: bool, reason: str) -> None:
+def sn_resolve(name: str, override: bool, reason: str) -> None:
     """Force a contested name to 'approved', overriding the rubric — on the record.
 
     \b
@@ -5246,9 +5246,9 @@ def sn_approve(name: str, override: bool, reason: str) -> None:
     wording but it failed the compliance re-review. `--override` accepts the
     human wording deliberately; the justification is stored on the node.
     """
-    from imas_codex.standard_names.promote import override_approve_contested
+    from imas_codex.standard_names.promote import resolve_contested_override
 
-    if override_approve_contested(name, reason=reason):
+    if resolve_contested_override(name, reason=reason):
         console.print(f"[green]✓ {name} → approved[/green] (override: {reason})")
     else:
         console.print(

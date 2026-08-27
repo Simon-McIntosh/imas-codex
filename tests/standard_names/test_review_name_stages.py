@@ -1384,7 +1384,7 @@ class TestQuorumGatedAcceptance:
                 sn_id="x",
                 claim_token="tok",
                 score=0.9,
-                model="sn-merge",
+                model="sn-approve",
                 min_score=0.75,
                 rotation_cap=3,
                 quorum_exempt=True,

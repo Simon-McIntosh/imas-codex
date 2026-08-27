@@ -3,7 +3,7 @@
 - Untouched batch names auto-promote accepted→approved on merge (with PR
   metadata); edited names re-trigger review (pass→approved, fail→contested).
 - ``contested`` is frozen: pool-excluded (even as a parent's only child) and
-  resolved only by sn edit / sn approve --override / sn revert.
+  resolved only by sn edit / sn resolve --override / sn revert.
 
 The PR-diff reader and the review scorer are stubbed so the state machine is
 tested without a live ISNC checkout or an LLM call.
@@ -16,13 +16,13 @@ from types import SimpleNamespace
 import pytest
 
 from imas_codex.graph.client import GraphClient
-from imas_codex.standard_names import promote as merge_mod
+from imas_codex.standard_names import promote as approval_mod
 from imas_codex.standard_names.promote import (
-    MergeChange,
+    ApprovalChange,
     list_contested,
-    override_approve_contested,
+    resolve_contested_override,
     revert_contested,
-    run_merge,
+    run_approval,
 )
 
 PREFIX = "__contestedtest__"
@@ -66,7 +66,7 @@ def _name_stage(nid):
 
 
 @pytest.mark.graph
-def test_merge_auto_approves_untouched_batch(clean, monkeypatch):
+def test_approval_auto_approves_untouched_batch(clean, monkeypatch):
     ready = f"{PREFIX}_ready"
     notready = f"{PREFIX}_notready"
     with GraphClient() as gc:
@@ -74,10 +74,10 @@ def test_merge_auto_approves_untouched_batch(clean, monkeypatch):
         _stage(gc, notready, name_stage="accepted", docs_stage="drafted")
 
     # No reviewer edits — the whole batch was approved as-is.
-    monkeypatch.setattr(merge_mod, "read_pr_changes", lambda *a, **k: [])
+    monkeypatch.setattr(approval_mod, "read_pr_changes", lambda *a, **k: [])
 
     with GraphClient() as gc:
-        report = run_merge(
+        report = run_approval(
             isnc_dir="/unused",
             base_ref="main",
             batch=[ready, notready],
@@ -93,24 +93,24 @@ def test_merge_auto_approves_untouched_batch(clean, monkeypatch):
 
 
 @pytest.mark.graph
-def test_merge_edited_name_excluded_from_auto_approve(clean, monkeypatch):
+def test_approval_edited_name_excluded_from_auto_approve(clean, monkeypatch):
     edited = f"{PREFIX}_edited"
     with GraphClient() as gc:
         _stage(gc, edited, name_stage="accepted", docs_stage="accepted")
 
-    change = MergeChange(sn_id=edited, axis="docs", new_value="new", old_value="old")
-    monkeypatch.setattr(merge_mod, "read_pr_changes", lambda *a, **k: [change])
+    change = ApprovalChange(sn_id=edited, axis="docs", new_value="new", old_value="old")
+    monkeypatch.setattr(approval_mod, "read_pr_changes", lambda *a, **k: [change])
     monkeypatch.setattr(
-        merge_mod,
+        approval_mod,
         "apply_edit",
         lambda **k: SimpleNamespace(blocked=None, successor=None, run_id=None),
     )
     # Edited name passes re-review → normal accept+approve path (not auto).
-    monkeypatch.setattr(merge_mod, "_score_proposal", lambda *a, **k: 0.95)
-    monkeypatch.setattr(merge_mod, "_accept", lambda *a, **k: None)
+    monkeypatch.setattr(approval_mod, "_score_proposal", lambda *a, **k: 0.95)
+    monkeypatch.setattr(approval_mod, "_accept", lambda *a, **k: None)
 
     with GraphClient() as gc:
-        report = run_merge(
+        report = run_approval(
             isnc_dir="/unused",
             base_ref="main",
             batch=[edited],
@@ -127,22 +127,22 @@ def test_merge_edited_name_excluded_from_auto_approve(clean, monkeypatch):
 
 
 @pytest.mark.graph
-def test_merge_edited_fail_contests(clean, monkeypatch):
+def test_approval_edited_fail_contests(clean, monkeypatch):
     name = f"{PREFIX}_fail"
     with GraphClient() as gc:
         _stage(gc, name, name_stage="accepted", docs_stage="accepted")
 
-    change = MergeChange(sn_id=name, axis="docs", new_value="bad", old_value="old")
-    monkeypatch.setattr(merge_mod, "read_pr_changes", lambda *a, **k: [change])
+    change = ApprovalChange(sn_id=name, axis="docs", new_value="bad", old_value="old")
+    monkeypatch.setattr(approval_mod, "read_pr_changes", lambda *a, **k: [change])
     monkeypatch.setattr(
-        merge_mod,
+        approval_mod,
         "apply_edit",
         lambda **k: SimpleNamespace(blocked=None, successor=None, run_id=None),
     )
-    monkeypatch.setattr(merge_mod, "_score_proposal", lambda *a, **k: 0.10)
+    monkeypatch.setattr(approval_mod, "_score_proposal", lambda *a, **k: 0.10)
 
     with GraphClient() as gc:
-        report = run_merge(isnc_dir="/unused", base_ref="main", gc=gc, **PR)
+        report = run_approval(isnc_dir="/unused", base_ref="main", gc=gc, **PR)
 
     assert any(c["sn_id"] == name for c in report.contested)
     assert not report.quarantined
@@ -168,7 +168,7 @@ def test_override_approve_and_revert(clean):
     listed = {r["id"] for r in list_contested()}
     assert {over, rev} <= listed
 
-    assert override_approve_contested(over, reason="expert override") is True
+    assert resolve_contested_override(over, reason="expert override") is True
     assert _name_stage(over) == "approved"
 
     assert revert_contested(rev, reason="drop the edit") is True
@@ -180,7 +180,7 @@ def test_resolution_noop_on_non_contested(clean):
     acc = f"{PREFIX}_acc"
     with GraphClient() as gc:
         _stage(gc, acc, name_stage="accepted")
-    assert override_approve_contested(acc, reason="x") is False
+    assert resolve_contested_override(acc, reason="x") is False
     assert revert_contested(acc, reason="x") is False
     assert _name_stage(acc) == "accepted"
 
@@ -226,12 +226,12 @@ def test_contested_child_not_live_for_enrich(clean):
     assert parent in claimed2
 
 
-# ── undo: unwind a folded merge's promotions ───────────────────────────────
+# ── undo: unwind a folded approval's promotions ────────────────────────────
 
 
 @pytest.mark.graph
-def test_undo_merge_demotes_and_reverts(clean):
-    from imas_codex.standard_names.promote import undo_merge
+def test_undo_approval_demotes_and_reverts(clean):
+    from imas_codex.standard_names.promote import undo_approval
 
     approved = f"{PREFIX}_undo_approved"
     other_pr = f"{PREFIX}_undo_other_pr"
@@ -248,7 +248,7 @@ def test_undo_merge_demotes_and_reverts(clean):
         _stage(gc, other_pr, name_stage="approved", catalog_pr_number=99)
         _stage(gc, contested, name_stage="contested", contested_reason="x")
 
-    report = undo_merge(pr_number=7, batch=[approved, contested])
+    report = undo_approval(pr_number=7, batch=[approved, contested])
 
     assert report.demoted == [approved]
     assert report.contested_reverted == [contested]

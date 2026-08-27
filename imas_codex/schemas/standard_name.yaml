@@ -591,7 +591,7 @@ enums:
           adjudication. Not published (not 'approved') and not silently
           reverted (a human deliberately changed it). Excluded from all pools
           like 'exhausted'/'superseded'; resolved by sn edit (→re-review),
-          sn approve --override (force approve), or sn revert (→accepted).
+          sn resolve --override (force approve), or sn revert (→accepted).
 
   RefineStopReason:
     description: >-
@@ -929,7 +929,7 @@ classes:
       catalog_pr_url:
         description: >-
           Full URL of the merged catalog PR that approved this entry.
-          Set only by sn merge with complete merge metadata.
+          Set only by sn approve with complete merge metadata.
       catalog_approved_at:
         description: >-
           ISO 8601 timestamp when the catalog pull request was merged. Null
@@ -947,25 +947,25 @@ classes:
         range: datetime
       merge_quarantine_reason:
         description: >-
-          Why sn merge quarantined a reviewer edit (the failing rubric verdict).
+          Why sn approve quarantined a reviewer edit (the failing rubric verdict).
           Set on the validation_status='quarantined' path during merge.
       merge_quarantine_at:
         description: >-
-          ISO 8601 timestamp when sn merge quarantined a reviewer edit.
+          ISO 8601 timestamp when sn approve quarantined a reviewer edit.
         range: datetime
       contested_reason:
         description: >-
           Why a reviewer-edited name was moved to the 'contested' stage — the
           edited form and the failing compliance re-review verdict recorded by
-          sn merge. Human-vs-machine conflict awaiting adjudication.
+          sn approve. Human-vs-machine conflict awaiting adjudication.
       contested_at:
         description: >-
-          ISO 8601 timestamp when sn merge moved the name to 'contested'.
+          ISO 8601 timestamp when sn approve moved the name to 'contested'.
         range: datetime
       contested_resolution:
         description: >-
           How a contested name was adjudicated — the human justification passed
-          to sn approve --override (force approve over the rubric) or sn revert
+          to sn resolve --override (force approve over the rubric) or sn revert
           (drop the edit back to accepted). Null while still contested.
       model:
         description: >-
@@ -1135,7 +1135,7 @@ classes:
       imported_at:
         description: >-
           ISO 8601 timestamp when this entry was last folded in from the
-          catalog. Set by ``sn merge`` on each catalog-PR merge.
+          catalog. Set by ``sn approve`` on each catalog-PR merge.
         range: datetime
       reviewer_score_name:
         description: >-

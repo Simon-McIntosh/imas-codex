@@ -6,7 +6,7 @@ from typing import Any
 
 from imas_codex.standard_names.promote import (
     mark_catalog_name_approved,
-    override_approve_contested,
+    resolve_contested_override,
 )
 
 
@@ -93,7 +93,7 @@ def test_contested_override_preserves_generated_identity_provenance() -> None:
         )
     )
 
-    assert override_approve_contested(
+    assert resolve_contested_override(
         "plasma_current", reason="expert approval", gc=graph
     )
 

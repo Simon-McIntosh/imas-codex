@@ -57,7 +57,7 @@
 
   <!-- import reconcile -->
   <rect x="412" y="184" width="150" height="60" rx="4" class="box accent"/>
-  <text x="420" y="206" class="lbl">sn merge</text>
+  <text x="420" y="206" class="lbl">sn approve</text>
   <text x="420" y="223" class="sub">promote → approved</text>
   <text x="420" y="237" class="sub">(untouched auto / edit re-review)</text>
 
@@ -100,7 +100,7 @@
   <path class="flow" style="stroke:#b5651d" d="M810,262 L810,292"/>
   <!-- CI -> import reconcile (back local) -->
   <path class="flow" d="M700,329 L600,329 L600,214 L564,214"/>
-  <text x="576" y="352" class="note">observe PR# → local sn merge</text>
+  <text x="576" y="352" class="note">observe PR# → local sn approve</text>
 
   <!-- import -> accepted becomes approved (freeze annotation) -->
   <path class="flowa" d="M487,184 L487,150" style="stroke-dasharray:4 3"/>
@@ -108,6 +108,6 @@
 
   <!-- caption -->
   <text x="16" y="404" class="cap">Two feedback loops: the local compose/review loop mints accepted names; the upstream PR loop is the human gate. Merge flips lifecycle</text>
-  <text x="16" y="422" class="cap">accepted → approved (untouched auto; edited names only if they re-pass review) and the local sn merge writes that frozen state back into the graph, the single source of truth.</text>
+  <text x="16" y="422" class="cap">accepted → approved (untouched auto; edited names only if they re-pass review) and the local sn approve writes that frozen state back into the graph, the single source of truth.</text>
   <text x="16" y="440" class="cap">Accent = local graph operations · brown = upstream human/CI gate · dashed = feedback / state-change edges.</text>
 </svg>

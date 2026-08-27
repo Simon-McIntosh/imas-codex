@@ -1,8 +1,8 @@
 ---
-name: sn/merge_notes_system
+name: sn/approval_notes_system
 description: Static system prompt for the fold-back tag summary — writes a grounded account of what review did to a standard-names batch
-used_by: imas_codex.standard_names.release_notes.build_merge_notes
-task: merge_notes
+used_by: imas_codex.standard_names.release_notes.build_approval_notes
+task: approval_notes
 dynamic: false
 schema_needs: []
 ---

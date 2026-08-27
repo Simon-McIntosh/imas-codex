@@ -1,7 +1,7 @@
-"""Tests for the fold-back receipt — the version tag ``sn merge`` writes.
+"""Tests for the fold-back receipt — the version tag ``sn approve`` writes.
 
 A fold-back requires a durable receipt linking the merged catalog PR to its
-graph actions. ``sn merge`` tags the merge commit with a machine-readable
+graph actions. ``sn approve`` tags the merge commit with a machine-readable
 contract block (``graph-merged: …``) plus a grounded human summary. The
 contract counts docs staged for ordinary quorum review separately from
 accepted names, so a successful fold-back never implies those docs are ready
@@ -29,21 +29,21 @@ import pytest
 
 from imas_codex.standard_names.promote import (
     CONTRACT_MARKER,
+    ApprovalReport,
     FoldBackTagReport,
-    MergeReport,
+    approval_tag_name,
     build_contract_block,
     build_merge_tag_message,
     create_fold_back_tag,
     delete_fold_back_tag,
     fetch_pr_evidence,
     has_contract_tag,
-    merge_tag_name,
     resolve_tag_remote,
     review_delta_diff,
     tag_fold_back,
 )
 
-MERGE = "imas_codex.standard_names.promote"
+APPROVAL = "imas_codex.standard_names.promote"
 
 
 def _git(args: list[str], cwd: Path) -> str:
@@ -97,8 +97,8 @@ def merged_repo(tmp_path: Path) -> dict:
     }
 
 
-def _report(accepted=1, staged=0, auto=3, contested=0) -> MergeReport:
-    r = MergeReport()
+def _report(accepted=1, staged=0, auto=3, contested=0) -> ApprovalReport:
+    r = ApprovalReport()
     r.accepted = [f"n{i}" for i in range(accepted)]
     r.staged_for_review = [f"s{i}" for i in range(staged)]
     r.auto_approved = [f"a{i}" for i in range(auto)]
@@ -157,16 +157,16 @@ class TestContractMessage:
         assert build_merge_tag_message(block, "   ") == block
 
 
-class TestMergeTagName:
+class TestApprovalTagName:
     def test_review_branch_yields_rc(self):
-        assert merge_tag_name("review/v0.2.0rc65") == "v0.2.0rc65"
+        assert approval_tag_name("review/v0.2.0rc65") == "v0.2.0rc65"
 
     def test_release_branch_yields_version(self):
-        assert merge_tag_name("release/v1.0.0") == "v1.0.0"
+        assert approval_tag_name("release/v1.0.0") == "v1.0.0"
 
     def test_other_branch_yields_none(self):
-        assert merge_tag_name("main") is None
-        assert merge_tag_name("") is None
+        assert approval_tag_name("main") is None
+        assert approval_tag_name("") is None
 
 
 # ---------------------------------------------------------------------------
@@ -293,14 +293,14 @@ class TestFetchPrEvidence:
             ],
             "commits": [{"oid": "c1", "messageHeadline": "publish batch"}],
         }
-        with patch(f"{MERGE}.subprocess.run", return_value=self._gh(payload)):
+        with patch(f"{APPROVAL}.subprocess.run", return_value=self._gh(payload)):
             evidence = fetch_pr_evidence("https://github.com/o/r/pull/7")
         assert evidence["body"] == "PR description"
         assert evidence["commits"][0]["oid"] == "c1"
 
     def test_gh_failure_returns_empty_never_raises(self):
         with patch(
-            f"{MERGE}.subprocess.run", return_value=self._gh({}, rc=1, err="no auth")
+            f"{APPROVAL}.subprocess.run", return_value=self._gh({}, rc=1, err="no auth")
         ):
             assert fetch_pr_evidence("https://github.com/o/r/pull/7") == {}
 
@@ -417,11 +417,11 @@ class TestTagFoldBack:
 
 
 # ---------------------------------------------------------------------------
-# CLI flow — sn merge writes / refuses / removes the receipt tag
+# CLI flow — sn approve writes / refuses / removes the receipt tag
 # ---------------------------------------------------------------------------
 
 
-class TestMergeCliTag:
+class TestApprovalCliTag:
     def _resolved(self, merged_repo):
         from imas_codex.standard_names.promote import ResolvedPr
 
@@ -433,7 +433,7 @@ class TestMergeCliTag:
             base_ref="main",
         )
 
-    def test_merge_creates_the_contract_tag(self, merged_repo):
+    def test_approval_creates_the_contract_tag(self, merged_repo):
         from click.testing import CliRunner
 
         from imas_codex.cli.sn import sn
@@ -441,14 +441,15 @@ class TestMergeCliTag:
         work, rc = merged_repo["work"], merged_repo["rc"]
         with (
             patch(
-                f"{MERGE}.resolve_merged_pr", return_value=self._resolved(merged_repo)
+                f"{APPROVAL}.resolve_merged_pr",
+                return_value=self._resolved(merged_repo),
             ),
-            patch(f"{MERGE}.run_merge", return_value=_report(accepted=2, auto=5)),
+            patch(f"{APPROVAL}.run_approval", return_value=_report(accepted=2, auto=5)),
         ):
             result = CliRunner().invoke(
                 sn,
                 [
-                    "merge",
+                    "approve",
                     "--isnc",
                     str(work),
                     "--pr",
@@ -459,7 +460,7 @@ class TestMergeCliTag:
         assert result.exit_code == 0, result.output
         assert has_contract_tag(work, rc)
 
-    def test_merge_refuses_when_already_folded_back(self, merged_repo):
+    def test_approval_refuses_when_already_folded_back(self, merged_repo):
         from click.testing import CliRunner
 
         from imas_codex.cli.sn import sn
@@ -477,14 +478,15 @@ class TestMergeCliTag:
         )
         with (
             patch(
-                f"{MERGE}.resolve_merged_pr", return_value=self._resolved(merged_repo)
+                f"{APPROVAL}.resolve_merged_pr",
+                return_value=self._resolved(merged_repo),
             ),
-            patch(f"{MERGE}.run_merge") as m_run,
+            patch(f"{APPROVAL}.run_approval") as m_run,
         ):
             result = CliRunner().invoke(
                 sn,
                 [
-                    "merge",
+                    "approve",
                     "--isnc",
                     str(work),
                     "--pr",
@@ -500,7 +502,7 @@ class TestMergeCliTag:
         from click.testing import CliRunner
 
         from imas_codex.cli.sn import sn
-        from imas_codex.standard_names.promote import UndoReport
+        from imas_codex.standard_names.promote import UndoApprovalReport
 
         work, rc, merge_commit = (
             merged_repo["work"],
@@ -516,14 +518,18 @@ class TestMergeCliTag:
         assert has_contract_tag(work, rc)
         with (
             patch(
-                f"{MERGE}.resolve_merged_pr", return_value=self._resolved(merged_repo)
+                f"{APPROVAL}.resolve_merged_pr",
+                return_value=self._resolved(merged_repo),
             ),
-            patch(f"{MERGE}.undo_merge", return_value=UndoReport(pr_number=7)),
+            patch(
+                f"{APPROVAL}.undo_approval",
+                return_value=UndoApprovalReport(pr_number=7),
+            ),
         ):
             result = CliRunner().invoke(
                 sn,
                 [
-                    "merge",
+                    "approve",
                     "--isnc",
                     str(work),
                     "--pr",
@@ -628,7 +634,7 @@ class TestLabelledVersionReceipt:
         assert rc not in _git(["ls-remote", "--tags", "origin"], work)
 
 
-class TestMergeCliLabelledVersion:
+class TestApprovalCliLabelledVersion:
     """The CLI must resolve a labelled batch RC end-to-end from the branch name."""
 
     def _resolved(self, repo):
@@ -642,7 +648,7 @@ class TestMergeCliLabelledVersion:
             base_ref="main",
         )
 
-    def test_merge_locates_the_labelled_artifact_and_tags_the_version(
+    def test_approval_locates_the_labelled_artifact_and_tags_the_version(
         self, labelled_merged_repo, tmp_path, monkeypatch
     ):
         from click.testing import CliRunner
@@ -663,21 +669,21 @@ class TestMergeCliLabelledVersion:
         )
         seen: dict = {}
 
-        def _run_merge(**kw):
+        def _run_approval(**kw):
             seen.update(kw)
             return _report(accepted=1, auto=0)
 
         with (
             patch(
-                f"{MERGE}.resolve_merged_pr",
+                f"{APPROVAL}.resolve_merged_pr",
                 return_value=self._resolved(labelled_merged_repo),
             ),
-            patch(f"{MERGE}.run_merge", side_effect=_run_merge),
+            patch(f"{APPROVAL}.run_approval", side_effect=_run_approval),
         ):
             result = CliRunner().invoke(
                 sn,
                 [
-                    "merge",
+                    "approve",
                     "--isnc",
                     str(work),
                     "--pr",
@@ -718,13 +724,13 @@ class TestMergeCliLabelledVersion:
             remote="origin",
         )
         with patch(
-            f"{MERGE}.resolve_merged_pr",
+            f"{APPROVAL}.resolve_merged_pr",
             return_value=self._resolved(labelled_merged_repo),
         ):
             result = CliRunner().invoke(
                 sn,
                 [
-                    "merge",
+                    "approve",
                     "--isnc",
                     str(work),
                     "--pr",

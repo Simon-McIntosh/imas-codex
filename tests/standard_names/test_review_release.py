@@ -733,13 +733,23 @@ def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
     monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _boom)
     title, body = release_notes.build_pr_notes(
         message="WEST batch",
-        rc_version="v0.1.0rc1",
+        rc_version="v0.1.0rc1+west-task-2e",
         batch_size=3,
         minted_from="west_task_2e.yaml",
+        changes=[
+            {
+                "domain": "equilibrium",
+                "added": ["a", "b"],
+                "changed": ["c"],
+                "removed": [],
+            }
+        ],
     )
-    assert title == "WEST batch"
-    assert "v0.1.0rc1" in body and "3 standard name(s)" in body
-    assert "No linked DD defects were reported" in body
+    assert title == "WEST equilibrium review batch"
+    assert "3 standard names" in body
+    assert "2 additions, 1 change, and 0 removals" in body
+    assert "v0.1.0rc1" not in title + body
+    assert "\n" not in body
 
 
 def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
@@ -801,7 +811,7 @@ def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
     assert upstream["upstream_url"] == "https://example.invalid/dd/12"
 
 
-def test_static_notes_list_exact_dd_paths_without_blocking_release():
+def test_static_notes_summarize_dd_caveats_without_enumerating_entries():
     from imas_codex.standard_names.release_notes import (
         static_pr_notes,
         summarize_dd_gap_facts,
@@ -821,15 +831,24 @@ def test_static_notes_list_exact_dd_paths_without_blocking_release():
     )
     _title, body = static_pr_notes(
         message="Batch",
-        rc_version="v0.1.0rc1",
+        rc_version="v0.1.0rc1+west-task-2e",
         batch_size=1,
         minted_from="batch.yaml",
+        changes=[
+            {
+                "domain": "equilibrium",
+                "added": ["plasma_current"],
+                "changed": [],
+                "removed": [],
+            }
+        ],
         dd_gaps=summary,
     )
 
-    assert "`equilibrium/path`" in body
-    assert "https://example.invalid/dd/27" in body
-    assert "do not suppress sources or block this release" in body
+    assert "1 unresolved and 0 retired caveats" in body
+    assert "equilibrium/path" not in body
+    assert "https://example.invalid/dd/27" not in body
+    assert "\n" not in body
 
 
 def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
@@ -839,7 +858,18 @@ def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
 
     def _ok(**kw):
         seen["messages"] = kw["messages"]
-        return release_notes.PrNotes(title="Batch", body="Body"), 0.0, {}
+        return (
+            release_notes.PrNotes(
+                title="WEST standard names review batch",
+                body=(
+                    "This WEST review batch contains one standard name. "
+                    "The catalog diff contains zero additions, changes, and removals. "
+                    "Review the fixed batch view before approving."
+                ),
+            ),
+            0.0,
+            {},
+        )
 
     monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _ok)
     summary = release_notes.summarize_dd_gap_facts(
@@ -857,37 +887,36 @@ def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
 
     title, body = release_notes.build_pr_notes(
         message="Batch",
-        rc_version="v0.1.0rc1",
+        rc_version="v0.1.0rc1+west-task-2e",
         batch_size=1,
         minted_from="batch.yaml",
         dd_gaps=summary,
     )
 
-    assert title == "Batch"
-    assert body.startswith("Body\n\n## Data Dictionary caveats")
-    assert body.count("## Data Dictionary caveats") == 1
-    assert "`equilibrium/path`" in body
-    assert "registered_exception" in body
+    assert title == "WEST standard names review batch"
+    assert body.startswith("This WEST review batch")
+    assert "equilibrium/path" not in body
+    assert "registered_exception" not in body
     assert "evidence_token" not in body
     system, user = (message["content"] for message in seen["messages"])
-    assert "DD defects stay visible and observational" in system
-    assert "equilibrium/path" in user
-    assert "registered_exception" in user
-    assert "Release-blocking: no" in user
+    assert "No headings, bullets, tables" in system
+    assert "equilibrium/path" not in user
+    assert "one short prose-paragraph" in user
 
 
-def test_model_authored_dd_caveats_are_replaced_not_duplicated(monkeypatch):
+def test_enumerating_model_body_is_rejected_before_publish(monkeypatch):
     from imas_codex.standard_names import release_notes
 
-    model_body = (
-        "Summary.\n\n"
-        "## Data Dictionary caveats\n\nNo linked DD defects were reported.\n\n"
-        "## Data Dictionary caveats\n\nRelease-blocking: yes.\n\n"
-        "## How to review\n\nInspect the catalog diff."
-    )
+    model_body = "Summary.\n- plasma_current\nReview the batch."
 
     def _misleading(**_kwargs):
-        return release_notes.PrNotes(title="Batch", body=model_body), 0.0, {}
+        return (
+            release_notes.PrNotes(
+                title="WEST equilibrium review batch", body=model_body
+            ),
+            0.0,
+            {},
+        )
 
     monkeypatch.setattr(
         "imas_codex.discovery.base.llm.call_llm_structured", _misleading
@@ -906,20 +935,25 @@ def test_model_authored_dd_caveats_are_replaced_not_duplicated(monkeypatch):
         ]
     )
 
-    _title, body = release_notes.build_pr_notes(
+    title, body = release_notes.build_pr_notes(
         message="Batch",
-        rc_version="v0.1.0rc1",
+        rc_version="v0.1.0rc1+west-task-2e",
         batch_size=1,
         minted_from="batch.yaml",
+        changes=[
+            {
+                "domain": "equilibrium",
+                "added": ["plasma_current"],
+                "changed": [],
+                "removed": [],
+            }
+        ],
         dd_gaps=summary,
     )
 
-    assert body.count("## Data Dictionary caveats") == 1
-    assert "No linked DD defects were reported" not in body
-    assert "Release-blocking: yes" not in body
-    assert "## How to review" in body
-    assert "`equilibrium/a`, `equilibrium/z`" in body
-    assert "https://example.invalid/dd/27" in body
+    assert title == "WEST equilibrium review batch"
+    assert "plasma_current" not in body
+    assert "\n" not in body
     assert "must-not-leak" not in body
 
 
@@ -929,10 +963,8 @@ def test_model_cannot_invent_dd_caveats_for_empty_fact_set(monkeypatch):
     def _invented(**_kwargs):
         return (
             release_notes.PrNotes(
-                title="Batch",
-                body=(
-                    "Summary.\n\n## Data Dictionary caveats\n\n99 unresolved defects."
-                ),
+                title="Standard names review batch",
+                body="This batch has one name. It has 99 unresolved defects.",
             ),
             0.0,
             {},
@@ -947,13 +979,45 @@ def test_model_cannot_invent_dd_caveats_for_empty_fact_set(monkeypatch):
         dd_gaps=release_notes.summarize_dd_gap_facts([]),
     )
 
-    assert body.count("## Data Dictionary caveats") == 1
+    assert "\n" not in body
     assert "99 unresolved defects" not in body
-    assert "No linked DD defects were reported" in body
 
 
-def test_build_merge_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
-    """A merge-summary synthesis failure yields '' so the deterministic tag
+def test_missing_model_title_is_rejected_before_publish(monkeypatch):
+    from imas_codex.standard_names import release_notes
+
+    class MissingTitle:
+        body = (
+            "This WEST batch contains one standard name. "
+            "The catalog diff contains one addition. "
+            "Review the fixed batch view before approving."
+        )
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.llm.call_llm_structured",
+        lambda **_kwargs: (MissingTitle(), 0.0, {}),
+    )
+    title, body = release_notes.build_pr_notes(
+        message="WEST batch",
+        rc_version="v0.1.0rc1+west-task-2e",
+        batch_size=1,
+        minted_from="batch.yaml",
+        changes=[
+            {
+                "domain": "equilibrium",
+                "added": ["plasma_current"],
+                "changed": [],
+                "removed": [],
+            }
+        ],
+    )
+
+    assert title == "WEST equilibrium review batch"
+    assert body.startswith("This WEST equilibrium review batch")
+
+
+def test_build_approval_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
+    """An approval-summary synthesis failure yields '' so the deterministic tag
     block is written alone — the fold-back is never blocked by the notes model."""
     from imas_codex.standard_names import release_notes
 
@@ -961,7 +1025,7 @@ def test_build_merge_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
         raise RuntimeError("no model")
 
     monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _boom)
-    notes = release_notes.build_merge_notes(
+    notes = release_notes.build_approval_notes(
         pr_description="Review batch demo",
         conversation=[{"author": "rev", "kind": "review", "body": "approve"}],
         commit_messages=["publish batch"],
@@ -970,15 +1034,19 @@ def test_build_merge_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
     assert notes == ""
 
 
-def test_build_merge_notes_returns_model_summary(monkeypatch):
+def test_build_approval_notes_returns_model_summary(monkeypatch):
     """When the model succeeds, its grounded summary is returned verbatim."""
     from imas_codex.standard_names import release_notes
 
     def _ok(**kw):
-        return release_notes.MergeNotes(summary="Reviewers renamed one entry."), 0.0, {}
+        return (
+            release_notes.ApprovalNotes(summary="Reviewers renamed one entry."),
+            0.0,
+            {},
+        )
 
     monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _ok)
-    notes = release_notes.build_merge_notes(
+    notes = release_notes.build_approval_notes(
         pr_description="d",
         conversation=[],
         commit_messages=[],
@@ -1067,8 +1135,9 @@ def test_review_release_scopes_dd_caveats_to_batch_names(isnc_repo, tmp_path):
     ]
     assert report.dd_gap_summary["unresolved_count"] == 1
     assert report.dd_gap_summary["blocks_release"] is False
-    assert "`equilibrium/path`" in seen["pr_body"]
-    assert "https://example.invalid/dd/27" in seen["pr_body"]
+    assert "1 unresolved and 0 retired caveats" in seen["pr_body"]
+    assert "equilibrium/path" not in seen["pr_body"]
+    assert "https://example.invalid/dd/27" not in seen["pr_body"]
 
 
 def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
@@ -1085,11 +1154,8 @@ def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
     def _misleading(**_kwargs):
         return (
             release_notes.PrNotes(
-                title="Batch",
-                body=(
-                    "Summary.\n\n## Data Dictionary caveats\n\n"
-                    "No linked DD defects were reported."
-                ),
+                title="Wrong title",
+                body="This batch has one name. Review the batch before approving.",
             ),
             0.0,
             {},
@@ -1122,9 +1188,8 @@ def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
     assert report.dd_gap_summary["available"] is False
     assert report.dd_gap_summary["read_error"] == "graph unavailable"
     assert report.dd_gap_summary["blocks_release"] is False
-    assert seen["body"].count("## Data Dictionary caveats") == 1
-    assert "could not be read (graph unavailable)" in seen["body"]
-    assert "No linked DD defects were reported" not in seen["body"]
+    assert "caveat evidence could not be read" in seen["body"]
+    assert "\n" not in seen["body"]
 
 
 # ── the batch label in the version (semver build metadata) ─────────────────
