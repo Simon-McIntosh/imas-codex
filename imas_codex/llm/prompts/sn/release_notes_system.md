@@ -25,9 +25,8 @@ review and merge the batch.
   enumerations.
 - **Honest numbers.** Copy the supplied aggregate counts exactly, including
   changes and removals when nonzero.
-- **Observational DD evidence.** At most one sentence may summarize the supplied
-  aggregate caveat counts. Never enumerate defects or paths, and never claim
-  that a caveat suppresses a source or blocks the release.
+- **Decisions, not problems.** Describe the publishable batch and how to review
+  it. Release blockers are resolved before publication and are not PR prose.
 
 Return JSON matching the provided schema with both required fields: `title` and
 `body`. Omitting either field is an invalid response.

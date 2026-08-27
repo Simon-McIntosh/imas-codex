@@ -18,15 +18,5 @@ only as provenance and must not appear in the title: `{{ rc_version }}`.
 
 The catalog diff has {{ change_counts.added }} additions,
 {{ change_counts.changed }} changes, and {{ change_counts.removed }} removals.
-{% if unmatched_count %}There are also {{ unmatched_count }} source paths without
-a linked name; they are outside the batch.{% endif %}
-
-{% if not dd_gaps.available %}
-Linked Data Dictionary caveat evidence could not be read, so do not claim the
-caveat count is zero.
-{% else %}
-Linked Data Dictionary evidence has {{ dd_gaps.unresolved_count }} unresolved
-and {{ dd_gaps.retired_count }} retired caveats. These counts are warning-only.
-{% endif %}
 
 Return the exact required `title` and one short prose-paragraph `body` now.

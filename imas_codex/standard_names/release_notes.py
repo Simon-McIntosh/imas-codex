@@ -273,23 +273,6 @@ def unavailable_dd_gap_summary(error: str) -> dict[str, Any]:
     return summary
 
 
-def _dd_gap_sentence(summary: Mapping[str, Any]) -> str:
-    """Render DD lifecycle evidence as one non-enumerating sentence."""
-    if not bool(summary.get("available", True)):
-        return (
-            " Linked Data Dictionary caveat evidence could not be read, so this "
-            "batch makes no claim that the caveat count is zero."
-        )
-    if not int(summary.get("total", 0) or 0):
-        return ""
-    return (
-        " Linked Data Dictionary evidence reports "
-        f"{summary.get('unresolved_count', 0)} unresolved and "
-        f"{summary.get('retired_count', 0)} retired caveats; these observations "
-        "are warning-only."
-    )
-
-
 def _change_counts(changes: list[dict[str, Any]]) -> dict[str, int]:
     return {
         kind: sum(len(change.get(kind, []) or []) for change in changes)
@@ -337,7 +320,41 @@ def review_pr_title(
 
 
 _OUTPUT_ENUMERATION_RE = re.compile(r"(?m)^\s*(?:[-*+]\s|\d+[.)]\s|#+\s|\|)")
+_COMMA_ENUMERATION_RE = re.compile(
+    r"(?i)\b[a-z][\w-]*\s*,\s*[a-z][\w-]*\s*,\s*"
+    r"(?:and\s+)?[a-z][\w-]*\b"
+)
 _VERSION_RE = re.compile(r"(?i)\bv?\d+\.\d+(?:\.\d+)?(?:rc\d+)?\b")
+_PROBLEM_NARRATION_RE = re.compile(
+    r"(?i)(?:"
+    r"\b(?:entries?|names?|source paths?)\b[^.!?\n]{0,60}"
+    r"\b(?:lack(?:ing)?|missing|unlinked|without)\b|"
+    r"\b(?:lack(?:ing)?|missing|unlinked|without)\b[^.!?\n]{0,60}"
+    r"\b(?:entries?|names?|links?|counts?)\b|"
+    r"\b(?:unresolved|open)\b[^.!?\n]{0,40}\b(?:caveats?|warnings?)\b|"
+    r"\bcaveats?\b[^.!?\n]{0,40}\b(?:unresolved|warning|could not be read)\b"
+    r")"
+)
+
+
+def validate_pr_text(title: str, body: str) -> tuple[str, str]:
+    """Validate operator-authored PR prose without changing its bytes."""
+    if not title.strip():
+        raise ValueError("PR title must not be empty")
+    if len(title) > 60:
+        raise ValueError("PR title must be at most 60 characters")
+    if "\n" in title:
+        raise ValueError("PR title must be one line")
+    if not body.strip():
+        raise ValueError("PR body must not be empty")
+    for field, value in (("title", title), ("body", body)):
+        if _OUTPUT_ENUMERATION_RE.search(value):
+            raise ValueError(f"PR {field} must not contain a bulleted list")
+        if _COMMA_ENUMERATION_RE.search(value):
+            raise ValueError(f"PR {field} must not contain a comma-enumerated list")
+    if _PROBLEM_NARRATION_RE.search(body):
+        raise ValueError("PR body must not narrate unresolved release problems")
+    return title, body
 
 
 def _validate_pr_notes(
@@ -360,7 +377,7 @@ def _validate_pr_notes(
     reported_numbers = {int(value) for value in re.findall(r"\b\d+\b", body)}
     if not reported_numbers <= allowed_numbers:
         raise ValueError("release-notes body introduced an unsupported count")
-    return title, body
+    return validate_pr_text(title, body)
 
 
 def _static_pr_body(
@@ -376,19 +393,15 @@ def _static_pr_body(
     domain = _single_changed_domain(changes)
     scope = " ".join(part for part in (facility, domain) if part) or "standard names"
     counts = _change_counts(changes)
-    unmatched = (
-        f", with {unmatched_count} source paths lacking a linked name"
-        if unmatched_count
-        else ""
-    )
+    del unmatched_count, dd_gaps
     return (
         f"This {scope} review batch contains {batch_size} standard names assembled "
         f"from {Path(minted_from).name}. "
         f"The catalog diff contains {_count_phrase(counts['added'], 'addition')}, "
         f"{_count_phrase(counts['changed'], 'change')}, and "
-        f"{_count_phrase(counts['removed'], 'removal')}{unmatched}. "
+        f"{_count_phrase(counts['removed'], 'removal')}. "
         "Review the fixed batch view and check each entry's wording, units, and "
-        "physics meaning before approving." + _dd_gap_sentence(dd_gaps)
+        "physics meaning before approving."
     )
 
 
@@ -439,7 +452,6 @@ def build_pr_notes(
         from imas_codex.settings import get_model
 
         changes = changes or []
-        summary = dd_gaps or summarize_dd_gap_facts([])
         title = review_pr_title(rc_version=rc_version, changes=changes)
         counts = _change_counts(changes)
         system = render_prompt("sn/release_notes_system", {})
@@ -451,11 +463,9 @@ def build_pr_notes(
                 "rc_version": rc_version,
                 "batch_size": batch_size,
                 "minted_from": minted_from,
-                "unmatched_count": unmatched_count,
                 "facility": _facility_label(rc_version),
                 "dominant_domain": _single_changed_domain(changes),
                 "change_counts": counts,
-                "dd_gaps": summary,
             },
         )
         notes, _cost, _tokens = call_llm_structured(
@@ -467,13 +477,7 @@ def build_pr_notes(
             response_model=PrNotes,
             service="standard-names",
         )
-        allowed_numbers = {
-            batch_size,
-            unmatched_count,
-            *counts.values(),
-            int(summary.get("unresolved_count", 0) or 0),
-            int(summary.get("retired_count", 0) or 0),
-        }
+        allowed_numbers = {batch_size, *counts.values()}
         return _validate_pr_notes(
             notes, required_title=title, allowed_numbers=allowed_numbers
         )

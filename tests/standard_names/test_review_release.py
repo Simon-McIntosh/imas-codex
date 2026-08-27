@@ -920,7 +920,7 @@ def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
     assert upstream["upstream_url"] == "https://example.invalid/dd/12"
 
 
-def test_static_notes_summarize_dd_caveats_without_enumerating_entries():
+def test_static_notes_omit_problem_narration():
     from imas_codex.standard_names.release_notes import (
         static_pr_notes,
         summarize_dd_gap_facts,
@@ -943,6 +943,7 @@ def test_static_notes_summarize_dd_caveats_without_enumerating_entries():
         rc_version="v0.1.0rc1+west-task-2e",
         batch_size=1,
         minted_from="batch.yaml",
+        unmatched_count=7,
         changes=[
             {
                 "domain": "equilibrium",
@@ -954,13 +955,15 @@ def test_static_notes_summarize_dd_caveats_without_enumerating_entries():
         dd_gaps=summary,
     )
 
-    assert "1 unresolved and 0 retired caveats" in body
+    assert "unresolved" not in body
+    assert "caveat" not in body
+    assert "lacking a linked name" not in body
     assert "equilibrium/path" not in body
     assert "https://example.invalid/dd/27" not in body
     assert "\n" not in body
 
 
-def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
+def test_release_notes_prompt_omits_problem_evidence(monkeypatch):
     from imas_codex.standard_names import release_notes
 
     seen: dict = {}
@@ -1010,6 +1013,9 @@ def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
     system, user = (message["content"] for message in seen["messages"])
     assert "No headings, bullets, tables" in system
     assert "equilibrium/path" not in user
+    assert "unresolved" not in user
+    assert "caveat" not in user
+    assert "linked name" not in user
     assert "one short prose-paragraph" in user
 
 
@@ -1198,6 +1204,148 @@ def test_review_release_uses_injected_notes_builder(isnc_repo, tmp_path):
     assert seen["pr_body"] == "Custom body"
 
 
+def test_review_release_explicit_pr_text_wins_verbatim(isnc_repo, tmp_path):
+    focus = _write_names_focus(tmp_path)
+    seen: dict = {}
+    supplied_title = "WEST review batch"
+    supplied_body = (
+        "This batch proposes standard names for WEST.\n\n"
+        "Review the physics meaning before approving.\n"
+    )
+
+    def notes_builder(**_kwargs):
+        raise AssertionError("generated notes must not run")
+
+    def pr_creator(*, branch, base, title, body, repo, head_owner):
+        seen["title"] = title
+        seen["body"] = body
+        return 5, f"https://github.com/{repo}/pull/5"
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "msg",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=pr_creator,
+        notes_builder=notes_builder,
+        pr_title=supplied_title,
+        pr_body=supplied_body,
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert seen == {"title": supplied_title, "body": supplied_body}
+
+
+@pytest.mark.parametrize(
+    ("title", "body", "error"),
+    [
+        ("", "Review this batch.", "must not be empty"),
+        ("x" * 61, "Review this batch.", "at most 60"),
+        ("WEST review batch", "- plasma_current\n- poloidal_flux", "bulleted"),
+        (
+            "equilibrium, transport, and magnetics",
+            "Review this batch.",
+            "comma-enumerated",
+        ),
+        (
+            "WEST review batch",
+            "Entries include plasma_current, poloidal_flux, and energy_flux.",
+            "comma-enumerated",
+        ),
+        (
+            "WEST review batch",
+            "Twelve source paths are lacking a linked name.",
+            "unresolved release problems",
+        ),
+        (
+            "WEST review batch",
+            "The batch has missing entry counts.",
+            "unresolved release problems",
+        ),
+        (
+            "WEST review batch",
+            "There are unresolved caveat warnings.",
+            "unresolved release problems",
+        ),
+    ],
+)
+def test_explicit_pr_text_contract_rejects_invalid_prose(title, body, error):
+    from imas_codex.standard_names.release_notes import validate_pr_text
+
+    with pytest.raises(ValueError, match=error):
+        validate_pr_text(title, body)
+
+
+def test_release_help_names_explicit_pr_text_options():
+    from click.testing import CliRunner
+
+    from imas_codex.cli.sn import sn
+
+    result = CliRunner().invoke(sn, ["release", "--help"])
+
+    assert result.exit_code == 0, result.output
+    assert "--pr-title" in result.output
+    assert "--pr-body-file" in result.output
+
+
+def test_release_cli_forwards_body_file_bytes(tmp_path):
+    from unittest.mock import patch
+
+    from click.testing import CliRunner
+
+    from imas_codex.cli.sn import sn
+
+    focus = _write_names_focus(tmp_path)
+    body_file = tmp_path / "pr-body.md"
+    body = "This is the WEST review batch.\n\nReview its physics meaning.\n"
+    body_file.write_text(body, encoding="utf-8")
+    seen: dict = {}
+
+    def release(**kwargs):
+        seen.update(kwargs)
+        return SimpleNamespace(
+            errors=[],
+            rc_version="v0.1.0rc1+west",
+            batch_label="west",
+            batch_size=2,
+            unmatched_sources=[],
+            artifact_path="artifact.yaml",
+            branch="review/candidate",
+            remote="origin",
+            pr_url="https://github.com/fork/catalog/pull/5",
+        )
+
+    with patch(
+        "imas_codex.standard_names.catalog_release.run_review_release",
+        side_effect=release,
+    ):
+        result = CliRunner().invoke(
+            sn,
+            [
+                "release",
+                "--batch",
+                str(focus),
+                "--isnc",
+                str(tmp_path),
+                "--pr-title",
+                "WEST review batch",
+                "--pr-body-file",
+                str(body_file),
+                "-m",
+                "WEST batch",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert seen["pr_title"] == "WEST review batch"
+    assert seen["pr_body"] == body
+
+
 def test_review_release_scopes_dd_caveats_to_batch_names(isnc_repo, tmp_path):
     """The release reads exact batch facts once and never mutates graph state."""
     focus = _write_names_focus(tmp_path)
@@ -1244,7 +1392,8 @@ def test_review_release_scopes_dd_caveats_to_batch_names(isnc_repo, tmp_path):
     ]
     assert report.dd_gap_summary["unresolved_count"] == 1
     assert report.dd_gap_summary["blocks_release"] is False
-    assert "1 unresolved and 0 retired caveats" in seen["pr_body"]
+    assert "unresolved" not in seen["pr_body"]
+    assert "caveat" not in seen["pr_body"]
     assert "equilibrium/path" not in seen["pr_body"]
     assert "https://example.invalid/dd/27" not in seen["pr_body"]
 
@@ -1297,7 +1446,8 @@ def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
     assert report.dd_gap_summary["available"] is False
     assert report.dd_gap_summary["read_error"] == "graph unavailable"
     assert report.dd_gap_summary["blocks_release"] is False
-    assert "caveat evidence could not be read" in seen["body"]
+    assert "caveat evidence could not be read" not in seen["body"]
+    assert "unresolved" not in seen["body"]
     assert "\n" not in seen["body"]
 
 
