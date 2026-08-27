@@ -774,6 +774,39 @@ def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
     assert "\n" not in body
 
 
+def test_review_title_uses_domain_only_for_single_domain():
+    from imas_codex.standard_names.release_notes import review_pr_title
+
+    single_domain = [
+        {
+            "domain": "equilibrium",
+            "added": ["plasma_current"],
+            "changed": [],
+            "removed": [],
+        }
+    ]
+    multi_domain = [
+        *single_domain,
+        {
+            "domain": "transport",
+            "added": ["energy_flux"],
+            "changed": [],
+            "removed": [],
+        },
+    ]
+
+    assert (
+        review_pr_title(rc_version="v0.1.0rc1+west-task-2e", changes=single_domain)
+        == "WEST equilibrium review batch"
+    )
+    multi_title = review_pr_title(
+        rc_version="v0.1.0rc1+west-task-2e", changes=multi_domain
+    )
+    assert multi_title == "WEST review batch"
+    assert "equilibrium" not in multi_title
+    assert "transport" not in multi_title
+
+
 def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
     from imas_codex.standard_names.release_notes import summarize_dd_gap_facts
 
@@ -882,7 +915,7 @@ def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
         seen["messages"] = kw["messages"]
         return (
             release_notes.PrNotes(
-                title="WEST standard names review batch",
+                title="WEST review batch",
                 body=(
                     "This WEST review batch contains one standard name. "
                     "The catalog diff contains zero additions, changes, and removals. "
@@ -915,7 +948,7 @@ def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
         dd_gaps=summary,
     )
 
-    assert title == "WEST standard names review batch"
+    assert title == "WEST review batch"
     assert body.startswith("This WEST review batch")
     assert "equilibrium/path" not in body
     assert "registered_exception" not in body
