@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="79">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="81">
+<meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
@@ -2353,7 +2353,13 @@ Done-when
     <div class="r-comment-body"><p>Live release exit 2 before export: detached worktree cannot auto-discover the ISNC checkout (ISNC not found); zero side effects verified everywhere; fresh node must carry IMAS_CODEX_SN_ISNC in the environment</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260827T073807156548-n-west-rc-recut2" data-who="impl-exportpolicy" data-when="2026-08-27T07:44:05Z">
-    <div class="r-comment-body"><p>Exit 1 on stale LOCAL review/v0.3.0rc1 branch (fork copy was deleted, local survived at 0fcf7d80) plus fork main advancing mid-invocation via the docs node&#x27;s REVIEWING.md push (coordinator serialization miss); baseline adjudicated still valid at e1ce1a2 (entry files absent, docs-only addition); committed rc1 artifact intact; zero remote effects</p></div>
+    <div class="r-comment-body"><p>Exit 1 on stale LOCAL review/v0.3.0rc1 branch (fork copy was deleted, local survived at 0fcf7d80) plus fork main advancing mid-invocation via the docs node's REVIEWING.md push (coordinator serialization miss); baseline adjudicated still valid at e1ce1a2 (entry files absent, docs-only addition); committed rc1 artifact intact; zero remote effects</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260827T074451259396-n-west-rc-recut3" data-who="impl-exportpolicy" data-when="2026-08-27T07:53:57Z">
+    <div class="r-comment-body"><p>Fork RC live as PURE ADDITION: v0.3.0rc1+west-task-2e, PR #2 (head 2a669af8) over blank baseline e1ce1a2 — 18 files added / 0 modified / 0 deleted, REVIEWING.md untouched; catalog.yml candidate_count=408 published_count=332 export_scope=review; accounting 408=332+76 exact; PR title 'WEST equilibrium review batch' + 4-sentence prose body, contract-compliant via deterministic fallback (LLM seat still omits title 5/5 — queued repair); upstream untouched; stale local branch audited at 0fcf7d80 and deleted pre-flight</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260827-additive-rc-live" data-who="reckon-ship" data-when="2026-08-27T08:05:00Z">
+    <div class="r-comment-body">The additive-baseline WEST RC is LIVE: v0.3.0rc1+west-task-2e, fork PR https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/2 (head 2a669af8) over blank baseline e1ce1a2: a PURE ADDITION of 18 files (17 domain lists plus catalog.yml), 0 modified, 0 deleted, REVIEWING.md untouched; 332 published of 408 accounted (76 withheld per-reason); PR title 'WEST equilibrium review batch' with a four-sentence prose body, contract-compliant via the deterministic fallback. f-west-stages-3-6 now targets PR #2 (PR #1 was closed as superseded when the fork was re-baselined). The whole additive design landed this session: blank fork main (f8af99d1, legacy dump recoverable at 4f218df), approval-owned baseline materialization with contested-byte removal and undo reversal (02898fcd), sn approve and sn resolve verbs (3ccc5f3a), the PR text contract, and the written release recipe (1f4f17ff plus catalog REVIEWING.md e1ce1a2). Open residue: the LLM notes seat still omits its required title 5/5 (fallback publishes compliantly) and the generated PR body should auto-link REVIEWING.md; both carried in f-west-stages-3-6.</div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>

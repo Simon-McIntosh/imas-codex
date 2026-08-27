@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:44:27",
+  "updated": "2026-08-27T09:54:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -37165,9 +37165,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T074451259396-n-west-rc-recut3",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-rc-recut3",
+        "node_definition": {
+          "done_when": "You hold EXCLUSIVE use of the catalog checkout at /home/ITER/mcintos/Code/imas-standard-names-catalog (no concurrent worker touches it). Pre-steps: verify the stale local branch review/v0.3.0rc1+west-task-2e points at 0fcf7d80 (the closed superseded PR head) then delete that local branch; git -C the checkout pull --no-rebase origin main so it sits at e1ce1a2 or later. Then, with IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog set: the exact live command uv run imas-codex sn release --batch west_production_dd_paths --bump minor -m 'WEST review batch rehearsal' exits 0 on its single permitted invocation at or after imas-codex ac718c67. Report: minted RC version, fork PR URL, PR diff is PURE ADDITION of catalog ENTRY files against e1ce1a2 (0 modified, 0 deleted; REVIEWING.md untouched), emitted entry count (expected 332), catalog.yml export_scope=review + review_batch, frozen artifact path + sha256 with the committed rc1 artifact's disposition, PR title and body quoted verbatim with a one-line judgement against the concise-prose contract; review branch pushed to the FORK only, upstream untouched (verified), NO --final, no tag expected; on nonzero exit stop and report without retrying",
+          "estimated_hours": null,
+          "goal": "The WEST review RC is live on the fork as a pure addition over the blank baseline",
+          "id": "n-west-rc-recut3",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T074451259396-n-west-rc-recut3/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-recut.md",
+            "imas_codex/standard_names/manifests/reviews/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-exportpolicy",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:44:55Z",
+        "completed_at": "2026-08-27T07:53:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 542,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 542,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "f989b08312376982fdfe9c19d831a2ee0d6af9b2",
+        "commits": [
+          "38173ae1aef54c58eb42abf8ba7f645a350956f3"
+        ],
+        "changed_lines": {
+          "added": 4,
+          "removed": 4,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "single live sn release invocation exit 0 + baseline diff audit (pr2.json, catalog-diff.txt)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T074451259396-n-west-rc-recut3/logs/live-release.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T074451259396-n-west-rc-recut3/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2171136,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2301931,
+            "output_tokens": 119,
+            "output_tokens_cumulative": 10162,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1334
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1008
+    "_version": 1009
   }
 }
