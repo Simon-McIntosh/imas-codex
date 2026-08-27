@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T09:37:36",
+  "updated": "2026-08-27T09:44:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -36973,9 +36973,201 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T072531614084-n-release-recipe-docs",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-release-recipe-docs",
+        "node_definition": {
+          "done_when": "Three documents land: (1) a Release Recipe section in imas_codex/standard_names/AGENTS.md stating the exact three-verb chain (sn run --batch / sn release --batch --bump minor -m / sn approve --pr), the additive-baseline model (blank main, every PR pure addition over previously-approved entries only, approvals invisible in later diffs), the commit and PR title/body format contract with one good and one banned example, the two integration routes (un-edited entries auto-promote accepted-to-approved with PR provenance; edited entries re-enter the pipeline for re-review, pass approved / fail contested, contested resolved only via sn resolve), and undo semantics; (2) the root AGENTS.md Release Workflow section corrected for sn approve and the additive chain, kept a thin pointer to the SN AGENTS.md; (3) REVIEWING.md on the fork catalog repo main (operational surface grant: one commit pushed to Simon-McIntosh/imas-standard-names-catalog main only, never upstream) telling reviewers: edit names and docs freely during review, every edit passes back through the SN pipeline for rule/style conformance, edit for physics meaning and let the machinery hold the style line, what approval means for provenance; all three cross-checked against the live CLI --help output so no stale verb or flag appears; report quotes each document's location; no graph writes",
+          "estimated_hours": null,
+          "goal": "The deterministic release recipe exists in writing for future agent runs",
+          "id": "n-release-recipe-docs",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072531614084-n-release-recipe-docs/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "AGENTS.md",
+            "imas_codex/standard_names/AGENTS.md",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/release-recipe-docs.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-breakdownkind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:25:39Z",
+        "completed_at": "2026-08-27T07:43:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1098,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1098,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "c5a6ac8b64a7d98442f13bf920a41797e43231e3",
+        "commits": [
+          "1f4f17ffdfcd49856f72694654b6e91f87a6ea7c"
+        ],
+        "changed_lines": {
+          "added": 101,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live CLI help contract checks (4 verbs) + required-content scans in both repos",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/release-recipe-docs.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T072531614084-n-release-recipe-docs/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03f75-6a4e-7cb1-ad76-8f64839e3dd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2379776,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2522214,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13948,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4130
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T073807156548-n-west-rc-recut2",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-rc-recut2",
+        "node_definition": {
+          "done_when": "At or after imas-codex 3e826dde, with IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog set in the process environment: the exact live command uv run imas-codex sn release --batch west_production_dd_paths --bump minor -m 'WEST review batch rehearsal' exits 0 on its single permitted invocation; the report records the minted RC version (the state machine decides \u2014 state which and why), the fork PR URL, verification that the PR diff is PURE ADDITION against blank fork main f8af99d1 (0 modified, 0 deleted), the emitted entry count (expected 332), catalog.yml export_scope=review + review_batch, the frozen artifact path + sha256 with the committed rc1 artifact's disposition, and the PR title and body quoted verbatim with a one-line judgement against the concise-prose contract; review branch pushed to the FORK only, upstream untouched (verified), NO --final, no tag expected; on nonzero exit stop and report without retrying",
+          "estimated_hours": null,
+          "goal": "The WEST review RC is live on the fork as a pure addition over the blank baseline",
+          "id": "n-west-rc-recut2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T073807156548-n-west-rc-recut2/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-rc-recut.md",
+            "imas_codex/standard_names/manifests/reviews/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-exportpolicy",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T07:38:12Z",
+        "completed_at": "2026-08-27T07:44:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 353,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 353,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "3e826dde5fed5b156bc220636d79c1f628c92f3d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T073807156548-n-west-rc-recut2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1809664,
+            "cached_input_tokens_cumulative": 3757312,
+            "input_tokens": 1748000,
+            "input_tokens_cumulative": 3840872,
+            "output_tokens": 2768,
+            "output_tokens_cumulative": 10043,
+            "reasoning_output_tokens": 918,
+            "reasoning_output_tokens_cumulative": 2663
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1006
+    "_version": 1008
   }
 }
