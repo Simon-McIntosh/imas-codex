@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="98">
+<meta name="plan-version" content="99">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2446,6 +2446,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260827T095011682473-n-rc-tag-at-cut" data-who="impl-relseams" data-when="2026-08-27T10:00:02Z">
     <div class="r-comment-body"><p>RC tags at cut time: annotated tag on the review-branch head pushed to fork only; --no-pr cuts an in-work RC with no PR; finals unchanged (tag-free until approval); approve's guard now refuses only a graph-merged: annotated tag so an RC tag never blocks fold-back, and the receipt records the prior tag ref so undo force-restores that exact object; 66 tests exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260827T103322889550-n-agent-authored-pr-text" data-who="impl-relseams" data-when="2026-08-27T10:44:10Z">
+    <div class="r-comment-body"><p>sn release --pr-title/--pr-body-file take agent text verbatim after validation (refuses empty/multiline/over-60-char titles, enumerated lists, and problem narration); seat and template demoted to fallbacks with unlinked-source and DD-caveat sentences deleted; live PR #2 body replaced with the authored decisions-only text (954 chars, sha 53df4b7d, byte-identical to source; normalized JSON minus body unchanged, no close/reopen); 44 tests exit 0</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131846395540-n-west-upstream-additivity-review" data-who="rev-west-upstream" data-when="2026-08-26T13:24:56Z">
     <div class="r-comment-body"><p>Workflow HOLD: fork-only branch transport and plain-final PR-then-tag are contradicted by source, and approved-byte identity is unproven.</p></div>

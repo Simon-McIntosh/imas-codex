@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:01:14",
+  "updated": "2026-08-27T12:45:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -115,6 +115,15 @@
         "role": "implement",
         "session_id": "01a0362d-2bbb-7803-8e1d-8719aed181ce",
         "created": "2026-08-24"
+      },
+      {
+        "id": "impl-actone",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-27"
       },
       {
         "id": "impl-admissionadj",
@@ -388,6 +397,17 @@
         "role": "implement",
         "session_id": "01a01880-5c67-70c3-bef4-e30cb2267b48",
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-citrigger",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a042cb-3ada-7cf1-8087-92574d67efbe",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a042cb-3ada-7cf1-8087-92574d67efbe"
+        },
+        "created": "2026-08-27"
       },
       {
         "id": "impl-closecensus",
@@ -2082,6 +2102,15 @@
         "role": "test",
         "session_id": "01a0377a-2ff5-7de0-a0e9-f9b874365b16",
         "created": "2026-08-25"
+      },
+      {
+        "id": "test-upstreamfit",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-27"
       },
       {
         "id": "test-west-rc-gates",
@@ -38257,9 +38286,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T103322889550-n-agent-authored-pr-text",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-agent-authored-pr-text",
+        "node_definition": {
+          "done_when": "sn release gains explicit PR title and body inputs (a title option and a body-file option; name them in the report) whose text is used verbatim after contract validation \u2014 validation rejects an empty title, a title longer than roughly 60 characters, a title or body containing a bulleted or comma-enumerated list of entries or domains, and a body containing problem narration (phrases reporting entries lacking names, missing counts, or unresolved caveat warnings); when no agent text is supplied the notes seat runs and the deterministic template is the final fallback, and BOTH have their problem-narration sentences removed (the unlinked-source-path sentence and the DD caveat sentence are deleted from imas_codex/llm/prompts/sn/release_notes_system.md, its user prompt, and the static builder in release_notes.py); focused tests prove supplied text wins, each rejection case is refused, and the fallback body no longer contains the removed sentences; tests captured once to a persistent log exit 0; ruff clean; local conventional commit with body. THEN, operational surface (fork Simon-McIntosh/imas-standard-names-catalog only, never upstream): replace the body of PR 2 with the exact contents of /run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/fe0ce76b-3257-4945-a367-2247df554cd3/scratchpad/pr2-body.md using gh pr edit --body-file, leaving title, head, base, diff and comments untouched (verified by before/after normalized JSON excluding body); NEVER close or reopen a pull request to re-trigger CI \u2014 use workflow_dispatch or gh run rerun; quote the final published body in the report; no graph writes",
+          "estimated_hours": null,
+          "goal": "The submitting agent supplies the review PR title and body",
+          "id": "n-agent-authored-pr-text",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103322889550-n-agent-authored-pr-text/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/release_notes.py",
+            "imas_codex/cli/sn.py",
+            "imas_codex/standard_names/catalog_release.py",
+            "imas_codex/llm/prompts/sn/release_notes_system.md",
+            "imas_codex/llm/prompts/sn/release_notes_user.md",
+            "tests/standard_names/test_review_release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relseams",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:33:28Z",
+        "completed_at": "2026-08-27T10:44:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 642,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 642,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9ef422e326f6a5bdf6e126c207cbd48d331d83cf",
+        "commits": [
+          "e951cd4510be815b95ba2f573a2d9feccf938234"
+        ],
+        "changed_lines": {
+          "added": 257,
+          "removed": 55,
+          "files": 6
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_review_release.py + PR before/after normalized comparison",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103322889550-n-agent-authored-pr-text/logs/focused-tests.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103322889550-n-agent-authored-pr-text/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03e92-abc5-7013-9ad8-0f84f9f82a3f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2772224,
+            "cached_input_tokens_cumulative": 8171008,
+            "input_tokens": 2748631,
+            "input_tokens_cumulative": 8345457,
+            "output_tokens": 3150,
+            "output_tokens_cumulative": 20181,
+            "reasoning_output_tokens": 2797,
+            "reasoning_output_tokens_cumulative": 5875
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1021
+    "_version": 1026
   }
 }
