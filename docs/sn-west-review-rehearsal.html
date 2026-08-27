@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -624,6 +624,10 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
 <div class="r-dec" data-key="approve-verb-and-pr-style" data-choice="rename-and-concise" data-by="Simon McIntosh" data-when="2026-08-27T08:30:00+00:00">
     <p class="r-dec-q">approve-verb-and-pr-style</p>
     <p class="r-dec-rat">Locked by the lead 2026-08-27: the fold-back workflow is the APPROVAL vector back to the graph and is renamed sn merge to sn approve (greenfield, no alias). PR title and body must state what the batch IS in words: a short concise title plus brief prose, never an enumeration of entries in either. The release-notes seat&#x27;s 5/5 title-contract failure (static fallback published on PR #1) is repaired as part of this contract.</p>
+    </div>
+<div class="r-dec" data-key="rc-tag-at-submit" data-choice="rc-tags-at-cut-finals-at-approval" data-by="Simon McIntosh" data-when="2026-08-27T10:15:00+00:00">
+    <p class="r-dec-q">rc-tag-at-submit</p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-27, relaxing D-final-shape for release candidates only. An RC is tagged at CUT time (submit), so it appears on the fork Releases page and gives a historic record paired with its site build; a PR is not required, so an in-work RC can be tagged and built without opening one. FINAL/stable tags keep the fold-back receipt contract: created by sn approve on the merge commit of the approved PR, meaning catalog and graph are in sync. Interaction to preserve: sn approve&#x27;s idempotency guard must key on the graph-merged: receipt shape rather than mere tag existence, because an RC tag legitimately exists before any fold-back.</p>
     </div>
 </section>
 
