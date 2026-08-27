@@ -1402,6 +1402,7 @@ def build_contract_block(
     batch_artifact: str | None,
     report: ApprovalReport,
     timestamp: str | None = None,
+    prior_tag_ref: str | None = None,
 ) -> str:
     """The deterministic, machine-readable contract lines.
 
@@ -1410,19 +1411,20 @@ def build_contract_block(
     and the fold-back outcome counts for the human record.
     """
     ts = timestamp or datetime.now(UTC).isoformat()
-    return "\n".join(
-        [
-            f"{CONTRACT_MARKER} {ts}",
-            f"pr: #{pr_number} {pr_url}",
-            f"batch: {batch_artifact or '(none)'}",
-            (
-                f"outcomes: approved={len(report.accepted)} "
-                f"staged_for_review={len(report.staged_for_review)} "
-                f"auto_approved={len(report.auto_approved)} "
-                f"contested={len(report.contested)}"
-            ),
-        ]
-    )
+    lines = [
+        f"{CONTRACT_MARKER} {ts}",
+        f"pr: #{pr_number} {pr_url}",
+        f"batch: {batch_artifact or '(none)'}",
+        (
+            f"outcomes: approved={len(report.accepted)} "
+            f"staged_for_review={len(report.staged_for_review)} "
+            f"auto_approved={len(report.auto_approved)} "
+            f"contested={len(report.contested)}"
+        ),
+    ]
+    if prior_tag_ref:
+        lines.append(f"prior-tag-ref: {prior_tag_ref}")
+    return "\n".join(lines)
 
 
 def build_merge_tag_message(contract_block: str, notes: str = "") -> str:
@@ -1460,12 +1462,25 @@ def create_fold_back_tag(
     local receipt with no remote counterpart. Returns ``(ok, error)``.
     """
     isnc = Path(isnc_dir)
-    made = _git_cp(["tag", "-a", tag, merge_commit, "-m", message], isnc)
+    ref = f"refs/tags/{tag}"
+    prior = (_git(["rev-parse", ref], isnc) or "").strip()
+    tag_args = ["tag"]
+    if prior:
+        tag_args.append("-f")
+    tag_args.extend(["-a", tag, merge_commit, "-m", message])
+    made = _git_cp(tag_args, isnc)
     if made.returncode != 0:
         return False, f"failed to create tag {tag}: {made.stderr.strip()}"
-    pushed = _git_cp(["push", remote, tag], isnc)
+    push_args = ["push"]
+    if prior:
+        push_args.append("--force")
+    push_args.extend([remote, ref])
+    pushed = _git_cp(push_args, isnc)
     if pushed.returncode != 0:
-        _git_cp(["tag", "-d", tag], isnc)  # roll back the local tag
+        if prior:
+            _git_cp(["update-ref", ref, prior], isnc)
+        else:
+            _git_cp(["tag", "-d", tag], isnc)
         return False, f"failed to push tag {tag} to {remote}: {pushed.stderr.strip()}"
     return True, None
 
@@ -1489,6 +1504,17 @@ def delete_fold_back_tag(
         )
         if not restored:
             return False, restore_error
+
+    prior_match = re.search(r"(?m)^prior-tag-ref: ([0-9a-f]+)$", contents)
+    if prior_match:
+        ref = f"refs/tags/{tag}"
+        restored = _git_cp(["update-ref", ref, prior_match.group(1)], isnc)
+        if restored.returncode != 0:
+            return False, restored.stderr.strip() or f"failed to restore RC tag {tag}"
+        pushed = _git_cp(["push", "--force", remote, ref], isnc)
+        if pushed.returncode != 0:
+            return False, pushed.stderr.strip()
+        return True, None
 
     errors: list[str] = []
     local = _git_cp(["tag", "-d", tag], isnc)
@@ -1654,6 +1680,13 @@ def tag_fold_back(
         out.error = f"cannot derive a version tag from head ref {head_ref!r}"
         return out
     out.tag = tag
+    if has_contract_tag(isnc_dir, tag):
+        out.error = f"{tag} already carries the fold-back contract"
+        return out
+
+    prior_tag_ref = (
+        _git(["rev-parse", f"refs/tags/{tag}"], Path(isnc_dir)) or ""
+    ).strip()
 
     contract = build_contract_block(
         pr_number=pr_number,
@@ -1661,6 +1694,7 @@ def tag_fold_back(
         batch_artifact=batch_artifact,
         report=report,
         timestamp=timestamp,
+        prior_tag_ref=prior_tag_ref or None,
     )
 
     notes = ""

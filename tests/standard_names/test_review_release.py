@@ -164,6 +164,15 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     # Branch created and pushed to the fork remote.
     assert report.branch == "review/v0.1.0rc1+demo-batch"
     assert report.pushed is True
+    assert report.tag_created is True
+    assert report.tag_pushed is True
+    assert (
+        _git("rev-list", "-n1", report.rc_version, cwd=isnc_repo).stdout.strip()
+        == report.commit_sha
+    )
+    assert (
+        report.rc_version in _git("ls-remote", "--tags", "origin", cwd=isnc_repo).stdout
+    )
     # PR opened and back-filled.
     assert report.pr_number == 42
     assert report.pr_url.endswith("/pull/42")
@@ -195,6 +204,38 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     assert ".yml" not in subject + body
 
 
+def test_review_release_can_cut_and_tag_without_opening_pr(isnc_repo, tmp_path):
+    focus = _write_names_focus(tmp_path)
+
+    def unexpected_pr(**_kwargs):
+        raise AssertionError("PR creation must be skipped")
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Review batch demo",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=unexpected_pr,
+        open_pr=False,
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert report.pushed and report.tag_pushed
+    assert report.pr_number is None and report.pr_url is None
+    assert (
+        _git("rev-list", "-n1", report.rc_version, cwd=isnc_repo).stdout.strip()
+        == _git("rev-parse", "HEAD", cwd=isnc_repo).stdout.strip()
+    )
+    assert (
+        report.rc_version in _git("ls-remote", "--tags", "origin", cwd=isnc_repo).stdout
+    )
+
+
 def test_review_branch_transport_ignores_upstream_remote(isnc_repo, tmp_path):
     """An upstream PR target cannot redirect branch transport upstream."""
     upstream = _add_upstream_remote(isnc_repo, tmp_path)
@@ -224,6 +265,19 @@ def test_review_branch_transport_ignores_upstream_remote(isnc_repo, tmp_path):
     assert (
         _git(
             "ls-remote", "--heads", str(upstream), report.branch, cwd=isnc_repo
+        ).stdout.strip()
+        == ""
+    )
+    assert (
+        report.rc_version in _git("ls-remote", "--tags", "origin", cwd=isnc_repo).stdout
+    )
+    assert (
+        _git(
+            "ls-remote",
+            "--tags",
+            str(upstream),
+            report.rc_version,
+            cwd=isnc_repo,
         ).stdout.strip()
         == ""
     )
