@@ -10,7 +10,7 @@ Two other paths own the write side and do NOT live here:
   each entry's ``sources:`` block and rebuilds provenance) is the diff-by-id
   reconciler ``catalog_reconcile.reconcile_catalog``;
 - folding reviewed curator edits from a merged catalog PR back into the ledger
-  is ``sn merge``.
+  is ``sn approve``.
 
 This module only compares; it never recreates nodes and never rebuilds
 provenance.

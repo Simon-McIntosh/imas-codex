@@ -441,7 +441,7 @@ def default_campaign_manifest_dir() -> Path:
     puts it with the other generated run artifacts under the user data dir
     (alongside ``logs/`` and ``benchmarks/``) rather than in the repo — unlike
     the frozen review artifact, which is committed under ``manifests/reviews/``
-    precisely because ``sn merge`` must resolve it from a branch name months
+    precisely because ``sn approve`` must resolve it from a branch name months
     later.
 
     It also must not default into the working directory: this repo is shared by
