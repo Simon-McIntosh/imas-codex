@@ -130,6 +130,17 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     reviews = tmp_path / "reviews"
     record: dict = {}
 
+    base_exporter = _stub_exporter(record)
+
+    def exporter(**kwargs):
+        result = base_exporter(**kwargs)
+        staging = Path(kwargs["staging_dir"])
+        _write_domain_catalog(
+            staging,
+            "- name: plasma_current\n  unit: A\n- name: poloidal_flux\n  unit: Wb\n",
+        )
+        return result
+
     report = run_review_release(
         isnc_repo,
         focus,
@@ -137,7 +148,7 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=reviews,
-        exporter=_stub_exporter(record),
+        exporter=exporter,
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -171,6 +182,17 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     # The review branch exists in the checkout.
     branches = _git("branch", cwd=isnc_repo).stdout
     assert "review/v0.1.0rc1+demo-batch" in branches
+
+    subject = _git("log", "-1", "--format=%s", cwd=isnc_repo).stdout.strip()
+    body = _git("log", "-1", "--format=%b", cwd=isnc_repo).stdout.strip()
+    assert subject == "sn: add Review batch demo"
+    assert report.commit_sha == _git("rev-parse", "HEAD", cwd=isnc_repo).stdout.strip()
+    assert "Published 2 entries" in body
+    assert "withheld 0" in body
+    assert "v0.1.0rc1+demo-batch" in body
+    assert "plasma_current" not in subject + body
+    assert "poloidal_flux" not in subject + body
+    assert ".yml" not in subject + body
 
 
 def test_review_branch_transport_ignores_upstream_remote(isnc_repo, tmp_path):
