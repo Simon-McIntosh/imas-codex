@@ -560,11 +560,11 @@ def apply_edit(
 
     ``refine`` (default ``True``) declares whether the attached proposal may
     be automatically refined (its wording rewritten) if review scores it
-    below threshold. ``sn merge`` attaches human-approved catalog wording
+    below threshold. ``sn approve`` attaches human-approved catalog wording
     with ``refine=False`` so the proposal is stamped ``edit_refine=false`` —
     a durable review-only marker recording that the wording must be scored
     as-is and never silently mutated. It does not alter the attach itself;
-    the merge caller enforces the accept-or-quarantine outcome.
+    the approval caller enforces the accept-or-quarantine outcome.
     """
     provided = [
         name
@@ -659,7 +659,7 @@ def apply_edit(
             )
 
         # Durable review-only marker: when the caller disables auto-refine
-        # (``sn merge`` folding human-approved wording), stamp the touched
+        # (``sn approve`` folding human-approved wording), stamp the touched
         # node so its provenance records that the wording must be scored
         # as-is and never silently rewritten.
         if not refine and plan.applied and plan.blocked is None:

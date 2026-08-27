@@ -13,7 +13,7 @@ never a node-recreating import:
   binder to restore ``StandardNameSource`` + ``PRODUCED_NAME`` +
   ``FROM_DD_PATH`` / ``FROM_SIGNAL`` (every write gated on the name existing).
 
-This is the sanctioned restore path.  ``sn merge`` is the PR-merge diff path
+This is the sanctioned restore path.  ``sn approve`` is the PR-merge diff path
 that folds reviewed curator edits from a merged catalog PR back into the
 ledger; it must NOT be used to bootstrap or restore the graph.  This
 reconciler is the only path that rebuilds provenance from a published catalog.

@@ -927,7 +927,7 @@ def backfill_review_artifact(
     """Write PR provenance into a frozen artifact as it becomes known.
 
     The PR number/URL land after ``gh pr create``; the merge commit lands when
-    ``sn merge`` folds the merged PR back. Only the provided fields are written.
+    ``sn approve`` folds the merged PR back. Only the provided fields are written.
     """
     import yaml
 
