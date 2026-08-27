@@ -344,42 +344,83 @@ as the comparison base.
 
 ### Commit and PR prose
 
-Commit subjects and PR titles name what the batch is in a short human phrase.
-Their bodies briefly state scope, provenance, and review intent in prose. A PR
-body is one paragraph of two to five grounded sentences. Neither subject/title
-nor body enumerates entry names, paths, domains, or versions; aggregate counts
-may appear in the body when they come from the frozen artifact and catalog
-diff.
+The submitting agent authors the PR title and body at release time, just as it
+authors a commit message. Agent-authored text wins after contract validation.
+The notes seat and deterministic template are headless fallbacks only; they do
+not displace an agent preparing a review PR. Check the live `sn release --help`
+for the current agent-facing title and body inputs. Its `--notes / --no-notes`
+switch remains the documented synthesized-versus-deterministic fallback seam.
 
-Good:
+Use a facility-level title for a multi-domain batch. A dominant domain must not
+make a broad batch look domain-scoped. A genuinely single-domain batch may name
+that domain when the release evidence proves the scope.
 
-```text
-Commit: sn: add WEST equilibrium review batch
-
-Add the WEST equilibrium names selected for expert review. The entries come
-from the frozen production manifest and remain subject to catalog approval.
-
-PR: WEST equilibrium review batch
-
-This WEST equilibrium review batch contains the frozen cohort selected for
-expert review. The catalog diff contains the measured aggregate additions and
-no removals. Review each entry's physics meaning, wording, and units before
-approving.
-```
-
-Banned:
+Good PR title:
 
 ```text
-Commit / PR: update equilibrium, transport, magnetics: plasma_current,
-electron_temperature, ion_temperature, ...
-
-- plasma_current
-- electron_temperature
-- ion_temperature
+WEST standard names review batch
 ```
 
-The banned form is an inventory rather than a human description of the batch.
-Use the catalog diff for the inventory; do not reproduce it in Git prose.
+Banned PR title:
+
+```text
+WEST equilibrium, transport, and magnetics entry update
+```
+
+The PR body is decisions-only prose: one paragraph of two to five grounded
+sentences stating what the batch is (facility, source manifest, and published
+count), the review decisions that materially shaped it, the review instruction,
+and the PR-scoped preview link. Problems are resolved before release, not
+narrated in the PR. Do not report missing names, unlinked-source counts,
+unresolved caveats, or defect lists. A policy decision may identify a semantic
+class when the distinction explains what the batch deliberately excludes.
+
+Good PR body:
+
+```text
+This WEST standard names review batch publishes 337 entries from the
+west_production_dd_paths manifest. Coordinate grids and ordinates are excluded
+by policy because they are structural indexing, not physical quantities.
+Review the names, documentation, units, and physics meaning in the PR-scoped
+preview before approving: https://example.invalid/review/current/.
+```
+
+Banned PR body:
+
+```text
+This batch still has 27 source paths without names and 5 unresolved caveats.
+Missing entries include plasma_current, electron_temperature, and more.
+```
+
+The operator-owned commit subject comes from the release message supplied with
+`-m/--message`, which the live help identifies as commit input. The publisher
+renders it as `sn: add <message>` and writes a short body with aggregate counts
+and release identity. The subject and body never enumerate entry names, paths,
+or domain files.
+
+Good commit:
+
+```text
+sn: add WEST standard names review batch
+
+Publish 337 approved candidates from the WEST production manifest.
+Release identity is recorded in the frozen review artifact.
+```
+
+Banned commit:
+
+```text
+sn: update equilibrium.yml, transport.yml, magnetics.yml (plasma_current, ...)
+```
+
+For the batch recipe, tag visibility begins at approval. `sn release --batch`
+creates the fork-hosted review branch and PR without publishing the fold-back
+tag. After the PR merges and `sn approve --pr` successfully folds it into the
+graph, approval creates the tag on the merge commit. Its presence is the
+visible receipt that catalog and graph are synchronized; a review branch or
+merged PR without that tag is not yet approved. This agrees with the release
+help's explicit final-release statement that the stable tag is created later
+by `sn approve`; plain non-batch release modes may have distinct tag behavior.
 
 ### Approval routes and undo
 
