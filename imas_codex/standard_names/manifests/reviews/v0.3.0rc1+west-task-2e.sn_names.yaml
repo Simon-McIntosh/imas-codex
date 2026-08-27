@@ -3,8 +3,8 @@ schema_version: 1
 name: review-v0-3-0rc1-west-task-2e
 rc_version: v0.3.0rc1+west-task-2e
 batch_label: west-task-2e
-minted_from: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/west-rc-cut-20260826e/n-west-fork-rc-cut/imas_codex/standard_names/manifests/west_production_dd_paths.yaml
-minted_at: '2026-08-26T23:07:06.610916+00:00'
+minted_from: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/west-additive-20260827a/n-west-rc-recut3/imas_codex/standard_names/manifests/west_production_dd_paths.yaml
+minted_at: '2026-08-27T07:46:50.138773+00:00'
 names:
 - accumulated_deposited_energy_of_plasma_facing_component
 - accumulated_total_particle_count_due_to_gas_injection
@@ -442,6 +442,6 @@ unmatched_sources:
 - summary/disruption/time/value
 - summary/global_quantities/tau_energy/value
 - summary/global_quantities/tau_energy_98/value
-pr_number: 1
-pr_url: https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/1
+pr_number: 2
+pr_url: https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/2
 merge_commit: null
