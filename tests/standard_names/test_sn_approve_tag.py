@@ -628,6 +628,41 @@ class TestApprovalCliTag:
         assert result.exit_code == 0, result.output
         assert has_contract_tag(work, rc)
 
+    def test_existing_rc_tag_does_not_block_approval(self, merged_repo):
+        from click.testing import CliRunner
+
+        from imas_codex.cli.sn import sn
+
+        work, rc = merged_repo["work"], merged_repo["rc"]
+        _git(["tag", "-a", rc, merged_repo["branch_first"], "-m", "RC cut"], work)
+        _git(["push", "origin", f"refs/tags/{rc}"], work)
+        assert not has_contract_tag(work, rc)
+
+        with (
+            patch(
+                f"{APPROVAL}.resolve_merged_pr",
+                return_value=self._resolved(merged_repo),
+            ),
+            patch(f"{APPROVAL}.run_approval", return_value=_report(accepted=2, auto=5)),
+        ):
+            result = CliRunner().invoke(
+                sn,
+                [
+                    "approve",
+                    "--isnc",
+                    str(work),
+                    "--pr",
+                    "https://github.com/o/r/pull/7",
+                    "--no-notes",
+                ],
+            )
+
+        assert result.exit_code == 0, result.output
+        assert has_contract_tag(work, rc)
+        assert (
+            _git(["rev-list", "-n1", rc], work).strip() == merged_repo["merge_commit"]
+        )
+
     def test_approval_refuses_when_already_folded_back(self, merged_repo):
         from click.testing import CliRunner
 
@@ -707,6 +742,60 @@ class TestApprovalCliTag:
             )
         assert result.exit_code == 0, result.output
         assert not has_contract_tag(work, rc)
+
+    def test_undo_restores_the_exact_rc_tag(self, merged_repo):
+        from click.testing import CliRunner
+
+        from imas_codex.cli.sn import sn
+        from imas_codex.standard_names.promote import UndoApprovalReport
+
+        work, rc = merged_repo["work"], merged_repo["rc"]
+        _git(["tag", "-a", rc, merged_repo["branch_first"], "-m", "RC cut"], work)
+        original_ref = _git(["rev-parse", f"refs/tags/{rc}"], work).strip()
+        _git(["push", "origin", f"refs/tags/{rc}"], work)
+        folded = tag_fold_back(
+            isnc_dir=work,
+            head_ref=f"review/{rc}",
+            merge_commit=merged_repo["merge_commit"],
+            pr_number=7,
+            pr_url="https://github.com/o/r/pull/7",
+            batch_artifact=None,
+            report=_report(),
+            remote="origin",
+            include_notes=False,
+            timestamp="T",
+        )
+        assert folded.created and has_contract_tag(work, rc)
+
+        with (
+            patch(
+                f"{APPROVAL}.resolve_merged_pr",
+                return_value=self._resolved(merged_repo),
+            ),
+            patch(
+                f"{APPROVAL}.undo_approval",
+                return_value=UndoApprovalReport(pr_number=7),
+            ),
+        ):
+            result = CliRunner().invoke(
+                sn,
+                [
+                    "approve",
+                    "--isnc",
+                    str(work),
+                    "--pr",
+                    "https://github.com/o/r/pull/7",
+                    "--undo",
+                ],
+            )
+
+        assert result.exit_code == 0, result.output
+        assert not has_contract_tag(work, rc)
+        assert _git(["rev-parse", f"refs/tags/{rc}"], work).strip() == original_ref
+        assert (
+            _git(["rev-list", "-n1", rc], work).strip() == merged_repo["branch_first"]
+        )
+        assert rc in _git(["ls-remote", "--tags", "origin"], work)
 
 
 # ---------------------------------------------------------------------------

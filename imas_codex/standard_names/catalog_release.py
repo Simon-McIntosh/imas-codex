@@ -845,6 +845,8 @@ class ReviewReleaseReport:
     branch: str = ""
     remote: str = ""
     pushed: bool = False
+    tag_created: bool = False
+    tag_pushed: bool = False
     pr_number: int | None = None
     pr_url: str | None = None
     dd_gap_summary: dict[str, Any] = field(default_factory=dict)
@@ -862,6 +864,8 @@ class ReviewReleaseReport:
             "branch": self.branch,
             "remote": self.remote,
             "pushed": self.pushed,
+            "tag_created": self.tag_created,
+            "tag_pushed": self.tag_pushed,
             "pr_number": self.pr_number,
             "pr_url": self.pr_url,
             "dd_gap_summary": self.dd_gap_summary,
@@ -1047,15 +1051,17 @@ def run_review_release(
     notes_builder: Any | None = None,
     llm_notes: bool = False,
     dd_gap_reader: Any | None = None,
+    open_pr: bool = True,
 ) -> ReviewReleaseReport:
-    """Mint → freeze → export → branch → push → PR → back-fill, in one call.
+    """Mint → freeze → export → branch → tag → optional PR, in one call.
 
     A single orchestrating step so the frozen sn-names artifact, the pushed RC
     catalog, and the PR stay in lock-step. The focus file drives the batch: an
     sn-sources file is minted live to the SN set (:func:`mint_sn_list`), an
     sn-names file is used directly (schema dispatch). The resolved set is frozen
     under ``manifests/reviews/<rc>.sn_names.yaml`` (RC-tagged, the traceable key)
-    and the PR number/URL back-filled after ``gh pr create``.
+    and the PR number/URL back-filled after ``gh pr create`` when ``open_pr``
+    is true. The RC tag is always created and pushed to the fork at cut time.
 
     The RC version carries the batch identity as semver build metadata
     (``v0.2.0rc66+<label>``, derived from the manifest — see
@@ -1206,9 +1212,10 @@ def run_review_release(
 
     if dry_run:
         logger.info(
-            "[dry-run] would branch %s, publish, push to %s, and open a PR",
+            "[dry-run] would branch %s, publish, and tag on %s%s",
             report.branch,
             effective_remote,
+            ", then open a PR" if open_pr else " without opening a PR",
         )
         return report
 
@@ -1260,6 +1267,27 @@ def run_review_release(
         report.errors.append(f"failed to push {report.branch}: {push.stderr}")
         return report
     report.pushed = True
+
+    # A candidate becomes a historic build identity when it is cut. Approval
+    # may later replace this ref with the graph-fold receipt; undo restores the
+    # exact annotated tag object created here.
+    tag = _run_git("tag", "-a", git_tag, "-m", message, cwd=isnc_path)
+    if tag.returncode != 0:
+        report.errors.append(f"failed to create RC tag {git_tag}: {tag.stderr}")
+        return report
+    report.tag_created = True
+    tag_push = _run_git("push", effective_remote, f"refs/tags/{git_tag}", cwd=isnc_path)
+    if tag_push.returncode != 0:
+        _run_git("tag", "-d", git_tag, cwd=isnc_path)
+        report.tag_created = False
+        report.errors.append(
+            f"failed to push RC tag {git_tag} to {effective_remote}: {tag_push.stderr}"
+        )
+        return report
+    report.tag_pushed = True
+
+    if not open_pr:
+        return report
 
     # ── 6. Open the PR and back-fill the artifact ──────────────────────
     # The PR repo and fork owner are derived from the ISNC checkout's own

@@ -413,14 +413,19 @@ Banned commit:
 sn: update equilibrium.yml, transport.yml, magnetics.yml (plasma_current, ...)
 ```
 
-For the batch recipe, tag visibility begins at approval. `sn release --batch`
-creates the fork-hosted review branch and PR without publishing the fold-back
-tag. After the PR merges and `sn approve --pr` successfully folds it into the
-graph, approval creates the tag on the merge commit. Its presence is the
-visible receipt that catalog and graph are synchronized; a review branch or
-merged PR without that tag is not yet approved. This agrees with the release
-help's explicit final-release statement that the stable tag is created later
-by `sn approve`; plain non-batch release modes may have distinct tag behavior.
+For the batch recipe, an RC tag is created on the review-branch head and pushed
+to the fork when `sn release --batch` cuts the candidate. This preserves each
+candidate and its site build as a historic release record. Pass `--no-pr` to
+cut, tag, and build an in-work RC without opening a pull request; the review
+branch and RC tag still go only to the fork.
+
+After a PR merges and `sn approve --pr` successfully folds it into the graph,
+approval replaces that RC ref with the `graph-merged:` receipt on the merge
+commit. The receipt shape, not tag existence alone, means catalog and graph are
+synchronized. `sn approve --undo` removes that receipt and restores the exact
+RC tag that existed before approval. Stable releases differ: `sn release
+--final` creates no release-time tag, so their first version tag is the
+fold-back receipt created by `sn approve`.
 
 ### Approval routes and undo
 
@@ -441,10 +446,12 @@ uv run imas-codex sn approve --undo --pr <merged-pr-url>
 ```
 
 Undo removes that PR's approval provenance, returns its auto-approved entries
-to `accepted`, returns its contested entries to `accepted`, and deletes the
-fold-back tag locally and remotely. Accepted human edits remain graph history;
-revert wording through `sn edit`, never by rewriting graph properties. Undo is
-scoped to the named PR and does not disturb approvals owned by another PR.
+to `accepted`, returns its contested entries to `accepted`, and removes the
+fold-back receipt locally and remotely. For an RC it restores the exact cut-time
+tag; for a stable release it deletes the receipt tag. Accepted human edits
+remain graph history; revert wording through `sn edit`, never by rewriting
+graph properties. Undo is scoped to the named PR and does not disturb approvals
+owned by another PR.
 
 ## The catalog is not the source of truth
 

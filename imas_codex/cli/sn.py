@@ -4492,8 +4492,9 @@ def sn_preview(
         "as a NAME ('west_production_dd_paths' resolves under standard_names/manifests/) or "
         "a path: mint the SN set, freeze it under manifests/reviews/"
         "<rc>.sn_names.yaml, export approved ∪ batch, branch + push to the "
-        "fork, open the PR, and back-fill the PR number/URL — all in one step. "
-        "The same token drives sn run --batch for the mop-up half."
+        "fork, tag the branch head, and normally open a PR — all in one step. "
+        "Use --no-pr for a tagged build without a PR. The same token drives "
+        "sn run --batch for the mop-up half."
     ),
 )
 @click.option(
@@ -4519,6 +4520,16 @@ def sn_preview(
         "[--batch] Synthesize a grounded PR description (release message + "
         "batch record + per-domain catalog diff) with the sn-release-notes "
         "model; --no-notes uses the deterministic static body."
+    ),
+)
+@click.option(
+    "--pr/--no-pr",
+    "open_pr",
+    default=True,
+    show_default=True,
+    help=(
+        "[--batch] Open a catalog review PR after cutting the fork RC. "
+        "--no-pr still pushes the review branch and RC tag for an in-work build."
     ),
 )
 @click.option(
@@ -4598,6 +4609,7 @@ def sn_release(
     batch_file: str | None,
     pr_target: str,
     llm_notes: bool,
+    open_pr: bool,
     export_only: bool,
     min_score: float,
     include_unreviewed: bool,
@@ -4641,6 +4653,7 @@ def sn_release(
       imas-codex sn release --export-only --domain equilibrium --gate-only
       imas-codex sn release --export-only --min-score 0.8 --force
       imas-codex sn release --batch <manifest.yaml> --bump minor -m "WEST batch"
+      imas-codex sn release --batch <manifest.yaml> --bump minor --no-pr -m "WEST batch"
     """
     from pathlib import Path
 
@@ -4733,6 +4746,7 @@ def sn_release(
                 export_kwargs=export_kwargs or None,
                 pr_target=pr_target,
                 llm_notes=llm_notes,
+                open_pr=open_pr,
             )
         except Exception as exc:
             console.print(f"[red]Review-batch error:[/red] {exc}")
@@ -4753,6 +4767,7 @@ def sn_release(
         console.print(f"  Artifact: {rr.artifact_path}")
         if not dry_run:
             console.print(f"  Branch: {rr.branch} → {rr.remote}")
+            console.print(f"  RC tag: {rr.rc_version} → {rr.remote}")
             if rr.pr_url:
                 console.print(f"  PR: {rr.pr_url}")
         return
