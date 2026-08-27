@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T12:45:17",
+  "updated": "2026-08-27T12:58:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -38391,9 +38391,357 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T104434424715-n-preflight-snapshot",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a75",
+        "node": "n-preflight-snapshot",
+        "node_definition": {
+          "done_when": "uv run imas-codex graph export completes exit 0 and the report records the archive path, its byte size, the StandardName node count and the fully-clean count (name_stage accepted, docs_stage accepted, validation_status valid) captured at snapshot time as the restore reference, plus the restore command a later session would run; no graph mutation, no catalog or GitHub actions",
+          "estimated_hours": null,
+          "goal": "A restorable graph snapshot exists before the approval rehearsal writes to the graph",
+          "id": "n-preflight-snapshot",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T104434424715-n-preflight-snapshot/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/preflight-snapshot.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-actone",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:44:38Z",
+        "completed_at": "2026-08-27T10:57:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 762,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 762,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "d4c6ac3c0763b0a9d5b19f977af02038b25c06fb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run imas-codex graph export + pre/post census",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/preflight-snapshot.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T104434424715-n-preflight-snapshot/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a042d2-6351-7243-9ef1-7f25f8e891ae",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5703936,
+            "cached_input_tokens_cumulative": 5703936,
+            "input_tokens": 5861423,
+            "input_tokens_cumulative": 5861423,
+            "output_tokens": 12820,
+            "output_tokens_cumulative": 12820,
+            "reasoning_output_tokens": 3669,
+            "reasoning_output_tokens_cumulative": 3669
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Exclusive scope permits only the report path; while completion requires editing and committing `/home/ITER/mcintos/Code/imas-standard-names-catalog/.github/workflows/catalog.yml`; pushing fork main; and dispatching the changed workflow. Those actions cannot be performed legally under this fence.",
+              "elapsed_seconds": 467,
+              "log_age_seconds": 321,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103645871755-n-preview-retrigger-input/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103645871755-n-preview-retrigger-input/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-preview-retrigger-input",
+              "phase": "starting",
+              "plan": "sn-west-review-rehearsal",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260827T103645871755-n-preview-retrigger-input",
+              "terminal_age_seconds": 345,
+              "terminal_at": "2026-08-27T10:38:51Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/west-additive-20260827a/n-preview-retrigger-input"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T104439669518-n-upstream-compat-audit",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-upstream-compat-audit",
+        "node_definition": {
+          "done_when": "reports/upstream-compat-audit.md answers, read-only with the producing command beside each claim: (1) do upstream main's 309 nested standard_names entries collide with the flat additive batch \u2014 list any identity appearing in both layouts, and state whether upstream's own validate and site workflows read the nested layout, the flat layout, or both (cite the workflow and CLI source lines); (2) would upstream's current catalog.yml, validate.yml and release.yml pass or fail on a PR adding 332 flat entries to a repo with no flat catalog \u2014 quote the failing step and exit condition if they fail, and say whether the fork's blank-baseline and preview fixes are the remedy; (3) does upstream have Pages configured such that a per-PR preview can deploy, or must external PRs use the artifact fallback; (4) a clear recommendation on whether the 309 nested entries must be cleared before the batch PR, may stay, or belong in a separate upstream PR, with the reasoning. Do not modify anything in either repository; no graph writes",
+          "estimated_hours": null,
+          "goal": "A verdict on whether the additive batch is safe and reviewable against upstream main as it stands",
+          "id": "n-upstream-compat-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T104439669518-n-upstream-compat-audit/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/upstream-compat-audit.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-upstreamfit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:44:44Z",
+        "completed_at": "2026-08-27T10:55:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 651,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 651,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d4c6ac3c0763b0a9d5b19f977af02038b25c06fb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only layout census, identity intersection, workflow source audit, Pages API probe",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/upstream-compat-audit.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T104439669518-n-upstream-compat-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a042d2-7929-7ed0-bd55-0a5f0b87950e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5940736,
+            "cached_input_tokens_cumulative": 5940736,
+            "input_tokens": 6140240,
+            "input_tokens_cumulative": 6140240,
+            "output_tokens": 25563,
+            "output_tokens_cumulative": 25563,
+            "reasoning_output_tokens": 10447,
+            "reasoning_output_tokens_cumulative": 10447
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Exclusive scope permits only the report path; while completion requires editing and committing `/home/ITER/mcintos/Code/imas-standard-names-catalog/.github/workflows/catalog.yml`; pushing fork main; and dispatching the changed workflow. Those actions cannot be performed legally under this fence.",
+              "elapsed_seconds": 473,
+              "log_age_seconds": 327,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103645871755-n-preview-retrigger-input/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103645871755-n-preview-retrigger-input/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-preview-retrigger-input",
+              "phase": "starting",
+              "plan": "sn-west-review-rehearsal",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260827T103645871755-n-preview-retrigger-input",
+              "terminal_age_seconds": 351,
+              "terminal_at": "2026-08-27T10:38:51Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/west-additive-20260827a/n-preview-retrigger-input"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T103645871755-n-preview-retrigger-input",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-preview-retrigger-input",
+        "node_definition": {
+          "done_when": "Operational surface: catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog and fork Simon-McIntosh/imas-standard-names-catalog only, never upstream. The Catalog Site workflow gains a first-class on-demand rebuild path: workflow_dispatch accepts a pull-request-number input which, when supplied, resolves that PR's base and head SHAs through the API and runs the same preview build, deploy and comment-upsert as the pull_request path (shared job or reusable steps, not a duplicated copy \u2014 state which), leaving PR state, title, body, branch and diff untouched; supplying no input keeps today's main-branch behavior. Evidence: a live dispatch against PR 2 by number completes successfully with the run URL recorded, the preview URL returns HTTP 200 afterwards, the existing preview comment is updated in place rather than duplicated (comment id and updated timestamp recorded before and after), and the PR timeline gains NO closed or reopened events during the run (timeline event counts recorded before and after prove zero new state events). Do not close, reopen, retitle, or edit the body of PR 2 \u2014 a concurrent node owns its body. Conventional commit pushed to fork main; no upstream, graph, or imas-codex writes",
+          "estimated_hours": null,
+          "goal": "A review preview can be rebuilt on demand without touching the pull request state",
+          "id": "n-preview-retrigger-input",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103645871755-n-preview-retrigger-input/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/preview-retrigger-input.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-citrigger",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T10:36:49Z",
+        "completed_at": "2026-08-27T10:51:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 909,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 909,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "d4c6ac3c0763b0a9d5b19f977af02038b25c06fb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live workflow_dispatch against PR 2 + before/after timeline event count + preview HTTP + comment id check",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/preview-retrigger-input.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T103645871755-n-preview-retrigger-input/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a042cb-3ada-7cf1-8087-92574d67efbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2564608,
+            "cached_input_tokens_cumulative": 2564608,
+            "input_tokens": 2708706,
+            "input_tokens_cumulative": 2708706,
+            "output_tokens": 15102,
+            "output_tokens_cumulative": 15102,
+            "reasoning_output_tokens": 5285,
+            "reasoning_output_tokens_cumulative": 5285
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1026
+    "_version": 1029
   }
 }

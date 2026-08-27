@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="100">
+<meta name="plan-version" content="103">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2395,6 +2395,9 @@ Done-when
 <div class="r-comment" data-section="s3" data-id="c-20260827-pr-churn-rootcause" data-who="reckon-ship" data-when="2026-08-27T10:55:00Z">
     <div class="r-comment-body">Root cause of the PR open/close churn the lead observed: the PR 2 timeline records six close-then-reopen pairs between 09:48:22Z and 09:56:24Z, each 1-2 seconds apart, all inside the preview-workflow node's window. The worker was closing and reopening the live review PR to force fresh pull_request events so its workflow would re-run for evidence. The shipped workflow does not need this: catalog.yml triggers on push, pull_request and workflow_dispatch, so an ordinary branch push or a dispatch re-runs it. BINDING for future release work: never close or reopen a live pull request to re-trigger CI (it churns reviewer notifications and briefly closes a PR others may be reading); use workflow_dispatch or gh run rerun. Only two PRs ever existed: 1 closed once as superseded by the additive re-baseline, 2 open since 07:50:40Z. The ban rides the agent-authored PR text node and belongs in the release recipe.</div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260827T103645871755-n-preview-retrigger-input" data-who="impl-citrigger" data-when="2026-08-27T10:51:58Z">
+    <div class="r-comment-body"><p>On-demand preview rebuild without touching PR state: workflow_dispatch takes a PR number, resolves base/head via API and runs the shared preview build/deploy/comment steps (fork commit 5068a645). Live dispatch 33064614947 succeeded, preview HTTP 200, comment 5437311459 updated in place, diff digest unchanged, and ZERO new closed/reopened timeline events — the cycling hack is retired</p></div>
+</div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
 </div>
@@ -2472,6 +2475,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T093040052288-n-catalog-ci-blank-main" data-who="impl-catalogblank" data-when="2026-08-27T09:42:44Z">
     <div class="r-comment-body"><p>Root cause: both workflows exited 2 on Click path-existence checks against the now-absent standard_names/ (blanking side effect). Fixed on fork main 706fd624: zero recursive YAML emits explicit blank-baseline notices, validate succeeds, site skips cleanly; populated catalogs unchanged. Fork-main reruns 33059420159 and 33059420170 both SUCCESS. PR #2 VERDICT: checks run on refs/pull/2/merge (head 30cfa66 into base e1ce1a2), rollup 2/2 SUCCESS, nothing blocks or misleads merge — but the PR Catalog Site check is green with its build step skipped, which the preview-site work must fix or rename</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T104439669518-n-upstream-compat-audit" data-who="test-upstreamfit" data-when="2026-08-27T10:55:35Z">
+    <div class="r-comment-body"><p>HOLD on the upstream batch PR with a measured reason: 25 identities exist in both upstream's 309 nested files and the flat batch, so the PR would read 307 additions + 25 edits + 284 DELETIONS, not a pure addition. Upstream validate passes while validating 0/332 (pinned loader ignores flat lists); release.yml calls validate.yml which has no workflow_call; catalog.yml skips PR deploy; Pages returns 404 and an external-fork PR cannot push Pages, so artifact fallback is required. Verdict: clear the 309 nested entries in a separate upstream baseline/infrastructure PR, then recut the batch against the blank upstream main</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260827T104434424715-n-preflight-snapshot" data-who="impl-actone" data-when="2026-08-27T10:57:20Z">
+    <div class="r-comment-body"><p>Restore point: /home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-d4c6ac3.tar.gz (2.46 GB), census StandardName 4668 / fully-clean 2262 identical pre and post, restore via imas-codex graph load; no mutation</p></div>
 </div>
 </section>
 </main>
