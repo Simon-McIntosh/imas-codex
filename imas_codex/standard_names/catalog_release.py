@@ -841,6 +841,7 @@ class ReviewReleaseReport:
     names: list[str] = field(default_factory=list)
     unmatched_sources: list[str] = field(default_factory=list)
     artifact_path: str | None = None
+    commit_sha: str | None = None
     branch: str = ""
     remote: str = ""
     pushed: bool = False
@@ -857,6 +858,7 @@ class ReviewReleaseReport:
             "batch_size": self.batch_size,
             "unmatched_sources": self.unmatched_sources,
             "artifact_path": self.artifact_path,
+            "commit_sha": self.commit_sha,
             "branch": self.branch,
             "remote": self.remote,
             "pushed": self.pushed,
@@ -876,6 +878,25 @@ def _slug_from_rc(rc_version: str) -> str:
     """Kebab-case batch name derived from an RC version tag (e.g. v0.2.0rc65)."""
     body = re.sub(r"[^a-z0-9]+", "-", rc_version.lower()).strip("-")
     return f"review-{body}"
+
+
+def _review_commit_message(
+    message: str,
+    *,
+    batch_label: str,
+    published_count: int,
+    withheld_count: int,
+    rc_version: str,
+) -> tuple[str, str]:
+    """Compose concise, deterministic prose for a review-branch commit."""
+    operator_phrase = " ".join(message.split())
+    subject = f"sn: add {operator_phrase.rstrip('.')}"
+    body = (
+        f"Published {published_count} entries for the {batch_label} review batch "
+        f"and withheld {withheld_count} from this release.\n"
+        f"The frozen review cohort is identified by {rc_version}."
+    )
+    return subject, body
 
 
 def _freeze_review_artifact(
@@ -1209,6 +1230,30 @@ def run_review_release(
     if getattr(pub, "errors", None):
         report.errors.extend(pub.errors)
         return report
+
+    if getattr(pub, "commit_sha", None):
+        subject, body = _review_commit_message(
+            message,
+            batch_label=batch_label,
+            published_count=assembly.batch_entries_written,
+            withheld_count=report.batch_size - assembly.batch_entries_written,
+            rc_version=git_tag,
+        )
+        amended = _run_git(
+            "commit",
+            "--amend",
+            "-m",
+            subject,
+            "-m",
+            body,
+            cwd=isnc_path,
+        )
+        if amended.returncode != 0:
+            report.errors.append(
+                f"failed to compose review commit message: {amended.stderr}"
+            )
+            return report
+        report.commit_sha = _run_git("rev-parse", "HEAD", cwd=isnc_path).stdout.strip()
 
     push = _run_git("push", effective_remote, report.branch, cwd=isnc_path)
     if push.returncode != 0:
