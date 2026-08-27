@@ -23,12 +23,13 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from imas_codex.standard_names.promote import (
     CONTRACT_MARKER,
+    ApprovalChange,
     ApprovalReport,
     FoldBackTagReport,
     approval_tag_name,
@@ -40,7 +41,9 @@ from imas_codex.standard_names.promote import (
     has_contract_tag,
     resolve_tag_remote,
     review_delta_diff,
+    run_approval,
     tag_fold_back,
+    undo_approval,
 )
 
 APPROVAL = "imas_codex.standard_names.promote"
@@ -97,6 +100,50 @@ def merged_repo(tmp_path: Path) -> dict:
     }
 
 
+@pytest.fixture()
+def additive_repo(tmp_path: Path) -> dict:
+    """A bare fork whose main starts blank and receives one two-entry batch."""
+    bare = tmp_path / "origin.git"
+    _git(["init", "--bare", "-b", "main", str(bare)], tmp_path)
+    work = tmp_path / "isnc"
+    work.mkdir()
+    _git(["init", "-b", "main"], work)
+    _git(["config", "user.email", "t@t"], work)
+    _git(["config", "user.name", "t"], work)
+    _git(["remote", "add", "origin", str(bare)], work)
+    (work / "README.md").write_text("Catalog.\n", encoding="utf-8")
+    _git(["add", "README.md"], work)
+    _git(["commit", "-q", "-m", "blank catalog"], work)
+    _git(["push", "-q", "origin", "main"], work)
+
+    (work / "standard_names").mkdir()
+    catalog = work / "standard_names" / "equilibrium.yml"
+    merged_bytes = (
+        "- name: approved_name\n"
+        "  unit: A\n"
+        "  documentation: Approved bytes.\n"
+        "- name: refused_name\n"
+        "  unit: V\n"
+        "  documentation: Refused bytes must not survive.\n"
+    )
+    catalog.write_text(merged_bytes, encoding="utf-8")
+    _git(["checkout", "-q", "-b", "review/batch"], work)
+    _git(["add", "standard_names/equilibrium.yml"], work)
+    _git(["commit", "-q", "-m", "review batch"], work)
+    _git(["checkout", "-q", "main"], work)
+    _git(["merge", "-q", "--no-ff", "review/batch", "-m", "Merge review batch"], work)
+    merge_commit = _git(["rev-parse", "HEAD"], work).strip()
+    _git(["push", "-q", "origin", "main"], work)
+    return {
+        "work": work,
+        "bare": bare,
+        "merge_commit": merge_commit,
+        "base_ref": f"{merge_commit}^1",
+        "catalog": catalog,
+        "merged_bytes": merged_bytes,
+    }
+
+
 def _report(accepted=1, staged=0, auto=3, contested=0) -> ApprovalReport:
     r = ApprovalReport()
     r.accepted = [f"n{i}" for i in range(accepted)]
@@ -104,6 +151,127 @@ def _report(accepted=1, staged=0, auto=3, contested=0) -> ApprovalReport:
     r.auto_approved = [f"a{i}" for i in range(auto)]
     r.contested = [{"sn_id": f"c{i}"} for i in range(contested)]
     return r
+
+
+def _fold_additive_batch(repo: dict, *, contest_refused: bool) -> ApprovalReport:
+    changes = (
+        [
+            ApprovalChange(
+                sn_id="refused_name",
+                axis="docs",
+                new_value="Refused bytes must not survive.",
+            )
+        ]
+        if contest_refused
+        else []
+    )
+    edit_plan = MagicMock(blocked=None, successor=None, run_id="approval-review")
+
+    def approve(name: str, **_kwargs) -> bool:
+        return name == "approved_name" or not contest_refused
+
+    with (
+        patch(f"{APPROVAL}.read_pr_changes", return_value=changes),
+        patch(f"{APPROVAL}._name_exists", return_value=True),
+        patch(f"{APPROVAL}.apply_edit", return_value=edit_plan),
+        patch(f"{APPROVAL}._score_proposal", return_value=0.2),
+        patch(f"{APPROVAL}._contest"),
+        patch(f"{APPROVAL}.mark_catalog_name_approved", side_effect=approve),
+    ):
+        return run_approval(
+            isnc_dir=repo["work"],
+            base_ref=repo["base_ref"],
+            threshold=0.85,
+            catalog_pr_number=7,
+            catalog_pr_url="https://github.com/fork/catalog/pull/7",
+            catalog_merge_commit_sha=repo["merge_commit"],
+            batch=["approved_name", "refused_name"],
+            gc=MagicMock(),
+        )
+
+
+class TestApprovedCatalogMaterialization:
+    def test_clean_fold_back_leaves_main_equal_to_the_approved_set(self, additive_repo):
+        report = _fold_additive_batch(additive_repo, contest_refused=False)
+
+        assert report.auto_approved == ["approved_name", "refused_name"]
+        assert additive_repo["catalog"].read_text() == additive_repo["merged_bytes"]
+        assert (
+            _git(
+                ["show", "origin/main:standard_names/equilibrium.yml"],
+                additive_repo["work"],
+            )
+            == additive_repo["merged_bytes"]
+        )
+        assert (
+            _git(["rev-parse", "origin/main"], additive_repo["work"]).strip()
+            == (additive_repo["merge_commit"])
+        )
+
+    def test_contested_entry_is_removed_from_main_by_a_correction_commit(
+        self, additive_repo
+    ):
+        report = _fold_additive_batch(additive_repo, contest_refused=True)
+
+        assert report.auto_approved == ["approved_name"]
+        assert report.contested == [
+            {"sn_id": "refused_name", "target_id": "refused_name", "score": 0.2}
+        ]
+        expected = (
+            "- name: approved_name\n  unit: A\n  documentation: Approved bytes.\n"
+        )
+        assert additive_repo["catalog"].read_text() == expected
+        assert "Refused bytes must not survive" not in _git(
+            ["show", "origin/main:standard_names/equilibrium.yml"],
+            additive_repo["work"],
+        )
+        assert (
+            _git(["rev-parse", "origin/main"], additive_repo["work"]).strip()
+            != (additive_repo["merge_commit"])
+        )
+
+    def test_undo_restores_catalog_main_and_graph_lifecycle(self, additive_repo):
+        report = _fold_additive_batch(additive_repo, contest_refused=True)
+        tag = "approval-receipt"
+        ok, err = create_fold_back_tag(
+            additive_repo["work"],
+            tag=tag,
+            merge_commit=additive_repo["merge_commit"],
+            message=build_contract_block(
+                pr_number=7,
+                pr_url="https://github.com/fork/catalog/pull/7",
+                batch_artifact="batch.sn_names.yaml",
+                report=report,
+                timestamp="T",
+            ),
+            remote="origin",
+        )
+        assert ok, err
+
+        gc = MagicMock()
+        gc.query.side_effect = [
+            [{"id": "approved_name"}],
+            [{"id": "refused_name"}],
+        ]
+        graph = undo_approval(
+            pr_number=7,
+            batch=["approved_name", "refused_name"],
+            gc=gc,
+        )
+        ok, err = delete_fold_back_tag(additive_repo["work"], tag=tag, remote="origin")
+
+        assert ok, err
+        assert graph.demoted == ["approved_name"]
+        assert graph.contested_reverted == ["refused_name"]
+        assert additive_repo["catalog"].read_text() == additive_repo["merged_bytes"]
+        assert (
+            _git(
+                ["show", "origin/main:standard_names/equilibrium.yml"],
+                additive_repo["work"],
+            )
+            == additive_repo["merged_bytes"]
+        )
+        assert not has_contract_tag(additive_repo["work"], tag)
 
 
 # ---------------------------------------------------------------------------

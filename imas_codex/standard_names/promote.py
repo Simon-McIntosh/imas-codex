@@ -118,6 +118,21 @@ class ApprovalReport:
     outcomes: list[ApprovalOutcome] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class _CatalogEntryBytes:
+    """One catalog entry's exact serialized bytes and containing path."""
+
+    path: str
+    content: str
+
+
+@dataclass(frozen=True)
+class _AdditiveCatalogDelta:
+    """Catalog additions above a byte-exact approved baseline."""
+
+    added_names: frozenset[str]
+
+
 # ---------------------------------------------------------------------------
 # PR diff reader
 # ---------------------------------------------------------------------------
@@ -161,6 +176,274 @@ def _parse_entries(text: str | None) -> dict[str, dict[str, Any]]:
 
 def _norm(v: Any) -> str:
     return v.strip() if isinstance(v, str) else ("" if v is None else str(v))
+
+
+def _catalog_sequence_entries(text: str, *, source: str) -> list[tuple[str, int, int]]:
+    """Return ``(name, start, end)`` spans for a top-level catalog sequence."""
+    try:
+        document = yaml.compose(text)
+    except yaml.YAMLError as exc:
+        raise ValueError(f"cannot parse catalog file {source}: {exc}") from exc
+    if document is None:
+        return []
+    if not isinstance(document, yaml.nodes.SequenceNode):
+        raise ValueError(f"catalog file {source} is not a top-level sequence")
+
+    named_starts: list[tuple[str, int]] = []
+    for item in document.value:
+        if not isinstance(item, yaml.nodes.MappingNode):
+            raise ValueError(f"catalog file {source} contains a non-mapping entry")
+        name = ""
+        for key, value in item.value:
+            if (
+                isinstance(key, yaml.nodes.ScalarNode)
+                and key.value == "name"
+                and isinstance(value, yaml.nodes.ScalarNode)
+            ):
+                name = str(value.value)
+                break
+        if not name:
+            raise ValueError(f"catalog file {source} contains an entry without a name")
+        named_starts.append((name, item.start_mark.index - item.start_mark.column))
+
+    return [
+        (
+            name,
+            start,
+            named_starts[index + 1][1] if index + 1 < len(named_starts) else len(text),
+        )
+        for index, (name, start) in enumerate(named_starts)
+    ]
+
+
+def _catalog_entries_from_text(
+    text: str, *, source: str
+) -> dict[str, _CatalogEntryBytes]:
+    entries: dict[str, _CatalogEntryBytes] = {}
+    for name, start, end in _catalog_sequence_entries(text, source=source):
+        if name in entries:
+            raise ValueError(f"duplicate catalog identity {name!r} in {source}")
+        entries[name] = _CatalogEntryBytes(path=source, content=text[start:end])
+    return entries
+
+
+def _merge_catalog_entries(
+    target: dict[str, _CatalogEntryBytes],
+    additions: dict[str, _CatalogEntryBytes],
+) -> None:
+    for name, entry in additions.items():
+        if name in target:
+            raise ValueError(f"duplicate catalog identity {name!r} across files")
+        target[name] = entry
+
+
+def _catalog_entries_at_ref(repo: Path, ref: str) -> dict[str, _CatalogEntryBytes]:
+    listing = _git(["ls-tree", "-r", "--name-only", ref, "--", "standard_names"], repo)
+    if listing is None:
+        raise ValueError(f"cannot read approved catalog baseline at {ref!r}")
+    entries: dict[str, _CatalogEntryBytes] = {}
+    for rel in listing.splitlines():
+        if not rel.endswith((".yml", ".yaml")):
+            continue
+        text = _git(["show", f"{ref}:{rel}"], repo)
+        if text is None:
+            raise ValueError(f"cannot read {rel} from approved catalog baseline")
+        _merge_catalog_entries(entries, _catalog_entries_from_text(text, source=rel))
+    return entries
+
+
+def _catalog_entries_in_worktree(repo: Path) -> dict[str, _CatalogEntryBytes]:
+    entries: dict[str, _CatalogEntryBytes] = {}
+    root = repo / "standard_names"
+    if not root.is_dir():
+        return entries
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.suffix not in {".yml", ".yaml"}:
+            continue
+        rel = path.relative_to(repo).as_posix()
+        _merge_catalog_entries(
+            entries,
+            _catalog_entries_from_text(path.read_text(encoding="utf-8"), source=rel),
+        )
+    return entries
+
+
+def _prepare_additive_catalog_delta(
+    isnc_dir: str | Path, base_ref: str
+) -> _AdditiveCatalogDelta:
+    """Verify the merged catalog retains its approved baseline byte-for-byte."""
+    repo = Path(isnc_dir)
+    status = _git_cp(["status", "--porcelain", "--untracked-files=all"], repo)
+    if status.returncode != 0:
+        raise ValueError(f"cannot inspect catalog checkout: {status.stderr.strip()}")
+    if status.stdout.strip():
+        raise ValueError("catalog checkout must be clean before approval fold-back")
+    branch = _git_cp(["symbolic-ref", "--short", "HEAD"], repo)
+    if branch.returncode != 0 or branch.stdout.strip() != "main":
+        raise ValueError("catalog approval fold-back must run on checked-out main")
+
+    baseline = _catalog_entries_at_ref(repo, base_ref)
+    merged = _catalog_entries_in_worktree(repo)
+    for name, approved_entry in baseline.items():
+        current_entry = merged.get(name)
+        if current_entry is None:
+            raise ValueError(f"merged PR removed approved catalog entry {name!r}")
+        if current_entry != approved_entry:
+            raise ValueError(
+                f"merged PR changed approved catalog entry {name!r}; "
+                "approval batches must be additive"
+            )
+    return _AdditiveCatalogDelta(added_names=frozenset(merged).difference(baseline))
+
+
+def _remove_catalog_entries(repo: Path, names: set[str]) -> list[str]:
+    """Remove selected entries while retaining every surviving byte exactly."""
+    changed: list[str] = []
+    root = repo / "standard_names"
+    if not root.is_dir():
+        return changed
+    remaining = set(names)
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.suffix not in {".yml", ".yaml"}:
+            continue
+        rel = path.relative_to(repo).as_posix()
+        text = path.read_text(encoding="utf-8")
+        spans = _catalog_sequence_entries(text, source=rel)
+        found = {name for name, _start, _end in spans if name in remaining}
+        if not found:
+            continue
+        cursor = 0
+        pieces: list[str] = []
+        kept = 0
+        for name, start, end in spans:
+            pieces.append(text[cursor:start])
+            if name not in names:
+                pieces.append(text[start:end])
+                kept += 1
+            cursor = end
+        pieces.append(text[cursor:])
+        if kept:
+            path.write_text("".join(pieces), encoding="utf-8")
+        else:
+            path.unlink()
+        changed.append(rel)
+        remaining.difference_update(found)
+    if remaining:
+        raise ValueError(
+            "cannot remove unapproved catalog entries absent from main: "
+            + ", ".join(sorted(remaining))
+        )
+    return changed
+
+
+_CATALOG_CORRECTION_SUBJECT = "catalog: materialize approved entries"
+_CATALOG_UNDO_SUBJECT = "catalog: unwind approved materialization"
+
+
+def _commit_catalog_correction(
+    repo: Path,
+    *,
+    names: set[str],
+    pr_number: int,
+    pr_url: str,
+) -> str | None:
+    """Remove unapproved additions, commit the correction, and push catalog main."""
+    if not names:
+        return None
+    changed = _remove_catalog_entries(repo, names)
+    staged = _git_cp(["add", "--", *changed], repo)
+    if staged.returncode != 0:
+        raise RuntimeError(f"cannot stage catalog correction: {staged.stderr.strip()}")
+    parent = _git_cp(["rev-parse", "HEAD"], repo)
+    if parent.returncode != 0:
+        raise RuntimeError(f"cannot identify catalog main: {parent.stderr.strip()}")
+    message = (
+        "Remove entries that did not earn fold-back approval so main remains "
+        "the accumulated approved catalog.\n\n"
+        f"Catalog-Approval-PR: {pr_number}\n"
+        f"Catalog-Approval-URL: {pr_url}\n"
+        f"Catalog-Pre-Fold-Back: {parent.stdout.strip()}"
+    )
+    committed = _git_cp(
+        ["commit", "-m", _CATALOG_CORRECTION_SUBJECT, "-m", message], repo
+    )
+    if committed.returncode != 0:
+        raise RuntimeError(
+            f"cannot commit catalog correction: {committed.stderr.strip()}"
+        )
+    correction = _git_cp(["rev-parse", "HEAD"], repo)
+    branch = _git_cp(["symbolic-ref", "--short", "HEAD"], repo)
+    remote = resolve_tag_remote(repo, pr_url)
+    pushed = _git_cp(
+        ["push", remote, f"HEAD:{branch.stdout.strip()}"],
+        repo,
+    )
+    if pushed.returncode != 0:
+        raise RuntimeError(
+            f"catalog correction {correction.stdout.strip()} was committed locally "
+            f"but could not be pushed to {remote}: {pushed.stderr.strip()}"
+        )
+    return correction.stdout.strip()
+
+
+def _find_catalog_correction(repo: Path, pr_number: int) -> str | None:
+    hashes = _git(["log", "--format=%H", "--", "standard_names"], repo) or ""
+    trailer = f"Catalog-Approval-PR: {pr_number}"
+    for commit in hashes.splitlines():
+        message = _git(["show", "-s", "--format=%B", commit], repo) or ""
+        if message.splitlines()[0:1] != [_CATALOG_CORRECTION_SUBJECT]:
+            continue
+        if trailer not in message.splitlines():
+            continue
+        later = _git(["log", "--format=%B", f"{commit}..HEAD"], repo) or ""
+        if f"Catalog-Correction: {commit}" in later.splitlines():
+            return None
+        return commit
+    return None
+
+
+def _undo_catalog_correction(
+    repo: Path, *, pr_number: int, remote: str
+) -> tuple[bool, str | None]:
+    """Apply the inverse correction as a new commit and push it to catalog main."""
+    correction = _find_catalog_correction(repo, pr_number)
+    if correction is None:
+        return True, None
+    status = _git_cp(["status", "--porcelain", "--untracked-files=all"], repo)
+    if status.returncode != 0 or status.stdout.strip():
+        return False, "catalog checkout must be clean before undoing materialization"
+    patch = _git_cp(["show", "--format=", "--binary", correction], repo)
+    if patch.returncode != 0:
+        return False, f"cannot read catalog correction {correction}"
+    applied = subprocess.run(
+        ["git", "apply", "--reverse", "--index"],
+        cwd=str(repo),
+        input=patch.stdout,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if applied.returncode != 0:
+        return False, f"cannot reverse catalog correction: {applied.stderr.strip()}"
+    message = (
+        "Restore the catalog entries removed by the fold-back correction.\n\n"
+        f"Catalog-Approval-PR: {pr_number}\n"
+        f"Catalog-Correction: {correction}"
+    )
+    committed = _git_cp(["commit", "-m", _CATALOG_UNDO_SUBJECT, "-m", message], repo)
+    if committed.returncode != 0:
+        return (
+            False,
+            f"cannot commit catalog materialization undo: {committed.stderr.strip()}",
+        )
+    branch = _git_cp(["symbolic-ref", "--short", "HEAD"], repo)
+    pushed = _git_cp(["push", remote, f"HEAD:{branch.stdout.strip()}"], repo)
+    if pushed.returncode != 0:
+        return (
+            False,
+            f"cannot push catalog materialization undo: {pushed.stderr.strip()}",
+        )
+    return True, None
 
 
 def read_pr_changes(isnc_dir: str | Path, base_ref: str) -> list[ApprovalChange]:
@@ -682,6 +965,10 @@ def run_approval(
             "catalog approval requires PR number, PR URL, and merge commit SHA"
         )
 
+    catalog_delta: _AdditiveCatalogDelta | None = None
+    if batch and not dry_run and all(value is not None for value in approval_values):
+        catalog_delta = _prepare_additive_catalog_delta(isnc_dir, base_ref)
+
     changes = read_pr_changes(isnc_dir, base_ref)
     report.changes_seen = len(changes)
     # With no edits AND no batch there is nothing to do. A batch with no edits
@@ -851,6 +1138,15 @@ def run_approval(
                             sn_id=nid, axis="name", decision="auto_approved"
                         )
                     )
+        if catalog_delta is not None:
+            approved_additions = set(report.accepted) | set(report.auto_approved)
+            unapproved_additions = set(catalog_delta.added_names) - approved_additions
+            _commit_catalog_correction(
+                Path(isnc_dir),
+                names=unapproved_additions,
+                pr_number=int(catalog_pr_number),
+                pr_url=str(catalog_pr_url),
+            )
         return report
     finally:
         if owns_gc:
@@ -1177,12 +1473,23 @@ def create_fold_back_tag(
 def delete_fold_back_tag(
     isnc_dir: str | Path, *, tag: str, remote: str
 ) -> tuple[bool, str | None]:
-    """Delete the fold-back tag locally and on *remote* (the ``--undo`` inverse).
+    """Undo catalog materialization, then delete the local and remote receipt.
 
     A missing local tag is not an error (undo may run after a fresh checkout);
     a remote-delete failure is reported. Returns ``(ok, error)``.
     """
     isnc = Path(isnc_dir)
+    contents = _git(["tag", "-l", tag, "--format=%(contents)"], isnc) or ""
+    pr_match = re.search(r"(?m)^pr: #(\d+)\b", contents)
+    if pr_match:
+        restored, restore_error = _undo_catalog_correction(
+            isnc,
+            pr_number=int(pr_match.group(1)),
+            remote=remote,
+        )
+        if not restored:
+            return False, restore_error
+
     errors: list[str] = []
     local = _git_cp(["tag", "-d", tag], isnc)
     if local.returncode != 0 and "not found" not in local.stderr.lower():
