@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T11:43:37",
+  "updated": "2026-08-27T12:00:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -38054,9 +38054,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T094442392994-n-catalog-preview-workflow",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-catalog-preview-workflow",
+        "node_definition": {
+          "done_when": "Operational surface: catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog and fork Simon-McIntosh/imas-standard-names-catalog only, never upstream. The Catalog Site workflow gains a pull_request job that, for same-repository PRs, fetches the PR base and head SHAs and invokes the exact site-deploy command recorded in reports/isn-preview-scope.md (ISN commit 1c63ad0 preview mode), passing the PR number as the version so the deploy path is per-PR, the PR base SHA as review-base and the PR head SHA as review-head, and never passing --set-default; it then upserts a single PR comment carrying the preview URL, idempotent so a re-run updates that same comment and never appends a second; the misleading always-green skipped build on PRs is resolved by making the job genuinely build or by renaming the check to say what it does, with the choice and reason stated; external-fork PRs degrade to an artifact upload rather than failing. Evidence: the workflow runs live on PR 2 to success with the run URL recorded, the preview URL returns HTTP 200 and its dataset contains only that PR's added-or-edited entries with a recorded count equal to the PR's entry additions, the PR carries exactly one preview comment, and a second run updates rather than duplicates it; fork-main pushes only; conventional commit; no upstream, graph, or imas-codex writes",
+          "estimated_hours": null,
+          "goal": "Every review PR gets a built site of only its own entries, linked from the PR",
+          "id": "n-catalog-preview-workflow",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T094442392994-n-catalog-preview-workflow/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-preview-workflow.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-catalogblank",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T09:44:47Z",
+        "completed_at": "2026-08-27T10:00:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 935,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 935,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "675f5803f5f69b3c83dd3a17e5b2d65a65b5c7eb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live Catalog Site run 33060827281 (2 attempts) + preview HTTP 200 + scoped dataset count + comment idempotency check",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T094442392994-n-catalog-preview-workflow/pr2-run-comment-rerun-full.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T094442392994-n-catalog-preview-workflow/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a04204-57a9-76e2-92f5-8e76a56e9c11",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1090048,
+            "cached_input_tokens_cumulative": 6080768,
+            "input_tokens": 1136576,
+            "input_tokens_cumulative": 6319753,
+            "output_tokens": 501,
+            "output_tokens_cumulative": 19279,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4364
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1019
+    "_version": 1020
   }
 }
