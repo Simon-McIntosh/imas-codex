@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T09:22:44",
+  "updated": "2026-09-01T09:33:32",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -39846,9 +39846,103 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T065916400950-n-west-demo-rc",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-demo-rc",
+        "node_definition": {
+          "done_when": "You hold exclusive use of the catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog; fork Simon-McIntosh/imas-standard-names-catalog only, never upstream. Pre-steps: ensure the ISN dependency pin used by the release resolves to ISN fork main at or after commit 93195dd so the new binding shape and writer are in effect (state the pin you used); close fork PR 2 unmerged with a one-line superseded comment and delete its review branch; pull the catalog checkout to current fork main. Prepare the body: copy /run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/fe0ce76b-3257-4945-a367-2247df554cd3/scratchpad/pr-demo-body.md and replace the single token ENTRY_COUNT with the exact emitted entry count, changing nothing else. With IMAS_CODEX_SN_ISNC set to the catalog checkout, run the release once: uv run imas-codex sn release --batch west_production_dd_paths --bump minor -m 'WEST review batch' --pr-title 'WEST review batch' --pr-body-file pointing at your prepared body. Report: minted RC version; the annotated RC tag on the fork with its object SHA and its appearance as a fork Release; the PR URL; proof the diff is pure addition against fork main with 0 modified and 0 deleted; the emitted entry count; the total line count of the emitted standard_names directory against the 12137-line original equilibrium.yml for comparison; confirmation that no emitted binding contains dd_path, dd_version, signal_id or semantic_facet; the frozen artifact path and sha256; the published title and body quoted; and the preview site URL once CI posts it, with its HTTP status and the entry count the site reports. Never close or reopen a PR to re-trigger CI; use the workflow dispatch input if a rebuild is needed. On nonzero exit stop and report without retrying",
+          "estimated_hours": null,
+          "goal": "A demonstration WEST release candidate is open on the fork in the new catalog format",
+          "id": "n-west-demo-rc",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T065916400950-n-west-demo-rc/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-demo-rc.md",
+            "imas_codex/standard_names/manifests/reviews/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-exportpolicy",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T06:59:23Z",
+        "completed_at": "2026-09-01T07:32:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2001,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2001,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e0272219411171ba7596280d4cf6fa630743235a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T065916400950-n-west-demo-rc/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2714112,
+            "cached_input_tokens_cumulative": 4885248,
+            "input_tokens": 2811137,
+            "input_tokens_cumulative": 5113068,
+            "output_tokens": 1161,
+            "output_tokens_cumulative": 11323,
+            "reasoning_output_tokens": 2472,
+            "reasoning_output_tokens_cumulative": 3806
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1052
+    "_version": 1053
   }
 }
