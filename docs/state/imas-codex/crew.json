@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T09:16:49",
+  "updated": "2026-09-01T09:22:44",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -39714,9 +39714,141 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T071637221157-n-isn-pin-bump",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-isn-pin-bump",
+        "node_definition": {
+          "done_when": "Both imas-standard-names dependency pins in pyproject.toml (there are two sites, around lines 18 and 184) advance from the current fork SHA to ISN fork main commit 93195dd or later, which carries the generic kind/ref/version binding, the review-friendly writer and the declared-algebra fix; uv.lock is regenerated to match. Verification recorded: uv run python -c importing imas_standard_names prints a version and the resolved commit; the focused export test module passes once to a persistent log exit 0 proving the new binding shape validates against the installed ISN model; ruff clean on pyproject if applicable. Local conventional commit with body covering pyproject.toml and uv.lock; no push; no graph writes",
+          "estimated_hours": null,
+          "goal": "The codex ISN pin resolves to the new catalog format",
+          "id": "n-isn-pin-bump",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T071637221157-n-isn-pin-bump/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "pyproject.toml",
+            "uv.lock"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-yamlslim",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:16:44Z",
+        "completed_at": "2026-09-01T07:22:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 330,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 330,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "e0272219411171ba7596280d4cf6fa630743235a",
+        "commits": [
+          "b3d933adf4cf82d78c70dd3213ef6300e699f74b"
+        ],
+        "changed_lines": {
+          "added": 5,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused export contract tests against the newly pinned ISN",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-demo-rc.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T071637221157-n-isn-pin-bump/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05b79-8edc-7982-b4f7-1ea4c0eea1c8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17664,
+            "cached_input_tokens_cumulative": 3835648,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3916870,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 6980,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1744
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: required durable ISN dependency pin at or after 93195dd cannot be produced within the exclusive write scope; which excludes pyproject.toml and uv.lock",
+              "elapsed_seconds": 1039,
+              "log_age_seconds": 820,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T065916400950-n-west-demo-rc/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T065916400950-n-west-demo-rc/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-west-demo-rc",
+              "phase": "starting",
+              "plan": "sn-west-review-rehearsal",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260901T065916400950-n-west-demo-rc",
+              "terminal_age_seconds": 843,
+              "terminal_at": "2026-09-01T07:02:39Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/west-demo-20260901d/n-west-demo-rc"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1051
+    "_version": 1052
   }
 }
