@@ -738,24 +738,26 @@ def test_seed_parent_sources_keeps_unit_between_normalized_names():
 
 
 def test_repair_normalization_peel_parent_units_scoping():
-    """The repair Cypher keys on all three guards: derived origin with a
-    recorded name-unit finding, no own normalization marker, and only
-    normalization-variant unit children."""
-    import inspect
+    """The normalization repair is reachable only through signed authority."""
+    import functools
 
     from imas_codex.standard_names import graph_ops
+    from imas_codex.standard_names.signed_manifest import apply_signed_manifest
 
-    src = inspect.getsource(graph_ops.repair_normalization_peel_parent_units)
-    assert "name_unit_consistency_check" in src, (
-        "repair must be gated on a recorded name-unit finding so genuinely "
-        "dimensionless parents (collisionality) are untouched"
-    )
-    assert "origin: 'derived'" in src
-    assert "SET sn.unit = null" in src and "DELETE r" in src
-
-    gc = MagicMock()
-    gc.query = MagicMock(return_value=[{"id": "particle_mass"}])
-    assert graph_ops.repair_normalization_peel_parent_units(gc) == ["particle_mass"]
+    repair = graph_ops.repair_normalization_peel_parent_units
+    assert isinstance(repair, functools.partial)
+    assert repair.func is apply_signed_manifest
+    assert repair.keywords == {
+        "authority_adapter": "normalization-peel-unit-repair",
+        "mutation_kind": "clear-normalization-peel-parent-unit",
+        "guard_set": (
+            "corrected-normalization-peel-unit-authority",
+            "out-of-allowlist-immutability",
+        ),
+        "reason": "clear mis-inherited units from normalization-peel parents",
+        "apply": True,
+    }
+    assert repair.args == ({},)
 
 
 # ── Tests: docs enrichment with parent/child context ────────────────────

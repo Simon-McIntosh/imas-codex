@@ -389,9 +389,13 @@ def test_quantity_token_duals_pass_identity_collision_gate(tmp_path: Path) -> No
 def test_non_quantity_token_collision_blocks_export_with_registry_citation(
     tmp_path: Path,
 ) -> None:
+    from imas_standard_names import get_grammar_context
+
+    locus_tokens = get_grammar_context()["grammar"]["vocabularies"]["locus_registry"]
+    collision_token = sorted(locus_tokens)[0]
     population = [
         _candidate(
-            "minimum_safety_factor",
+            collision_token,
             _has_dd_source_binding=True,
             _has_derived_producer=False,
             _has_non_derived_producer=True,
@@ -409,11 +413,11 @@ def test_non_quantity_token_collision_blocks_export_with_registry_citation(
     assert not (tmp_path / "catalog.yml").exists()
     assert len(collision_gate.issues) == 1
     issue = collision_gate.issues[0]
-    assert issue["identity"] == "minimum_safety_factor"
-    assert issue["token"] == "minimum_safety_factor"
+    assert issue["identity"] == collision_token
+    assert issue["token"] == collision_token
     assert issue["segment"] == "locus"
     assert issue["registry_entry"].startswith("locus_registry.yml:")
-    assert "minimum_safety_factor" in issue["detail"]
+    assert collision_token in issue["detail"]
     assert "locus" in issue["detail"]
     assert "locus_registry.yml:" in issue["detail"]
 
