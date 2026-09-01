@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T11:38:07",
+  "updated": "2026-09-01T12:14:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -40624,9 +40624,116 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T094146165152-n-mint-drop-accounting2",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-mint-drop-accounting2",
+        "node_definition": {
+          "done_when": "The silent drop occurs at cohort MINTING, which discards manifest membership and terminal target identity before the exporter sees the batch, so fix it where the data still exists: find the minting and release handoff code that builds the frozen candidate cohort from a batch manifest and carry forward, for every manifest source, its source path and the identity it currently produces even when that identity is not accepted. The exporter then records each such source as an excluded row naming the source path, the identity and its terminal stage, instead of the source vanishing and appearing only as an unmatched path. Every manifest source ends in exactly one of three accounted states \u2014 emitted, excluded with a reason, or documented non-nameable \u2014 and the export report carries that reconciliation as a count equal to the manifest size, which is 355 for west_production_dd_paths. Focused tests prove a source whose identity is exhausted appears as an excluded row rather than disappearing, a source whose identity is superseded with an unaccepted replacement appears once with the replacement named, an accepted source still emits, and the three-state reconciliation equals the manifest size in a fixture containing all three. Regenerate the WEST batch read-only and record the three-state reconciliation against 355. Tests captured once to a persistent log exit 0; ruff clean; local conventional commit with body; no push, no graph writes",
+          "estimated_hours": null,
+          "goal": "A manifest source that loses its name is an accounted exclusion, not a silent drop",
+          "id": "n-mint-drop-accounting2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T094146165152-n-mint-drop-accounting2/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "imas_codex/standard_names/catalog_release.py",
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_export_exclusion_ledger.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-mintledger",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T09:41:54Z",
+        "completed_at": "2026-09-01T09:53:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 717,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 717,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "a696cb6d434ba00c5da65b33640c9e3f15eb184b",
+        "commits": [
+          "8ce1b3be1c54dce4ed1dde0458f49b7223d04386"
+        ],
+        "changed_lines": {
+          "added": 354,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_export_exclusion_ledger.py + live WEST reconciliation",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T094146165152-n-mint-drop-accounting2/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T094146165152-n-mint-drop-accounting2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c58-bf71-7ef2-89fd-0917ab49d423",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8409600,
+            "cached_input_tokens_cumulative": 8409600,
+            "input_tokens": 8978391,
+            "input_tokens_cumulative": 8978391,
+            "output_tokens": 23427,
+            "output_tokens_cumulative": 23427,
+            "reasoning_output_tokens": 6216,
+            "reasoning_output_tokens_cumulative": 6216
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1066
+    "_version": 1067
   }
 }
