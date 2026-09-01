@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 from datetime import UTC, datetime
@@ -38,6 +39,107 @@ if TYPE_CHECKING:
     from imas_codex.graph.profiles import Neo4jProfile
 
 NEO4J_IMAGE = neo4j_image()
+
+
+def _measure_graph_scope(driver) -> dict[str, int | dict[str, int]]:
+    """Measure totals and every node label through one graph connection."""
+    with driver.session() as session:
+        node_record = session.run("MATCH (n) RETURN count(n) AS count").single()
+        relationship_record = session.run(
+            "MATCH ()-[r]->() RETURN count(r) AS count"
+        ).single()
+        label_rows = session.run(
+            "MATCH (n) UNWIND labels(n) AS label "
+            "RETURN label, count(*) AS count ORDER BY label"
+        )
+        return {
+            "nodes": node_record["count"] if node_record else 0,
+            "relationships": (
+                relationship_record["count"] if relationship_record else 0
+            ),
+            "labels": {row["label"]: row["count"] for row in label_rows},
+        }
+
+
+def _measure_live_graph_scope() -> dict[str, int | dict[str, int]]:
+    """Measure the active graph while it is still available over Bolt."""
+    from imas_codex.graph.client import GraphClient
+
+    client = GraphClient.from_profile()
+    try:
+        return _measure_graph_scope(client)
+    finally:
+        client.close()
+
+
+def _measure_dump_scope(dump_path: Path) -> dict[str, int | dict[str, int]]:
+    """Load an archive dump temporarily and measure its exact stored scope."""
+    from neo4j import GraphDatabase
+
+    from imas_codex.graph.temp_neo4j import (
+        _cleanup_stale_temp_neo4j,
+        _should_use_slurm,
+        _slurm_partition,
+        start_temp_neo4j,
+        stop_temp_neo4j,
+    )
+
+    if _should_use_slurm():
+        with tempfile.TemporaryDirectory(dir=dump_path.parent) as result_dir:
+            result_path = Path(result_dir) / "scope.json"
+            partition = _slurm_partition()
+            if not partition.endswith("_debug"):
+                partition = f"{partition}_debug"
+            measure_script = (
+                "import json, sys; from pathlib import Path; "
+                "from imas_codex.cli.graph.data import _measure_dump_scope; "
+                "Path(sys.argv[2]).write_text(json.dumps("
+                "_measure_dump_scope(Path(sys.argv[1]))))"
+            )
+            result = subprocess.run(
+                [
+                    "srun",
+                    f"--partition={partition}",
+                    "--time=00:30:00",
+                    "--cpus-per-task=2",
+                    "--mem=8G",
+                    sys.executable,
+                    "-c",
+                    measure_script,
+                    str(dump_path),
+                    str(result_path),
+                ],
+                capture_output=True,
+                text=True,
+                env={**os.environ, "TMPDIR": "/tmp"},
+            )
+            if result.returncode != 0:
+                raise click.ClickException(
+                    f"Failed to measure archive dump on compute node: "
+                    f"{result.stderr.strip()}"
+                )
+            return json.loads(result_path.read_text())
+
+    bolt_port = 27687
+    http_port = 27474
+    _cleanup_stale_temp_neo4j(bolt_port, http_port)
+
+    temp_base = dump_path.parent if shutil.which("srun") else None
+    with tempfile.TemporaryDirectory(dir=temp_base) as tmpdir:
+        temp_dir = Path(tmpdir) / "neo4j-scope"
+        for subdir in ("data", "logs", "dumps"):
+            (temp_dir / subdir).mkdir(parents=True)
+        shutil.copy(dump_path, temp_dir / "dumps" / "neo4j.dump")
+
+        process, _log_path = start_temp_neo4j(temp_dir, bolt_port, http_port)
+        try:
+            driver = GraphDatabase.driver(f"bolt://127.0.0.1:{bolt_port}", auth=None)
+            try:
+                return _measure_graph_scope(driver)
+            finally:
+                driver.close()
+        finally:
+            stop_temp_neo4j(process)
 
 
 def _resolve_scheduler(profile: Neo4jProfile) -> str:
@@ -417,6 +519,10 @@ def graph_export(
 
     require_apptainer()
 
+    archive_scope = None
+    if not source_dump and not facilities and not dd_only:
+        archive_scope = _measure_live_graph_scope()
+
     def _build_archive(archive_dir: Path) -> None:
         """Build the archive contents: dump with optional filtering."""
         if source_dump:
@@ -455,12 +561,18 @@ def graph_export(
                 archive_dir / "graph.dump",
             )
 
+        measured_scope = archive_scope or _measure_dump_scope(
+            archive_dir / "graph.dump"
+        )
         manifest = {
             "version": __version__,
             "git_commit": git_info["commit"],
             "git_tag": git_info["tag"],
             "timestamp": datetime.now(UTC).isoformat(),
             "format": "csv" if (archive_dir / "csv").is_dir() else "dump",
+            "node_count": measured_scope["nodes"],
+            "relationship_count": measured_scope["relationships"],
+            "label_counts": measured_scope["labels"],
         }
         (archive_dir / "manifest.json").write_text(json.dumps(manifest, indent=2))
 
