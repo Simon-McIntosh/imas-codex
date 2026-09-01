@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="156">
+<meta name="plan-version" content="158">
 <meta name="plan-impl" content="0.99">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23,b5ed3fae">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23,b5ed3fae,dc5bdcc3">
 </head>
 <body>
   <main class="plan-doc">
@@ -2642,6 +2642,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260902T0131-undo" data-who="reckon-ship" data-when="2026-09-02T01:31:00Z">
     <div class="r-comment-body">Stage 6 undo ran live (report b5ed3fae, merged c787bbd2): sn approve --undo demoted 374 approved and 1 contested, cleared PR provenance on all of them, reverted the catalog by inverse commit 408eb922 on the fork, removed the graph-merged: receipt and kept the cut-time RC tag; accepted human edits stayed as history. Negative result: breakdown_initial_time stayed approved, because the pre-fix resolve had approved it with null PR provenance and undo selects approved names by catalog_pr_number only. Census after: approved 1, contested 0, accepted 2335 versus expected 0 / 0 / 2336. Two operational notes: undo first exited 2 in the detached worktree because ISNC discovery failed and needed IMAS_CODEX_SN_ISNC set; and the provenance fix at 65a43ae3 prevents the recurrence for future approvals. Fix node: undo falls back to frozen-batch membership for approved names lacking provenance; then undo repeats to clear the last row, then 6b re-fold.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T233138048589-n-undo-batch-membership-fallback" data-who="impl-approvebase" data-when="2026-09-01T23:41:35Z">
+    <div class="r-comment-body"><p>undo_approval now also demotes approved frozen-batch members lacking catalog_pr_number while leaving non-members untouched; approval suites pass</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260902T0142-undo-fallback" data-who="reckon-ship" data-when="2026-09-02T01:42:00Z">
+    <div class="r-comment-body">Undo fallback landed at dc5bdcc3 (merged 038b5ae5): undo_approval demotes an approved row when catalog_pr_number matches the PR, or when it is null and the id belongs to the supplied frozen batch; a three-row fixture proves both selected rows revert with all five catalog_* fields cleared while a null-provenance non-member is byte-identical; 56/56 approval tests. Stage 6b next: one live cycle with all repairs in place, sn approve --pr (expect 374 auto-approved, 2 contested WITH provenance, receipt tag), sn resolve --override on breakdown_initial_time (expect the reviewer wording materialized), sn approve --undo (expect approved 0, contested 0, receipt gone, RC tag kept), leaving the graph unwound for the real physicist review under sn-west-catalog-release.</div>
 </div>
 </section>
 </main>
