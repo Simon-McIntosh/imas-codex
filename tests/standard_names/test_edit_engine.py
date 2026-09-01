@@ -1488,7 +1488,8 @@ class TestRefineRotationPropagation:
             edit_mode="rename",
             edit_status="applied",  # already resolved — should NOT propagate
         )
-        with _patched_graph(fake):
+        fake.add_source("dd:magnetics/ip", sn_id="toroidal_plasma_current")
+        with _patched_graph(fake), _admitting_pairing_guard():
             result = persist_refined_name(
                 old_name="toroidal_plasma_current",
                 new_name="poloidal_plasma_current",

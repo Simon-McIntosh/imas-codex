@@ -244,22 +244,16 @@ def test_any_rejected_source_rolls_back_everything(
     record.assert_not_called()
 
 
-def test_source_less_rename_refuses_without_recording_human_edit() -> None:
+def test_source_less_rename_still_records_human_edit() -> None:
     admitted = AttachmentPairingGuardResult((), ())
     with _persistence_boundary([], admitted) as boundary:
-        transaction, guard, retarget, record = boundary
-        with pytest.raises(RefinedNamePersistenceRefusal) as refusal:
-            _persist()
+        transaction, _guard, retarget, record = boundary
+        _persist()
 
-    assert (
-        refusal.value.reason
-        is RefinedNamePersistenceRefusalReason.AUTHORITATIVE_SOURCE_COHORT_EMPTY
-    )
-    guard.assert_not_called()
-    retarget.assert_not_called()
-    record.assert_not_called()
-    transaction.rollback.assert_called_once_with()
-    transaction.commit.assert_not_called()
+    assert retarget.call_args.kwargs["source_ids"] == []
+    record.assert_called_once()
+    assert record.call_args.kwargs["operation"] == "human_edit"
+    transaction.commit.assert_called_once_with()
 
 
 def test_predecessor_compare_and_set_loss_has_no_mutation() -> None:
