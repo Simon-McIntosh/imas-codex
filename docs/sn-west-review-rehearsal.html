@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="128">
+<meta name="plan-version" content="129">
 <meta name="plan-impl" content="0.92">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2556,6 +2556,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260901T112106078906-n-pending-plan-staleness" data-who="test-planstale" data-when="2026-09-01T11:41:48Z">
     <div class="r-comment-body"><p>Verdicts for all 15 open plans: 5 still-current, 8 contradicted, 1 empty (sn-embedding-coverage-gate), 1 overtaken (strategy, the only pre-August plan). Named the specific text to change in each contradicted plan and surfaced a new 2-row accepted-embedding regression.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260901T114326366102-n-repair-contradicted-plans" data-who="impl-planrepair" data-when="2026-09-01T11:50:49Z">
+    <div class="r-comment-body"><p>Eight plans stop asserting things that are no longer true: five carried stale operational instructions (a superseded pull request, a renamed command, a shipped dependency), three carried drifted live counts. sn-west-catalog-release&#x27;s depends_on drops from three entries to one.</p></div>
 </div>
 </section>
 </main>
