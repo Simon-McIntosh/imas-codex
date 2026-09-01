@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:26:25",
+  "updated": "2026-09-01T23:31:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -48081,9 +48081,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T212730575700-n-west-stage4b-resolve",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage4b-resolve",
+        "node_definition": {
+          "done_when": "crew/reports/west-stage4b-resolve.md records a Cypher read of both contested nodes before (name_stage, docs_stage, reviewer_score_docs, contested_reason, description, the four catalog_* provenance fields), the resolve command with exit status and output, and the same read after showing breakdown_initial_time name_stage='approved' with contested_resolution recorded, its description equal to the reviewer's edited text, pulse_duration unchanged, contested_total 1, plus a note on whether resolve stamped the catalog_* provenance fields",
+          "estimated_hours": null,
+          "goal": "Demonstrate the contested-to-approved adjudication path on the live graph by running imas-codex sn resolve breakdown_initial_time --override --reason with a reason stating the shorter wording preserves the breakdown-onset semantics, leaving pulse_duration contested",
+          "id": "n-west-stage4b-resolve",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212730575700-n-west-stage4b-resolve/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "crew/reports/west-stage4b-resolve.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:27:37Z",
+        "completed_at": "2026-09-01T21:30:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 184,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 184,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "da31b00791dda63724c5e9713007c92af4026b9e",
+        "commits": [
+          "4d078c6f069485ec6a4a82543cfa417112a086d3"
+        ],
+        "changed_lines": {
+          "added": 214,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "imas-codex sn resolve breakdown_initial_time --override --reason ...; Cypher read before and after",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:5e6d43025ae524849a3c901d7b3e8abebb964d05f07bdb90a79492080f4d7530"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T212730575700-n-west-stage4b-resolve/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 549632,
+            "cached_input_tokens_cumulative": 2980352,
+            "input_tokens": 488010,
+            "input_tokens_cumulative": 3069116,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 7490,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 985
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1248
+    "_version": 1249
   }
 }

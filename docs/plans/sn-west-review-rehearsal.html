@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="140">
+<meta name="plan-version" content="141">
 <meta name="plan-impl" content="0.97">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2594,6 +2594,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260901T2127-provenance-fix" data-who="reckon-ship" data-when="2026-09-01T21:27:00Z">
     <div class="r-comment-body">Both stage-4 defects repaired at commit 65a43ae3 (merged 810a1d65): the contest transition now writes catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha and catalog_reviewer_actor atomically with name_stage='contested', undo clears them, and sn approve no longer calls backfill_review_artifact after merge, so the cut-time review manifest stays byte-identical and the graph-merged: tag is the sole fold-back receipt. 54/54 approval tests. Next live stages on the already-folded PR 3 state: 4b sn resolve --override on breakdown_initial_time to demonstrate the contested-to-approved adjudication path; 5 freeze-check with a cost-capped unscoped sn run comparing approved and contested identities before and after; 6 sn approve --undo; 6b re-fold with the repaired code to prove the contested nodes now carry provenance.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T212730575700-n-west-stage4b-resolve" data-who="impl-weststage3" data-when="2026-09-01T21:30:41Z">
+    <div class="r-comment-body"><p>sn resolve --override moved breakdown_initial_time to approved with contested_resolution recorded and left pulse_duration contested, but the node kept its pre-edit description instead of the reviewer&#x27;s wording and the catalog_* provenance stayed null: the resolver approves without materializing the human text it is accepting</p></div>
 </div>
 </section>
 </main>
