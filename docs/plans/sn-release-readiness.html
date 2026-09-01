@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="78">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/closure-audit.md,docs/evidence/sn-release-readiness/residue-disposition.md">
 <meta name="plan-impl" content="1.0">
@@ -445,6 +445,36 @@
   should fix it rather than route around it.
 </p>
 
+<h2 id="s11">&#167;11 &mdash; Four suite failures a release would carry</h2>
+<p>
+  A full <code>tests/standard_names</code> capture on 2026-09-01 reported 6,811 passed
+  and 4 failed. All four were independently verified <strong>pre-existing</strong> by
+  re-executing the same ids at merge-base <code>711038bf</code> and reproducing identical
+  errors, so none was introduced by that day's work. They are recorded here rather than
+  left in a run log because <strong>two of the four are release-relevant</strong>, which
+  is this plan's subject:
+</p>
+<ul>
+  <li><code>test_catalog_layout_hierarchy::TestRoundTripByteStability::test_byte_stable_round_trip</code>
+    &mdash; <code>UnknownCatalogKeyError</code> for <code>roles</code>. A catalog that does
+    not round-trip byte-stably is a catalog whose published form can drift from its
+    source.</li>
+  <li><code>test_export_exclusion_ledger::test_non_quantity_token_collision_blocks_export_with_registry_citation</code>
+    &mdash; the collision gate asserts <code>not passed</code> and the gate reports
+    <code>passed</code>. An export-exclusion gate that fails open is exactly the class of
+    defect this plan exists to catch.</li>
+  <li><code>test_component_system::test_repair_normalization_peel_parent_units_scoping</code>
+    &mdash; <code>inspect.getsource</code> raises <code>TypeError</code> on a
+    <code>partial</code>. Likely a test-harness fault rather than a product one.</li>
+  <li><code>test_sn_help_no_reconcile::TestSnHelpNoLegacyVerbs::test_no_resolve_links_as_command</code>
+    &mdash; a help-line assertion, cosmetic surface rather than behaviour.</li>
+</ul>
+<p>
+  What this section owes is a disposition per failure with evidence: fixed, or shown to be
+  a stale test asserting a contract the code deliberately changed. The two release-relevant
+  ones must not be closed as cosmetic without demonstrating the export path is sound.
+</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="unreviewed-in-first-release" data-choice="include-structural-only" data-by="Simon McIntosh" data-when="2026-08-23T08:42:13+00:00">
@@ -782,8 +812,14 @@
 <div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T122318417713-n-producerembeddrain" data-who="impl-embedgap" data-when="2026-09-01T12:34:30Z">
     <div class="r-comment-body"><p>Scoped runs now drain StandardName embeddings and refuse completion on a residual gap; regression fails pre-change at assert embedded is True and passes post-change 2/0; targeted pool suites 52 passed 0 failed; no LLM cost</p></div>
 </div>
+<div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T123740388875-n-s9regression" data-who="test-s9regress" data-when="2026-09-01T12:51:09Z">
+    <div class="r-comment-body"><p>SUITE REGRESSED: 6807 passed / 11 failed / 8 skipped at current main; 7 NEW failures all in test_sn_approve_tag.py from ResolvedPr.reviewer_actor becoming a required constructor arg while two fixture helpers omit it; 4 failures verified pre-existing at the merge-base with identical errors; the embedding-drain merge caused none</p></div>
+</div>
 <div class="r-comment" data-section="s7a" data-id="c-20260901T1235-producerdrain" data-who="reckon-ship" data-when="2026-09-01T12:35:00+00:00">
     <div class="r-comment-body">n-producerembeddrain landed — commit 13db4468; gate scoped-run-embedding-drain passed; measure the new regression FAILED against the unmodified code at 1 failed and 0 passed, failing precisely at 'assert state["embedded"] is True', then PASSED after the change at 2 passed and 0 failed, with the targeted pool suites at 52 passed and 0 failed and ruff check and format clean on both paths; 2 tests added; no LLM call and no spend. THE FAIL-FIRST EVIDENCE IS THE POINT: a test that passes both before and after proves nothing and would have closed this section on an assertion. The pre-change failure shows the scoped idle exit performing ZERO embedding work, which is the defect stated rather than inferred. THE FIX DOES NOT TRUST ITSELF, which is what makes it a gate rather than a hope: after transient scope residue clears, and only on a successful scope_run_id exit, it drains through the existing claim, process and persist path in run-id-bounded batches of 100, releases claims and RAISES on an embedding exception or a written-count mismatch, and then INDEPENDENTLY re-queries the same run scope for accepted described StandardName rows whose embedding is null, raising on any nonzero result. So a partial or silently-short drain fails the run instead of completing it. This closes the producer half of the embedding gap: the two repaired rows can no longer be recreated by the next scoped run.</div>
+</div>
+<div class="r-comment" data-section="§2a" data-id="c-run-r-20260901T124053977193-n-importguardredundancy" data-who="inv-importguard" data-when="2026-09-01T12:48:00Z">
+    <div class="r-comment-body"><p>REDUNDANT: main removed the arbitrary bulk-import writer and its two replacements make catalog-supplied origin and status unreachable, 23 passed 0 failed; only an uncalled provenance-stamping helper would be lost, so the 7-day-old orphan is safe to discard</p></div>
 </div>
 </section>
 </main>
