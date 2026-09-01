@@ -86,6 +86,10 @@ def _stub_parent_lifecycle_startup():
             f"{_DGO}.reconcile_dd_unit_corrections",
             return_value={"checked": 0, "corrected": 0},
         ),
+        patch(
+            "imas_codex.discovery.base.embed_worker.embed_description_worker",
+            new_callable=AsyncMock,
+        ),
     )
     with ExitStack() as stack:
         for startup_patch in startup_patches:
