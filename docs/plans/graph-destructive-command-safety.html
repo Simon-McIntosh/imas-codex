@@ -6,8 +6,8 @@
   <meta name="docs-project"   content="imas-codex">
   <meta name="reckon-type"    content="plan">
   <meta name="plan-slug"      content="graph-destructive-command-safety">
-  <meta name="plan-title"     content="Graph Destructive Command Safety">
-  <meta name="plan-summary"   content="Make graph recovery real and destructive graph commands name their target, so no command can destroy the live graph by default">
+  <meta name="plan-title"     content="Graph Operational Safety">
+  <meta name="plan-summary"   content="Make graph recovery real, destructive commands name their target, and the service run where its config says">
   <meta name="plan-status"    content="draft">
   <meta name="plan-roi"       content="high">
   <meta name="plan-effort-hours" content="6.0">
@@ -17,7 +17,7 @@
   <meta name="plan-capability-risk" content="elevated">
   <meta name="plan-sprint"    content="S10">
   <meta name="plan-owner"     content="Simon McIntosh">
-  <title>Graph Destructive Command Safety | imas-codex</title>
+  <title>Graph Operational Safety | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
@@ -122,6 +122,42 @@
       clears the live one, and per &#167;2 there is nothing to restore.
     </p>
 
+    <h2 id="s3a">&#167;3a &mdash; The service ignores its configured partition, and that took the graph down</h2>
+    <p>
+      Measured 2026-09-01 during a backup. The facility config declares where the graph
+      belongs:
+    </p>
+    <pre>compute_locations:
+  titan:
+    scheduler: slurm
+    partition: titan
+    service_job_name: codex-neo4j</pre>
+    <p>
+      and <code>[tool.imas-codex.graph].location</code> is already <code>"titan"</code>.
+      The launcher does not read either. In <code>imas_codex/cli/services.py</code> the
+      GPU branch takes its partition from the resolved target, while the other branch
+      routes every CPU-only service to <code>_general_partition_name()</code> &mdash;
+      commented, deliberately, as <em>&ldquo;CPU-only services (e.g. Neo4j) use a general
+      partition&rdquo;</em>. So <code>partition: titan</code> is dead config and the graph
+      has been running on the shared batch partition instead.
+    </p>
+    <p>
+      <strong>The consequence is an availability failure, not an inefficiency.</strong> A
+      backup necessarily stops the service, and the restart then competes for a general
+      partition: job <code>1260741</code> sat <code>PENDING</code> on reason
+      <code>Priority</code> behind 38 queued jobs with 3 of 140 nodes idle, while port
+      7687 refused connections. An always-on service cannot depend on batch scheduling
+      for its own restart.
+    </p>
+    <p>
+      The declared target has ample room and needs no data migration, because the store
+      lives on GPFS reachable from every node: <code>98dci4-gpu-0002</code> had 18 of 20
+      CPUs and 231 of 256 GB free against the job's request of 4 CPUs and 32 GB. The
+      trade to accept knowingly is correlated failure &mdash; the embedding server already
+      lives there, so one drained node would take both services rather than one. That is
+      worth stating in the plan rather than discovering later.
+    </p>
+
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
     <ul>
       <li>A backup routine that produces a restorable artifact or fails loudly, with the
@@ -159,6 +195,9 @@
         pushed, not a registry query, so the first task is to confirm it against the
         registry and only then decide whether release-pinned offsite copies are an
         adequate floor.</li>
+      <li>The graph service submitted to the partition its <code>compute_locations</code>
+        entry declares, so <code>partition: titan</code> stops being dead config, with the
+        correlated-failure trade recorded where an operator will read it.</li>
       <li>Node and label counts recorded in the archive manifest, so a backup can state
         what it contains without a trial restore. The current manifest carries the code
         revision and format only, which identifies compatibility but not scope.</li>
