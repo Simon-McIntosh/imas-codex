@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="118">
+<meta name="plan-version" content="120">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2409,6 +2409,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T074744716648-n-cohort-delta-reconcile" data-who="test-cohortdelta" data-when="2026-09-01T08:04:30Z">
     <div class="r-comment-body"><p>332-4+1=329 closes exactly, but all four departures are release concerns, and the mechanism is systemic: an identity that loses name acceptance is DROPPED AT COHORT MINTING rather than entering the exclusion ledger, so the packet reports exact accounting while silently carrying fewer proposals. Departures: frequency_of_diagnostic_antenna (exhausted, successor_collision, intended successor absent), gap_at_plasma_boundary (attempts_exhausted), poloidal_magnetic_field_at_constraint_position (superseded; replacement poloidal_magnetic_field_of_magnetic_field_probe itself exhausted), spectral_flux_of_spectrometer_channel (grammar_invalid). Six WEST source paths now have no reviewable proposal and appear only as unmatched sources</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T080739862312-n-departed-identity-recovery" data-who="impl-radialrebind" data-when="2026-09-01T08:52:04Z">
+    <div class="r-comment-body"><p>All four departed concepts recovered or refused with reason, and all six WEST sources now have accepted targets: frequency_of_wave_diagnostic_channel accepted 0.99375/0.85 (the successor previously absent), poloidal_magnetic_field_of_magnetic_field_probe accepted 0.88125/0.90625, spectral_flux_of_spectrometer_channel accepted 0.8875/0.90625 and parses today, gap_at_plasma_boundary exhausted at 0.65 with a recorded attempts_exhausted refusal. Spend $2.97. The worker's confinement proof failed because its first rescore triggered global maintenance; coordinator verified independently that the 14-edge PRODUCED_NAME delta is 26 remove_derived_parent rows all carrying the lifecycle-admission reason, with ZERO detach operations in the window, so no real name lost sources</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T080658183920-n-mint-drop-accounting" data-who="impl-mintledger" data-when="2026-09-01T08:11:41Z">
+    <div class="r-comment-body"><p>Under-scoped: the silent drop happens at cohort MINTING, which discards manifest membership and terminal target identity before export.py sees the batch, so the fix cannot live in export.py alone. Redispatching with the minting and release handoff paths in scope</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
