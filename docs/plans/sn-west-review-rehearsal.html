@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="152">
-<meta name="plan-impl" content="0.98">
+<meta name="plan-version" content="154">
+<meta name="plan-impl" content="0.99">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23">
 </head>
 <body>
   <main class="plan-doc">
@@ -2630,6 +2630,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260902T0108-dryrun-fix" data-who="reckon-ship" data-when="2026-09-02T01:08:00Z">
     <div class="r-comment-body">sn run --dry-run is read-only again at 80c66161 (merged in the docs beat 4c77b058's parent): the CLI routes dry runs through a dedicated extraction and pool-planning preview that returns before SNRun audit state, global maintenance, seeding, scope stamping, claims, embedding startup or any provider call; a spy regression sees 0 write queries, 0 claims across seven entry points, 0 LLM calls; live dry-run exit 0 with StandardName 4,682, StandardNameSource 9,675 and claimed_at 0 unchanged. The torch-in-teardown fixture in test_pool_orchestrator_integration.py is a hidden-suite-failures node (test extra now provisions torch, so an unmocked embedding warmup loads it past the 30 s teardown timeout).</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T224531722035-n-west-stage5-freeze-check-3" data-who="test-s10freeze" data-when="2026-09-01T23:18:49Z">
+    <div class="r-comment-body"><p>freeze-check PASS: one unscoped sn run --flush --cost-limit 5 (SNRun 220c6abf, spend 5.0999 / 5.00, 0 ParameterMissing, 27 reviewed, 51 non-frozen names touched) left all 376 approved and contested rows byte-identical across 19 projected fields, including the drafted-docs positive control breakdown_initial_time</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260902T0119-freeze-pass" data-who="reckon-ship" data-when="2026-09-02T01:19:00Z">
+    <div class="r-comment-body">Stage 5 freeze-check PASSED on the third run (report 38889c23, merged e0b2e2f1). One unscoped sn run --flush --cost-limit 5 (SNRun 220c6abf, exact spend 5.0999 against 5.00, 1.02x; 0 ParameterMissing; 27 reviewed, 3 enriched, 3 regenerated; 51 non-frozen names touched) left all 376 approved and contested rows byte-identical across 19 projected fields, frozen digest fe4d32b4 unchanged before and after, with the drafted-docs breakdown_initial_time as positive control. The three freeze runs together spent about 10.54 USD. Stage 6 undo next, then 6b re-fold with the repaired approve, resolve and guard code.</div>
 </div>
 </section>
 </main>

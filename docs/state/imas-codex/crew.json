@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T01:08:01",
+  "updated": "2026-09-02T01:19:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -48840,9 +48840,99 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T224531722035-n-west-stage5-freeze-check-3",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage5-freeze-check-3",
+        "node_definition": {
+          "done_when": "crew/reports/west-stage5-freeze-check-3.md records the before snapshot summary, the sn run command with exit status, SNRun id, log path, exact spend against the cap and the count of ParameterMissing errors in its log (expected 0), the after snapshot, and a row-level diff over all approved and contested rows reporting zero modified fields with breakdown_initial_time named as the drafted-docs positive control, while stating how many non-frozen names the run touched",
+          "estimated_hours": null,
+          "goal": "Repeat the freeze-check with the claim binding repaired: snapshot every approved and contested StandardName with the same ordered Cypher projection as crew/reports/west-stage5-freeze-check-2.md, run one unscoped 'imas-codex sn run --flush --cost-limit 5' to completion, and re-take the identical snapshot",
+          "id": "n-west-stage5-freeze-check-3",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T224531722035-n-west-stage5-freeze-check-3/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "crew/reports/west-stage5-freeze-check-3.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s10freeze",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T22:45:39Z",
+        "completed_at": "2026-09-01T23:18:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1990,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1990,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "548176ffc47303d396ad1d36963c714c1ebead1b",
+        "commits": [
+          "38889c23f348b32c24ef3b14917fe17723b8e649"
+        ],
+        "changed_lines": {
+          "added": 179,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "Cypher snapshot; imas-codex sn run --flush --cost-limit 5; Cypher snapshot; canonical diff",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:332867774907f2857514874f722e47ce117e7aa7a45ca559dc46bb4765d77569"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T224531722035-n-west-stage5-freeze-check-3/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eec-45af-7642-8253-def99404124e",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1262
+    "_version": 1263
   }
 }
