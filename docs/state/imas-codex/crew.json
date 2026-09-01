@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T01:51:06",
+  "updated": "2026-09-02T01:55:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -49337,9 +49337,99 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T235121650370-n-west-catalog-main-inverse",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-catalog-main-inverse",
+        "node_definition": {
+          "done_when": "crew/reports/west-catalog-main-inverse.md records the fork main SHA before, the revert commit SHA and its diffstat, a byte-level comparison showing the catalog tree at the new head equals the tree at 6a5c44d3, the tag list showing only the cut-time RC tag and no graph-merged: receipt, an upstream default-branch SHA read proving upstream untouched, and a GraphClient census confirming approved 0 and contested 0",
+          "estimated_hours": null,
+          "goal": "Bring the fork catalog main back in sync with the unwound graph by reverting the receipt-less materialization commit e631b875 on Simon-McIntosh/imas-standard-names-catalog main through git revert pushed to the fork only, so fork main's catalog content equals the PR 3 merge 6a5c44d3 again",
+          "id": "n-west-catalog-main-inverse",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T235121650370-n-west-catalog-main-inverse/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "crew/reports/west-catalog-main-inverse.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T23:51:27Z",
+        "completed_at": "2026-09-01T23:55:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 236,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 236,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "54289dbf8b7a704642637dd4f586b0c91b3a0b21",
+        "commits": [
+          "e5df9970b4a6072f4bf38118db5503a659e033a4"
+        ],
+        "changed_lines": {
+          "added": 154,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "git revert on the fork catalog main; git diff-tree against 6a5c44d3; tag list; upstream SHA read; GraphClient census",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:94bcab081b2a1b2d3e9b83e277336eae70128266c783bf193defe8ec626d262c"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T235121650370-n-west-catalog-main-inverse/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1268
+    "_version": 1269
   }
 }
