@@ -149,6 +149,32 @@
   </p>
 </section>
 
+<h2 id="s3b">&#167;3b &mdash; Where the target check belongs, and where it must not spread</h2>
+<p>
+  Measured before dispatch so the fix does not widen unnecessarily.
+  <code>graph_load</code> and <code>graph_clear</code> both live in
+  <code>imas_codex/cli/graph/data.py</code> (lines 496 and 1231), so the check has one
+  natural home. <strong><code>resolve_neo4j</code> has twelve callers</strong> &mdash;
+  <code>settings</code>, <code>graph/__init__</code>, <code>neo4j_ops</code>,
+  <code>client</code>, <code>profiles</code>, <code>health</code>,
+  <code>cli/graph/registry</code>, <code>cli/tunnel</code>, <code>cli/graph/data</code>,
+  <code>cli/release</code>, <code>cli/compute</code>, <code>cli/services</code> &mdash; and
+  most are read-only consumers that connect rather than destroy.
+</p>
+<p>
+  <strong>So the destination requirement belongs at the destructive command boundary, not
+  threaded through the selector.</strong> Adding a destination parameter to
+  <code>resolve_neo4j</code> would put a twelve-file blast radius behind a two-command
+  problem, and would oblige every read-only caller to name a target it has no opinion
+  about. The check the locked decision requires &mdash; the command names its destination
+  and refuses when the resolved symlink disagrees &mdash; is expressible where the symlink
+  is already resolved for a destructive purpose. Four test files reference the load or clear
+  surface (<code>test_graph_cli_package</code>, <code>test_dd_resolutions</code>,
+  <code>test_docker_embedded</code>, <code>graph_mcp/conftest</code>) and must be in scope
+  from the start, because a rename or signature change whose references are left unscoped is
+  exactly what stopped the backup node at its fence.
+</p>
+
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
     <ul>
       <li>A backup routine that produces a restorable artifact or fails loudly, with the
