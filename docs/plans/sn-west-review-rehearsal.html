@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="141">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-version" content="143">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5">
 </head>
 <body>
   <main class="plan-doc">
@@ -2596,7 +2596,13 @@ Done-when
     <div class="r-comment-body">Both stage-4 defects repaired at commit 65a43ae3 (merged 810a1d65): the contest transition now writes catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha and catalog_reviewer_actor atomically with name_stage='contested', undo clears them, and sn approve no longer calls backfill_review_artifact after merge, so the cut-time review manifest stays byte-identical and the graph-merged: tag is the sole fold-back receipt. 54/54 approval tests. Next live stages on the already-folded PR 3 state: 4b sn resolve --override on breakdown_initial_time to demonstrate the contested-to-approved adjudication path; 5 freeze-check with a cost-capped unscoped sn run comparing approved and contested identities before and after; 6 sn approve --undo; 6b re-fold with the repaired code to prove the contested nodes now carry provenance.</div>
 </div>
 <div class="r-comment" data-section="followups" data-id="c-run-r-20260901T212730575700-n-west-stage4b-resolve" data-who="impl-weststage3" data-when="2026-09-01T21:30:41Z">
-    <div class="r-comment-body"><p>sn resolve --override moved breakdown_initial_time to approved with contested_resolution recorded and left pulse_duration contested, but the node kept its pre-edit description instead of the reviewer&#x27;s wording and the catalog_* provenance stayed null: the resolver approves without materializing the human text it is accepting</p></div>
+    <div class="r-comment-body"><p>sn resolve --override moved breakdown_initial_time to approved with contested_resolution recorded and left pulse_duration contested, but the node kept its pre-edit description instead of the reviewer's wording and the catalog_* provenance stayed null: the resolver approves without materializing the human text it is accepting</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T213139904122-n-resolve-materializes-wording" data-who="impl-approvebase" data-when="2026-09-01T21:40:52Z">
+    <div class="r-comment-body"><p>sn resolve --override now materializes the stored steered edit (docs_hint into description and documentation, or name_hint into the id) atomically with the approved transition and contested_resolution; 58 approval tests plus 4 CLI tests pass</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260901T2141-resolve-fix" data-who="reckon-ship" data-when="2026-09-01T21:41:00Z">
+    <div class="r-comment-body">Stage 4b (report 4d078c6f) was a negative result: sn resolve breakdown_initial_time --override moved the name to approved with contested_resolution recorded and left pulse_duration contested (contested_total 1), but the node kept its pre-edit description and the catalog_* provenance stayed null, so the resolver approved wording it never applied. Repaired at 5f0799f5 (merged ccb712da): resolve_contested_override now materializes the stored steered edit (docs_hint into description and documentation, or name_hint into the id) atomically with the approved transition; 58 approval tests plus 4 CLI tests pass. Live graph state after 4b: 375 approved (374 auto plus breakdown_initial_time with the OLD text), 1 contested. Stage 5 freeze-check next, then stage 6 undo and 6b re-fold with the repaired code, which will also materialize the correct wording and provenance.</div>
 </div>
 </section>
 </main>

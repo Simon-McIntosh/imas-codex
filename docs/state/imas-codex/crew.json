@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:31:33",
+  "updated": "2026-09-01T23:41:00",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -48182,9 +48182,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T213139904122-n-resolve-materializes-wording",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-resolve-materializes-wording",
+        "node_definition": {
+          "done_when": "a focused test drives a reviewer edit to contested with a mocked score, runs the resolver, and asserts the node's description equals the reviewer's edited text, name_stage='approved', contested_resolution recorded, and the four catalog_* fields equal the PR's values; the approval, tag, reviewer-base and contested-provenance suites still pass; the live graph is not modified by this node",
+          "estimated_hours": null,
+          "goal": "Make sn resolve --override apply the human wording it accepts: on the contested-to-approved transition the node's description (or name, per the contested axis) becomes the reviewer's edited text held in the stored steered proposal, with the four catalog_* provenance fields copied from that proposal when they are absent on the node",
+          "id": "n-resolve-materializes-wording",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T213139904122-n-resolve-materializes-wording/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/promote.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_sn_resolve_materializes.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-approvebase",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:31:44Z",
+        "completed_at": "2026-09-01T21:40:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 548,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 548,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "7c43e9bd13d2ca42c4a5d22d3639c1ff041284f7",
+        "commits": [
+          "5f0799f5e01890ac25b2bd408561083823f9dc6a"
+        ],
+        "changed_lines": {
+          "added": 152,
+          "removed": 6,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_resolve_materializes.py tests/standard_names/test_sn_approve*.py tests/standard_names/test_promote_*.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T213139904122-n-resolve-materializes-wording/logs/after-approval-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T213139904122-n-resolve-materializes-wording/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ebd-75bd-7102-ab56-aaed8b98c700",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2366464,
+            "cached_input_tokens_cumulative": 5323008,
+            "input_tokens": 2443881,
+            "input_tokens_cumulative": 5558217,
+            "output_tokens": 4377,
+            "output_tokens_cumulative": 17601,
+            "reasoning_output_tokens": 4157,
+            "reasoning_output_tokens_cumulative": 7016
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1249
+    "_version": 1250
   }
 }
