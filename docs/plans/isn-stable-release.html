@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="isn-stable-release">
+  <meta name="plan-title"     content="ISN Stable Release">
+  <meta name="plan-summary"   content="Land the grammar work on upstream ISN, publish v0.8.0, and repoint every pin from fork SHAs to that release">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="3.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S8">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-blocks"    content="sn-west-review-rehearsal">
+  <title>ISN Stable Release | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why this is its own plan</h2>
+    <p>
+      The WEST catalog cannot cite a grammar that exists only as a fork commit. Every
+      standard name in that batch is composed against the ISN vocabulary, and the
+      published catalog records which version of that vocabulary judged it. Today
+      imas-codex pins ISN by git SHA at two sites in <code>pyproject.toml</code>, the
+      catalog tracks the fork's <code>main</code>, and upstream ISN carries sixty-seven
+      release-candidate tags with no stable version. A catalog published on that footing
+      is not reproducible by anyone outside this machine.
+    </p>
+    <p>
+      This is a different subject from preparing a review batch, in a different
+      repository, with its own lifecycle and its own audience: the release is a public
+      Python package that other projects install. It blocks
+      <a href="/imas-codex/sn-west-review-rehearsal.html">sn-west-review-rehearsal</a>
+      but outlives it, which is why it is tracked here rather than as a section there.
+    </p>
+
+    <h2 id="s2">§2 — State at authoring</h2>
+    <p>
+      Upstream pull request 19 on <code>iterorganization/IMAS-Standard-Names</code>
+      carries the fork's work into upstream <code>main</code>. It was reconciled on
+      2026-09-01 and is now <code>MERGEABLE</code>: the fork led upstream by 462 commits
+      while three upstream-only commits were missing, so upstream was merged in with an
+      ordinary two-parent commit rather than a rebase. The conflict in
+      <code>pyproject.toml</code> was resolved by preserving the fork's package removals,
+      security floors and grammar and site configuration while accepting upstream's
+      removal of pytest upper bounds, and <code>uv.lock</code> was regenerated from that
+      combined contract. The full suite passed 2,014 tests with none failing at 91%
+      coverage, and all three pull-request checks are green.
+    </p>
+    <p>
+      The merge itself is currently blocked on a credential rather than on evidence. The
+      pull request touches <code>.github/workflows/release.yml</code>, and the available
+      GitHub token lacks the <code>workflow</code> scope, so the API refuses the merge.
+      Either a maintainer merges it through the web interface, or the token is refreshed
+      with that scope.
+    </p>
+
+    <h2 id="s3">§3 — Releasing, and what the tag actually does</h2>
+    <p>
+      Tagging is not a local act. Upstream's <code>release.yml</code> fires on tags
+      matching a semantic version, including release candidates, and runs a
+      <code>publish-pypi</code> job using trusted publishing into
+      <code>https://pypi.org/project/imas-standard-names/</code>. Tagging therefore
+      publishes a public package release under the ITER organisation, and a version
+      number once published can be yanked but never reused. The lead authorised this
+      explicitly on 2026-09-01, including the PyPI publication.
+    </p>
+    <p>
+      Because the pull request lands on upstream rather than on the fork, the correct tag
+      is the stable <code>v0.8.0</code> and not a release candidate. The sixty-seven
+      <code>rc</code> tags were fork-side prototyping and stay there. After the release
+      publishes, three pins move from fork SHAs to that version: two dependency
+      declarations in the imas-codex <code>pyproject.toml</code> with the lockfile
+      regenerated, and the catalog repository's own dependency, which currently tracks
+      the fork's <code>main</code> branch.
+    </p>
+    <p>
+      The pin bump is not cosmetic. imas-codex currently resolves ISN at
+      <code>93195dd</code>, which predates the
+      <code>minimum_absolute_safety_factor</code> locus rename, so the exporter still
+      judges identities against the pre-rename vocabulary and reports a collision that the
+      vocabulary no longer has.
+    </p>
+
+    <h2 id="s4">§4 — Deliverables</h2>
+    <ul>
+      <li>Upstream pull request 19 merged, with the merge commit recorded.</li>
+      <li><code>v0.8.0</code> tagged on that merge commit and pushed to upstream.</li>
+      <li>The release workflow observed to completion, with the PyPI release confirmed
+        present at the published URL rather than assumed from a green run.</li>
+      <li>Both imas-codex dependency declarations and <code>uv.lock</code> resolving to
+        <code>v0.8.0</code>, proven by the installed distribution reporting that version.</li>
+      <li>The catalog repository's dependency moved from the fork branch to the release.</li>
+      <li>A recorded check that the exporter, running against the released vocabulary, no
+        longer reports the <code>minimum_safety_factor</code> collision.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="release-kind" data-choice="stable-upstream" data-by="Simon McIntosh" data-when="2026-09-01T10:45:00+00:00">
+        <p class="r-dec-q">Is the tag a fork release candidate or a stable upstream release?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="stable-upstream">Stable v0.8.0 on upstream, published to PyPI</button>
+          <button class="r-opt" data-value="fork-rc">Another fork release candidate</button>
+          </p>
+        <p class="r-dec-rat">Locked by the lead: pull request 19 is cross-repository into iterorganization, so the work lands upstream and deserves the correct stable tag rather than a sixty-eighth release candidate. The lead authorised the PyPI publication after being shown that the tag triggers trusted publishing and that a published version can be yanked but never reused.</p>
+        </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-isr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship isn-stable-release" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Merge pull request 19, publish v0.8.0, and repoint the three pins</h4>
+    <div class="r-fu-body"><p>Checks are green and the pull request is mergeable; the merge needs a token carrying the <code>workflow</code> scope or a maintainer merging through the web interface. After the release publishes, move the two imas-codex declarations and the catalog dependency onto <code>v0.8.0</code> and confirm the exporter no longer reports the stale-vocabulary collision.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship isn-stable-release</pre>
+    </article>
+    </section>
+  </main>
+</body>
+</html>

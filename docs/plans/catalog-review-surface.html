@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="catalog-review-surface">
+  <meta name="plan-title"     content="Catalog Review Surface Integrity">
+  <meta name="plan-summary"   content="Make the reviewer's surface honest: what a reviewer may change, enforced by checks, with edits traceable back into the graph">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S8">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-blocks"    content="sn-west-review-rehearsal">
+  <title>Catalog Review Surface Integrity | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why this outlives any one batch</h2>
+    <p>
+      A review batch is a conversation with a physicist conducted entirely through a
+      catalog file and a generated site. That surface has to be honest about three things,
+      and none of them is specific to WEST: what the reviewer is invited to change, what is
+      machine-owned and would silently break provenance if edited, and what happens to an
+      edit after it is merged. Every future batch inherits whatever this plan settles, which
+      is why it is tracked apart from the batch that first needed it.
+    </p>
+    <p>
+      The prompt for it was a real reviewer's feedback on the first upstream attempt: the
+      YAML was painful to review, it carried far more Data Dictionary content than a reader
+      needed, entries ran together with no separation, and a declared scalar was being
+      rendered as a vector. Those particular defects are fixed. What is not yet built is the
+      part that keeps the surface honest once a reviewer starts typing into it.
+    </p>
+
+    <h2 id="s2">§2 — What a reviewer may change</h2>
+    <p>
+      The reviewer is invited to change the standard name itself and its description and
+      documentation prose, because those carry the physics judgement the review exists to
+      capture. Machine-owned and not to be edited by hand: the unit, which comes from the
+      Data Dictionary and never from an author; the entry kind; the status; every source
+      binding field; the generated identity roles; and the file's structure, meaning entry
+      ordering, blank-line separation and key order. That distinction is now written into
+      the catalog's <code>REVIEWING.md</code> in plain sentences, framed as protecting a
+      reviewer from silently breaking provenance rather than as restricting their judgement.
+    </p>
+
+    <h2 id="s3">§3 — Enforcement, not just guidance</h2>
+    <p>
+      A guideline nobody checks is a guideline that decays. A continuous-integration job
+      compares the base and head of every changed entry in a review pull request and fails
+      when a machine-owned field differs, naming the identity, the field and both values so
+      the reviewer can see exactly what to revert. A change confined to the name or the
+      prose passes. The job reports and never rewrites the reviewer's branch, because
+      silently correcting someone's edit is worse than refusing it.
+    </p>
+    <p>
+      The same discipline has a second half that is not yet built: after a review merges,
+      the fold-back has to carry each edit back into the graph so that an accepted human
+      change is traceable to the reviewer and the pull request that made it, and a change
+      that fails the naming grammar is marked contested rather than absorbed. Proving that
+      end to end, including that a trial run leaves no lasting change, is the work this
+      plan still owes.
+    </p>
+
+    <h2 id="s4">§4 — Deliverables</h2>
+    <ul>
+      <li>The editable-versus-machine-owned distinction stated in the reviewer guide.</li>
+      <li>A continuous-integration check that fails a review pull request touching a
+        machine-owned field, proven live against one forbidden edit and one permitted
+        prose edit.</li>
+      <li>An exercised approval fold-back carrying an accepted edit and a
+        pipeline-refused edit, with the refusal visible to the reviewer rather than
+        silent.</li>
+      <li>Evidence that the exercise can be unwound with no lasting change to the graph
+        or the catalog, so a rehearsal never costs real state.</li>
+      <li>A traceability check: for an accepted edit, the graph records who changed it and
+        which pull request carried it.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="guard-posture" data-choice="report-never-rewrite" data-by="Simon McIntosh" data-when="2026-09-01T10:50:00+00:00">
+        <p class="r-dec-q">When a reviewer edits a machine-owned field, does the check correct it or refuse it?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="report-never-rewrite">Report and fail the check, naming the field and both values</button>
+          <button class="r-opt" data-value="auto-revert">Automatically revert the field on the reviewer's branch</button>
+          </p>
+        <p class="r-dec-rat">Locked: the job reports and never rewrites the reviewer's branch. Silently correcting someone's edit hides the disagreement and teaches nothing, while a named failure shows exactly what to revert and why the value is machine-owned.</p>
+        </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-crs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship catalog-review-surface" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Exercise the approval fold-back with accepted and refused edits, and prove the unwind</h4>
+    <div class="r-fu-body"><p>The reviewer guidance is written and the metadata guard is being proven against scratch branches. What remains is the approval half: run the fold-back on the fork demonstration pull request with one accepted edit and one edit the pipeline must refuse, show the refusal reaches the reviewer, prove the unwind leaves no lasting change, and confirm an accepted edit is traceable to its author and pull request in the graph.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship catalog-review-surface</pre>
+    </article>
+    </section>
+  </main>
+</body>
+</html>
