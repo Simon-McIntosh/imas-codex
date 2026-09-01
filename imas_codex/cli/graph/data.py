@@ -49,6 +49,21 @@ def _resolve_scheduler(profile: Neo4jProfile) -> str:
         return "none"
 
 
+def _require_matching_graph_target(
+    target: str,
+    profile: Neo4jProfile,
+    *,
+    operation: str,
+) -> None:
+    """Refuse a destructive operation unless its named target is active."""
+    if target != profile.name:
+        raise click.ClickException(
+            f"Refusing to {operation} graph '{target}': active graph is "
+            f"'{profile.name}'.\n"
+            f"Switch to '{target}' before retrying."
+        )
+
+
 # ============================================================================
 # Graph Secure Command
 # ============================================================================
@@ -490,16 +505,21 @@ def graph_export(
 
 @click.command()
 @click.argument("archive", type=click.Path(exists=True))
+@click.argument("target")
 @click.option("--force", is_flag=True, help="Overwrite existing data")
 @click.option("--no-restart", is_flag=True, help="Don't restart Neo4j after load")
 @click.option("--password", envvar="NEO4J_PASSWORD", default=None)
 def graph_load(
     archive: str,
+    target: str,
     force: bool,
     no_restart: bool,
     password: str | None,
 ) -> None:
     """Load graph database from archive.
+
+    TARGET must name the currently active graph. The command refuses to load
+    when the active graph symlink resolves to a different name.
 
     When the configured location is remote, the archive is transferred
     via SCP and loaded on the remote host.
@@ -508,6 +528,7 @@ def graph_load(
     from imas_codex.settings import get_graph_password
 
     profile = resolve_neo4j()
+    _require_matching_graph_target(target, profile, operation="load")
     password = password or get_graph_password()
 
     archive_path = Path(archive)
@@ -1227,16 +1248,19 @@ def facility_remove(facility_id: str, force: bool) -> None:
 
 
 @click.command()
+@click.argument("target")
 @click.option("--force", is_flag=True, help="Skip confirmation prompt")
-def graph_clear(force: bool) -> None:
+def graph_clear(target: str, force: bool) -> None:
     """Clear all data from the graph database.
 
-    Requires Neo4j to be running.
+    TARGET must name the graph selected by the active symlink. Requires Neo4j
+    to be running.
     """
     from imas_codex.graph.client import GraphClient
     from imas_codex.graph.profiles import resolve_neo4j
 
     profile = resolve_neo4j()
+    _require_matching_graph_target(target, profile, operation="clear")
 
     if not is_neo4j_running(profile.http_port):
         raise click.ClickException(
