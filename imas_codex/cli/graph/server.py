@@ -17,6 +17,7 @@ from imas_codex.graph.ghcr import (
 from imas_codex.graph.neo4j_ops import (
     check_database_locks,
     check_stale_neo4j_process,
+    get_backup_currency,
     is_neo4j_running,
     neo4j_image,
     secure_data_directory,
@@ -346,6 +347,29 @@ def graph_status(registry: str | None) -> None:
                 f"  Dev revision: {manifest['dev_base_version']}"
                 f"-r{manifest.get('dev_revision', '?')}"
             )
+
+    currency = get_backup_currency()
+    click.echo("\nBackup currency:")
+    if currency.backup_path is None:
+        click.echo("  Newest backup: none")
+    else:
+        click.echo(
+            f"  Newest backup: {currency.backup_path}"
+            f" ({currency.backup_modified_at.isoformat()})"
+        )
+    if currency.live_path is None:
+        click.echo("  Newest live file: none")
+    else:
+        click.echo(
+            f"  Newest live file: {currency.live_path}"
+            f" ({currency.live_modified_at.isoformat()})"
+        )
+    if currency.age_seconds is None:
+        click.echo("  Behind live data: unavailable (no restorable backup)")
+    else:
+        click.echo(
+            f"  Behind live data: {currency.age_seconds:.0f} s ({currency.status})"
+        )
 
     # SLURM job status with color-coded resource usage
     try:

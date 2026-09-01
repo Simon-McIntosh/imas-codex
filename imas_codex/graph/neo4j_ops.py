@@ -15,9 +15,10 @@ import json
 import os
 import shutil
 import subprocess
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import click
 
@@ -438,6 +439,78 @@ def check_graph_exists(data_dir: Path | None = None) -> bool:
 # ============================================================================
 # Backup helpers
 # ============================================================================
+
+
+@dataclass(frozen=True, slots=True)
+class BackupCurrency:
+    """Measured lag between the newest restorable backup and live graph data."""
+
+    status: Literal["current", "stale", "no_backup"]
+    backup_path: Path | None
+    backup_modified_at: datetime | None
+    live_path: Path | None
+    live_modified_at: datetime | None
+    age_seconds: float | None
+
+
+def get_backup_currency() -> BackupCurrency:
+    """Measure how far the newest graph backup is behind the live data directory."""
+    from imas_codex.graph.profiles import BACKUPS_DIR, resolve_neo4j
+
+    profile = resolve_neo4j()
+
+    backup_files = (
+        [
+            path
+            for path in BACKUPS_DIR.rglob("*")
+            if path.is_file() and path.stat().st_size > 0
+        ]
+        if BACKUPS_DIR.exists()
+        else []
+    )
+    live_data_dir = profile.data_dir / "data"
+    live_files = (
+        [path for path in live_data_dir.rglob("*") if path.is_file()]
+        if live_data_dir.exists()
+        else []
+    )
+
+    backup_path = max(backup_files, key=lambda path: path.stat().st_mtime, default=None)
+    live_path = max(live_files, key=lambda path: path.stat().st_mtime, default=None)
+    backup_modified_at = (
+        datetime.fromtimestamp(backup_path.stat().st_mtime, tz=UTC)
+        if backup_path is not None
+        else None
+    )
+    live_modified_at = (
+        datetime.fromtimestamp(live_path.stat().st_mtime, tz=UTC)
+        if live_path is not None
+        else None
+    )
+
+    if backup_modified_at is None:
+        return BackupCurrency(
+            status="no_backup",
+            backup_path=None,
+            backup_modified_at=None,
+            live_path=live_path,
+            live_modified_at=live_modified_at,
+            age_seconds=None,
+        )
+
+    age_seconds = (
+        max(0.0, (live_modified_at - backup_modified_at).total_seconds())
+        if live_modified_at is not None
+        else 0.0
+    )
+    return BackupCurrency(
+        status="stale" if age_seconds > 0 else "current",
+        backup_path=backup_path,
+        backup_modified_at=backup_modified_at,
+        live_path=live_path,
+        live_modified_at=live_modified_at,
+        age_seconds=age_seconds,
+    )
 
 
 def write_data_presence_marker(
