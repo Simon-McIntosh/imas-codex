@@ -782,6 +782,13 @@ def _build_pool_specs(
                 f"exact pool {only_pool!r} is excluded by another pool filter"
             )
 
+    # A rescore is a fresh quorum draw on the existing identity.  Letting the
+    # adjacent refine pool participate would turn a low score into a rewrite
+    # and mint a REFINED_FROM successor under the rescore operator.
+    from imas_codex.standard_names.rescore import apply_rescore_pool_contract
+
+    specs = apply_rescore_pool_contract(specs, scope_run_id=scope_run_id)
+
     # ── Backlog throttle wiring ───────────────────────────────────────
     # Upstream generators/refiners pause when their downstream review
     # queue exceeds the configured cap.  The throttle wraps the claim
@@ -2225,7 +2232,17 @@ async def run_sn_pools(
             # blocked until the account is topped up.
             summary.stop_reason = "provider_budget_exhausted"
         elif budget_saturated_event.is_set():
-            summary.stop_reason = "budget_saturated"
+            from imas_codex.standard_names.rescore import (
+                classify_rescore_budget_stop,
+            )
+
+            summary.stop_reason = (
+                classify_rescore_budget_stop(
+                    scope_run_id=scope_run_id,
+                    budget_saturated=True,
+                )
+                or "budget_saturated"
+            )
         elif time_limit_event.is_set():
             summary.stop_reason = "time_limit_reached"
         elif idle_exhausted_event.is_set():
