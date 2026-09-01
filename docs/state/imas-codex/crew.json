@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T08:42:05",
+  "updated": "2026-09-01T08:49:54",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -761,6 +761,15 @@
         "role": "implement",
         "session_id": "01a023fc-bd11-7662-88d5-7824aca67282",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-genericsrc",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-goldenrefresh",
@@ -1628,6 +1637,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-08-27"
+      },
+      {
+        "id": "impl-vectorclass",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-voltadj",
@@ -39487,6 +39505,6 @@
       }
     ],
     "holds": [],
-    "_version": 1046
+    "_version": 1048
   }
 }
