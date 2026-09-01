@@ -19,11 +19,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S9">
-<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-modified" content="2026-09-01">
 <meta name="plan-depends-on" content="sn-pipeline-recovery">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-commits" content="1519e1c5,aa553671,edb57f02,a1f98d21,7ceeb5cf,a90c9dca,c334e821,0ebbf133,a28cdeb6,3990b9c6,4a0fbd7a">
 <meta name="plan-artifacts" content="docs/evidence/sn-benchmark-evolution/reuse-map.md,docs/evidence/sn-benchmark-evolution/benchmark-gate-run.md,imas_codex/standard_names/advisory_panel.py,imas_codex/standard_names/advisory_benchmark.py">
 </head>
@@ -57,6 +57,48 @@
 
     <h2 id="s4">§4 — Plan 34 dependency</h2>
     <p>Plan 33 directly informs and partially blocks the benchmark-v1 build-out, especially where the eval set wants multi-reviewer consensus, grammar-equivalence scoring, and expanded anchor coverage.</p>
+
+    <h2 id="s5">&#167;5 &mdash; Verdict: a detector, not a judge &mdash; and the triage runs without it</h2>
+    <p>
+      <strong>Locked by the lead 2026-09-01: the graph-wide advisory census is retired
+      and the deterministic-serving sweep is not purchased.</strong> The benchmark
+      answered its question, and the answer is a qualified negative that is worth more
+      than the census would have been.
+    </p>
+    <p>
+      What DSv4-flash demonstrably does: it catches <strong>every</strong> critical
+      defect in the controlled corpus (recall 1.000) and does not cry wolf on clean
+      names (false-positive rate 0.300 against a &le;0.500 bar). Those are the two
+      properties a triage instrument exists for. What it cannot do is give the same
+      answer twice or agree with the panel that would adjudicate it: hosted-quorum
+      agreement sits at 0.800 against 0.909, and the residual variance is
+      <em>provider-side</em> rather than request-side &mdash; three calls sharing an
+      equal complete-request hash returned 1.000, 0.625 and 0.9875, and three serial
+      full-corpus passes spread Brier across 0.044, straddling the 0.1038 threshold.
+      <strong>So it is a competent detector and an inconsistent judge, and a flag that
+      does not reproduce is noise rather than triage.</strong>
+    </p>
+    <p>
+      The remedy is not to engineer the serving stack until it reproduces. Removing that
+      residue needs a controlled deterministic-serving variant &mdash; five settings
+      varied one at a time at roughly a 26-minute cold start each, on two dedicated
+      H200s at reduced throughput, displacing the compose seat &mdash; and it would
+      settle only whether gates read as values or as bands. It produces no better
+      standard name. Measured against the review-only drain's actual USD 61.56, it is
+      cheaper to rescore the tail than to characterise the instrument that would have
+      ranked it.
+    </p>
+    <p>
+      <strong>The recovery triage in this plan's title survives the census that was
+      going to deliver it.</strong> The parked population can be ranked from signals the
+      graph already holds &mdash; <code>refine_stop_reason</code> and the collision
+      target recorded by the attempt-budget machinery, reviewer score, chain length, and
+      vocabulary-gap evidence. That ranking is reproducible <em>by construction</em>
+      rather than by benchmark: the same query over the same graph returns the same
+      order, which is exactly the property the advisory route could not supply at any
+      price. This section owes that ranked triage, splitting the tail into
+      rescore-candidate, vocabulary-gap and stay-parked dispositions.
+    </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -93,24 +135,25 @@
       </p>
     <p class="r-dec-rat">Commit the frozen benchmark inputs, expected semantic labels, and thresholds for reproducibility; write measured run results to the established benchmark artifact store.</p>
     </div>
-<div class="r-dec" data-key="advisory-scope" data-choice="full-graph-advisory" data-by="Simon McIntosh" data-when="2026-08-10T08:14:32+00:00">
+<div class="r-dec" data-key="advisory-scope" data-choice="small-pilot-only" data-by="Simon McIntosh" data-when="2026-09-01T12:28:57+00:00">
     <p class="r-dec-q">How broadly may DSv4 review the existing graph after benchmarking?</p>
     <p class="r-dec-ctx">The local model is effectively free at point of use and can triage thousands of names, but it must not bootstrap its own authority.</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="full-graph-advisory">Run a full graph-wide flag-only advisory census after benchmark gates.</button>
-      <button class="r-opt" data-value="small-pilot-only">Stop after a small sample.</button>
+      <button class="r-opt" data-value="full-graph-advisory">Run a full graph-wide flag-only advisory census after benchmark gates.</button>
+      <button class="r-opt chosen" data-value="small-pilot-only">Stop after a small sample.</button>
       <button class="r-opt" data-value="authoritative-local-review">Let DSv4 change acceptance or source membership.</button>
       </p>
-    <p class="r-dec-rat">Locked by the lead as 6A. After benchmark gates, run the full graph-wide DSv4 advisory census. Outputs are flags and ranked exact manifests only; hosted quorum and governed graph APIs retain authority.</p>
+    <p class="r-dec-rat">RELOCKED 2026-09-01 by the lead, reversing the 6A full-graph-advisory intent. The benchmark WAS the pilot and the pilot is where this stops. Grounds, in the order that decided it. (1) The gates already answered the product question and the two failures are about seating DSv4 as a JUDGE, not about using it as a detector: recall 1.000 and false-positive rate 0.300 against a 0.500 bar are the two properties a triage instrument needs, while hosted-quorum agreement 0.800 against 0.909 and irreducible run-to-run variance are what disqualify it from adjudicating. A flag that does not reproduce is noise rather than triage, so the census would have ranked thousands of parked names on a signal that moves between runs - worse than not ranking them. (2) The residue is provider-side, proven by three calls sharing an equal complete-request hash returning 1.000, 0.625 and 0.9875, so no prompt or decoding change reaches it; only a controlled deterministic-serving variant would, at five settings varied one at a time, roughly 26 minutes of cold start each, two dedicated H200s at reduced throughput, displacing the live compose seat - and measured at dispatch time 7 of the node&#x27;s 8 GPUs were already allocated, so the capacity is not merely unbudgeted but unavailable without displacement. It would settle only whether gates read as values or as bands and would produce no better standard name. (3) THE TRIAGE DOES NOT NEED IT. The parked tail can be ranked from signals the graph already holds - refine_stop_reason and the collision target from the attempt-budget machinery, reviewer score, chain length, vocabulary-gap evidence - and that ranking is reproducible BY CONSTRUCTION, which is precisely the property the advisory route could not buy at any price. (4) Nothing waits on the census: the 2026-08-11 wave audit already de-gated this plan to informing rather than blocking, and its blocks list is empty. So the census is retired rather than deferred, the recovery triage moves to section 5 as deterministic work, and the negative result is recorded as the plan&#x27;s finding.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dsv4-advisory" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-benchmark-evolution" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dsv4-advisory" data-status="resolved" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-benchmark-evolution" data-resolved-at="2026-09-01T12:28:57+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Benchmark DSv4 and produce a graph-wide advisory defect census</h4>
     <div class="r-fu-body"><p>Build a production-faithful, typed-context benchmark for DSv4, calibrate it against hosted quorum and adversarial geometry cases, then run a frozen full-graph advisory sweep with zero graph mutation.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-benchmark-evolution</pre>
+    <p class="r-fu-outcome">RESOLVED 2026-09-01 as a RETIREMENT, not a delivery, on the lead's relock of advisory-scope to small-pilot-only. The benchmark and its instrument were built and gated: the panel adapter, frozen-batch runner, controlled 40-row corpus and decoding pin all landed and are green, and the five derived gates were measured twice. Three pass - critical-defect recall 1.000, clean-name false-positive rate 0.300 against 0.500, repeatability 0.900 after pinning. Two do not - Brier 0.105455 against 0.103764 and hosted-quorum agreement 0.800 against 0.909091 - and the locked 6A decision made the census conditional on the gates, so it never became authorised. The diagnosis then established that the residual variance is provider-side inference nondeterminism rather than request drift, removable only by a deterministic-serving variant needing dedicated two-H200 capacity that measurement showed was unavailable without displacing the live compose seat. The zero-mutation graph-wide advisory census is therefore NOT RUN and is retired rather than deferred. The finding stands as the deliverable: DSv4-flash is a competent defect detector and an inconsistent judge on this serving stack.</p>
     </article>
 <article class="r-fu" data-id="f-exhausted-tail-triage" data-status="open" data-written-by="portfolio-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-benchmark-evolution" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Triage the exhausted-name tail with advisory flags and sn rescore</h4>
@@ -123,10 +166,11 @@
     <pre class="r-fu-prompt">/reckon-ship sn-benchmark-evolution</pre>
     <p class="r-fu-outcome">ANSWERED 2026-08-25 at adc2291c, at USD 0.00. The cause is PROVIDER-SIDE INFERENCE NONDETERMINISM - not hidden request drift, and not runner concurrency. The decisive probe: three calls sharing an equal COMPLETE SEMANTIC REQUEST HASH covering endpoint, model, messages, schema, max tokens, timeout, temperature, seed, reasoning, metadata and headers returned scores 1.000, 0.625 and 0.9875. Nothing about the request differed and the answers still did. Three serial candidate-only full-corpus passes with equal ordered input and equal message hashes gave Brier 0.102465, 0.146418 and 0.112895, spread 0.043953, straddling the 0.103764 threshold, with 30 of 40 rows moving. The earlier concurrent runner was a genuine confound but serializing does not cure the residue, and row-order effects are not identifiable above endpoint repeat noise. The serving stack explains it: vLLM 0.26.0 on two H200s with tensor parallelism, asynchronous scheduling, chunked prefill, prefix caching, CUDA graphs, FP8 KV cache and FP4 MoE - a stack with several documented sources of run-to-run numerical variation. CONSEQUENCE FOR THE GATES: this benchmark is distributional by construction, so no single-run verdict near a threshold means anything, and the calibration threshold sits inside the band. The residue is removable only in principle, by a controlled deterministic-serving variant, and that experiment costs dedicated two-H200 capacity plus roughly a 26-minute cold start per variant at reduced throughput. It should be run BEFORE the 57 mean-separation repeats are purchased, because if determinism is recoverable those repeats measure noise that need not exist. Continues as f-benchmark-deterministicserving.</p>
     </article>
-<article class="r-fu" data-id="f-benchmark-deterministicserving" data-status="open" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-benchmark-deterministicserving" data-status="resolved" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="2026-09-01T12:28:57+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Test a deterministic-serving variant before buying 57 repeats</h4>
     <div class="r-fu-body">AUTHORITY-REQUIRED: needs dedicated two-H200 capacity, not just budget. Launch a separate serving variant, serialize requests, disable asynchronous scheduling and chunked batching, then vary deterministic kernels and the low-precision and cache choices ONE AT A TIME - FP8 KV, FP4 MoE, prefix caching, CUDA graphs - repeating the complete-request probe and the 40-row Brier probe after each. Expect roughly a 26-minute cold start per variant and reduced throughput. The decision this unblocks: if a deterministic variant collapses the 0.043953 band, every existing gate can be read against a value and the 57 mean-separation repeats become unnecessary; if it does not, the benchmark is irreducibly distributional and every gate must be restated as a band with an explicit sample size rather than a single number. Either outcome is worth more than 57 repeats of a noisy instrument. Until this resolves, f-dsv4-advisory and f-exhausted-tail-triage stay blocked and the graph-wide advisory census stays UNAUTHORIZED.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-benchmark-evolution</pre>
+    <p class="r-fu-outcome">RESOLVED 2026-09-01 as NOT PURCHASED, by the lead's decision to close on the negative result. This followup was correctly marked authority-required and the authority was sought rather than assumed: measured at the moment of asking, node 98dci4-gpu-0003 had 7 of its 8 H200s allocated - deepseek-v4-flash on 2, glm-5-3 on 4, another user's job on 1 - leaving a single free GPU against the two a tensor-parallel DSv4 variant needs, so the sweep could not run without displacing a live serving seat. Presented with restart-deterministically, queue-behind, and close-on-the-result, the lead chose to close. The reasoning that made that the right call rather than a budget concession: the experiment would decide only whether this benchmark's gates read against a value or against a band, it produces no improved standard name, and the work it was gating - ranking the parked tail - turns out to be doable from deterministic graph signals that are reproducible by construction and need no GPU at all. The 57 mean-separation repeats this followup existed to prevent are likewise not purchased, which was its own stated preference. The 0.044 Brier band and its provider-side cause remain recorded as a measured property of this serving stack for anyone who later needs a reproducible local judge.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
