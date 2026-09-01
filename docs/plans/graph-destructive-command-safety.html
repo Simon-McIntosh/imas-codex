@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="graph-destructive-command-safety">
+  <meta name="plan-title"     content="Graph Destructive Command Safety">
+  <meta name="plan-summary"   content="Make graph recovery real and destructive graph commands name their target, so no command can destroy the live graph by default">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S10">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Graph Destructive Command Safety | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">&#167;1 &mdash; Why this exists</h2>
+    <p>
+      A read-only audit on 2026-09-01, commissioned only to decide whether a review
+      rehearsal could run on an isolated graph, found two defects that have nothing to do
+      with that rehearsal and outlive it. Both share one shape: <strong>a safeguard that
+      is named and documented, and does not hold.</strong> Neither was found by reading
+      the documentation, which asserts the opposite; both were found by walking the code.
+    </p>
+    <p>
+      The audit is recorded at
+      <a href="/imas-codex/evidence/catalog-review-surface/graph-substrate-audit">graph-substrate-audit</a>.
+      It returned a no-go, and the rehearsal it was serving is a separate plan's problem.
+      What belongs here is the reason the answer was no.
+    </p>
+
+    <h2 id="s2">&#167;2 &mdash; The function named for backing up data does not back up data</h2>
+    <p>
+      <code>backup_existing_data()</code> writes zero-byte
+      <code>graph_data_existed.marker</code> files. It records <em>that</em> data was
+      present, not the data. So the recovery directory looks populated to anyone who
+      lists it, the call site reads as protective, and there is nothing to restore from.
+    </p>
+    <p>
+      Measured state at the time of the audit: the backups directory contained
+      <strong>no dump at all</strong>. The newest archive anywhere was
+      <strong>2,457,088,786 bytes</strong> dated <strong>2026-08-27 12:49</strong>, while
+      live database files had been written the same afternoon as the audit
+      &mdash; <code>data/transactions/neo4j/checkpoint.0</code> at
+      <strong>2026-09-01 14:16:59</strong>. The live directory was
+      <strong>15,058,189,845 bytes</strong>. A five-day-old archive against a 15 GB live
+      store is not a backup, and the thing that was supposed to make one produces a
+      placeholder.
+    </p>
+    <p>
+      This is the more dangerous of the two defects, because it is silent in the
+      direction that flatters: a marker file present in a recovery directory reads as
+      evidence of safety. The fix is that a function claiming to back up data either
+      produces a restorable artifact or fails loudly, and that a caller can ask
+      &ldquo;is there a current backup?&rdquo; and get an answer derived from the
+      artifact's own modification time against the live store's, not from a marker's
+      existence.
+    </p>
+
+    <h2 id="s3">&#167;3 &mdash; The environment variable does not select the target; the symlink does</h2>
+    <p>
+      User-facing documentation describes <code>IMAS_CODEX_GRAPH</code> as selecting the
+      graph. In <code>resolve_neo4j()</code> (<code>imas_codex/graph/profiles.py:389</code>)
+      the location chooses the <em>host and ports</em>, while <strong>data identity comes
+      from a single active <code>neo4j</code> symlink</strong>. There is no per-command
+      destination profile for <code>load</code> or <code>clear</code>. Both therefore act
+      on whatever that one symlink currently resolves to.
+    </p>
+    <figure>
+      <svg viewBox="0 0 660 232" width="100%" role="img"
+           aria-label="Diagram: the graph environment variable selects only host and ports, while a single active symlink selects the data directory that load and clear both act on."
+           style="max-width:660px">
+        <text x="0" y="14" font-family="system-ui" font-size="13" fill="#1a1a1c">What a caller sets</text>
+        <text x="380" y="14" font-family="system-ui" font-size="13" fill="#1a1a1c">What it actually selects</text>
+
+        <rect x="0" y="28" width="196" height="42" fill="#ffffff" stroke="#9a9aa2" stroke-width="1"/>
+        <text x="12" y="46" font-family="ui-monospace,monospace" font-size="12" fill="#1a1a1c">IMAS_CODEX_GRAPH</text>
+        <text x="12" y="62" font-family="system-ui" font-size="11" fill="#55555c">documented as &ldquo;the graph&rdquo;</text>
+
+        <line x1="196" y1="49" x2="376" y2="49" stroke="#9a9aa2" stroke-width="1"/>
+        <polygon points="376,49 368,45.5 368,52.5" fill="#9a9aa2"/>
+        <rect x="380" y="28" width="230" height="42" fill="#ffffff" stroke="#9a9aa2" stroke-width="1"/>
+        <text x="392" y="46" font-family="system-ui" font-size="12" fill="#1a1a1c">host and ports only</text>
+        <text x="392" y="62" font-family="system-ui" font-size="11" fill="#55555c">no data directory is chosen here</text>
+
+        <rect x="0" y="104" width="196" height="42" fill="#ffffff" stroke="#b4341f" stroke-width="1.5"/>
+        <text x="12" y="122" font-family="ui-monospace,monospace" font-size="12" fill="#1a1a1c">neo4j &rarr; .neo4j/&lt;name&gt;</text>
+        <text x="12" y="138" font-family="system-ui" font-size="11" fill="#55555c">the single active symlink</text>
+
+        <line x1="196" y1="125" x2="376" y2="125" stroke="#b4341f" stroke-width="1.5"/>
+        <polygon points="376,125 368,121.5 368,128.5" fill="#b4341f"/>
+        <rect x="380" y="104" width="230" height="42" fill="#ffffff" stroke="#b4341f" stroke-width="1.5"/>
+        <text x="392" y="122" font-family="system-ui" font-size="12" fill="#1a1a1c">the data directory &mdash; identity</text>
+        <text x="392" y="138" font-family="system-ui" font-size="11" fill="#55555c">currently the live 15 GB codex store</text>
+
+        <text x="0" y="182" font-family="ui-monospace,monospace" font-size="12" fill="#1a1a1c">graph load</text>
+        <text x="0" y="200" font-family="ui-monospace,monospace" font-size="12" fill="#1a1a1c">graph clear</text>
+        <text x="96" y="191" font-family="system-ui" font-size="11" fill="#55555c">take no destination argument</text>
+        <line x1="286" y1="191" x2="376" y2="145" stroke="#b4341f" stroke-width="1.5"/>
+        <polygon points="376,145 369.5,150.5 374.5,153.5" fill="#b4341f"/>
+        <text x="392" y="196" font-family="system-ui" font-size="12" fill="#b4341f">so both destroy whatever the symlink points at</text>
+      </svg>
+      <figcaption>
+        The documented control and the real control are different objects. Setting the
+        environment variable changes where a client connects, not what a destructive
+        command overwrites.
+      </figcaption>
+    </figure>
+    <p>
+      The practical consequence is that isolating a destructive operation by setting an
+      environment variable &mdash; which is what the documentation invites &mdash; does
+      not isolate anything. An operator who believes they are clearing a scratch graph
+      clears the live one, and per &#167;2 there is nothing to restore.
+    </p>
+
+    <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
+    <ul>
+      <li>A backup routine that produces a restorable artifact or fails loudly, with the
+        marker-only path removed rather than left beside it.</li>
+      <li>A currency check answering &ldquo;is there a current backup?&rdquo; from the
+        archive's modification time against the newest live database file, so the answer
+        cannot be satisfied by a stale archive or a marker.</li>
+      <li>An explicit destination on every destructive graph command, so
+        <code>load</code> and <code>clear</code> name what they act on instead of
+        inheriting it, and refuse when the resolved target does not match the name
+        given.</li>
+      <li>Documentation corrected to describe the symlink as the data selector, with the
+        environment variable's real scope stated, so the safe procedure and the
+        documented procedure are the same procedure.</li>
+      <li>A regression proving a destructive command aimed at a scratch target cannot
+        touch the live directory, failing against the current code.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="destructive-target-posture" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How should a destructive graph command establish its target?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="require-explicit-name">Require an explicit target name and refuse if the resolved symlink disagrees</button>
+          <button class="r-opt" data-value="confirm-resolved-target">Keep inheriting the symlink but print the resolved path and require interactive confirmation</button>
+          <button class="r-opt" data-value="protect-live-names">Keep inheriting, and hard-refuse a fixed list of protected names such as codex</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="backup-failure-posture" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">When a backup cannot be produced, what should the caller experience?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="fail-closed">Raise and abort the operation that requested protection</button>
+          <button class="r-opt" data-value="warn-and-proceed">Warn and let the operation proceed unprotected</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-gdcs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship graph-destructive-command-safety" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Make graph recovery real, then make destructive commands name their target</h4>
+        <div class="r-fu-body"><p>Two decisions are open and both change the shape of the work, so lock them before dispatching: what establishes a destructive command's target, and whether a failed backup aborts the operation that asked for protection. The measured starting state is in &#167;2 and &#167;3 and does not need re-deriving. Order matters: recovery before restriction, because the currency check is what makes every later change verifiable.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship graph-destructive-command-safety</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
