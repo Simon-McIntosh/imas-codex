@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:39:58",
+  "updated": "2026-09-01T22:42:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1209,9 +1209,11 @@
         "id": "impl-offsitecurrency",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05eaa-f249-7740-a518-639c676b25c3",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eaa-f249-7740-a518-639c676b25c3"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1227,9 +1229,11 @@
         "id": "impl-offsiteretention",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05eab-66a1-7ea2-b794-25105ede902b",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eab-66a1-7ea2-b794-25105ede902b"
+        },
         "created": "2026-09-01"
       },
       {
@@ -2164,9 +2168,11 @@
         "id": "impl-weststage3",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eae-37b8-7a01-a104-a336b09e2048"
+        },
         "created": "2026-09-01"
       },
       {
@@ -46920,9 +46926,213 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T203042577067-n-offsite-currency",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-currency",
+        "node_definition": {
+          "done_when": "unit tests cover the current, stale and no_offsite outcomes against a mocked registry listing and the local currency tests still pass, and a recorded live 'imas-codex graph status' run shows the new offsite row naming the v5.3.0-rc6 copy with an age of at least 56 days",
+          "estimated_hours": null,
+          "goal": "Report offsite currency in imas-codex graph status beside the local backup row: the age of the newest full-scope copy in the GHCR registry relative to the newest live database file, as a typed current/stale/no_offsite result shaped like BackupCurrency and read from the registry rather than from the local push receipt",
+          "id": "n-offsite-currency",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/graph/neo4j_ops.py",
+            "imas_codex/graph/ghcr.py",
+            "imas_codex/cli/graph/server.py",
+            "tests/core/test_backup_currency.py",
+            "tests/cli/test_graph_status_offsite.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-offsitecurrency",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:30:55Z",
+        "completed_at": "2026-09-01T20:40:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 551,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 551,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "3f0c687db086e0aae128bc7392d1ff6a023008b2",
+        "commits": [
+          "03433bfd92233923f34207445bd1b7058982061d"
+        ],
+        "changed_lines": {
+          "added": 282,
+          "removed": 17,
+          "files": 5
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/core/test_backup_currency.py tests/cli/test_graph_status_offsite.py; imas-codex graph status",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/logs/focused-tests-after-auth-fix.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eaa-f249-7740-a518-639c676b25c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4440576,
+            "cached_input_tokens_cumulative": 4440576,
+            "input_tokens": 4609922,
+            "input_tokens_cumulative": 4609922,
+            "output_tokens": 17184,
+            "output_tokens_cumulative": 17184,
+            "reasoning_output_tokens": 4877,
+            "reasoning_output_tokens_cumulative": 4877
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T203413267658-n-west-stage3-review-merge",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage3-review-merge",
+        "node_definition": {
+          "done_when": "crew/reports/west-stage3-review-merge.md records the two edited entry ids, the before/after text of each edit, the two commit SHAs with their author, the PR 3 merge commit SHA and merged_at from the GitHub API, the CI check conclusions on the final head, and a gh api read proving the upstream repository default branch is unchanged",
+          "estimated_hours": null,
+          "goal": "Exercise the reviewer path on the current fork PR 3 (review/v0.3.0rc1+west-task-2e into fork main) as the authorized reviewer stand-in: two GitHub API commits on the PR branch editing two different batch entries in reviewer-editable fields only (one compliant description improvement, one deliberately non-compliant description wording that the review pipeline should contest), followed by merging PR 3 on the fork with upstream untouched",
+          "id": "n-west-stage3-review-merge",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203413267658-n-west-stage3-review-merge/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "crew/reports/west-stage3-review-merge.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:34:29Z",
+        "completed_at": "2026-09-01T20:41:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 423,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 423,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "de55bada019383f880963c2f5fc309de2e63bcc0",
+        "commits": [
+          "06527979319a633112467e3380ad7cd99540943d"
+        ],
+        "changed_lines": {
+          "added": 80,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "GitHub Checks API on head 58bfb0f2; PR merge with expected-head guard; upstream default-branch SHA read before and after",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:f84d34e3a215f9c3d223b68c1772172d4c931928fca6c2b90fb10d3bd3068b0b"
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203413267658-n-west-stage3-review-merge/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2528256,
+            "cached_input_tokens_cumulative": 2528256,
+            "input_tokens": 2752396,
+            "input_tokens_cumulative": 2752396,
+            "output_tokens": 11906,
+            "output_tokens_cumulative": 11906,
+            "reasoning_output_tokens": 3648,
+            "reasoning_output_tokens_cumulative": 3648
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1226
+    "_version": 1231
   }
 }

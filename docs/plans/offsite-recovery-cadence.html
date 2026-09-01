@@ -22,7 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
+<meta name="plan-commits" content="03433bfd">
+<meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt">
+<meta name="plan-impl" content="0.17">
 </head>
 <body>
   <main class="plan-doc">
@@ -184,6 +187,14 @@
     <pre class="r-fu-prompt">/reckon-ship offsite-recovery-cadence</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T203042577067-n-offsite-currency" data-who="impl-offsitecurrency" data-when="2026-09-01T20:40:06Z">
+    <div class="r-comment-body"><p>graph status reports offsite currency from the GitHub Packages listing: v5.3.0-rc6 pushed 2026-07-07T12:27:23Z, 56.338 days behind the newest live database file; 7 focused tests pass; GHCR_TOKEN in .env returns 401, gh credential works</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T2042-currency-landing" data-who="reckon-ship" data-when="2026-09-01T20:42:00Z">
+    <div class="r-comment-body">n-offsite-currency landed at commit 03433bfd (merged d2709b32): graph status now shows an offsite row read from the GitHub Packages listing of the full-scope package, typed current/stale/no_offsite like BackupCurrency. Live measure: newest offsite copy ghcr.io/simon-mcintosh/imas-codex-graph:v5.3.0-rc6 pushed 2026-07-07T12:27:23Z, 4,867,635 s (56.338 days) behind the newest live database file; 7 focused tests pass. Finding for the push job: the GHCR_TOKEN in the project .env returns HTTP 401 while the gh credential reads the private package, so resolve_token's gh fallback is the working path and the stored token needs rotation by the lead. Remaining nodes: tiered prune selector, scheduled push job, one-off stale-version prune, first real push plus trial restore measurement, and the export/start launcher defect found by the restore-point node.</div>
+</div>
+</section>
+</main>
 </body>
 </html>
