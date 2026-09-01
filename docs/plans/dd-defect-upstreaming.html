@@ -17,11 +17,12 @@
 <section class="callout" id="scope">
   <h2>Scope</h2>
   <p>
-    Four Standard Name identities are held not because their names are wrong but
-    because the Data Dictionary contradicts itself. Each contradiction was
-    measured against a live graph with exact paths, quoted prose and unit
-    evidence during the semantic-integrity programme. This plan carries them
-    upstream as individual, reviewable contributions.
+    One Standard Name identity remains held not because its name is wrong but
+    because the Data Dictionary contradicts itself. A controlled live recheck on
+    2026-09-01 found the sensor-direction units corrected by upstream authority and
+    the torque identity accepted, valid and bound to its charge-state-resolved
+    toroidal DD source. The remaining contradiction is carried upstream as an
+    individual, reviewable contribution.
   </p>
   <p>
     <strong>Nothing in this plan is submitted without explicit authorization.</strong>
@@ -30,32 +31,36 @@
   </p>
 </section>
 
-<h2 id="s1">§1 — The four measured defects</h2>
+<h2 id="s1">§1 — Current defect disposition</h2>
 <table>
-  <caption>Held identities and the DD contradiction behind each</caption>
+  <caption>Controlled live recheck on 2026-09-01; one of four rows remains unresolved</caption>
   <thead>
-    <tr><th>DD path</th><th>Contradiction</th><th>Held identity</th></tr>
+    <tr><th>DD path</th><th>Current authority</th><th>Identity</th><th>Status</th></tr>
   </thead>
   <tbody>
     <tr>
       <td><code>waves/coherent_wave/profiles_1d/ion/state/power_inside_fast</code></td>
       <td>The leaf is named <code>fast</code> and is charge-state resolved, but its prose describes deposition into the <em>thermal</em> population — and a distinct <code>power_inside_thermal</code> sibling carries the same thermal wording. The recipient population is therefore undetermined.</td>
       <td><code>fast_ion_charge_state_power_at_inside_flux_surface</code></td>
+      <td><strong>Unresolved</strong></td>
     </tr>
     <tr>
       <td><code>operational_instrumentation/sensor/direction/x</code></td>
-      <td>The parent declares a unit vector, whose components are dimensionless, while the child is metre-valued and coordinate-worded. A direction cosine has unit <code>1</code>.</td>
+      <td>The authoritative live DD row now carries unit <code>1</code>, consistent with a dimensionless direction cosine.</td>
       <td><code>x_direction_unit_vector_of_sensor</code></td>
+      <td><strong>Resolved upstream</strong></td>
     </tr>
     <tr>
       <td><code>operational_instrumentation/sensor/direction/z</code></td>
-      <td>The identical dimensional contradiction on the <code>z</code> component.</td>
+      <td>The authoritative live DD row now carries unit <code>1</code>, consistent with a dimensionless direction cosine.</td>
       <td><code>z_direction_unit_vector_of_sensor</code></td>
+      <td><strong>Resolved upstream</strong></td>
     </tr>
     <tr>
-      <td>plasma-source <code>phi</code> torque leaf; distributions collisional-torque leaf</td>
-      <td>No single path carries all three required semantics. One is process-total and toroidal but only ion-species resolved; the other is charge-state resolved but restricted to collisional transfer to a thermal recipient. Neither incomplete path may be attached.</td>
+      <td><code>plasma_sources/source/ggd/ion/state/momentum/phi</code></td>
+      <td>The 2026-09-01 recheck found the identity accepted and valid, with this exact DD 4.1.1 source as its sole <code>PRODUCED_NAME</code> binding. The path carries toroidal, ion and charge-state structure; its authoritative unit is <code>kg.m^-1.s^-2</code>.</td>
       <td><code>toroidal_ion_charge_state_torque_density</code></td>
+      <td><strong>Resolved</strong></td>
     </tr>
   </tbody>
 </table>
@@ -108,18 +113,17 @@
 <h2 id="s3">§3 — Why these are upstream rather than local</h2>
 <p>
   The semantic-integrity programme repaired every defect it could reach and
-  recorded fail-closed refusals for the rest. These four are refusals of the
-  second kind: the naming pipeline behaved correctly and the guard refused a
+  recorded fail-closed refusals for the rest. The remaining row is a refusal of
+  the second kind: the naming pipeline behaved correctly and the guard refused a
   wrong attachment. Renaming the Standard Name would encode the DD's
   contradiction into the vocabulary; attaching the near-miss path would bind
   wrong physics. Neither is acceptable, so the contradiction must be resolved
   where it lives.
 </p>
 <p>
-  The sensor-direction pair is the clearest case. A unit-vector component is
-  dimensionless by construction. Either the children should be dimensionless
-  direction cosines, or the parent should be redefined as a displacement — and
-  only DD authority can choose.
+  The sensor-direction pair demonstrates the authority boundary: DD authority
+  now supplies the dimensionless unit <code>1</code>, so those two local holds are
+  closed without a naming-side workaround.
 </p>
 
 <h2 id="s4">§4 — Vocabulary question, tracked separately</h2>

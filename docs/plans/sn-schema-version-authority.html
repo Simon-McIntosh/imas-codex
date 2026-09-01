@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="The Schema Is the One Authority the Graph Does Not Record">
-<meta name="plan-summary" content="The graph records which version of every external authority it was built from - 35 DDVersion nodes, 110 ISNGrammarVersion nodes - except the LinkML schema, which has no such node and no digest anywhere. So a long-lived MCP server that loaded the schema before a migration keeps serving against a graph built after it, and the mismatch is undetectable from either side. Found by a peer session after 21 stdio servers were observed still running pre-rename key spellings.">
+<meta name="plan-summary" content="The graph records DD and grammar authority versions, but no LinkML schema digest; a stale server can serve a migrated graph without detecting drift.">
 <meta name="plan-status" content="draft">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="M">
@@ -44,8 +44,8 @@
   <section>
     <h2>§2 — The gap is in an existing pattern, not a missing feature</h2>
     <p>This graph already records the version of every external authority it was built
-    against. There are 35 <code>DDVersion</code> nodes and 110
-    <code>ISNGrammarVersion</code> nodes, and code consults them rather than trusting that
+    against. A controlled live measurement on 2026-09-01 found 35
+    <code>DDVersion</code> nodes and 112 <code>ISNGrammarVersion</code> nodes, and code consults them rather than trusting that
     whoever is connected loaded the right thing.</p>
     <p>The LinkML schema is the one authority with no such node and no digest anywhere.
     <code>imas_codex/graph/schema_context_data.py</code> is 2,303 lines generated
