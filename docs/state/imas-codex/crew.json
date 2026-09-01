@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T20:47:14",
+  "updated": "2026-09-01T20:50:36",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2489,6 +2489,15 @@
           "gpt-5.6-sol": "01a03e99-8550-72c0-9c24-0af0d578618a"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "test-graphsafety",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "test-identities",
@@ -45677,9 +45686,113 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T183549156839-n-namingparity",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73d",
+        "node": "n-namingparity",
+        "node_definition": {
+          "done_when": "build_remote_export_script, build_remote_push_script and build_remote_release_push_script receive their outer archive name and inner directory name from the caller's graph_archive_stamp result instead of forming PID-based names, and graph_push's local temporary archive carries the same stamp; a test extends tests/cli/test_graph_archive_naming.py to assert every producer's name matches one shared grammar and is shown failing before the change; tests/cli reports 0 failures with ruff clean on the staged paths",
+          "estimated_hours": null,
+          "goal": "Bring the remote and push archive producers under the same naming contract as the local ones",
+          "id": "n-namingparity",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T183549156839-n-namingparity/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73d",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/graph/remote.py",
+            "imas_codex/cli/graph/registry.py",
+            "imas_codex/cli/graph/data.py",
+            "tests/cli/test_graph_archive_naming.py",
+            "imas_codex/cli/release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-namingparity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:35:54Z",
+        "completed_at": "2026-09-01T18:50:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 854,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 854,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "855022df99cfe09bd466f7f1f7c15f12205ec7be",
+        "commits": [
+          "815b848f9ecb4339a46a69cac5cbdbab48a797af"
+        ],
+        "changed_lines": {
+          "added": 223,
+          "removed": 126,
+          "files": 5
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider tests/cli/test_graph_archive_naming.py -q; pytest -p no:cacheprovider tests/cli; ruff check --no-cache",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T183549156839-n-namingparity/tests-cli.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T183549156839-n-namingparity/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05e41-a203-7113-a39c-dfb26fa3d6f5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6086144,
+            "cached_input_tokens_cumulative": 6086144,
+            "input_tokens": 6246545,
+            "input_tokens_cumulative": 6246545,
+            "output_tokens": 24175,
+            "output_tokens_cumulative": 24175,
+            "reasoning_output_tokens": 6043,
+            "reasoning_output_tokens_cumulative": 6043
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1192
+    "_version": 1194
   }
 }
