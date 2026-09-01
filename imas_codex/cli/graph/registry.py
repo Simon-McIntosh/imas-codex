@@ -35,6 +35,7 @@ from imas_codex.graph.neo4j_ops import (
     Neo4jOperation,
     backup_graph_dump,
     check_graph_exists,
+    graph_archive_stamp,
 )
 
 
@@ -142,6 +143,8 @@ def graph_push(
     pkg_name = get_package_name(
         list(facilities) or None, without_dd=without_dd, dd_only=dd_only
     )
+    archive_dir_name = f"{pkg_name}-{graph_archive_stamp(git_info['commit_short'])}"
+    archive_name = f"{archive_dir_name}.tar.gz"
 
     click.echo(f"Push target: {target_registry}/{pkg_name}:{version_tag}")
     if git_info["is_fork"]:
@@ -220,6 +223,8 @@ def graph_push(
                 is_dev=dev,
                 dd_only=dd_only,
                 codex_cli_path=codex_cli_path,
+                archive_name=archive_name,
+                archive_dir_name=archive_dir_name,
                 scheduler=_resolve_scheduler(profile),
                 partition=_resolve_partition(profile),
             )
@@ -266,7 +271,7 @@ def graph_push(
     require_oras()
 
     with tempfile.TemporaryDirectory() as push_tmpdir:
-        archive_path = Path(push_tmpdir) / f"{pkg_name}-{version_tag}.tar.gz"
+        archive_path = Path(push_tmpdir) / archive_name
 
         with GraphProgress("push") as gp:
             gp.set_total_phases(3 if not dev else 2)

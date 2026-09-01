@@ -977,20 +977,27 @@ def _push_all_graph_variants(
 
         # Build artifact refs for each variant
         from imas_codex.graph.ghcr import get_git_info
+        from imas_codex.graph.neo4j_ops import graph_archive_stamp
 
         git_info = get_git_info()
+        archive_stamp = graph_archive_stamp(git_info["commit_short"])
         full_pkg = get_package_name()
         full_ref = f"{registry}/{full_pkg}:{git_tag}"
+        full_archive_dir = f"{full_pkg}-{archive_stamp}"
 
         dd_pkg = get_package_name(dd_only=True)
         dd_ref = f"{registry}/{dd_pkg}:{git_tag}"
+        dd_archive_dir = f"{dd_pkg}-{archive_stamp}"
 
         facility_refs = None
+        facility_archive_dirs = None
         if not is_rc and facilities:
             facility_refs = {}
+            facility_archive_dirs = {}
             for fac in facilities:
                 fac_pkg = get_package_name(facilities=[fac])
                 facility_refs[fac] = f"{registry}/{fac_pkg}:{git_tag}"
+                facility_archive_dirs[fac] = f"{fac_pkg}-{archive_stamp}"
 
         if dry_run:
             click.echo(f"\n  [DRY RUN] Would push from {profile.host}:")
@@ -1008,6 +1015,15 @@ def _push_all_graph_variants(
             facility_artifact_refs=facility_refs,
             version_tag=git_tag,
             git_commit=git_info["commit"],
+            archive_name=f"{full_archive_dir}.tar.gz",
+            archive_dir_name=full_archive_dir,
+            dd_archive_name=f"{dd_archive_dir}.tar.gz",
+            dd_archive_dir_name=dd_archive_dir,
+            facility_archive_names={
+                fac: f"{name}.tar.gz"
+                for fac, name in (facility_archive_dirs or {}).items()
+            },
+            facility_archive_dir_names=facility_archive_dirs,
             message=message,
             token=None,  # Use cached GHCR creds on remote
             is_dev=False,

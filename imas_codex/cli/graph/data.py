@@ -390,8 +390,9 @@ def _update_env_file(env_file: Path, new_password: str) -> None:
 @click.option(
     "--version-label",
     default=None,
-    help="Override version label for archive directory name.",
+    help="Override the version recorded in the archive manifest.",
 )
+@click.option("--archive-dir-name", default=None, hidden=True)
 def graph_export(
     output: str | None,
     no_restart: bool,
@@ -402,6 +403,7 @@ def graph_export(
     verbose: bool = False,
     source_dump: str | None = None,
     version_label: str | None = None,
+    archive_dir_name: str | None = None,
 ) -> None:
     """Export graph database to archive.
 
@@ -419,6 +421,8 @@ def graph_export(
     pkg_name = get_package_name(
         facilities=list(facilities), without_dd=without_dd, dd_only=dd_only
     )
+    archive_stamp = graph_archive_stamp(git_info["commit_short"])
+    archive_dir_name = archive_dir_name or f"{pkg_name}-{archive_stamp}"
 
     if output:
         output_path = Path(output)
@@ -426,8 +430,7 @@ def graph_export(
         from imas_codex.graph.dirs import ensure_exports_dir
 
         exports = ensure_exports_dir()
-        archive_stamp = graph_archive_stamp(git_info["commit_short"])
-        output_path = exports / f"{pkg_name}-{archive_stamp}.tar.gz"
+        output_path = exports / f"{archive_dir_name}.tar.gz"
 
     # ── Remote dispatch ──────────────────────────────────────────────────
     from imas_codex.graph.remote import is_remote_location
@@ -464,6 +467,8 @@ def graph_export(
             gp.start_phase(f"Exporting graph [{profile.name}] on {profile.host}")
             script = build_remote_export_script(
                 profile.name,
+                archive_name=f"{archive_dir_name}.tar.gz",
+                archive_dir_name=archive_dir_name,
                 scheduler=_resolve_scheduler(profile),
             )
             try:
@@ -587,7 +592,7 @@ def graph_export(
         tmp_base = str(profile.data_dir) if shutil.which("srun") else None
         with tempfile.TemporaryDirectory(dir=tmp_base) as tmpdir:
             tmp = Path(tmpdir)
-            archive_dir = tmp / f"{pkg_name}-{version_label}"
+            archive_dir = tmp / archive_dir_name
             archive_dir.mkdir()
 
             _build_archive(archive_dir)
@@ -604,7 +609,7 @@ def graph_export(
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 tmp = Path(tmpdir)
-                archive_dir = tmp / f"{pkg_name}-{version_label}"
+                archive_dir = tmp / archive_dir_name
                 archive_dir.mkdir()
 
                 _build_archive(archive_dir)
