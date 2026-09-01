@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="bcb25e0e">
-<meta name="plan-artifacts" content="docs/evidence/catalog-review-surface/reuse-map.md">
-<meta name="plan-impl" content="0.43">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="bcb25e0e,9fa88452">
+<meta name="plan-artifacts" content="docs/evidence/catalog-review-surface/reuse-map.md,imas_codex/schemas/standard_name.yaml,imas_codex/standard_names/promote.py,tests/standard_names/test_promote_reviewer_actor.py">
+<meta name="plan-impl" content="0.57">
 </head>
 <body>
   <main class="plan-doc">
@@ -158,6 +158,12 @@
 </div>
 <div class="r-comment" data-section="§4a" data-id="c-20260901T1220-crsfoldbackmap" data-who="reckon-ship" data-when="2026-09-01T12:20:00+00:00">
     <div class="r-comment-body">n-crsfoldbackmap landed — commit bcb25e0e; gate reuse-map-completeness passed; measure 17 candidate mechanisms against a floor of 8, 17 fitness verdicts, 0 candidates lacking a verdict, and all five named anchors present under an independent coordinator re-check at exit 0; artifact docs/evidence/catalog-review-surface/reuse-map.md. THE MAP MOVES TWO OF THE THREE REMAINING DELIVERABLES FROM EXERCISE TO IMPLEMENTATION, which is the result rather than the candidate count. Reusable as-is: the approval entry point is imas_codex/cli/sn.py:sn_approve delegating to standard_names/promote.py:run_approval, and the catalog pull-request traceability fields catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha and catalog_approved_at are already written by mark_catalog_name_approved — so the census finding that all four read zero across 4,666 rows means the writer has never been reached, not that it is missing. GAP ONE, and it blocks deliverable five outright: human authority is persisted only as edit_origin='human' with NO reviewer login anywhere, so the graph cannot today record WHO changed an entry; a durable reviewer-actor field sourced from authoritative GitHub evidence must land before the who-changed-it gate can be measured rather than asserted. GAP TWO bounds deliverable four: the normal undo path exists at promote.py:undo_approval with delete_fold_back_tag and _undo_catalog_correction, but an accepted human edit remains in graph history by design, so a no-lasting-change proof needs an isolated graph substrate rather than an in-place rollback. It also corrected a coordinator fact recorded in this section: the live guard is .github/workflows/validate.yml, not catalog.yml.</div>
+</div>
+<div class="r-comment" data-section="§4a" data-id="c-run-r-20260901T122336161160-n-revieweractor" data-who="impl-revieweractor" data-when="2026-09-01T12:30:44Z">
+    <div class="r-comment-body"><p>catalog_reviewer_actor declared and filled from the merged-PR author in the same payload as number/url/SHA; content_edit only, cleared on undo; 23 passed 0 failed; firing control 261 accepted human edits with 0 actors pre-deployment</p></div>
+</div>
+<div class="r-comment" data-section="§4a" data-id="c-20260901T1231-revieweractor" data-who="reckon-ship" data-when="2026-09-01T12:31:00+00:00">
+    <div class="r-comment-body">n-revieweractor landed — commit 9fa88452; gate reviewer-actor-persisted passed; measure 23 passed and 0 failed across the new regression plus the sn-approve and cli-approve suites at exit 0, with a live pre-deployment firing control of 261 accepted human edits carrying 0 actors; artifacts imas_codex/schemas/standard_name.yaml, standard_names/promote.py, tests/standard_names/test_promote_reviewer_actor.py; 1 test added. THIS CLOSES THE GAP THAT MADE DELIVERABLE FIVE UNMEASURABLE RATHER THAN MERELY UNDONE: before this commit no reviewer login existed anywhere in the graph, so a who-changed-it check could only have been asserted. catalog_reviewer_actor is now declared on StandardName with a description binding it to merged pull-request evidence and explicitly forbidding inference from edit_origin. THE PROVENANCE IS THE DESIGN POINT: resolve_merged_pr reads author.login out of the SAME gh payload that already yields the number, url and merge commit, so the actor arrives on the identical authoritative tuple rather than from a second, separately-trustworthy source — an actor that could disagree with its own pull-request number would be worse than none. Two discriminations were made correctly and are worth keeping: the actor is persisted for a content_edit only and NOT for an unchanged_ratification, so ratifying someone else's entry does not credit you with authoring it; and undo_approval clears it, which is what lets the unwind deliverable be provable rather than partial. The 261-with-0 control is the honest baseline: the field exists but no row can carry it until a fold-back actually runs, so the traceability RECEIPT still needs the live exercise.</div>
 </div>
 </section>
 </main>
