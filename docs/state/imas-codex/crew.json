@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:58:07",
+  "updated": "2026-09-01T23:04:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -179,9 +179,11 @@
         "id": "impl-approvebase",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05ebd-75bd-7102-ab56-aaed8b98c700",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05ebd-75bd-7102-ab56-aaed8b98c700"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1608,9 +1610,11 @@
         "id": "impl-residualthree",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05ec3-2e2f-7e02-9464-2b5e0da2fc5d",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05ec3-2e2f-7e02-9464-2b5e0da2fc5d"
+        },
         "created": "2026-09-01"
       },
       {
@@ -47662,9 +47666,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T205102664752-n-approve-reviewer-diff-base",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-approve-reviewer-diff-base",
+        "node_definition": {
+          "done_when": "a focused test builds a blank-main additive PR whose merge first parent lacks the batch files, applies a post-cut description edit to one entry, and asserts read_pr_changes/resolve_merged_pr report exactly that entry as edited with before and after text; the existing tests in tests/standard_names/test_sn_approve.py and test_sn_approve_tag.py still pass; a recorded 'imas-codex sn approve --pr https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3 --dry-run' from this worktree reports 2 changed entries (breakdown_initial_time, pulse_duration) and writes nothing",
+          "estimated_hours": null,
+          "goal": "Make sn approve detect reviewer edits on a pure-addition PR by diffing the merged catalog entries against the frozen batch artifact (or equivalently the cut-time RC tag commit) for edit detection, while keeping the merge first parent only as the additive approved-baseline for untouched-entry auto-promotion",
+          "id": "n-approve-reviewer-diff-base",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T205102664752-n-approve-reviewer-diff-base/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/promote.py",
+            "tests/standard_names/test_sn_approve_reviewer_base.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-approvebase",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:51:09Z",
+        "completed_at": "2026-09-01T21:03:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 768,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 768,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "72273e039cda1a748fa46ef0c1e75f67c30e5553",
+        "commits": [
+          "6059a234bc3d71d6b5f74aff49cc94254d5be5e9"
+        ],
+        "changed_lines": {
+          "added": 161,
+          "removed": 18,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_approve_reviewer_base.py tests/standard_names/test_sn_approve.py tests/standard_names/test_sn_approve_tag.py; imas-codex sn approve --pr .../pull/3 --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T205102664752-n-approve-reviewer-diff-base/logs/after-approve-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T205102664752-n-approve-reviewer-diff-base/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ebd-75bd-7102-ab56-aaed8b98c700",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6821120,
+            "cached_input_tokens_cumulative": 6821120,
+            "input_tokens": 7025093,
+            "input_tokens_cumulative": 7025093,
+            "output_tokens": 20158,
+            "output_tokens_cumulative": 20158,
+            "reasoning_output_tokens": 7459,
+            "reasoning_output_tokens_cumulative": 7459
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1242
+    "_version": 1245
   }
 }
