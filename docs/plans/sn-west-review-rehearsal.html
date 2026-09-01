@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="138">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-version" content="140">
+<meta name="plan-impl" content="0.97">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3">
 </head>
 <body>
   <main class="plan-doc">
@@ -2588,6 +2588,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260901T2116-stage4-live" data-who="reckon-ship" data-when="2026-09-01T21:16:00Z">
     <div class="r-comment-body">Stage 4 ran LIVE (report commit 973028ef, merged 45b4ba48). sn approve --pr on PR 3: dry-run saw 2 changes; live run auto-promoted 374 untouched batch names accepted-to-approved with PR 3 provenance, and routed both reviewer edits through the docs re-review: breakdown_initial_time contested at 0.708 and pulse_duration contested at 0.508 against the 0.850 threshold. The graph-merged: receipt tag was written on the fork (approved=0 staged_for_review=0 auto_approved=374 contested=2) and a second invocation was refused by the idempotency guard. Negative results: (1) the edit intended as compliant was contested, so the accept path for an edited entry is not yet demonstrated; a quorum reading of 0.708 on a shorter rewording is within the docs-gate noise band and may be legitimate, so the contested-to-approved path will be exercised with sn resolve --override rather than by loosening the threshold; (2) DEFECT: the two contested StandardName nodes carry null catalog_pr_number/url/merge sha/reviewer actor while the 374 auto-approved carry them; (3) the CLI wrote merge_commit into the frozen review manifest imas_codex/standard_names/manifests/reviews/v0.3.0rc1+west-task-2e.sn_names.yaml, left unstaged in the worktree. Fix node dispatched for (2) and (3); stages 4b (resolve), 5 (freeze-check) and 6 (undo) follow.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T211648723894-n-approve-contested-provenance" data-who="impl-approvebase" data-when="2026-09-01T21:26:10Z">
+    <div class="r-comment-body"><p>contested names now carry the four merged-PR provenance fields atomically, undo clears them, and sn approve no longer rewrites the frozen review artifact after merge (the graph-merged tag is the receipt); 54/54 approval tests pass</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260901T2127-provenance-fix" data-who="reckon-ship" data-when="2026-09-01T21:27:00Z">
+    <div class="r-comment-body">Both stage-4 defects repaired at commit 65a43ae3 (merged 810a1d65): the contest transition now writes catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha and catalog_reviewer_actor atomically with name_stage='contested', undo clears them, and sn approve no longer calls backfill_review_artifact after merge, so the cut-time review manifest stays byte-identical and the graph-merged: tag is the sole fold-back receipt. 54/54 approval tests. Next live stages on the already-folded PR 3 state: 4b sn resolve --override on breakdown_initial_time to demonstrate the contested-to-approved adjudication path; 5 freeze-check with a cost-capped unscoped sn run comparing approved and contested identities before and after; 6 sn approve --undo; 6b re-fold with the repaired code to prove the contested nodes now carry provenance.</div>
 </div>
 </section>
 </main>

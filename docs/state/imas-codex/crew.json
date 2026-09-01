@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:15:58",
+  "updated": "2026-09-01T23:26:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -47977,9 +47977,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T211648723894-n-approve-contested-provenance",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-approve-contested-provenance",
+        "node_definition": {
+          "done_when": "a focused test drives one reviewer edit through the contest path and asserts the four provenance fields equal the merged PR's values; the existing approval, tag and reviewer-base tests still pass; the report states the verdict on the manifest write with the code path cited file:line and the chosen behaviour implemented, and the live graph is not modified by this node",
+          "estimated_hours": null,
+          "goal": "Make sn approve stamp merged-PR provenance (catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha, catalog_reviewer_actor) on contested names exactly as it does on auto-approved names, with crew/reports/approve-manifest-mutation.md deciding whether the CLI's write of merge_commit into the frozen review manifest is a receipt to keep (in which case approve commits it deliberately with undo resetting it) or a mutation to remove",
+          "id": "n-approve-contested-provenance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211648723894-n-approve-contested-provenance/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/promote.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_sn_approve_contested_provenance.py",
+            "crew/reports/approve-manifest-mutation.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-approvebase",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:16:55Z",
+        "completed_at": "2026-09-01T21:26:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 555,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 555,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "dc2cff24ddf91037c1042cae55c5558a68809448",
+        "commits": [
+          "65a43ae3a593027360d2cf6f8154c01830e73c18"
+        ],
+        "changed_lines": {
+          "added": 171,
+          "removed": 13,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_approve_contested_provenance.py tests/standard_names/test_sn_approve.py tests/standard_names/test_sn_approve_tag.py tests/standard_names/test_sn_approve_reviewer_base.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211648723894-n-approve-contested-provenance/logs/after-approval-suite-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211648723894-n-approve-contested-provenance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ebd-75bd-7102-ab56-aaed8b98c700",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2956544,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3114336,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13224,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2859
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1247
+    "_version": 1248
   }
 }
