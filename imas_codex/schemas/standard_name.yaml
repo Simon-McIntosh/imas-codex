@@ -930,6 +930,12 @@ classes:
         description: >-
           Full URL of the merged catalog PR that approved this entry.
           Set only by sn approve with complete merge metadata.
+      catalog_reviewer_actor:
+        description: >-
+          GitHub login of the catalog pull-request author whose accepted
+          editorial change was folded into this entry. Sourced from the same
+          merged pull-request evidence as catalog_pr_number and
+          catalog_merge_commit_sha; never inferred from edit_origin.
       catalog_approved_at:
         description: >-
           ISO 8601 timestamp when the catalog pull request was merged. Null

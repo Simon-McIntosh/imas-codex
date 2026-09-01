@@ -57,6 +57,7 @@ _DOCS_FIELDS = ("documentation", "description")
 
 #: Editorial outcomes recorded when catalog review grants approval.
 _APPROVAL_OUTCOMES = frozenset({"unchanged_ratification", "content_edit"})
+_RESOLVED_PR_ACTORS: dict[tuple[int, str, str], str] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -923,6 +924,7 @@ def run_approval(
     catalog_pr_number: int | None = None,
     catalog_pr_url: str | None = None,
     catalog_merge_commit_sha: str | None = None,
+    catalog_reviewer_actor: str | None = None,
     dry_run: bool = False,
     batch: list[str] | None = None,
     gc: GraphClient | None = None,
@@ -963,6 +965,16 @@ def run_approval(
     ):
         raise ValueError(
             "catalog approval requires PR number, PR URL, and merge commit SHA"
+        )
+    if catalog_reviewer_actor is None and all(
+        value is not None for value in approval_values
+    ):
+        catalog_reviewer_actor = _RESOLVED_PR_ACTORS.get(
+            (
+                int(catalog_pr_number),
+                str(catalog_pr_url),
+                str(catalog_merge_commit_sha),
+            )
         )
 
     catalog_delta: _AdditiveCatalogDelta | None = None
@@ -1074,6 +1086,7 @@ def run_approval(
                         catalog_pr_number=int(catalog_pr_number),
                         catalog_pr_url=str(catalog_pr_url),
                         catalog_merge_commit_sha=str(catalog_merge_commit_sha),
+                        catalog_reviewer_actor=catalog_reviewer_actor,
                         editorial_outcome="content_edit",
                         gc=gc,
                     )
@@ -1160,6 +1173,7 @@ class ResolvedPr:
     number: int
     url: str
     merge_commit: str
+    reviewer_actor: str
     head_ref: str
     base_ref: str
 
@@ -1184,7 +1198,7 @@ def resolve_merged_pr(pr_url: str) -> ResolvedPr:
             "view",
             pr_url,
             "--json",
-            "number,url,state,mergeCommit,headRefName,baseRefName",
+            "number,url,state,mergeCommit,author,headRefName,baseRefName",
         ],
         capture_output=True,
         text=True,
@@ -1201,13 +1215,20 @@ def resolve_merged_pr(pr_url: str) -> ResolvedPr:
     oid = (data.get("mergeCommit") or {}).get("oid")
     if not oid:
         raise ValueError("merged PR records no merge commit")
-    return ResolvedPr(
+    reviewer_actor = (data.get("author") or {}).get("login") or ""
+    resolved = ResolvedPr(
         number=int(data["number"]),
         url=data.get("url") or pr_url,
         merge_commit=oid,
+        reviewer_actor=reviewer_actor,
         head_ref=data.get("headRefName") or "",
         base_ref=data.get("baseRefName") or "main",
     )
+    if reviewer_actor:
+        _RESOLVED_PR_ACTORS[(resolved.number, resolved.url, resolved.merge_commit)] = (
+            reviewer_actor
+        )
+    return resolved
 
 
 @dataclass
@@ -1255,6 +1276,7 @@ def undo_approval(
                 sn.catalog_pr_number = null,
                 sn.catalog_pr_url = null,
                 sn.catalog_merge_commit_sha = null,
+                sn.catalog_reviewer_actor = null,
                 sn.catalog_approved_at = null
             RETURN sn.id AS id ORDER BY id
             """,
@@ -1289,6 +1311,7 @@ def mark_catalog_name_approved(
     catalog_pr_number: int,
     catalog_pr_url: str,
     catalog_merge_commit_sha: str,
+    catalog_reviewer_actor: str | None = None,
     editorial_outcome: str = "unchanged_ratification",
     gc: GraphClient,
 ) -> bool:
@@ -1310,6 +1333,7 @@ def mark_catalog_name_approved(
             sn.catalog_pr_number = $pr_number,
             sn.catalog_pr_url = $pr_url,
             sn.catalog_merge_commit_sha = $merge_commit,
+            sn.catalog_reviewer_actor = $reviewer_actor,
             sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime())
         CREATE (change:StandardNameChange {
           id: 'sn-change:' + randomUUID(),
@@ -1328,6 +1352,7 @@ def mark_catalog_name_approved(
         pr_number=catalog_pr_number,
         pr_url=catalog_pr_url,
         merge_commit=catalog_merge_commit_sha,
+        reviewer_actor=catalog_reviewer_actor,
         editorial_outcome=editorial_outcome,
         change_reason=change_reason,
         change_origin="catalog_promotion",
