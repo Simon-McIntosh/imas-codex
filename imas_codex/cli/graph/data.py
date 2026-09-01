@@ -23,6 +23,7 @@ from imas_codex.graph.ghcr import (
 from imas_codex.graph.neo4j_ops import (
     Neo4jOperation,
     backup_graph_dump,
+    graph_archive_stamp,
     is_neo4j_running,
     neo4j_image,
     run_neo4j_dump as _run_neo4j_dump,
@@ -323,7 +324,8 @@ def graph_export(
         from imas_codex.graph.dirs import ensure_exports_dir
 
         exports = ensure_exports_dir()
-        output_path = exports / f"{pkg_name}-{version_label}.tar.gz"
+        archive_stamp = graph_archive_stamp(git_info["commit_short"])
+        output_path = exports / f"{pkg_name}-{archive_stamp}.tar.gz"
 
     # ── Remote dispatch ──────────────────────────────────────────────────
     from imas_codex.graph.remote import is_remote_location
