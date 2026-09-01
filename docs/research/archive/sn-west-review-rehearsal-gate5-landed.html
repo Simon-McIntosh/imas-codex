@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-gate5-landed">
+  <meta name="plan-title" content="WEST rehearsal §3 — gate 5 landed: the residual closed by instrument">
+  <meta name="plan-summary" content="Acceptance 300→331/355; all 221 batch names parse at the pin with no null units; export ambiguity 0; the 355 partition into accepted / documented / instrumented with zero unexplained. $8.75 of the $25 review cap.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="sonnet">
+  <meta name="plan-informs" content="sn-west-review-rehearsal">
+  <title>WEST rehearsal §3 — gate 5 landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2>Headline</h2>
+    <p>
+      §3's residual naming work closed by instrument on 2026-07-29:
+      <strong>331 of 355</strong> WEST sources carry an accepted name
+      (300 at session start), the batch's <strong>221 names all parse</strong>
+      at ISN pin <code>937ea94</code> with <strong>no null units</strong>,
+      WEST export ambiguity is <strong>0</strong>, and the manifest partitions
+      into accepted / documented non-nameable / instrumented with
+      <strong>zero unexplained paths</strong>. Total paid review:
+      <strong>$8.75</strong> of the $25 cap ($6.44 edits pass + $2.31 batch
+      pass); composes were pennies. Per D-release-standard the handoff is
+      &ldquo;gate 5 holds&rdquo; — all five robustness gates now carry measured
+      HOLDS entries in
+      <a href="/imas-codex/plans/sn-naming-loop-robustness">sn-naming-loop-robustness</a> §5.
+    </p>
+
+    <h2>Item 0 — the three export blockers</h2>
+    <table>
+      <thead><tr><th>blocker</th><th>root cause</th><th>repair</th><th>outcome</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>accumulated_deposited_thermal_energy_of_plasma_facing_component</code></td>
+          <td>Fails canonical order at the pin; the canonical reorder parses
+              <code>thermal</code> as the thermal-<em>population</em> token — a
+              species claim the DD text (&ldquo;energy extracted from the
+              component on the whole plasma discharge&rdquo;) does not make.</td>
+          <td><code>sn edit --rename</code> →
+              <code>accumulated_deposited_energy_of_plasma_facing_component</code></td>
+          <td>accepted 0.925, unit J</td>
+        </tr>
+        <tr>
+          <td><code>initial_plasma_breakdown_time</code></td>
+          <td>Every spelling joining <code>plasma</code> and
+              <code>breakdown</code> canonicalizes to nonsense —
+              <code>plasma</code> binds as a <em>channel qualifier</em>,
+              splitting the lexical concept. The natural id
+              <code>breakdown_time</code> is a refine tombstone inside this
+              name's own chain (superseded from <code>refining</code>;
+              adopting it would close a REFINED_FROM cycle — the /phi trap).</td>
+          <td><code>sn edit --rename</code> → <code>breakdown_initial_time</code>
+              (breakdown-phase scoping qualifier + temporal qualifier + base);
+              grammar finding filed as
+              <a href="https://github.com/Simon-McIntosh/IMAS-Standard-Names/issues/39">ISN #39</a></td>
+          <td>accepted 0.925, unit s</td>
+        </tr>
+        <tr>
+          <td><code>greenwald_density</code> unit NULL</td>
+          <td>A derived <em>operand parent</em> (structurally accepted via
+              ENRICH_PARENTS, zero reviews) holding its child's dimensionless
+              DD leaf (<code>greenwald_fraction/value</code>); derived-parent
+              unit inheritance correctly refuses to peel a unit from ratio
+              children, so the unit was null by design — the defect was the
+              attachment.</td>
+          <td><code>sn detach</code> extended with a structural-parent
+              exemption (a parent anchored by live HAS_PARENT children is not
+              orphaned by losing its last realization — 56 accepted derived
+              parents carry none by design; commit <code>1efea0d1</code>, TDD);
+              the leaf's true name staged as
+              <code>ratio_of_line_averaged_electron_density_to_greenwald_density</code>
+              per the DD formula.</td>
+          <td>ratio name accepted 0.9625, unit 1; the parent released,
+              unit legitimately absent as an unrealized structural parent</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Item D — the last export ambiguity</h2>
+    <p>
+      <code>bind_sources_exclusively</code> moved the three generic
+      poloidal-field paths (<code>edge_profiles/ggd/b_field/poloidal</code>,
+      <code>plasma_profiles/ggd/b_field/poloidal</code>,
+      <code>magnetics/b_field_pol_probe/field</code>) onto
+      <code>poloidal_magnetic_field</code> (lead-authorised cross-manifest
+      reach); <code>gate_migrated_attachments</code> validated all three
+      pairings (0 rejections); the constraint leaf detached. WEST export
+      ambiguity measured on <code>HAS_STANDARD_NAME</code> with HAS_PARENT
+      co-realization excluded: <strong>0 pairs</strong>.
+    </p>
+
+    <h2>The gm cluster — 6 of 9 resolved, each with its own DD unit</h2>
+    <p>
+      The composer demonstrably cannot emit the chained-operator forms (it
+      fuses <code>flux_surface_averaged_inverse_square</code> into one
+      transformation token — the exact pydantic rejection is now a measured
+      loop finding). What converged deterministically is the
+      <strong>two-step</strong>: let compose mint <em>any</em> single-source
+      name, then <code>sn edit --rename</code> onto the parser-validated
+      target, which review accepts on merit.
+    </p>
+    <table>
+      <thead><tr><th>path</th><th>accepted name</th><th>unit</th><th>score</th></tr></thead>
+      <tbody>
+        <tr><td>gm2</td><td><code>flux_surface_averaged_ratio_of_square_toroidal_flux_radius_gradient_magnitude_to_square_major_radius</code></td><td>m^-2</td><td>0.858</td></tr>
+        <tr><td>gm3</td><td><code>flux_surface_averaged_square_toroidal_flux_radius_gradient_magnitude</code></td><td>1</td><td>0.888</td></tr>
+        <tr><td>gm4</td><td><code>flux_surface_averaged_inverse_square_magnetic_field_magnitude</code></td><td>T^-2</td><td>0.975</td></tr>
+        <tr><td>gm7</td><td><code>flux_surface_averaged_toroidal_flux_radius_gradient_magnitude</code></td><td>1</td><td>0.956</td></tr>
+        <tr><td>gm8</td><td><code>flux_surface_averaged_major_radius</code> (pre-existing)</td><td>m</td><td>—</td></tr>
+        <tr><td>gm9</td><td><code>flux_surface_averaged_inverse_major_radius</code> (rename of the metric spelling)</td><td>m^-1</td><td>0.975</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Both collapsed carrier names are retired (superseded through the rename
+      cascade / acceptance dedup). gm2's rename accepted while its predecessor
+      had no sources left to migrate — the successor was rebound
+      deterministically and its unit set to the DD declaration (m^-2), with a
+      <code>StandardNameChange</code> recording why. gm1 / gm5 / gm6 remain
+      <code>failed</code> at the composer's attempt cap with parser-validated
+      targets documented — instrumented in the partition, and the strongest
+      capability datum the robustness plan now owns.
+    </p>
+
+    <h2>Rescores, pairs, composables</h2>
+    <ul>
+      <li>Rescores staged (--stage-only, one batch review):
+        <code>radial_coordinate_of_strike_point</code> accepted 0.869;
+        <code>radial_coordinate_of_line_of_sight</code> (the 16-path lever)
+        and <code>toroidal_magnetic_flux</code> re-entered review and sit
+        drafted after the capped pass — their paths are counted in the
+        accepted 331 via sibling names where applicable, otherwise
+        instrumented.</li>
+      <li><code>b_field_average</code>: NEITHER stored candidate was right;
+        <code>flux_surface_averaged_magnetic_field_magnitude</code> accepted
+        0.956 via rename of the exhausted candidate.</li>
+      <li><code>n_e_line</code>: decided from catalog precedent — the accepted
+        electron-density family is uniformly on the <code>density</code> base
+        (zero accepted <code>number_density</code> names);
+        <code>line_integrated_electron_density</code> rescored and the
+        <code>number_density</code> variant hinted to converge onto it.</li>
+      <li>False-gap composables landed on first pass under the new reuse
+        guidance: <code>ece/channel/optical_depth</code> composed onto the
+        registered <code>opacity</code> base (the settled synonym delivered as
+        retry feedback), geometry z-coordinates composed
+        (<code>vertical_coordinate_of_conductor_cross_section</code>, …).</li>
+    </ul>
+
+    <h2>Gate 5 — the partition (final, 2026-07-29)</h2>
+    <table>
+      <thead><tr><th>bucket</th><th>n</th><th>content</th></tr></thead>
+      <tbody>
+        <tr><td>accepted</td><td><strong>331</strong></td>
+            <td>every batch name parses at the pin; no null units</td></tr>
+        <tr><td>documented non-nameable</td><td>10</td>
+            <td>7 time bases (dimension axes), the solver iteration counter,
+                detector-humidity housekeeping, one eligibility-skipped
+                contour-tree coordinate — each with its stated reason</td></tr>
+        <tr><td>in review pipeline</td><td>9</td>
+            <td>drafted/reviewed candidates in flight (half-widths,
+                camera_dimensions, optical-depth recompose, power_loss,
+                rho_pol_norm, dvolume_dpsi, radiance pair)</td></tr>
+        <tr><td>gap-eligible retry</td><td>5</td>
+            <td>gm1/gm5/gm6 (composer capability, targets documented) +
+                2 extracted leftovers</td></tr>
+        <tr><td><strong>unexplained</strong></td><td><strong>0</strong></td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Spend</h2>
+    <p>
+      Review $8.75 (edits $6.44: 30 reviewed + 7 refined; batch $2.31: 12
+      reviewed + 4 refined) — under the $25 cap. Composes ~$0.30 across three
+      drains. Campaign total ≈ $89 of the 500 USD ceiling.
+    </p>
+
+  </main>
+</body>
+</html>

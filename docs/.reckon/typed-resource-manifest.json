@@ -1,0 +1,1283 @@
+{
+  "format": 1,
+  "moves": [
+    {
+      "archived": true,
+      "from": "archive/dd-graph-hygiene-s2-landed.html",
+      "resource": "imas-codex:evidence:dd-graph-hygiene-s2-landed",
+      "sha256": "cc86e2043c5878bf71a5c621421089a3b6be3db1b4059d3b02de2b37deb4bb16",
+      "slug": "dd-graph-hygiene-s2-landed",
+      "to": "evidence/archive/dd-graph-hygiene-s2-landed.html",
+      "type": "evidence"
+    },
+    {
+      "archived": true,
+      "from": "archive/dd-graph-hygiene-s3-landed.html",
+      "resource": "imas-codex:evidence:dd-graph-hygiene-s3-landed",
+      "sha256": "fd6f4d7363800cb22726927854a87ddca6a929bc078f6af683fe43e84d53d9a9",
+      "slug": "dd-graph-hygiene-s3-landed",
+      "to": "evidence/archive/dd-graph-hygiene-s3-landed.html",
+      "type": "evidence"
+    },
+    {
+      "archived": true,
+      "from": "archive/dd-graph-hygiene-s4-landed.html",
+      "resource": "imas-codex:evidence:dd-graph-hygiene-s4-landed",
+      "sha256": "a495de625bd811d7bb746956d970da8eed42a2ab37c7ba92bea1c94c355073c3",
+      "slug": "dd-graph-hygiene-s4-landed",
+      "to": "evidence/archive/dd-graph-hygiene-s4-landed.html",
+      "type": "evidence"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-family-harmonization-landed.html",
+      "resource": "imas-codex:evidence:sn-family-harmonization-landed",
+      "sha256": "f8594436fb0a3a6bbba79630bf9bf68ecc301d20f3c911bd9ecdf3236b3322d6",
+      "slug": "sn-family-harmonization-landed",
+      "to": "evidence/archive/sn-family-harmonization-landed.html",
+      "type": "evidence"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-graph-wide-integrity-watchdog-stubs-west-landed.html",
+      "resource": "imas-codex:evidence:sn-graph-wide-integrity-watchdog-stubs-west-landed",
+      "sha256": "7aba4dee56711375fa9fce662838cb2e060af9abdd0cae41ccf00ae0cf052869",
+      "slug": "sn-graph-wide-integrity-watchdog-stubs-west-landed",
+      "to": "evidence/archive/sn-graph-wide-integrity-watchdog-stubs-west-landed.html",
+      "type": "evidence"
+    },
+    {
+      "archived": false,
+      "from": "33-cli-harmonization.html",
+      "resource": "imas-codex:plan:33-cli-harmonization",
+      "sha256": "81eca5edc8d75666d11311121a85a8f6670a9d3b9ed64149accf0e605bf5b3e9",
+      "slug": "33-cli-harmonization",
+      "to": "plans/33-cli-harmonization.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/00-implementation-order.html",
+      "resource": "imas-codex:plan:00-implementation-order",
+      "sha256": "187cf34b35b5bea6c7470b36a77e820d78f6ee0971c33ca2c740888677b33bd2",
+      "slug": "00-implementation-order",
+      "to": "plans/archive/00-implementation-order.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/09-llm-compose.html",
+      "resource": "imas-codex:plan:09-llm-compose",
+      "sha256": "3d74d32319d8c90c27f10bd4308342c04c5917e0efbfa659734a471e6443b39b",
+      "slug": "09-llm-compose",
+      "to": "plans/archive/09-llm-compose.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/09-sn-generate.html",
+      "resource": "imas-codex:plan:09-sn-generate",
+      "sha256": "4e357198c2f68011c0a4abf360cfaccba1dc2fb947e3ab028ce5c56d283a3bc4",
+      "slug": "09-sn-generate",
+      "to": "plans/archive/09-sn-generate.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/10-pipeline-fixes.html",
+      "resource": "imas-codex:plan:10-pipeline-fixes",
+      "sha256": "d1feda023cd9b92e81686f7f2dadad4b8676e80043871664597823693c1943f4",
+      "slug": "10-pipeline-fixes",
+      "to": "plans/archive/10-pipeline-fixes.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/11-publish-validation.html",
+      "resource": "imas-codex:plan:11-publish-validation",
+      "sha256": "2c691edfb4ae0f94f3a45c8e83759537c217c415e1688b9db15fa7afae113dc1",
+      "slug": "11-publish-validation",
+      "to": "plans/archive/11-publish-validation.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/11-rich-compose.html",
+      "resource": "imas-codex:plan:11-rich-compose",
+      "sha256": "b2ded7a28038ed952403fc7d6325a584e0bee912478233bda75649fc3ad1e9f0",
+      "slug": "11-rich-compose",
+      "to": "plans/archive/11-rich-compose.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/12-catalog-import.html",
+      "resource": "imas-codex:plan:12-catalog-import",
+      "sha256": "ed59bea3929644fecac7c01485a8b995829411730d8a2e0a0eef235dd2884bf4",
+      "slug": "12-catalog-import",
+      "to": "plans/archive/12-catalog-import.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/13-publish-pipeline.html",
+      "resource": "imas-codex:plan:13-publish-pipeline",
+      "sha256": "44cd79e9547b65d32691c4af66ecb094d505391bd85c37f71a98c24ae5c5135f",
+      "slug": "13-publish-pipeline",
+      "to": "plans/archive/13-publish-pipeline.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/14-mcp-tools-benchmark.html",
+      "resource": "imas-codex:plan:14-mcp-tools-benchmark",
+      "sha256": "c8c81da719bcbb3bb52d7b6f05be4c9ad7ebe0866a9ea2a6ac9aad808d08cb83",
+      "slug": "14-mcp-tools-benchmark",
+      "to": "plans/archive/14-mcp-tools-benchmark.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/15-import-physics-domain.html",
+      "resource": "imas-codex:plan:15-import-physics-domain",
+      "sha256": "9942a54515301c076fff664af47eb0ee68105f39774f6917244c67247ed3dcbb",
+      "slug": "15-import-physics-domain",
+      "to": "plans/archive/15-import-physics-domain.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/19-benchmark-and-lifecycle.html",
+      "resource": "imas-codex:plan:19-benchmark-and-lifecycle",
+      "sha256": "2d3ed7fb6ea14efcd1c4fd7ae55c9ede23ad9e97c3eda89796d9fd21a12189b6",
+      "slug": "19-benchmark-and-lifecycle",
+      "to": "plans/archive/19-benchmark-and-lifecycle.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/21-architecture-boundary.html",
+      "resource": "imas-codex:plan:21-architecture-boundary",
+      "sha256": "55af4d765eb5ca9351e576eb38b881081dcb0d6cc3a16170273dacef3c7a72f8",
+      "slug": "21-architecture-boundary",
+      "to": "plans/archive/21-architecture-boundary.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/22-rename-and-regeneration-context.html",
+      "resource": "imas-codex:plan:22-rename-and-regeneration-context",
+      "sha256": "990665adbfdbf1d62aa3cbe95cd84704711afc7098b6c5d22ff2b5994a1f6e8f",
+      "slug": "22-rename-and-regeneration-context",
+      "to": "plans/archive/22-rename-and-regeneration-context.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/25-standalone-review.html",
+      "resource": "imas-codex:plan:25-standalone-review",
+      "sha256": "a34c6ab79047df693f248847ae1c2453104f009c9c6af7ac5fc9e69abe86af2a",
+      "slug": "25-standalone-review",
+      "to": "plans/archive/25-standalone-review.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/26-sn-pipeline-quality-iteration.html",
+      "resource": "imas-codex:plan:26-sn-pipeline-quality-iteration",
+      "sha256": "7abc9b4b716b42d340aa767d306cc6299eb57480e1defa2bbb4d988ff8ab7b12",
+      "slug": "26-sn-pipeline-quality-iteration",
+      "to": "plans/archive/26-sn-pipeline-quality-iteration.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/38-grammar-vnext.html",
+      "resource": "imas-codex:plan:38-grammar-vnext",
+      "sha256": "d0e67cb213980bfa9488454ad539b35afbe02c5f806e6dabfdd19e95e76650d2",
+      "slug": "38-grammar-vnext",
+      "to": "plans/archive/38-grammar-vnext.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/42-polling-workers.html",
+      "resource": "imas-codex:plan:42-polling-workers",
+      "sha256": "fd3cc18d5274fc805fdffa953666bf8356ade00461fa5d6f6cf9dc62d8a964d1",
+      "slug": "42-polling-workers",
+      "to": "plans/archive/42-polling-workers.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/43-pipeline-rd-fix.html",
+      "resource": "imas-codex:plan:43-pipeline-rd-fix",
+      "sha256": "d927fb96c3d7d9ae76194b36b515630683ba692a024f686d86a8e232ea3d4212",
+      "slug": "43-pipeline-rd-fix",
+      "to": "plans/archive/43-pipeline-rd-fix.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/44-sn-graph-renames-batched-embed.html",
+      "resource": "imas-codex:plan:44-sn-graph-renames-batched-embed",
+      "sha256": "0bcf5bce6c1d4940866573cfb2bc414bbf4a45fac552300a3ff1f8595b35fb7f",
+      "slug": "44-sn-graph-renames-batched-embed",
+      "to": "plans/archive/44-sn-graph-renames-batched-embed.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/container-neo4j-recovery.html",
+      "resource": "imas-codex:plan:container-neo4j-recovery",
+      "sha256": "9bd9289e9a4738f08b5a064ac686ba9b9a04bef0713976b5ffa750905efce088",
+      "slug": "container-neo4j-recovery",
+      "to": "plans/archive/container-neo4j-recovery.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/dd-multi-pass-enrichment.html",
+      "resource": "imas-codex:plan:dd-multi-pass-enrichment",
+      "sha256": "6fde8b593dc1b792429cb07b21cf050947a708c7c6014949e2705bd453458947",
+      "slug": "dd-multi-pass-enrichment",
+      "to": "plans/archive/dd-multi-pass-enrichment.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/dd-node-kind-classification.html",
+      "resource": "imas-codex:plan:dd-node-kind-classification",
+      "sha256": "a8ab30aeb69b18edf538f4c9ae90782157664e68d91043b54bf2517a221470f6",
+      "slug": "dd-node-kind-classification",
+      "to": "plans/archive/dd-node-kind-classification.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/dd-unified-classification.html",
+      "resource": "imas-codex:plan:dd-unified-classification",
+      "sha256": "a9a35e58e509c85f4917e8fc94813711cab10ec43c08d5adec3aff945b155ecf",
+      "slug": "dd-unified-classification",
+      "to": "plans/archive/dd-unified-classification.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/isn-standard-name-kind.html",
+      "resource": "imas-codex:plan:isn-standard-name-kind",
+      "sha256": "70d7e5ca114de0d84b98857f1db9f4a1a80e0ff662428d5fa7063639497efa12",
+      "slug": "isn-standard-name-kind",
+      "to": "plans/archive/isn-standard-name-kind.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/search-recall-and-enrichment.html",
+      "resource": "imas-codex:plan:search-recall-and-enrichment",
+      "sha256": "a1a69c60e98ba62c618cdc421da24774eea8e7d64aecc8d3c1c9e10d049ebe86",
+      "slug": "search-recall-and-enrichment",
+      "to": "plans/archive/search-recall-and-enrichment.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-coverage-and-hygiene-landed.html",
+      "resource": "imas-codex:plan:sn-coverage-and-hygiene-landed",
+      "sha256": "fb7ecb1e45f6beaad47ca8ac85bcb0afa82b8f37b6819111e2b2b8beddb5b388",
+      "slug": "sn-coverage-and-hygiene-landed",
+      "to": "plans/archive/sn-coverage-and-hygiene-landed.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-dd-attachment-completeness-s3-landed.html",
+      "resource": "imas-codex:plan:sn-dd-attachment-completeness",
+      "sha256": "0b6d3853fec655017c01e2f2e116bfdbbf01f811ddb788eeca72e58bce56a897",
+      "slug": "sn-dd-attachment-completeness",
+      "to": "plans/archive/sn-dd-attachment-completeness.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "dd-graph-hygiene.html",
+      "resource": "imas-codex:plan:dd-graph-hygiene",
+      "sha256": "6b32cb29c3ce6b0e40e67fd29e5ca0cadc13605d8cb9450b7032627b63fa290c",
+      "slug": "dd-graph-hygiene",
+      "to": "plans/dd-graph-hygiene.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "dd-horizon-update.html",
+      "resource": "imas-codex:plan:dd-horizon-update",
+      "sha256": "478ed4644070bafd6574219128e2afd7e87b5e837d36853c5f23e1f43f49e912",
+      "slug": "dd-horizon-update",
+      "to": "plans/dd-horizon-update.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "docs-refresh.html",
+      "resource": "imas-codex:plan:docs-refresh",
+      "sha256": "188f4912e8c0a9ea52ebfd359243b010e5fc29d7ee8b5850e2924791ad2bfad8",
+      "slug": "docs-refresh",
+      "to": "plans/docs-refresh.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "plan-lifecycle-hygiene.html",
+      "resource": "imas-codex:plan:plan-lifecycle-hygiene",
+      "sha256": "2c0333fc5b0ddfc01376088fc752cec1bf885de4004bc03b4c2fb4c0e62ab1a8",
+      "slug": "plan-lifecycle-hygiene",
+      "to": "plans/plan-lifecycle-hygiene.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-architectural-pivot.html",
+      "resource": "imas-codex:plan:sn-architectural-pivot",
+      "sha256": "7c5f35b0f7801f582b6eba831a4dc786f6e8f841b2084bce9a126227ed9d5d61",
+      "slug": "sn-architectural-pivot",
+      "to": "plans/sn-architectural-pivot.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-benchmark-evolution.html",
+      "resource": "imas-codex:plan:sn-benchmark-evolution",
+      "sha256": "598a55c848f933c164bbf0760516d8bbcae336bdbc1a490bc856ece12e3350e6",
+      "slug": "sn-benchmark-evolution",
+      "to": "plans/sn-benchmark-evolution.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-benchmark-v1.html",
+      "resource": "imas-codex:plan:sn-benchmark-v1",
+      "sha256": "3574ac1c97860462bb1c6be8359782220ad09e38545ff489653e785d3b8d13b1",
+      "slug": "sn-benchmark-v1",
+      "to": "plans/sn-benchmark-v1.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-catalog-approval-pipeline.html",
+      "resource": "imas-codex:plan:sn-catalog-approval-pipeline",
+      "sha256": "79e70d4f8dc4581a368c929cb745a48f84f5d8652fcffaacd6e5e920a83b0a5c",
+      "slug": "sn-catalog-approval-pipeline",
+      "to": "plans/sn-catalog-approval-pipeline.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-catalog-quality-refactor.html",
+      "resource": "imas-codex:plan:sn-catalog-quality-refactor",
+      "sha256": "9156063d24b03f70a20472ec16ac7a184f67a86c22829dcfb722305908292958",
+      "slug": "sn-catalog-quality-refactor",
+      "to": "plans/sn-catalog-quality-refactor.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-closed-physical-base.html",
+      "resource": "imas-codex:plan:sn-closed-physical-base",
+      "sha256": "f4a5d6bd17d4b3ac1c953e4dec96b01545aead27bcc359c77165d96cf51bdcf9",
+      "slug": "sn-closed-physical-base",
+      "to": "plans/sn-closed-physical-base.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-coverage-and-hygiene.html",
+      "resource": "imas-codex:plan:sn-coverage-and-hygiene",
+      "sha256": "e038535de152ed2535579922d5533f4b62dd88b3fbba573a1aa9f6441b1391cc",
+      "slug": "sn-coverage-and-hygiene",
+      "to": "plans/sn-coverage-and-hygiene.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-dd-attachment-completeness.html",
+      "resource": "imas-codex:plan:sn-dd-attachment-completeness",
+      "sha256": "9279acacee0159f435b9d971ec63a5d30f2bd33d13f0be14ea968af3664d7f3d",
+      "slug": "sn-dd-attachment-completeness",
+      "to": "plans/sn-dd-attachment-completeness.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-dd-gaps.html",
+      "resource": "imas-codex:plan:sn-dd-gaps",
+      "sha256": "c9987a6afc477bd9ecdcdbbb4740da1b5a0fbef0b00845895c59fdd59f40cec5",
+      "slug": "sn-dd-gaps",
+      "to": "plans/sn-dd-gaps.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-expert-hints.html",
+      "resource": "imas-codex:plan:sn-expert-hints",
+      "sha256": "10224943b02d3726c18b09594581c76b474c53a4b41d18654ef27f0dfa629bce",
+      "slug": "sn-expert-hints",
+      "to": "plans/sn-expert-hints.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-extraction-prompt-overhaul.html",
+      "resource": "imas-codex:plan:sn-extraction-prompt-overhaul",
+      "sha256": "f182ed6aa65dc7a9a83348e45717cb7c2f82d8a62c6438df8d2dc7943f13d381",
+      "slug": "sn-extraction-prompt-overhaul",
+      "to": "plans/sn-extraction-prompt-overhaul.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-family-harmonization.html",
+      "resource": "imas-codex:plan:sn-family-harmonization",
+      "sha256": "fc530a5dc8eac5f17d7d9a914ab542729782a02e23415c488666e1b263b56c24",
+      "slug": "sn-family-harmonization",
+      "to": "plans/sn-family-harmonization.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-graph-wide-integrity.html",
+      "resource": "imas-codex:plan:sn-graph-wide-integrity",
+      "sha256": "cfd8f9caa6a0f1abcda4b2a5f9bcd4519ecf90a6aaa6b02877b0df864e71498d",
+      "slug": "sn-graph-wide-integrity",
+      "to": "plans/sn-graph-wide-integrity.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-naming-loop-robustness.html",
+      "resource": "imas-codex:plan:sn-naming-loop-robustness",
+      "sha256": "07c35dcee8822aebbb8f1622168f93a883433f931f9bfef61bd650a692e39d27",
+      "slug": "sn-naming-loop-robustness",
+      "to": "plans/sn-naming-loop-robustness.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-pipeline-hardening.html",
+      "resource": "imas-codex:plan:sn-pipeline-hardening",
+      "sha256": "022d46154bbdace7636f60d88dcdb94f27d6309cb9c01cd1884c90dfff720673",
+      "slug": "sn-pipeline-hardening",
+      "to": "plans/sn-pipeline-hardening.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-quality-bootstrap-v2.html",
+      "resource": "imas-codex:plan:sn-quality-bootstrap-v2",
+      "sha256": "f9039ecb6a0ff76c92fca924a636c3abf41da8da6997d29c9f344d9ec1d20f7c",
+      "slug": "sn-quality-bootstrap-v2",
+      "to": "plans/sn-quality-bootstrap-v2.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-quality-parity.html",
+      "resource": "imas-codex:plan:sn-quality-parity",
+      "sha256": "c83f72ee7cc3c0ba95086f5e4a1b1d232a8e70eda748d90dea81eaedb067ab9e",
+      "slug": "sn-quality-parity",
+      "to": "plans/sn-quality-parity.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-search-facility.html",
+      "resource": "imas-codex:plan:sn-search-facility",
+      "sha256": "c4d808ac49a9a69220909e424a4b7d7ccd4fe01f0c53886b22a446f794699629",
+      "slug": "sn-search-facility",
+      "to": "plans/sn-search-facility.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-structural-repair.html",
+      "resource": "imas-codex:plan:sn-structural-repair",
+      "sha256": "e8421f297f30cd9b3b01bda3a22cdb36fddf595e5c39160b4584f81fabf09814",
+      "slug": "sn-structural-repair",
+      "to": "plans/sn-structural-repair.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-structured-fanout.html",
+      "resource": "imas-codex:plan:sn-structured-fanout",
+      "sha256": "eefdf91a8f90f30a6f9721a97ee215d34f79f7b9f28cbebb2eb822cfba0e8f7f",
+      "slug": "sn-structured-fanout",
+      "to": "plans/sn-structured-fanout.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "sn-west-review-rehearsal.html",
+      "resource": "imas-codex:plan:sn-west-review-rehearsal",
+      "sha256": "93e1be0627d9cf39811197da65c8032b29285fc30931c0a5d212cd4ec3f65866",
+      "slug": "sn-west-review-rehearsal",
+      "to": "plans/sn-west-review-rehearsal.html",
+      "type": "plan"
+    },
+    {
+      "archived": false,
+      "from": "strategy.html",
+      "resource": "imas-codex:plan:strategy",
+      "sha256": "77cbc452f4961fbceab5a721a2d457e2cff01a23c7da7bcea6ccf1adf1376088",
+      "slug": "strategy",
+      "to": "plans/strategy.html",
+      "type": "plan"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/01-grammar-api-exports.html",
+      "resource": "imas-codex:research:01-grammar-api-exports",
+      "sha256": "1fe9e647bfcdc1d1b8c735c74969a36829295aaf1c6219af267e5a51b51c8df3",
+      "slug": "01-grammar-api-exports",
+      "to": "research/archive/01-grammar-api-exports.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/02-dd-path-linking.html",
+      "resource": "imas-codex:research:02-dd-path-linking",
+      "sha256": "3d8c4628699d2ce913dda024387ba3573159a7d350012d99b15f17daee557660",
+      "slug": "02-dd-path-linking",
+      "to": "research/archive/02-dd-path-linking.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/03-grammar-extensions.html",
+      "resource": "imas-codex:research:03-grammar-extensions",
+      "sha256": "06a1ff8d0813b0baa709a158ef1bd60f32258566b62debbcc6e5d06f7c286883",
+      "slug": "03-grammar-extensions",
+      "to": "research/archive/03-grammar-extensions.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/04-json-schema-contract.html",
+      "resource": "imas-codex:research:04-json-schema-contract",
+      "sha256": "69173c2df3ce8de596dc0673d066af6a9a5c480ce62556ae5640167620ef1d4f",
+      "slug": "04-json-schema-contract",
+      "to": "research/archive/04-json-schema-contract.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/05-sn-build-pipeline.html",
+      "resource": "imas-codex:research:05-sn-build-pipeline",
+      "sha256": "e6b71538339b52643754ee34d4b42f1cd4fc91ea51e8647ed0e87449c5375efd",
+      "slug": "05-sn-build-pipeline",
+      "to": "research/archive/05-sn-build-pipeline.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/06-cross-model-review.html",
+      "resource": "imas-codex:research:06-cross-model-review",
+      "sha256": "f5e69d38e98efe70dcf806ffd9ee1ed6dd8a8ab8b0fd8b4167e351f8d408529d",
+      "slug": "06-cross-model-review",
+      "to": "research/archive/06-cross-model-review.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/07-benchmarking.html",
+      "resource": "imas-codex:research:07-benchmarking",
+      "sha256": "e15e877166fdb59513a2eed89a2cd97d2bc3f2048b78fce2099d3c8faf1ce2ad",
+      "slug": "07-benchmarking",
+      "to": "research/archive/07-benchmarking.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/08-publish.html",
+      "resource": "imas-codex:research:08-publish",
+      "sha256": "7e1c750d4ea366c580776b96b1273e493e90508101f039bd29d50095431bd097",
+      "slug": "08-publish",
+      "to": "research/archive/08-publish.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/09-llm-compose-integration.html",
+      "resource": "imas-codex:research:09-llm-compose-integration",
+      "sha256": "be1ba857fe6db6e25482b5328a2db14acd1f69d43f04583b44989eb34f4fc69c",
+      "slug": "09-llm-compose-integration",
+      "to": "research/archive/09-llm-compose-integration.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/10-documentation-and-linking.html",
+      "resource": "imas-codex:research:10-documentation-and-linking",
+      "sha256": "015ca23eff7d74113fc30c041430f5bcb7de1c7c49e54cc86456f8e83373dd9e",
+      "slug": "10-documentation-and-linking",
+      "to": "research/archive/10-documentation-and-linking.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/11-schema-and-persistence.html",
+      "resource": "imas-codex:research:11-schema-and-persistence",
+      "sha256": "ab191db255ecf3e9edebc385982f523d580a72fb9e12a6d7e262e0a1bfcdccd8",
+      "slug": "11-schema-and-persistence",
+      "to": "research/archive/11-schema-and-persistence.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/12-benchmark-enhancement.html",
+      "resource": "imas-codex:research:12-benchmark-enhancement",
+      "sha256": "c04d859c62132cfece6845579b324008137a1cb12e7f1004a276ab987e980e0c",
+      "slug": "12-benchmark-enhancement",
+      "to": "research/archive/12-benchmark-enhancement.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/13-integration-testing.html",
+      "resource": "imas-codex:research:13-integration-testing",
+      "sha256": "b73231c2949fcad51e09cf9eff8b7730948f3ac782efce6f7f23d18196b656a4",
+      "slug": "13-integration-testing",
+      "to": "research/archive/13-integration-testing.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/14-link-validation.html",
+      "resource": "imas-codex:research:14-link-validation",
+      "sha256": "b8a7f1dade6f7a05e6afaa45f32ac8f24a8da59c62e84eb339c18c9d3454563a",
+      "slug": "14-link-validation",
+      "to": "research/archive/14-link-validation.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/DD-01-diamagnetic-axis.html",
+      "resource": "imas-codex:research:DD-01-diamagnetic-axis",
+      "sha256": "dc8d94c81ec7d83988e9a8acb919c3ff2cb83fa6898a7df750e91c06fbd96b2a",
+      "slug": "DD-01-diamagnetic-axis",
+      "to": "research/archive/DD-01-diamagnetic-axis.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/DD-02-grid-object-measure-unit.html",
+      "resource": "imas-codex:research:DD-02-grid-object-measure-unit",
+      "sha256": "c18c7240041f329d2e34be9cdc81380e98ceb3b229a8c1cb8ebdf3d5665248a5",
+      "slug": "DD-02-grid-object-measure-unit",
+      "to": "research/archive/DD-02-grid-object-measure-unit.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/DD-03-multiplicity-unit.html",
+      "resource": "imas-codex:research:DD-03-multiplicity-unit",
+      "sha256": "b2cd7df6f97cd1a6b35101c134f9f4bb80fe2d7d5ba37d13d0c6e5942e6faf66",
+      "slug": "DD-03-multiplicity-unit",
+      "to": "research/archive/DD-03-multiplicity-unit.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/DD-04-pulse-schedule-reference-unit.html",
+      "resource": "imas-codex:research:DD-04-pulse-schedule-reference-unit",
+      "sha256": "e046cdbe32cd115b703b2c46afeaff46cda76887a200f8c1bc0e26f89d4a5c88",
+      "slug": "DD-04-pulse-schedule-reference-unit",
+      "to": "research/archive/DD-04-pulse-schedule-reference-unit.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/DD-05-neutron-fluxes-rates-duplicate.html",
+      "resource": "imas-codex:research:DD-05-neutron-fluxes-rates-duplicate",
+      "sha256": "f7bd7d0a79d358a26b83392345857a70002b0c1a50c8d6ec76ca2a8ac547eaad",
+      "slug": "DD-05-neutron-fluxes-rates-duplicate",
+      "to": "research/archive/DD-05-neutron-fluxes-rates-duplicate.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-names/DD-06-thermalisation-spelling.html",
+      "resource": "imas-codex:research:DD-06-thermalisation-spelling",
+      "sha256": "cc6591a7bba1e9461d8ea928e321b3229d82d82ea4ace0f87da1bcf107003354",
+      "slug": "DD-06-thermalisation-spelling",
+      "to": "research/archive/DD-06-thermalisation-spelling.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/d3-senior-review-2026-04.html",
+      "resource": "imas-codex:research:d3-senior-review-2026-04",
+      "sha256": "0a8acabc2398bb6913bf7c75c0e10b78d9c5158496fa937709ad78852c8b31d1",
+      "slug": "d3-senior-review-2026-04",
+      "to": "research/archive/d3-senior-review-2026-04.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/dd-horizon-update-landed.html",
+      "resource": "imas-codex:research:dd-horizon-update-landed",
+      "sha256": "2a32ce9247083b786c08de1eedda45d6761711cf58da3854b978bd6714dc7f24",
+      "slug": "dd-horizon-update-landed",
+      "to": "research/archive/dd-horizon-update-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/standard-names/model-selection-runbook.html",
+      "resource": "imas-codex:research:model-selection-runbook",
+      "sha256": "93c4b3def1d9f4ff2592d5aa5eb36ba0bcf0b20d40baffe9ba5fe2bf58d7dbfb",
+      "slug": "model-selection-runbook",
+      "to": "research/archive/model-selection-runbook.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-catalog-approval-pipeline-landed.html",
+      "resource": "imas-codex:research:sn-catalog-approval-pipeline-landed",
+      "sha256": "df0493b3bf260642f7444a11c5a5971fbafbf08f250347ccc817420d5df06884",
+      "slug": "sn-catalog-approval-pipeline-landed",
+      "to": "research/archive/sn-catalog-approval-pipeline-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-dd-gaps-foundation-landed.html",
+      "resource": "imas-codex:research:sn-dd-gaps-foundation-landed",
+      "sha256": "fba013fde56a27f507026b3823a87fdd9e10b47f9af05a9d3acff5159625e1e4",
+      "slug": "sn-dd-gaps-foundation-landed",
+      "to": "research/archive/sn-dd-gaps-foundation-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-dd-gaps-policy-landed.html",
+      "resource": "imas-codex:research:sn-dd-gaps-policy-landed",
+      "sha256": "474d8ad518fc422a3e4d5a5468d8250bb14c33b44312a0eae81618852e76d70f",
+      "slug": "sn-dd-gaps-policy-landed",
+      "to": "research/archive/sn-dd-gaps-policy-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-derived-parent-unit-authority-landed.html",
+      "resource": "imas-codex:research:sn-derived-parent-unit-authority-landed",
+      "sha256": "9eeadf248f9bb5d05b98009512e57a142922d56792b0d54b53e386a52c2f85fa",
+      "slug": "sn-derived-parent-unit-authority-landed",
+      "to": "research/archive/sn-derived-parent-unit-authority-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-expert-hints-landed.html",
+      "resource": "imas-codex:research:sn-expert-hints-landed",
+      "sha256": "8d981505577392f25c6da6b1a8624e266a7ab5a9587366d508c0300240d3962e",
+      "slug": "sn-expert-hints-landed",
+      "to": "research/archive/sn-expert-hints-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-gas-unit-cache-repair-landed.html",
+      "resource": "imas-codex:research:sn-gas-unit-cache-repair-landed",
+      "sha256": "553af76c80f7f6b90875d53352bbd7d5fa9322c0fe7966058e9910950ac89351",
+      "slug": "sn-gas-unit-cache-repair-landed",
+      "to": "research/archive/sn-gas-unit-cache-repair-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-graph-provenance-ledger-landed.html",
+      "resource": "imas-codex:research:sn-graph-provenance-ledger-landed",
+      "sha256": "7781568d3fb868ab29cda70d10c17d06c07cd2d9199ca145a9f0f53a64c4c185",
+      "slug": "sn-graph-provenance-ledger-landed",
+      "to": "research/archive/sn-graph-provenance-ledger-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-graph-wide-integrity-guards-landed.html",
+      "resource": "imas-codex:research:sn-graph-wide-integrity-guards-landed",
+      "sha256": "11db698982cbada85707d71b7218ccb74b63a84578c0b7f38a635e30c49644ae",
+      "slug": "sn-graph-wide-integrity-guards-landed",
+      "to": "research/archive/sn-graph-wide-integrity-guards-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-graph-wide-integrity-west-deprotection-landed.html",
+      "resource": "imas-codex:research:sn-graph-wide-integrity-west-deprotection-landed",
+      "sha256": "6f96df9b07c622d493171a558760ebf958fbb784048f9eaecee691339eebd4d6",
+      "slug": "sn-graph-wide-integrity-west-deprotection-landed",
+      "to": "research/archive/sn-graph-wide-integrity-west-deprotection-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-naming-loop-robustness-recovery-landed.html",
+      "resource": "imas-codex:research:sn-naming-loop-robustness-recovery-landed",
+      "sha256": "cbc4b4c24e72ace683f2c8bb28ff0f66b84beb27fca4dbc782a839c149201097",
+      "slug": "sn-naming-loop-robustness-recovery-landed",
+      "to": "research/archive/sn-naming-loop-robustness-recovery-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-naming-loop-robustness-rungs-landed.html",
+      "resource": "imas-codex:research:sn-naming-loop-robustness-rungs-landed",
+      "sha256": "f9879ad7d58351701508a630e17db7647181c069963afac849004828c2b1435f",
+      "slug": "sn-naming-loop-robustness-rungs-landed",
+      "to": "research/archive/sn-naming-loop-robustness-rungs-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-attachment-heal-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-attachment-heal-landed",
+      "sha256": "13a3e16961284b025e2408724ec270161735ce3666fad72b85753a75c5cb689e",
+      "slug": "sn-west-review-rehearsal-attachment-heal-landed",
+      "to": "research/archive/sn-west-review-rehearsal-attachment-heal-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-attachment-integrity-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-attachment-integrity-landed",
+      "sha256": "8e395c1822c94c963cf52f44cf83d4378c6f160475fbdb1ae519042ff5da5221",
+      "slug": "sn-west-review-rehearsal-attachment-integrity-landed",
+      "to": "research/archive/sn-west-review-rehearsal-attachment-integrity-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-false-vocab-gaps-landed",
+      "sha256": "62a5c4ea9a2e987c8b35c47b73139091c5956076d6fa23f6ff5878d33132b636",
+      "slug": "sn-west-review-rehearsal-false-vocab-gaps-landed",
+      "to": "research/archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-gap-closure-instruments-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-gap-closure-instruments-landed",
+      "sha256": "41594a656783a09d7561ab1d753152917ab910b1a594ae5d9f094bfc13c05b3b",
+      "slug": "sn-west-review-rehearsal-gap-closure-instruments-landed",
+      "to": "research/archive/sn-west-review-rehearsal-gap-closure-instruments-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-gap-closure-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-gap-closure-landed",
+      "sha256": "17840a40c29897639afbe5b53c7e78f29d2b7dcc86b84104d85a6903b102a8f8",
+      "slug": "sn-west-review-rehearsal-gap-closure-landed",
+      "to": "research/archive/sn-west-review-rehearsal-gap-closure-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-gate5-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-gate5-landed",
+      "sha256": "8b9a952c7138b30c033d2c431445d74219fc86d68fb7e86f606ea1b083da7be8",
+      "slug": "sn-west-review-rehearsal-gate5-landed",
+      "to": "research/archive/sn-west-review-rehearsal-gate5-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-review-entry-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-review-entry-landed",
+      "sha256": "f8042697fce4d0469c26dbd891698b5b48acc61c3c34a22d6df6687535c2dc71",
+      "slug": "sn-west-review-rehearsal-review-entry-landed",
+      "to": "research/archive/sn-west-review-rehearsal-review-entry-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-s0-1-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-s0-1-landed",
+      "sha256": "7e1727af23a76de08ffa3a8f6420fee79fccf19a8d9bed648659cfe2138afe10",
+      "slug": "sn-west-review-rehearsal-s0-1-landed",
+      "to": "research/archive/sn-west-review-rehearsal-s0-1-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-s4b-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-s4b-landed",
+      "sha256": "cbb45c7cd6435aeb355e9ea16cce2311bc0d81bc411ca720e81bfb818408d3a7",
+      "slug": "sn-west-review-rehearsal-s4b-landed",
+      "to": "research/archive/sn-west-review-rehearsal-s4b-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-unit-hygiene-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-unit-hygiene-landed",
+      "sha256": "9ec5aa6588c02a81b297bdb75127f805eb68765009a2f8182b1f835f2e069f68",
+      "slug": "sn-west-review-rehearsal-unit-hygiene-landed",
+      "to": "research/archive/sn-west-review-rehearsal-unit-hygiene-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-vocab-gap-rca-landed.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-vocab-gap-rca-landed",
+      "sha256": "5075ecc601ed01c60c9601108ea5360fc7f909aab4fa519e886d97fc0c9df368",
+      "slug": "sn-west-review-rehearsal-vocab-gap-rca-landed",
+      "to": "research/archive/sn-west-review-rehearsal-vocab-gap-rca-landed.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/sn-west-review-rehearsal-write-path-verdicts.html",
+      "resource": "imas-codex:research:sn-west-review-rehearsal-write-path-verdicts",
+      "sha256": "20472f3f4e15f33948d9672c6d6be76794cead202fdf55325e1fd7a485985bc5",
+      "slug": "sn-west-review-rehearsal-write-path-verdicts",
+      "to": "research/archive/sn-west-review-rehearsal-write-path-verdicts.html",
+      "type": "research"
+    },
+    {
+      "archived": true,
+      "from": "archive/research/standard-name-field-audit-2025-07.html",
+      "resource": "imas-codex:research:standard-name-field-audit-2025-07",
+      "sha256": "153c93ba81b815cd6987ace390384e765e1e55c57f15d3634b7a6f836b27e2c3",
+      "slug": "standard-name-field-audit-2025-07",
+      "to": "research/archive/standard-name-field-audit-2025-07.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "cocos-diagnostic-tools-efit-input.html",
+      "resource": "imas-codex:research:cocos-diagnostic-tools-efit-input",
+      "sha256": "398d164994c75e3a864bae6b72f1be993daa1b4442a0635ec266e084a6de6619",
+      "slug": "cocos-diagnostic-tools-efit-input",
+      "to": "research/cocos-diagnostic-tools-efit-input.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "features-readme.html",
+      "resource": "imas-codex:research:features-readme",
+      "sha256": "bb49b30e553b30bea6a35ba0bdaa8e036e32cd3561946dedc233a538ad9945d4",
+      "slug": "features-readme",
+      "to": "research/features-readme.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "gpu-cluster-internet-justification.html",
+      "resource": "imas-codex:research:gpu-cluster-internet-justification",
+      "sha256": "47d50805af1d16b4ba6cefdb8f3f0ddf1adad6da540701a6a3980af697b66d43",
+      "slug": "gpu-cluster-internet-justification",
+      "to": "research/gpu-cluster-internet-justification.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "gpu-cluster-scoping.html",
+      "resource": "imas-codex:research:gpu-cluster-scoping",
+      "sha256": "a9dc6bc7278459253fa28ca1d73e946b44ac2cf1fadf57e15af50c23c8bd0f8e",
+      "slug": "gpu-cluster-scoping",
+      "to": "research/gpu-cluster-scoping.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "phase8-smoke-results.html",
+      "resource": "imas-codex:research:phase8-smoke-results",
+      "sha256": "0d63091ce91b0799e3f6b43b9cff6f09ae594f65e65d89d71b618c8b22076511",
+      "slug": "phase8-smoke-results",
+      "to": "research/phase8-smoke-results.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "plans-readme.html",
+      "resource": "imas-codex:research:plans-readme",
+      "sha256": "a92d5191786602381edf9176f8e6a5bc975a4936f2663c81a751514c4aa53d55",
+      "slug": "plans-readme",
+      "to": "research/plans-readme.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "sn-binary-operand-validation-design.html",
+      "resource": "imas-codex:research:sn-binary-operand-validation-design",
+      "sha256": "6cb74dc8199cdf37869f40bb6f3607d5cc1d57188167664db590f91a18f64252",
+      "slug": "sn-binary-operand-validation-design",
+      "to": "research/sn-binary-operand-validation-design.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "sn-deployment-readiness.html",
+      "resource": "imas-codex:research:sn-deployment-readiness",
+      "sha256": "f7d84b4ed91ed0580e310e143559cb0ffc2737e1b360d44ec162ec3e87471ff6",
+      "slug": "sn-deployment-readiness",
+      "to": "research/sn-deployment-readiness.html",
+      "type": "research"
+    },
+    {
+      "archived": false,
+      "from": "sn-graph-evaluation.html",
+      "resource": "imas-codex:research:sn-graph-evaluation",
+      "sha256": "aa1aa05182254851ad4a5ed0e1016bf08185f443ec453fc20a395a7c1e5de8b6",
+      "slug": "sn-graph-evaluation",
+      "to": "research/sn-graph-evaluation.html",
+      "type": "research"
+    }
+  ],
+  "project": "imas-codex",
+  "rewrites": [
+    {
+      "from": "evidence/archive/sn-dd-gaps-landed.html",
+      "from_sha256": "14e05c4a55bef1b05085f1605faa220f51b1f5e5904a39e34378f73a0741f50e",
+      "to": "evidence/archive/sn-dd-gaps-landed.html",
+      "to_sha256": "0cc4afeba42f38ae3bdebfa296acbf963f53cbf420345d4204a0402c693a5158"
+    },
+    {
+      "from": "archive/sn-graph-wide-integrity-watchdog-stubs-west-landed.html",
+      "from_sha256": "7aba4dee56711375fa9fce662838cb2e060af9abdd0cae41ccf00ae0cf052869",
+      "to": "evidence/archive/sn-graph-wide-integrity-watchdog-stubs-west-landed.html",
+      "to_sha256": "31aa920a49460c03111b07803bb9f4118d727160d7af3008d1744d9c81f755b6"
+    },
+    {
+      "from": "archive/standard-names/09-sn-generate.html",
+      "from_sha256": "4e357198c2f68011c0a4abf360cfaccba1dc2fb947e3ab028ce5c56d283a3bc4",
+      "to": "plans/archive/09-sn-generate.html",
+      "to_sha256": "92dde3cddeb6231c0e1d436cb62582a762b15c43379a084bb034365665b6ca25"
+    },
+    {
+      "from": "archive/standard-names/10-pipeline-fixes.html",
+      "from_sha256": "d1feda023cd9b92e81686f7f2dadad4b8676e80043871664597823693c1943f4",
+      "to": "plans/archive/10-pipeline-fixes.html",
+      "to_sha256": "194a2055d0b31ad5c9365d8daf0a3e72c1fd8b142c6aaf13f3f04ee20c125e34"
+    },
+    {
+      "from": "archive/standard-names/11-publish-validation.html",
+      "from_sha256": "2c691edfb4ae0f94f3a45c8e83759537c217c415e1688b9db15fa7afae113dc1",
+      "to": "plans/archive/11-publish-validation.html",
+      "to_sha256": "3ef2b9b808f0c95626bf4716e9cf68142484bbd1c599c9587bd0750983d16c26"
+    },
+    {
+      "from": "archive/standard-names/11-rich-compose.html",
+      "from_sha256": "b2ded7a28038ed952403fc7d6325a584e0bee912478233bda75649fc3ad1e9f0",
+      "to": "plans/archive/11-rich-compose.html",
+      "to_sha256": "de31af58f23537c13190d7b08f84ae19fe7dcd4e2280e80fc6848cca1a095de4"
+    },
+    {
+      "from": "archive/standard-names/12-catalog-import.html",
+      "from_sha256": "ed59bea3929644fecac7c01485a8b995829411730d8a2e0a0eef235dd2884bf4",
+      "to": "plans/archive/12-catalog-import.html",
+      "to_sha256": "be5bc90b78b6be9e8b1070af5f84b6cc0fc3415dcc256c56fa19d3366c56947e"
+    },
+    {
+      "from": "archive/standard-names/13-publish-pipeline.html",
+      "from_sha256": "44cd79e9547b65d32691c4af66ecb094d505391bd85c37f71a98c24ae5c5135f",
+      "to": "plans/archive/13-publish-pipeline.html",
+      "to_sha256": "20d10009fa620ce57177255cba57bed7138066773a242077d171819a54e6d789"
+    },
+    {
+      "from": "archive/standard-names/14-mcp-tools-benchmark.html",
+      "from_sha256": "c8c81da719bcbb3bb52d7b6f05be4c9ad7ebe0866a9ea2a6ac9aad808d08cb83",
+      "to": "plans/archive/14-mcp-tools-benchmark.html",
+      "to_sha256": "47ddecd96a85e4ad2908c3eabb349b7549ee22aac46a119441a9d5814f785f6b"
+    },
+    {
+      "from": "archive/standard-names/19-benchmark-and-lifecycle.html",
+      "from_sha256": "2d3ed7fb6ea14efcd1c4fd7ae55c9ede23ad9e97c3eda89796d9fd21a12189b6",
+      "to": "plans/archive/19-benchmark-and-lifecycle.html",
+      "to_sha256": "66a234652def5c6a32d750ac184a2d00a486906dd60ae7969924b3e9e09138bb"
+    },
+    {
+      "from": "archive/standard-names/21-architecture-boundary.html",
+      "from_sha256": "55af4d765eb5ca9351e576eb38b881081dcb0d6cc3a16170273dacef3c7a72f8",
+      "to": "plans/archive/21-architecture-boundary.html",
+      "to_sha256": "2120949df55eddc4785e529cc505f0d02df2cf1a607c746995ae2b8eb621aaab"
+    },
+    {
+      "from": "archive/standard-names/22-rename-and-regeneration-context.html",
+      "from_sha256": "990665adbfdbf1d62aa3cbe95cd84704711afc7098b6c5d22ff2b5994a1f6e8f",
+      "to": "plans/archive/22-rename-and-regeneration-context.html",
+      "to_sha256": "53c3bac27d51ee42bc13175a52d77302b6f97b7acf24d26ded01e33211013aed"
+    },
+    {
+      "from": "archive/standard-names/25-standalone-review.html",
+      "from_sha256": "a34c6ab79047df693f248847ae1c2453104f009c9c6af7ac5fc9e69abe86af2a",
+      "to": "plans/archive/25-standalone-review.html",
+      "to_sha256": "5bf681d88b8ae33df50d815acbdd3667d195fe516caeab7186f03f0e926419ab"
+    },
+    {
+      "from": "archive/standard-names/26-sn-pipeline-quality-iteration.html",
+      "from_sha256": "7abc9b4b716b42d340aa767d306cc6299eb57480e1defa2bbb4d988ff8ab7b12",
+      "to": "plans/archive/26-sn-pipeline-quality-iteration.html",
+      "to_sha256": "8f2bbf14b07490cbc0e3bece4c4e275d38250e6cad2247cd209ad972d08237d5"
+    },
+    {
+      "from": "archive/standard-names/42-polling-workers.html",
+      "from_sha256": "fd3cc18d5274fc805fdffa953666bf8356ade00461fa5d6f6cf9dc62d8a964d1",
+      "to": "plans/archive/42-polling-workers.html",
+      "to_sha256": "0ab9dfbc4227569e0434cf134e979e7491ceeed0f1df926646ca79ad001d1a82"
+    },
+    {
+      "from": "archive/standard-names/43-pipeline-rd-fix.html",
+      "from_sha256": "d927fb96c3d7d9ae76194b36b515630683ba692a024f686d86a8e232ea3d4212",
+      "to": "plans/archive/43-pipeline-rd-fix.html",
+      "to_sha256": "9786e6f11010a2f4dba6320dc9b3d817c4c48313b39b29a74c5255bf6b5ca8f4"
+    },
+    {
+      "from": "archive/standard-names/44-sn-graph-renames-batched-embed.html",
+      "from_sha256": "0bcf5bce6c1d4940866573cfb2bc414bbf4a45fac552300a3ff1f8595b35fb7f",
+      "to": "plans/archive/44-sn-graph-renames-batched-embed.html",
+      "to_sha256": "404c0e61a53665612697b90120841c168afdf3288b785ffa9696ded81fc54e01"
+    },
+    {
+      "from": "archive/sn-coverage-and-hygiene-landed.html",
+      "from_sha256": "fb7ecb1e45f6beaad47ca8ac85bcb0afa82b8f37b6819111e2b2b8beddb5b388",
+      "to": "plans/archive/sn-coverage-and-hygiene-landed.html",
+      "to_sha256": "95157c63375b25737ec08b189e5ba4526ca42579bd69aae21b3eed609a959404"
+    },
+    {
+      "from": "dd-graph-hygiene.html",
+      "from_sha256": "6b32cb29c3ce6b0e40e67fd29e5ca0cadc13605d8cb9450b7032627b63fa290c",
+      "to": "plans/dd-graph-hygiene.html",
+      "to_sha256": "ca792c2c1f441cb8b1a05f05a75b4e8c5cce9ae4a70ab39f99c39847e4f85bcf"
+    },
+    {
+      "from": "dd-horizon-update.html",
+      "from_sha256": "478ed4644070bafd6574219128e2afd7e87b5e837d36853c5f23e1f43f49e912",
+      "to": "plans/dd-horizon-update.html",
+      "to_sha256": "22f760230d17d4eaf2d475c6595ee54d159142b8c7f964ff87e2bf5a1320b08c"
+    },
+    {
+      "from": "plans/isn-stable-release.html",
+      "from_sha256": "0bbb7783da1b53303f1fa7c53d73850cbc45a4f7f6fbd7e71a669b4f36a54801",
+      "to": "plans/isn-stable-release.html",
+      "to_sha256": "ddb1a7419902a870e42b1bbf4d1fa0a1ba508aa52fb4252be61d391cb4c62623"
+    },
+    {
+      "from": "sn-catalog-approval-pipeline.html",
+      "from_sha256": "79e70d4f8dc4581a368c929cb745a48f84f5d8652fcffaacd6e5e920a83b0a5c",
+      "to": "plans/sn-catalog-approval-pipeline.html",
+      "to_sha256": "e2f41fb8682d6ccf6157d28c5ef031047cb4d01362039515594709a72c78793a"
+    },
+    {
+      "from": "sn-coverage-and-hygiene.html",
+      "from_sha256": "e038535de152ed2535579922d5533f4b62dd88b3fbba573a1aa9f6441b1391cc",
+      "to": "plans/sn-coverage-and-hygiene.html",
+      "to_sha256": "80e5c366b7dc82a19c29b77d2a6b810b6e17367650b810dbbb0b84a45f374e77"
+    },
+    {
+      "from": "sn-dd-attachment-completeness.html",
+      "from_sha256": "9279acacee0159f435b9d971ec63a5d30f2bd33d13f0be14ea968af3664d7f3d",
+      "to": "plans/sn-dd-attachment-completeness.html",
+      "to_sha256": "bac2075f4b44051fba9251359f1131efe8427f6e63af86a59ef41c7cb2378f0b"
+    },
+    {
+      "from": "sn-expert-hints.html",
+      "from_sha256": "10224943b02d3726c18b09594581c76b474c53a4b41d18654ef27f0dfa629bce",
+      "to": "plans/sn-expert-hints.html",
+      "to_sha256": "423cc9ba0bbe55c6f1f1cc3cba10c22445f32d6c9a810867fce6e923de22161d"
+    },
+    {
+      "from": "sn-family-harmonization.html",
+      "from_sha256": "fc530a5dc8eac5f17d7d9a914ab542729782a02e23415c488666e1b263b56c24",
+      "to": "plans/sn-family-harmonization.html",
+      "to_sha256": "27987b7ce1d2f1d468c7e3530557d8e325817fc41a5de8ca1e4faca9b9d83b88"
+    },
+    {
+      "from": "sn-graph-wide-integrity.html",
+      "from_sha256": "cfd8f9caa6a0f1abcda4b2a5f9bcd4519ecf90a6aaa6b02877b0df864e71498d",
+      "to": "plans/sn-graph-wide-integrity.html",
+      "to_sha256": "e5706c7f81265bc62b47861b2ac28c42500f0ef0ee1711ac5acd0341629ddcf1"
+    },
+    {
+      "from": "sn-naming-loop-robustness.html",
+      "from_sha256": "07c35dcee8822aebbb8f1622168f93a883433f931f9bfef61bd650a692e39d27",
+      "to": "plans/sn-naming-loop-robustness.html",
+      "to_sha256": "3778ec3fe57b932b58fcf7c78eaf583625197ea3dbc52093a03b6ebdbecc5729"
+    },
+    {
+      "from": "plans/sn-release-readiness.html",
+      "from_sha256": "bd5aeaecf6f6d6c1ac033d6187d57296380697ed746ff861b6ff428f9114ef81",
+      "to": "plans/sn-release-readiness.html",
+      "to_sha256": "25ec3b5454d1971eb768c4ebe8a0fc3b672a6348750acc20cc93f1a661fac516"
+    },
+    {
+      "from": "plans/sn-repair-operator-consolidation.html",
+      "from_sha256": "967d663d3170b38e9bd52d8f07dbd9956260b687ff3187305e5517166b6db617",
+      "to": "plans/sn-repair-operator-consolidation.html",
+      "to_sha256": "dff4062dccfcb61727681a057847c5ab18b019a8cbc0157a98877833aa2fcc80"
+    },
+    {
+      "from": "sn-structural-repair.html",
+      "from_sha256": "e8421f297f30cd9b3b01bda3a22cdb36fddf595e5c39160b4584f81fabf09814",
+      "to": "plans/sn-structural-repair.html",
+      "to_sha256": "23e3e2ad359fbdee4b779c9462e35ff118a8a397c4b9c1215a30a522e9b5c500"
+    },
+    {
+      "from": "sn-west-review-rehearsal.html",
+      "from_sha256": "93e1be0627d9cf39811197da65c8032b29285fc30931c0a5d212cd4ec3f65866",
+      "to": "plans/sn-west-review-rehearsal.html",
+      "to_sha256": "f5806dcf6648f81a9df0475f325ebac9acacb780e3a41d260b0e5423c6eb0e83"
+    },
+    {
+      "from": "strategy.html",
+      "from_sha256": "77cbc452f4961fbceab5a721a2d457e2cff01a23c7da7bcea6ccf1adf1376088",
+      "to": "plans/strategy.html",
+      "to_sha256": "ff72f68f6c5f00b0a4e5ad48d061520a7e9970c9ce1f7c7f686b0c1882c275b7"
+    },
+    {
+      "from": "archive/sn-expert-hints-landed.html",
+      "from_sha256": "8d981505577392f25c6da6b1a8624e266a7ab5a9587366d508c0300240d3962e",
+      "to": "research/archive/sn-expert-hints-landed.html",
+      "to_sha256": "300a4b3e2c6b139289b6c895e0e7a3682992a774bf08559a3b97b6d94f3c3005"
+    },
+    {
+      "from": "archive/sn-naming-loop-robustness-rungs-landed.html",
+      "from_sha256": "f9879ad7d58351701508a630e17db7647181c069963afac849004828c2b1435f",
+      "to": "research/archive/sn-naming-loop-robustness-rungs-landed.html",
+      "to_sha256": "8090ad33a6d7c663a2621f2d45d28c3cd043b6b09d5e30f2659230f17cf26702"
+    },
+    {
+      "from": "archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html",
+      "from_sha256": "62a5c4ea9a2e987c8b35c47b73139091c5956076d6fa23f6ff5878d33132b636",
+      "to": "research/archive/sn-west-review-rehearsal-false-vocab-gaps-landed.html",
+      "to_sha256": "13a9472a6976e90de1f04a3b5eeec079726f8289437ca629d2350e3b077fa0cc"
+    },
+    {
+      "from": "archive/sn-west-review-rehearsal-gate5-landed.html",
+      "from_sha256": "8b9a952c7138b30c033d2c431445d74219fc86d68fb7e86f606ea1b083da7be8",
+      "to": "research/archive/sn-west-review-rehearsal-gate5-landed.html",
+      "to_sha256": "67a7b7e6d74a419ad3b79dd1059dc7ce7653175134240ee89b0612522ca7c4ca"
+    },
+    {
+      "from": "features-readme.html",
+      "from_sha256": "bb49b30e553b30bea6a35ba0bdaa8e036e32cd3561946dedc233a538ad9945d4",
+      "to": "research/features-readme.html",
+      "to_sha256": "a7c5fcd47ab68a605a58a8a93956fea959c0203e7691e2de1292290422b7d200"
+    },
+    {
+      "from": "plans-readme.html",
+      "from_sha256": "a92d5191786602381edf9176f8e6a5bc975a4936f2663c81a751514c4aa53d55",
+      "to": "research/plans-readme.html",
+      "to_sha256": "b23867679b3892cb240e8d0c26d1d6151ea181c56da92f6397f7ff150e4c7299"
+    },
+    {
+      "from": "sn-deployment-readiness.html",
+      "from_sha256": "f7d84b4ed91ed0580e310e143559cb0ffc2737e1b360d44ec162ec3e87471ff6",
+      "to": "research/sn-deployment-readiness.html",
+      "to_sha256": "acd98144dd74ec5e022d11eab82a4c79640b2215be881747a900a50ec9e8c24d"
+    }
+  ]
+}
