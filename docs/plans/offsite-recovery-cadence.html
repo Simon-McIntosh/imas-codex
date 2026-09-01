@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="5">
-<meta name="plan-commits" content="03433bfd">
-<meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt">
-<meta name="plan-impl" content="0.17">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="03433bfd,8c850276">
+<meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -193,6 +193,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2042-currency-landing" data-who="reckon-ship" data-when="2026-09-01T20:42:00Z">
     <div class="r-comment-body">n-offsite-currency landed at commit 03433bfd (merged d2709b32): graph status now shows an offsite row read from the GitHub Packages listing of the full-scope package, typed current/stale/no_offsite like BackupCurrency. Live measure: newest offsite copy ghcr.io/simon-mcintosh/imas-codex-graph:v5.3.0-rc6 pushed 2026-07-07T12:27:23Z, 4,867,635 s (56.338 days) behind the newest live database file; 7 focused tests pass. Finding for the push job: the GHCR_TOKEN in the project .env returns HTTP 401 while the gh credential reads the private package, so resolve_token's gh fallback is the working path and the stored token needs rotation by the lead. Remaining nodes: tiered prune selector, scheduled push job, one-off stale-version prune, first real push plus trial restore measurement, and the export/start launcher defect found by the restore-point node.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T203116263091-n-offsite-retention" data-who="impl-offsiteretention" data-when="2026-09-01T20:43:54Z">
+    <div class="r-comment-body"><p>graph prune tiered selector: live dry-run over 47 versions classified 25 keep (4 weekly, 3 monthly, 18 release/latest) and 22 delete (10 untagged, 2 test, 10 thinned), zero deletions; 3 unit tests pass</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T2044-retention-landing" data-who="reckon-ship" data-when="2026-09-01T20:44:00Z">
+    <div class="r-comment-body">n-offsite-retention landed at commit 8c850276 (merged 890f64f6): graph prune now applies the locked tiered policy. Live dry-run over the 47 imas-codex-graph versions: 25 keep (4 weekly, 3 monthly, 18 release or latest) and 22 delete (10 untagged, 2 test-prefixed, 10 thinned), zero deletions performed; 3 unit tests over a synthetic 47-version census prove release-tagged versions are never selected. Two legacy test tags without the test- prefix (v5.0.0-fix-test, v-direct-test) fall into the weekly tier and will thin out on their own. The one-off live prune is its own node and awaits the lead's go, since it deletes 22 registry versions.</div>
 </div>
 </section>
 </main>

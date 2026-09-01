@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:42:05",
+  "updated": "2026-09-01T22:44:20",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -47130,9 +47130,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T203116263091-n-offsite-retention",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-retention",
+        "node_definition": {
+          "done_when": "unit tests exercise the tier selection over a synthetic listing shaped like the live 47-version imas-codex-graph package with release-tagged versions never selected, plus a recorded --dry-run against the live registry listing every current version as keep-or-delete with its tier while performing no deletion",
+          "estimated_hours": null,
+          "goal": "Give imas-codex graph prune a tiered retention selector (four newest weekly full copies kept, older copies thinned to three monthly, release-tagged or latest versions always kept, untagged or test-prefixed versions marked for deletion) built over the existing list_registry_tags/delete_tag primitives with ghcr.py left unedited",
+          "id": "n-offsite-retention",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/cli/graph/registry.py",
+            "tests/cli/test_graph_prune_tiered.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-offsiteretention",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:31:25Z",
+        "completed_at": "2026-09-01T20:43:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 749,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 749,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "3f0c687db086e0aae128bc7392d1ff6a023008b2",
+        "commits": [
+          "8c85027606780fbf8b268518ec0d6acafef172d0"
+        ],
+        "changed_lines": {
+          "added": 382,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u GHCR_TOKEN PYTHON_DOTENV_DISABLED=1 uv run --no-env-file --no-sync imas-codex graph prune --registry ghcr.io/simon-mcintosh --dry-run; pytest tests/cli/test_graph_prune_tiered.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eab-66a1-7ea2-b794-25105ede902b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 443648,
+            "cached_input_tokens_cumulative": 443648,
+            "input_tokens": 598511,
+            "input_tokens_cumulative": 598511,
+            "output_tokens": 4742,
+            "output_tokens_cumulative": 4742,
+            "reasoning_output_tokens": 541,
+            "reasoning_output_tokens_cumulative": 541
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1231
+    "_version": 1232
   }
 }
