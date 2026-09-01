@@ -966,6 +966,8 @@ class ReviewReleaseReport:
     batch_size: int = 0
     names: list[str] = field(default_factory=list)
     unmatched_sources: list[str] = field(default_factory=list)
+    manifest_size: int = 0
+    source_reconciliation: dict[str, Any] = field(default_factory=dict)
     artifact_path: str | None = None
     commit_sha: str | None = None
     branch: str = ""
@@ -986,6 +988,8 @@ class ReviewReleaseReport:
             "batch_label": self.batch_label,
             "batch_size": self.batch_size,
             "unmatched_sources": self.unmatched_sources,
+            "manifest_size": self.manifest_size,
+            "source_reconciliation": self.source_reconciliation,
             "artifact_path": self.artifact_path,
             "commit_sha": self.commit_sha,
             "branch": self.branch,
@@ -1038,6 +1042,7 @@ def _freeze_review_artifact(
     names: list[str],
     minted_from: str,
     unmatched: list[str],
+    manifest_sources: list[dict[str, Any]] | None = None,
     batch_label: str | None = None,
 ) -> Path:
     """Materialise the frozen sn-names batch record, tagged by the RC version.
@@ -1065,6 +1070,10 @@ def _freeze_review_artifact(
         "pr_url": None,
         "merge_commit": None,
     }
+    if manifest_sources is not None:
+        doc["manifest_sources"] = sorted(
+            manifest_sources, key=lambda row: row["source_path"]
+        )
     path = reviews_dir / f"{rc_version}.sn_names.yaml"
     path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
     return path
@@ -1251,9 +1260,25 @@ def run_review_release(
         report.errors.append(f"focus file: {exc}")
         return report
 
+    manifest_sources: list[dict[str, Any]] | None = None
     if kind == "sn_sources":
         mint = mint_sn_list(items, gc=gc)
-        names, unmatched = mint.names, mint.unmatched_paths
+        from imas_codex.standard_names.graph_ops import (
+            fetch_manifest_source_release_rows,
+        )
+
+        manifest_sources = fetch_manifest_source_release_rows(items, gc=gc)
+        terminal_ids = [
+            row["standard_name_id"]
+            for row in manifest_sources
+            if row.get("standard_name_id")
+        ]
+        names = list(dict.fromkeys([*mint.names, *terminal_ids]))
+        unmatched = [
+            row["source_path"]
+            for row in manifest_sources
+            if not row.get("standard_name_id")
+        ]
     else:
         names, unmatched = list(dict.fromkeys(items)), []
 
@@ -1263,6 +1288,7 @@ def run_review_release(
     report.names = sorted(names)
     report.batch_size = len(report.names)
     report.unmatched_sources = sorted(unmatched)
+    report.manifest_size = len(items) if kind == "sn_sources" else 0
 
     # DD-gap lifecycle evidence is a read-only release caveat, never an export
     # gate. The canonical reader owns graph queries and exact batch-name
@@ -1324,6 +1350,7 @@ def run_review_release(
         names=report.names,
         minted_from=str(focus_file),
         unmatched=report.unmatched_sources,
+        manifest_sources=manifest_sources,
         batch_label=batch_label,
     )
     report.artifact_path = str(artifact)
@@ -1331,12 +1358,17 @@ def run_review_release(
     # ── 4. Export approved ∪ batch (review_batch stamped) ──────────────
     staging_dir.mkdir(parents=True, exist_ok=True)
     try:
-        exporter(
+        export_report = exporter(
             staging_dir=staging_dir,
             force=True,
             review_batch=report.names,
+            manifest_sources=manifest_sources,
             **(export_kwargs or {}),
         )
+        if manifest_sources is not None and hasattr(export_report, "to_dict"):
+            report.source_reconciliation = export_report.to_dict().get(
+                "source_reconciliation", {}
+            )
     except Exception as exc:
         report.errors.append(f"export failed: {exc}")
         return report

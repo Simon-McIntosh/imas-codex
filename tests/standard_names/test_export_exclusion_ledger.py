@@ -51,6 +51,7 @@ def _run_fixture_export(
     include_sources: bool = False,
     source_bindings: list[dict] | None = None,
     write_domain_yaml: bool = False,
+    manifest_sources: list[dict] | None = None,
 ):
     with ExitStack() as stack:
         stack.enter_context(
@@ -100,6 +101,7 @@ def _run_fixture_export(
             skip_gate=True,
             force=True,
             include_sources=include_sources,
+            manifest_sources=manifest_sources,
         )
 
 
@@ -352,3 +354,109 @@ def test_export_keeps_catalog_semantic_advisories(tmp_path: Path) -> None:
     assert report.all_gates_passed
     assert report.exported_names == ["radial_coordinate_of_line_of_sight"]
     assert report.exclusion_records == []
+
+
+def test_manifest_sources_reconcile_emitted_excluded_and_non_nameable(
+    tmp_path: Path,
+) -> None:
+    population = [
+        _candidate("accepted_name"),
+        _candidate("exhausted_name", name_stage="exhausted"),
+        _candidate("replacement_name", name_stage="reviewed"),
+    ]
+    manifest_sources = [
+        {
+            "source_path": "equilibrium/accepted",
+            "standard_name_id": "accepted_name",
+            "terminal_stage": "accepted",
+        },
+        {
+            "source_path": "equilibrium/exhausted",
+            "standard_name_id": "exhausted_name",
+            "terminal_stage": "exhausted",
+        },
+        {
+            "source_path": "equilibrium/superseded",
+            "standard_name_id": "replacement_name",
+            "terminal_stage": "reviewed",
+        },
+        {
+            "source_path": "equilibrium/time",
+            "standard_name_id": None,
+            "terminal_stage": None,
+            "non_nameable_reason": "non_nameable_coordinate: time axis",
+        },
+    ]
+
+    report = _run_fixture_export(
+        tmp_path,
+        population,
+        manifest_sources=manifest_sources,
+    )
+    reconciliation = report.to_dict()["source_reconciliation"]
+    rows = {row["source_path"]: row for row in reconciliation["rows"]}
+
+    assert report.all_gates_passed
+    assert reconciliation == {
+        "manifest_size": 4,
+        "accounted": 4,
+        "emitted": 1,
+        "excluded": 2,
+        "documented_non_nameable": 1,
+        "rows": reconciliation["rows"],
+    }
+    assert rows["equilibrium/accepted"]["disposition"] == "emitted"
+    assert rows["equilibrium/exhausted"] == {
+        "source_path": "equilibrium/exhausted",
+        "disposition": "excluded",
+        "standard_name_id": "exhausted_name",
+        "terminal_stage": "exhausted",
+        "reason": "name_not_accepted",
+    }
+    assert rows["equilibrium/superseded"]["standard_name_id"] == "replacement_name"
+    assert rows["equilibrium/superseded"]["disposition"] == "excluded"
+    assert rows["equilibrium/time"]["disposition"] == "documented_non_nameable"
+
+
+def test_manifest_source_projection_follows_superseded_identity() -> None:
+    from imas_codex.standard_names.graph_ops import fetch_manifest_source_release_rows
+
+    class _ProjectionClient:
+        def __init__(self):
+            self.calls = 0
+
+        def query(self, _cypher: str, **_params):
+            self.calls += 1
+            if self.calls == 1:
+                return [
+                    {
+                        "source_path": "equilibrium/replaced",
+                        "source_status": "attached",
+                        "skip_reason": None,
+                        "skip_reason_detail": None,
+                        "produced_sn_id": "prior_name",
+                        "direct_ids": ["prior_name"],
+                    }
+                ]
+            return [
+                {
+                    "start_id": "prior_name",
+                    "target_id": "replacement_name",
+                    "terminal_stage": "reviewed",
+                    "depth": 1,
+                }
+            ]
+
+    rows = fetch_manifest_source_release_rows(
+        ["equilibrium/replaced"], gc=_ProjectionClient()
+    )
+
+    assert rows == [
+        {
+            "source_path": "equilibrium/replaced",
+            "source_status": "attached",
+            "standard_name_id": "replacement_name",
+            "terminal_stage": "reviewed",
+            "non_nameable_reason": "",
+        }
+    ]

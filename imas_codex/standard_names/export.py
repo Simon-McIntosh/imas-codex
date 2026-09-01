@@ -207,6 +207,26 @@ class ExclusionRecord:
         }
 
 
+@dataclass(frozen=True)
+class SourceDispositionRecord:
+    """One manifest source accounted by the review export."""
+
+    source_path: str
+    disposition: str
+    standard_name_id: str | None = None
+    terminal_stage: str | None = None
+    reason: str = ""
+
+    def to_dict(self) -> dict[str, str | None]:
+        return {
+            "source_path": self.source_path,
+            "disposition": self.disposition,
+            "standard_name_id": self.standard_name_id,
+            "terminal_stage": self.terminal_stage,
+            "reason": self.reason,
+        }
+
+
 @dataclass
 class ExportReport:
     """Full report from an export run."""
@@ -234,6 +254,9 @@ class ExportReport:
     exported_names: list[str] = field(default_factory=list)
     validation_failures: int = 0
     exclusion_records: list[ExclusionRecord] = field(default_factory=list)
+    source_disposition_records: list[SourceDispositionRecord] = field(
+        default_factory=list
+    )
 
     def record_exclusions(self, records: list[ExclusionRecord]) -> None:
         """Append identity-bearing exclusions and refresh compatibility counts."""
@@ -267,6 +290,13 @@ class ExportReport:
         ]
 
     def to_dict(self) -> dict[str, Any]:
+        source_counts = {
+            disposition: sum(
+                record.disposition == disposition
+                for record in self.source_disposition_records
+            )
+            for disposition in ("emitted", "excluded", "documented_non_nameable")
+        }
         return {
             "gates": [g.to_dict() for g in self.gate_results],
             "divergence": [d.to_dict() for d in self.divergence_entries],
@@ -279,6 +309,18 @@ class ExportReport:
                     key=lambda record: (record.reason, record.standard_name_id),
                 )
             ],
+            "source_reconciliation": {
+                "manifest_size": len(self.source_disposition_records),
+                "accounted": sum(source_counts.values()),
+                **source_counts,
+                "rows": [
+                    record.to_dict()
+                    for record in sorted(
+                        self.source_disposition_records,
+                        key=lambda record: record.source_path,
+                    )
+                ],
+            },
             "counts": {
                 "total_candidates": self.total_candidates,
                 "exported": self.exported_count,
@@ -549,6 +591,9 @@ def _classify_export_population(
         elif candidate.get("validation_status") != "valid":
             reason = "invalid_validation_status"
             detail = f"validation_status={candidate.get('validation_status')!r}"
+        elif candidate.get("name_stage") not in {"accepted", "approved"}:
+            reason = "name_not_accepted"
+            detail = f"name_stage={candidate.get('name_stage')!r}"
         elif candidate.get("review_quorum_shortfall") is not None:
             reason = "name_review_quorum_shortfall"
             detail = "name review quorum shortfall remains recorded"
@@ -1896,6 +1941,7 @@ def run_export(
     names_only: bool = False,
     final: bool = False,
     review_batch: list[str] | None = None,
+    manifest_sources: list[dict[str, Any]] | None = None,
 ) -> ExportReport:
     """Export standard names from the graph to a staging directory.
 
@@ -1940,6 +1986,10 @@ def run_export(
         additive — ``approved`` catalog ∪ this batch — and the batch id-set is
         stamped into ``catalog.yml`` (``export_scope: review``, ``review_batch``)
         so the SPA can render a PR-scoped view. When None, a normal RC export.
+    manifest_sources:
+        Exact source membership and terminal target projection from cohort
+        minting. When supplied, every row is reconciled as emitted, excluded,
+        or documented non-nameable in the export report.
 
     Returns
     -------
@@ -2333,6 +2383,69 @@ def run_export(
 
     accounting_gate = _run_exclusion_accounting_gate(report, population_ids)
     report.gate_results.append(accounting_gate)
+    if manifest_sources is not None:
+        exported_ids = set(report.exported_names)
+        exclusions_by_id = {
+            record.standard_name_id: record for record in report.exclusion_records
+        }
+        seen_paths: set[str] = set()
+        duplicate_paths: list[str] = []
+        for source in manifest_sources:
+            source_path = str(source["source_path"])
+            if source_path in seen_paths:
+                duplicate_paths.append(source_path)
+                continue
+            seen_paths.add(source_path)
+            standard_name_id = source.get("standard_name_id")
+            terminal_stage = source.get("terminal_stage")
+            non_nameable_reason = str(source.get("non_nameable_reason") or "")
+            if non_nameable_reason:
+                disposition = "documented_non_nameable"
+                reason = non_nameable_reason
+            elif standard_name_id in exported_ids:
+                disposition = "emitted"
+                reason = ""
+            else:
+                disposition = "excluded"
+                exclusion = exclusions_by_id.get(standard_name_id)
+                reason = (
+                    exclusion.reason
+                    if exclusion is not None
+                    else "no_terminal_identity"
+                    if not standard_name_id
+                    else "identity_not_exported"
+                )
+            report.source_disposition_records.append(
+                SourceDispositionRecord(
+                    source_path=source_path,
+                    disposition=disposition,
+                    standard_name_id=(
+                        str(standard_name_id) if standard_name_id else None
+                    ),
+                    terminal_stage=(str(terminal_stage) if terminal_stage else None),
+                    reason=reason,
+                )
+            )
+        source_issues: list[dict[str, Any]] = []
+        if duplicate_paths:
+            source_issues.append(
+                {"type": "duplicate_manifest_source", "paths": sorted(duplicate_paths)}
+            )
+        if len(report.source_disposition_records) != len(manifest_sources):
+            source_issues.append(
+                {
+                    "type": "manifest_source_accounting_mismatch",
+                    "manifest_size": len(manifest_sources),
+                    "accounted": len(report.source_disposition_records),
+                }
+            )
+        report.gate_results.append(
+            GateResult(
+                gate="manifest_source_accounting",
+                passed=not source_issues,
+                issues=source_issues,
+            )
+        )
     report.all_gates_passed = all(
         gate.passed or gate.skipped for gate in report.gate_results
     )
