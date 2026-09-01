@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import tarfile
 import tempfile
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -18,16 +20,20 @@ from imas_codex.graph.ghcr import (
     dispatch_graph_quality as _dispatch_graph_quality,
     ensure_fresh_version as _ensure_fresh_version,
     fetch_tag_messages as _fetch_tag_messages,
+    get_ghcr_owner_and_type,
     get_git_info,
     get_local_graph_manifest,
     get_package_name,
     get_registry,
     get_version_tag,
+    github_api_paginated,
+    github_api_request,
     list_registry_tags as _list_registry_tags,
     login_to_ghcr,
     require_clean_git,
     require_oras,
     resolve_latest_tag as _resolve_latest_tag,
+    resolve_token,
     save_dev_revision as _save_dev_revision,
     save_local_graph_manifest,
 )
@@ -37,6 +43,153 @@ from imas_codex.graph.neo4j_ops import (
     check_graph_exists,
     graph_archive_stamp,
 )
+
+_RELEASE_TAG = re.compile(r"^v?\d+\.\d+\.\d+(?:-rc\d+)?$")
+
+
+@dataclass(frozen=True)
+class RegistryVersion:
+    """One GitHub Packages version with its registry-owned creation time."""
+
+    id: int
+    name: str
+    created_at: datetime
+    tags: tuple[str, ...]
+
+    @property
+    def display_name(self) -> str:
+        """Return stable human-facing identity, including untagged versions."""
+        if self.tags:
+            return ", ".join(self.tags)
+        return f"untagged@{self.id} ({self.name})"
+
+
+@dataclass(frozen=True)
+class RetentionDecision:
+    """Keep/delete classification for one registry version."""
+
+    version: RegistryVersion
+    keep: bool
+    tier: str
+
+
+def _is_release_version(version: RegistryVersion) -> bool:
+    return any(_RELEASE_TAG.fullmatch(tag) for tag in version.tags)
+
+
+def _select_tiered_retention(
+    versions: list[RegistryVersion],
+    *,
+    weekly_keep: int = 4,
+    monthly_keep: int = 3,
+) -> list[RetentionDecision]:
+    """Classify versions under dense-weekly, sparse-monthly retention.
+
+    Release-tagged versions and the version carrying ``latest`` are protected.
+    Untagged and ``test-*`` versions are deletion candidates regardless of age.
+    The remaining scheduled/development copies retain the newest weekly window,
+    then the newest copy in each of the next distinct calendar months.
+    """
+    ordered = sorted(versions, key=lambda version: version.created_at, reverse=True)
+    decisions: dict[int, RetentionDecision] = {}
+    tierable: list[RegistryVersion] = []
+
+    for version in ordered:
+        if "latest" in version.tags:
+            decisions[version.id] = RetentionDecision(version, True, "latest")
+        elif _is_release_version(version):
+            decisions[version.id] = RetentionDecision(version, True, "release")
+        elif not version.tags:
+            decisions[version.id] = RetentionDecision(version, False, "delete-untagged")
+        elif any(tag.startswith("test-") for tag in version.tags):
+            decisions[version.id] = RetentionDecision(version, False, "delete-test")
+        else:
+            tierable.append(version)
+
+    for version in tierable[:weekly_keep]:
+        decisions[version.id] = RetentionDecision(version, True, "weekly")
+
+    monthly_selected = 0
+    represented_months: set[tuple[int, int]] = set()
+    for version in tierable[weekly_keep:]:
+        month = (version.created_at.year, version.created_at.month)
+        if month not in represented_months and monthly_selected < monthly_keep:
+            represented_months.add(month)
+            monthly_selected += 1
+            decisions[version.id] = RetentionDecision(version, True, "monthly")
+        else:
+            decisions[version.id] = RetentionDecision(version, False, "delete-thinned")
+
+    return [decisions[version.id] for version in ordered]
+
+
+def _list_registry_versions(
+    registry: str,
+    pkg_name: str,
+    token: str | None,
+) -> list[RegistryVersion]:
+    """List package versions and verify their tags against the OCI inventory."""
+    listed_tags = set(_list_registry_tags(registry, token, pkg_name=pkg_name))
+    resolved = resolve_token(token)
+    owner, api_type = get_ghcr_owner_and_type(registry, resolved)
+    path = f"/{api_type}/{owner}/packages/container/{pkg_name}/versions"
+    status, records = github_api_paginated(path, resolved)
+    if status != 200:
+        raise click.ClickException(
+            f"Failed to list package versions for {registry}/{pkg_name} (HTTP {status})"
+        )
+
+    versions: list[RegistryVersion] = []
+    for record in records:
+        try:
+            tags = tuple(
+                record.get("metadata", {}).get("container", {}).get("tags", [])
+            )
+            created_at = datetime.fromisoformat(
+                record["created_at"].replace("Z", "+00:00")
+            )
+            versions.append(
+                RegistryVersion(
+                    id=int(record["id"]),
+                    name=str(record["name"]),
+                    created_at=created_at,
+                    tags=tags,
+                )
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise click.ClickException(
+                f"Malformed package-version record for {registry}/{pkg_name}: {record!r}"
+            ) from exc
+
+    version_tags = {tag for version in versions for tag in version.tags}
+    missing = sorted(listed_tags - version_tags)
+    if missing:
+        raise click.ClickException(
+            "Package-version inventory does not contain tags returned by the "
+            f"registry listing: {', '.join(missing)}"
+        )
+    return versions
+
+
+def _delete_untagged_version(
+    registry: str,
+    pkg_name: str,
+    version_id: int,
+    token: str | None,
+) -> bool:
+    """Delete an untagged package version, which has no tag for ``delete_tag``."""
+    resolved = resolve_token(token)
+    owner, api_type = get_ghcr_owner_and_type(registry, resolved)
+    path = f"/{api_type}/{owner}/packages/container/{pkg_name}/versions/{version_id}"
+    status, response = github_api_request(path, resolved, method="DELETE")
+    if status in (200, 204):
+        return True
+    message = response.get("message", "") if isinstance(response, dict) else response
+    click.echo(
+        f"  Failed to delete untagged version {version_id} (HTTP {status}): {message}",
+        err=True,
+    )
+    return False
 
 
 def _resolve_scheduler(profile) -> str:
@@ -899,6 +1052,7 @@ def graph_tags(registry: str | None, facility: str | None) -> None:
 
 @click.command()
 @click.option("--registry", envvar="IMAS_DATA_REGISTRY", default=None)
+@click.option("--token", envvar="GHCR_TOKEN")
 @click.option(
     "--facility",
     "-F",
@@ -907,13 +1061,20 @@ def graph_tags(registry: str | None, facility: str | None) -> None:
 )
 @click.option("--keep", default=5, help="Number of recent tags to keep.")
 @click.option("--dev-only", is_flag=True, help="Only prune dev tags.")
+@click.option(
+    "--tiered/--flat",
+    default=True,
+    help="Use 4 weekly + 3 monthly copies, or the legacy flat --keep window.",
+)
 @click.option("--dry-run", is_flag=True, help="Show what would be deleted.")
 @click.option("--force", is_flag=True, help="Skip confirmation prompt.")
 def graph_prune(
     registry: str | None,
+    token: str | None,
     facility: str | None,
     keep: int,
     dev_only: bool,
+    tiered: bool,
     dry_run: bool,
     force: bool,
 ) -> None:
@@ -922,7 +1083,63 @@ def graph_prune(
     target_registry = get_registry(git_info, registry)
     pkg_name = f"imas-codex-graph-{facility}" if facility else "imas-codex-graph"
 
-    tags = _list_registry_tags(target_registry, pkg_name=pkg_name)
+    if tiered and not dev_only:
+        versions = _list_registry_versions(target_registry, pkg_name, token)
+        if not versions:
+            click.echo(f"No versions found for {target_registry}/{pkg_name}")
+            return
+
+        decisions = _select_tiered_retention(versions)
+        to_delete = [decision for decision in decisions if not decision.keep]
+        click.echo(
+            f"Tiered retention for {target_registry}/{pkg_name}: "
+            f"{len(decisions) - len(to_delete)} keep, {len(to_delete)} delete"
+        )
+        for decision in decisions:
+            action = "KEEP" if decision.keep else "DELETE"
+            stamp = (
+                decision.version.created_at.astimezone(UTC)
+                .isoformat()
+                .replace("+00:00", "Z")
+            )
+            click.echo(
+                f"  {action:<6} {decision.tier:<17} {stamp}  "
+                f"{decision.version.display_name}"
+            )
+
+        if not to_delete:
+            click.echo("Nothing to prune under tiered retention")
+            return
+        if dry_run:
+            click.echo("\n(dry-run — no changes made)")
+            return
+        if not force and not click.confirm(f"Delete {len(to_delete)} version(s)?"):
+            click.echo("Aborted.")
+            return
+
+        deleted = 0
+        for decision in to_delete:
+            version = decision.version
+            if version.tags:
+                success = _delete_tag(
+                    target_registry,
+                    version.tags[0],
+                    token,
+                    pkg_name=pkg_name,
+                )
+            else:
+                success = _delete_untagged_version(
+                    target_registry, pkg_name, version.id, token
+                )
+            if success:
+                click.echo(f"  ✓ Deleted {version.display_name}")
+                deleted += 1
+            else:
+                click.echo(f"  ✗ Failed to delete {version.display_name}")
+        click.echo(f"\n✓ Pruned {deleted}/{len(to_delete)} versions")
+        return
+
+    tags = _list_registry_tags(target_registry, token, pkg_name=pkg_name)
     if not tags:
         click.echo(f"No tags found for {target_registry}/{pkg_name}")
         return
@@ -975,7 +1192,7 @@ def graph_prune(
 
     deleted = 0
     for tag in to_delete:
-        if _delete_tag(target_registry, tag, pkg_name=pkg_name):
+        if _delete_tag(target_registry, tag, token, pkg_name=pkg_name):
             click.echo(f"  ✓ Deleted {tag}")
             deleted += 1
         else:
