@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T01:07:46",
+  "updated": "2026-09-02T01:08:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -818,6 +818,15 @@
         "role": "implement",
         "session_id": "01a029bf-e648-7c62-97e7-efcd177fee51",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-fixturetorch",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-fkeyconv",
@@ -48834,6 +48843,6 @@
       }
     ],
     "holds": [],
-    "_version": 1261
+    "_version": 1262
   }
 }
