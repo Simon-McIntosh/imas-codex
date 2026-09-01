@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="hidden-suite-failures">
+  <meta name="plan-title" content="What the Collection Error Was Hiding">
+  <meta name="plan-summary" content="Restoring test collection exposed 49 failures that had been invisible for a week behind an exit-2 import error">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S10">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>What the Collection Error Was Hiding | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="2">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">&#167;1 &mdash; Why this exists</h2>
+    <p>
+      <code>uv run pytest</code> &mdash; the command this repository&rsquo;s own guidance names
+      as the default &mdash; <strong>exited 2 having run zero tests, every time, from 2026-08-25
+      to 2026-09-01</strong>. One undeclared import in
+      <code>tests/docs/test_documentation_layout.py</code> raised at collection, and a
+      collection error aborts the whole run.
+    </p>
+    <p>
+      That was repaired in commit <code>1d4fb8be</code> while shipping
+      <a href="/imas-codex/plans/graph-destructive-command-safety">graph-operational-safety</a>,
+      whose verification node found it. The repair is not what this plan is about. <strong>The
+      suite now collects, and 49 tests fail.</strong> This plan owns those 49.
+    </p>
+    <p>
+      The shape is worth naming because it is not a test-maintenance backlog. An exit code of 2
+      with no failure list does not read as &ldquo;the suite is broken&rdquo;; it reads as
+      something odd with the runner, and it gets stepped past. <strong>A guard that reports its
+      own malfunction in a register nobody parses is indistinguishable from a guard that
+      passes</strong> &mdash; and for a week every change landed against a suite that verified
+      nothing while appearing to be present.
+    </p>
+
+    <h2 id="s2">&#167;2 &mdash; The measured census</h2>
+    <p>
+      Full run recorded 2026-09-01 at
+      <code>~/.config/reckon/crew/runs/r-20260901T190133843009-n-suitecollection/logs/pytest-after.log</code>.
+      Before: exit 2, <strong>0 collected outcomes</strong>. After: exit 1,
+      <strong>12,021 passed, 49 failed, 145 skipped, 1 xfailed</strong>, 486.91 s.
+    </p>
+    <table>
+      <caption>All 49 failures by file, with attribution established rather than assumed</caption>
+      <thead><tr><th>Count</th><th>File</th><th>Cluster</th><th>Attribution</th></tr></thead>
+      <tbody>
+        <tr><td>12</td><td><code>tests/standard_names/test_edit_engine.py</code></td><td rowspan="3">SN edit surface</td><td rowspan="3">Follows <code>9c4403db</code> (2026-09-01 19:13), which added a source-cohort refusal to <code>graph_ops.py</code> and updated two test files but not these three. <strong>Owned by that commit&rsquo;s author</strong>, who was notified.</td></tr>
+        <tr><td>5</td><td><code>tests/standard_names/test_edit_scope.py</code></td></tr>
+        <tr><td>3</td><td><code>tests/standard_names/test_edit_parity.py</code></td></tr>
+        <tr><td>10</td><td><code>tests/features/test_search.py</code></td><td rowspan="3">Optional dependency</td><td rowspan="3">Missing <code>torch</code>, which <code>pyproject.toml</code> declares only inside an extra. Either the tests must skip without it or the extra must be provisioned for test runs &mdash; a decision, not a repair.</td></tr>
+        <tr><td>6</td><td><code>tests/test_imas_search_scoring.py</code></td></tr>
+        <tr><td>2</td><td><code>tests/embeddings/test_prompt_name.py</code></td></tr>
+        <tr><td>7</td><td><code>tests/integration/test_workflows.py</code></td><td>Integration</td><td>Untriaged.</td></tr>
+        <tr><td>2</td><td><code>tests/ids/test_mapping_e2e.py</code></td><td>Mapping end-to-end</td><td>Untriaged.</td></tr>
+        <tr><td>1</td><td><code>tests/cli/test_services_remote.py</code></td><td>Remote cleanup</td><td>A timeout &mdash; may be environmental rather than a defect.</td></tr>
+        <tr><td>1</td><td><code>tests/test_graph_marker_gate.py</code></td><td>Marker selection</td><td><code>test_missing_credential_explicit_graph_selection_exits_not_run</code> expects &ldquo;No Neo4j credential is configured&rdquo;; the subprocess emitted &ldquo;Configured project Neo4j graph is not available&rdquo;. An environment-dependent message, not a rename.</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>None of the 49 is in a file the graph-safety plan touched.</strong> That was
+      checked rather than asserted: the one that looked like it might be &mdash; a
+      &ldquo;graph marker&rdquo; failure, against a plan that had renamed a marker-writing
+      function that same day &mdash; turned out to be a <em>pytest marker-selection</em> test
+      that references neither the old nor the new name.
+    </p>
+
+    <h2 id="s2a">&#167;2a &mdash; The twenty are claimed, and the author&rsquo;s diagnosis inverts the obvious fix</h2>
+    <p>
+      The author of <code>9c4403db</code> claimed the SN twenty within minutes of being
+      notified, reproduced them at <strong>20 failed / 77 passed</strong> across the three
+      files, and reached a conclusion worth recording here because it is the opposite of what
+      this plan would have guessed. <strong>The fixtures should not gain a source cohort and
+      the guard should not tolerate the legacy shape &mdash; the guard is aimed at the wrong
+      path.</strong>
+    </p>
+    <p>
+      Their decisive evidence is a rename inside their own commit: a test called
+      <code>test_source_less_rename_still_records_human_edit</code> was flipped to
+      <code>test_source_less_rename_refuses_without_recording_human_edit</code>, on the reading
+      that it codified a defect. It did not; it encoded a distinction the flip erased.
+      <strong>An automated refine minting a successor from an ungrounded predecessor is what
+      needed refusing; a human <code>sn edit --rename</code> on an ungrounded name is a
+      deliberate correction</strong> and the only sanctioned path for correcting a standard
+      name. The guard therefore broke the correction path for exactly the names that most need
+      correcting. The repair scopes the refusal to the automated refine path and restores the
+      original assertion.
+    </p>
+    <p>
+      <strong>Their independent measurement also makes the blast radius larger than &#167;1
+      states.</strong> <code>testpaths = ["tests"]</code>, so a bare <code>uv run pytest</code>
+      collects <code>tests/docs/</code>, hits the missing import, and <em>interrupts collection
+      for the whole tree</em> &mdash; they measured exit 2 with
+      <code>Interrupted: 1 error during collection</code>. The consequence is the part to
+      carry: <strong>every green figure quoted in that week came from a targeted invocation
+      that happened to avoid one directory.</strong> They had been reporting a 6,818-passed
+      standard-names run as general health, and a node gate reporting 255 passed is what let
+      this regression through. A narrow green is not evidence about a tree.
+    </p>
+
+    <h2 id="s3">&#167;3 &mdash; What each cluster needs, and from whom</h2>
+    <p>
+      These are four different kinds of work and should not be treated as one queue. Two of
+      them need a decision before any repair, and one is not this plan&rsquo;s to make at all.
+    </p>
+    <ul>
+      <li><strong>The SN twenty are the author&rsquo;s.</strong> The guard added by
+        <code>9c4403db</code> is plausibly correct and the fixtures plausibly predate it;
+        deciding whether the fixtures gain a source cohort or the guard tolerates the legacy
+        shape needs whoever made the change. This plan tracks them and does not repair them.</li>
+      <li><strong>The torch eighteen need a policy, not a patch.</strong> A test that fails
+        because an optional extra is absent is either a test that should skip or an extra that
+        is not really optional. Both are defensible; picking one silently is how the situation
+        recurs.</li>
+      <li><strong>The integration nine need triage before estimation.</strong> Nothing is known
+        about them yet beyond the count, and pretending otherwise would repeat the error that
+        produced this plan.</li>
+      <li><strong>The two singletons need a verdict on whether they are defects at all.</strong>
+        A timeout and an environment-dependent message may both be artifacts of where the suite
+        ran rather than of what it tested.</li>
+    </ul>
+
+    <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
+    <ul>
+      <li>A triage pass that assigns every one of the 49 to a cluster with a verdict: a defect
+        to fix here, a defect owned elsewhere, an environmental artifact, or a test whose
+        premise is wrong.</li>
+      <li>A decision on the optional-dependency policy, applied consistently, so a test never
+        again fails merely because an extra is absent.</li>
+      <li>Whatever repairs the triage assigns to this plan, each with a named test moving from
+        failing to passing.</li>
+      <li>A guard against the recurrence itself: the failure here was not the broken import but
+        that <strong>an exit-2 collection error was indistinguishable from an environment
+        quirk for a week</strong>. Something must make a suite that collects nothing loud
+        rather than quiet.</li>
+      <li>A final full-suite figure recorded against the census above, so the count that closes
+        this plan is comparable to the count that opened it.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="optional-dependency-posture" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">When a test needs an optional extra that is absent, what should happen?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="skip-with-reason">The test skips with a stated reason</button>
+      <button class="r-opt" data-value="provision-the-extra">The extra is provisioned for test runs and its absence is a real failure</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="collection-failure-visibility" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What should make a zero-collection suite impossible to mistake for a passing one?</p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-hsf-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship hidden-suite-failures" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Triage the 49, and decide the optional-dependency posture before repairing any of them</h4>
+    <div class="r-fu-body"><p>The census in §2 is measured and does not need re-deriving; §3 says what each cluster needs and from whom. Start with triage rather than repair, because two clusters need a decision first and one — the twenty SN edit failures following commit 9c4403db — belongs to that commit's author, who has been notified. The deliverable that matters most is the last one: the defect was never the broken import, it was that an exit-2 collection error read as an environment quirk for a week.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship hidden-suite-failures</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

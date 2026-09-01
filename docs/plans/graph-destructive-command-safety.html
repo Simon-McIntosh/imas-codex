@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac,716a8557,7c2aa040,cfdf8c11,c3eaf56d,a8780e61,fcf0027e,76596e72,b2c1a298,7d86f251,815b848f">
 <meta name="plan-artifacts" content="docs/evidence/archive/graph-destructive-command-safety-landed.html,docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/graph-operational-safety/offsite-currency.md,docs/evidence/graph-operational-safety/offsite-inventory.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py,imas_codex/graph/neo4j_ops.py,imas_codex/graph/remote.py,imas_codex/cli/graph/data.py,imas_codex/cli/graph/registry.py,imas_codex/cli/graph/server.py,imas_codex/cli/graph/__init__.py,imas_codex/cli/release.py,docs/architecture/graph.md,docs/architecture/graph-profiles.md,tests/cli/test_graph_archive_naming.py,tests/cli/test_graph_manifest_scope.py,tests/cli/test_graph_destructive_backup.py,tests/cli/test_graph_destructive_target.py,tests/core/test_backup_currency.py">
 <meta name="plan-impl" content="0.93">
@@ -532,6 +532,9 @@
 </div>
 <div class="r-comment" data-section="§3e" data-id="c-20260901T1834-docs" data-who="reckon-ship" data-when="2026-09-01T18:34:00+00:00">
     <div class="r-comment-body">n-selectordocs landed — commits <code>b2c1a298</code> and <code>7d86f251</code>; gate documented-surface-matches-live-help passed; measure a live Click audit of <strong>100 checks across all 18 graph commands with 0 failures</strong>, <strong>carrying its own positive control</strong> confirming the removed command names are genuinely absent rather than merely unsearched, plus 15 tests passed and ruff clean. Every claim in §3e is now corrected at source: the three commands that never existed are gone, <code>graph tunnel</code> is back under <code>imas-codex tunnel</code>, the two unreal <code>prune</code> flags are removed, every <code>load</code> and <code>clear</code> example carries its target, and the active symlink is named as the data selector on all five surfaces with <code>graph switch NAME</code> as the way to change it. <code>graph status</code>'s new backup-currency line is documented in all four documents. COORDINATOR VERIFICATION BEFORE MERGE, because a documentation fix that introduces a new false claim is the very defect it was sent to repair: the rewritten <code>AGENTS.md</code> row cites <code>get_graph_profile</code>, <code>get_graph_name</code>, <code>get_graph_location</code> and <code>get_graph_uri</code>, and <strong>all four exist</strong> — checked against a positive control. It also emerged that the row's PRIOR text cited <code>resolve_graph</code>, <strong>which does not exist</strong>, so the correction retired a dangling pointer nobody had noticed alongside the false claim it was aimed at.</div>
+</div>
+<div class="r-comment" data-section="§3f" data-id="c-run-r-20260901T190133843009-n-suitecollection" data-who="impl-suitecollect" data-when="2026-09-01T19:16:56Z">
+    <div class="r-comment-body"><p>Collection restored: before exit 2 with 0 collected outcomes, after exit 1 with 12021 passed / 49 failed / 145 skipped / 1 xfailed; ruff clean. The gate is the restoration, not a green suite - the coordinator&#x27;s original done-when demanded exit 0 on an unmeasured assumption and was corrected mid-flight; the 49 exposed failures are pre-existing and none is in a file this plan touched</p></div>
 </div>
 </section>
 </main>
