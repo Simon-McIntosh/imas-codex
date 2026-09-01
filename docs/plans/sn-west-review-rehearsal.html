@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="148">
+<meta name="plan-version" content="150">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b">
 </head>
 <body>
   <main class="plan-doc">
@@ -2618,6 +2618,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-run-r-20260901T220832290350-n-west-stage5-freeze-check-2" data-who="test-s10freeze" data-when="2026-09-01T22:19:39Z">
     <div class="r-comment-body"><p>freeze-check blocked by a regression in the guard: _claim_sn_atomic read-back references $frozen_name_stages but binds only token and drain_scope_id, so five pools raised 1,343 ParameterMissing errors, processed 0 names, spent 0.00; frozen rows unchanged 376/376 but that proves nothing about the guard</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T222052946333-n-frozen-guard-param-binding" data-who="impl-freezeguard" data-when="2026-09-01T22:43:33Z">
+    <div class="r-comment-body"><p>frozen_name_stages is bound on both tx.run calls of the atomic claim read-back (execution-level fake-transaction regression 2/2); 219 passed in the pools/workers subset with the only failure a 30 s subprocess timeout in test_pool_phase_import_orders (green in the 34531f99 whole-tree run, environmental under fleet load); no ParameterMissing in the live run; NEGATIVE FINDING: sn run --dry-run seeded 1,614 sources, ran paid pools and wrote graph state (about 1.22 USD) before forced exit</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260902T0045-binding-fix" data-who="reckon-ship" data-when="2026-09-02T00:45:00Z">
+    <div class="r-comment-body">The frozen-stage guard shipped with a regression: the atomic claim read-back referenced $frozen_name_stages without binding it, so the repeat freeze-check (report bfe3e390) saw 1,343 ParameterMissing failures across five pools, zero work and zero spend. Fixed at 3a2d0d3b (merged 81a9b9f2) with an execution-level fake-transaction regression that raises on any referenced-but-unbound parameter; 219 passed in the pools/workers subset, the one failure being a 30 s subprocess timeout in test_pool_phase_import_orders that was green in the whole-tree run and is read as fleet-load latency. Second negative finding from that node: sn run --dry-run is not dry. It seeded 1,614 sources, ran paid pools and persisted docs for two names (about 1.22 USD) before the worker killed it. The graph mutations are ordinary pipeline results, not corruption; the flag is the defect and gets its own node. Freeze-check runs a third time with the binding in place.</div>
 </div>
 </section>
 </main>

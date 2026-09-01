@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T00:20:35",
+  "updated": "2026-09-02T00:44:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -48614,9 +48614,111 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T222052946333-n-frozen-guard-param-binding",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-frozen-guard-param-binding",
+        "node_definition": {
+          "done_when": "an execution-level regression drives _claim_sn_atomic with a fake transaction that raises on any Cypher parameter referenced but not bound and asserts frozen_name_stages is bound on every tx.run it makes; the 10 existing frozen-guard tests plus the pools/workers subset pass with command, exit status and log path recorded; a recorded 'imas-codex sn run --dry-run' from this worktree completes without ParameterMissing",
+          "estimated_hours": null,
+          "goal": "Bind the frozen_name_stages parameter in the _claim_sn_atomic token read-back (imas_codex/standard_names/graph_ops.py near line 14199, whose tx.run currently passes only token and drain_scope_id) so every pool claim executes again",
+          "id": "n-frozen-guard-param-binding",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T222052946333-n-frozen-guard-param-binding/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_frozen_stage_pool_guard.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-freezeguard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T22:21:03Z",
+        "completed_at": "2026-09-01T22:43:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1350,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1350,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "10642b7cb0c6713aab735632b7c67d6e70799269",
+        "commits": [
+          "3a2d0d3b87c6f895bfed62305c5e88a6fbba4b12"
+        ],
+        "changed_lines": {
+          "added": 69,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_frozen_stage_pool_guard.py tests/standard_names/test_pool*.py tests/standard_names/test_workers*.py",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T222052946333-n-frozen-guard-param-binding/pools-workers.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T222052946333-n-frozen-guard-param-binding/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05efb-18d3-7191-a501-516b98310241",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2002432,
+            "cached_input_tokens_cumulative": 9411584,
+            "input_tokens": 1926499,
+            "input_tokens_cumulative": 9661825,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13518,
+            "reasoning_output_tokens": 712,
+            "reasoning_output_tokens_cumulative": 4285
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1257
+    "_version": 1258
   }
 }
