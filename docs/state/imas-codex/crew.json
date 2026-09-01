@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:56:57",
+  "updated": "2026-09-02T00:07:45",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -828,6 +828,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-freezeguard",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05efb-18d3-7191-a501-516b98310241",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05efb-18d3-7191-a501-516b98310241"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "impl-freshdraw",
@@ -48397,9 +48408,114 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T215824369997-n-frozen-stage-pool-guard",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-frozen-stage-pool-guard",
+        "node_definition": {
+          "done_when": "a focused test seeds approved, contested, accepted names with drafted docs, asserting the claim queries of every pool (generate_docs, review_docs, refine_docs, review_name, refine_name, enrich_parents, generate_name) return only the accepted one while persist_reviewed_docs together with the review-aggregate writer skip approved or contested ids; a second test asserts sn approve auto-promotion together with sn resolve --override leave docs_stage in a terminal non-drafted state; the standard_names suite subset for pools, workers, approve, promote passes with command, exit status, log path recorded; the live graph is not modified",
+          "estimated_hours": null,
+          "goal": "Row-freeze the folded catalog cohort against the ordinary pipeline, so that no sn run pool claim or review-aggregate write touches a StandardName whose name_stage is approved or contested, with approval/resolve settling docs_stage to a terminal value",
+          "id": "n-frozen-stage-pool-guard",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T215824369997-n-frozen-stage-pool-guard/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/pools.py",
+            "imas_codex/standard_names/workers.py",
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/standard_names/promote.py",
+            "tests/standard_names/test_frozen_stage_pool_guard.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-freezeguard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:58:28Z",
+        "completed_at": "2026-09-01T22:07:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 546,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 546,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3be09ec0b1149d7a4f722933f9d7a2f2db0bfd20",
+        "commits": [
+          "81b3e71dd934395e17aedc720edc2a9d5a3d1622"
+        ],
+        "changed_lines": {
+          "added": 195,
+          "removed": 1,
+          "files": 3
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_pool*.py tests/standard_names/test_workers*.py tests/standard_names/test_sn_approve*.py tests/standard_names/test_promote*.py tests/standard_names/test_cli_approve.py tests/standard_names/test_frozen_stage_pool_guard.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T215824369997-n-frozen-stage-pool-guard/standard-names-subset.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T215824369997-n-frozen-stage-pool-guard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05efb-18d3-7191-a501-516b98310241",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7409152,
+            "cached_input_tokens_cumulative": 7409152,
+            "input_tokens": 7735326,
+            "input_tokens_cumulative": 7735326,
+            "output_tokens": 15849,
+            "output_tokens_cumulative": 15849,
+            "reasoning_output_tokens": 3573,
+            "reasoning_output_tokens_cumulative": 3573
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1253
+    "_version": 1256
   }
 }

@@ -16,14 +16,14 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="145">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="147">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d">
 </head>
 <body>
   <main class="plan-doc">
@@ -2609,6 +2609,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260901T2157-freeze-fail" data-who="reckon-ship" data-when="2026-09-01T21:57:00Z">
     <div class="r-comment-body">Stage 5 freeze-check FAILED (report 7ef24d29, merged c3377902), and that is the rehearsal doing its job. One unscoped sn run --flush --cost-limit 5 kept the census at 375 approved + 1 contested and touched 135 non-frozen names (12 created, 5 deleted, 118 changed), but on the approved breakdown_initial_time it changed review_mean_score 0.9375 to 0.903125 and review_disagreement false to true: the name was approved with docs_stage still drafted, the docs review pool claimed it, the final docs persistence became a no-op on a stage mismatch, yet the aggregate review fields were written. Defect: pool claims and review aggregate writes do not exclude name_stage approved or contested. Cost note: the run spent 5.4396 against a 5.00 cap (1.088x, in-flight reviews completing after the budget signal), a second post-July data point on cap overshoot. Fix node dispatched; stage 5 repeats after it, then stage 6 undo and 6b re-fold.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T215824369997-n-frozen-stage-pool-guard" data-who="impl-freezeguard" data-when="2026-09-01T22:07:34Z">
+    <div class="r-comment-body"><p>approved and contested rows are frozen: all six pool claims exclude them at seed, expansion and token readback, generate_name skips sources bound to them, update_review_aggregates skips them, approval and override settle docs_stage to accepted; 10 focused tests, 282/282 standard-names subset</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260902T0008-freeze-guard" data-who="reckon-ship" data-when="2026-09-02T00:08:00Z">
+    <div class="r-comment-body">Frozen-stage guard landed at 81b3e71d (merged c0c0bd07): approved and contested are the shared frozen name stages; all six pool claims exclude them at seed, expansion and token readback; generate_name skips sources already bound to a frozen name; update_review_aggregates skips them; persist_reviewed_docs already required accepted; automatic approval and contested override now settle docs_stage to accepted. 10 focused regressions, 282/282 in the pools/workers/approve/promote subset. Stage 5 freeze-check repeats against the live cohort (breakdown_initial_time still sits at docs_stage drafted from the pre-fix approval, which makes it the positive control for the claim exclusion).</div>
 </div>
 </section>
 </main>
