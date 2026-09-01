@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"      content="imas-codex">
+  <meta name="reckon-type"       content="evidence">
+  <meta name="plan-slug"         content="sn-benchmark-evolution-landed">
+  <meta name="plan-title"        content="Advisory Review Benchmark and Recovery Triage — Landed Record">
+  <meta name="plan-summary"      content="What the review benchmark measured, why its census was retired, and how the recovery it was meant to enable was delivered without it">
+  <meta name="plan-evidence-for" content="sn-benchmark-evolution">
+  <meta name="plan-owner"        content="Simon McIntosh">
+  <title>Advisory Review Benchmark and Recovery Triage — Landed Record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="verdict">Verdict</h2>
+    <p>
+      The plan asked whether a free local model could triage the standard-name graph.
+      <strong>The answer is a qualified no, and the work it was meant to enable was
+      delivered anyway by a cheaper route.</strong> DSv4-flash is a competent defect
+      <em>detector</em> and an inconsistent <em>judge</em>; the graph-wide advisory census
+      was retired rather than deferred; and the recovery triage in the plan's title was
+      produced deterministically, for nothing, from signals the graph already held.
+    </p>
+
+    <h2 id="instrument">The instrument, and what it cost to build honestly</h2>
+    <p>
+      Phase A built two mechanisms the reuse map marked genuinely new. A
+      <strong>non-persisting three-seat panel adapter</strong> (<code>aa553671</code>)
+      retains all raw seat judgments with median, spread and contested status, because the
+      review pipeline's arithmetic mean discards exactly the disagreement a benchmark
+      exists to surface. A <strong>frozen-batch runner</strong> (<code>edb57f02</code>)
+      carries three distinct hashes &mdash; population, ordered inputs, ordered results
+      &mdash; so a later run cannot silently redefine what was measured. Both prove their
+      advisory contract <em>by structure</em>: static dependency tests fail if the module
+      ever reaches graph mutation, review persistence or the budget manager.
+    </p>
+    <p>
+      A first gate run <strong>refused to execute</strong> (<code>a1f98d21</code>) because
+      31 of 51 positive slots were unpopulated and no numeric threshold existed for any of
+      the five measures. Gates with no numbers cannot pass or fail, and running anyway
+      would have manufactured the authority the census was conditional on. The refusal cost
+      USD 0.00 and was the correct result.
+    </p>
+    <p>
+      The replacement corpus (<code>a90c9dca</code>) is 40 ordered rows &mdash; 20 accepted
+      valid identities plus 20 deterministic corruptions across 18 domains, hash
+      <code>216e738a</code> &mdash; each carrying path, identity, unit and provenance, the
+      four things all 31 legacy stubs lacked. The builder <strong>fails closed</strong> on a
+      corruption that leaves an identity unchanged, which a dry run had caught and which
+      would have inflated every recall figure. A parallel disposition of the legacy surface
+      (<code>c334e821</code>) found 32 of 51 positive rows recoverable and the 19 losses
+      concentrated in three whole domains rather than scattered.
+    </p>
+
+    <h2 id="gates">The gates, measured twice</h2>
+    <table>
+      <thead><tr><th>Gate</th><th>Threshold</th><th>Calibration</th><th>Pinned re-run</th></tr></thead>
+      <tbody>
+        <tr><td>critical-defect recall</td><td>&ge; 1.000000</td><td>1.000000 pass</td><td>1.000000 pass</td></tr>
+        <tr><td>clean-name false-positive rate</td><td>&le; 0.500000</td><td>0.275000 pass</td><td>0.300000 pass</td></tr>
+        <tr><td>Brier calibration error</td><td>&le; 0.103764</td><td>0.097836 pass</td><td>0.105455 <strong>fail</strong></td></tr>
+        <tr><td>repeated-label agreement</td><td>&ge; 0.900000</td><td>0.825000 <strong>fail</strong></td><td>0.900000 pass</td></tr>
+        <tr><td>hosted-quorum agreement</td><td>&ge; 0.909091</td><td>0.800000 <strong>fail</strong></td><td>0.800000 <strong>fail</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Every threshold is <em>derived</em> from the controlled corpus through a two-pass
+      weakest-hosted-seat envelope, explicitly excluding circular graph-history bounds, so
+      each is a measurement rather than a bar someone chose. Calibration cost USD 2.544742
+      of a USD 10 ceiling (<code>0ebbf133</code>); the pinned re-run cost USD 0.9617504
+      (<code>4a0fbd7a</code>), a third as much, because determinism is cheaper as well as
+      more repeatable.
+    </p>
+    <p>
+      <strong>The shape of the failure is the result.</strong> The model catches every
+      critical defect and does not cry wolf &mdash; the two properties a triage instrument
+      needs. What it cannot do is give the same answer twice or agree with the panel that
+      would adjudicate it.
+    </p>
+
+    <h2 id="nondeterminism">Why the instability was not fixable by configuration</h2>
+    <p>
+      A diagnosis (<code>a28cdeb6</code>) found all 7 unstable rows among the 20 <em>good</em>
+      rows and 0 among the 20 corrupted: a deliberate corruption is unambiguous, while a
+      clean name near the accept boundary is a judgement call. Six of seven flips were
+      reject-to-accept, so the model was inconsistently <em>too harsh</em>, not randomly
+      wrong. The mechanical cause was unpinned decoding against vLLM defaults of
+      temperature 1.0 and seed <code>None</code>.
+    </p>
+    <p>
+      Pinning temperature 0.0 and seed 20260825 (<code>3990b9c6</code>) moved repeatability
+      to exactly its threshold, confirming the sampler diagnosis, and traded it for Brier
+      &mdash; greedy decoding sharpens probabilities, so a model that stops wavering also
+      stops hedging. <strong>The residue is provider-side and irreducible on this stack:</strong>
+      three calls sharing an equal <em>complete semantic request hash</em> returned 1.000,
+      0.625 and 0.9875, and three serial full-corpus passes spread Brier across 0.043953
+      with 30 of 40 rows moving. Removing it would need a controlled deterministic-serving
+      variant &mdash; five settings varied one at a time, ~26 min cold start each, two
+      dedicated H200s at reduced throughput.
+    </p>
+
+    <h2 id="retired">The census, retired rather than deferred</h2>
+    <p>
+      Relocked by the lead 2026-09-01 to <em>small-pilot-only</em>. At the moment of asking,
+      7 of the node's 8 H200s were allocated, so the determinism sweep was not merely
+      unbudgeted but unavailable without displacing a live serving seat &mdash; and it would
+      have settled only whether gates read as values or bands, producing no better standard
+      name. Against a review-only drain that came in at USD 61.56, characterising the
+      instrument cost more than the work it would have ranked.
+    </p>
+
+    <h2 id="triage">The recovery, delivered without the census</h2>
+    <p>
+      The ranking the census was going to produce came instead from signals already in the
+      graph (<code>27f0b78a</code>). The parked population is <strong>275</strong> &mdash;
+      not the ~349 previously in circulation &mdash; partitioning into <strong>32
+      rescore-candidate, 4 vocabulary-gap and 239 stay-parked</strong>, residual 0.
+      <strong>239 of 275 are correctly parked</strong>, so the actionable worklist is an
+      order of magnitude smaller than the census would have justified.
+    </p>
+    <p>
+      It carries the one property the advisory route could not buy at any price:
+      <strong>the ordered-row hash <code>d2335280</code> is identical across two consecutive
+      passes</strong>, and the committed query hash <code>2dad8167</code> is embedded so the
+      population can be rebuilt rather than trusted. Every signal read carries a positive
+      control proving the property exists rather than silently evaluating null &mdash;
+      which matters because a wrong property name returns a clean, plausible, empty
+      partition, and nobody interrogates good news.
+    </p>
+
+    <h2 id="rescore">The rescore, and the three defects it exposed</h2>
+    <p>
+      Resubmitting the 32 recovered <strong>12 to accepted</strong> and returned 10 to the
+      tail with fresh scores, at <strong>USD 4.982846</strong> across 115 attributable
+      <code>LLMCost</code> rows. The recovery thesis holds.
+    </p>
+    <p>
+      Its identity-retention gate <strong>failed on a real defect</strong>, which is what the
+      gate existed to catch: <code>sn rescore</code> entered <code>REFINE_NAME</code> and
+      minted a reworded successor, <code>particle_convection_velocity</code> yielding
+      <code>particle_velocity_due_to_convection</code>, against a documented
+      unchanged-identity contract. Two further defects came with it &mdash; an unaffordable
+      mandatory reviewer seat made the runner repeat a budget-refused deferral instead of
+      terminating, and 3 of the 32 had drifted out of deterministic validation, including
+      <code>toroidal_angle_of_secondary_x_point</code>, which asserts an angle while carrying
+      the metre unit its own DD binding supplies. <strong>The worker refused a retry</strong>
+      under the time fence and the two-attempt rule; a re-roll would have bought a better
+      number and hidden all three.
+    </p>
+    <p>
+      The contract is now structural (<code>90444b9e</code>): an exact-rescore run selects
+      only the review pool and cannot reach refine, so a poor draw has nowhere to go but back
+      onto the same node. Budget saturation in rescore scope terminates as
+      <code>budget_exhausted</code> without restating non-rescore saturation. 2 passed on the
+      contract suite, 39 passed and 0 failed across targeted suites. One caveat kept: the
+      fail-before was a collection error rather than an assertion failure, so the empirical
+      proof of the old defect remains the live run.
+    </p>
+
+    <h2 id="artifacts">Artifacts</h2>
+    <ul>
+      <li><code>docs/evidence/sn-benchmark-evolution/reuse-map.md</code></li>
+      <li><code>docs/evidence/sn-benchmark-evolution/benchmark-gate-run.md</code></li>
+      <li><code>docs/evidence/sn-benchmark-evolution/exhausted-tail-triage.md</code></li>
+      <li><code>docs/evidence/sn-benchmark-evolution/tail-rescore.md</code></li>
+      <li><code>imas_codex/standard_names/advisory_panel.py</code>,
+        <code>advisory_benchmark.py</code>, <code>rescore.py</code></li>
+    </ul>
+  </main>
+</body>
+</html>
