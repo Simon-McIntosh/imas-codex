@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T20:15:36",
+  "updated": "2026-09-01T20:34:41",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -59,6 +59,17 @@
         "role": "documentation",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "doc-graphselector",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": "01a05e30-b6f4-79b0-aa2c-bfe355d051e0",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e30-b6f4-79b0-aa2c-bfe355d051e0"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "doc-identityguidance",
@@ -1076,9 +1087,11 @@
         "id": "impl-manifestscope",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e27-a037-7370-9318-d81bd09af749",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e27-a037-7370-9318-d81bd09af749"
+        },
         "created": "2026-09-01"
       },
       {
@@ -45350,9 +45363,217 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T181717983980-n-selectordocs",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73e",
+        "node": "n-selectordocs",
+        "node_definition": {
+          "done_when": "Every graph command and flag shown in docs/architecture/graph.md, docs/architecture/graph-profiles.md, README.md, AGENTS.md and the graph help banner exists in imas-codex graph --help; every load and clear example carries its required target; the symlink is described as the data selector with graph switch NAME as the way to change it and the location variable's real scope stated; the claim that all graph commands take a graph selection flag is removed; graph status's backup-currency output is documented; and a recorded verification shows each documented command name checked against the live help output with its result",
+          "estimated_hours": null,
+          "goal": "Make the documented graph procedure the same procedure the code implements",
+          "id": "n-selectordocs",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T181717983980-n-selectordocs/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a73e",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "docs/architecture/graph.md",
+            "docs/architecture/graph-profiles.md",
+            "README.md",
+            "AGENTS.md",
+            "imas_codex/cli/graph/__init__.py"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-graphselector",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:17:25Z",
+        "completed_at": "2026-09-01T18:29:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 744,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 744,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "da01d56314aca0f2d678a0e09bc6eebc9e012088",
+        "commits": [
+          "b2c1a298b848e2306e78045c561efdb2b33c1237",
+          "7d86f2517fbaad2f2494ed5cdf0540bf5a9b2442"
+        ],
+        "changed_lines": {
+          "added": 156,
+          "removed": 151,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live Click help audit across 18 graph commands; pytest test_graph_cli_package test_backup_currency test_graph_destructive_target; ruff check and format; live imas-codex graph status",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T181717983980-n-selectordocs/help-surface-verification.txt",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T181717983980-n-selectordocs/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e30-b6f4-79b0-aa2c-bfe355d051e0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6095360,
+            "cached_input_tokens_cumulative": 6095360,
+            "input_tokens": 6283731,
+            "input_tokens_cumulative": 6283731,
+            "output_tokens": 28301,
+            "output_tokens_cumulative": 28301,
+            "reasoning_output_tokens": 8851,
+            "reasoning_output_tokens_cumulative": 8851
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T180720466332-n-manifestscope",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73d",
+        "node": "n-manifestscope",
+        "node_definition": {
+          "done_when": "The manifest written beside graph.dump carries total node count, total relationship count and per-label counts measured from the graph the archive was built from, so a facility-scoped or DD-only export reports its post-filter contents rather than the unfiltered source; a new test in tests/cli/test_graph_manifest_scope.py pins both the unfiltered and a filtered case and is shown failing before the change; tests/cli reports 0 failures with ruff clean on the staged paths",
+          "estimated_hours": null,
+          "goal": "Make an archive manifest state what the archive actually contains",
+          "id": "n-manifestscope",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180720466332-n-manifestscope/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73d",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/cli/graph/data.py",
+            "tests/cli/test_graph_manifest_scope.py",
+            "tests/cli/test_graph_archive_naming.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-manifestscope",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:07:29Z",
+        "completed_at": "2026-09-01T18:19:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 699,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 699,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "6849f268b59ebf13a97c3b422726a0ab77fdfd5f",
+        "commits": [
+          "fcf0027ef818e08e407335e8440bfeafe90239fc",
+          "76596e72b69e24661de05d345a2ed907b982aef4"
+        ],
+        "changed_lines": {
+          "added": 237,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider tests/cli/test_graph_manifest_scope.py; pytest -p no:cacheprovider tests/cli; ruff check --no-cache",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180720466332-n-manifestscope/logs/cli-final.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180720466332-n-manifestscope/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05e27-a037-7370-9318-d81bd09af749",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1714432,
+            "cached_input_tokens_cumulative": 1714432,
+            "input_tokens": 1883203,
+            "input_tokens_cumulative": 1883203,
+            "output_tokens": 5149,
+            "output_tokens_cumulative": 5149,
+            "reasoning_output_tokens": 1104,
+            "reasoning_output_tokens_cumulative": 1104
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1182
+    "_version": 1187
   }
 }
