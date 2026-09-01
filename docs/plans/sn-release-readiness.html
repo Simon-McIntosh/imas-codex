@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="94">
+<meta name="plan-version" content="95">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/embedding-gap.md,docs/evidence/sn-release-readiness/suite-four-disposition.md,docs/evidence/sn-release-readiness/import-order-timeout.md,docs/evidence/sn-release-readiness/strain-ordinal-edit.md,docs/evidence/sn-release-readiness/unsourced-ancestry.md">
 <meta name="plan-impl" content="0.94">
@@ -708,6 +708,11 @@
     <h4 class="r-fu-title">Rebuild the 72 never-grounded chain-cap identities and settle the ISN measurement-direction gap</h4>
     <div class="r-fu-body"><p>Measured on 2026-09-01 and recorded in <code>docs/evidence/sn-release-readiness/unsourced-ancestry.md</code>: of 78 unsourced chain-cap identities, <strong>72 have no sourced ancestor at any depth</strong>, 4 are recoverable from an immediate predecessor and 2 need adjudication. So the remedy is a rebuild, and source reattachment closes only 4. Two questions this plan has not answered and must: how 72 identities came to exist with no DD binding anywhere — the composer requires a source, so a fold, dedup or derived path is the likely origin — and whether <code>persist_refined_name</code>'s deliberate empty-cohort no-op should instead refuse, since a successor born unsourced carries no signal that it is ungrounded. Separately, the six strain-gauge measurement-direction identities are blocked on an <strong>ISN-owned vocabulary decision</strong>: no non-ordinal token exists, so either ISN gains one or the names fold onto the existing generic sensor direction-vector identities under separate authorization. Codex must not invent the token or write either fix directly.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-release-readiness §12</pre>
+    </article>
+<article class="r-fu" data-id="f-srr-31regen" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship sn-regeneration-decision" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pointer: the 31 born-ungrounded rows belong to sn-regeneration-decision, whose precondition is now met</h4>
+    <div class="r-fu-body"><p><strong>Pointer only &mdash; the work belongs to <code>sn-regeneration-decision</code></strong> (draft, S12), not to this plan. That plan exists to settle whether to delete and regenerate names and docs from sources on a stated threshold, explicitly <em>once origin is declared</em>, and this session declared it: the ungrounded roots are 37 from the legacy generic writer and 35 from a catalog-import path current main has removed, with zero from a derived or consolidation route. Its precondition is therefore satisfied for the first time.</p><p>The cohort it should take: the <strong>30 empty-cohort successor mints plus 1 legacy pre-ledger row</strong> that were born ungrounded, which the lead directed should wait for the cause fix and then regenerate through the ordinary pipeline rather than have sources attached to identities a defect minted. <strong>The cause fix has landed</strong> &mdash; <code>persist_refined_name</code> now refuses an empty authoritative source cohort and rolls back before minting, measured at zero blast radius &mdash; so regeneration would no longer feed a live generator. Explicitly NOT in that cohort: the 42 whose sources migrated to survivors under signed retirements, which this plan has recorded as correct behaviour rather than a defect.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-regeneration-decision</pre>
     </article>
 </section>
 
