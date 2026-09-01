@@ -119,6 +119,85 @@
     still succeeds, so the guard blocks the mistake rather than the operation.</p>
   </section>
 
+  <section id="offsite">
+    <h2>The offsite figure confirmed the local record, then found something worse</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-offsitecurrency</code>, commit
+    <code>716a8557</code>. Record:
+    <a href="/imas-codex/evidence/graph-operational-safety/offsite-currency">offsite-currency</a>.</p>
+    <p>The plan asked for a registry query rather than a reading of the local file, on the
+    suspicion that the local manifest&rsquo;s claim about what had been pushed might be
+    wrong. It is not wrong. The registry agrees byte-for-byte and the GitHub Packages
+    timestamp agrees to the second.</p>
+    <table>
+      <caption>Offsite exposure, measured from the registry rather than the local record</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Registry package</td><td><code>ghcr.io/simon-mcintosh/imas-codex-graph-tcv</code></td></tr>
+        <tr><td>Version</td><td><code>5.3.0rc6.dev91-g2479801d7.d20260706-r1</code></td></tr>
+        <tr><td>Pushed</td><td>2026-07-07T12:57:57Z</td></tr>
+        <tr><td>Version id / layer</td><td>1008212308 / 2,810,090,518 bytes, <code>sha256:0cb92406&hellip;</code></td></tr>
+        <tr><td>Newest local restore point</td><td>2026-09-01T12:52:53Z, 2,458,442,456 bytes</td></tr>
+        <tr><td><strong>Exposure</strong></td><td><strong>4,838,096.778723 s = 55.996490494 days</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The finding is what the package is, not how old it is.</strong> The only
+    package the registry returned is <em>TCV-scoped</em>, while the newest local restore point
+    carries the full-graph package name. So the two-month figure does not bound what it was
+    assumed to bound &mdash; it dates a facility subset. Whether a full-graph offsite copy
+    exists at all is a question this measurement raised rather than answered, and it is the
+    difference between an assumed floor and a measured one.</p>
+  </section>
+
+  <section id="archive-stamp">
+    <h2>No archive filename may assert a property that decays</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-archivestamp</code>, commit
+    <code>7c2aa040</code>.</p>
+    <p>One <code>graph_archive_stamp</code> formatter now names both default producers as
+    <code>dev-&lt;short-revision&gt;-&lt;YYYYMMDDTHHMMSSZ&gt;</code>. The two had each been
+    holding the half the other omitted: the exporter carried the revision and no timestamp,
+    so two exports at one revision collided; the dump helper carried the timestamp and no
+    revision, so a dump could not say which code it restores into. Proven defaults:
+    <code>imas-codex-graph-dev-6fc745c-20260901T125109Z.tar.gz</code> and
+    <code>codex-dev-6fc745c-20260901T125109Z.dump</code>.</p>
+    <p>The formatter <strong>fails closed</strong>: with no git revision available it raises
+    rather than emitting a name that cannot state what it restores into &mdash; the same
+    posture as the backup decision one level down.</p>
+    <p>Focused regression <strong>0 passed / 1 failed &rarr; 1 passed / 0 failed</strong>;
+    combined suite 181 passed / 1 failed, the single failure being the out-of-fence inert
+    regression below; ruff clean. Verified against the release path before merge, because the
+    change replaces a tag-bearing default: <code>graph_push</code> always passes its own
+    <code>-o</code> output path so the default never reaches it, and
+    <code>version_label</code> still names the inner archive directory, so tag identity is
+    preserved exactly where it was.</p>
+  </section>
+
+  <section id="inert-regression">
+    <h2>A regression that exits at argument parsing pins nothing</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-inertregression</code>, commit
+    <code>cfdf8c11</code>.</p>
+    <p><code>tests/cli/test_graph_destructive_backup.py</code> was written before
+    <code>graph load</code> required a target. Once the target check landed, the invocation
+    exited with Click status 2 and <code>Missing argument 'TARGET'</code>, so the command
+    under test never reached the mocked dump failure the test exists to observe. Pre-fix the
+    file ran <strong>1 passed / 1 failed</strong>; post-fix <strong>2 passed / 0 failed</strong>,
+    with the full <code>tests/cli</code> plus <code>test_graph_cli_package</code> run at
+    <strong>176 passed / 0 failed</strong>. The change is one insertion and one deletion.</p>
+    <p><strong>Main was red and nobody had noticed.</strong> Two independent measurements
+    found it within minutes &mdash; the reconnaissance pass reading the file, and
+    <code>n-archivestamp</code> hitting it as the sole failure in an otherwise green 181-test
+    run &mdash; after it had sat on <code>origin/main</code> since the target check landed.
+    The repair went to the roster member that wrote the file rather than a fresh worker, so
+    it reached someone who still remembered why the mocks were arranged as they are.</p>
+    <p><strong>This is the third instance of one failure mode in a day, and the first to
+    escape.</strong> The other two &mdash; both a change whose references were not scoped
+    &mdash; were caught by a worker&rsquo;s own fence, because the reference and the change
+    sat inside one node&rsquo;s write scope. This one crossed a node boundary: each node was
+    green in isolation and the interaction broke the earlier one, which is precisely the
+    arrangement no single fence can see. The generalisable countermeasure is to enumerate
+    every reference to a surface <em>before</em> fencing a node that changes it, and to treat
+    a suite run that is green only within a fence as unverified outside it.</p>
+  </section>
+
   <section id="ledger-repair">
     <h2>The ledger disagreed with the tree, and looked healthy while it did</h2>
     <p><strong>Recorded 2026-09-01</strong> &mdash; commit <code>da9b8ced</code>.</p>
