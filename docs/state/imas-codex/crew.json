@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T20:00:55",
+  "updated": "2026-09-01T20:06:24",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -168,9 +168,11 @@
         "id": "impl-archivestamp",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e1e-8f3e-7c93-9ba8-3c1d5916edba",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e1e-8f3e-7c93-9ba8-3c1d5916edba"
+        },
         "created": "2026-09-01"
       },
       {
@@ -2462,9 +2464,11 @@
         "id": "test-offsite",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e1e-d200-7233-810d-3d955b436f90",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e1e-d200-7233-810d-3d955b436f90"
+        },
         "created": "2026-09-01"
       },
       {
@@ -44810,9 +44814,312 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T175746164629-n-offsitecurrency",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73c",
+        "node": "n-offsitecurrency",
+        "node_definition": {
+          "done_when": "docs/evidence/graph-operational-safety/offsite-currency.md records the newest graph package version actually present in the registry with its push date, the exposure window in days against the newest local restore point at /home/ITER/mcintos/.local/share/imas-codex/backups, every command run with its exit code, and an explicit verdict on whether the local manifest claim of 5.3.0rc6.dev91-g2479801d7.d20260706-r1 agrees with what the registry returns",
+          "estimated_hours": null,
+          "goal": "Measure the offsite currency of the graph against the container registry",
+          "id": "n-offsitecurrency",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T175746164629-n-offsitecurrency/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73c",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "docs/evidence/graph-operational-safety/offsite-currency.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-offsite",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T17:57:52Z",
+        "completed_at": "2026-09-01T18:02:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 288,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 288,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "da9b8ced285e10eaabcfe8d3818012781bc47724",
+        "commits": [
+          "716a8557505eb9655102d05e291023eb98bf6db5"
+        ],
+        "changed_lines": {
+          "added": 108,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only registry tag query, GitHub Packages version query, OCI manifest fetch, local restore-point stat and exposure calculation",
+          "exit_status": 0,
+          "log_path": "docs/evidence/graph-operational-safety/offsite-currency.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T175746164629-n-offsitecurrency/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e1e-d200-7233-810d-3d955b436f90",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2057728,
+            "cached_input_tokens_cumulative": 2057728,
+            "input_tokens": 2185208,
+            "input_tokens_cumulative": 2185208,
+            "output_tokens": 12741,
+            "output_tokens_cumulative": 12741,
+            "reasoning_output_tokens": 5719,
+            "reasoning_output_tokens_cumulative": 5719
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T175729841338-n-archivestamp",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73c",
+        "node": "n-archivestamp",
+        "node_definition": {
+          "done_when": "A new test asserts that the default output name of graph export and the default dump name of backup_graph_dump each carry the short git revision plus a UTC timestamp in one shared format; that test fails against the pre-change code and passes after; tests/cli plus tests/core/test_neo4j_ops.py report 0 failures with ruff clean on the staged paths",
+          "estimated_hours": null,
+          "goal": "Give every graph archive filename both the code revision and a UTC timestamp",
+          "id": "n-archivestamp",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T175729841338-n-archivestamp/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73c",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/cli/graph/data.py",
+            "imas_codex/graph/neo4j_ops.py",
+            "tests/core/test_neo4j_ops.py",
+            "tests/cli/test_graph_archive_naming.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-archivestamp",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T17:57:35Z",
+        "completed_at": "2026-09-01T18:04:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 407,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 407,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "da9b8ced285e10eaabcfe8d3818012781bc47724",
+        "commits": [
+          "7c2aa040f04ba84876a10219f321764b49452f1a"
+        ],
+        "changed_lines": {
+          "added": 109,
+          "removed": 4,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider tests/cli/test_graph_archive_naming.py -q; pytest -p no:cacheprovider tests/cli tests/core/test_neo4j_ops.py; ruff check --no-cache",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T175729841338-n-archivestamp/logs/pytest-cli-core.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T175729841338-n-archivestamp/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e1e-8f3e-7c93-9ba8-3c1d5916edba",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 229888,
+            "cached_input_tokens_cumulative": 229888,
+            "input_tokens": 347145,
+            "input_tokens_cumulative": 347145,
+            "output_tokens": 1285,
+            "output_tokens_cumulative": 1285,
+            "reasoning_output_tokens": 158,
+            "reasoning_output_tokens_cumulative": 158
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T180252108158-n-inertregression",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73d",
+        "node": "n-inertregression",
+        "node_definition": {
+          "done_when": "tests/cli/test_graph_destructive_backup.py passes the required target argument to graph_load so the command runs instead of exiting at Click parsing; the test is shown FAILING against the file as currently committed and passing after the change, with both runs' output recorded; tests/cli plus tests/core/test_graph_cli_package.py report 0 failures with ruff clean on the staged path",
+          "estimated_hours": null,
+          "goal": "Restore the backup regression to reaching the dump-failure path it stopped exercising",
+          "id": "n-inertregression",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180252108158-n-inertregression/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73d",
+          "spec_level": "exact",
+          "time_budget": "15m",
+          "write_paths": [
+            "tests/cli/test_graph_destructive_backup.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-realbackup",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:03:00Z",
+        "completed_at": "2026-09-01T18:05:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 166,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 166,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "d66d121f5273986ef061582cd9a01086e8f1d678",
+        "commits": [
+          "cfdf8c11d1ca8d9d1c67b608ef886762ea68ff4c"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider tests/cli/test_graph_destructive_backup.py; pytest -p no:cacheprovider tests/cli tests/core/test_graph_cli_package.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180252108158-n-inertregression/full-suite.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180252108158-n-inertregression/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dfb-25b3-7e62-8f8c-5b67a0733f0c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3028480,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3089789,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 4228,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 525
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1170
+    "_version": 1175
   }
 }
