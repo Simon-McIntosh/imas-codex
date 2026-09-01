@@ -32,11 +32,13 @@ class TestSnHelpNoLegacyVerbs:
         runner = CliRunner()
         result = runner.invoke(sn, ["--help"])
         assert result.exit_code == 0
-        # Check there's no "resolve-links" or "link" as a top-level subcommand
-        lines = result.output.splitlines()
-        command_lines = [ln.strip() for ln in lines if ln.strip().startswith("resolve")]
-        # Should be empty — resolve-links is no longer a verb
-        assert not command_lines, f"Found resolve-links as a command: {command_lines}"
+        command_lines = result.output.partition("Commands:")[2].splitlines()
+        listed_commands = {
+            match.group(1)
+            for line in command_lines
+            if (match := re.match(r"^  ([a-z0-9][a-z0-9-]*)\s{2,}", line))
+        }
+        assert "resolve-links" not in listed_commands
 
     def test_no_seed_command(self):
         runner = CliRunner()

@@ -360,7 +360,9 @@ class TestRoundTripByteStability:
                 for k, v in canon.items()
                 if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
             }
+            roles = clean.pop("roles", [])
             ordered = reorder_entry_dict(clean)
+            ordered["roles"] = roles
             re_emitted.append(ordered)
 
         re_emitted_yaml = yaml.safe_dump(
