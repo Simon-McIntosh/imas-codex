@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="15">
-<meta name="plan-commits" content="37296b5b,9d071bdf">
+<meta name="plan-version" content="17">
+<meta name="plan-commits" content="37296b5b,9d071bdf,289ed276">
 <meta name="plan-artifacts" content="crew/reports/suite-triage.md,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
   <main class="plan-doc">
@@ -446,6 +446,12 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2029-wave1-landing" data-who="reckon-ship" data-when="2026-09-01T20:29:00Z">
     <div class="r-comment-body">Wave 1 landed. n-ci-main-conclusive-expr commit 37296b5b: cancel-in-progress is now ${{ github.event_name == 'pull_request' }} with the group key unchanged (yaml load exit 0); the first attempt 76862deb wrote the expression bare and was ledgered work-rejected. n-suite-triage-29 commit 9d071bdf: all 29 remaining failures classified from a fresh run with the test extra provisioned, 162 passed / 1 failed / 6 skipped in 64.87 s; 28 environmental (missing torch), 1 wrong-premise (test_missing_credential_explicit_graph_selection_exits_not_run lets ambient graph state pick the branch), 0 defects to fix here. Provisioning the extra installed torch 2.10.0+cpu into the shared root .venv. Remaining nodes: one loud conftest test-extra check, the graph-marker premise repair, and the closing full-suite figure. Reuse map: ~/.config/reckon/crew/reports/s10-reuse-map.md.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T203013257602-n-test-extra-preflight" data-who="impl-testextra" data-when="2026-09-01T20:38:23Z">
+    <div class="r-comment-body"><p>one conftest preflight exits once with 'uv sync --extra test' when torch is absent; eight-file run 164 passed / 1 failed (pre-existing foreign-owned graph-marker premise) / 6 skipped in 120.1 s</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T2039-preflight-landing" data-who="reckon-ship" data-when="2026-09-01T20:39:00Z">
+    <div class="r-comment-body">n-test-extra-preflight landed at commit 289ed276: one pytest_collection_modifyitems preflight exits once with USAGE_ERROR and the message 'uv sync --extra test' when torch is absent and a torch-dependent suite is selected; two subprocess regressions pin the blocked and provisioned paths. Eight-file gate 164 passed / 1 failed / 6 skipped in 120.1 s; the single failure is the pre-existing graph-marker premise owned by n-graph-marker-premise, so the gate passed by delta. Merged at 1bd97d26.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T202010483788-n-suite-triage-29" data-who="test-suitetriage" data-when="2026-09-01T20:27:01Z">
     <div class="r-comment-body"><p>29 of 29 classified: 28 environmental (missing test extra), 1 wrong-premise (graph-marker credential test); fresh run 162 passed / 1 failed / 6 skipped in 64.87 s with torch 2.10.0+cpu provisioned</p></div>

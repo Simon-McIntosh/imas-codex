@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:34:04",
+  "updated": "2026-09-01T22:38:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1990,9 +1990,11 @@
         "id": "impl-testextra",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05eaa-7144-71e3-bce3-715d7bd45a8a",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eaa-7144-71e3-bce3-715d7bd45a8a"
+        },
         "created": "2026-09-01"
       },
       {
@@ -46706,9 +46708,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T203013257602-n-test-extra-preflight",
+        "plan": "hidden-suite-failures",
+        "section": "\u00a74",
+        "node": "n-test-extra-preflight",
+        "node_definition": {
+          "done_when": "tests/test_extra_preflight.py proves in a subprocess with torch import blocked that pytest exits non-zero with exactly one message containing 'uv sync --extra test' and zero ModuleNotFoundError tracebacks, and proves the preflight is silent when torch imports; the seven census files plus the new test run green with the extra present, with the pytest command, exit status and log path recorded",
+          "estimated_hours": null,
+          "goal": "Add one conftest-level preflight that stops collection of the test-extra-dependent suites with a single loud message naming 'uv sync --extra test' when torch is absent, following the existing pytest.exit pattern in tests/conftest.py instead of scattering importorskip across the eighteen torch-dependent tests",
+          "id": "n-test-extra-preflight",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203013257602-n-test-extra-preflight/manifest.md",
+          "plan": "hidden-suite-failures",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/conftest.py",
+            "tests/test_extra_preflight.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-testextra",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:30:22Z",
+        "completed_at": "2026-09-01T20:38:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 481,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 481,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "3f0c687db086e0aae128bc7392d1ff6a023008b2",
+        "commits": [
+          "289ed276b80285d3d4df51ed5e71308e9f9f4388"
+        ],
+        "changed_lines": {
+          "added": 100,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider <seven census files> tests/test_extra_preflight.py",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203013257602-n-test-extra-preflight/logs/pytest-census-and-preflight.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203013257602-n-test-extra-preflight/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eaa-7144-71e3-bce3-715d7bd45a8a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 225792,
+            "cached_input_tokens_cumulative": 225792,
+            "input_tokens": 340757,
+            "input_tokens_cumulative": 340757,
+            "output_tokens": 921,
+            "output_tokens_cumulative": 921,
+            "reasoning_output_tokens": 91,
+            "reasoning_output_tokens_cumulative": 91
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest exits",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1221
+    "_version": 1223
   }
 }
