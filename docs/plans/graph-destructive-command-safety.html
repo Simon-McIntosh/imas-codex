@@ -4,22 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="graph-destructive-command-safety">
-  <meta name="plan-title"     content="Graph Operational Safety">
-  <meta name="plan-summary"   content="Make graph recovery real, destructive commands name their target, and the service run where its config says">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="graph-destructive-command-safety">
+  <meta name="plan-title" content="Graph Operational Safety">
+  <meta name="plan-summary" content="Make graph recovery real, destructive commands name their target, and the service run where its config says">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S10">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S10">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Graph Operational Safety | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="68e79fb2">
+<meta name="plan-artifacts" content="docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -122,41 +127,27 @@
       clears the live one, and per &#167;2 there is nothing to restore.
     </p>
 
-    <h2 id="s3a">&#167;3a &mdash; The service ignores its configured partition, and that took the graph down</h2>
-    <p>
-      Measured 2026-09-01 during a backup. The facility config declares where the graph
-      belongs:
-    </p>
-    <pre>compute_locations:
-  titan:
-    scheduler: slurm
-    partition: titan
-    service_job_name: codex-neo4j</pre>
-    <p>
-      and <code>[tool.imas-codex.graph].location</code> is already <code>"titan"</code>.
-      The launcher does not read either. In <code>imas_codex/cli/services.py</code> the
-      GPU branch takes its partition from the resolved target, while the other branch
-      routes every CPU-only service to <code>_general_partition_name()</code> &mdash;
-      commented, deliberately, as <em>&ldquo;CPU-only services (e.g. Neo4j) use a general
-      partition&rdquo;</em>. So <code>partition: titan</code> is dead config and the graph
-      has been running on the shared batch partition instead.
-    </p>
-    <p>
-      <strong>The consequence is an availability failure, not an inefficiency.</strong> A
-      backup necessarily stops the service, and the restart then competes for a general
-      partition: job <code>1260741</code> sat <code>PENDING</code> on reason
-      <code>Priority</code> behind 38 queued jobs with 3 of 140 nodes idle, while port
-      7687 refused connections. An always-on service cannot depend on batch scheduling
-      for its own restart.
-    </p>
-    <p>
-      The declared target has ample room and needs no data migration, because the store
-      lives on GPFS reachable from every node: <code>98dci4-gpu-0002</code> had 18 of 20
-      CPUs and 231 of 256 GB free against the job's request of 4 CPUs and 32 GB. The
-      trade to accept knowingly is correlated failure &mdash; the embedding server already
-      lives there, so one drained node would take both services rather than one. That is
-      worth stating in the plan rather than discovering later.
-    </p>
+    <section id="s3a" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-09-01</span>
+    <h2>&#167;3a &mdash; The service ignores its configured partition, and that took the graph down</h2></header>
+  <p class="landed-summary">
+    Fifteen lines in <code>_submit_service_job()</code>: CPU graph partition resolution
+    moved from <code>_general_partition_name()</code> (live value <code>sun</code>) to the
+    partition the graph's own compute location declares, and an invalid non-compute target
+    now fails loudly instead of falling back. Ended a live outage &mdash; job
+    <code>1260741</code> had sat <code>PENDING</code> on reason <code>Priority</code> with
+    port 7687 refused; its replacement <code>1260760</code> reached <code>RUNNING</code> on
+    <code>98dci4-gpu-0002</code> and answered <strong>1,612,957 nodes</strong> over bolt.
+    Data verified against pre-stop values: StandardName 4,670, accepted 2,318, accepted
+    carrying an embedding 2,318, accepted <strong>missing</strong> an embedding
+    <strong>0</strong>, LLMCost 35,065 rows at USD 1715.78 &mdash; all identical, so the
+    morning's embedding repair survived the dump, shutdown and migration. Suites 31 passed,
+    0 failed (commit <code>68e79fb2</code>).
+    Carried trade: the graph now shares its node with the embedding server, so one drained
+    node takes both where they previously failed independently.
+    Full record: <a href="/imas-codex/evidence/graph-operational-safety/partition-fix">partition-fix</a>.
+  </p>
+</section>
 
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
     <ul>
@@ -204,34 +195,42 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="destructive-target-posture" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How should a destructive graph command establish its target?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="require-explicit-name">Require an explicit target name and refuse if the resolved symlink disagrees</button>
-          <button class="r-opt" data-value="confirm-resolved-target">Keep inheriting the symlink but print the resolved path and require interactive confirmation</button>
-          <button class="r-opt" data-value="protect-live-names">Keep inheriting, and hard-refuse a fixed list of protected names such as codex</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="backup-failure-posture" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">When a backup cannot be produced, what should the caller experience?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="fail-closed">Raise and abort the operation that requested protection</button>
-          <button class="r-opt" data-value="warn-and-proceed">Warn and let the operation proceed unprotected</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="destructive-target-posture" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should a destructive graph command establish its target?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="require-explicit-name">Require an explicit target name and refuse if the resolved symlink disagrees</button>
+      <button class="r-opt" data-value="confirm-resolved-target">Keep inheriting the symlink but print the resolved path and require interactive confirmation</button>
+      <button class="r-opt" data-value="protect-live-names">Keep inheriting, and hard-refuse a fixed list of protected names such as codex</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="backup-failure-posture" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">When a backup cannot be produced, what should the caller experience?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fail-closed">Raise and abort the operation that requested protection</button>
+      <button class="r-opt" data-value="warn-and-proceed">Warn and let the operation proceed unprotected</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-gdcs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship graph-destructive-command-safety" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Make graph recovery real, then make destructive commands name their target</h4>
-        <div class="r-fu-body"><p>Two decisions are open and both change the shape of the work, so lock them before dispatching: what establishes a destructive command's target, and whether a failed backup aborts the operation that asked for protection. The measured starting state is in &#167;2 and &#167;3 and does not need re-deriving. Order matters: recovery before restriction, because the currency check is what makes every later change verifiable.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship graph-destructive-command-safety</pre>
-      </article>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-gdcs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship graph-destructive-command-safety" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make graph recovery real, then make destructive commands name their target</h4>
+    <div class="r-fu-body"><p>Two decisions are open and both change the shape of the work, so lock them before dispatching: what establishes a destructive command's target, and whether a failed backup aborts the operation that asked for protection. The measured starting state is in §2 and §3 and does not need re-deriving. Order matters: recovery before restriction, because the currency check is what makes every later change verifiable.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship graph-destructive-command-safety</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="§3a" data-id="c-run-r-20260901T132019046878-n-graphpartition" data-who="impl-graphpartition" data-when="2026-09-01T13:39:16Z">
+    <div class="r-comment-body"><p>Graph service now submits to its declared partition: generated sbatch carries titan, job 1260760 RUNNING on 98dci4-gpu-0002, bolt answered 1612957 nodes, 31 passed 0 failed; the sun job 1260741 that had queued on Priority is cancelled</p></div>
+</div>
+<div class="r-comment" data-section="§3a" data-id="c-20260901T1340-graphpartition" data-who="reckon-ship" data-when="2026-09-01T13:40:00+00:00">
+    <div class="r-comment-body">n-graphpartition landed — commit 68e79fb2; gate graph-runs-where-configured passed; measure the generated sbatch script now carries '#SBATCH --partition=titan' where it previously resolved to the general partition, replacement job 1260760 reached RUNNING on 98dci4-gpu-0002, a read-only bolt query answered 1612957 nodes, and the service and profile suites report 31 passed and 0 failed with ruff clean; artifact docs/evidence/graph-operational-safety/partition-fix.md. THE FIX IS FIFTEEN LINES IN _submit_service_job() AND IT ENDED A LIVE OUTAGE: CPU graph partition resolution moved from _general_partition_name(), whose live value was sun, to the partition the graph's own compute location declares. The worker also made it refuse an invalid non-compute target rather than silently falling back, which is the right shape - a misconfigured location should fail loudly rather than quietly land on a shared partition. VERIFIED BY MEASUREMENT AGAINST PRE-STOP VALUES, because a service that restarts is not the same claim as data that survived: total nodes 1612957, StandardName 4670, accepted 2318, accepted carrying an embedding 2318, accepted MISSING an embedding 0, LLMCost 35065 rows at USD 1715.78 - every figure identical to what was measured before the backup stopped the service, so this morning's embedding repair survived the dump, the shutdown and the migration. The prior job 1260741, which had sat PENDING on reason Priority with port 7687 refused, is cancelled. Two properties of the new placement are worth carrying: the graph now starts in seconds on idle capacity instead of queueing behind 38 jobs, and it shares 98dci4-gpu-0002 with the embedding server, so one drained node now takes both services where previously they failed independently.</div>
+</div>
+</section>
+</main>
 </body>
 </html>
