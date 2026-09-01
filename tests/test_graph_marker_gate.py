@@ -6,13 +6,17 @@ from unittest.mock import Mock
 import conftest
 import pytest
 
-from imas_codex.graph.profiles import DEFAULT_PASSWORD
-
 pytest_plugins = ("pytester",)
 
 
-def _install_project_conftest(pytester: pytest.Pytester) -> None:
+def _install_project_conftest(
+    pytester: pytest.Pytester, *, credential_configured: bool | None = None
+) -> None:
     source = Path(conftest.__file__).read_text(encoding="utf-8")
+    if credential_configured is not None:
+        source += (
+            f"\n_graph_credential_is_configured = lambda: {credential_configured!r}\n"
+        )
     pytester.makeconftest(source)
 
 
@@ -34,10 +38,9 @@ def _write_mixed_test_file(pytester: pytest.Pytester) -> None:
 def test_missing_credential_explicit_graph_selection_exits_not_run(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _install_project_conftest(pytester)
+    _install_project_conftest(pytester, credential_configured=False)
     _write_mixed_test_file(pytester)
     monkeypatch.delenv("IMAS_CODEX_TEST_NEO4J_URI", raising=False)
-    monkeypatch.setenv("NEO4J_PASSWORD", DEFAULT_PASSWORD)
 
     result = pytester.runpytest_subprocess("-m", "graph", "-q")
 
@@ -50,10 +53,9 @@ def test_missing_credential_explicit_graph_selection_exits_not_run(
 def test_default_credentialless_selection_stays_green(
     pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _install_project_conftest(pytester)
+    _install_project_conftest(pytester, credential_configured=False)
     _write_mixed_test_file(pytester)
     monkeypatch.delenv("IMAS_CODEX_TEST_NEO4J_URI", raising=False)
-    monkeypatch.setenv("NEO4J_PASSWORD", DEFAULT_PASSWORD)
 
     result = pytester.runpytest_subprocess("-m", "not slow and not graph", "-q")
 
