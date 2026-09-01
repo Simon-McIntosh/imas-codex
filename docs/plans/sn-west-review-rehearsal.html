@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="154">
+<meta name="plan-version" content="156">
 <meta name="plan-impl" content="0.99">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23,b5ed3fae">
 </head>
 <body>
   <main class="plan-doc">
@@ -2636,6 +2636,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260902T0119-freeze-pass" data-who="reckon-ship" data-when="2026-09-02T01:19:00Z">
     <div class="r-comment-body">Stage 5 freeze-check PASSED on the third run (report 38889c23, merged e0b2e2f1). One unscoped sn run --flush --cost-limit 5 (SNRun 220c6abf, exact spend 5.0999 against 5.00, 1.02x; 0 ParameterMissing; 27 reviewed, 3 enriched, 3 regenerated; 51 non-frozen names touched) left all 376 approved and contested rows byte-identical across 19 projected fields, frozen digest fe4d32b4 unchanged before and after, with the drafted-docs breakdown_initial_time as positive control. The three freeze runs together spent about 10.54 USD. Stage 6 undo next, then 6b re-fold with the repaired approve, resolve and guard code.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T232007247429-n-west-stage6-undo" data-who="impl-weststage3" data-when="2026-09-01T23:29:43Z">
+    <div class="r-comment-body"><p>sn approve --undo demoted 374 approved and 1 contested, cleared PR provenance, reverted the catalog (inverse commit 408eb922) and removed the graph-merged receipt while keeping the cut-time RC tag, but left breakdown_initial_time approved because it had been approved by the pre-fix resolve with null PR provenance and undo selects by provenance only; census after: approved 1, contested 0, accepted 2335 (expected 0 / 0 / 2336)</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260902T0131-undo" data-who="reckon-ship" data-when="2026-09-02T01:31:00Z">
+    <div class="r-comment-body">Stage 6 undo ran live (report b5ed3fae, merged c787bbd2): sn approve --undo demoted 374 approved and 1 contested, cleared PR provenance on all of them, reverted the catalog by inverse commit 408eb922 on the fork, removed the graph-merged: receipt and kept the cut-time RC tag; accepted human edits stayed as history. Negative result: breakdown_initial_time stayed approved, because the pre-fix resolve had approved it with null PR provenance and undo selects approved names by catalog_pr_number only. Census after: approved 1, contested 0, accepted 2335 versus expected 0 / 0 / 2336. Two operational notes: undo first exited 2 in the detached worktree because ISNC discovery failed and needed IMAS_CODEX_SN_ISNC set; and the provenance fix at 65a43ae3 prevents the recurrence for future approvals. Fix node: undo falls back to frozen-batch membership for approved names lacking provenance; then undo repeats to clear the last row, then 6b re-fold.</div>
 </div>
 </section>
 </main>
