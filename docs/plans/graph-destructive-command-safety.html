@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="graph-destructive-command-safety">
   <meta name="plan-title" content="Graph Operational Safety">
   <meta name="plan-summary" content="Make graph recovery real, destructive commands name their target, and the service run where its config says">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="34">
-<meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac,716a8557,7c2aa040,cfdf8c11,c3eaf56d,a8780e61,fcf0027e,76596e72,b2c1a298,7d86f251,815b848f">
+<meta name="plan-version" content="35">
+<meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac,716a8557,7c2aa040,cfdf8c11,c3eaf56d,a8780e61,fcf0027e,76596e72,b2c1a298,7d86f251,815b848f,0949c2c2,1d4fb8be">
 <meta name="plan-artifacts" content="docs/evidence/archive/graph-destructive-command-safety-landed.html,docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/graph-operational-safety/offsite-currency.md,docs/evidence/graph-operational-safety/offsite-inventory.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py,imas_codex/graph/neo4j_ops.py,imas_codex/graph/remote.py,imas_codex/cli/graph/data.py,imas_codex/cli/graph/registry.py,imas_codex/cli/graph/server.py,imas_codex/cli/graph/__init__.py,imas_codex/cli/release.py,docs/architecture/graph.md,docs/architecture/graph-profiles.md,tests/cli/test_graph_archive_naming.py,tests/cli/test_graph_manifest_scope.py,tests/cli/test_graph_destructive_backup.py,tests/cli/test_graph_destructive_target.py,tests/core/test_backup_currency.py">
-<meta name="plan-impl" content="0.93">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -160,219 +160,70 @@
   </p>
 </section>
 
-    <h2 id="s3c">&#167;3c &mdash; Measured state before the remaining work</h2>
-<p>
-  Re-measured against the tree on 2026-09-01 after the first three nodes landed, so the
-  remaining nodes are cut from what is there now rather than from what &#167;2 and &#167;3
-  found this morning. Three of the findings change the shape of a deliverable.
-</p>
-<p>
-  <strong>The archive rename already happened, so what remains is the code contract, and
-  the two producers fail it in opposite directions.</strong>
-  <code>codex-current-20260901T125005Z.tar.gz</code> was renamed in place to
-  <code>imas-codex-graph-dev-6fc745c-20260901T125109Z.tar.gz</code> with SHA-256
-  <code>e13a9054&hellip;</code> and size 2,458,442,456 unchanged across the rename
-  (<a href="/imas-codex/evidence/catalog-review-surface/graph-backup-receipt">receipt</a>).
-  That corrected one artifact by hand and left both producers unchanged:
-</p>
-<ul>
-  <li><code>graph_export</code> (<code>imas_codex/cli/graph/data.py:326</code>) writes
-    <code>{pkg_name}-{version_label}.tar.gz</code> &mdash; it carries the revision and
-    <strong>omits the timestamp</strong>, so two dumps at one revision collide.</li>
-  <li><code>backup_graph_dump</code> (<code>imas_codex/graph/neo4j_ops.py:442</code>) writes
-    <code>{profile.name}-{timestamp}.dump</code> &mdash; it carries the timestamp and
-    <strong>omits the revision</strong>, so a dump cannot state which code it restores into.</li>
-</ul>
-<p>
-  Each producer already holds the half the other omits, so the contract is a convergence of
-  two existing conventions rather than a new one.
-</p>
-<p>
-  <strong>The manifest counts must be read before the service stops.</strong> The manifest
-  built at <code>data.py:456</code> carries <code>version</code>, <code>git_commit</code>,
-  <code>git_tag</code>, <code>timestamp</code> and <code>format</code>. On the dump path
-  Neo4j is already stopped by the time <code>_build_archive</code> runs, so a count issued
-  there has nothing to query; the counts have to be captured from the live graph before the
-  stop and carried in. The CSV and cached-dump paths do not stop the service and are the
-  easier half &mdash; a solution that only works there is not the deliverable.
-</p>
-<p>
-  <strong>The currency check must report an age, not a verdict.</strong> Measured at
-  18:10 on 2026-09-01: the newest restorable archive is
-  <strong>2026-09-01 14:52:53</strong> and the newest live database file
-  (<code>data/transactions/neo4j/checkpoint.0</code>) is <strong>18:10:20</strong>,
-  <strong>11,847&nbsp;s later</strong>, for no reason other than that the service is running
-  and checkpointing. A running store is <em>always</em> newer than its last backup, so a
-  boolean &ldquo;is the backup current&rdquo; reads false forever and teaches nothing. The
-  answer an operator can act on is the measured gap plus what it is a gap against.
-  <code>graph status</code> (<code>imas_codex/cli/graph/server.py:317</code>) already prints
-  a graph-manifest block and is where that line is read.
-</p>
-<p>
-  <strong>Two smaller bindings.</strong> The offsite figure must come from the registry, not
-  from the local record that is the thing under suspicion &mdash; the local manifest claims a
-  last push of <code>5.3.0rc6.dev91-g2479801d7.d20260706-r1</code>, and confirming it is the
-  task. And the documentation defect has an exact address:
-  <code>docs/architecture/graph-profiles.md</code> presents <code>name</code> /
-  <code>IMAS_CODEX_GRAPH</code> as selecting <em>&ldquo;what data&rdquo;</em> (lines 8, 21
-  and 191), which is the sentence &#167;3 measured as false.
-</p>
+<section id="s3c" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-09-01</span>
+    <h2>&#167;3c &mdash; Measured state before the remaining work</h2></header>
+  <p class="landed-summary">
+    Re-measurement that reshaped three deliverables: the archive rename had already happened by
+    hand so only the CODE contract remained, and the two producers failed it in opposite
+    directions &mdash; the exporter carrying the revision without a timestamp, the dump helper
+    the reverse. Manifest counts had to be read before the service stop, and the currency check
+    had to report an age rather than a verdict, since a running store is always newer than its
+    last backup (measured 11,847&nbsp;s). Both landed: commits <code>c3eaf56d</code> and
+    <code>7c2aa040</code>.
+    Full record: <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#backup-currency">backup currency</a>
+    and <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#archive-stamp">archive stamp</a>.
+  </p>
+</section>
 
-    <h2 id="s3d">&#167;3d &mdash; What the reconnaissance found, and the one defect it found in landed work</h2>
-<p>
-  A read-only prior-art pass over the tree returned 5/5 capability areas inventoried, 0/5
-  already implemented, 5/5 with reusable primitives in reach, and 0/5 carrying a regression
-  for the behaviour still owed. Four of its findings bind the remaining nodes; the first is
-  a defect in work this plan already landed.
-</p>
-<p>
-  <strong>The backup regression stopped regressing the moment the target check landed.</strong>
-  <code>tests/cli/test_graph_destructive_backup.py:43</code> invokes
-  <code>graph_load</code> as <code>[str(archive), "--force"]</code> &mdash; without the
-  <code>TARGET</code> argument that <code>n-targetname</code> then made mandatory. Click now
-  exits at argument parsing, so the command under test never reaches the dump-failure path
-  the test exists to pin, and <code>dump.assert_called_once_with()</code> cannot hold.
-  <strong>This is the third instance today of one failure mode &mdash; a change whose
-  references were not scoped &mdash; and the first to escape.</strong> The other two were
-  caught by a worker&rsquo;s own fence, because the reference and the change sat in one
-  node&rsquo;s scope. This one crossed a node boundary: each node was green in isolation and
-  the interaction broke the earlier one, which is precisely the arrangement no single fence
-  can see. Both nodes are on <code>origin/main</code>, so it is fixed here rather than
-  recorded as a lesson.
-</p>
-<p>
-  <strong>Archive identity has four producers, not two.</strong> &#167;3c named the local
-  pair; reconnaissance found the same grammar owed by
-  <code>graph/remote.py</code>&rsquo;s <code>build_remote_export_script</code>,
-  <code>build_remote_push_script</code> and <code>build_remote_release_push_script</code>,
-  each forming PID-based outer names (<code>imas-codex-graph-export-$$.tar.gz</code>) and a
-  generic inner directory while <em>already holding</em> the version tag and commit it
-  discards, plus <code>cli/graph/registry.py::graph_push</code>, whose local temporary
-  archive carries no timestamp. So the contract is one shared helper composing package
-  identity, revision and UTC stamp, whose resolved names are passed <em>into</em> the remote
-  builders. Embedding a copy of the grammar in each generated shell script would preserve
-  exactly the split authority that produced the defect, and fixing only the local CLI would
-  leave every operational archive inconsistent with it.
-</p>
-<p>
-  <strong>Manifest counts must describe the artifact, not the source graph.</strong>
-  <code>GraphClient.get_stats</code> gives totals directly, but facility and DD-only exports
-  filter through <code>graph/temp_neo4j.py</code>&rsquo;s <code>create_facility_dump</code>
-  and <code>create_dd_only_dump</code>, and only the post-filter graph can state what the
-  shipped archive contains &mdash; a live count on a filtered export is a wrong number that
-  looks right. One trap beneath that: <code>get_label_counts</code> keys on
-  <code>labels(n)[0]</code>, so a multi-labelled node is counted once under its primary
-  label; if the manifest means every label, it must count with <code>UNWIND labels(n)</code>.
-</p>
-<p>
-  <strong>Two bindings for the remaining pair.</strong> For the offsite figure, the seam is
-  <code>ghcr.py::get_package_version_id</code> with <code>github_api_paginated</code>, which
-  already reads the authoritative GitHub Packages version record and then discards
-  everything but the id &mdash; <code>resolve_latest_tag</code> orders by tag grammar and
-  revision rather than registry time and <strong>must not</strong> be used as a currency
-  oracle. For the documentation, five surfaces carry the false claim:
-  <code>docs/architecture/graph-profiles.md</code>,
-  <code>docs/architecture/graph.md</code>, the root <code>AGENTS.md</code> graph-access
-  paragraph, the <code>README.md</code> graph section, and the help banner in
-  <code>cli/graph/__init__.py</code>. Two of them are now actively unsafe rather than merely
-  stale: <code>graph.md</code> and the help banner both show <code>load</code> and
-  <code>clear</code> invocations <em>without</em> the target argument the command now
-  requires, so a reader following either gets a usage error at best.
-</p>
+<section id="s3d" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-09-01</span>
+    <h2>&#167;3d &mdash; What the reconnaissance found, and the one defect it found in landed work</h2></header>
+  <p class="landed-summary">
+    A prior-art pass returned 5/5 areas inventoried, 0/5 already implemented, and found that
+    archive identity had <strong>four</strong> producers rather than two &mdash; all now under one
+    grammar (<code>815b848f</code>, <code>tests/cli</code> 174 passed). It also found a defect in
+    already-landed work: the backup regression had stopped reaching the dump-failure path once
+    <code>load</code> required a target, fixed at <code>cfdf8c11</code> (1 passed/1 failed &rarr;
+    2 passed). Manifest scope counts landed at <code>fcf0027e</code>, measured post-filter so a
+    filtered export describes itself.
+    Full record: <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#reference-scoping">the four-instance pattern</a>,
+    <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#manifest-scope">manifest scope</a>,
+    <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#naming-parity">naming parity</a>.
+  </p>
+</section>
 
-    <h2 id="s3e">&#167;3e &mdash; The documentation defect is larger than the selector claim</h2>
-<p>
-  &#167;3 found one false sentence. Enumerating the documented graph surface against
-  <code>imas-codex graph --help</code> found that the false sentence is the <em>smallest</em>
-  of three defects, and that two of them would stop an operator before the selector claim
-  ever mattered. Measured against the real command list &mdash; <code>clear</code>,
-  <code>export</code>, <code>facility</code>, <code>fetch</code>, <code>init</code>,
-  <code>list</code>, <code>load</code>, <code>profiles</code>, <code>prune</code>,
-  <code>pull</code>, <code>push</code>, <code>secure</code>, <code>shell</code>,
-  <code>start</code>, <code>status</code>, <code>stop</code>, <code>switch</code>,
-  <code>tags</code>:
-</p>
-<p>
-  <strong>Documented commands that do not exist.</strong>
-  <code>graph backup</code> and <code>graph restore</code> are documented in both
-  <code>docs/architecture/graph.md</code> (lines 125&ndash;128) and <code>README.md</code>
-  (lines 717&ndash;724) and are not commands. <code>README.md</code> also documents a
-  <code>graph db</code> subgroup (lines 664&ndash;668) that does not exist &mdash; the real
-  forms are <code>graph start</code>, <code>graph status</code>, <code>graph shell</code>
-  &mdash; and <code>graph tunnel</code> (lines 702&ndash;711), which lives at
-  <code>imas-codex tunnel</code>, not under <code>graph</code>. Both files document
-  <code>graph prune --backups --older-than 30d</code>; <code>prune</code> exists but takes
-  <code>--registry</code>, <code>-F/--facility</code>, <code>--keep</code>,
-  <code>--dev-only</code>, <code>--dry-run</code> and <code>--force</code>, so
-  <strong>neither flag is real</strong> and the command it belongs to prunes registry tags
-  rather than local backups.
-</p>
-<p>
-  <strong>Documented invocations that now fail.</strong> <code>graph.md</code> line 114 shows
-  <code>graph load archive.tar.gz</code> and line 129 shows <code>graph clear</code>;
-  <code>README.md</code> line 727 shows <code>graph clear</code>. All three omit the target
-  the command now requires, so a reader following them gets a usage error. The command help
-  is already correct &mdash; <code>graph clear TARGET</code> reads &ldquo;TARGET must name the
-  graph selected by the active symlink&rdquo; &mdash; which gives the prose its wording.
-</p>
-<p>
-  <strong>And one false claim outside the documentation set &#167;3 named.</strong> The root
-  <code>AGENTS.md</code> graph-access paragraph states that <em>all</em> CLI
-  <code>graph</code> commands take <code>--graph/-g</code>. They do not:
-  <code>graph status</code> takes only <code>--registry</code>, and <code>graph clear</code>
-  takes only <code>--force</code>. That matters more than an ordinary stale line, because it
-  tells an agent a destructive command can be aimed with a flag that does not exist &mdash;
-  the same absence-as-permission shape as the selector claim, one level further out.
-</p>
-<p>
-  <strong>The correction has a positive form, and the command for it already exists.</strong>
-  <code>graph switch NAME</code> stops Neo4j, repoints the <code>neo4j/</code> symlink and
-  restarts &mdash; so it, not an environment variable, is how data identity changes. The
-  accurate account is one sentence per object: the active symlink selects the data,
-  <code>IMAS_CODEX_GRAPH_LOCATION</code> selects where the server runs and on which ports,
-  <code>graph switch NAME</code> changes data identity, and
-  <code>load ARCHIVE TARGET</code> / <code>clear TARGET</code> name what they destroy.
-</p>
+<section id="s3e" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-09-01</span>
+    <h2>&#167;3e &mdash; The documentation defect is larger than the selector claim</h2></header>
+  <p class="landed-summary">
+    Enumerating the documented graph surface against live <code>--help</code> found the false
+    selector sentence was the smallest of three defects: three documented commands
+    (<code>graph backup</code>, <code>graph restore</code>, a <code>graph db</code> subgroup) do
+    not exist, two <code>prune</code> flags are not real, three <code>load</code>/<code>clear</code>
+    examples omit the now-required target, and the agent instructions claimed a universal
+    <code>--graph/-g</code> selector plus a <code>resolve_graph()</code> accessor &mdash; neither
+    of which exists. All corrected across five surfaces, verified by a live audit of
+    <strong>100 checks / 0 failures</strong> carrying its own positive control
+    (<code>b2c1a298</code>, <code>7d86f251</code>).
+    Full record: <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#documentation">documentation</a>.
+  </p>
+</section>
 
-    <h2 id="s3f">&#167;3f &mdash; The verification found the default test command collects nothing</h2>
-<p>
-  The integrated verification passed on every tier this plan touches &mdash;
-  <code>tests/core</code> 899 passed / 2 skipped, <code>tests/cli</code> 174 passed / 0 failed,
-  ruff clean across 15 paths &mdash; and then reported one thing it was asked to attribute
-  rather than hide.
-</p>
-<p>
-  <strong><code>uv run pytest</code>, the repository's documented default test command, exits 2
-  having run zero tests.</strong> The figures are 0 passed, 0 failed, <strong>1 collection
-  error</strong>, 2 skipped, 764 deselected. A collection error aborts the run, so the roughly
-  three thousand tests the default suite is documented to execute have not executed.
-</p>
-<p>
-  The cause is one import. <code>tests/docs/test_documentation_layout.py:4</code> reads
-  <code>from reckon.resources import TYPE_ROOTS</code>. Both halves check out and that is what
-  makes the diagnosis exact: <code>TYPE_ROOTS</code> <em>does</em> exist, at
-  <code>reckon/resources.py:26</code>, and the test is right to derive the typed roots from
-  reckon rather than hardcode a copy that would drift. What is missing is the
-  <strong>declaration</strong> &mdash; <code>reckon</code> appears nowhere in
-  <code>pyproject.toml</code>, so it is absent from the project environment and the import
-  raises.
-</p>
-<p>
-  Attribution, checked rather than assumed: the test arrived in commit <code>651d2367</code> on
-  <strong>2026-08-25</strong>, no commit in this plan's landing set touches it, and neither the
-  file nor <code>pyproject.toml</code> has recent activity or uncommitted work from a
-  concurrent agent. So it is pre-existing, it is unclaimed, and <strong>it has been silently
-  true for a week</strong> &mdash; every default suite run in that window reported a
-  non-zero exit having verified nothing.
-</p>
-<p>
-  <strong>Declaring <code>reckon</code> as a dependency is the wrong repair</strong>, which is
-  why this is worth a sentence rather than a one-line patch. Reckon is a local checkout rather
-  than a published package, so a declaration would either pin a machine-specific path or fail
-  everywhere it is absent &mdash; and it would make an operational repository depend on its
-  planning tool to run its own tests. The check is worth keeping where reckon <em>is</em>
-  available, so the import becomes conditional and the file skips when it is not.
-</p>
+<section id="s3f" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-09-01</span>
+    <h2>&#167;3f &mdash; The verification found the default test command collects nothing</h2></header>
+  <p class="landed-summary">
+    <code>uv run pytest</code> had exited 2 having run zero tests since 2026-08-25, because
+    <code>tests/docs/test_documentation_layout.py</code> imported an undeclared
+    <code>reckon</code> and a collection error aborts the whole tree. Made conditional at
+    <code>1d4fb8be</code>, preserving <code>TYPE_ROOTS</code> as reckon's authority: before exit
+    2 with 0 collected outcomes, after <strong>12,021 passed / 49 failed / 145 skipped</strong>.
+    None of the 49 is in a file this plan touched. They are owned by
+    <a href="/imas-codex/plans/hidden-suite-failures">hidden-suite-failures</a>, and the twenty
+    SN failures within them were claimed by their author.
+  </p>
+</section>
 
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
     <ul>
@@ -442,10 +293,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-gdcs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship graph-destructive-command-safety" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-gdcs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship graph-destructive-command-safety" data-resolved-at="2026-09-01T19:20:51+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Make graph recovery real, then make destructive commands name their target</h4>
     <div class="r-fu-body"><p>Two decisions are open and both change the shape of the work, so lock them before dispatching: what establishes a destructive command's target, and whether a failed backup aborts the operation that asked for protection. The measured starting state is in §2 and §3 and does not need re-deriving. Order matters: recovery before restriction, because the currency check is what makes every later change verifiable.</p></div>
     <pre class="r-fu-prompt">/reckon-ship graph-destructive-command-safety</pre>
+    <p class="r-fu-outcome">Shipped 2026-09-01. Fifteen nodes landed across every §4 deliverable. Recovery is real: both destructive call sites dump for real and abort when the dump fails, the marker-writer is renamed to say what it does and rejects zero-byte output, and get_backup_currency answers how far behind the newest restore point is rather than a verdict that would read false forever against a running store. Destructive commands name their target and refuse a mismatch before any side effect, with resolve_neo4j untouched so a two-command problem did not acquire a twelve-file blast radius. One archive grammar now covers nine producers; manifests state their post-filter contents; the documented procedure matches the implemented one across five surfaces, verified by a live audit of 100 checks with 0 failures. Offsite exposure is measured at 56.238 days against a full-graph copy that does exist, and the adequacy verdict is no. Integrated verification: tests/core 899 passed, tests/cli 174 passed, ruff clean across 15 paths. Followup: the offsite cadence needs decisions this plan had no authority to make, and is now owned by offsite-recovery-cadence; the 49 failures that restoring test collection exposed are owned by hidden-suite-failures.</p>
+    </article>
+<article class="r-fu" data-id="f-gdcs-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship offsite-recovery-cadence" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The offsite verdict needs a cadence, and that plan owns it</h4>
+    <div class="r-fu-body"><p>Pointer, not work. This plan measured offsite currency and decided adequacy: not adequate, because release cadence is acting as the backup schedule and the only full-graph copy is 56.238 days behind. Establishing a cadence is outward-facing, recurring, and needs three decisions the measurement cannot make, so it lives in <a href="/imas-codex/plans/offsite-recovery-cadence">offsite-recovery-cadence</a> with those decisions seeded open. The 49 exposed test failures are likewise owned by <a href="/imas-codex/plans/hidden-suite-failures">hidden-suite-failures</a>.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship offsite-recovery-cadence</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -534,7 +391,7 @@
     <div class="r-comment-body">n-selectordocs landed — commits <code>b2c1a298</code> and <code>7d86f251</code>; gate documented-surface-matches-live-help passed; measure a live Click audit of <strong>100 checks across all 18 graph commands with 0 failures</strong>, <strong>carrying its own positive control</strong> confirming the removed command names are genuinely absent rather than merely unsearched, plus 15 tests passed and ruff clean. Every claim in §3e is now corrected at source: the three commands that never existed are gone, <code>graph tunnel</code> is back under <code>imas-codex tunnel</code>, the two unreal <code>prune</code> flags are removed, every <code>load</code> and <code>clear</code> example carries its target, and the active symlink is named as the data selector on all five surfaces with <code>graph switch NAME</code> as the way to change it. <code>graph status</code>'s new backup-currency line is documented in all four documents. COORDINATOR VERIFICATION BEFORE MERGE, because a documentation fix that introduces a new false claim is the very defect it was sent to repair: the rewritten <code>AGENTS.md</code> row cites <code>get_graph_profile</code>, <code>get_graph_name</code>, <code>get_graph_location</code> and <code>get_graph_uri</code>, and <strong>all four exist</strong> — checked against a positive control. It also emerged that the row's PRIOR text cited <code>resolve_graph</code>, <strong>which does not exist</strong>, so the correction retired a dangling pointer nobody had noticed alongside the false claim it was aimed at.</div>
 </div>
 <div class="r-comment" data-section="§3f" data-id="c-run-r-20260901T190133843009-n-suitecollection" data-who="impl-suitecollect" data-when="2026-09-01T19:16:56Z">
-    <div class="r-comment-body"><p>Collection restored: before exit 2 with 0 collected outcomes, after exit 1 with 12021 passed / 49 failed / 145 skipped / 1 xfailed; ruff clean. The gate is the restoration, not a green suite - the coordinator&#x27;s original done-when demanded exit 0 on an unmeasured assumption and was corrected mid-flight; the 49 exposed failures are pre-existing and none is in a file this plan touched</p></div>
+    <div class="r-comment-body"><p>Collection restored: before exit 2 with 0 collected outcomes, after exit 1 with 12021 passed / 49 failed / 145 skipped / 1 xfailed; ruff clean. The gate is the restoration, not a green suite - the coordinator's original done-when demanded exit 0 on an unmeasured assumption and was corrected mid-flight; the 49 exposed failures are pre-existing and none is in a file this plan touched</p></div>
 </div>
 </section>
 </main>
