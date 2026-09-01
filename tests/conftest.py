@@ -3,6 +3,8 @@ Test configuration and fixtures for the MCP-based architecture.
 """
 
 import os
+from importlib import import_module
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -30,6 +32,33 @@ from imas_codex.search.document_store import (  # noqa: E402
 )
 from imas_codex.search.engines.base_engine import MockSearchEngine  # noqa: E402
 from imas_codex.tools import Tools  # noqa: E402
+
+_TEST_EXTRA_DEPENDENT_SUITES = frozenset(
+    {
+        Path("tests/embeddings/test_prompt_name.py"),
+        Path("tests/features/test_search.py"),
+        Path("tests/test_imas_search_scoring.py"),
+    }
+)
+
+
+def _test_extra_is_available() -> bool:
+    """Whether the dependency required by the test-extra suites imports."""
+    try:
+        import_module("torch")
+    except ImportError:
+        return False
+    return True
+
+
+def _selection_requires_test_extra(items: list[pytest.Item]) -> bool:
+    """Whether collection includes a suite backed by the test extra."""
+    repository_root = Path(__file__).resolve().parent.parent
+    dependent_paths = {
+        (repository_root / relative_path).resolve()
+        for relative_path in _TEST_EXTRA_DEPENDENT_SUITES
+    }
+    return any(item.path.resolve() in dependent_paths for item in items)
 
 
 def pytest_addoption(parser):
@@ -170,7 +199,14 @@ def _explicit_graph_marker_selection(config: pytest.Config | None) -> bool:
 
 
 def pytest_collection_modifyitems(config, items):  # noqa: ARG001
-    """Auto-skip graph/integration-marked tests when Neo4j is unreachable."""
+    """Fail unavailable prerequisites once before dependent tests execute."""
+    if _selection_requires_test_extra(items) and not _test_extra_is_available():
+        pytest.exit(
+            "Test-extra-dependent suites require torch; install it with "
+            "'uv sync --extra test' before running this selection.",
+            returncode=pytest.ExitCode.USAGE_ERROR,
+        )
+
     graph_items = [
         item
         for item in items
