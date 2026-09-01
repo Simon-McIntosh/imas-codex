@@ -8,16 +8,19 @@
   <meta name="plan-slug" content="strategy">
   <meta name="plan-title" content="Federated Fusion Knowledge Graph Builder Strategy">
   <meta name="plan-summary" content="Strategic architecture for imas-codex as a federated fusion knowledge graph builder, covering the four-zone topology, agile LinkML workflow, and roadmap.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="archived">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
-  <meta name="plan-tier" content="opus">
   <title>Federated Fusion Knowledge Graph Builder Strategy | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
 <body>
   <main class="plan-doc">
+<div class="r-note" style="border-left:3px solid #b06000;padding:0.6rem 0.9rem;margin:0 0 1.25rem 0">
+  <p style="margin:0 0 0.5rem 0"><strong>Archived on 2026-09-01 — overtaken by the implementation that followed it.</strong> Kept as the record of the original architectural intent, which still reads true at the level of vision. Do not act on its specifics.</p>
+  <p style="margin:0">Three concrete parts are now wrong. The two-command surface it specifies, <code>serve imas</code> and <code>serve agents</code>, was replaced by the unified <code>serve</code> with <code>--read-only</code> and <code>--dd-only</code> modes. The ReAct subagent layer it describes was removed. Code search and graph publishing are listed as future work and both shipped. For the current architecture read <code>AGENTS.md</code> and the documents under <code>docs/architecture/</code>; for what is actually open, read the live plans in the advancing sprints.</p>
+</div>
 <h1>Codex: The Federated Fusion Knowledge Graph Builder</h1>
 <figure><svg viewBox="0 0 760 170" role="img" aria-label="Core strategy flow" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">Core strategy flow</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Discovery engine</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">LinkML schema</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Logic synthesis</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Graph artifact</text></svg><figcaption>The strategy links discovery, schema evolution, logic synthesis, and artifact publishing into one graph-as-code pipeline.</figcaption></figure>
 <p><strong>System:</strong> <code>imas-codex</code>
