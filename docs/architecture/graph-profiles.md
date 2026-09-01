@@ -1,16 +1,15 @@
 # Graph Profile Configuration
 
-Graph profiles configure **what** data is in a Neo4j instance and **where**
-it runs. These are two orthogonal concerns:
+Graph operation has two independent selectors. They must not be confused:
 
-| Concept | Config key | Env override | Example |
-|---------|-----------|--------------|---------|
-| **Name** | `name` | `IMAS_CODEX_GRAPH` | `"codex"` (all facilities + IMAS DD) |
-| **Location** | `location` | `IMAS_CODEX_GRAPH_LOCATION` | `"iter"` (ITER login node) |
+| Concept | Authority | How to change it | Example |
+|---------|-----------|------------------|---------|
+| **Data identity** | Active `neo4j/` symlink | `imas-codex graph switch NAME` | `codex` (all facilities + IMAS DD) |
+| **Server location** | `location` config | `IMAS_CODEX_GRAPH_LOCATION` | `titan` (SLURM compute location) |
 
-The default graph is **`codex`** — a single graph containing all facilities
-and the IMAS data dictionary. It runs at the **`iter`** location (the ITER
-HPC cluster).
+The graph name comes from the symlink target, not from an environment
+variable. `IMAS_CODEX_GRAPH_LOCATION` selects where Neo4j runs and the port
+slot it uses; it never selects or repoints the data directory.
 
 ## Configuration
 
@@ -18,8 +17,7 @@ All graph settings live in `pyproject.toml`:
 
 ```toml
 [tool.imas-codex.graph]
-name = "codex"          # What data (override: IMAS_CODEX_GRAPH=tcv)
-location = "iter"       # Where it runs (override: IMAS_CODEX_GRAPH_LOCATION=local)
+location = "titan"      # Where it runs (override: IMAS_CODEX_GRAPH_LOCATION=local)
 username = "neo4j"
 password = "imas-codex"
 
@@ -30,14 +28,20 @@ locations = ["iter", "tcv", "jt-60sa", "jet", "west", "mast-u", "asdex-u", "east
 
 ## Key Concepts
 
-### Name (what data)
+### Data identity (what data)
 
-The graph **name** identifies what data lives in the Neo4j instance:
+Each graph data directory lives at
+`~/.local/share/imas-codex/.neo4j/<name>/`. The active
+`~/.local/share/imas-codex/neo4j` symlink points to exactly one of them:
 
 - `"codex"` — the main graph with all facilities + IMAS data dictionary
-- `"tcv"` — a single-facility graph (when name matches a location, ports
-  come from that location's slot — see below)
+- `"tcv"` — a single-facility graph
 - `"sandbox"` — any arbitrary name for experimentation
+
+Use `imas-codex graph list` to inspect the available directories and
+`imas-codex graph switch NAME` to stop Neo4j when needed, repoint the symlink,
+and restart it. `load ARCHIVE TARGET` and `clear TARGET` require `TARGET` to
+match this active name and refuse before side effects when it does not.
 
 ### Location (where it runs)
 
@@ -54,17 +58,12 @@ to an SSH alias and a port slot:
 Port formula: `bolt = 7687 + index`, `http = 7474 + index` (index from the
 `locations` list).
 
-### How Name and Location Interact
+### How data identity and location interact
 
-When resolving a graph profile:
-
-1. **Name matches a location** (e.g. `name = "tcv"`) → ports come from that
-   location's slot. Useful for per-facility graphs.
-2. **Name does not match any location** (e.g. `name = "codex"`) → ports come
-   from the configured `location` key (default: `"iter"`).
-
-This means **`codex`** at location `"iter"` uses the same ports as an
-explicit `"iter"` graph — they share the Neo4j instance.
+The two selectors meet only when `resolve_neo4j()` assembles a connection:
+the active symlink supplies `name` and `data_dir`, while the configured
+location supplies `host`, `uri`, `bolt_port`, and `http_port`. Changing a data
+name does not change ports. Changing a location does not change data identity.
 
 ### SSH hosts
 
@@ -81,13 +80,12 @@ the SSH alias differs from the location name:
 ## URI Resolution
 
 ```
-Name → Location → is_local_host(location) → URI
-                       ↓ (remote)
-                 auto-tunnel → bolt://localhost:{port+10000}
+Location → is_local_host(location) → URI
+                    ↓ (remote)
+              auto-tunnel → bolt://localhost:{port+10000}
 ```
 
-1. Graph name `"codex"` doesn't match a location → uses configured
-   location `"iter"` → ports 7687/7474, SSH to `iter`
+1. A facility or compute location resolves to its facility's port slot.
 2. `is_local_host("iter")` checks facility private YAML:
    - On ITER login node: True → `bolt://localhost:7687`
    - Elsewhere: False → auto-tunnel → `bolt://localhost:17687`
@@ -113,24 +111,24 @@ imas-codex tunnel stop iter          # Stop tunnel
 
 ## Configuration Scenarios
 
-### 1. Default: Codex Graph on ITER
+### 1. Configured service location
 
 ```toml
 [tool.imas-codex.graph]
-name = "codex"       # All facilities + IMAS DD
-location = "iter"    # Runs on ITER login node
+location = "titan"   # Runs as a SLURM service on the configured compute location
 ```
 
-**From ITER login node:** Direct access at `bolt://localhost:7687`
-**From WSL:** Auto-tunnels to `bolt://localhost:17687`
+Compute locations inherit their parent facility's port slot. On the facility,
+the client discovers the service allocation and connects directly; from
+elsewhere, it establishes a tunnel.
 
-### 2. Per-Facility Graph
+### 2. Select a per-facility graph
 
-When `name` matches a location, it uses that location's port slot:
+Switching changes the symlink, not the location or ports:
 
 ```bash
-# Run a TCV-only graph (port 7688)
-IMAS_CODEX_GRAPH=tcv imas-codex graph start
+imas-codex graph switch tcv
+imas-codex graph status
 ```
 
 ### 3. Local Development
@@ -146,25 +144,10 @@ Or via env var:
 export IMAS_CODEX_GRAPH_LOCATION=local
 ```
 
-### 4. Explicit Profile Override
+### 4. Multiple locations
 
-For non-standard setups, define an explicit profile:
-
-```toml
-[tool.imas-codex.graph.profiles.staging]
-location = "staging-server"   # Where Neo4j runs
-bolt-port = 7700              # Custom ports
-http-port = 7701
-data-dir = "/custom/path/neo4j-staging"
-```
-
-```bash
-IMAS_CODEX_GRAPH=staging imas-codex graph status
-```
-
-### 5. Multiple Tunnels
-
-Access multiple facility graphs simultaneously from WSL:
+Use the location override to connect to a different deployment. This changes
+the host and port slot only:
 
 ```bash
 # Each location gets its own tunnel port:
@@ -172,23 +155,23 @@ Access multiple facility graphs simultaneously from WSL:
 #   tcv:    17688/17475
 #   jt-60sa: 17689/17476
 
-IMAS_CODEX_GRAPH=codex  imas-codex graph status  # iter ports
-IMAS_CODEX_GRAPH=tcv    imas-codex graph status  # tcv ports
+IMAS_CODEX_GRAPH_LOCATION=iter imas-codex graph status  # iter ports
+IMAS_CODEX_GRAPH_LOCATION=tcv  imas-codex graph status  # tcv ports
 ```
 
 ## Data Directory Convention
 
-| Graph name | Directory |
-|-----------|-----------|
-| `codex` (default) | `~/.local/share/imas-codex/.neo4j/codex/` |
-| `tcv` | `~/.local/share/imas-codex/.neo4j/tcv/` |
-| `sandbox` | `~/.local/share/imas-codex/.neo4j/sandbox/` |
+| Object | Directory |
+|--------|-----------|
+| `codex` graph | `~/.local/share/imas-codex/.neo4j/codex/` |
+| `tcv` graph | `~/.local/share/imas-codex/.neo4j/tcv/` |
+| `sandbox` graph | `~/.local/share/imas-codex/.neo4j/sandbox/` |
+| Active selector | `~/.local/share/imas-codex/neo4j` symlink |
 
 ## Quick Reference
 
 | Env Var | Purpose |
 |---------|---------|
-| `IMAS_CODEX_GRAPH` | Select graph name |
 | `IMAS_CODEX_GRAPH_LOCATION` | Override where Neo4j runs |
 | `IMAS_CODEX_TUNNEL_BOLT_ITER` | Override tunnel port |
 | `NEO4J_URI` | Override URI completely |
@@ -196,7 +179,9 @@ IMAS_CODEX_GRAPH=tcv    imas-codex graph status  # tcv ports
 | CLI Command | Purpose |
 |-------------|---------|
 | `graph profiles` | List all profiles and status |
-| `graph status` | Check active graph |
+| `graph status` | Show active identity, service state, and backup currency |
+| `graph list` | List graph data directories and the active one |
+| `graph switch NAME` | Repoint the active data symlink |
 | `graph start` | Start active graph |
 | `graph stop` | Stop active graph |
 | `graph shell` | Interactive Cypher shell |
@@ -207,3 +192,7 @@ IMAS_CODEX_GRAPH=tcv    imas-codex graph status  # tcv ports
 | `tunnel status` | Show active tunnels |
 | `graph push` | Push graph to GHCR |
 | `graph pull` | Fetch + load from GHCR |
+
+`IMAS_CODEX_GRAPH` is not a data selector and is not read by
+`resolve_neo4j()`. Use `graph switch NAME` whenever the active data identity
+must change.

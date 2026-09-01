@@ -11,18 +11,28 @@ The imas-codex knowledge graph is a Neo4j-based store that unifies:
 
 All schema definitions live in **LinkML** (`schemas/*.yaml`) as the single source of truth.
 
-## Graph Profiles
+## Graph Data Identity and Server Location
 
-Named graph profiles allow switching between Neo4j instances at runtime.
-Each profile maps to a specific host, port, and data directory.
+The active `~/.local/share/imas-codex/neo4j` symlink selects the graph data
+directory. Each graph lives under
+`~/.local/share/imas-codex/.neo4j/<name>/`, and `imas-codex graph switch NAME`
+stops Neo4j when necessary, repoints the symlink, and restarts it. This is the
+only supported procedure for changing graph data identity.
+
+Server location is independent of data identity. The configured
+`[tool.imas-codex.graph].location`, overridden by
+`IMAS_CODEX_GRAPH_LOCATION`, selects the host, scheduler placement, and Bolt
+and HTTP ports. It does not select a data directory. `IMAS_CODEX_GRAPH` is not
+consumed by graph profile resolution and must not be used to aim a graph
+command.
 
 ### Port Convention
 
-| Facility | Bolt | HTTP | Data Dir |
-|----------|------|------|----------|
-| iter | 7687 | 7474 | `neo4j/` |
-| tcv | 7688 | 7475 | `neo4j-tcv/` |
-| jt-60sa | 7689 | 7476 | `neo4j-jt-60sa/` |
+| Location | Bolt | HTTP |
+|----------|------|------|
+| iter | 7687 | 7474 |
+| tcv | 7688 | 7475 |
+| jt-60sa | 7689 | 7476 |
 
 ### Location-Aware Resolution
 
@@ -32,14 +42,14 @@ The `host` field on each profile records where Neo4j physically runs:
 - `host=None` — Neo4j runs locally
 - At connection time, `is_local_host(host)` determines direct vs tunnel access
 
-**From ITER** (host matches local machine):
+**From the configured facility** (location is directly reachable):
 ```
-resolve_graph("iter") → bolt://localhost:7687  (direct)
+resolve_neo4j() → direct local or SLURM service URI
 ```
 
-**From WSL** (host is remote):
+**From a remote workstation**:
 ```
-resolve_graph("iter") → bolt://localhost:7687  (via SSH tunnel)
+resolve_neo4j() → localhost tunnel URI
 ```
 
 **Dual-instance** (local + tunneled, conflicting ports):
@@ -49,28 +59,24 @@ IMAS_CODEX_TUNNEL_BOLT_ITER=17687
 # Then: ssh -f -N -L 17687:localhost:7687 iter
 ```
 
-### Profile Resolution Priority
+### Connection Resolution Priority
 
 1. `NEO4J_URI` / `NEO4J_USERNAME` / `NEO4J_PASSWORD` env vars (escape hatch)
-2. Explicit `[tool.imas-codex.graph.profiles.<name>]` in pyproject.toml
-3. Convention-based port mapping for known facility names
-4. `IMAS_CODEX_GRAPH` env var selects the active profile
+2. `IMAS_CODEX_GRAPH_LOCATION` for the server location
+3. `[tool.imas-codex.graph].location` in `pyproject.toml`
+4. Convention-based port mapping for the resolved location
+
+Data identity is resolved separately from the active symlink, before a
+`Neo4jProfile` is returned.
 
 ### Configuration
 
 ```toml
 # pyproject.toml
 [tool.imas-codex.graph]
-name = "codex"          # Graph identity (override: IMAS_CODEX_GRAPH=tcv)
-location = "iter"       # Where it runs (override: IMAS_CODEX_GRAPH_LOCATION=local)
+location = "titan"      # Where it runs (override: IMAS_CODEX_GRAPH_LOCATION=local)
 username = "neo4j"
 password = "imas-codex"
-
-# Explicit profile override
-[tool.imas-codex.graph.profiles.staging]
-location = "staging-server"
-bolt-port = 7700
-http-port = 7701
 ```
 
 ## Graph Client
@@ -78,19 +84,17 @@ http-port = 7701
 ```python
 from imas_codex.graph import GraphClient
 
-# Use active profile
+# Use the active symlink and configured location
 with GraphClient() as client:
     result = client.query("MATCH (n:Facility) RETURN n.id")
 
-# Use specific profile
-with GraphClient.from_profile("tcv") as client:
+# Resolve the active symlink and location explicitly
+with GraphClient.from_profile() as client:
     print(client.get_stats())
-
-# Runtime switching
-import os
-os.environ["IMAS_CODEX_GRAPH"] = "tcv"
-# Next GraphClient() will connect to tcv
 ```
+
+To change data identity, run `imas-codex graph switch NAME`; do not set an
+environment variable in Python.
 
 ## Graph Management CLI
 
@@ -98,9 +102,9 @@ os.environ["IMAS_CODEX_GRAPH"] = "tcv"
 
 ```bash
 # Start/stop/status (under 'graph')
-imas-codex graph start                 # Start active profile
-imas-codex graph stop                  # Stop active profile
-imas-codex graph status                # Show graph status
+imas-codex graph start                 # Start the configured Neo4j service
+imas-codex graph stop                  # Stop the configured Neo4j service
+imas-codex graph status                # Show service, manifest, backup currency, and SLURM status
 imas-codex graph profiles              # List all profiles
 imas-codex graph shell                 # Interactive Cypher shell
 ```
@@ -111,7 +115,7 @@ imas-codex graph shell                 # Interactive Cypher shell
 # Export and load
 imas-codex graph export                # Full graph export
 imas-codex graph export --facility tcv # Per-facility export (filtered)
-imas-codex graph load archive.tar.gz   # Load archive into Neo4j
+imas-codex graph load archive.tar.gz codex  # TARGET must match the active symlink
 
 # GHCR registry
 imas-codex graph push                  # Push release to GHCR
@@ -122,23 +126,28 @@ imas-codex graph pull --facility tcv   # Pull per-facility graph
 imas-codex graph tags                  # List GHCR versions
 imas-codex graph tags --facility tcv   # List per-facility versions
 
-# Backup and restore
-imas-codex graph backup                # Create neo4j-admin dump backup
-imas-codex graph restore               # Restore from backup (interactive)
-imas-codex graph restore backup.dump   # Restore specific backup
-imas-codex graph clear                 # Clear graph (auto-backup first)
+# Destructive operations name the active target
+imas-codex graph load archive.tar.gz codex  # Load only when codex is active
+imas-codex graph clear codex           # Clear codex (auto-backup first)
 
-# Cleanup
-imas-codex graph prune tag1 tag2       # Delete GHCR tags
-imas-codex graph prune --dev           # Remove all dev tags
-imas-codex graph prune --backups --older-than 30d  # Clean old backups
+# Registry cleanup (dry-run by default in this example)
+imas-codex graph prune --dev-only --keep 5 --dry-run
 ```
+
+Both `load ARCHIVE TARGET` and `clear TARGET` refuse to proceed unless
+`TARGET` is the name selected by the active symlink. To operate on another
+graph, first run `imas-codex graph switch NAME`, then pass the same `NAME` as
+the destructive command's target.
+
+`graph status` also reports backup currency: the newest non-empty restorable
+backup, the newest file under the active graph's `data/` directory, and the
+measured number of seconds the backup is behind live data (`current`, `stale`,
+or unavailable when no backup exists).
 
 ### SSH Tunnels
 
 ```bash
 imas-codex tunnel start iter           # Start tunnel to specific host
-imas-codex tunnel start --all          # Start tunnels for all services
 imas-codex tunnel stop iter
 imas-codex tunnel status               # Show active tunnels
 ```
@@ -160,8 +169,8 @@ This preserves the full IMAS Data Dictionary (shared across facilities) while is
 imas-codex graph export --facility tcv
 imas-codex graph push --facility tcv --dev
 
-# End user pulls only their facility
-export IMAS_CODEX_GRAPH=tcv
+# End user activates a named data directory, then pulls into it
+imas-codex graph switch tcv
 imas-codex graph pull --facility tcv
 imas-codex graph start
 ```

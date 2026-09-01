@@ -368,7 +368,7 @@ imas-codex sn run --physics-domain magnetics --dry-run
 imas-codex sn run --min-score 0.85 --rotation-cap 5 --escalation-model openrouter/anthropic/claude-opus-4.7 -c 20
 ```
 
-**Refine-pipeline flags (Phase 8.1):**
+**Refine-pipeline flags:**
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -637,9 +637,13 @@ docker build --secret id=GHCR_TOKEN,env=GHCR_TOKEN \
 
 IMAS Codex uses a Neo4j knowledge graph to store facility data, IMAS Data Dictionary paths, and semantic embeddings. The CLI provides comprehensive tools for managing graph instances.
 
-### Graph Profiles
+### Graph Data and Server Location
 
-Named profiles allow switching between Neo4j instances at runtime. Each profile maps to a host, bolt port, HTTP port, and data directory.
+The active `~/.local/share/imas-codex/neo4j` symlink selects the graph data
+directory. Change it with `imas-codex graph switch NAME`; setting
+`IMAS_CODEX_GRAPH` does not select graph data. The independent
+`IMAS_CODEX_GRAPH_LOCATION` variable selects where the Neo4j server runs and
+therefore which host and Bolt/HTTP port slot is used.
 
 **Convention ports** (no configuration needed for known facilities):
 
@@ -649,23 +653,26 @@ Named profiles allow switching between Neo4j instances at runtime. Each profile 
 | tcv | 7688 | 7475 |
 | jt-60sa | 7689 | 7476 |
 
-Select the active profile:
+Select graph data:
 ```bash
-export IMAS_CODEX_GRAPH=tcv
+imas-codex graph switch tcv
 ```
 
 ### Quick Start (End User)
 
 ```bash
+# Select the data directory that the pull may replace
+imas-codex graph switch tcv
+
 # Pull a facility graph from GHCR
 imas-codex graph pull --facility tcv
 
 # Start Neo4j
-imas-codex graph db start
+imas-codex graph start
 
 # Verify
-imas-codex graph db status
-imas-codex graph db shell
+imas-codex graph status
+imas-codex graph shell
 # > MATCH (n:FacilityPath) RETURN n.facility_id, count(n)
 ```
 
@@ -699,33 +706,34 @@ IMAS_CODEX_TUNNEL_BOLT_ITER=17687
 
 ```bash
 # Start tunnel to remote graph (reads profile host/port)
-imas-codex graph tunnel start iter
-
-# With custom local port (for dual-instance)
-imas-codex graph tunnel start iter --local-bolt-port 17687
+imas-codex tunnel start iter
 
 # Show active tunnels
-imas-codex graph tunnel status
+imas-codex tunnel status
 
 # Stop tunnel
-imas-codex graph tunnel stop iter
+imas-codex tunnel stop iter
 ```
 
-### Backup and Restore
+### Export, Load, and Clear
 
 ```bash
-# Create a neo4j-admin dump backup
-imas-codex graph backup
+# Create a restorable graph archive
+imas-codex graph export
 
-# Restore from backup (interactive selection)
-imas-codex graph restore
-
-# Restore specific file
-imas-codex graph restore ~/.local/share/imas-codex/backups/iter-20260213.dump
-
-# Clear graph (auto-backup first)
-imas-codex graph clear
+# Destructive commands must name the graph selected by the active symlink
+imas-codex graph load archive.tar.gz codex
+imas-codex graph clear codex
 ```
+
+To load or clear a different graph, first run `imas-codex graph switch NAME`,
+then pass the same `NAME` as `TARGET`. A mismatch is refused before backup,
+transfer, service-state, or graph write side effects.
+
+`imas-codex graph status` reports the newest non-empty backup, the newest live
+database file, and the measured number of seconds the backup is behind live
+data. This backup-currency figure distinguishes `current`, `stale`, and
+`no_backup` state instead of treating the existence of a file as recovery.
 
 ### GHCR Registry
 
@@ -741,8 +749,7 @@ imas-codex graph pull --facility tcv  # Pull per-facility graph
 
 # List and cleanup
 imas-codex graph tags              # List available versions
-imas-codex graph prune --dev      # Remove all dev tags
-imas-codex graph prune --backups --older-than 30d  # Clean old backups
+imas-codex graph prune --dev-only --keep 5 --dry-run  # Preview old dev-tag cleanup
 ```
 
 ### Per-Facility Federation
@@ -1013,7 +1020,7 @@ The search system is the core component that provides fast, flexible search capa
 
 ## Future Work
 
-### MCP Resources Implementation (Phase 2 - Planned)
+### MCP Resources (Planned)
 
 We plan to implement MCP resources to provide efficient access to pre-computed IMAS data:
 
@@ -1031,7 +1038,7 @@ We plan to implement MCP resources to provide efficient access to pre-computed I
 - `ids://physics-domains` - Physics domain mappings and relationships
 - `examples://search-patterns` - Common search patterns and workflows
 
-### MCP Prompts Implementation (Phase 3 - Planned)
+### MCP Prompts (Planned)
 
 Specialized prompts for physics analysis and workflow automation:
 
@@ -1049,7 +1056,7 @@ Specialized prompts for physics analysis and workflow automation:
 - `cross-ids-analysis` - Analyze relationships between multiple IDS
 - `imas-python-code` - Generate Python code for data analysis
 
-### Performance Optimization (Phase 4 - In Progress)
+### Performance Optimization (In Progress)
 
 Continued optimization of search and tool performance:
 
@@ -1067,7 +1074,7 @@ Continued optimization of search and tool performance:
 - **Multi-Format Export**: Optimized export formats (raw, structured, enhanced)
 - **Selective AI Enhancement**: Conditional AI enhancement based on request context
 
-### Testing and Quality Assurance (Phase 5 - Planned)
+### Testing and Quality Assurance (Planned)
 
 Comprehensive testing strategy for all MCP components:
 
