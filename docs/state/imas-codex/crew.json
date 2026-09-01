@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T13:00:38",
+  "updated": "2026-09-01T13:12:36",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -99,9 +99,11 @@
         "id": "doc-westevidence",
         "harness": "codex",
         "role": "documentation",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05c9f-aadc-7813-992a-4691234ca2b3",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05c9f-aadc-7813-992a-4691234ca2b3"
+        },
         "created": "2026-09-01"
       },
       {
@@ -41085,9 +41087,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T105915792416-n-cumulative-evidence-record",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-cumulative-evidence-record",
+        "node_definition": {
+          "done_when": "docs/evidence/archive/sn-west-review-rehearsal-landed.html exists carrying reckon-type=evidence and plan-evidence-for=sn-west-review-rehearsal, linking /_shared/foundation.css and /_shared/dashboard.css, with one stable anchor per material result drawn from the committed run ledger docs/state/imas-codex/crew.json and the crew reports directory, never from invention. Each anchor states the quantitative measure and its commit: catalog format (equilibrium.yml 12137 lines at 133 per entry to 5620 at 62, DD duplication 57.8 percent removed, generic kind/ref/version bindings, blank-line separation, unicode, site DD resolution through imas-python); accounting (structural_parent exclusion, full-set semantic validation replacing per-entry validation that wrongly excluded 350 of 408, approved-baseline preservation, withheld-overlap retention, and total source accounting closing 355 = 296 emitted + 49 excluded + 10 documented non-nameable); identity (the segment-based collision rule, generated roles, the minimum_absolute_safety_factor locus rename, five structure-targeting bindings retired); release surface (fork-only transport, RC tag at cut with --no-pr, stale-branch reclaim, agent-authored PR text, operator-owned commit subject); upstream state (baseline cleared to a06e520, zero open PRs); and the review surface (PR-scoped preview site with 329 scoped entries, scalar-vs-vector fix, REVIEWING.md). Also record the negative results that changed the plan, each with its number: the cohort delta that found four silently dropped identities and six unproposed sources, the singleton-validation defect, and the 41 published parents plus five grammar-token duals. Verify with reckon audit-doc reporting no ERRORs and quote that output. HTML never markdown; a table only where denser than prose; figures only where a relationship is clearer drawn than written, per the representation rule. Conventional commit with body; no push; no graph writes",
+          "estimated_hours": null,
+          "goal": "One cumulative evidence record carries what this campaign proved",
+          "id": "n-cumulative-evidence-record",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T105915792416-n-cumulative-evidence-record/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/archive/sn-west-review-rehearsal-landed.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-westevidence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T10:59:22Z",
+        "completed_at": "2026-09-01T11:12:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 787,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 787,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "6648a98db6528f9db1670e7c672bfc1aaaefaf09",
+        "commits": [
+          "b2398a1aeeb36f98f83d9ed5e8eaa870e7b2f6ec"
+        ],
+        "changed_lines": {
+          "added": 373,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc on the evidence record",
+          "exit_status": 0,
+          "log_path": "docs/evidence/archive/sn-west-review-rehearsal-landed.html",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T105915792416-n-cumulative-evidence-record/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c9f-aadc-7813-992a-4691234ca2b3",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1079
+    "_version": 1081
   }
 }
