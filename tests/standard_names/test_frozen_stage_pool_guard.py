@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import re
 from typing import Any
 from unittest.mock import patch
 
@@ -13,6 +14,73 @@ from imas_codex.standard_names.promote import (
     mark_catalog_name_approved,
     resolve_contested_override,
 )
+
+
+class _ClaimTransaction:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+        self.closed = False
+
+    def run(self, statement: str, **parameters: Any) -> list[dict[str, Any]]:
+        self.calls.append((statement, parameters))
+        referenced = set(re.findall(r"\$([A-Za-z_][A-Za-z0-9_]*)", statement))
+        missing = referenced - parameters.keys()
+        if missing:
+            raise RuntimeError(f"missing Cypher parameters: {sorted(missing)}")
+        if "RETURN c.id AS _cluster_id" in statement:
+            return [{"_cluster_id": None, "_unit": None, "_physics_domain": None}]
+        return [{"id": "accepted_name", "claim_token": parameters["token"]}]
+
+    def commit(self) -> None:
+        self.closed = True
+
+    def close(self) -> None:
+        self.closed = True
+
+
+class _ClaimSession:
+    def __init__(self, transaction: _ClaimTransaction) -> None:
+        self.transaction = transaction
+
+    def __enter__(self) -> _ClaimSession:
+        return self
+
+    def __exit__(self, *_args: Any) -> None:
+        return None
+
+    def begin_transaction(self) -> _ClaimTransaction:
+        return self.transaction
+
+
+class _ClaimGraph:
+    def __init__(self, transaction: _ClaimTransaction) -> None:
+        self.transaction = transaction
+
+    def __enter__(self) -> _ClaimGraph:
+        return self
+
+    def __exit__(self, *_args: Any) -> None:
+        return None
+
+    def session(self) -> _ClaimSession:
+        return _ClaimSession(self.transaction)
+
+
+def test_atomic_claim_binds_every_referenced_parameter() -> None:
+    transaction = _ClaimTransaction()
+    graph = _ClaimGraph(transaction)
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        claimed = graph_ops._claim_sn_atomic(
+            eligibility_where="sn.name_stage = 'accepted'",
+            query_params={},
+            batch_size=1,
+        )
+
+    assert [item["id"] for item in claimed] == ["accepted_name"]
+    assert len(transaction.calls) == 2
+    assert all(
+        "frozen_name_stages" in parameters for _, parameters in transaction.calls
+    )
 
 
 @pytest.mark.parametrize(

@@ -14198,6 +14198,7 @@ def _claim_sn_atomic(
                         """,
                         token=token,
                         drain_scope_id=drain_scope_id,
+                        frozen_name_stages=list(_PIPELINE_FROZEN_NAME_STAGES),
                     )
                 )
 
