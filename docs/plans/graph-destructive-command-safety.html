@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="33">
 <meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac,716a8557,7c2aa040,cfdf8c11,c3eaf56d,a8780e61,fcf0027e,76596e72,b2c1a298,7d86f251,815b848f">
 <meta name="plan-artifacts" content="docs/evidence/archive/graph-destructive-command-safety-landed.html,docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/graph-operational-safety/offsite-currency.md,docs/evidence/graph-operational-safety/offsite-inventory.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py,imas_codex/graph/neo4j_ops.py,imas_codex/graph/remote.py,imas_codex/cli/graph/data.py,imas_codex/cli/graph/registry.py,imas_codex/cli/graph/server.py,imas_codex/cli/graph/__init__.py,imas_codex/cli/release.py,docs/architecture/graph.md,docs/architecture/graph-profiles.md,tests/cli/test_graph_archive_naming.py,tests/cli/test_graph_manifest_scope.py,tests/cli/test_graph_destructive_backup.py,tests/cli/test_graph_destructive_target.py,tests/core/test_backup_currency.py">
 <meta name="plan-impl" content="0.93">
@@ -334,6 +334,46 @@
   <code>load ARCHIVE TARGET</code> / <code>clear TARGET</code> name what they destroy.
 </p>
 
+    <h2 id="s3f">&#167;3f &mdash; The verification found the default test command collects nothing</h2>
+<p>
+  The integrated verification passed on every tier this plan touches &mdash;
+  <code>tests/core</code> 899 passed / 2 skipped, <code>tests/cli</code> 174 passed / 0 failed,
+  ruff clean across 15 paths &mdash; and then reported one thing it was asked to attribute
+  rather than hide.
+</p>
+<p>
+  <strong><code>uv run pytest</code>, the repository's documented default test command, exits 2
+  having run zero tests.</strong> The figures are 0 passed, 0 failed, <strong>1 collection
+  error</strong>, 2 skipped, 764 deselected. A collection error aborts the run, so the roughly
+  three thousand tests the default suite is documented to execute have not executed.
+</p>
+<p>
+  The cause is one import. <code>tests/docs/test_documentation_layout.py:4</code> reads
+  <code>from reckon.resources import TYPE_ROOTS</code>. Both halves check out and that is what
+  makes the diagnosis exact: <code>TYPE_ROOTS</code> <em>does</em> exist, at
+  <code>reckon/resources.py:26</code>, and the test is right to derive the typed roots from
+  reckon rather than hardcode a copy that would drift. What is missing is the
+  <strong>declaration</strong> &mdash; <code>reckon</code> appears nowhere in
+  <code>pyproject.toml</code>, so it is absent from the project environment and the import
+  raises.
+</p>
+<p>
+  Attribution, checked rather than assumed: the test arrived in commit <code>651d2367</code> on
+  <strong>2026-08-25</strong>, no commit in this plan's landing set touches it, and neither the
+  file nor <code>pyproject.toml</code> has recent activity or uncommitted work from a
+  concurrent agent. So it is pre-existing, it is unclaimed, and <strong>it has been silently
+  true for a week</strong> &mdash; every default suite run in that window reported a
+  non-zero exit having verified nothing.
+</p>
+<p>
+  <strong>Declaring <code>reckon</code> as a dependency is the wrong repair</strong>, which is
+  why this is worth a sentence rather than a one-line patch. Reckon is a local checkout rather
+  than a published package, so a declaration would either pin a machine-specific path or fail
+  everywhere it is absent &mdash; and it would make an operational repository depend on its
+  planning tool to run its own tests. The check is worth keeping where reckon <em>is</em>
+  available, so the import becomes conditional and the file skips when it is not.
+</p>
+
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
     <ul>
       <li>A backup routine that produces a restorable artifact or fails loudly, with the
@@ -450,6 +490,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260901T183556965347-n-objectstoreinventory" data-who="inv-objectstore" data-when="2026-09-01T18:47:02Z">
     <div class="r-comment-body"><p>6,055 unreachable loose objects totalling 29.788 MiB; 352 dangling commit roots; 0 stashes; 63 worktrees with 48 distinct heads and 0 prunable; no dangling commit reachable from a stash or unreferenced worktree head; largest sampled objects have exact reachable same-tree equivalents; recommendation is NOT to prune while writers are active</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T185207704152-n-integratedsuite" data-who="test-graphsafety" data-when="2026-09-01T18:59:30Z">
+    <div class="r-comment-body"><p>1073 passing tests with zero failures across tests/core (899 passed, 2 skipped) and tests/cli (174 passed); ruff 15 paths 0 findings; live graph status reports 11847 s stale; default suite exits 2 on a pre-existing collection error attributed to 651d2367, untouched by this plan</p></div>
 </div>
 <div class="r-comment" data-section="§3c" data-id="c-run-r-20260901T175746164629-n-offsitecurrency" data-who="test-offsite" data-when="2026-09-01T18:02:40Z">
     <div class="r-comment-body"><p>Offsite exposure measured at 55.996490494 days: registry package version 5.3.0rc6.dev91-g2479801d7.d20260706-r1 pushed 2026-07-07T12:57:57Z against a newest local restore point of 2026-09-01T12:52:53Z; the local manifest claim agrees byte-for-byte, but the only package the registry returned is TCV-scoped, so the confirmed offsite copy is a facility subset rather than the full graph</p></div>

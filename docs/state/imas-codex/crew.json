@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T20:50:36",
+  "updated": "2026-09-01T21:00:44",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2494,9 +2494,11 @@
         "id": "test-graphsafety",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05e50-8c14-7b30-94cb-d9d42dd551e3",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e50-8c14-7b30-94cb-d9d42dd551e3"
+        },
         "created": "2026-09-01"
       },
       {
@@ -45790,9 +45792,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T185207704152-n-integratedsuite",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a74",
+        "node": "n-integratedsuite",
+        "node_definition": {
+          "done_when": "docs/evidence/graph-operational-safety/integrated-suite.md records the default pytest suite plus the tests/core and tests/cli tiers run against current main with exact pass and fail counts, every failure named with a verdict on whether this plan's changes caused it or it is pre-existing, a ruff check over the source and test files this plan touched, and a live imas-codex graph status showing the backup-currency line; every command appears with its exit code",
+          "estimated_hours": null,
+          "goal": "Verify the integrated result of every node this plan landed",
+          "id": "n-integratedsuite",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185207704152-n-integratedsuite/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "docs/evidence/graph-operational-safety/integrated-suite.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-graphsafety",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:52:11Z",
+        "completed_at": "2026-09-01T18:59:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 439,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 439,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "37be1554e001161ab3ef9c3c81881af5118f0e74",
+        "commits": [
+          "0949c2c2317a7260a5d53c88d3e041e99a4bfb2b"
+        ],
+        "changed_lines": {
+          "added": 82,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest (default); pytest tests/core; pytest tests/cli; ruff check on 15 plan-touched paths; imas-codex graph status",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185207704152-n-integratedsuite/pytest-core.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T185207704152-n-integratedsuite/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e50-8c14-7b30-94cb-d9d42dd551e3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5086208,
+            "cached_input_tokens_cumulative": 5086208,
+            "input_tokens": 5262827,
+            "input_tokens_cumulative": 5262827,
+            "output_tokens": 14718,
+            "output_tokens_cumulative": 14718,
+            "reasoning_output_tokens": 4912,
+            "reasoning_output_tokens_cumulative": 4912
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest suite",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1194
+    "_version": 1196
   }
 }
