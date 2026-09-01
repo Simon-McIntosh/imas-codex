@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T09:47:24",
+  "updated": "2026-09-01T10:06:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1458,6 +1458,15 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-spadetail",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-srcmigrate",
         "harness": "codex",
         "role": "implement",
@@ -2044,6 +2053,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "test-cohortdelta",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "test-dimcalib",
         "harness": "codex",
         "role": "test",
@@ -2092,6 +2110,15 @@
         "role": "test",
         "session_id": "01a02daf-eff1-7e41-9189-2639a85127ec",
         "created": "2026-08-21"
+      },
+      {
+        "id": "test-minq",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "test-parity",
@@ -40153,9 +40180,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T074744716648-n-cohort-delta-reconcile",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-cohort-delta-reconcile",
+        "node_definition": {
+          "done_when": "reports/cohort-delta.md reconciles the earlier 332-entry emitted set against the current 329-entry set in the frozen artifact v0.3.0rc1+west-task-2e, read-only: every identity present in one and absent from the other is listed by name with the reason it entered or left, drawn from live graph state and the two export reports (for example newly accepted from the tail drain, newly excluded as a structural parent under the source-free rule, moved into or out of a withheld ledger class, or folded into another identity); the arithmetic closes exactly, meaning 332 minus departures plus arrivals equals 329 with no unexplained row; every reported zero carries a positive control; and the report states plainly whether any departure represents a name a reviewer would have expected to see, which would be a release concern rather than bookkeeping. No writes outside the report, no graph mutation",
+          "estimated_hours": null,
+          "goal": "The membership change between the two candidate cuts is explained name by name",
+          "id": "n-cohort-delta-reconcile",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T074744716648-n-cohort-delta-reconcile/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/cohort-delta.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-cohortdelta",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:47:53Z",
+        "completed_at": "2026-09-01T08:04:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 997,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 997,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "11afcc1bda34f18a25036c4a67c3a194989420d0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "two-artifact identity diff with live graph state, producer-edge and absent-successor positive controls",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/cohort-delta.md",
+          "log_digest": null
+        },
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T074744716648-n-cohort-delta-reconcile/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05bf0-5b7e-7f72-b17e-154a2b7cc03c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8678912,
+            "cached_input_tokens_cumulative": 8678912,
+            "input_tokens": 8990846,
+            "input_tokens_cumulative": 8990846,
+            "output_tokens": 31656,
+            "output_tokens_cumulative": 31656,
+            "reasoning_output_tokens": 13392,
+            "reasoning_output_tokens_cumulative": 13392
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1056
+    "_version": 1060
   }
 }
