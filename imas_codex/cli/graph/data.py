@@ -22,7 +22,7 @@ from imas_codex.graph.ghcr import (
 )
 from imas_codex.graph.neo4j_ops import (
     Neo4jOperation,
-    backup_existing_data,
+    backup_graph_dump,
     is_neo4j_running,
     neo4j_image,
     run_neo4j_dump as _run_neo4j_dump,
@@ -579,7 +579,7 @@ def graph_load(
         if no_restart:
             op.was_running = False
 
-        backup_existing_data("pre-load", data_dir=profile.data_dir)
+        backup_graph_dump()
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)

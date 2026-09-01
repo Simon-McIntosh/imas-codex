@@ -32,7 +32,8 @@ from imas_codex.graph.ghcr import (
     save_local_graph_manifest,
 )
 from imas_codex.graph.neo4j_ops import (
-    backup_existing_data,
+    Neo4jOperation,
+    backup_graph_dump,
     check_graph_exists,
 )
 
@@ -563,7 +564,7 @@ def graph_fetch(
 @click.option("--registry", envvar="IMAS_DATA_REGISTRY", default=None)
 @click.option("--token", envvar="GHCR_TOKEN")
 @click.option("--force", is_flag=True, help="Overwrite existing graph without checks")
-@click.option("--no-backup", is_flag=True, help="Skip backup marker")
+@click.option("--no-backup", is_flag=True, help="Skip the pre-pull graph dump")
 @click.option(
     "--facility",
     "-F",
@@ -805,7 +806,8 @@ def graph_pull(
     click.echo(f"Pulling: {artifact_ref}")
 
     if not no_backup:
-        backup_existing_data("pre-pull", data_dir=profile.data_dir)
+        with Neo4jOperation("graph pull backup", require_stopped=True):
+            backup_graph_dump()
 
     with GraphProgress("pull") as gp:
         gp.set_total_phases(2)
