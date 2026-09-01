@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="133">
+<meta name="plan-version" content="134">
 <meta name="plan-impl" content="0.94">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2573,6 +2573,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260901T2043-stage3-landing" data-who="reckon-ship" data-when="2026-09-01T20:43:00Z">
     <div class="r-comment-body">Stages 2b and 3 landed. Restore point (commit 13be369b): imas-codex-graph-dev-4b89363-20260901T202303Z.tar.gz, 2,458,729,143 bytes, sha256 a5747316; StandardName 4,675, fully clean 2,269, approved 0, identical before export and after restart. Stage 3 (commit 06527979): two reviewer edits on fork PR 3 through the GitHub Contents API, both authored Simon-McIntosh: breakdown_initial_time description tightened (compliant, 4155056e) and pulse_duration description given a false terminal event, auxiliary heating instead of confined-plasma termination (deliberately non-compliant, 58bfb0f2); 3/3 checks green on the final head; PR 3 merged as 6a5c44d3 at 2026-09-01T20:39:07Z; upstream main unchanged at a06e5205 before and after. Next: sn approve --pr, then freeze-check, then --undo.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T204318462601-n-west-stage4-approve" data-who="impl-weststage3" data-when="2026-09-01T20:50:09Z">
+    <div class="r-comment-body"><p>dry-run against base merge^1 saw 0 changes: under the blank-main additive chain the first parent lacks the batch files, so read_pr_changes cannot see reviewer edits; live approve would have bypassed compliant-versus-contested routing</p></div>
 </div>
 </section>
 </main>
