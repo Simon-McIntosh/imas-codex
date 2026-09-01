@@ -99,7 +99,7 @@ class _RacingEditTransaction:
                 {
                     "old_name": params["old_name"],
                     "new_name": params["new_name"],
-                    "source_ids": [],
+                    "source_ids": ["dd:path/a"],
                     **{
                         f"source_{field}": value
                         for field, value in source_state.items()
@@ -244,16 +244,22 @@ def test_any_rejected_source_rolls_back_everything(
     record.assert_not_called()
 
 
-def test_source_less_rename_still_records_human_edit() -> None:
+def test_source_less_rename_refuses_without_recording_human_edit() -> None:
     admitted = AttachmentPairingGuardResult((), ())
     with _persistence_boundary([], admitted) as boundary:
-        transaction, _guard, retarget, record = boundary
-        _persist()
+        transaction, guard, retarget, record = boundary
+        with pytest.raises(RefinedNamePersistenceRefusal) as refusal:
+            _persist()
 
-    assert retarget.call_args.kwargs["source_ids"] == []
-    record.assert_called_once()
-    assert record.call_args.kwargs["operation"] == "human_edit"
-    transaction.commit.assert_called_once_with()
+    assert (
+        refusal.value.reason
+        is RefinedNamePersistenceRefusalReason.AUTHORITATIVE_SOURCE_COHORT_EMPTY
+    )
+    guard.assert_not_called()
+    retarget.assert_not_called()
+    record.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+    transaction.commit.assert_not_called()
 
 
 def test_predecessor_compare_and_set_loss_has_no_mutation() -> None:
@@ -284,8 +290,8 @@ def test_predecessor_compare_and_set_loss_has_no_mutation() -> None:
 
 
 def test_preflight_fences_settled_edits_and_worker_claims() -> None:
-    admitted = AttachmentPairingGuardResult((), ())
-    with _persistence_boundary([], admitted) as boundary:
+    admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
+    with _persistence_boundary(["dd:path/a"], admitted) as boundary:
         transaction, _guard, _retarget, _record = boundary
         _persist(
             edit_mode=None,
@@ -314,10 +320,12 @@ def test_open_edit_propagation_uses_only_the_atomic_transaction() -> None:
         "edit_include_accepted": True,
     }
     transaction = _transaction(
-        [], source_edit_state=open_edit, effective_edit_state=open_edit
+        ["dd:path/a"],
+        source_edit_state=open_edit,
+        effective_edit_state=open_edit,
     )
     graph = _graph(transaction)
-    admitted = AttachmentPairingGuardResult((), ())
+    admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
     with (
         patch(
             "imas_codex.standard_names.graph_ops.GraphClient",
@@ -330,7 +338,7 @@ def test_open_edit_propagation_uses_only_the_atomic_transaction() -> None:
         patch(
             "imas_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
-            return_value=0,
+            return_value=1,
         ),
         patch(
             "imas_codex.standard_names.provenance_lifecycle."
@@ -361,7 +369,7 @@ def test_open_edit_propagation_uses_only_the_atomic_transaction() -> None:
 def test_edit_state_race_fails_the_finalization_fence_and_rolls_back() -> None:
     transaction = _RacingEditTransaction()
     graph = _graph(transaction)
-    admitted = AttachmentPairingGuardResult((), ())
+    admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
     with (
         patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
         patch(
@@ -429,8 +437,8 @@ def test_event_write_failure_rolls_back_graph_mutation() -> None:
 
 
 def test_regular_refine_records_its_operation_once() -> None:
-    admitted = AttachmentPairingGuardResult((), ())
-    with _persistence_boundary([], admitted) as boundary:
+    admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
+    with _persistence_boundary(["dd:path/a"], admitted) as boundary:
         _transaction_mock, _guard, _retarget, record = boundary
         _persist(
             edit_mode=None,
@@ -445,10 +453,10 @@ def test_regular_refine_records_its_operation_once() -> None:
 
 
 def test_transient_retry_rolls_back_first_event_and_commits_one() -> None:
-    first = _transaction([])
-    second = _transaction([])
+    first = _transaction(["dd:path/a"])
+    second = _transaction(["dd:path/a"])
     graphs = [_graph(first), _graph(second)]
-    admitted = AttachmentPairingGuardResult((), ())
+    admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
     event_calls = 0
 
     def record(*_args, **_kwargs):
@@ -470,7 +478,7 @@ def test_transient_retry_rolls_back_first_event_and_commits_one() -> None:
         patch(
             "imas_codex.standard_names.provenance_lifecycle."
             "retarget_standard_name_sources",
-            return_value=0,
+            return_value=1,
         ),
         patch(
             "imas_codex.standard_names.provenance_lifecycle."
