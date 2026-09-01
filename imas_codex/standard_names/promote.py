@@ -1314,7 +1314,8 @@ def undo_approval(
     The reverse of :func:`run_approval`'s *promotions* — a property-level revert,
     not a checkout:
 
-    * names ``approved`` by this PR (``catalog_pr_number`` matches) drop back
+    * names ``approved`` by this PR (``catalog_pr_number`` matches), plus
+      approved frozen-batch members without stamped PR provenance, drop back
       to ``accepted`` with the catalog provenance fields cleared;
     * ``contested`` names in *batch* (the frozen artifact list) drop back to
       ``accepted`` with the contested fields cleared.
@@ -1335,6 +1336,7 @@ def undo_approval(
             """
             MATCH (sn:StandardName {name_stage: 'approved'})
             WHERE sn.catalog_pr_number = $pr
+               OR (sn.catalog_pr_number IS NULL AND sn.id IN $batch)
             SET sn.name_stage = 'accepted',
                 sn.catalog_pr_number = null,
                 sn.catalog_pr_url = null,
@@ -1344,6 +1346,7 @@ def undo_approval(
             RETURN sn.id AS id ORDER BY id
             """,
             pr=pr_number,
+            batch=batch or [],
         )
         report.demoted = [r["id"] for r in (rows or [])]
         if batch:
