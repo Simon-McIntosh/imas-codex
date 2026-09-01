@@ -40,7 +40,7 @@ def test_load_aborts_before_archive_replacement_when_dump_fails(tmp_path, monkey
     monkeypatch.setattr(data, "backup_graph_dump", dump, raising=False)
     monkeypatch.setattr(data.tarfile, "open", continued)
 
-    result = CliRunner().invoke(data.graph_load, [str(archive), "--force"])
+    result = CliRunner().invoke(data.graph_load, [str(archive), "test", "--force"])
 
     assert result.exit_code != 0
     assert "dump failed" in result.output
