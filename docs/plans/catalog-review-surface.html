@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-commits" content="bcb25e0e,9fa88452">
 <meta name="plan-artifacts" content="docs/evidence/catalog-review-surface/reuse-map.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,imas_codex/schemas/standard_name.yaml,imas_codex/standard_names/promote.py,tests/standard_names/test_promote_reviewer_actor.py">
 <meta name="plan-impl" content="0.57">
@@ -147,10 +147,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-crs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship catalog-review-surface" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-crs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship catalog-review-surface" data-resolved-at="2026-09-01T14:26:24+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Exercise the approval fold-back with accepted and refused edits, and prove the unwind</h4>
     <div class="r-fu-body"><p>The reviewer guidance, metadata guard and approval fold-back are built. What remains is the live exercise: run the fold-back on the fork demonstration pull request with one accepted edit and one edit the pipeline must refuse, show the refusal reaches the reviewer, unwind the exercise with no lasting graph or catalog change, and capture a traceability receipt proving the accepted edit records its author and pull request.</p></div>
     <pre class="r-fu-prompt">/reckon-ship catalog-review-surface</pre>
+    <p class="r-fu-outcome">RESOLVED 2026-09-01 as SUPERSEDED by f-crs-002, which carries the same three deliverables plus the dependency that actually blocks them. Two of its four premises were overtaken on the day. It described the guard as built and awaiting live proof: the guard is now proven live in both directions on fork pull requests 4 and 5, the machine-owned unit edit failing its check and the prose-only edit passing, both branches left unrewritten. And it assumed the fold-back merely needed exercising: the reuse map established that no reviewer login was persisted anywhere, so the who-changed-it deliverable was UNMEASURABLE rather than merely undone, and catalog_reviewer_actor had to be built before the receipt could exist - it now is, taken from the merged pull request author in the same authoritative payload that supplies the number, url and merge commit. What remains genuinely blocked is recorded on f-crs-002: the lead chose an isolated substrate over an in-place undo, standing one up needs graph init and switch, and the substrate audit found direct graph init unsafe on a running service with load and clear acting on whatever the single active symlink resolves to. That is a hard dependency on graph-destructive-command-safety, whose two open decisions are the lead's.</p>
     </article>
 <article class="r-fu" data-id="f-crs-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship catalog-review-surface" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Exercise the fold-back on an isolated substrate once destructive commands name their target</h4>
