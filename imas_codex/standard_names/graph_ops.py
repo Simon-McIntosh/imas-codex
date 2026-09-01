@@ -11607,6 +11607,105 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     }
 
 
+def fetch_manifest_source_release_rows(
+    dd_paths: list[str], gc: Any | None = None
+) -> list[dict[str, Any]]:
+    """Resolve every manifest path to its current terminal name identity.
+
+    Review-cohort minting intentionally selects only live names.  Release
+    accounting needs a wider projection: the exact source membership plus the
+    identity at the end of each source's successor chain, even when that name is
+    exhausted or otherwise unaccepted.  Skipped sources retain their durable
+    refusal so they can be reported as documented non-nameable rows.
+    """
+    paths = list(dict.fromkeys(dd_paths))
+    if not paths:
+        return []
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        source_rows = client.query(
+            """
+            UNWIND $paths AS path
+            OPTIONAL MATCH (source:StandardNameSource {id: 'dd:' + path})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(direct:StandardName)
+            RETURN path AS source_path,
+                   source.status AS source_status,
+                   source.skip_reason AS skip_reason,
+                   source.skip_reason_detail AS skip_reason_detail,
+                   source.produced_sn_id AS produced_sn_id,
+                   collect(DISTINCT direct.id) AS direct_ids
+            ORDER BY source_path
+            """,
+            paths=paths,
+        )
+        seed_ids = sorted(
+            {
+                name_id
+                for row in source_rows or []
+                for name_id in [
+                    row.get("produced_sn_id"),
+                    *(row.get("direct_ids") or []),
+                ]
+                if name_id
+            }
+        )
+        terminal_by_seed: dict[str, dict[str, Any]] = {}
+        if seed_ids:
+            successor_rows = client.query(
+                """
+                MATCH (start:StandardName)
+                WHERE start.id IN $seed_ids
+                OPTIONAL MATCH path=(start)-[:HAS_SUCCESSOR*0..]->(target:StandardName)
+                WHERE NOT (target)-[:HAS_SUCCESSOR]->(:StandardName)
+                RETURN start.id AS start_id, target.id AS target_id,
+                       target.name_stage AS terminal_stage,
+                       length(path) AS depth
+                ORDER BY start_id, depth DESC, target_id
+                """,
+                seed_ids=seed_ids,
+            )
+            for row in successor_rows or []:
+                terminal_by_seed.setdefault(str(row["start_id"]), dict(row))
+
+        resolved: list[dict[str, Any]] = []
+        for row in source_rows or []:
+            direct_ids = sorted(row.get("direct_ids") or [])
+            produced_id = row.get("produced_sn_id")
+            seed_id = produced_id if produced_id in direct_ids else None
+            if seed_id is None and len(direct_ids) == 1:
+                seed_id = direct_ids[0]
+            if seed_id is None and produced_id:
+                seed_id = produced_id
+            if seed_id is None and direct_ids:
+                seed_id = direct_ids[0]
+            terminal = terminal_by_seed.get(str(seed_id)) if seed_id else None
+            skip_reason = str(row.get("skip_reason") or "").strip()
+            skip_detail = str(row.get("skip_reason_detail") or "").strip()
+            resolved.append(
+                {
+                    "source_path": str(row["source_path"]),
+                    "source_status": row.get("source_status"),
+                    "standard_name_id": (
+                        terminal.get("target_id") if terminal else seed_id
+                    ),
+                    "terminal_stage": (
+                        terminal.get("terminal_stage") if terminal else None
+                    ),
+                    "non_nameable_reason": (
+                        ": ".join(part for part in [skip_reason, skip_detail] if part)
+                        if row.get("source_status") == "skipped"
+                        else ""
+                    ),
+                }
+            )
+        return resolved
+    finally:
+        if own:
+            client.close()
+
+
 def reconcile_source_status_liveness(
     gc: Any | None = None,
     *,
