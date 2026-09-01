@@ -206,7 +206,9 @@ def test_export_emits_generic_source_bindings_and_preserves_accounting(
     }.intersection(key for binding in emitted["sources"] for key in binding)
 
     strict_projection = {
-        key: value for key, value in emitted.items() if key != "physics_domain"
+        key: value
+        for key, value in emitted.items()
+        if key not in {"physics_domain", "roles"}
     }
     strict_entry = _entry_model(strict_projection)
     assert strict_entry.name == "emitted_name"
@@ -354,6 +356,111 @@ def test_export_keeps_catalog_semantic_advisories(tmp_path: Path) -> None:
     assert report.all_gates_passed
     assert report.exported_names == ["radial_coordinate_of_line_of_sight"]
     assert report.exclusion_records == []
+
+
+def test_quantity_token_duals_pass_identity_collision_gate(tmp_path: Path) -> None:
+    duals = [
+        "normalized_toroidal_flux_coordinate",
+        "toroidal_flux_coordinate",
+        "poloidal_current_function",
+        "safety_factor",
+    ]
+    population = [
+        _candidate(
+            name,
+            _has_dd_source_binding=True,
+            _has_derived_producer=False,
+            _has_non_derived_producer=True,
+            _is_parent=False,
+        )
+        for name in duals
+    ]
+
+    report = _run_fixture_export(tmp_path, population)
+
+    collision_gate = next(
+        gate for gate in report.gate_results if gate.gate == "identity_token_collision"
+    )
+    assert collision_gate.passed
+    assert collision_gate.issues == []
+    assert report.exported_names == duals
+
+
+def test_non_quantity_token_collision_blocks_export_with_registry_citation(
+    tmp_path: Path,
+) -> None:
+    population = [
+        _candidate(
+            "minimum_safety_factor",
+            _has_dd_source_binding=True,
+            _has_derived_producer=False,
+            _has_non_derived_producer=True,
+            _is_parent=False,
+        )
+    ]
+
+    report = _run_fixture_export(tmp_path, population)
+
+    collision_gate = next(
+        gate for gate in report.gate_results if gate.gate == "identity_token_collision"
+    )
+    assert not collision_gate.passed
+    assert not report.all_gates_passed
+    assert not (tmp_path / "catalog.yml").exists()
+    assert len(collision_gate.issues) == 1
+    issue = collision_gate.issues[0]
+    assert issue["identity"] == "minimum_safety_factor"
+    assert issue["token"] == "minimum_safety_factor"
+    assert issue["segment"] == "locus"
+    assert issue["registry_entry"].startswith("locus_registry.yml:")
+    assert "minimum_safety_factor" in issue["detail"]
+    assert "locus" in issue["detail"]
+    assert "locus_registry.yml:" in issue["detail"]
+
+
+def test_generated_roles_mark_quantity_parent_and_leaf(tmp_path: Path) -> None:
+    population = [
+        _candidate(
+            "electron_temperature",
+            physics_domain="equilibrium",
+            _has_dd_source_binding=True,
+            _has_derived_producer=False,
+            _has_non_derived_producer=True,
+            _is_parent=True,
+        ),
+        _candidate(
+            "ion_temperature",
+            physics_domain="equilibrium",
+            _has_dd_source_binding=True,
+            _has_derived_producer=False,
+            _has_non_derived_producer=True,
+            _is_parent=False,
+        ),
+    ]
+
+    report = _run_fixture_export(
+        tmp_path,
+        population,
+        write_domain_yaml=True,
+    )
+
+    assert report.all_gates_passed
+    emitted = yaml.safe_load(
+        (tmp_path / "standard_names" / "equilibrium.yml").read_text(encoding="utf-8")
+    )
+    roles = {entry["name"]: entry["roles"] for entry in emitted}
+    assert roles == {
+        "electron_temperature": ["quantity", "parent"],
+        "ion_temperature": ["quantity"],
+    }
+    assert report.to_dict()["role_metadata"] == {
+        "entries": 2,
+        "counts": {
+            "grammar_token_dual": 0,
+            "parent": 1,
+            "quantity": 2,
+        },
+    }
 
 
 def test_manifest_sources_reconcile_emitted_excluded_and_non_nameable(

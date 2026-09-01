@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.metadata
+import importlib.resources
 import json
 import logging
 import os
@@ -21,6 +22,7 @@ import re
 import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +38,7 @@ from imas_codex.standard_names.protection import PROTECTED_FIELDS
 from imas_codex.standard_names.provenance_lifecycle import (
     fetch_public_semantic_sources,
 )
+from imas_codex.standard_names.segments import grammar_token_index
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +96,7 @@ GATE_B = "cross_field_consistency"
 GATE_C = "score_thresholds"
 GATE_D = "divergence_detection"
 GATE_EXCLUSION_ACCOUNTING = "exclusion_accounting"
+GATE_IDENTITY_TOKEN_COLLISION = "identity_token_collision"
 
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
@@ -109,7 +113,7 @@ _ISN_UNSUPPORTED_FIELDS = frozenset({"constraints"})
 # must strip them before re-validating — otherwise every entry would spuriously
 # fail on these known, intentional fields.
 _GRAPH_ONLY_RENDERED_FIELDS = frozenset(
-    {"physics_domain", "validity_domain", "sources"}
+    {"physics_domain", "validity_domain", "roles", "sources"}
 )
 
 # These identity-specific holds take precedence over generic lifecycle gates.
@@ -253,6 +257,8 @@ class ExportReport:
     all_gates_passed: bool = True
     exported_names: list[str] = field(default_factory=list)
     validation_failures: int = 0
+    role_entry_count: int = 0
+    role_counts: dict[str, int] = field(default_factory=dict)
     exclusion_records: list[ExclusionRecord] = field(default_factory=list)
     source_disposition_records: list[SourceDispositionRecord] = field(
         default_factory=list
@@ -320,6 +326,10 @@ class ExportReport:
                         key=lambda record: record.source_path,
                     )
                 ],
+            },
+            "role_metadata": {
+                "entries": self.role_entry_count,
+                "counts": dict(sorted(self.role_counts.items())),
             },
             "counts": {
                 "total_candidates": self.total_candidates,
@@ -484,6 +494,9 @@ def _fetch_export_population(
              MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
              WHERE review.review_axis = 'docs'
          }} AS has_docs_review,
+         EXISTS {{
+             MATCH (:StandardName)-[:HAS_PARENT]->(sn)
+         }} AS is_parent,
          {docs_review_eligibility_where()} AS has_winning_docs_review
     OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
     OPTIONAL MATCH (sn)-[:HAS_COCOS]->(c:COCOS)
@@ -494,6 +507,7 @@ def _fetch_export_population(
         _has_dd_source_binding: has_dd_source_binding,
         _has_derived_producer: has_derived_producer,
         _has_non_derived_producer: has_non_derived_producer,
+        _is_parent: is_parent,
         _has_docs_review: has_docs_review,
         _has_winning_docs_review: has_winning_docs_review
     }} AS record
@@ -1092,6 +1106,109 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
     return entry
 
 
+@lru_cache(maxsize=1)
+def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[str]]:
+    """Return live token segments and the token classes that denote quantities."""
+    from imas_standard_names import get_grammar_context
+
+    vocabularies = get_grammar_context()["grammar"]["vocabularies"]
+    physical_bases = set(vocabularies["physical_bases"])
+    geometry_carriers = set(vocabularies["geometry_carriers"])
+    locus_tokens = set(vocabularies["locus_registry"])
+
+    segments = dict(grammar_token_index())
+    for token in locus_tokens:
+        segments[token] = ("locus",)
+
+    quantity_tokens = frozenset(physical_bases | geometry_carriers)
+    return segments, quantity_tokens
+
+
+def _token_registry_entry(token: str) -> str:
+    """Locate a live ISN vocabulary mapping key and return ``file:line``."""
+    from yaml.nodes import MappingNode, Node, SequenceNode
+
+    vocabulary_root = (
+        importlib.resources.files("imas_standard_names.grammar") / "vocabularies"
+    )
+
+    def find_key(node: Node) -> int | None:
+        if isinstance(node, MappingNode):
+            for key_node, value_node in node.value:
+                if getattr(key_node, "value", None) == token:
+                    return key_node.start_mark.line + 1
+                found = find_key(value_node)
+                if found is not None:
+                    return found
+        elif isinstance(node, SequenceNode):
+            for child in node.value:
+                found = find_key(child)
+                if found is not None:
+                    return found
+        return None
+
+    for resource in sorted(vocabulary_root.iterdir(), key=lambda item: item.name):
+        if resource.name.rsplit(".", 1)[-1] not in {"yml", "yaml"}:
+            continue
+        root = yaml.compose(resource.read_text(encoding="utf-8"))
+        if root is None:
+            continue
+        line = find_key(root)
+        if line is not None:
+            return f"{resource.name}:{line}"
+    return "runtime ISN vocabulary:line unavailable"
+
+
+def _identity_token_collision_gate(
+    domain_entries: dict[str, list[dict[str, Any]]],
+) -> GateResult:
+    """Reject published identities equal to non-quantity grammar tokens."""
+    segments_by_token, quantity_tokens = _identity_token_segments()
+    issues: list[dict[str, Any]] = []
+    for entries in domain_entries.values():
+        for entry in entries:
+            identity = entry.get("name")
+            segments = segments_by_token.get(identity, ())
+            if not segments or identity in quantity_tokens:
+                continue
+            registry_entry = _token_registry_entry(identity)
+            for segment in segments:
+                issues.append(
+                    {
+                        "type": "identity_token_collision",
+                        "identity": identity,
+                        "token": identity,
+                        "segment": segment,
+                        "registry_entry": registry_entry,
+                        "detail": (
+                            f"published identity {identity!r} equals grammar token "
+                            f"{identity!r} in non-quantity segment {segment!r} "
+                            f"at {registry_entry}"
+                        ),
+                    }
+                )
+    return GateResult(
+        gate=GATE_IDENTITY_TOKEN_COLLISION,
+        passed=not issues,
+        issues=issues,
+    )
+
+
+def _published_identity_roles(candidate: dict[str, Any]) -> list[str]:
+    """Derive overlapping reviewer-facing roles from topology and vocabulary."""
+    segments_by_token, _ = _identity_token_segments()
+    roles: list[str] = []
+    if candidate.get("_has_dd_source_binding") or candidate.get(
+        "_has_non_derived_producer"
+    ):
+        roles.append("quantity")
+    if candidate.get("_is_parent"):
+        roles.append("parent")
+    if candidate["id"] in segments_by_token:
+        roles.append("grammar_token_dual")
+    return roles
+
+
 # =============================================================================
 # Internal supersession lineage
 # =============================================================================
@@ -1676,7 +1793,9 @@ def _write_domain_yaml(
             for k, v in canon.items()
             if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
         }
+        roles = clean.pop("roles", [])
         ordered = reorder_entry_dict(clean)
+        ordered["roles"] = roles
         # Final-shape validation gate: the dict about to be written must still
         # satisfy the ISN model. A failure here is a defect in the augmentation
         # pipeline (dangling-link pruning, computed-ref derivation,
@@ -2203,6 +2322,7 @@ def run_export(
             # Write physics_domain AFTER ISN validation (graph-only field).
             # ISN CatalogRenderer expects a scalar string, not a list.
             entry_dict["physics_domain"] = primary if primary != "unscoped" else ""
+            entry_dict["roles"] = _published_identity_roles(cand)
 
             # Derive computed fields from graph edges
             entry_name = entry_dict.get("name") or cand["id"]
@@ -2327,6 +2447,24 @@ def run_export(
             pruned_examples.extend(
                 additional_examples[: max(0, 20 - len(pruned_examples))]
             )
+
+        identity_token_gate = _identity_token_collision_gate(domain_entries)
+        role_rows = [entry for entries in domain_entries.values() for entry in entries]
+        report.role_entry_count = len(role_rows)
+        report.role_counts = {
+            role: sum(role in entry.get("roles", []) for entry in role_rows)
+            for role in ("quantity", "parent", "grammar_token_dual")
+        }
+        report.gate_results.append(identity_token_gate)
+        if not identity_token_gate.passed:
+            report.all_gates_passed = False
+            report.gate_failures += 1
+            logger.error(
+                "Export blocked by %d identity/token collision(s)",
+                len(identity_token_gate.issues),
+            )
+            _write_export_report(staging_path, report)
+            return report
 
         report.pruned_links = pruned_count
         if report.pruned_links:
