@@ -1230,6 +1230,22 @@ def _fetch_sources_for_entry(
     return sources or None
 
 
+def _catalog_source_reference(source: dict[str, Any]) -> dict[str, Any]:
+    """Return the minimal durable catalog reference for one source binding.
+
+    A DD path and its pinned version identify the authoritative snapshot, so
+    copied documentation, type, unit, coordinates, URLs, and enhancement text
+    would only duplicate content that imas-python can resolve. Signal bindings
+    have no equivalent DD identity and retain their public semantic projection.
+    """
+    if source.get("dd_path"):
+        return {
+            "dd_path": source["dd_path"],
+            "dd_version": source["dd_version"],
+        }
+    return dict(source)
+
+
 def _fetch_ordering_edges_for_domain(
     gc: Any,
     domain: str,
@@ -2142,7 +2158,9 @@ def run_export(
             if include_sources:
                 sources = _fetch_sources_for_entry(gc, entry_name)
                 if sources:
-                    entry_dict["sources"] = sources
+                    entry_dict["sources"] = [
+                        _catalog_source_reference(source) for source in sources
+                    ]
 
             # Guard against the same SN landing in domain_entries twice —
             # the candidate loop iterates per (cand × physics_domain) and
