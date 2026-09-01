@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:52:09",
+  "updated": "2026-09-01T22:56:40",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1603,6 +1603,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "impl-residualthree",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-residue",
         "harness": "codex",
         "role": "implement",
@@ -2767,9 +2776,11 @@
         "id": "test-s10fullsuite",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05eb4-342d-7322-ab21-f3b08533ce0e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eb4-342d-7322-ab21-f3b08533ce0e"
+        },
         "created": "2026-09-01"
       },
       {
@@ -47443,9 +47454,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T204057382688-n-suite-final-figure",
+        "plan": "hidden-suite-failures",
+        "section": "\u00a74",
+        "node": "n-suite-final-figure",
+        "node_definition": {
+          "done_when": "crew/reports/suite-final-figure.md records the exact command, exit status, passed/failed/skipped/xfailed counts, wall time and log path of one 'uv run --no-sync pytest -p no:cacheprovider' run over the whole tree, lists every failing test id if any, and states the delta against the opening census of 12,021 passed / 49 failed / 145 skipped / 1 xfailed",
+          "estimated_hours": null,
+          "goal": "Record the closing full-suite figure comparable to the opening census by running the bare whole-tree pytest once from this worktree against the shared root environment with the test extra present",
+          "id": "n-suite-final-figure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/manifest.md",
+          "plan": "hidden-suite-failures",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "crew/reports/suite-final-figure.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-s10fullsuite",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:41:02Z",
+        "completed_at": "2026-09-01T20:55:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 864,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 864,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "34531f99b0ebd07ff1e687ca226e1dccecd01b46",
+        "commits": [
+          "a97ce9674f18ef2cfa7fcde67f9349cfc38b5d6f"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/logs/pytest-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eb4-342d-7322-ab21-f3b08533ce0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3629056,
+            "cached_input_tokens_cumulative": 3629056,
+            "input_tokens": 3768001,
+            "input_tokens_cumulative": 3768001,
+            "output_tokens": 12525,
+            "output_tokens_cumulative": 12525,
+            "reasoning_output_tokens": 4245,
+            "reasoning_output_tokens_cumulative": 4245
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 1237
+    "_version": 1240
   }
 }

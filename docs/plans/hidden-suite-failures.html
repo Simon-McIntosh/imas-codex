@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="19">
-<meta name="plan-commits" content="37296b5b,9d071bdf,289ed276,abe01f53">
-<meta name="plan-artifacts" content="crew/reports/suite-triage.md,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="21">
+<meta name="plan-commits" content="37296b5b,9d071bdf,289ed276,abe01f53,a97ce967">
+<meta name="plan-artifacts" content="crew/reports/suite-triage.md,crew/reports/suite-final-figure.md,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/logs/pytest-final.log,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
+<meta name="plan-impl" content="0.83">
 </head>
 <body>
   <main class="plan-doc">
@@ -452,6 +452,12 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2039-preflight-landing" data-who="reckon-ship" data-when="2026-09-01T20:39:00Z">
     <div class="r-comment-body">n-test-extra-preflight landed at commit 289ed276: one pytest_collection_modifyitems preflight exits once with USAGE_ERROR and the message 'uv sync --extra test' when torch is absent and a torch-dependent suite is selected; two subprocess regressions pin the blocked and provisioned paths. Eight-file gate 164 passed / 1 failed / 6 skipped in 120.1 s; the single failure is the pre-existing graph-marker premise owned by n-graph-marker-premise, so the gate passed by delta. Merged at 1bd97d26.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T204057382688-n-suite-final-figure" data-who="test-s10fullsuite" data-when="2026-09-01T20:55:26Z">
+    <div class="r-comment-body"><p>closing whole-tree run at 34531f99: 12,070 passed / 3 failed / 142 skipped / 1 xfailed in 584.93 s; delta vs opening +49 passed / -46 failed; three residual failures are new ids outside the opening 49</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T2056-closing-figure" data-who="reckon-ship" data-when="2026-09-01T20:56:00Z">
+    <div class="r-comment-body">n-suite-final-figure landed at commit a97ce967 (merged ee56cff3): one bare whole-tree run at 34531f99 with the test extra present gave 12,070 passed / 3 failed / 142 skipped / 1 xfailed in 584.93 s, against the opening 12,021 / 49 / 145 / 1, a delta of +49 passed and -46 failed with 12,216 outcomes in both. All 49 opening ids are green. The 3 residual ids are NEW, none in the opening census: test_repository_cypher_literals_have_declared_properties (StandardName.review_resubmit_count in cli/sn.py, StandardNameSource.run_id in cli/sn.py, FacilityPath.claimed_by and claimed_at in discovery/base/executor.py undeclared in LinkML), test_archive_uses_packaged_sha_and_source_date_epoch (sha None), test_pipeline_hash_changes_when_prompt_changes (composite hash unchanged). The last two may be worktree artifacts of the shared-.venv layout; the first is schema drift from a commit at 14:29 today. One more node closes them before the plan ships.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T202010483788-n-suite-triage-29" data-who="test-suitetriage" data-when="2026-09-01T20:27:01Z">
     <div class="r-comment-body"><p>29 of 29 classified: 28 environmental (missing test extra), 1 wrong-premise (graph-marker credential test); fresh run 162 passed / 1 failed / 6 skipped in 64.87 s with torch 2.10.0+cpu provisioned</p></div>
