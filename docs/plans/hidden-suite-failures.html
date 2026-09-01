@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -261,6 +261,44 @@ ERROR tests/docs/test_zzz_tmp_probe_abort.py
       baseline, since a file may carry findings that are not yours to fix in passing); the same
       shape applies here. What a promotion must demonstrate is that it added no failure, not
       that the tree is clean.
+    </p>
+
+    <h2 id="s2f">&#167;2f &mdash; Who owns which half, so neither is built twice nor dropped</h2>
+    <p>
+      The recurrence work split across two repositories once it was clear the gap was
+      consequence rather than detection. Recording the split here because the dangerous outcome
+      is not duplication &mdash; it is a half that each side believes the other holds.
+    </p>
+    <ul>
+      <li><strong>The promotion gate is reckon&rsquo;s</strong>, at
+        <code>promotion-consequence-gate</code> (commit <code>28b789d</code>, reckon S9), so
+        every project benefits rather than this one. It carries the delta constraint as its
+        &#167;2 and, usefully, a deliverable proving the gate would <em>not</em> have blocked
+        the fifteen nodes of the session that found this &mdash; the counter-example promoted
+        to an acceptance test so the constraint cannot be quietly dropped during
+        implementation. Three decisions are open there: the delta baseline, who executes the
+        suite, and whether it defaults on. <strong>This plan must not build a second one.</strong></li>
+      <li><strong>The concurrency policy is THIS repository&rsquo;s and this plan claims
+        it.</strong> The file is <code>.github/workflows/test.yml</code> &mdash; imas-codex
+        config, not reckon&rsquo;s &mdash; so a plan in another repository can note it but
+        cannot fix it. Left merely &ldquo;tracked to be handed on&rdquo;, it is precisely the
+        work that falls between two plans and is never done.</li>
+    </ul>
+    <p>
+      <strong>The two halves touch at exactly one point, and it is a correctness constraint on
+      the gate rather than a coincidence.</strong> A promotion gate that reads a CI conclusion
+      must treat <em>cancelled</em> as <strong>absence of evidence, never as a pass</strong>.
+      With 65 of 120 runs cancelled, the naive reading &mdash; &ldquo;not failed&rdquo; &mdash;
+      would let the majority of pushes through a gate that had measured nothing. That is the
+      same absence-as-permission shape this repository has now named repeatedly, and it would
+      arrive inside the very mechanism built to prevent it.
+    </p>
+    <p>
+      Scope note on the concurrency change: it is a real behavioural change to CI &mdash; more
+      runs reaching a conclusion means more consumed minutes &mdash; and it is a policy
+      decision rather than a defect repair, since <code>cancel-in-progress</code> is the
+      correct setting for pull requests. It is therefore recorded as claimed, not as done, and
+      wants the lead&rsquo;s agreement before it lands.
     </p>
 
     <h2 id="s3">&#167;3 &mdash; What each cluster needs, and from whom</h2>
