@@ -5282,7 +5282,7 @@ def sn_approve(
     help="Justification recorded in the change ledger (contested_resolution).",
 )
 def sn_resolve(name: str, override: bool, reason: str) -> None:
-    """Force a contested name to 'approved', overriding the rubric — on the record.
+    """Apply a contested proposal and approve it over the rubric, on the record.
 
     \b
     A contested name is a human-vs-machine conflict: the reviewer changed the
@@ -5292,7 +5292,9 @@ def sn_resolve(name: str, override: bool, reason: str) -> None:
     from imas_codex.standard_names.promote import resolve_contested_override
 
     if resolve_contested_override(name, reason=reason):
-        console.print(f"[green]✓ {name} → approved[/green] (override: {reason})")
+        console.print(
+            f"[green]✓ {name} proposal applied → approved[/green] (override: {reason})"
+        )
     else:
         console.print(
             f"[red]✗ {name} is not contested[/red] — override-approve only "

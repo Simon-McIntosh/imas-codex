@@ -847,10 +847,11 @@ def list_contested(gc: GraphClient | None = None) -> list[dict[str, Any]]:
 def resolve_contested_override(
     name: str, *, reason: str, gc: GraphClient | None = None
 ) -> bool:
-    """Force a contested name to 'approved' over the rubric, on the record.
+    """Apply and approve a contested steered proposal over the rubric.
 
     Human authority beats the machine rubric, but only deliberately: the
-    justification is stored in ``contested_resolution``.
+    proposal payload is materialized and the justification is stored in
+    ``contested_resolution``.
     """
     owns = gc is None
     if gc is None:
@@ -859,12 +860,36 @@ def resolve_contested_override(
         rows = gc.query(
             """
             MATCH (sn:StandardName {id: $name, name_stage: 'contested'})
-            SET sn.name_stage = 'approved',
+            WITH sn, sn.id AS prior_name,
+                 CASE
+                   WHEN sn.edit_mode = 'docs'
+                        AND trim(coalesce(sn.docs_hint, '')) <> ''
+                   THEN sn.docs_hint
+                   ELSE sn.description
+                 END AS approved_description,
+                 CASE
+                   WHEN sn.edit_mode = 'docs'
+                        AND trim(coalesce(sn.docs_hint, '')) <> ''
+                   THEN sn.docs_hint
+                   ELSE sn.documentation
+                 END AS approved_documentation,
+                 CASE
+                   WHEN sn.edit_mode = 'rename'
+                        AND trim(coalesce(sn.name_hint, '')) <> ''
+                   THEN sn.name_hint
+                   ELSE sn.id
+                 END AS approved_name
+            SET sn.id = approved_name,
+                sn.description = approved_description,
+                sn.documentation = approved_documentation,
+                sn.name_stage = 'approved',
+                sn.edit_status = CASE WHEN sn.edit_mode IN ['docs', 'rename']
+                                      THEN 'applied' ELSE sn.edit_status END,
                 sn.contested_resolution = $reason,
                 sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime())
             CREATE (change:StandardNameChange {
               id: 'sn-change:' + randomUUID(),
-              from_name: sn.id,
+              from_name: prior_name,
               to_name: sn.id,
               operation: $editorial_outcome,
               reason: $reason,
