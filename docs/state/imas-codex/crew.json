@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:28:35",
+  "updated": "2026-09-01T22:34:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2149,9 +2149,11 @@
         "id": "impl-westsnapshot",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05ea1-10f8-75e2-b187-a90d24a1b966",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05ea1-10f8-75e2-b187-a90d24a1b966"
+        },
         "created": "2026-09-01"
       },
       {
@@ -46604,9 +46606,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T202002275297-n-west-stage3-restore-point",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage3-restore-point",
+        "node_definition": {
+          "done_when": "a new export archive exists under the imas-codex exports directory named by graph_archive_stamp, and crew/reports/west-stage3-restore-point.md records its path, size, the StandardName total and fully-clean census counts taken from the live graph at export time, and the exact imas-codex graph load command that restores it",
+          "estimated_hours": null,
+          "goal": "Take a fresh full-graph restore point immediately before the rehearsal stage-3 writes so sn approve and sn approve --undo have a byte-stable pre-state to be judged against",
+          "id": "n-west-stage3-restore-point",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202002275297-n-west-stage3-restore-point/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "crew/reports/west-stage3-restore-point.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-westsnapshot",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:20:08Z",
+        "completed_at": "2026-09-01T20:33:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 802,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 802,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "4b8936366a7a8ed2304c9c23598744f00a8684f0",
+        "commits": [
+          "13be369b819da4cd5a02b07c792a40e0a53373fa"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex graph export; gzip -t <archive>; GraphClient census before and after restart",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/services/codex-neo4j.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202002275297-n-west-stage3-restore-point/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-10f8-75e2-b187-a90d24a1b966",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8169728,
+            "cached_input_tokens_cumulative": 8169728,
+            "input_tokens": 8414180,
+            "input_tokens_cumulative": 8414180,
+            "output_tokens": 14844,
+            "output_tokens_cumulative": 14844,
+            "reasoning_output_tokens": 4821,
+            "reasoning_output_tokens_cumulative": 4821
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1219
+    "_version": 1221
   }
 }
