@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"     content="imas-codex">
+  <meta name="reckon-type"      content="evidence">
+  <meta name="plan-slug"        content="isn-stable-release-landed">
+  <meta name="plan-title"       content="ISN Stable Release — Landed Record">
+  <meta name="plan-summary"     content="What the v0.8.0 release and the three pin moves actually produced, with the measurements that settled each one">
+  <meta name="plan-status"      content="archived">
+  <meta name="plan-evidence-for" content="isn-stable-release">
+  <meta name="plan-owner"       content="Simon McIntosh">
+  <title>ISN Stable Release — Landed Record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="summary">Summary</h2>
+    <p>
+      The IMAS Standard Names grammar work landed on upstream <code>main</code>, was
+      published as the project's first stable release, and every dependency
+      declaration that had been resolving a fork commit now resolves that release.
+      The measurement the whole exercise existed for — that the exporter stops
+      reporting a locus collision the vocabulary no longer has — was taken against
+      the released wheel and passes.
+    </p>
+
+    <h2 id="release">The release</h2>
+    <p>
+      Upstream pull request 19 on <code>iterorganization/IMAS-Standard-Names</code>
+      merged at <code>49fe54b4</code>. It had been mergeable and green for some time
+      and was blocked only on a credential: the pull request touches
+      <code>.github/workflows/release.yml</code>, and the API refuses a merge from a
+      token without the <code>workflow</code> scope. Refreshing the token cleared it;
+      no evidence changed.
+    </p>
+    <p>
+      <code>v0.8.0</code> was tagged on that merge commit and pushed, which fires
+      upstream's trusted-publishing job. The release was then confirmed by reading
+      the package index directly — <code>latest on PyPI: 0.8.0</code>, wheel and
+      source distribution both present — rather than inferred from a green workflow
+      run. A green run says the job finished, not that the artifact is fetchable, and
+      a published version can be yanked but never reused, so the distinction is worth
+      the extra call.
+    </p>
+    <p>
+      The tag is stable rather than a sixty-eighth release candidate because the work
+      landed upstream rather than on the fork. The 67 <code>rc</code> tags were
+      fork-side prototyping and stay there.
+    </p>
+
+    <h2 id="pins">The three pins</h2>
+    <table>
+      <thead>
+        <tr><th>Declaration</th><th>From</th><th>To</th><th>Landed</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>imas-codex build requirement</td>
+          <td>fork commit <code>93195dd</code></td>
+          <td><code>==0.8.0</code></td>
+          <td rowspan="2"><code>0c37fdae</code></td>
+        </tr>
+        <tr>
+          <td>imas-codex dev group</td>
+          <td>fork commit <code>93195dd</code></td>
+          <td><code>==0.8.0</code></td>
+        </tr>
+        <tr>
+          <td>catalog dev group</td>
+          <td>fork <code>@main</code> branch</td>
+          <td><code>[quality,docs]==0.8.0</code></td>
+          <td><code>1b596f3</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Provenance was proven rather than assumed. A version string alone does not
+      distinguish a registry install from a git build of the same commit, because
+      both report a similar version; the discriminator is that the installed
+      distribution carries no <code>direct_url.json</code>. That was checked on both
+      sides. <code>uv.lock</code> in imas-codex resolves the hashed wheel
+      <code>imas_standard_names-0.8.0-py3-none-any.whl</code>; the catalog keeps no
+      lockfile, which was confirmed against the active <code>.gitignore</code> rule
+      rather than assumed from its absence.
+    </p>
+    <p>
+      The catalog change carried its contributor guidance in the same commit. That
+      repository's <code>AGENTS.md</code> had stated that tracking the branch was a
+      deliberate design choice and showed the git reference as the required form, so
+      pinning <code>pyproject.toml</code> alone would have left the next contributor
+      reverting the pin with the repository's own documentation behind them. The
+      section now states the rule in force: pin a published stable release, ignore
+      release-candidate churn, bump deliberately on each new stable release.
+    </p>
+
+    <h2 id="gate">The measurement the pin existed for</h2>
+    <p>
+      imas-codex had been resolving ISN at <code>93195dd</code>, which predates the
+      <code>minimum_absolute_safety_factor</code> locus rename, so the exporter was
+      judging identities against the pre-rename vocabulary and reporting a collision
+      the vocabulary no longer has. Against the released wheel, a read-only WEST
+      regeneration reports:
+    </p>
+    <ul>
+      <li><code>identity_token_collision</code> — <code>passed=true</code>,
+        <code>skipped=false</code>, <code>issue_count=0</code>,
+        <code>issues=[]</code></li>
+      <li>every enabled gate passing, 328 of 412 identities exported, and all 355
+        sources reconciled as 297 emitted, 48 excluded, 10 documented
+        non-nameable</li>
+      <li>focused export tests: 25 passed, exit status 0</li>
+    </ul>
+
+    <h2 id="trap">A measurement trap worth carrying forward</h2>
+    <p>
+      The first attempt at that gate measurement contradicted itself. The worker
+      proved the import at <code>0.8.0</code>, then had the regeneration report
+      <code>0.8.0rc68.dev8+g93195dde4</code> and reproduce the collision. Nothing was
+      flaky.
+    </p>
+    <p>
+      A detached worktree shares the one root environment, and that environment syncs
+      from the <strong>main checkout's committed</strong> <code>pyproject.toml</code>
+      — not from the worktree's edited copy. Main still pinned the fork commit, so
+      every concurrent peer running anything at all deterministically reinstalled the
+      fork build over the worker's install. The failure mode is worse than a plain
+      error because it is intermittent in a way that looks like flakiness: measure
+      once and the answer is right, measure again after a peer runs and the old
+      defect is back.
+    </p>
+    <p>
+      The general rule: a pin change is not real to any other process until it is
+      committed to the main checkout, so a single node cannot own both a pin change
+      and the behavioural evidence for it. Split them, or serialize — which is what
+      this worker eventually did to obtain the verdict above.
+    </p>
+  </main>
+</body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T13:42:47",
+  "updated": "2026-09-01T13:51:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1190,9 +1190,11 @@
         "id": "impl-planrepair",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05cc8-1df5-73a3-88ab-65c69f0c8191",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05cc8-1df5-73a3-88ab-65c69f0c8191"
+        },
         "created": "2026-09-01"
       },
       {
@@ -41509,9 +41511,121 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T114326366102-n-repair-contradicted-plans",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a75",
+        "node": "n-repair-contradicted-plans",
+        "node_definition": {
+          "done_when": "Read /home/ITER/mcintos/.config/reckon/crew/reports/pending-plan-staleness.md, an audit of this project's plans, and apply the repair its 'Specific text to change' column names for each of the eight plans it verdicts contradicted: catalog-review-surface, sn-benchmark-evolution, sn-west-review-rehearsal, sn-schema-version-authority, mast-semantic-source-repair, sn-regeneration-decision, sn-west-catalog-release and dd-defect-upstreaming. Apply exactly the repairs that column names and nothing wider. Preserve dated historical receipts as history rather than rewriting them; where a count has drifted, add the current measurement as a new record saying when it was taken, except where the column explicitly says to correct the number in place. Two repairs are metadata rather than prose: remove sn-relocation-retirement-apply from sn-west-catalog-release's plan-depends-on because it is already shipped, and also remove sn-embedding-coverage-gate from that same plan-depends-on because the orchestrator is closing that plan as empty. One more fact the audit could not have known: the imas-codex standard-names pin has since landed on main as commit 0c37fdae, so the isn-stable-release premise the audit measured as still stale is now satisfied on the imas-codex side; do not edit isn-stable-release, just do not reintroduce the stale claim anywhere else. Author every edit as HTML directly, since these files are the store as well as the document, and never write markdown syntax into a rendered body. Validate each edited file with reckon audit-doc and clear every ERROR before finishing. Do not change any plan's status, sprint, or implementation fraction, and do not touch sn-embedding-coverage-gate or strategy, whose dispositions the orchestrator owns. Commit locally with a conventional subject and a body, staging only the plan files you edited. Report each plan with a one-line description of what you changed",
+          "estimated_hours": null,
+          "goal": "Eight plans stop asserting things that are no longer true",
+          "id": "n-repair-contradicted-plans",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T114326366102-n-repair-contradicted-plans/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/plans/catalog-review-surface.html",
+            "docs/sn-benchmark-evolution.html",
+            "docs/sn-west-review-rehearsal.html",
+            "docs/plans/sn-schema-version-authority.html",
+            "docs/plans/mast-semantic-source-repair.html",
+            "docs/plans/sn-regeneration-decision.html",
+            "docs/plans/sn-west-catalog-release.html",
+            "docs/plans/dd-defect-upstreaming.html",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/repair-contradicted-plans.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-planrepair",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T11:43:33Z",
+        "completed_at": "2026-09-01T11:50:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 436,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 436,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "094ca7f924ea4e2af857346d81f2b036c6f27cbf",
+        "commits": [
+          "2a641983c7653279b010246bad5c56cd31e63eff"
+        ],
+        "changed_lines": {
+          "added": 61,
+          "removed": 61,
+          "files": 8
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reckon audit-doc on each of the eight edited plan files",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/repair-contradicted-plans.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T114326366102-n-repair-contradicted-plans/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05cc8-1df5-73a3-88ab-65c69f0c8191",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3132160,
+            "cached_input_tokens_cumulative": 3132160,
+            "input_tokens": 3305328,
+            "input_tokens_cumulative": 3305328,
+            "output_tokens": 17215,
+            "output_tokens_cumulative": 17215,
+            "reasoning_output_tokens": 4039,
+            "reasoning_output_tokens_cumulative": 4039
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1087
+    "_version": 1089
   }
 }
