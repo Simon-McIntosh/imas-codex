@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T12:54:33",
+  "updated": "2026-09-01T12:59:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -94,6 +94,15 @@
         "role": "documentation",
         "session_id": "01a02da5-3a01-7d21-86aa-5a416ea7ca0e",
         "created": "2026-08-23"
+      },
+      {
+        "id": "doc-westevidence",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "doc-worktreesecrets",
@@ -1368,9 +1377,11 @@
         "id": "impl-reviewci",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05c9a-8ddb-7fe2-87b8-75ff4242c735",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05c9a-8ddb-7fe2-87b8-75ff4242c735"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1388,9 +1399,11 @@
         "id": "impl-reviewfields",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05c99-f0d6-7ed3-893c-6a59c092c0fe",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05c99-f0d6-7ed3-893c-6a59c092c0fe"
+        },
         "created": "2026-09-01"
       },
       {
@@ -40977,6 +40990,6 @@
       }
     ],
     "holds": [],
-    "_version": 1075
+    "_version": 1078
   }
 }
