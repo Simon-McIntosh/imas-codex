@@ -733,54 +733,19 @@ def _build_pool_specs(
         ),
     ]
 
-    # ── Names-only / docs-only filtering ─────────────────────────────
-    _DOCS_POOLS = {"generate_docs", "review_docs", "refine_docs"}
-    if names_only:
-        specs = [s for s in specs if s.name not in _DOCS_POOLS]
-    if docs_only:
-        # Inverse of names_only: run ONLY the docs pools (generate_docs,
-        # review_docs, refine_docs) on already name-accepted names — so a
-        # budget-capped docs rotation spends purely on documentation, not on
-        # name compose/review.
-        specs = [s for s in specs if s.name in _DOCS_POOLS]
-
-    # ── Flush / skip-generate filtering ──────────────────────────────
-    # Flush mode drains exactly the pinned downstream set without generating
-    # new names.
-    # ``--only`` phases that exclude the generate phase (skip_generate, e.g.
-    # ``--only link`` / ``--only review``) drop the same pool. Both exclude
-    # generate_name so only review/refine/docs pools run — no new composition.
-    if flush:
-        from imas_codex.standard_names.pools import FLUSH_POOL_NAMES
-
-        specs = [s for s in specs if s.name in FLUSH_POOL_NAMES]
-    elif skip_generate:
-        specs = [s for s in specs if s.name != "generate_name"]
-
-    # ── Skip-review filtering ────────────────────────────────────────
-    # ``--only compose`` (and any generate-only selection) sets skip_review:
-    # run the generate pools but no scoring/refinement. Drops the review AND
-    # refine pools — refine has no work without review, and review is the only
-    # paid (OpenRouter) stage, so this is the free, local-only zero-shot mode.
-    if skip_review:
-        _REVIEW_REFINE_POOLS = {
-            "review_name",
-            "review_docs",
-            "refine_name",
-            "refine_docs",
-        }
-        specs = [s for s in specs if s.name not in _REVIEW_REFINE_POOLS]
-
-    # Exact action selectors are applied after the established coarse filters,
-    # so names-only/docs-only and review suppression retain their safety
-    # semantics. A contradictory combination fails instead of silently running
-    # zero pools or widening to an adjacent review/refine action.
-    if only_pool is not None:
-        specs = [spec for spec in specs if spec.name == only_pool]
-        if len(specs) != 1:
-            raise ValueError(
-                f"exact pool {only_pool!r} is excluded by another pool filter"
-            )
+    # Keep operational construction and read-only preview on one pool-selection
+    # contract. Only the operational side constructs the claim adapters above.
+    selected_pool_names = set(
+        _selected_pool_names(
+            names_only=names_only,
+            docs_only=docs_only,
+            flush=flush,
+            skip_review=skip_review,
+            skip_generate=skip_generate,
+            only_pool=only_pool,
+        )
+    )
+    specs = [spec for spec in specs if spec.name in selected_pool_names]
 
     # A rescore is a fresh quorum draw on the existing identity.  Letting the
     # adjacent refine pool participate would turn a low score into a rewrite
@@ -998,6 +963,144 @@ async def _seed_domain_sources(
         default_dd_version=extract_dd_version,
     )
     return written
+
+
+def _selected_pool_names(
+    *,
+    names_only: bool = False,
+    docs_only: bool = False,
+    flush: bool = False,
+    skip_review: bool = False,
+    skip_generate: bool = False,
+    only_pool: str | None = None,
+) -> tuple[str, ...]:
+    """Return the worker pools a run would start without constructing claims."""
+    from imas_codex.standard_names.pool_registry import POOL_NAMES
+    from imas_codex.standard_names.pools import FLUSH_POOL_NAMES
+
+    if only_pool is not None and only_pool not in POOL_NAMES:
+        raise ValueError(f"unknown standard-name pool: {only_pool}")
+
+    pools = list(POOL_NAMES)
+    docs_pools = {"generate_docs", "review_docs", "refine_docs"}
+    if names_only:
+        pools = [pool for pool in pools if pool not in docs_pools]
+    if docs_only:
+        pools = [pool for pool in pools if pool in docs_pools]
+    if flush:
+        pools = [pool for pool in pools if pool in FLUSH_POOL_NAMES]
+    elif skip_generate:
+        pools = [pool for pool in pools if pool != "generate_name"]
+    if skip_review:
+        review_and_refine = {
+            "review_name",
+            "review_docs",
+            "refine_name",
+            "refine_docs",
+        }
+        pools = [pool for pool in pools if pool not in review_and_refine]
+    if only_pool is not None:
+        pools = [pool for pool in pools if pool == only_pool]
+        if len(pools) != 1:
+            raise ValueError(
+                f"exact pool {only_pool!r} is excluded by another pool filter"
+            )
+    return tuple(pools)
+
+
+async def preview_sn_pools(
+    *,
+    source: str = "dd",
+    domains: tuple[str, ...] = (),
+    max_sources: int | None = None,
+    focus_paths: tuple[str, ...] = (),
+    names_only: bool = False,
+    docs_only: bool = False,
+    flush: bool = False,
+    skip_review: bool = False,
+    skip_generate: bool = False,
+    only_pool: str | None = None,
+    pending_fn: Callable[[], dict[str, int]] | None = None,
+) -> dict[str, Any]:
+    """Build a read-only extraction and worker-pool plan for ``sn run``.
+
+    This preview deliberately does not reuse the operational seeding or pool
+    construction functions: those functions bind graph claims and write audit
+    state as part of their contract. Candidate extraction and pending-count
+    queries are reads, so the returned plan can be inspected safely against a
+    live graph.
+    """
+    selected_pools = _selected_pool_names(
+        names_only=names_only,
+        docs_only=docs_only,
+        flush=flush,
+        skip_review=skip_review,
+        skip_generate=skip_generate,
+        only_pool=only_pool,
+    )
+    pending = await asyncio.to_thread(pending_fn) if pending_fn is not None else {}
+    pending = {pool: int(pending.get(pool, 0)) for pool in selected_pools}
+
+    if focus_paths:
+        return {
+            "source": source,
+            "domains": list(domains),
+            "extraction_candidates": len(focus_paths),
+            "pools": list(selected_pools),
+            "pending": pending,
+            "focus_paths": list(focus_paths),
+        }
+
+    auto_seed = not (flush or docs_only or skip_generate)
+    if source != "dd" or not auto_seed:
+        return {
+            "source": source,
+            "domains": list(domains),
+            "extraction_candidates": 0,
+            "pools": list(selected_pools),
+            "pending": pending,
+            "focus_paths": [],
+        }
+
+    selected_domains = list(domains)
+    if not selected_domains:
+        selected_domains = await asyncio.to_thread(
+            _list_physics_domains_with_extractable_paths, source
+        )
+    selected_domains = [domain for domain in selected_domains if domain != "mixed"]
+
+    from imas_codex.standard_names.graph_ops import get_existing_standard_names
+    from imas_codex.standard_names.sources.dd import extract_dd_candidates
+
+    existing = await asyncio.to_thread(get_existing_standard_names)
+    candidate_ids: set[str] = set()
+    for domain in selected_domains:
+        batches = await asyncio.to_thread(
+            extract_dd_candidates,
+            domain_filter=domain,
+            existing_names=existing,
+            force=False,
+            name_only=False,
+        )
+        for batch in batches:
+            for item in batch.items:
+                path = item.get("path")
+                if path:
+                    candidate_ids.add(str(path))
+        if max_sources is not None and len(candidate_ids) >= max_sources:
+            break
+
+    extraction_candidates = len(candidate_ids)
+    if max_sources is not None:
+        extraction_candidates = min(extraction_candidates, max_sources)
+    return {
+        "source": source,
+        "domains": selected_domains,
+        "extraction_candidates": extraction_candidates,
+        "pools": list(selected_pools),
+        "pending": pending,
+        "focus_paths": [],
+    }
 
 
 async def run_sn_pools(

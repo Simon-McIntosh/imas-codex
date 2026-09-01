@@ -657,6 +657,7 @@ def _run_sn_cmd(
     edits_only: bool = False,
     skip_global_maintenance: bool = False,
     scope_started_callback: Callable[[], None] | None = None,
+    preview_focus_paths: tuple[str, ...] = (),
 ) -> dict[str, Any] | None:
     """Execute the pool-based SN orchestrator with Rich progress display.
 
@@ -751,6 +752,42 @@ def _run_sn_cmd(
         # Terminality must never inherit a display cache entry observed before
         # the latest completion epoch.
         return {k: v["pending"] for k, v in _query_pool_progress().items()}
+
+    if dry_run:
+        from imas_codex.cli.utils import run_async
+        from imas_codex.standard_names.loop import preview_sn_pools
+        from imas_codex.standard_names.turn import exact_pool_from_only
+
+        plan = run_async(
+            preview_sn_pools(
+                source=source,
+                domains=domains,
+                max_sources=max_sources,
+                focus_paths=preview_focus_paths,
+                names_only=names_only,
+                docs_only=docs_only,
+                flush=flush,
+                skip_review=skip_review,
+                skip_generate=skip_generate,
+                only_pool=exact_pool_from_only(only),
+                pending_fn=_pool_pending_fn,
+            )
+        )
+        preview_console = Console(quiet=quiet)
+        preview_console.print("[bold green]Standard Names dry-run plan[/bold green]")
+        preview_console.print(
+            f"Extraction candidates: {plan['extraction_candidates']} ({plan['source']})"
+        )
+        domain_label = ", ".join(plan["domains"]) or "none"
+        preview_console.print(f"Domains: {domain_label}")
+        pool_rows = [
+            f"{pool} (pending={plan['pending'].get(pool, 0)})" for pool in plan["pools"]
+        ]
+        preview_console.print("Pools: " + (", ".join(pool_rows) or "none"))
+        preview_console.print(
+            "Graph writes: 0; claims: 0; LLM calls: 0; planned spend: $0.00"
+        )
+        return plan
 
     if use_rich:
         cli_console = Console()
@@ -2301,6 +2338,35 @@ def sn_run(
         )
 
         scope_run_id = str(_uuid.uuid4())
+
+        if dry_run:
+            _run_sn_cmd(
+                cost_limit=cost_limit,
+                time_limit=time_limit,
+                compose_model=compose_model,
+                per_domain_limit=limit,
+                dry_run=True,
+                quiet=quiet,
+                domains=domains,
+                verbose=verbose,
+                min_score=min_score,
+                rotation_cap=rotation_cap,
+                escalation_model=escalation_model,
+                review_name_backlog_cap=review_name_backlog_cap,
+                review_docs_backlog_cap=review_docs_backlog_cap,
+                skip_generate=skip_generate_from_only,
+                skip_review=skip_review,
+                names_only=names_only,
+                docs_only=docs_only,
+                source=source,
+                override_edits=_override_edits,
+                only=only_phase,
+                max_sources=max_sources,
+                edits_only=edits_only,
+                skip_global_maintenance=skip_global_maintenance,
+                preview_focus_paths=tuple(flat_focus),
+            )
+            return
 
         # 1. Clear stale run_ids from previous focused runs. Both node labels
         #    are cleared in a single statement so the reset is atomic and the
