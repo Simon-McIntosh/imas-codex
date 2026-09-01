@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="hidden-suite-failures">
   <meta name="plan-title" content="What the Collection Error Was Hiding">
-  <meta name="plan-summary" content="Restoring test collection exposed 49 failures that had been invisible for a week behind an exit-2 import error">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="All 49 hidden failures are green, main CI runs keep their conclusion, a missing test extra fails once and loudly; closing figure 12,070 passed">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="21">
-<meta name="plan-commits" content="37296b5b,9d071bdf,289ed276,abe01f53,a97ce967">
-<meta name="plan-artifacts" content="crew/reports/suite-triage.md,crew/reports/suite-final-figure.md,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/logs/pytest-final.log,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
-<meta name="plan-impl" content="0.83">
+<meta name="plan-version" content="25">
+<meta name="plan-commits" content="37296b5b,9d071bdf,289ed276,abe01f53,a97ce967,fcb22e07">
+<meta name="plan-artifacts" content="docs/evidence/archive/hidden-suite-failures-landed.html,crew/reports/suite-triage.md,crew/reports/suite-final-figure.md,crew/reports/suite-residual-three.md,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/logs/pytest-final.log,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -362,44 +362,29 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
       noise, <code>cancelled</code> read as not-failure, and now skipped read as satisfied.
     </p>
 
-    <h2 id="s3">&#167;3 &mdash; What each cluster needs, and from whom</h2>
-    <p>
-      These are four different kinds of work and should not be treated as one queue. Two of
-      them need a decision before any repair, and one is not this plan&rsquo;s to make at all.
+    <h2 id="s3"><span class="badge badge-shipped">&#10003; landed 2026-09-01</span> &#167;3 &mdash; Every one of the 49 carries a verdict</h2>
+    <p class="landed-summary">
+      The author repaired the SN twenty at <code>8ee947b0</code>. The remaining 29 were triaged
+      from a fresh run with the test extra provisioned: 28 environmental artifacts (27 the missing
+      extra, 1 a timeout that passed in 3.66 s) and 1 wrong premise, 0 defects, 0 owned elsewhere
+      (<code>9d071bdf</code>). The wrong premise, the graph-marker credential test, now overrides
+      the credential probe in its subprocess conftest and passes with and without a reachable
+      graph (<code>abe01f53</code>). Full record:
+      <a href="/imas-codex/evidence/archive/hidden-suite-failures-landed#s3">&#167;3 landed</a>.
     </p>
-    <ul>
-      <li><strong>The SN twenty are the author&rsquo;s.</strong> The guard added by
-        <code>9c4403db</code> is plausibly correct and the fixtures plausibly predate it;
-        deciding whether the fixtures gain a source cohort or the guard tolerates the legacy
-        shape needs whoever made the change. This plan tracks them and does not repair them.</li>
-      <li><strong>The torch eighteen need a policy, not a patch.</strong> A test that fails
-        because an optional extra is absent is either a test that should skip or an extra that
-        is not really optional. Both are defensible; picking one silently is how the situation
-        recurs.</li>
-      <li><strong>The integration nine need triage before estimation.</strong> Nothing is known
-        about them yet beyond the count, and pretending otherwise would repeat the error that
-        produced this plan.</li>
-      <li><strong>The two singletons need a verdict on whether they are defects at all.</strong>
-        A timeout and an environment-dependent message may both be artifacts of where the suite
-        ran rather than of what it tested.</li>
-    </ul>
 
-    <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
-    <ul>
-      <li>A triage pass that assigns every one of the 49 to a cluster with a verdict: a defect
-        to fix here, a defect owned elsewhere, an environmental artifact, or a test whose
-        premise is wrong.</li>
-      <li>A decision on the optional-dependency policy, applied consistently, so a test never
-        again fails merely because an extra is absent.</li>
-      <li>Whatever repairs the triage assigns to this plan, each with a named test moving from
-        failing to passing.</li>
-      <li>A guard against the recurrence itself: the failure here was not the broken import but
-        that <strong>an exit-2 collection error was indistinguishable from an environment
-        quirk for a week</strong>. Something must make a suite that collects nothing loud
-        rather than quiet.</li>
-      <li>A final full-suite figure recorded against the census above, so the count that closes
-        this plan is comparable to the count that opened it.</li>
-    </ul>
+    <h2 id="s4"><span class="badge badge-shipped">&#10003; landed 2026-09-01</span> &#167;4 &mdash; Deliverables</h2>
+    <p class="landed-summary">
+      Main CI runs keep their conclusion: <code>cancel-in-progress</code> is now
+      <code>${{ github.event_name == 'pull_request' }}</code> (<code>37296b5b</code>; a bare first
+      attempt was rejected). A missing test extra stops collection once with
+      <q>uv sync --extra test</q> instead of eighteen import errors (<code>289ed276</code>).
+      Closing whole-tree figure 12,070 passed / 3 failed / 142 skipped / 1 xfailed against the
+      opening 12,021 / 49 / 145 / 1 (<code>a97ce967</code>); the 3 were shared-.venv worktree
+      artifacts, closed at root cause with four Cypher properties declared in LinkML
+      (<code>fcb22e07</code>). The consequence gate is reckon&rsquo;s. Full record:
+      <a href="/imas-codex/evidence/archive/hidden-suite-failures-landed#s4">&#167;4 landed</a>.
+    </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -428,10 +413,16 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-hsf-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship hidden-suite-failures" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-hsf-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship hidden-suite-failures" data-resolved-at="2026-09-01T21:12:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Triage the 49, and decide the optional-dependency posture before repairing any of them</h4>
     <div class="r-fu-body"><p>The census in §2 is measured and does not need re-deriving; §3 says what each cluster needs and from whom. Start with triage rather than repair, because two clusters need a decision first and one — the twenty SN edit failures following commit 9c4403db — belongs to that commit's author, who has been notified. The deliverable that matters most is the last one: the defect was never the broken import, it was that an exit-2 collection error read as an environment quirk for a week.</p></div>
     <pre class="r-fu-prompt">/reckon-ship hidden-suite-failures</pre>
+    <p class="r-fu-outcome">Landed 2026-09-01 in six promoted nodes. Triage: 28 environmental (unprovisioned test extra), 1 wrong premise, 0 defects. Decisions locked and applied: provision-the-extra with one loud conftest preflight (289ed276); main CI runs keep their conclusion (37296b5b). Graph-marker premise repaired (abe01f53). Closing whole-tree figure 12,070 passed / 3 failed / 142 skipped / 1 xfailed (a97ce967); the 3 were shared-.venv worktree artifacts and were closed at root cause with four Cypher properties declared in LinkML (fcb22e07). Cumulative evidence: docs/evidence/archive/hidden-suite-failures-landed.html. The consequence gate is reckon's; see the pointer followup.</p>
+    </article>
+<article class="r-fu" data-id="f-hsf-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship reckon:promotion-consequence-gate" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pointer: the promotion-consequence gate is owned by reckon</h4>
+    <div class="r-fu-body"><p>foreign-owner. The half of the recurrence guard that turns a red or cancelled <code>main</code> into a refused promotion lives in reckon's <code>promotion-consequence-gate</code> plan (commit 28b789d there). Nothing executes from here; this row exists so the split recorded in §2f is visible from this plan. It carries the one correctness constraint the two halves share: a cancelled CI run is absence of evidence, never a pass.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship reckon:promotion-consequence-gate</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -458,6 +449,12 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2056-closing-figure" data-who="reckon-ship" data-when="2026-09-01T20:56:00Z">
     <div class="r-comment-body">n-suite-final-figure landed at commit a97ce967 (merged ee56cff3): one bare whole-tree run at 34531f99 with the test extra present gave 12,070 passed / 3 failed / 142 skipped / 1 xfailed in 584.93 s, against the opening 12,021 / 49 / 145 / 1, a delta of +49 passed and -46 failed with 12,216 outcomes in both. All 49 opening ids are green. The 3 residual ids are NEW, none in the opening census: test_repository_cypher_literals_have_declared_properties (StandardName.review_resubmit_count in cli/sn.py, StandardNameSource.run_id in cli/sn.py, FacilityPath.claimed_by and claimed_at in discovery/base/executor.py undeclared in LinkML), test_archive_uses_packaged_sha_and_source_date_epoch (sha None), test_pipeline_hash_changes_when_prompt_changes (composite hash unchanged). The last two may be worktree artifacts of the shared-.venv layout; the first is schema drift from a commit at 14:29 today. One more node closes them before the plan ships.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T205715946062-n-suite-residual-three" data-who="impl-residualthree" data-when="2026-09-01T21:07:58Z">
+    <div class="r-comment-body"><p>all three residual ids reproduced green in both layouts: mixed worktree/main import artifacts of the shared .venv; four persistent Cypher properties now LinkML-declared with 10 obsolete checker rows removed; two tests made layout-independent; scope widened mid-flight to cypher_property_check.py by coordinator grant</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T2112-residual-closed" data-who="reckon-ship" data-when="2026-09-01T21:12:00Z">
+    <div class="r-comment-body">n-suite-residual-three landed at commit fcb22e07 (merged 8c4a8a24, scope-changed): all three residual ids reproduced green from both the worktree and the main checkout, so they were artifacts of a whole-tree run in a worktree that shares the main checkout's .venv (tests collected from one tree, some modules imported from the other). The four flagged Cypher properties are genuine persistent writers and are now LinkML-declared, ten obsolete checker allowances removed; the two layout-sensitive tests derive their paths from the imported module. build-models clean, 3/3 pass. Coordinator note: the worker needed cypher_property_check.py mid-flight and reckon has no scope-extension primitive, so the grant was given by resume advice and recorded on the pointer before promotion. Plan shipped; drain ledger: f-hsf-001 folded across n-suite-triage-29, n-ci-main-conclusive-expr, n-test-extra-preflight, n-graph-marker-premise, n-suite-final-figure, n-suite-residual-three; f-hsf-002 foreign-owner (reckon promotion-consequence-gate); rows 2, foldable-remaining 0.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T202010483788-n-suite-triage-29" data-who="test-suitetriage" data-when="2026-09-01T20:27:01Z">
     <div class="r-comment-body"><p>29 of 29 classified: 28 environmental (missing test extra), 1 wrong-premise (graph-marker credential test); fresh run 162 passed / 1 failed / 6 skipped in 64.87 s with torch 2.10.0+cpu provisioned</p></div>

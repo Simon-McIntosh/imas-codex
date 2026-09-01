@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="hidden-suite-failures-landed">
+  <meta name="plan-title" content="What the collection error was hiding — cumulative evidence">
+  <meta name="plan-evidence-for" content="hidden-suite-failures">
+  <meta name="plan-verifies" content="hidden-suite-failures#s4">
+  <title>Hidden suite failures landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>What the collection error was hiding — cumulative evidence</h1>
+  <p>This record consolidates what the <code>hidden-suite-failures</code> plan proved on
+  2026-09-01. The plan opened on a whole-tree census of 12,021 passed / 49 failed /
+  145 skipped / 1 xfailed taken the moment collection was restored, and it closes on the
+  same command reporting every one of those 49 ids green. Every result below is reconciled
+  against the committed run ledger at <code>docs/state/imas-codex/crew.json</code> and the
+  manifests under <code>~/.config/reckon/crew/runs/</code>. Dense count-to-commit mappings
+  are tables; causal findings are prose. No figure is included because none of these
+  relationships is clearer drawn than counted.</p>
+
+  <section id="s3">
+    <h2>§3 — Every one of the 49 carries a verdict</h2>
+    <p>Twenty of the 49 were repaired by their author at <code>8ee947b0</code> before this
+    plan executed. The remaining 29 were triaged from a fresh run of exactly the seven files
+    the census names, with the declared test extra provisioned into the shared root
+    environment (<code>torch 2.10.0+cpu</code>): 162 passed, 1 failed, 6 skipped in 64.87 s.
+    The verdicts were 28 environmental artifacts and one wrong premise; no row was a defect
+    to fix here and none was owned elsewhere. Twenty-seven of the 28 were the missing test
+    extra; the twenty-eighth was a remote-cleanup timeout that passed in 3.66 s once the
+    environment was sane.</p>
+    <p>The wrong premise was <code>test_missing_credential_explicit_graph_selection_exits_not_run</code>.
+    Its setup set <code>NEO4J_PASSWORD</code> to the default and believed that made the
+    subprocess credentialless; project environment loading supplied the live credential
+    anyway, so ambient graph state chose the branch. The repair overrides the credential
+    probe inside the subprocess conftest, so the credentialless branch is deterministic:
+    the test passes 1/1 with the live graph reachable and 1/1 with every
+    <code>NEO4J_*</code> variable cleared, and it still pins the missing-credential message
+    rather than the configured-graph-unavailable one.</p>
+    <table>
+      <thead><tr><th>Result</th><th>Measure</th><th>Commit</th></tr></thead>
+      <tbody>
+        <tr><td>Triage of the 29</td><td>28 environmental, 1 wrong-premise, 0 defects, 0 foreign; 162 passed / 1 failed / 6 skipped in 64.87 s</td><td><code>9d071bdf</code></td></tr>
+        <tr><td>Graph-marker premise</td><td>1/1 live, 1/1 cleared environment, module 3/3</td><td><code>abe01f53</code></td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: <code>crew/reports/suite-triage.md</code>; runs <code>n-suite-triage-29</code>
+    and <code>n-graph-marker-premise</code>.</p>
+  </section>
+
+  <section id="s4">
+    <h2>§4 — The recurrence guard is delivery, and the extra fails once and loudly</h2>
+    <p>The plan's own probe had shown that detection already existed: CI ran the bare
+    whole-tree suite and was red on all 55 concluded runs, while 65 of 120 runs on
+    <code>main</code> were cancelled by <code>cancel-in-progress</code> and reached no
+    conclusion at all. The repository's half of the repair is one line in
+    <code>.github/workflows/test.yml</code>: <code>cancel-in-progress</code> now evaluates
+    <code>${{ github.event_name == 'pull_request' }}</code>, so a superseded pull-request
+    run still stops early while every push to <code>main</code> keeps its recorded
+    conclusion. The first attempt wrote the expression bare, which GitHub would have
+    rejected at workflow validation; it was ledgered <code>work-rejected</code> and the
+    delimited form landed on the second attempt. The consequence half, a promotion gate
+    judging by delta and treating a cancelled run as absence of evidence, is reckon's and
+    is tracked there.</p>
+    <p>The optional-dependency posture was locked as provision-the-extra: torch was already
+    declared in the <code>test</code> extra and CI already installs it, so the eighteen
+    torch failures were an unprovisioned local environment, not a missing declaration. One
+    <code>pytest_collection_modifyitems</code> preflight now exits once with
+    <code>USAGE_ERROR</code> and the message <q>uv sync --extra test</q> when torch is absent
+    and a torch-dependent suite is selected. Two subprocess regressions pin the blocked and
+    the provisioned paths.</p>
+    <table>
+      <thead><tr><th>Result</th><th>Measure</th><th>Commit</th></tr></thead>
+      <tbody>
+        <tr><td>Main runs keep their conclusion</td><td>yaml load prints <code>${{ github.event_name == 'pull_request' }}</code>; first attempt <code>76862deb</code> rejected as bare</td><td><code>37296b5b</code></td></tr>
+        <tr><td>Loud test-extra preflight</td><td>blocked import: exit non-zero, exactly 1 install message, 0 ModuleNotFoundError; provisioned: exit 0; eight-file gate 164 passed / 1 pre-existing failure / 6 skipped in 120.1 s</td><td><code>289ed276</code></td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: runs <code>n-ci-main-conclusive</code>, <code>n-ci-main-conclusive-expr</code>
+    and <code>n-test-extra-preflight</code>; reuse map
+    <code>~/.config/reckon/crew/reports/s10-reuse-map.md</code>.</p>
+  </section>
+
+  <section id="closing-figure">
+    <h2>Closing figure: 49 became 0, and the 3 that appeared were the worktree's</h2>
+    <p>One bare whole-tree run at revision <code>34531f99</code> reported 12,070 passed /
+    3 failed / 142 skipped / 1 xfailed in 584.93 s, against the opening 12,021 / 49 / 145 / 1.
+    Both runs account for 12,216 outcomes. Every one of the opening 49 ids is green. The 3
+    residual ids were new and were then reproduced individually from both the worktree and
+    the main checkout: all three passed in both layouts. They were artifacts of running the
+    whole tree from a detached worktree whose <code>.venv</code> is the main checkout's: the
+    run collected tests from the worktree while importing some modules from the main
+    checkout's editable install, so a mocked path, a hashed prompt directory and a Cypher
+    property inventory each disagreed with the source tree the test believed it was
+    measuring.</p>
+    <p>The repair kept the genuine half. The four Cypher properties the checker flagged
+    (<code>StandardName.review_resubmit_count</code>, <code>StandardNameSource.run_id</code>,
+    <code>FacilityPath.claimed_by</code>, <code>FacilityPath.claimed_at</code>) are real
+    persistent writers and are now declared in LinkML, with ten obsolete runtime allowances
+    removed from the checker inventory; the two layout-sensitive tests now derive their
+    paths from the imported module's <code>__file__</code>. <code>build-models</code>
+    regenerates cleanly and no generated file was committed.</p>
+    <table>
+      <thead><tr><th>Outcome</th><th>Opening</th><th>Closing</th><th>Delta</th></tr></thead>
+      <tbody>
+        <tr><td>Passed</td><td>12,021</td><td>12,070</td><td>+49</td></tr>
+        <tr><td>Failed</td><td>49</td><td>3 (all layout artifacts, since repaired)</td><td>-46</td></tr>
+        <tr><td>Skipped</td><td>145</td><td>142</td><td>-3</td></tr>
+        <tr><td>Xfailed</td><td>1</td><td>1</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>Commits <code>a97ce967</code> (figure) and <code>fcb22e07</code> (repair). Evidence:
+    <code>crew/reports/suite-final-figure.md</code>,
+    <code>crew/reports/suite-residual-three.md</code>, log
+    <code>~/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/logs/pytest-final.log</code>.</p>
+    <p>The lesson the figure leaves behind: a whole-tree run is a property of one source
+    tree, so it must be taken from a checkout whose imported modules and collected tests are
+    the same tree. A worktree sharing the main checkout's environment is the wrong place to
+    take it unless every test resolves paths from the module it imported.</p>
+  </section>
+
+  <section id="what-remains">
+    <h2>What remains</h2>
+    <p>Nothing in this repository. The promotion-consequence gate that turns a red
+    <code>main</code> into a refused promotion is owned by reckon's
+    <code>promotion-consequence-gate</code> plan and is not duplicated here. The
+    <code>GHCR_TOKEN</code> stored in the project <code>.env</code> returning HTTP 401 was
+    found by the same session and belongs to the offsite plan, not to this one.</p>
+  </section>
+</main>
+</body>
+</html>

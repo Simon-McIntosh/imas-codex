@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:04:08",
+  "updated": "2026-09-01T23:11:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -47768,9 +47768,117 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T205715946062-n-suite-residual-three",
+        "plan": "hidden-suite-failures",
+        "section": "\u00a74",
+        "node": "n-suite-residual-three",
+        "node_definition": {
+          "done_when": "crew/reports/suite-residual-three.md records for each of the three ids the reproducing command in the worktree and in the main checkout with exit statuses, the verdict, and the fix; the three tests pass from this worktree after the fix with the command and log path recorded; build-models regenerates cleanly if a schema changed and no generated file is committed; ruff clean on changed paths",
+          "estimated_hours": null,
+          "goal": "Close the three residual whole-tree failures named in crew/reports/suite-final-figure.md at root cause: the LinkML property drift (StandardName.review_resubmit_count, StandardNameSource.run_id, FacilityPath.claimed_by and claimed_at referenced in Cypher but undeclared) is repaired by declaring the slots the code genuinely writes or removing dead references, while the packaged-sha and prompt-hash failures are first reproduced from both this worktree and a read-only run in the main checkout to decide whether they are shared-.venv worktree artifacts, in which case the tests are made layout-independent rather than skipped",
+          "id": "n-suite-residual-three",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T205715946062-n-suite-residual-three/manifest.md",
+          "plan": "hidden-suite-failures",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/schemas/facility.yaml",
+            "imas_codex/schemas/standard_name.yaml",
+            "imas_codex/cli/sn.py",
+            "imas_codex/discovery/base/executor.py",
+            "tests/standard_names/test_export_determinism.py",
+            "tests/standard_names/test_pipeline_version.py",
+            "crew/reports/suite-residual-three.md",
+            "imas_codex/graph/cypher_property_check.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-residualthree",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:57:24Z",
+        "completed_at": "2026-09-01T21:07:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 634,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 634,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "6f36a423f3d932cd9ab0c2c6e5aa4c102a57952a",
+        "commits": [
+          "fcb22e07fa721d789fef8f4dffd804f1b0cca60e"
+        ],
+        "changed_lines": {
+          "added": 51,
+          "removed": 14,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run build-models --force; uv run --no-sync pytest -p no:cacheprovider tests/graph/test_cypher_property_check.py tests/standard_names/test_export_determinism.py tests/standard_names/test_pipeline_version.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T205715946062-n-suite-residual-three/logs/pytest-after-ruff.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T205715946062-n-suite-residual-three/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05ec3-2e2f-7e02-9464-2b5e0da2fc5d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2592768,
+            "cached_input_tokens_cumulative": 2592768,
+            "input_tokens": 2773246,
+            "input_tokens_cumulative": 2773246,
+            "output_tokens": 8379,
+            "output_tokens_cumulative": 8379,
+            "reasoning_output_tokens": 1330,
+            "reasoning_output_tokens_cumulative": 1330
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1245
+    "_version": 1246
   }
 }
