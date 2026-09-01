@@ -20,7 +20,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="15">
+<meta name="plan-commits" content="37296b5b,9d071bdf">
+<meta name="plan-artifacts" content="crew/reports/suite-triage.md,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
   <main class="plan-doc">
@@ -434,6 +437,18 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2f" data-id="c-run-r-20260901T202020075986-n-ci-main-conclusive" data-who="impl-cimain" data-when="2026-09-01T20:22:50Z">
     <div class="r-comment-body"><p>expression written bare; GitHub evaluates cancel-in-progress only inside ${{ }} so the workflow would fail validation; corrective node dispatched to the same member</p></div>
+</div>
+<div class="r-comment" data-section="s2f" data-id="c-run-r-20260901T202425347961-n-ci-main-conclusive-expr" data-who="impl-cimain" data-when="2026-09-01T20:27:28Z">
+    <div class="r-comment-body"><p>cancel-in-progress now ${{ github.event_name == 'pull_request' }} with the group key unchanged; yaml load prints the delimited expression</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T202046316195-n-s10-reuse-map" data-who="scout-s10" data-when="2026-09-01T20:26:57Z">
+    <div class="r-comment-body"><p>reuse map: 6 deliverable groups, 32 candidates, 1 positive control, every symbol cited file:line; WEST stages 3-6 already implemented end to end, offsite is composition over existing push/prune/stamp/status seams</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T2029-wave1-landing" data-who="reckon-ship" data-when="2026-09-01T20:29:00Z">
+    <div class="r-comment-body">Wave 1 landed. n-ci-main-conclusive-expr commit 37296b5b: cancel-in-progress is now ${{ github.event_name == 'pull_request' }} with the group key unchanged (yaml load exit 0); the first attempt 76862deb wrote the expression bare and was ledgered work-rejected. n-suite-triage-29 commit 9d071bdf: all 29 remaining failures classified from a fresh run with the test extra provisioned, 162 passed / 1 failed / 6 skipped in 64.87 s; 28 environmental (missing torch), 1 wrong-premise (test_missing_credential_explicit_graph_selection_exits_not_run lets ambient graph state pick the branch), 0 defects to fix here. Provisioning the extra installed torch 2.10.0+cpu into the shared root .venv. Remaining nodes: one loud conftest test-extra check, the graph-marker premise repair, and the closing full-suite figure. Reuse map: ~/.config/reckon/crew/reports/s10-reuse-map.md.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T202010483788-n-suite-triage-29" data-who="test-suitetriage" data-when="2026-09-01T20:27:01Z">
+    <div class="r-comment-body"><p>29 of 29 classified: 28 environmental (missing test extra), 1 wrong-premise (graph-marker credential test); fresh run 162 passed / 1 failed / 6 skipped in 64.87 s with torch 2.10.0+cpu provisioned</p></div>
 </div>
 </section>
 </main>

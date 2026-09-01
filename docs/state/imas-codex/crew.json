@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:23:59",
+  "updated": "2026-09-01T22:28:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1117,6 +1117,15 @@
         "created": "2026-09-01"
       },
       {
+        "id": "impl-markerpremise",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-massdensity",
         "harness": "codex",
         "role": "implement",
@@ -1193,6 +1202,33 @@
         "role": "implement",
         "session_id": "01a02e11-88ff-7e91-9e65-d1fe8e069d10",
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-offsitecurrency",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
+        "id": "impl-offsitepush",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
+        "id": "impl-offsiteretention",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-ordercycle",
@@ -1951,6 +1987,15 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-testextra",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-torflux",
         "harness": "codex",
         "role": "implement",
@@ -2102,6 +2147,15 @@
       },
       {
         "id": "impl-westsnapshot",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
+        "id": "impl-weststage3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -2429,9 +2483,11 @@
         "id": "scout-s10",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05ea1-b94c-7d13-8acd-40449befb07a",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
+        },
         "created": "2026-09-01"
       },
       {
@@ -2744,9 +2800,11 @@
         "id": "test-suitetriage",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05ea1-3720-78e0-9bbf-cf91ca86aced",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05ea1-3720-78e0-9bbf-cf91ca86aced"
+        },
         "created": "2026-09-01"
       },
       {
@@ -46251,9 +46309,304 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T202046316195-n-s10-reuse-map",
+        "plan": "hidden-suite-failures",
+        "section": "\u00a74",
+        "node": "n-s10-reuse-map",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md exists with at least one fitness verdict per deliverable, file:line for every symbol named, and a positive-control row proving the search fired",
+          "estimated_hours": null,
+          "goal": "Produce the S10 reuse map naming the existing modules, symbols, tests, CI steps and data that already solve wholly or partly each remaining S10 deliverable (the offsite scheduled push with tiered retention and manifest-count verification, offsite currency in graph status, CI main-branch conclusiveness, one loud test-extra check, triage of the 29 remaining suite failures, the WEST stage 3 to 6 approve/freeze-check/undo chain) with a one-line fitness verdict per candidate",
+          "id": "n-s10-reuse-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202046316195-n-s10-reuse-map/manifest.md",
+          "plan": "hidden-suite-failures",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "open",
+          "time_budget": "8m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "scout-s10",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-01T20:20:51Z",
+        "completed_at": "2026-09-01T20:27:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 374,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 374,
+        "stalled": false,
+        "time_budget": "8m",
+        "base_sha": "4b8936366a7a8ed2304c9c23598744f00a8684f0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "test -s /home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md && grep -c 'Consume\\|Extend\\|Unfit' /home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:2c9b01be2b52790ab7da398c28283653a9218ed4d141f97f74d74e519134ad89"
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202046316195-n-s10-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-b94c-7d13-8acd-40449befb07a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4794624,
+            "cached_input_tokens_cumulative": 4794624,
+            "input_tokens": 5030712,
+            "input_tokens_cumulative": 5030712,
+            "output_tokens": 15393,
+            "output_tokens_cumulative": 15393,
+            "reasoning_output_tokens": 4545,
+            "reasoning_output_tokens_cumulative": 4545
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "investigation node in a read-only worktree; deliverable is the report at ~/.config/reckon/crew/reports/s10-reuse-map.md",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T202010483788-n-suite-triage-29",
+        "plan": "hidden-suite-failures",
+        "section": "\u00a73",
+        "node": "n-suite-triage-29",
+        "node_definition": {
+          "done_when": "crew/reports/suite-triage.md lists all 29 test ids with a verdict and one line of evidence each, records the pytest command, exit status, passed/failed counts and log path of the fresh run, and states how many of the 29 still fail once the test extra is present",
+          "estimated_hours": null,
+          "goal": "Assign every one of the 29 remaining suite failures a verdict of defect-to-fix-here, owned-elsewhere, environmental-artifact, or wrong-premise, from a fresh run of exactly the nine files the census names, using the shared main-checkout .venv with the test extra so the torch cluster is measured as provisioned rather than assumed",
+          "id": "n-suite-triage-29",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202010483788-n-suite-triage-29/manifest.md",
+          "plan": "hidden-suite-failures",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "crew/reports/suite-triage.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-suitetriage",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:20:18Z",
+        "completed_at": "2026-09-01T20:27:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 403,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 403,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "4b8936366a7a8ed2304c9c23598744f00a8684f0",
+        "commits": [
+          "9d071bdf7e9167ca9be5020e7ad452c94792ceb2"
+        ],
+        "changed_lines": {
+          "added": 73,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/cli/test_services_remote.py tests/embeddings/test_prompt_name.py tests/features/test_search.py tests/ids/test_mapping_e2e.py tests/integration/test_workflows.py tests/test_graph_marker_gate.py tests/test_imas_search_scoring.py",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202010483788-n-suite-triage-29/logs/pytest-census-files.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202010483788-n-suite-triage-29/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-3720-78e0-9bbf-cf91ca86aced",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2419200,
+            "cached_input_tokens_cumulative": 2419200,
+            "input_tokens": 2547436,
+            "input_tokens_cumulative": 2547436,
+            "output_tokens": 14511,
+            "output_tokens_cumulative": 14511,
+            "reasoning_output_tokens": 6341,
+            "reasoning_output_tokens_cumulative": 6341
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest command",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260901T202425347961-n-ci-main-conclusive-expr",
+        "plan": "hidden-suite-failures",
+        "section": "s2f",
+        "node": "n-ci-main-conclusive-expr",
+        "node_definition": {
+          "done_when": "the concurrency block of .github/workflows/test.yml reads cancel-in-progress: ${{ github.event_name == 'pull_request' }} with the group key unchanged, a recorded python yaml load prints that delimited string, and the change is one focused commit on top of 76862deb touching only that file",
+          "estimated_hours": null,
+          "goal": "Wrap the Test workflow's cancel-in-progress expression in GitHub expression delimiters so the runner evaluates it as a boolean instead of rejecting a bare string",
+          "id": "n-ci-main-conclusive-expr",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202425347961-n-ci-main-conclusive-expr/manifest.md",
+          "plan": "hidden-suite-failures",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "s2f",
+          "spec_level": "exact",
+          "time_budget": "15m",
+          "write_paths": [
+            ".github/workflows/test.yml"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-cimain",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:24:34Z",
+        "completed_at": "2026-09-01T20:27:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 174,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 174,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "c0295004f3f53efa4f0c5b6938785e761844dd66",
+        "commits": [
+          "37296b5be6c021fdb89c3247f040c830261e0555"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync python -c \"import pathlib, yaml; print(yaml.safe_load(pathlib.Path('.github/workflows/test.yml').read_text())['concurrency']['cancel-in-progress'])\"",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202425347961-n-ci-main-conclusive-expr/logs/yaml-load.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T202425347961-n-ci-main-conclusive-expr/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05ea1-586c-7053-abb0-4e49efca804c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1269504,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1416806,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 3477,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 563
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1208
+    "_version": 1219
   }
 }
