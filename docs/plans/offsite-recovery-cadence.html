@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -152,27 +152,27 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="offsite-cadence" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="offsite-cadence" data-choice="fixed-interval" data-by="Simon McIntosh" data-when="2026-09-01T20:16:08+00:00">
     <p class="r-dec-q">How often should a full-graph offsite push run?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="fixed-interval">On a fixed interval regardless of change</button>
+      <button class="r-opt chosen" data-value="fixed-interval">On a fixed interval regardless of change</button>
       <button class="r-opt" data-value="change-triggered">When the local store has drifted past a threshold the currency check already measures</button>
       <button class="r-opt" data-value="prompted-manual">Never automatically; prompt an operator when status reports staleness</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-09-01: weekly full-graph push on its own schedule, executed as a SLURM-scheduled job (no crontab exists on the login node and services are SLURM-only). The push is a no-op when the existing currency check shows the store has not changed since the last offsite copy, so the interval bounds exposure at seven days without paying for unchanged uploads. Fixed interval chosen over pure drift-triggering because a threshold still needs the same scheduler to poll, and over operator prompting because the 56-day gap is what a default of manual produces.</p>
     </div>
-<div class="r-dec" data-key="offsite-retention" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="offsite-retention" data-choice="tiered-4w-3m-releases" data-by="Simon McIntosh" data-when="2026-09-01T20:16:08+00:00">
     <p class="r-dec-q">How many full offsite copies are kept, and what is the acceptable registry storage cost?</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-09-01 after asking how to guard against storage growth: tiered fall-off, not a flat window. Keep the 4 newest weekly copies, thin older ones to 3 monthly copies, and never prune a copy carrying a release tag (it pairs with shipped code). Restores use the newest point, so density matters only near the present; older points need to exist sparsely. Ceiling is 7 scheduled copies, about 17 GB at the measured 2.43 GB per full archive, plus releases. Measured 2026-09-01: the package is PRIVATE (billed storage) and already holds 47 versions, many untagged or test-* pushes from March and April; a one-off prune of those is in scope. graph prune --keep exists but is a flat window, so the tiered rule needs a small policy layer over it.</p>
     </div>
-<div class="r-dec" data-key="recovery-verification-depth" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="recovery-verification-depth" data-choice="manifest-counts" data-by="Simon McIntosh" data-when="2026-09-01T20:16:08+00:00">
     <p class="r-dec-q">What must a push prove before the copy counts as a recovery point?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="presence-only">It resolves in the registry and its manifest fetches</button>
-      <button class="r-opt" data-value="manifest-counts">Its manifest counts match the live graph at push time</button>
+      <button class="r-opt chosen" data-value="manifest-counts">Its manifest counts match the live graph at push time</button>
       <button class="r-opt" data-value="trial-restore">A periodic trial restore into a scratch graph, compared by counts</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-09-01 as counts-every-push plus a periodic trial restore: every scheduled push compares the archive manifest&#x27;s node, relationship and label counts against the live graph at push time (already recorded, costs nothing) and a mismatch means the copy does not count. A full trial restore into a scratch graph, compared by counts, runs once inside this plan because no restore has ever been performed and a registry entry is not a demonstrated recovery path; after that it recurs quarterly, not per push, because each restore costs a 15 GB scratch load. The wall time and registry storage of the first real push and restore are recorded from the run.</p>
     </div>
 </section>
 

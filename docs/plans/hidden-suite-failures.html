@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -400,17 +400,17 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="optional-dependency-posture" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="optional-dependency-posture" data-choice="provision-extra-fail-loud" data-by="Simon McIntosh" data-when="2026-09-01T20:16:16+00:00">
     <p class="r-dec-q">When a test needs an optional extra that is absent, what should happen?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="skip-with-reason">The test skips with a stated reason</button>
       <button class="r-opt" data-value="provision-the-extra">The extra is provisioned for test runs and its absence is a real failure</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-09-01: the extra is provisioned for test runs and its absence is a real failure, reported once and loudly. torch is already declared in the [test] extra, and pyproject&#x27;s own comment states that a silently-skipped contract test carries no signal, so the eighteen torch failures were an unprovisioned environment rather than a missing declaration. Deliverables: verify CI and the documented test recipe install the test extra (with the cpu torch index) and repair if not; replace the scatter of eighteen import errors with one conftest-level check that fails collection of the dependent suites with an install instruction naming the extra. importorskip is not adopted for torch because the search and scoring suites would then never run on a machine lacking it.</p>
     </div>
-<div class="r-dec" data-key="collection-failure-visibility" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="collection-failure-visibility" data-choice="main-never-cancelled-plus-delta-gate" data-by="Simon McIntosh" data-when="2026-09-01T20:16:16+00:00">
     <p class="r-dec-q">What should make a zero-collection suite impossible to mistake for a passing one?</p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-09-01. The plan&#x27;s own probe (§2d, §2e) showed the detection already exists: CI ran the bare whole-tree suite and was red on all 55 concluded runs, while 65 of 120 runs were cancelled with no conclusion at all. So the repair is delivery, not a pytest flag. Two parts: (1) THIS repository changes .github/workflows/test.yml so cancel-in-progress applies only to pull requests and every commit on main reaches a conclusion, accepting the extra CI minutes; (2) the consequence is reckon&#x27;s promotion gate (promotion-consequence-gate), which judges by delta against a baseline and treats a cancelled run as absence of evidence, never as a pass. --continue-on-collection-errors is rejected because it shrinks the blast radius and the signal together, and a second collection emitter is rejected because the existing one was already produced and ignored.</p>
     </div>
 <div class="r-dec" data-key="layout-check-home" data-choice="move-into-reckon" data-by="Simon McIntosh" data-when="2026-09-01T20:15:38+00:00">
     <p class="r-dec-q">Where should the typed-layout check live, given it has never run in imas-codex?</p>
