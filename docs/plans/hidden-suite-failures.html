@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -36,7 +36,7 @@
       That was repaired in commit <code>1d4fb8be</code> while shipping
       <a href="/imas-codex/plans/graph-destructive-command-safety">graph-operational-safety</a>,
       whose verification node found it. The repair is not what this plan is about. <strong>The
-      suite now collects, and 49 tests fail.</strong> This plan owns those 49.
+      suite now collects, and 49 tests failed.</strong> Twenty were repaired at <code>8ee947b0</code> the same day (&#167;2b); <strong>this plan owns the remaining twenty-nine</strong> and the recurrence guard.
     </p>
     <p>
       The shape is worth naming because it is not a test-maintenance backlog. An exit code of 2
@@ -109,6 +109,47 @@
       that happened to avoid one directory.</strong> They had been reporting a 6,818-passed
       standard-names run as general health, and a node gate reporting 255 passed is what let
       this regression through. A narrow green is not evidence about a tree.
+    </p>
+
+    <h2 id="s2b">&#167;2b &mdash; The twenty are green; twenty-nine remain</h2>
+    <p>
+      <strong>Resolved 2026-09-01 at commit <code>8ee947b0</code></strong>, verified on
+      <code>origin/main</code>. Measured pre and post on the same command: the three edit
+      suites went <strong>20 failed &rarr; 97 passed / 0 failed</strong>, and
+      <code>tests/standard_names</code> as a whole went <strong>20 failed with 6,801
+      passed &rarr; 6,821 passed / 0 failed / 8 skipped</strong>. <strong>That 6,821 is a
+      clean post-fix baseline for the standard-names subtree</strong>, which is useful here
+      because it lets the remaining twenty-nine be separated from it without re-running that
+      subtree.
+    </p>
+    <p>
+      <strong>Neither option in &#167;2a was the fix, and the author says so explicitly.</strong>
+      The fixtures did not need sources and the guard did not need to tolerate the legacy shape
+      &mdash; the guard was aimed at the wrong path. The atomic preflight's
+      <code>effective_edit_mode</code> now separates the two cases: a non-empty effective mode
+      permits the source-less no-op and records <code>human_edit</code>, while an empty
+      effective mode refuses an observed empty authoritative cohort. Both properties hold at
+      once, which was the real requirement.
+    </p>
+    <p>
+      <strong>The check that matters is what the fix did NOT touch.</strong> Making these
+      twenty green by deleting the guard would have been trivial and would have reopened the
+      stranding path it closed. Verified independently here rather than taken on the
+      author&rsquo;s word: <code>8ee947b0</code> changes
+      <code>graph_ops.py</code> and two test files, and
+      <code>test_refine_source_cohort_gate.py</code> is <em>not</em> among them, so
+      <code>test_empty_authoritative_source_cohort_refuses_successor</code> still asserts the
+      refusal it always did. The guard was narrowed, not removed.
+    </p>
+    <p>
+      <strong>One correction to &#167;1, and it is the kind worth making loudly.</strong> This
+      plan and its opening commit called all 49 &ldquo;pre-existing&rdquo;. That is wrong for at
+      least one of them: the SN twenty were introduced by <code>9c4403db</code> at 19:13 on
+      2026-09-01, <em>inside</em> the outage window rather than before it. So the accurate
+      statement is not that the collection error hid an old backlog &mdash; it is that
+      <strong>the outage window was itself a period in which new breakage could land and be
+      invisible</strong>, and at least one did. That is a strictly worse property than a stale
+      backlog, and it raises the priority of the recurrence guard in &#167;4 above the repairs.
     </p>
 
     <h2 id="s3">&#167;3 &mdash; What each cluster needs, and from whom</h2>
