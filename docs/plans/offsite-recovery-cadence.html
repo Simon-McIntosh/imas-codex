@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log">
 <meta name="plan-impl" content="0.57">
@@ -181,9 +181,15 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-orc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship offsite-recovery-cadence" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-orc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship offsite-recovery-cadence" data-resolved-at="2026-09-01T21:19:52+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Decide the cadence, the retention and what a copy must prove before it counts</h4>
     <div class="r-fu-body"><p>Three decisions gate the work and all three are the lead's, because each commits recurring outward-facing effect or spend: how often a full push runs, how many copies the registry keeps, and what a push must demonstrate before the copy counts as a recovery point. The measured starting state is in §2 and does not need re-deriving — the exposure is 56.238 days, no combination of the filtered subsets closes it, and no trial restore has ever been performed. §3 lists the machinery the prerequisite plan already landed, so most of this is consuming existing pieces rather than building new ones.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship offsite-recovery-cadence</pre>
+    <p class="r-fu-outcome">Decided 2026-09-01 (weekly no-op-when-unchanged push; tiered 4 weekly + 3 monthly + releases; counts every push plus one trial restore now then quarterly) and four nodes landed: offsite currency in graph status (03433bfd, live 56.338 days stale), tiered prune selector with a live dry-run of 25 keep / 22 delete (8c850276), graph-only launcher config repair (af2f8c3c), and the graph offsite-push command with --schedule (7e09dc98, live dry-run: push needed). The three live operations remain and are the lead's to trigger; see f-orc-002.</p>
+    </article>
+<article class="r-fu" data-id="f-orc-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship offsite-recovery-cadence" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the first real offsite cycle with --schedule, apply the one-off prune, and take the trial restore</h4>
+    <div class="r-fu-body"><p>authority-required. Three outward or destructive live operations remain, each built and dry-run but not executed: (1) <code>imas-codex graph offsite-push --schedule</code>, which uploads a 2.4 GB full archive to the private GHCR package, stops Neo4j for the dump, and submits a weekly self-resubmitting SLURM job; the harness classifier refused to let the coordinator dispatch it twice on 2026-09-01. (2) <code>imas-codex graph prune --registry ghcr.io/simon-mcintosh</code> without <code>--dry-run</code>, which deletes the 22 versions the tiered dry-run marked (10 untagged, 2 test-prefixed, 10 thinned), best run after (1) so the fresh weekly copy exists first. (3) The one-off trial restore of the pushed archive into a scratch graph, compared by counts, which needs a second Neo4j instance and 15 GB of scratch. Run them in that order; each writes a receipt (offsite-push under <code>~/.local/share/imas-codex/offsite-push/receipts</code>) whose wall time and bytes close the plan's last deliverable. Environment note: the <code>GHCR_TOKEN</code> in the project <code>.env</code> returns 401; unset it (or rotate it) so <code>resolve_token</code> falls back to the gh credential, as the retention dry-run did.</p></div>
     <pre class="r-fu-prompt">/reckon-ship offsite-recovery-cadence</pre>
     </article>
 </section>
