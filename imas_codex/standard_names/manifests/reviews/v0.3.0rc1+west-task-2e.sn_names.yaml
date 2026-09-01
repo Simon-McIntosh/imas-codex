@@ -3,8 +3,8 @@ schema_version: 1
 name: review-v0-3-0rc1-west-task-2e
 rc_version: v0.3.0rc1+west-task-2e
 batch_label: west-task-2e
-minted_from: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/west-additive-20260827a/n-west-rc-recut3/imas_codex/standard_names/manifests/west_production_dd_paths.yaml
-minted_at: '2026-08-27T07:46:50.138773+00:00'
+minted_from: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/west-demo-20260901e/n-west-demo-rc2/imas_codex/standard_names/manifests/west_production_dd_paths.yaml
+minted_at: '2026-09-01T07:37:17.680627+00:00'
 names:
 - accumulated_deposited_energy_of_plasma_facing_component
 - accumulated_total_particle_count_due_to_gas_injection
@@ -16,6 +16,7 @@ names:
 - argon_density_at_magnetic_axis
 - atomic_count
 - atomic_mass
+- atomic_number
 - beryllium_density_at_divertor_target
 - beryllium_density_at_magnetic_axis
 - beryllium_density_at_plasma_boundary
@@ -90,10 +91,8 @@ names:
 - flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude
 - forward_power_of_ion_cyclotron_heating_antenna
 - forward_wave_phase_of_ion_cyclotron_heating_antenna
-- frequency_of_diagnostic_antenna
 - frequency_of_ion_cyclotron_heating_antenna
 - gap_at_outboard_midplane
-- gap_at_plasma_boundary
 - gas_flow
 - greenwald_density
 - hard_xray_brightness
@@ -120,6 +119,7 @@ names:
 - ion_current_of_mass_spectrometer_channel
 - ion_density_at_plasma_boundary
 - ion_temperature_at_divertor_target
+- ipb98y2_confinement_time
 - iron_density_at_divertor_target
 - iron_density_at_magnetic_axis
 - iron_density_at_plasma_boundary
@@ -216,7 +216,6 @@ names:
 - poloidal_current_function
 - poloidal_length_of_flux_surface
 - poloidal_magnetic_field
-- poloidal_magnetic_field_at_constraint_position
 - poloidal_magnetic_flux
 - poloidal_magnetic_flux_at_flux_surface
 - poloidal_magnetic_flux_at_magnetic_axis
@@ -272,6 +271,7 @@ names:
 - radial_outline_of_plasma_boundary
 - radial_outline_of_wall
 - radiated_power_over_core_region
+- radiative_temperature_at_ece_channel
 - radiative_temperature_at_magnetic_axis
 - ratio_of_coolant_mass_to_time
 - ratio_of_electron_temperature_at_magnetic_axis_to_volume_averaged_electron_temperature
@@ -311,7 +311,6 @@ names:
 - spectral_bremsstrahlung_radiance
 - spectral_calibration_factor_at_line_of_sight
 - spectral_etendue_of_spectrometer_channel
-- spectral_flux_of_spectrometer_channel
 - spectral_radiance
 - spectral_signal_to_noise_ratio_of_spectrometer_channel
 - spectral_wavelength_of_optical_element
@@ -393,6 +392,8 @@ names:
 - vertical_outline_of_antenna_strap
 - vertical_outline_of_limiter_tile
 - vertical_outline_of_plasma_facing_component
+- voltage_of_ion_cyclotron_heating_antenna
+- voltage_of_ion_cyclotron_heating_antenna_amplitude
 - voltage_of_mass_spectrometer_channel
 - voltage_of_poloidal_magnetic_field_probe
 - volume_averaged_effective_charge
@@ -425,8 +426,10 @@ unmatched_sources:
 - camera_x_rays/detector_temperature/time
 - camera_x_rays/frame/time
 - core_profiles/profiles_1d/time
-- ece/channel/t_radiation
+- ece/channel/frequency
 - equilibrium/time_slice/boundary/outline/z
+- equilibrium/time_slice/constraints/b_field_pol_probe/measured
+- equilibrium/time_slice/constraints/b_field_pol_probe/reconstructed
 - equilibrium/time_slice/constraints/faraday_angle/weight
 - equilibrium/time_slice/contour_tree/node/z
 - equilibrium/time_slice/convergence/iterations_n
@@ -435,13 +438,12 @@ unmatched_sources:
 - hard_x_rays/emissivity_profile_1d/time
 - ic_antennas/antenna/module/strap/distance_to_conductor
 - ic_antennas/antenna/module/strap/width_phi
-- ic_antennas/antenna/module/voltage/amplitude
-- ic_antennas/antenna/power_launched
 - pf_active/coil/current
-- spectrometer_visible/channel/isotope_ratios/isotope/element/z_n
+- spectrometer_visible/channel/grating_spectrometer/intensity_spectrum
+- spectrometer_visible/channel/grating_spectrometer/processed_line/intensity
+- summary/boundary/gap_limiter_wall/value
 - summary/disruption/time/value
 - summary/global_quantities/tau_energy/value
-- summary/global_quantities/tau_energy_98/value
-pr_number: 2
-pr_url: https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/2
+pr_number: 3
+pr_url: https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3
 merge_commit: null
