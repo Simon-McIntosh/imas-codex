@@ -135,7 +135,7 @@ def test_export_ledger_closes_over_fixture_population(tmp_path: Path) -> None:
     assert report.exported_count + sum(row["count"] for row in rows.values()) == 4
 
 
-def test_export_emits_only_pinned_dd_reference_and_preserves_accounting(
+def test_export_emits_generic_source_bindings_and_preserves_accounting(
     tmp_path: Path,
 ) -> None:
     population = [
@@ -170,6 +170,7 @@ def test_export_emits_only_pinned_dd_reference_and_preserves_accounting(
             copied_dd_content,
             {
                 "signal_id": "west:magnetics/ip",
+                "version": "62253",
                 "semantic_facet": "measured",
             },
         ],
@@ -181,22 +182,33 @@ def test_export_emits_only_pinned_dd_reference_and_preserves_accounting(
     )[0]
     assert emitted["sources"] == [
         {
-            "dd_path": "equilibrium/time_slice/profiles_1d/psi",
-            "dd_version": "4.1.0",
+            "kind": "imas-dd",
+            "ref": "equilibrium/time_slice/profiles_1d/psi",
+            "version": "4.1.0",
         },
         {
-            "signal_id": "west:magnetics/ip",
-            "semantic_facet": "measured",
+            "kind": "west",
+            "ref": "west:magnetics/ip",
+            "version": "62253",
         },
     ]
-    assert set(emitted["sources"][0]) == {"dd_path", "dd_version"}
+    assert all(
+        set(binding) == {"kind", "ref", "version"} for binding in emitted["sources"]
+    )
+    assert emitted["sources"][1]["kind"] != "imas-dd"
+    assert not {
+        "dd_path",
+        "dd_version",
+        "signal_id",
+        "semantic_facet",
+    }.intersection(key for binding in emitted["sources"] for key in binding)
 
     strict_projection = {
-        key: value
-        for key, value in emitted.items()
-        if key not in {"physics_domain", "sources"}
+        key: value for key, value in emitted.items() if key != "physics_domain"
     }
-    assert _entry_model(strict_projection).name == "emitted_name"
+    strict_entry = _entry_model(strict_projection)
+    assert strict_entry.name == "emitted_name"
+    assert strict_entry.model_dump(mode="json")["sources"] == emitted["sources"]
 
     rows = {row.reason: row for row in report.exclusion_records}
     assert report.exported_count == 1

@@ -1233,17 +1233,42 @@ def _fetch_sources_for_entry(
 def _catalog_source_reference(source: dict[str, Any]) -> dict[str, Any]:
     """Return the minimal durable catalog reference for one source binding.
 
-    A DD path and its pinned version identify the authoritative snapshot, so
-    copied documentation, type, unit, coordinates, URLs, and enhancement text
-    would only duplicate content that imas-python can resolve. Signal bindings
-    have no equivalent DD identity and retain their public semantic projection.
+    Source-system bindings use the ISN generic ``kind``/``ref``/``version``
+    contract. A DD path and its pinned version identify the authoritative
+    snapshot. Facility signal identifiers carry their facility before the
+    first colon; their version must be pinned by the source projection rather
+    than inferred by the catalog exporter.
     """
     if source.get("dd_path"):
         return {
-            "dd_path": source["dd_path"],
-            "dd_version": source["dd_version"],
+            "kind": "imas-dd",
+            "ref": source["dd_path"],
+            "version": source["dd_version"],
         }
-    return dict(source)
+
+    signal_id = source.get("signal_id")
+    if signal_id:
+        facility, separator, _ = str(signal_id).partition(":")
+        if not separator or not facility:
+            raise ValueError(
+                f"facility signal source has no facility-qualified id: {signal_id!r}"
+            )
+        version = source.get("version")
+        if version in (None, ""):
+            raise ValueError(
+                f"facility signal source {signal_id!r} has no pinned version"
+            )
+        return {
+            "kind": str(source.get("kind") or facility),
+            "ref": str(signal_id),
+            "version": str(version),
+        }
+
+    return {
+        "kind": str(source["kind"]),
+        "ref": str(source["ref"]),
+        "version": str(source["version"]),
+    }
 
 
 def _fetch_ordering_edges_for_domain(
