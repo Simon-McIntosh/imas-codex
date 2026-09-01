@@ -4,22 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="catalog-review-surface">
-  <meta name="plan-title"     content="Catalog Review Surface Integrity">
-  <meta name="plan-summary"   content="Make the reviewer's surface honest: what a reviewer may change, enforced by checks, with edits traceable back into the graph">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="catalog-review-surface">
+  <meta name="plan-title" content="Catalog Review Surface Integrity">
+  <meta name="plan-summary" content="Make the reviewer&#x27;s surface honest: what a reviewer may change, enforced by checks, with edits traceable back into the graph">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S9">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-blocks"    content="sn-west-review-rehearsal">
+  <meta name="plan-sprint" content="S9">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="sn-west-review-rehearsal">
   <title>Catalog Review Surface Integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="bcb25e0e">
+<meta name="plan-artifacts" content="docs/evidence/catalog-review-surface/reuse-map.md">
+<meta name="plan-impl" content="0.43">
 </head>
 <body>
   <main class="plan-doc">
@@ -98,7 +103,9 @@
       (<code>origin</code> Simon-McIntosh, <code>upstream</code> iterorganization).
       The reviewer guide states the editable-versus-machine-owned distinction at commit
       <code>e9d3044</code>; the guard job lives in
-      <code>.github/workflows/catalog.yml</code> at commit <code>dd70ba6</code>.
+      <code>.github/workflows/validate.yml</code> at commit <code>dd70ba6</code>
+      (a coordinator note first recorded it as <code>catalog.yml</code>; the reuse map
+      corrected it).
       <strong>The guard is proven live in both directions:</strong> fork pull request 4
       edits the machine-owned <code>unit</code> and its <code>review-edit-guard</code>
       check <strong>fails</strong>, while pull request 5 carries only a description
@@ -126,25 +133,33 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="guard-posture" data-choice="report-never-rewrite" data-by="Simon McIntosh" data-when="2026-09-01T10:50:00+00:00">
-        <p class="r-dec-q">When a reviewer edits a machine-owned field, does the check correct it or refuse it?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="report-never-rewrite">Report and fail the check, naming the field and both values</button>
-          <button class="r-opt" data-value="auto-revert">Automatically revert the field on the reviewer's branch</button>
-          </p>
-        <p class="r-dec-rat">Locked: the job reports and never rewrites the reviewer's branch. Silently correcting someone's edit hides the disagreement and teaches nothing, while a named failure shows exactly what to revert and why the value is machine-owned.</p>
-        </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="guard-posture" data-choice="report-never-rewrite" data-by="Simon McIntosh" data-when="2026-09-01T10:50:00+00:00">
+    <p class="r-dec-q">When a reviewer edits a machine-owned field, does the check correct it or refuse it?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="report-never-rewrite">Report and fail the check, naming the field and both values</button>
+      <button class="r-opt" data-value="auto-revert">Automatically revert the field on the reviewer&#x27;s branch</button>
+      </p>
+    <p class="r-dec-rat">Locked: the job reports and never rewrites the reviewer&#x27;s branch. Silently correcting someone&#x27;s edit hides the disagreement and teaches nothing, while a named failure shows exactly what to revert and why the value is machine-owned.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
+<h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-crs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship catalog-review-surface" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Exercise the approval fold-back with accepted and refused edits, and prove the unwind</h4>
     <div class="r-fu-body"><p>The reviewer guidance, metadata guard and approval fold-back are built. What remains is the live exercise: run the fold-back on the fork demonstration pull request with one accepted edit and one edit the pipeline must refuse, show the refusal reaches the reviewer, unwind the exercise with no lasting graph or catalog change, and capture a traceability receipt proving the accepted edit records its author and pull request.</p></div>
     <pre class="r-fu-prompt">/reckon-ship catalog-review-surface</pre>
     </article>
-    </section>
-  </main>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="§4a" data-id="c-run-r-20260901T121144493784-n-crsfoldbackmap" data-who="inv-crsreuse" data-when="2026-09-01T12:18:20Z">
+    <div class="r-comment-body"><p>Reuse map: 17 candidates, 17 verdicts, 0 unverdicted; named the approval entry point, the PR-traceability writer, the reviewer-identity gap and the unwind boundary</p></div>
+</div>
+<div class="r-comment" data-section="§4a" data-id="c-20260901T1220-crsfoldbackmap" data-who="reckon-ship" data-when="2026-09-01T12:20:00+00:00">
+    <div class="r-comment-body">n-crsfoldbackmap landed — commit bcb25e0e; gate reuse-map-completeness passed; measure 17 candidate mechanisms against a floor of 8, 17 fitness verdicts, 0 candidates lacking a verdict, and all five named anchors present under an independent coordinator re-check at exit 0; artifact docs/evidence/catalog-review-surface/reuse-map.md. THE MAP MOVES TWO OF THE THREE REMAINING DELIVERABLES FROM EXERCISE TO IMPLEMENTATION, which is the result rather than the candidate count. Reusable as-is: the approval entry point is imas_codex/cli/sn.py:sn_approve delegating to standard_names/promote.py:run_approval, and the catalog pull-request traceability fields catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha and catalog_approved_at are already written by mark_catalog_name_approved — so the census finding that all four read zero across 4,666 rows means the writer has never been reached, not that it is missing. GAP ONE, and it blocks deliverable five outright: human authority is persisted only as edit_origin='human' with NO reviewer login anywhere, so the graph cannot today record WHO changed an entry; a durable reviewer-actor field sourced from authoritative GitHub evidence must land before the who-changed-it gate can be measured rather than asserted. GAP TWO bounds deliverable four: the normal undo path exists at promote.py:undo_approval with delete_fold_back_tag and _undo_catalog_correction, but an accepted human edit remains in graph history by design, so a no-lasting-change proof needs an isolated graph substrate rather than an in-place rollback. It also corrected a coordinator fact recorded in this section: the live guard is .github/workflows/validate.yml, not catalog.yml.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="74">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/closure-audit.md,docs/evidence/sn-release-readiness/residue-disposition.md">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-impl" content="0.98">
 </head>
 <body>
 <main class="plan-doc">
@@ -348,6 +348,33 @@
   but it means the normalisation has a hole worth finding while only two rows show it.
 </p>
 
+<h2 id="s7a">&#167;7a &mdash; The producer that can ship an accepted name with no embedding</h2>
+<p>
+  The two-row embedding gap found on 2026-09-01 was a symptom with a locatable
+  cause, so the cause is tracked here rather than left as a repaired number. Both
+  <code>frequency_of_wave_diagnostic_channel</code> and
+  <code>intensity_at_spectral_line</code> were <strong>never produced</strong>
+  rather than lost: <code>embedding</code>, <code>embedded_at</code>,
+  <code>embed_text_hash</code> and <code>embed_failed_at</code> were all null, both
+  were created in a scoped run, and those runs recorded zero embed-worker lines.
+</p>
+<p>
+  <strong>The defect is structural.</strong> <code>run_sn_pools</code> marks a scoped
+  run <code>skip_global_maintenance</code>, and the <code>StandardName</code>
+  embedding worker is only constructed under
+  <code>if not skip_global_maintenance</code>. A scoped run can therefore promote
+  names and documentation to accepted and finish with newly described names carrying
+  no vector &mdash; which is exactly the state the release gate asserts is impossible.
+  The repair restored both vectors deterministically at zero cost, but it does not
+  stop the next scoped run reopening the same gap.
+</p>
+<p>
+  What this section owes is the producer fix: a scoped run must retain a scoped or
+  final <code>StandardName</code> embedding drain and must not be able to complete
+  with newly described accepted names unembedded, proven by an orchestration test
+  that fails against the current code.
+</p>
+
 <h2 id="s8">&#167;8 &mdash; Residue carried in from the integrity closure</h2>
 <p>
   <a href="/imas-codex/plans/sn-integrity-residual-closure">sn-integrity-residual-closure</a>
@@ -514,10 +541,11 @@
     <pre class="r-fu-prompt">/reckon-ship sn-release-readiness</pre>
     <p class="r-fu-outcome">ADJUDICATED 2026-08-25 at ffabcdec. Verdict DISTINCT, behaviour deliberately unchanged, and the ownership boundary now recorded at the definition so the question is not reopened. _DOC_LINK_RE parses an already-formed Markdown link into BOTH visible label and name target, feeding _doc_link_mismatches, whose one production caller is persist_reviewed_docs on the accept path. find_name_references discovers reference identities and returns only identity, span and syntax, deliberately masking Markdown labels as bare candidates. They are not two authorities on one rule; they answer different questions about the same text. Call sites: _DOC_LINK_RE one, find_name_references two. The differing inputs are named rather than asserted: a resolved link yields a label-and-target pair locally but only the target identity from the shared parser, while a bare bracket or a free name reference is found by the shared parser and is not a resolved-link pair at all - which is exactly why the accept-path mismatch check cannot be built on the shared parser. 14 of 14 focused tests pass with no behavioural change. This closes the currency correction recorded earlier: the plan's claim that the graph_ops half was never cut over was already stale, and what looked like a residual duplicate is a genuine second concern.</p>
     </article>
-<article class="r-fu" data-id="f-srr-embedgap" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="orchestrator" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship sn-release-readiness" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srr-embedgap" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="orchestrator" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship sn-release-readiness" data-resolved-at="2026-09-01T12:22:11+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Two accepted names carry no embedding, which the release gate asserts is impossible</h4>
     <div class="r-fu-body"><p>A controlled census on 2026-09-01 measured 2 of the 2,318 accepted <code>StandardName</code> rows with no embedding, against 2,316 accepted rows that do carry one, which is the firing control for the count. The release gate asserts an exact zero over the accepted population, so as it stands the gate fails, and it fails on names a release would actually ship rather than on drafted work.</p><p>This is a fresh regression, not a reopening: the accepted corpus was repaired to 2,302 of 2,302 when the gate was scoped, and that plan has since closed with nothing executable left. Identify the two rows, establish whether the embedding was never produced or was lost, repair them deterministically at no LLM cost as the earlier repair was, and re-measure the gate. If the cause is a producer that can drop an embedding on an accepted row, that producer is the real defect and the repair is only the symptom.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-release-readiness</pre>
+    <p class="r-fu-outcome">RESOLVED 2026-09-01 at commit d5c16e41, at USD 0.000000 and 0 LLM calls. Both rows identified: frequency_of_wave_diagnostic_channel and intensity_at_spectral_line. Verdict on both is NEVER-PRODUCED rather than lost, and the evidence is positive rather than inferred from absence: embedding, embedded_at, embed_text_hash AND embed_failed_at were all null, both names were created in a scoped run, and those runs recorded zero embed_worker lines - a lost vector would have left a hash or a failure stamp behind. Repaired deterministically through claim_embed_batch, process_embed_batch and persist_embed_batch fenced by each producing run_id, and the gate re-measures to exact zero WITH ITS FIRING CONTROL: accepted 2318, accepted carrying an embedding 2316 to 2318, accepted lacking one 2 to 0, gap_ids empty. Controlled before-and-after held 4670 StandardNames and 2318 accepted, global LLMCost unchanged at 35065 rows and USD 1715.784847. THE FOLLOWUP'S OWN CONDITIONAL FIRED: the producer that can drop an embedding on an accepted row exists and is the real defect. run_sn_pools marks a scoped run skip_global_maintenance and constructs the StandardName embedding worker only under if not skip_global_maintenance, so a scoped run can promote names and docs to accepted and finish with newly described names unembedded. The repair does not close that, so the producer fix is now section 7a of this plan with its own node rather than a resolved number.</p>
     </article>
 </section>
 
@@ -704,6 +732,12 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20260825T063046205602-n-ddgapevidencerulefix" data-who="impl-ddgapfix" data-when="2026-08-25T06:40:45Z">
     <div class="r-comment-body"><p>Undeclared prose persists as manual evidence with verbatim text in reason and a null structured predicate; enum locked to 4 values; 1 failed 1 passed to 2 passed, broader selection 67 passed</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20260901T121202639118-n-embedgap" data-who="impl-embedgap" data-when="2026-09-01T12:19:54Z">
+    <div class="r-comment-body"><p>Accepted embedding gap 2 to 0 with firing control 2316 to 2318 of 2318; both never-produced; producer defect located in run_sn_pools scoped-run maintenance skip; USD 0.000000 and 0 LLM calls</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260901T1221-embedgap" data-who="reckon-ship" data-when="2026-09-01T12:21:00+00:00">
+    <div class="r-comment-body">n-embedgap landed — commit d5c16e41; gate accepted-embedding-coverage passed; measure accepted rows lacking an embedding 2 to 0 against an exact-zero bar, with the firing control moving 2316 to 2318 of 2318 accepted and gap_ids empty at exit 0; artifact docs/evidence/sn-release-readiness/embedding-gap.md; spend USD 0.000000 across 0 LLM calls. The repair is the cheap half. THE RESULT IS THE PRODUCER: a scoped run sets skip_global_maintenance and the StandardName embedding worker is built only when that flag is false, so any scoped run can accept newly described names and leave them with no vector - the precise state the release gate asserts cannot occur. That is why the two rows were never-produced rather than lost, and why repairing them again after the next scoped run would be treating the symptom twice. Tracked as section 7a with its own node.</div>
 </div>
 <div class="r-comment" data-section="§9" data-id="c-20260824T1600-closureaudit" data-who="reckon-ship" data-when="2026-08-24T16:00:00+00:00">
     <div class="r-comment-body">n-readinessclosure landed — commit 7638824a, merged at 41a3405b; gate closure-audit-completeness passed; measure 7 section rows, 2 landed, 5 outstanding, 7 live Cypher citations; artifact docs/evidence/sn-release-readiness/closure-audit.md. The audit contradicts the recorded impl of 0.99 and the correction is downward, not a rounding: LANDED are §3, whose export accounting closes exactly at 2,030 emitted + 305 excluded = 2,335 accepted with every emitted identity serialized and the gate reporting zero issues, and §6, whose pre-spend tail census closes at 144 + 72 + 1 = 217 with residual 0 over 431 stranded sources. OUTSTANDING are §2 (accepted 2,335, scored 1,894, structural authority 250, overlap 0, residual 191 — 96 catalog edits with no reviewer, 84 derived rows with no reviewer, 5 bare structural markers, 6 with a named reviewer but no score), §4 (_build_stub_entry still emits status deprecated with superseded_by and a successor link against the internal-record-only lock; dormant only because catalog_approved is 0 of 1,914 superseded, of which 509 have no successor by either route), §5 (270 of 2,335 accepted lack accepted docs — 138 pending, 68 drafted, 52 reviewed, 12 exhausted — plus 19 quarantined), §7 (missing physics_domain is 0, but missing documentation is 75, and the accept-time normalizer still uses its own _BARE_DOC_LINK_RE and swallows normalization failure instead of refusing acceptance), and §8 (2 accepted source-less identities, 1 live dual-bound source, no voltage_of_ece_channel successor, reflector/centre/phi still on the incumbent target). impl is corrected to 3 of 8 executable nodes. Every zero was taken only after proving property coverage — 4,666 StandardName with full name_stage, 24,789 StandardNameReview with full review_axis, 250 HAS_STRUCTURAL_AUTHORITY edges with complete records — which is the discipline sn-graph-identity-convention exists to make mechanical.</div>
