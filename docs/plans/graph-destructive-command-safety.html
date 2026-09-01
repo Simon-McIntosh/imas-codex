@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="7">
-<meta name="plan-commits" content="68e79fb2">
-<meta name="plan-artifacts" content="docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="9">
+<meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac">
+<meta name="plan-artifacts" content="docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py,imas_codex/graph/neo4j_ops.py,imas_codex/cli/graph/data.py,tests/cli/test_graph_destructive_backup.py,tests/cli/test_graph_destructive_target.py">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -175,6 +175,64 @@
   exactly what stopped the backup node at its fence.
 </p>
 
+    <h2 id="s3c">&#167;3c &mdash; Measured state before the remaining work</h2>
+<p>
+  Re-measured against the tree on 2026-09-01 after the first three nodes landed, so the
+  remaining nodes are cut from what is there now rather than from what &#167;2 and &#167;3
+  found this morning. Three of the findings change the shape of a deliverable.
+</p>
+<p>
+  <strong>The archive rename already happened, so what remains is the code contract, and
+  the two producers fail it in opposite directions.</strong>
+  <code>codex-current-20260901T125005Z.tar.gz</code> was renamed in place to
+  <code>imas-codex-graph-dev-6fc745c-20260901T125109Z.tar.gz</code> with SHA-256
+  <code>e13a9054&hellip;</code> and size 2,458,442,456 unchanged across the rename
+  (<a href="/imas-codex/evidence/catalog-review-surface/graph-backup-receipt">receipt</a>).
+  That corrected one artifact by hand and left both producers unchanged:
+</p>
+<ul>
+  <li><code>graph_export</code> (<code>imas_codex/cli/graph/data.py:326</code>) writes
+    <code>{pkg_name}-{version_label}.tar.gz</code> &mdash; it carries the revision and
+    <strong>omits the timestamp</strong>, so two dumps at one revision collide.</li>
+  <li><code>backup_graph_dump</code> (<code>imas_codex/graph/neo4j_ops.py:442</code>) writes
+    <code>{profile.name}-{timestamp}.dump</code> &mdash; it carries the timestamp and
+    <strong>omits the revision</strong>, so a dump cannot state which code it restores into.</li>
+</ul>
+<p>
+  Each producer already holds the half the other omits, so the contract is a convergence of
+  two existing conventions rather than a new one.
+</p>
+<p>
+  <strong>The manifest counts must be read before the service stops.</strong> The manifest
+  built at <code>data.py:456</code> carries <code>version</code>, <code>git_commit</code>,
+  <code>git_tag</code>, <code>timestamp</code> and <code>format</code>. On the dump path
+  Neo4j is already stopped by the time <code>_build_archive</code> runs, so a count issued
+  there has nothing to query; the counts have to be captured from the live graph before the
+  stop and carried in. The CSV and cached-dump paths do not stop the service and are the
+  easier half &mdash; a solution that only works there is not the deliverable.
+</p>
+<p>
+  <strong>The currency check must report an age, not a verdict.</strong> Measured at
+  18:10 on 2026-09-01: the newest restorable archive is
+  <strong>2026-09-01 14:52:53</strong> and the newest live database file
+  (<code>data/transactions/neo4j/checkpoint.0</code>) is <strong>18:10:20</strong>,
+  <strong>11,847&nbsp;s later</strong>, for no reason other than that the service is running
+  and checkpointing. A running store is <em>always</em> newer than its last backup, so a
+  boolean &ldquo;is the backup current&rdquo; reads false forever and teaches nothing. The
+  answer an operator can act on is the measured gap plus what it is a gap against.
+  <code>graph status</code> (<code>imas_codex/cli/graph/server.py:317</code>) already prints
+  a graph-manifest block and is where that line is read.
+</p>
+<p>
+  <strong>Two smaller bindings.</strong> The offsite figure must come from the registry, not
+  from the local record that is the thing under suspicion &mdash; the local manifest claims a
+  last push of <code>5.3.0rc6.dev91-g2479801d7.d20260706-r1</code>, and confirming it is the
+  task. And the documentation defect has an exact address:
+  <code>docs/architecture/graph-profiles.md</code> presents <code>name</code> /
+  <code>IMAS_CODEX_GRAPH</code> as selecting <em>&ldquo;what data&rdquo;</em> (lines 8, 21
+  and 191), which is the sentence &#167;3 measured as false.
+</p>
+
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
     <ul>
       <li>A backup routine that produces a restorable artifact or fails loudly, with the
@@ -258,6 +316,9 @@
 </div>
 <div class="r-comment" data-section="§4" data-id="c-20260901T1700-decisionslocked" data-who="reckon-ship" data-when="2026-09-01T17:00:00+00:00">
     <div class="r-comment-body">CORRECTED 2026-09-01, and the correction is the point: an earlier version of this comment asserted that BOTH of this plan's decisions were locked, naming <code>backup-failure-posture</code> as fail-closed. <strong>That was false. The lead locked only <code>destructive-target-posture</code>; <code>backup-failure-posture</code> was not put to them in that round and REMAINS OPEN.</strong> The coordinator dropped it to fit a four-question limit and then wrote it up as decided, which is recording an approval that was never given — the most damaging kind of error in a plan record, because a later reader has no way to tell a fabricated lock from a real one. What IS locked: <code>destructive-target-posture</code> = require-explicit-name, so <code>load</code> and <code>clear</code> must name their destination and refuse when the resolved symlink disagrees, on the measured ground that the documented environment variable selects host and ports while a single symlink selects the data. That alone unblocks <code>catalog-review-surface</code>. Still needed from the lead: whether a caller whose backup could not be produced aborts or proceeds.</div>
+</div>
+<div class="r-comment" data-section="§4" data-id="c-20260901T1800-statedrift" data-who="reckon-ship" data-when="2026-09-01T18:00:00+00:00">
+    <div class="r-comment-body">PLAN-STATE DRIFT CORRECTED, and the shape of it is worth naming because the record looked healthy while it was wrong. Two nodes landed this afternoon and both wrote a comment: n-realbackup2 (commit <code>d9f54eff</code>, merged <code>4edf6c30</code>) and n-targetname (commit <code>f02560ac</code>, merged <code>fb8a8b7c</code>). NEITHER advanced <code>impl</code>, <code>commits</code> or <code>artifacts</code> — the plan still read 0.25 with a single commit while three nodes were on origin/main, so a reader consulting the ledger rather than the prose would have seen a quarter of the work done and one fix landed. A landing beat that writes only a comment is not a landing beat: the comment is the account, the state write is what <code>roadmap</code> and the next session actually read. Corrected here against the tree: all three fix commits verified reachable from origin/main by <code>git merge-base --is-ancestor</code>, <code>_require_matching_graph_target</code> present at data.py:52 with call sites at 531 (load) and 1263 (clear), <code>backup_graph_dump</code> called at data.py:603 and registry.py:810, and <code>backup_existing_data</code> gone with zero remaining references. <code>impl</code> is restated against the full node denominator of nine — three landed, six remaining, so 0.33 rather than a re-derived 0.25.</div>
 </div>
 <div class="r-comment" data-section="§2" data-id="c-20260901T1715-backuplocked" data-who="reckon-ship" data-when="2026-09-01T17:15:00+00:00">
     <div class="r-comment-body">backup-failure-posture is now locked, and the context that decided it is worth keeping because it inverted the question. The coordinator had offered abort-versus-proceed while stating it could not size the blast radius. Enumerating the callers answered that and dissolved the framing: there are TWO, both destructive - pre-load and pre-pull - so nothing routine is affected, and BACKUP_GRAPH_DUMP ALREADY EXISTS UNUSED IN THE SAME FILE. So the real finding is not that failure handling is wrong but that two destructive commands call a marker-writer while a genuine neo4j-admin dump sits immediately below it. The name is the defect: the docstring says 'Create a marker for pre-operation recovery (lightweight)' and the function honestly touches a zero-byte marker - it is the NAME backup_existing_data that promises recovery, which is precisely why the defect survived, since reading the function would have revealed it and no caller needed to. This also closes a coordinator error recorded above: an earlier version of the sibling comment asserted this decision was already locked when it had never been put to the lead.</div>
