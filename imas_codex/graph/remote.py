@@ -575,108 +575,6 @@ echo "LOAD_COMPLETE"
     return run_script_via_stdin(script, ssh_host=ssh_host, timeout=600, check=True)
 
 
-def remote_export_graph(
-    graph_name: str,
-    ssh_host: str,
-    scheduler: str = "none",
-) -> str:
-    """Export (dump) the active graph on a remote host.
-
-    Returns the remote path to the created archive (in the remote
-    ``exports/`` directory) so the caller can ``scp_from_remote`` it.
-
-    Handles GPFS stale-lock scenarios by performing a clean start/stop
-    cycle before dumping if the initial dump fails.
-
-    Args:
-        graph_name: Active graph name (for service naming).
-        ssh_host: SSH host alias.
-        scheduler: ``"slurm"`` or ``"none"`` (systemd).
-
-    Returns:
-        Remote path to the ``.tar.gz`` archive.
-    """
-    from imas_codex.remote.executor import run_script_via_stdin
-
-    lifecycle = _neo4j_lifecycle_bash('"$SERVICE"', scheduler=scheduler)
-    script = f"""\
-set -e
-DATA_DIR="{REMOTE_LINK}"
-EXPORTS="{REMOTE_EXPORTS}"
-SERVICE="imas-codex-neo4j-{graph_name}"
-IMAGE="{_neo4j_image_shell()}"
-mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
-ARCHIVE="$EXPORTS/imas-codex-graph-export-$$.tar.gz"
-
-{lifecycle}
-
-wait_neo4j_ready() {{
-    # Wait for Neo4j to be fully started (up to 60s for large graphs)
-    for i in $(seq 1 12); do
-        if curl -sf http://localhost:7474 >/dev/null 2>&1; then
-            return 0
-        fi
-        sleep 5
-    done
-    echo "Warning: Neo4j did not become ready within 60s" >&2
-}}
-
-do_dump() {{
-    mkdir -p "$DATA_DIR/dumps"
-    apptainer exec \
-        --bind "$DATA_DIR/data:/data" \
-        --bind "$DATA_DIR/dumps:/dumps" \
-        --writable-tmpfs \
-        "$IMAGE" \
-        neo4j-admin database dump neo4j \
-            --to-path=/dumps \
-            --overwrite-destination=true \
-            --verbose
-}}
-
-# Stop Neo4j
-stop_neo4j
-
-# Attempt dump — may fail if database wasn't cleanly shut down
-if ! do_dump; then
-    echo "Initial dump failed — performing recovery cycle..." >&2
-    # Start Neo4j for clean recovery, then stop cleanly
-    start_neo4j
-    wait_neo4j_ready
-    stop_neo4j
-    # Retry dump
-    do_dump
-fi
-
-# Package archive
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"' EXIT
-ARCHIVE_DIR="$TMPDIR/imas-codex-graph-export"
-mkdir -p "$ARCHIVE_DIR"
-cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
-
-# Create manifest
-DATE=$(date -Iseconds)
-cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
-{{"version": "remote-export", "timestamp": "$DATE"}}
-MANIFEST_EOF
-
-tar czf "$ARCHIVE" -C "$TMPDIR" "imas-codex-graph-export"
-rm -rf "$TMPDIR"
-
-# Restart Neo4j
-start_neo4j
-
-echo "ARCHIVE_PATH=$ARCHIVE"
-"""
-    output = run_script_via_stdin(script, ssh_host=ssh_host, timeout=600, check=True)
-    # Extract archive path from marker line
-    for line in output.strip().splitlines():
-        if line.startswith("ARCHIVE_PATH="):
-            return line.split("=", 1)[1].strip()
-    raise RuntimeError(f"Could not find archive path in output:\n{output}")
-
-
 def remote_backup(
     label: str,
     ssh_host: str,
@@ -982,6 +880,9 @@ echo "LOAD_COMPLETE"
 
 def build_remote_export_script(
     graph_name: str,
+    *,
+    archive_name: str,
+    archive_dir_name: str,
     scheduler: str = "none",
 ) -> str:
     """Build a bash script for streaming remote graph export.
@@ -996,7 +897,7 @@ EXPORTS="{REMOTE_EXPORTS}"
 SERVICE="imas-codex-neo4j-{graph_name}"
 IMAGE="{_neo4j_image_shell()}"
 mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
-ARCHIVE="$EXPORTS/imas-codex-graph-export-$$.tar.gz"
+ARCHIVE="$EXPORTS/{archive_name}"
 
 {lifecycle}
 
@@ -1038,7 +939,7 @@ fi
 echo "PROGRESS:ARCHIVING"
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
-ARCHIVE_DIR="$TMPDIR/imas-codex-graph-export"
+ARCHIVE_DIR="$TMPDIR/{archive_dir_name}"
 mkdir -p "$ARCHIVE_DIR"
 cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
 
@@ -1047,7 +948,7 @@ cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
 {{"version": "remote-export", "timestamp": "$DATE"}}
 MANIFEST_EOF
 
-tar czf "$ARCHIVE" -C "$TMPDIR" "imas-codex-graph-export"
+tar czf "$ARCHIVE" -C "$TMPDIR" "{archive_dir_name}"
 rm -rf "$TMPDIR"
 SIZE=$(du -h "$ARCHIVE" | cut -f1)
 
@@ -1067,6 +968,8 @@ def _build_remote_dd_only_push_script(
     annotation_args: str,
     tag_latest_block: str,
     codex_cli_path: str,
+    archive_name: str,
+    archive_dir_name: str,
     scheduler: str = "none",
     partition: str | None = None,
 ) -> str:
@@ -1094,7 +997,8 @@ def _build_remote_dd_only_push_script(
         # $ARCHIVE is expanded by the outer bash before srun sees it.
         # Paths are on shared GPFS so the compute node can access them.
         export_block = f"""\
-if {srun_flags} {codex_cli_path} graph export --dd-only -o "$ARCHIVE"; then
+if {srun_flags} {codex_cli_path} graph export --dd-only -o "$ARCHIVE" \\
+    --archive-dir-name "{archive_dir_name}"; then
     echo "  Export completed on compute node"
 else
     RC=$?
@@ -1106,13 +1010,16 @@ else
     exit $RC
 fi"""
     else:
-        export_block = f'"{codex_cli_path}" graph export --dd-only -o "$ARCHIVE"'
+        export_block = (
+            f'"{codex_cli_path}" graph export --dd-only -o "$ARCHIVE" '
+            f'--archive-dir-name "{archive_dir_name}"'
+        )
 
     return f"""\
 set -e
 EXPORTS="{REMOTE_EXPORTS}"
 mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
-ARCHIVE="$EXPORTS/imas-codex-graph-dd-push-$$.tar.gz"
+ARCHIVE="$EXPORTS/{archive_name}"
 
 cleanup() {{
     rm -f "$ARCHIVE"
@@ -1152,6 +1059,8 @@ def build_remote_push_script(
     is_dev: bool = False,
     dd_only: bool = False,
     codex_cli_path: str | None = None,
+    archive_name: str,
+    archive_dir_name: str,
     scheduler: str = "none",
     partition: str | None = None,
 ) -> str:
@@ -1197,6 +1106,8 @@ oras tag "{artifact_ref}" latest 2>&1
             annotation_args=annotation_args,
             tag_latest_block=tag_latest_block,
             codex_cli_path=codex_cli_path or "imas-codex",
+            archive_name=archive_name,
+            archive_dir_name=archive_dir_name,
             scheduler=scheduler,
             partition=partition,
         )
@@ -1210,7 +1121,7 @@ EXPORTS="{REMOTE_EXPORTS}"
 SERVICE="imas-codex-neo4j-{graph_name}"
 IMAGE="{_neo4j_image_shell()}"
 mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
-ARCHIVE="$EXPORTS/imas-codex-graph-push-$$.tar.gz"
+ARCHIVE="$EXPORTS/{archive_name}"
 
 {lifecycle}
 
@@ -1259,7 +1170,7 @@ fi
 
 echo "PROGRESS:ARCHIVING"
 TMPDIR=$(mktemp -d)
-ARCHIVE_DIR="$TMPDIR/imas-codex-graph-push"
+ARCHIVE_DIR="$TMPDIR/{archive_dir_name}"
 mkdir -p "$ARCHIVE_DIR"
 cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
 
@@ -1268,7 +1179,7 @@ cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
 {{"version": "remote-push", "timestamp": "$DATE"}}
 MANIFEST_EOF
 
-tar czf "$ARCHIVE" -C "$TMPDIR" "imas-codex-graph-push"
+tar czf "$ARCHIVE" -C "$TMPDIR" "{archive_dir_name}"
 rm -rf "$TMPDIR"
 SIZE=$(du -h "$ARCHIVE" | cut -f1)
 
@@ -1300,6 +1211,12 @@ def build_remote_release_push_script(
     facility_artifact_refs: dict[str, str] | None = None,
     version_tag: str,
     git_commit: str,
+    archive_name: str,
+    archive_dir_name: str,
+    dd_archive_name: str | None = None,
+    dd_archive_dir_name: str | None = None,
+    facility_archive_names: dict[str, str] | None = None,
+    facility_archive_dir_names: dict[str, str] | None = None,
     message: str | None = None,
     token: str | None = None,
     is_dev: bool = False,
@@ -1316,6 +1233,18 @@ def build_remote_release_push_script(
     Emits ``PROGRESS:`` markers for phase tracking.
     """
     codex_cli = codex_cli_path or "imas-codex"
+    if dd_artifact_ref and (not dd_archive_name or not dd_archive_dir_name):
+        raise ValueError("DD release requires caller-supplied archive names")
+    if facility_artifact_refs:
+        if not facility_archive_names or not facility_archive_dir_names:
+            raise ValueError("Facility release requires caller-supplied archive names")
+        missing_names = set(facility_artifact_refs) - set(facility_archive_names)
+        missing_directories = set(facility_artifact_refs) - set(
+            facility_archive_dir_names
+        )
+        if missing_names or missing_directories:
+            missing = sorted(missing_names | missing_directories)
+            raise ValueError(f"Missing archive names for facilities: {missing}")
 
     # Token is passed into the script via _do_ghcr_login argument
     token_arg = f'"{token}"' if token else ""
@@ -1350,7 +1279,7 @@ def build_remote_release_push_script(
 echo "PROGRESS:FILTERING_DD"
 # Run DD-only export with periodic keepalive to prevent SSH timeout
 "$CODEX_CLI" graph export --dd-only --source-dump "$DATA_DIR/dumps/neo4j.dump" \\
-    -o "$DD_ARCHIVE" </dev/null 2>&1 &
+    -o "$DD_ARCHIVE" --archive-dir-name "{dd_archive_dir_name}" </dev/null 2>&1 &
 EXPORT_PID=$!
 while kill -0 "$EXPORT_PID" 2>/dev/null; do
     echo "PROGRESS:FILTERING_DD"
@@ -1382,12 +1311,15 @@ echo "SIZE_DD=$SIZE_DD"
     if facility_artifact_refs:
         for fac, fac_ref in sorted(facility_artifact_refs.items()):
             fac_upper = fac.upper()
+            fac_archive_name = facility_archive_names[fac]
+            fac_archive_dir_name = facility_archive_dir_names[fac]
             facility_block += f"""
 echo "PROGRESS:FILTERING_FAC_{fac_upper}"
-FAC_ARCHIVE_{fac_upper}="$EXPORTS/imas-codex-graph-{fac}-push-$$.tar.gz"
+FAC_ARCHIVE_{fac_upper}="$EXPORTS/{fac_archive_name}"
 "$CODEX_CLI" graph export --facility {fac} \\
     --source-dump "$DATA_DIR/dumps/neo4j.dump" \\
-    -o "$FAC_ARCHIVE_{fac_upper}" </dev/null 2>&1
+    -o "$FAC_ARCHIVE_{fac_upper}" \\
+    --archive-dir-name "{fac_archive_dir_name}" </dev/null 2>&1
 
 echo "PROGRESS:PUSHING_FAC_{fac_upper}"
 _do_ghcr_login {token_arg}
@@ -1402,7 +1334,7 @@ rm -f "$FAC_ARCHIVE_{fac_upper}"
 
     dd_archive_init = ""
     if dd_artifact_ref:
-        dd_archive_init = 'DD_ARCHIVE="$EXPORTS/imas-codex-graph-dd-push-$$.tar.gz"'
+        dd_archive_init = f'DD_ARCHIVE="$EXPORTS/{dd_archive_name}"'
 
     return f"""\
 set -e
@@ -1412,7 +1344,7 @@ SERVICE="imas-codex-neo4j-{graph_name}"
 IMAGE="{_neo4j_image_shell()}"
 CODEX_CLI="{codex_cli}"
 mkdir -p "$EXPORTS" && chmod 700 "$EXPORTS"
-FULL_ARCHIVE="$EXPORTS/imas-codex-graph-push-$$.tar.gz"
+FULL_ARCHIVE="$EXPORTS/{archive_name}"
 {dd_archive_init}
 
 # Authenticate with GHCR — use provided token or load from remote .env
@@ -1478,7 +1410,7 @@ fi
 
 echo "PROGRESS:ARCHIVING_FULL"
 TMPDIR=$(mktemp -d)
-ARCHIVE_DIR="$TMPDIR/imas-codex-graph-push"
+ARCHIVE_DIR="$TMPDIR/{archive_dir_name}"
 mkdir -p "$ARCHIVE_DIR"
 cp "$DATA_DIR/dumps/neo4j.dump" "$ARCHIVE_DIR/graph.dump"
 
@@ -1487,7 +1419,7 @@ cat > "$ARCHIVE_DIR/manifest.json" << MANIFEST_EOF
 {{"version": "remote-push", "timestamp": "$DATE"}}
 MANIFEST_EOF
 
-tar czf "$FULL_ARCHIVE" -C "$TMPDIR" "imas-codex-graph-push"
+tar czf "$FULL_ARCHIVE" -C "$TMPDIR" "{archive_dir_name}"
 rm -rf "$TMPDIR"
 TMPDIR=""
 SIZE_FULL=$(du -h "$FULL_ARCHIVE" | cut -f1)
@@ -1524,7 +1456,6 @@ __all__ = [
     "remote_cleanup_archive",
     "remote_create_graph_dir",
     "remote_ensure_exports_dir",
-    "remote_export_graph",
     "remote_fetch_from_ghcr",
     "remote_is_neo4j_running",
     "remote_list_graphs",
