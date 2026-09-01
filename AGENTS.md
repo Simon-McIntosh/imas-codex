@@ -24,7 +24,7 @@ All model and tool settings live in `pyproject.toml` under `[tool.imas-codex]`. 
 
 | Section | Purpose | Accessor |
 |---------|---------|----------|
-| `[graph]` | Neo4j connection, graph name/location | `get_graph_uri()`, `get_graph_username()`, `get_graph_password()`, `resolve_graph()` |
+| `[graph]` | Neo4j connection, active symlink identity, server location | `get_graph_profile()`, `get_graph_name()`, `get_graph_location()`, `get_graph_uri()` |
 | `[hosts]` | Host/location metadata, login nodes, local hosts | `is_local_host()` |
 | `[logs]` | CLI log directory and rotation | — |
 | `[embedding]` | Embedding model, dimension, location, scheduler | `get_model("embedding")`, `get_embedding_location()` |
@@ -59,7 +59,7 @@ All model and tool settings live in `pyproject.toml` under `[tool.imas-codex]`. 
 - **Keeping families current:** review the model families periodically and keep at least the latest ~2 iterations of each family in use (e.g. `gpt-5.5` **and** `gpt-5.6`, `claude-sonnet-4.6` → `claude-sonnet-5`, `opus-4.7` → `opus-4.8`). A model can be excluded on **provider capacity** rather than version — e.g. `qwen3.7-max` / `minimax-m3` are omitted from every seat because their OpenRouter providers upstream-throttle (429) under the review pools' concurrency; vet a new reviewer with `sn bench --role concurrency` before seating it.
 - **Effort is a benchmark axis:** `sn bench --role <seat> --efforts minimal,low,medium,high` sweeps reasoning-effort (one row per model×effort) — for judgment seats (review/refine) lower effort can beat high because models overthink, so measure it rather than defaulting to `high`.
 
-**Graph access:** Profiles separate **name** (what data) from **location** (where Neo4j runs). Default graph `"codex"` (all facilities + IMAS DD) runs at location `"iter"`. Select via `IMAS_CODEX_GRAPH` / `IMAS_CODEX_GRAPH_LOCATION`; each location maps to a unique bolt+HTTP port pair (iter 7687/7474, tcv 7688/7475, jt-60sa 7689/7476). `NEO4J_URI`/`NEO4J_USERNAME`/`NEO4J_PASSWORD` override any profile; `resolve_graph(name)` (`imas_codex.graph.profiles`) resolves directly; all CLI `graph` commands take `--graph/-g`. Full detail: `docs/architecture/graph-profiles.md`.
+**Graph access:** The active `~/.local/share/imas-codex/neo4j` symlink selects **what data** Neo4j serves; change it with `imas-codex graph switch NAME`. The independent `IMAS_CODEX_GRAPH_LOCATION` override selects **where Neo4j runs** and therefore its host and Bolt/HTTP port slot (iter 7687/7474, tcv 7688/7475, jt-60sa 7689/7476). `IMAS_CODEX_GRAPH` does not select data. `NEO4J_URI`/`NEO4J_USERNAME`/`NEO4J_PASSWORD` are connection escape hatches; `resolve_neo4j()` (`imas_codex.graph.profiles`) combines the active symlink identity with the resolved location. Graph subcommands expose their own options; there is no universal `--graph/-g` selector. Full detail: `docs/architecture/graph-profiles.md`.
 
 **Location-aware connections:** `is_local_host(host)` picks direct vs tunnel at connect time; for edge cases configure `login_nodes`/`local_hosts` in the facility's private YAML (`imas-codex config local-hosts`).
 
@@ -463,7 +463,7 @@ We run **Neo4j 2026.01.x** with `db.query.default_language: CYPHER_5`. The only 
 
 ### Neo4j Management
 
-`imas-codex graph <cmd>` (`--help` for full list): lifecycle `start`/`stop`/`status`/`shell`/`clear`; archives `export [-f <facility>]`/`load`/`fetch`; GHCR `pull`/`push --dev`/`tags`/`prune --dev` (all take `--facility`); instances `init`/`switch`/`list`; `profiles`; `secure` (rotate password). Also `imas-codex tunnel start <host>`/`status` and `config private push` / `config secrets push <host>`.
+`imas-codex graph <cmd>` (`--help` for the full list): server `start`/`stop`/`status`/`shell`/`profiles`; instances `init`/`switch`/`list`; archives `export`/`load ARCHIVE TARGET`/`fetch`; GHCR `pull`/`push --dev`/`tags`/`prune --dev-only`; maintenance `clear TARGET`/`secure`; facilities `facility`. `export`, `fetch`, `pull`, `push`, `tags`, and `prune` accept `-F/--facility`; `load` and `clear` instead require the explicit `TARGET` selected by the active symlink. `graph status` reports the newest non-empty backup, newest live database file, and their measured lag. Also use `imas-codex tunnel start <host>`/`status` and `config private push` / `config secrets push <host>`.
 
 Never use `DETACH DELETE` on production data without user confirmation. For re-embedding: update nodes in place, don't delete and recreate.
 

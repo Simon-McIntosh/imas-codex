@@ -13,19 +13,19 @@ def graph() -> None:
     Server:
       imas-codex graph start               Start Neo4j (SLURM/systemd/local)
       imas-codex graph stop                Stop Neo4j
-      imas-codex graph status              Show status with SLURM resource usage
+      imas-codex graph status              Show service, backup, and SLURM status
 
     \b
     Setup:
       imas-codex graph init NAME           Create a new graph
       imas-codex graph list                List local graph instances
-      imas-codex graph switch NAME         Activate a different graph
+      imas-codex graph switch NAME         Select data via the active symlink
       imas-codex graph shell               Interactive Cypher REPL
 
     \b
     Archive & Registry:
       imas-codex graph export              Export graph to archive
-      imas-codex graph load <file>         Load graph archive
+      imas-codex graph load ARCHIVE TARGET Load archive into the named active graph
       imas-codex graph push                Push archive to GHCR
       imas-codex graph pull                Fetch + load from GHCR
       imas-codex graph fetch               Download archive (no load)
@@ -34,7 +34,7 @@ def graph() -> None:
 
     \b
     Maintenance:
-      imas-codex graph clear               Clear all graph data
+      imas-codex graph clear TARGET        Clear the named active graph
       imas-codex graph secure              Rotate Neo4j password
 
     \b
