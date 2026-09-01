@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-false-vocab-gaps-landed">
+  <meta name="plan-status" content="reference">
+  <title>WEST rehearsal §3 — the vocab gaps were mostly fabricated | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2>§3 — the pipeline was reporting gaps for vocabulary it already had (2026-07-28)</h2>
+
+    <div class="card" style="border-left:4px solid #c0392b; padding-left:12px;">
+      <p style="margin:0;">
+        <strong>Correction to this document's own first claim.</strong> It was
+        written asserting the recorded vocab gaps were &ldquo;mostly
+        fabricated&rdquo;. Measured against the stored population with the shipped
+        classifier, the reclassification is <strong>76 of 564 &mdash; 13.5%</strong>,
+        not most. Operator-blindness was real and is fixed, but it explains about a
+        seventh of the recorded gaps. The other <strong>488 need their own
+        diagnosis</strong>: <code>position</code> is the worst major segment at 9%
+        (128 unexplained) and 45 <code>device</code> gaps have nothing to do with
+        operators at all. The projection that put it near 63% came from a 21-token
+        sample and was wrong by ~4.7&times;, because one token can back many nodes.
+        Both numbers below are kept as recorded, with this correction on top.
+      </p>
+    </div>
+
+    <div class="card" style="border-left:4px solid #b5651d; padding-left:12px;">
+      <p style="margin:0 0 6px;">
+        <strong>The RC was not cut.</strong> The lead asked whether the pipeline's
+        vocab-error rate was a prompt-context defect — &ldquo;it seems like the
+        pipeline is throwing up lots of vocab errors when the vocab exists&rdquo;.
+        It is in part, but not in the prompts: the prompts are complete and the
+        <em>classifier</em> was blind to operators. <strong>531 of 564 recorded
+        vocab gaps say &ldquo;this token does not exist&rdquo;</strong>, and a
+        measurable share name quantities that compose from operators the grammar
+        already registers. Chasing that took precedence over the release, because
+        composing the gm cluster before fixing it would only have minted more of
+        them.
+      </p>
+      <p style="margin:0;">
+        Two of this session's own confident diagnoses were falsified by later
+        measurement, both before any code depended on them. That is recorded below
+        as prominently as the findings, because the pattern &mdash; a plausible
+        mechanism asserted from reading, then contradicted by one query &mdash; is
+        the recurring failure mode in this plan's history.
+      </p>
+    </div>
+
+    <p>
+      <img src="/imas-codex/figures/sn-west-review-rehearsal/false-vocab-gaps-and-residual.png"
+           alt="Left: the 564 recorded vocab gaps by classifier verdict, 531 absent
+                against 19 wrong-slot-placement, 11 decomposable and 3 ambiguous,
+                with the reason field empty on all of them. Centre: the mechanism,
+                showing that single operators such as square and inverse classify
+                correctly as wrong-slot placements while the multi-operator compound
+                inverse_square and a flux-surface-averaged compound base both
+                classify as absent. Right: the 55 unaccepted WEST sources grouped by
+                the instrument that closes them, 24 needing a rescore, 11 a compose,
+                6 a choice between two names, 5 a review and 9 documented as
+                non-nameable."
+           style="max-width:100%;height:auto;">
+    </p>
+
+    <h3>The prompts are not the defect &mdash; measured, not argued</h3>
+    <p>
+      Every SN prompt was rendered with the real production
+      <code>build_compose_context()</code> and its tokens counted. All five
+      name-bearing seats carry the vocabulary in full:
+    </p>
+    <table>
+      <thead>
+        <tr><th>seat</th><th>operators</th><th>qualifiers</th><th>physical_bases</th>
+            <th>processes</th><th>devices</th><th>geometry</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>generate_name</code></td><td>51/51</td><td>114/114</td><td>159/159</td><td>81/81</td><td>97/97</td><td>63/63</td></tr>
+        <tr><td><code>refine_name</code></td><td>51/51</td><td>114/114</td><td>159/159</td><td>81/81</td><td>97/97</td><td>63/63</td></tr>
+        <tr><td><code>review_names</code></td><td>51/51</td><td>114/114</td><td>159/159</td><td>81/81</td><td>97/97</td><td>63/63</td></tr>
+        <tr><td><code>generate_docs</code></td><td>51/51</td><td>114/114</td><td>159/159</td><td>81/81</td><td>97/97</td><td>63/63</td></tr>
+        <tr><td><code>enrich_parent</code></td><td>51/51</td><td>114/114</td><td>159/159</td><td>81/81</td><td>97/97</td><td>63/63</td></tr>
+      </tbody>
+    </table>
+    <p>
+      So the defect class fixed in <code>d622dfc2</code> (a static example subset in
+      the prompt) is closed for the seats that compose or review a name. The prompt
+      even warns against this exact error and carries a worked <code>gm1</code>
+      example. Two smaller prompt gaps remain and are ISN-side, not codex-side:
+      <code>qualifier_categories</code> and <code>generic_physical_bases</code> are
+      unreachable through <code>get_grammar_context()</code> at all
+      (<code>load_qualifier_categories()</code> exists and is never returned), and
+      the prompt therefore shows a flat qualifier list while asking for
+      <em>ordered</em> stacking &mdash; a plausible driver of ordering errors.
+    </p>
+
+    <h3>The defect is one mechanism behind four call sites</h3>
+    <p>
+      Operators are a grammar mechanism that lives <strong>outside</strong>
+      <code>SEGMENT_TOKEN_MAP</code>, so every consumer reaching for that map alone
+      is silently operator-blind. Measured in the decomposition classifier:
+      <strong>0 of 51 operator tokens</strong> appear in its index.
+    </p>
+    <table>
+      <thead><tr><th>segment / token offered</th><th>verdict</th><th>correct?</th></tr></thead>
+      <tbody>
+        <tr><td><code>qualifier / square</code></td><td><code>wrong_slot_placement</code></td><td>yes</td></tr>
+        <tr><td><code>qualifier / inverse</code></td><td><code>wrong_slot_placement</code></td><td>yes</td></tr>
+        <tr><td><code>qualifier / inverse_square</code></td><td><code>absent</code></td><td><strong>no</strong></td></tr>
+        <tr><td><code>physical_base / flux_surface_averaged_square_magnetic_field</code></td><td><code>absent</code></td><td><strong>no</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Single operators are caught &mdash; <code>ab826533</code> holds. Every
+      <em>multi</em>-operator compound falls through, which is exactly the
+      <code>inverse&nbsp;&compfn;&nbsp;square</code> shape of gm1/gm4/gm5/gm9. The
+      cost is not cosmetic: an <code>absent</code> actionable gap either strands a
+      nameable source (the next drain pays to re-compose it) or raises a spurious
+      request to extend ISN's closed vocabulary. Both look like real gaps in every
+      report.
+    </p>
+    <p>
+      Tokens the model actually proposed, verbatim from the graph, every one of them
+      expressible today: <code>inverse_square_of_magnetic_field</code>,
+      <code>magnetic_field_magnitude_squared</code>,
+      <code>derivative_of_area_with_respect_to_poloidal_flux</code>,
+      <code>line_integrated_density</code>,
+      <code>gradient_rho_squared_over_B_squared</code> (this one is gm6),
+      <code>logarithmic_gradient</code>, <code>path_length_variation</code>,
+      <code>z_square_average</code>, <code>average_square</code>,
+      <code>mean_square</code>,
+      <code>pedestal_maximum_gradient_of_electron_temperature</code>.
+    </p>
+    <p>
+      Compounding it: the <code>reason</code> field is <strong>empty on all
+      564</strong>. ISN's <code>UnknownBaseTokenError</code> carries the full legal
+      token list, but codex has <strong>zero handlers</strong> for it and ISN's own
+      message prints only the count. A model that fails is never told which token,
+      which slot, or the alternatives, so it re-offers the same compound. The
+      gap-report <code>segment</code> field is also unconstrained free text.
+    </p>
+
+    <h3>Two diagnoses of this session, falsified</h3>
+    <table>
+      <thead><tr><th>asserted</th><th>falsified by</th><th>the truth</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>The <code>operator_token &rarr; qualifier</code> map in the rescue path
+              was relabelling correct model output, producing the
+              <code>qualifier:inverse_square</code> records.</td>
+          <td>One graph query. That path writes a distinctive literal reason string;
+              it occurs <strong>0 times</strong> in 564 nodes.</td>
+          <td>The map is not firing at all. The model proposes unregistered
+              <em>compounds</em>; the classifier calls them absent.</td>
+        </tr>
+        <tr>
+          <td>A fold/detach costs ~2 min because of 43.6&nbsp;s of ISN import plus
+              27.7&nbsp;s of context build, per process.</td>
+          <td>Interleaved re-measurement on an idle <code>sun_debug</code> node
+              versus the login node at load 15&ndash;50.</td>
+          <td>Only the <strong>build</strong> is intrinsic:
+              <strong>24.5&ndash;24.9&nbsp;s</strong> against the production catalog
+              on an idle node. The import is <strong>1.7&ndash;2.5&nbsp;s</strong>
+              there; the 43.6&nbsp;s figure was the BEST of five login-node samples
+              (43.6&ndash;96.3&nbsp;s), and the build read 156&ndash;221&nbsp;s on the
+              same node. So <strong>~80% of the observed 2 minutes was contention
+              and ~20% real</strong>, of which the build is ~95%.
+              <code>tests/grammar/</code> runs in 21&nbsp;s on a compute node and did
+              not finish in 20&nbsp;min on the login node.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The second correction has a standing consequence: <strong>never take an ISN
+      wall-clock measurement on the login node.</strong> The lever on import cost is
+      the NUMBER of module files (936 for the grammar package), not CPU: under load
+      each costs ~50&nbsp;ms against ~0.6&nbsp;ms idle, and
+      <code>-X importtime</code> total self-time tracks the swing exactly
+      (3.1&nbsp;s quiet, 46.8&nbsp;s loaded, same 936 modules). ~400 of them are
+      pulled by pydantic entry-point plugin discovery, triggered by the first
+      <code>BaseModel</code> class creation, dragging in the whole
+      opentelemetry / rich / protobuf / requests tree.
+      <code>PYDANTIC_DISABLE_PLUGINS=1</code> cuts login-node import
+      2.0&ndash;2.6&times; (median ~66&nbsp;s &rarr; ~25&nbsp;s, interleaved A/B over
+      6 reps) while costing only 0.26&nbsp;s of CPU idle &mdash; so it is a
+      contention win, not a compute win. <code>logfire</code> is a dev-group
+      dependency that no source file imports; removing it is a dependency decision
+      for the lead, not an agent. Next-largest file-count reduction after it:
+      <code>imas_standard_names/__init__.py</code> imports <code>pint</code>
+      unconditionally, 154 modules a parse-only consumer never needs.
+    </p>
+    <p>
+      <strong>The honest ordering of the three levers</strong>, since it changes what
+      to do rather than just what to believe: (1) run bulk sweeps on
+      <code>sun_debug</code> &mdash; that removes the ~95&nbsp;s contention term and is
+      the single biggest factor in the observed 2&nbsp;minutes; (2) the cache, which
+      removes 24.5 of the ~26 genuinely-real seconds and is what makes a
+      compute-node sweep effectively free; (3) logfire, which halves the residual
+      import that dominates a warm-cache process anywhere contended. Stated
+      plainly: a no-cache sweep on <code>sun_debug</code> would have cost ~26&nbsp;s
+      per fold, not 2&nbsp;minutes &mdash; <em>the login node was the blocker, not
+      the missing cache.</em>
+    </p>
+
+    <h3>What landed</h3>
+    <table>
+      <thead><tr><th>change</th><th>commit</th><th>effect</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>ISN: <code>toroidal_flux_radius_gradient</code> vector base for
+              |&nabla;&rho;|</td>
+          <td><code>221664d</code></td>
+          <td>Unblocks gm3/gm7. <code>gradient</code> was never missing &mdash; it is
+              a registered operator; the blocker was that a transformation may not
+              apply to a geometry carrier, so
+              <code>gradient_of_toroidal_flux_radius</code> is unrepresentable.
+              Deliberately NOT flagged <code>constant_on_flux_surface</code>: &rho; is
+              constant on a flux surface, |&nabla;&rho;| is not, and flagging it would
+              make the reduction gate refuse the averaged names that are the only
+              reason to register it.</td>
+        </tr>
+        <tr>
+          <td>ISN: the grammar context persists across processes</td>
+          <td><code>8fc0da0</code></td>
+          <td>Keyed on a fingerprint of every input (module bytes, specification,
+              vocabulary YAML, distribution version, catalog size/mtime), atomic
+              <code>os.replace</code>, degrades to a rebuild on a corrupt entry, env
+              opt-out. Verified on an idle compute node against the production
+              catalog: payload build 24.5&nbsp;s &rarr; <strong>0.03&nbsp;s</strong>,
+              whole process 26&nbsp;s &rarr; <strong>0.57&nbsp;s (45&times;)</strong>.
+              Six simultaneous cold processes against an empty cache dir all
+              completed, leaving exactly one valid 202&nbsp;KB entry and no temp
+              files. One caveat carried in the code: the catalog half of the key is
+              <code>(relpath, size, mtime_ns)</code> rather than content &mdash;
+              content-hashing the catalog is the very scan the cache exists to avoid
+              &mdash; so an edit preserving both size and mtime is invisible, and
+              every catalog write costs the next process one rebuild. The
+              package and vocabulary half IS content-hashed.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>The residual, by the instrument that closes it</h3>
+    <p>
+      Re-measured against the manifest: <strong>300 of 355</strong> accepted, 55 not.
+      Grouping by the blocking NAME rather than by path changes the shape of the work
+      &mdash; <strong>one rescore unblocks 16</strong>.
+    </p>
+    <table>
+      <thead><tr><th>blocking name</th><th>stage</th><th>WEST paths</th><th>instrument</th></tr></thead>
+      <tbody>
+        <tr><td><code>radial_coordinate_of_line_of_sight</code> (72 sources corpus-wide)</td><td>exhausted</td><td><strong>16</strong></td><td><code>sn rescore</code></td></tr>
+        <tr><td><code>line_integrated_electron_number_density</code> vs <code>line_integrated_electron_density</code></td><td>drafted / exhausted</td><td>3</td><td>pick one</td></tr>
+        <tr><td>gm3 + gm7 sharing <code>flux_surface_normal_contravariant_flux_surface_averaged_metric</code></td><td>exhausted</td><td>2</td><td>supersede, split</td></tr>
+        <tr><td><code>radial_coordinate_of_strike_point</code></td><td>exhausted</td><td>2</td><td><code>sn rescore</code></td></tr>
+        <tr><td><code>b_field_average</code>: <code>flux_surface_averaged_magnetic_field</code> vs <code>flux_surface_average_magnetic_field_magnitude</code></td><td>exhausted / pending</td><td>1</td><td>neither &mdash; see below</td></tr>
+        <tr><td>gm1, gm4, gm5, gm6 (no name at all)</td><td>&mdash;</td><td>4</td><td>compose</td></tr>
+        <tr><td><code>darea_dpsi</code>, <code>density_ratio</code>, <code>ece/channel/optical_depth</code></td><td>&mdash;</td><td>3</td><td>compose (false gaps)</td></tr>
+        <tr><td>7 time bases, <code>convergence/iterations_n</code>, <code>detector_humidity</code></td><td>&mdash;</td><td>9</td><td>document as non-nameable</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Two adjudications settled from the DD text. <code>b_field_average</code> is
+      documented &ldquo;Flux surface averaged modulus of B&rdquo;, so the name needs
+      <code>magnitude</code> &mdash; the exhausted candidate lacks it and the pending
+      one is malformed (<code>flux_surface_average_</code>, not
+      <code>averaged</code>); the correct name is
+      <code>flux_surface_averaged_magnetic_field_magnitude</code> and neither
+      existing candidate should win. And <code>ece/channel/optical_depth</code> was
+      filed as a true vocab gap, but <code>optical_depth</code> IS the registered
+      <code>opacity</code> base &mdash; another false gap of the class above.
+    </p>
+
+    <h3>The ambiguity is one path, and /phi is not it</h3>
+    <p>
+      Counted on the edge the export actually reads
+      (<code>HAS_STANDARD_NAME</code>, both ends at an exported stage, excluding
+      <code>HAS_PARENT</code> co-realization): <strong>103 pairs corpus-wide,
+      exactly 1 of them WEST</strong> &mdash;
+      <code>equilibrium/time_slice/constraints/b_field_pol_probe/measured</code>
+      realizing both <code>poloidal_magnetic_field</code> and
+      <code>poloidal_magnetic_field_at_constraint_position</code>. The lead has
+      authorised the detach-plus-rebind, which reaches three non-manifest paths,
+      because it is the only fix that closes the ambiguity without orphaning a name.
+    </p>
+    <p>
+      <strong>/phi is resolved as a reasoned residual, and three of its recorded
+      premises were wrong.</strong> First,
+      <code>toroidal_coordinate_of_line_of_sight</code> is <em>not</em>
+      grammar-invalid: it parses cleanly as <code>coordinate</code> +
+      a <code>toroidal</code> projection, and <code>toroidal_coordinate</code> parses
+      alone. Both spellings are legal, so this was never a validity problem. Second,
+      the grammar-correct <code>toroidal_angle_of_line_of_sight</code> carries
+      <code>superseded_from_stage='refining'</code>, <strong>not
+      <code>accepted</code></strong> &mdash; it never earned quorum, so restoring it
+      would be a hand-accept, which is banned. The restore-then-repoint capability
+      that <code>tombstone_supersede_into</code>'s docstring anticipates cannot be
+      justified on &ldquo;reinstate previously-earned acceptance&rdquo; grounds here.
+      Third, /phi is <strong>not release-blocking</strong>: the family splits 28
+      paths on <code>toroidal_angle_of_measurement_position</code> and 3 on
+      <code>toroidal_coordinate_of_line_of_sight</code>, on <em>disjoint</em> paths,
+      so no path realizes both and the export stays unambiguous. The cycle risk is
+      real and confirmed (<code>toroidal_angle_of_line_of_sight</code>
+      &rarr;<code>REFINED_FROM</code>&rarr;
+      <code>toroidal_coordinate_of_line_of_sight</code>, while
+      <code>toroidal_angle_of_measurement_position</code> refines FROM the former), so
+      a fold would close a 2-cycle. The remaining option &mdash; folding the 3 into
+      the measurement-position name &mdash; is the one this plan already says to leave
+      alone, since that name legitimately spans a broader concept.
+    </p>
+    <p>
+      Noted and deliberately untouched:
+      <code>toroidal_angle_of_measurement_position</code> is
+      <code>origin='catalog_edit'</code> and holds <strong>116 sources</strong> &mdash;
+      the unreviewed bulk-import name whose dedup exemption this plan already removed
+      as a defect. Accepted, broad, and not WEST-blocking; it belongs to
+      <a href="/imas-codex/plans/sn-graph-wide-integrity">sn-graph-wide-integrity</a>.
+    </p>
+
+    <h3>Three claims measurement overturned, two of them the plan's own</h3>
+    <ul>
+      <li><strong><code>path_length_variation</code> does NOT compose.</strong> The
+        plan records that it composes via the <code>variation</code> operator plus
+        the <code>length</code> base, and that claim has been repeated across
+        sessions without re-measurement. Measured against the live registry:
+        <code>variation</code> is a registered operator and <code>length</code> a
+        registered physical_base, but <code>path</code> is in <strong>no</strong>
+        class and <code>path_length</code> is in <strong>no</strong> class. So the
+        compound is not expressible and <code>absent</code> is the correct verdict.
+        The follow-up is a narrow vocabulary decision &mdash; register
+        <code>path</code>, or reuse the already-registered
+        <code>connection_length</code> &mdash; not a classifier fix.</li>
+      <li><strong><code>qualifier_categories</code> is not missing from the
+        prompts.</strong> Its <em>tokens</em> all reach every seat, because they are
+        qualifier names. The real gap is that the <strong>category ordering
+        structure</strong> is not exposed while the prompt asks for ordered
+        stacking &mdash; which matters because the flat qualifier class is
+        mid-decomposition into ordered binding-depth segments. No token-coverage
+        test can detect this.</li>
+      <li><strong>gm6's <code>absent</code> verdict was correct, not a miss.</strong>
+        Codex has ISN <code>0.8.0rc58</code>, which predates the
+        reduction-over-binary work, so the composed form raises
+        <code>UnknownBaseTokenError</code> there. Independently,
+        <code>rho</code> and <code>B</code> are symbol shorthand registered in no
+        class, so no token matcher can reach it &mdash; that needs symbol expansion,
+        a different instrument.</li>
+    </ul>
+
+    <h3>Not done</h3>
+    <ul>
+      <li>488 of the 564 recorded gaps remain unexplained by the operator mechanism,
+        including 128 <code>position</code> and 45 <code>device</code>. Diagnosing
+        that class is its own piece of work. The retry-feedback change that fills
+        the empty <code>reason</code> field is the prerequisite that makes it
+        diagnosable at all.</li>
+      <li>Three consumers still read <code>SEGMENT_TOKEN_MAP</code> directly rather
+        than the operator-inclusive accessor:
+        <code>vocab_token_filter.py:228</code> (so plural dedup cannot see
+        operators &mdash; <code>squares</code> will not dedup against
+        <code>square</code>), <code>vocab_promotion.py:53</code>, and
+        <code>workers.py:279</code>. Each is a candidate for the sixth instance of
+        this same mechanism.</li>
+      <li>ISN-side: locus tokens <code>active_wall_point</code>,
+        <code>beam_path</code>, <code>primary</code> are in the locus registry but
+        in no <code>SEGMENT_TOKEN_MAP</code> segment, so a consumer enumerating the
+        vocabulary cannot emit them &mdash; the same shape as the unsegmented
+        <code>gyrocenter</code>.</li>
+      <li>The RC is not cut and no paid work ran this session. The graph was read,
+        never written.</li>
+      <li>The 531 stored <code>absent</code> gaps are not reclassified. Stopping their
+        production comes first; a reconcile over the stored ones is a separate,
+        sequenced step.</li>
+      <li>gm2/gm6 need the reduction-over-a-binary-form grammar extension the lead
+        chose over the two alternatives the plan offered (a weighting qualifier
+        asserts a normalisation these coefficients do not perform; a lexicalised
+        composite base was forbidden earlier in this same plan). Measured: a
+        reduction wrapping a binary form fails in the PARSER, not merely the model
+        validator, so it is a parser change, not a validator relaxation.</li>
+      <li>ISN-side prompt reachability (<code>qualifier_categories</code>,
+        <code>generic_physical_bases</code>, the unsegmented <code>gyrocenter</code>)
+        is unqueued.</li>
+    </ul>
+
+  </main>
+</body>
+</html>

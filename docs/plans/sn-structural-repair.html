@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-structural-repair">
+  <meta name="plan-title" content="SN structural repair: re-derive stale edges, backfill parse columns, canonicalize names">
+  <meta name="plan-summary" content="Archived 2026-08-10 as a shipped structural-repair record. Current exact membership and lifecycle recovery is owned by graph-wide semantic integrity.">
+  <meta name="plan-status" content="archived">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="">
+  <meta name="plan-blocks" content="">
+  <title>SN structural repair | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <section class="card" style="border-left:4px solid #2563eb;padding:0.75em 1em;margin-bottom:1.25em">
+      <p style="margin:0 0 0.4em"><strong>✓ SHIPPED (2026-06-30) — two RCs on the fork for review:</strong>
+        codex graph/MCP <code>v5.3.0-rc5</code> (GHCR + CI) and ISNC catalog
+        <code>v0.2.0rc54</code> (2194 names, GitHub Pages). All structural-health metrics zero.</p>
+      <ul style="margin:0">
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>§2a grammar backfill</strong> —
+          200 → <strong>36</strong> NULL-base accepted non-derived names; 164 backfilled, 36 true defects
+          marked <code>grammar_parse_fallback=true</code>. $0. Record:
+          <a href="../archive/sn-structural-repair-s2a-landed.html">§2a landed</a>.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>§2b keystone — idempotency fixed to a fixpoint</strong> —
+          re-derivation now mints 0 / orphans 0 (4 code fixes; the decisive one is batch-authoritative
+          admission). mode_number/diffusivity tangles repaired; <code>toroidal_mhd_mode_number</code> no
+          longer a projection parent; §2b defects 12→0. Derived parents stabilized <strong>1375→284</strong>
+          (595 churn-era shadows reaped; fixpoint guarantees no legitimate loss). + automatic
+          orphaned-content cleanup (794 stale DocsRevisions cleared). Commits
+          <code>da19942e</code>/<code>4d16adf1</code>/<code>a9dbc840</code>. Record:
+          <a href="../archive/sn-structural-repair-s2b-landed.html">§2b landed</a>.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>§2c/§2d — canonicalize + record defects</strong> —
+          <strong>0 NonCanonicalNameError</strong> remain: 27 names renamed in-place to their canonical
+          token order (edges/docs preserved) + 2 deprecate-merged. The 7 genuine defects (6 subject-stack,
+          1 unknown-base) recorded as 5 <code>VocabGap</code> nodes for a maintainer vocab decision. $0.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>wrongly-superseded parents (108) + 3 code hardenings</strong> —
+          post-drain audit found 108 superseded names that were the live <code>derive_edges</code>-parent
+          of a child (208 children under dead parents), incl. foundational bases (<code>atomic_mass</code>,
+          <code>major_radius</code>, <code>radius</code>, <code>wavelength</code>). Un-superseded + dropped
+          113 bogus REFINED_FROM → <strong>0 children under superseded parents</strong>. Hardenings:
+          orphan-sweep recovers unclaimed <code>refining</code>; <code>_rewire</code> migrates only to a true
+          rename; binary operands excluded from unit inheritance. See followup f-snsr-005.</li>
+        <li><strong>Decisions locked:</strong> <code>superseded-base-parent</code> → un-supersede (each
+          superseded base was wrongly refined into one of its own projection children);
+          <code>repair-vehicle</code> → code-fix + one-time data repair.</li>
+        <li><span class="badge badge-shipped">✓ landed</span> <strong>full docs drain + two RCs</strong> —
+          graph-wide docs drained (2229 accepted + 150 exhausted + 8 pending); cut codex graph RC
+          <code>v5.3.0-rc5</code> (origin, GHCR, CI building) and ISNC catalog RC <code>v0.2.0rc54</code>
+          (origin, 2194 names, commit <code>7514c1c0</code>). No new ISN grammar RC needed.</li>
+        <li><strong>Residuals (tracked, optional follow-on):</strong> 5 §2d VocabGaps (ISN vocab rotation);
+          8 docs-pending foundational bases; 3 ISNC validation exclusions + 3 dimensionless-density advisories.
+          Finalize: review RCs → <code>release --final</code> / <code>sn release --final</code> to upstream.</li>
+      </ul>
+    </section>
+
+    <h2 id="s0">§0 — Premise: stale data AND a live non-idempotency bug</h2>
+
+    <p style="background:#fef3c7;padding:0.6em 0.9em;border-radius:4px">
+      <strong>Reframing (2026-06-25, handoff f-snch-003 + live investigation).</strong>
+      The original premise below ("stale data, not a redesign") is only half right. The
+      stale edges are real, but the deeper finding is that the four startup functions
+      (<code>rederive_structural_edges</code> → <code>seed_parent_sources</code> →
+      <code>normalize_derived_parent_lifecycle</code> → <code>structural_accept_derived_parents</code>,
+      <code>loop.py:902</code>) are <strong>not idempotent</strong>: every <code>sn run</code>
+      startup mints fresh placeholder parents and orphans others even on a stable name set.
+      Three bugs: <strong>(B1) accretion</strong> — <code>_write_standard_name_edges</code>
+      MERGE-<em>adds</em> derived HAS_PARENT edges and never deletes a child's stale ones (this
+      <em>is</em> the diffusivity-8 + mode_number tangles); <strong>(B2) admission ping-pong</strong>
+      — Clause-B + the single-child-shadow veto read the accreted topology, so mint↔delete
+      oscillates per startup (~154/rotation); <strong>(B3) unreaped zombies</strong> —
+      <code>normalize_derived_parent_lifecycle</code> only re-checks parents that still have a
+      child, so childless derived parents accumulate (live: 327, of which 283 carry orphaned docs).
+      So §2b is a <em>code fix</em> + one-time data repair, not pure re-derivation.
+    </p>
+    <p>
+      Investigating the sibling-drift complaint
+      (<a href="/imas-codex/plans/sn-family-harmonization">sn-family-harmonization</a>)
+      surfaced a class of <strong>structural</strong> defects in the SN graph:
+      names that don't parse, projection children parented under the wrong node,
+      and parent/child physics-domain mismatches. Research established the key
+      finding: the <strong>current</strong> <code>derivation.py</code> and
+      <code>parents.py</code> code already produces the <em>correct</em> edges and
+      parse columns — the bad edges/columns are <strong>leftovers from older
+      pipeline versions</strong>. So this is largely a deterministic,
+      <strong>~$0</strong> re-derivation + backfill job, not a redesign.
+    </p>
+    <p>
+      The motivating case: <code>toroidal_mhd_mode_number</code>
+      (<code>physics_domain=transport</code>, column-null) is wrongly acting as
+      the projection-<strong>parent</strong> of <code>poloidal_mode_number</code>
+      and <code>radial_mode_number</code> (both magnetohydrodynamics). A
+      toroidal-specific name cannot be the root of a poloidal projection. Running
+      current <code>derive_edges()</code> on those children correctly points them
+      at the bare base <code>mode_number</code> — the live graph just carries a
+      stale edge migrated during an old refine cycle
+      (<code>persist_refined_name</code> migrates source edges,
+      <code>graph_ops.py:8675</code>).
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Stale HAS_PARENT edges point mode_number children at the wrong parent; re-derivation fixes them"
+           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+        <style>
+          .bx{fill:#fff;stroke:#374151;stroke-width:1}
+          .t{fill:#111827;font-size:11.5px}
+          .tt{fill:#111827;font-size:12.5px;font-weight:600}
+          .cap{fill:#374151;font-size:11px}
+        </style>
+        <!-- LEFT current/stale -->
+        <text x="20" y="18" class="tt">current (stale edge)</text>
+        <rect x="20" y="30" width="190" height="28" fill="#fff" stroke="#b91c1c" stroke-width="1.4"/>
+        <text x="28" y="48" class="t">toroidal_mhd_mode_number (transport)</text>
+        <rect class="bx" x="20" y="92" width="120" height="24"/><text x="26" y="108" class="t">poloidal_mode_number</text>
+        <rect class="bx" x="20" y="122" width="120" height="24"/><text x="26" y="138" class="t">radial_mode_number</text>
+        <rect class="bx" x="20" y="152" width="120" height="24"/><text x="26" y="168" class="t">toroidal_mode_number</text>
+        <g stroke="#b91c1c" stroke-width="1.2" fill="none">
+          <line x1="80" y1="92" x2="95" y2="58"/>
+          <line x1="80" y1="122" x2="105" y2="58"/>
+          <line x1="80" y1="152" x2="115" y2="58"/>
+        </g>
+        <text x="20" y="192" class="cap">children → a projection node (wrong, domain-mismatched)</text>
+
+        <line x1="380" y1="20" x2="380" y2="184" stroke="#e5e7eb" stroke-width="1"/>
+
+        <!-- RIGHT re-derived -->
+        <text x="420" y="18" class="tt">after re-derivation</text>
+        <rect x="420" y="30" width="150" height="28" fill="#fff" stroke="#16a34a" stroke-width="1.4"/>
+        <text x="428" y="48" class="t">mode_number (bare base, vector)</text>
+        <rect class="bx" x="420" y="92" width="120" height="24"/><text x="426" y="108" class="t">poloidal_mode_number</text>
+        <rect class="bx" x="420" y="122" width="120" height="24"/><text x="426" y="138" class="t">radial_mode_number</text>
+        <rect class="bx" x="420" y="152" width="120" height="24"/><text x="426" y="168" class="t">toroidal_mode_number</text>
+        <g stroke="#16a34a" stroke-width="1.2" fill="none">
+          <line x1="480" y1="92" x2="490" y2="58"/>
+          <line x1="480" y1="122" x2="500" y2="58"/>
+          <line x1="480" y1="152" x2="510" y2="58"/>
+        </g>
+        <text x="420" y="192" class="cap">3 distinct axes → bare base re-admitted (Clause B)</text>
+      </svg>
+      <figcaption style="font-size:12px;color:#374151">
+        The <code>mode_number</code> tangle: re-deriving the children's
+        <code>HAS_PARENT</code> edges re-points them at the bare base, which the
+        admission gate then re-admits as a vector parent (3 distinct projection
+        axes). No LLM. The complication: the correct base is currently
+        <code>superseded</code> — see the open decision.
+      </figcaption>
+    </figure>
+
+    <h2 id="s1">§1 — Repair taxonomy (research-verified counts)</h2>
+    <table>
+      <thead><tr><th>bucket</th><th>count</th><th>operation</th><th>LLM</th></tr></thead>
+      <tbody>
+        <tr><td>Backfill grammar columns</td><td>164 (+<code>toroidal_mhd_mode_number</code>)</td><td>re-run <code>_parse_grammar</code> over the ids (they parse <em>now</em>; columns predate the backfill, <code>grammar_parse_version=NULL</code>)</td><td>$0</td></tr>
+        <tr><td>Rename-cascade (canonical)</td><td>27</td><td><code>rename_cascade(old, canonical)</code> — the parser hands back the exact canonical form (e.g. <code>lower_neutron_energy → neutron_lower_energy</code>)</td><td>$0</td></tr>
+        <tr><td>Deprecate-and-merge</td><td>~4</td><td>canonical target already exists as a <code>superseded</code> node → retire the stale survivor, migrate sources</td><td>$0</td></tr>
+        <tr><td>Re-derive <code>HAS_PARENT</code> edges</td><td>8 (4 diffusivity parents) + the <code>mode_number</code> family</td><td>delete stale edge → <code>derive_edges</code> → re-run <code>is_admissible_parent_name</code> (resurrects bare-base parents <code>mode_number</code>, <code>*_diffusivity</code>)</td><td>$0</td></tr>
+        <tr><td>Re-compose (true defects)</td><td>7</td><td>6 subject-stack (<code>ion</code>+<code>particle</code> etc.) + 1 unknown-base (<code>normal_non_axisymmetric_magnetic_field</code>) through GENERATE_NAME / vocab rotation</td><td>small</td></tr>
+        <tr><td>Domain "drift" false-errors</td><td>~254</td><td>handled by <a href="/imas-codex/plans/sn-coverage-and-hygiene">sn-coverage-and-hygiene §1</a> populating <code>source_domains</code> (the legitimacy oracle)</td><td>(§1)</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Headline:</strong> apart from the 7 re-compose cases, the whole
+      plan is deterministic re-derivation + backfill (~$0). The 200 "unparsed"
+      accepted names decompose as <strong>164 backfill</strong> +
+      <strong>36 true defects</strong> (29 non-canonical, 6 subject-stack, 1
+      unknown-base).
+    </p>
+
+    <h2 id="s2">§2 — Deliverables &amp; sequence</h2>
+    <ul>
+      <li><span class="badge badge-shipped">✓ landed</span> <strong>§2a — grammar backfill.</strong>
+        Re-ran <code>_write_grammar_decomposition</code> (same <code>parse_standard_name</code>
+        authority as persist) over the 200 column-null ids. <strong>200 → 36</strong>; 164
+        backfilled, 36 true defects marked <code>grammar_parse_fallback=true</code>. $0.
+        Record: <a href="../archive/sn-structural-repair-s2a-landed.html">§2a landed</a>.</li>
+      <li><strong>§2b — edge re-derivation.</strong> For the projection children
+        with stale parents (the diffusivity 8 + the <code>mode_number</code>
+        family): delete the stale <code>HAS_PARENT</code> edge, recompute via
+        <code>derive_edges</code> (<code>derivation.py:58</code>), re-run the
+        admission gate (<code>parents.py:207</code>). Resolve the
+        superseded-base question first (decision below).
+        <em>Done-when:</em> the original query
+        <code>MATCH (c)-[r:HAS_PARENT {operator_kind:'projection'}]->(p) WHERE p.component IS NOT NULL</code>
+        returns 0 <strong>AND</strong> no projection child is parented under a
+        domain-mismatched non-base node. <strong>Plan defect found:</strong> that
+        query alone <em>misses</em> the mode_number tangle — its bad parent
+        <code>toroidal_mhd_mode_number</code> has <code>component=NULL</code>, so the
+        done-when must also assert <code>toroidal_mhd_mode_number</code> is no longer a
+        projection parent and its 3 children re-point at bare base <code>mode_number</code>.</li>
+      <li><strong>§2c — canonical renames + deprecate-merge.</strong> Drive
+        <code>rename_cascade()</code> for the 27 absent-target canonical renames;
+        deprecate-and-merge the ~4 whose canonical already exists
+        <code>superseded</code>. All <code>--dry-run</code> first.
+        <em>Done-when:</em> 0 <code>NonCanonicalNameError</code> among accepted
+        names.</li>
+      <li><strong>§2d — re-compose the 7 true defects.</strong> Route the 6
+        subject-stack + 1 unknown-base names through GENERATE_NAME (the
+        unknown-base may need an ISN vocab rotation). <em>Done-when:</em> all 7
+        either parse cleanly or carry a recorded <code>VocabGap</code> +
+        decision.</li>
+      <li><strong>§2e — verify.</strong> Re-run the structural-defect queries;
+        confirm the family anchors for harmonization are clean (no member
+        resolves to a superseded node via a stale edge).</li>
+    </ul>
+
+    <h2 id="s3">§3 — Documentation updates (on landing)</h2>
+    <ul>
+      <li><code>docs/architecture/standard-names.md</code> — note the
+        re-derivation/backfill maintenance pass and the grammar-parse-version
+        backfill semantics.</li>
+      <li><code>plans/README.md</code> — register this plan.</li>
+      <li>Cross-reference the <code>source_domains</code> dependency on
+        <code>sn-coverage-and-hygiene §1</code>.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="superseded-base-parent" data-choice="un-supersede" data-by="reckon-ship" data-when="2026-06-25T04:46:42+00:00">
+    <p class="r-dec-q">The correct bare-base parents ( mode_number , *_diffusivity ) are currently superseded . How should edge re-derivation handle that?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="un-supersede">un-supersede the bare-base parent (restore it as the live canonical vector base)</button>
+      <button class="r-opt" data-value="repoint-to-successor">re-point children at the live successor of the superseded base</button>
+      </p>
+    <p class="r-dec-rat">Live REFINED_FROM dry-run (2026-06-25): every wrongly-superseded bare base was refined into ONE OF ITS OWN projection children — mode_number→toroidal_mode_index, electron_diffusivity→radial_electron_diffusivity, ion_diffusivity→poloidal_ion_diffusivity, particle_diffusivity→radial_ion_state_diffusion_coefficient. Repointing children onto those &#x27;successors&#x27; recreates the exact tangle. Un-supersede the bare base (Clause B re-admits with ≥2 projection axes) AND delete the bad projection-of-self REFINED_FROM edge.</p>
+    </div>
+<div class="r-dec" data-key="repair-vehicle" data-choice="cli-phase" data-by="reckon-ship" data-when="2026-06-25T04:46:42+00:00">
+    <p class="r-dec-q">Run the repair as inline Cypher migrations (graph shell) or as a scoped CLI phase?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="inline-cypher">inline Cypher via graph shell / repl (AGENTS.md migration policy)</button>
+      <button class="r-opt chosen" data-value="cli-phase">a scoped sn CLI phase (e.g. sn run --only reparent / a sn repair command)</button>
+      </p>
+    <p class="r-dec-rat">Reframed by handoff f-snch-003: the churn is a LIVE non-idempotency bug in the startup functions (B1 edge accretion / B2 admission ping-pong / B3 unreaped childless zombies), not just stale data — so the plan&#x27;s §0 &#x27;~$0, not a redesign&#x27; premise is superseded. Repair = CODE FIX of rederive_structural_edges/_write_standard_name_edges/normalize_derived_parent_lifecycle/_rewire_has_parent_off_superseded + parents.py (reconcile-not-accrete, reap childless, don&#x27;t migrate onto projection-of-self) so startups become idempotent, PLUS one-time inline-Cypher data repair for the current mess. Backfill (§2a) + renames stay inline Cypher.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-snsr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-structural-repair §2a" data-resolved-at="2026-06-25T04:51:35+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§2a — grammar-column backfill (the cheap, high-coverage first step)</h4>
+    <div class="r-fu-body">Re-run the grammar parse over the 164 accepted non-derived names whose segment columns are NULL only because they predate the backfill (grammar_parse_version=NULL) — they parse fine under current ISN. This is $0, reversible, and immediately shrinks the "200 unparsed" figure to the 36 true defects, clarifying the rest of the plan. Confirm the 164 vs 36 split against the live graph before writing.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-structural-repair (http://localhost:8765/imas-codex/sn-structural-repair.html)
+Section: §2a (grammar-column backfill)
+Tier:    opus
+
+Context
+  200 accepted non-derived StandardNames have NULL physical_base AND NULL
+  geometric_base. Research showed ~164 parse fine under CURRENT ISN — their
+  segment columns simply predate the grammar-parse backfill (grammar_parse_version
+  NULL). Re-parsing with the same authority the persist path uses backfills them
+  at $0. Only ~36 are true defects (handled by later sections). Do §2a only here.
+
+State to read  (code/files, not the plan)
+  imas_codex/standard_names/graph_ops.py (_parse_grammar ~128, the pydantic parse
+    authority; how segment columns + grammar_parse_version are written)
+  imas_codex/standard_names/derivation.py
+  AGENTS.md &quot;Graph Migrations&quot; (run as inline Cypher / repl, batch large sets;
+    never scripts/migrate_*.py)
+
+Scope locks / constraints  (non-decision)
+  Use the SAME parse authority as persist (imas_standard_names grammar /
+    _parse_grammar) — do not hand-roll parsing. Re-run is idempotent.
+  Only touch the column-null set; do NOT rename or re-parent here (later sections).
+  Confirm the 164/36 split live before writing; report any drift from research.
+  Never hardcode model strings; import enums from generated models.
+
+Done-when
+  1. The ~164 column-null-but-parseable names have segment columns +
+     grammar_parse_version populated.
+  2. The accepted-no-base count drops to the ~36 true defects; report the exact
+     residual list (it seeds §2b/§2c/§2d).
+  3. uv run pytest tests/standard_names/ green.
+  4. Followup written for §2b (edge re-derivation, honouring the superseded-base
+     decision) + this one resolved.</pre>
+    <p class="r-fu-outcome">§2a landed (2026-06-25): re-ran _write_grammar_decomposition over the 200 NULL-base accepted non-derived names → 200 dropped to 36. 164 backfilled with segment columns + grammar_parse_version; 36 true defects marked grammar_parse_fallback=true (exact list captured in archive/sn-structural-repair-s2a-landed.html, seeds §2c/§2d). $0, no code changed. Live-confirmed the 164/36 split before writing.</p>
+    </article>
+<article class="r-fu" data-id="f-snsr-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair §2b" data-resolved-at="2026-06-25T06:09:53+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§2b keystone — fix HAS_PARENT non-idempotency (3 churn bugs) then one-time data repair + reap</h4>
+    <div class="r-fu-body">The handoff f-snch-003 reframed §2b: the derived-parent churn is a live non-idempotency bug, not just stale data. Fix three bugs in the four startup functions, then run the one-time data repair (un-supersede the bare bases per the locked decision, reconcile the 8 diffusivity + mode_number stale edges), then reap the 327 childless zombies (user-authorized), then verify idempotency (startup twice → 0 mint / 0 orphan). §2a's 36-defect residual feeds §2c/§2d afterward.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-structural-repair
+Section: §2b (keystone — idempotency code fix + one-time data repair + reap)
+Tier:    opus
+
+Context
+  The four startup functions (loop.py:902: rederive_structural_edges → seed_parent_sources →
+  normalize_derived_parent_lifecycle → structural_accept_derived_parents) are NOT idempotent.
+  Live root-cause (memory project_sn_derived_parent_churn_rootcause): B1 accretion —
+  _write_standard_name_edges (graph_ops.py:1301) MERGE-adds derived HAS_PARENT edges and never
+  deletes a child&#x27;s stale ones (this IS the diffusivity-8 + mode_number tangles); B2 admission
+  ping-pong — Clause-B + single-child-shadow veto (parents.py) read accreted topology so
+  mint↔delete oscillates; B3 unreaped childless zombies — normalize only re-checks parents that
+  still have a child (live 327 childless, 283 with orphaned docs).
+
+Locked decisions to honour
+  superseded-base-parent → un-supersede the bare base (mode_number, electron/ion/particle_diffusivity);
+    delete the bad projection-of-self REFINED_FROM edge; Clause B re-admits with ≥2 axes.
+  repair-vehicle → code fix (startup functions) + one-time inline-Cypher data repair.
+  zombie reap → DETACH DELETE the 327 childless derived parents + their orphaned docs/reviews.
+
+State to read (code)
+  imas_codex/standard_names/graph_ops.py: _write_standard_name_edges (1301), rederive_structural_edges
+    (1514), _rewire_has_parent_off_superseded (1543), _materialize_derived_parent_rows (1799),
+    seed_parent_sources (2027), normalize_derived_parent_lifecycle (2093),
+    _delete_derived_parent_nodes (1741), _query_accepted_derived_parents_for_cleanup (1715).
+  imas_codex/standard_names/parents.py (is_admissible_parent_name, is_single_child_shadow).
+  imas_codex/standard_names/derivation.py (derive_edges).
+
+Scope locks / constraints
+  B1: when re-deriving a child&#x27;s HAS_PARENT, reconcile to EXACTLY the current derive_edges output —
+    delete derived (operator_kind projection/coordinate/unary_postfix) edges the current derivation no
+    longer emits. Do NOT delete catalog/import or non-derived edges.
+  B2: evaluate admissibility against the FINAL reconciled topology (after the full re-derivation pass),
+    so mint/delete converges in one startup, no cross-run oscillation.
+  B3: extend normalize_derived_parent_lifecycle (or a reaper) to delete childless derived parents
+    (origin=&#x27;derived&#x27;, no live HAS_PARENT child) + orphaned docs/reviews/derived StandardNameSource.
+  _rewire_has_parent_off_superseded MUST NOT migrate children onto a REFINED_FROM successor that is a
+    projection-of-self (would recreate the tangle). Un-supersede instead.
+  Never DETACH DELETE accepted catalog-authoritative (origin!=derived) names.
+  Never hardcode model strings; import enums from generated models.
+
+Done-when
+  1. Code fix lands; uv run pytest tests/standard_names/ green (add regression tests for B1/B2/B3).
+  2. One-time data repair: mode_number + *_diffusivity un-superseded and live as vector bases; the 3
+     mode_number children + diffusivity children re-point at the correct bare base; bad
+     projection-of-self REFINED_FROM edges deleted. §2b query returns 0 AND toroidal_mhd_mode_number is
+     no longer a projection parent.
+  3. 327 childless zombies + orphaned docs reaped.
+  4. Idempotency gate (§2e): run the four startup functions twice on the stabilized set; diff = 0 new
+     parents minted, 0 orphaned.
+  5. Followup written for §2c/§2d (renames + re-compose, residual in archive) + this one resolved.</pre>
+    <p class="r-fu-outcome">§2b landed (2026-06-25): idempotency fixed to a FIXPOINT (startup mints 0 / orphans 0). Four code fixes in graph_ops.py — reconcile-not-accrete edges; rederive from LIVE names only + clear dead-name edges; zero-incoming reaper; batch-authoritative admission (full_rebuild) [the decisive one — transient graph topology was flipping the qualifier single-child shadow-veto verdict → 2-cycle]; + _rewire projection-of-self guard; + Neo4j-2026 NOT-IN fix. Data repair: mode_number/electron/ion_diffusivity un-superseded as vector bases, bad projection-of-self REFINED_FROM deleted, toroidal_mhd_mode_number no longer a projection parent (3→0 children), §2b projection-under-component defects 12→0. Derived parents stabilized 1375→284 (595 documented reaped — churn-era shadows; fixpoint guarantees nothing legitimately-derivable is lost). Commits da19942e (converge), 4d16adf1 (initial 3-bug fix). Suite green except 4 pre-existing unrelated failures. PLUS automatic orphaned-content cleanup (a9dbc840): reaper deletes its DocsRevisions inline + sweep_orphaned_docs_revisions backstop each startup; cleared 794 orphaned revisions live. Record: archive/sn-structural-repair-s2b-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-snsr-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair §2c" data-resolved-at="2026-06-25T06:18:47+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">§2c/§2d — canonical renames + re-compose the 36 true defects</h4>
+    <div class="r-fu-body">§2a's residual is 36 accepted non-derived names the current ISN grammar rejects (grammar_parse_fallback=true). §2c: drive rename_cascade for the absent-target canonical renames (e.g. lower_neutron_energy→neutron_lower_energy), deprecate-and-merge any whose canonical already exists superseded — all --dry-run first. §2d: route the subject-stacked + unknown-base names through GENERATE_NAME / an ISN vocab rotation; each either parses cleanly or carries a recorded VocabGap. Exact 36-name list in archive/sn-structural-repair-s2a-landed.html.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-structural-repair
+Section: §2c (canonical renames + deprecate-merge) then §2d (re-compose true defects)
+Tier:    opus
+
+Context
+  §2a left 36 accepted non-derived names that current ISN rejects
+  (grammar_parse_fallback=true). The list is in
+  archive/sn-structural-repair-s2a-landed.html. They split into: non-canonical
+  orderings the parser would re-spell (rename_cascade), names whose canonical
+  already exists as a superseded node (deprecate-and-merge), subject-stacked
+  names (e.g. ion+particle), and unknown-base names
+  (normal_non_axisymmetric_magnetic_field) needing a vocab rotation.
+
+State to read
+  imas_codex/standard_names/graph_ops.py (rename_cascade, deprecate/merge helpers)
+  archive/sn-structural-repair-s2a-landed.html (the 36-name residual)
+  docs/architecture/standard-names.md (vocab rotation workflow)
+
+Scope locks / constraints
+  --dry-run every rename/merge first; report the mapping before applying.
+  Use the ISN parser to derive the canonical form — never hand-spell.
+  Re-compose via GENERATE_NAME; record a VocabGap when a true token gap blocks.
+  Never DETACH DELETE accepted catalog-authoritative names.
+
+Done-when
+  1. 0 NonCanonicalNameError / grammar_parse_fallback=true among accepted
+     non-derived names (or each residual carries a recorded VocabGap + note).
+  2. uv run pytest tests/standard_names/ green.
+  3. Followup written for the docs top-up + export + this one resolved.</pre>
+    <p class="r-fu-outcome">§2c/§2d landed (2026-06-25). §2c: 0 NonCanonicalNameError remain among accepted non-derived names — 27 renamed in-place (SET id=canonical_form from NonCanonicalNameError.canonical_form, preserving all edges/docs/reviews, grammar columns re-parsed, scalar produced_sn_id/DocsRevision.sn_id refs updated) + 2 deprecate-merged where the canonical already existed (sources migrated, old superseded via HAS_SUCCESSOR). §2d: the 7 genuine defects (6 subject-stack: ion+particle×3, helium_4+ion, hydrogenic+ion_species, deuterium_deuterium+neutron; 1 unknown-base: normal_non_axisymmetric_magnetic_field) recorded as 5 VocabGaps (vocab_gap:subject:{particle,ion,ion_species,neutron} category=subject_stack + vocab_gap:physical_base:normal_non_axisymmetric_magnetic_field category=unknown_base, each carrying affected_standard_names). These need a maintainer naming/vocab-rotation decision (the grammar forbids stacked subjects); tracked in-graph rather than guessed. $0, no code changed.</p>
+    </article>
+<article class="r-fu" data-id="f-snsr-004" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-06-25" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="2026-06-30T10:13:40+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Docs top-up for the ~25 undocumented stable derived parents + export</h4>
+    <div class="r-fu-body">After stabilization only ~25 of the 284 stable derived parents lack accepted docs (vs the ~$80 budgeted; far cheaper now). Run a docs cycle (enrich_parents/generate_docs/review_docs) to bring them to docs_stage=accepted, then sn release --export-only and spot-check that NO placeholder description and NO childless parent is exported. The derived-parent population is now a fixpoint, so exporting is finally safe (was deliberately deferred while churning).</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-structural-repair
+Section: docs top-up + export
+Tier:    sonnet
+
+Context
+  The derived-parent population is now an idempotent fixpoint (284 stable parents,
+  ~259 docs_accepted). Only ~25 lack accepted docs. The handoff deferred export
+  while the population churned; that blocker is gone.
+
+How to run
+  uv run imas-codex sn run --flush -c &lt;small budget&gt; (docs pools drain the ~25).
+  Monitor docs_stage=accepted climb; mid-pipeline state is durable.
+  Then: uv run imas-codex sn release --export-only.
+
+Done-when
+  1. The ~25 undocumented stable derived parents reach docs_stage=accepted
+     (or exhausted if borderline) with children-grounded docs.
+  2. sn release --export-only emits the catalog; spot-check no placeholder
+     description and no childless derived parent survives export.
+  3. Followup written (or plan closed) + this one resolved.</pre>
+    <p class="r-fu-outcome">Shipped (2026-06-30). Full graph-wide docs drain complete (campaign ~$285 across runs): 2229 docs-accepted + 150 exhausted + 8 pending (un-superseded origin=None bases the docs gate excludes). Two RCs cut on the FORK (origin) for review: (1) codex graph/MCP v5.3.0-rc5 via `imas-codex release` — both graph variants pushed to GHCR, git tag pushed, CI building (graph-quality/smoke-test/build-and-push → Azure test). (2) ISNC catalog v0.2.0rc54 via `sn release` — 2194 names exported to imas-standard-names-catalog (commit 7514c1c0), pushed to origin, GitHub Pages live. No new ISN (grammar) RC needed (grammar unchanged). Final graph evidence ALL ZERO: childless derived=0, placeholder=0, orphaned DocsRevisions=0, s2b projection-under-component=0, mode_number tangle=0, children-under-superseded=0, NonCanonical accepted=0. Residuals (tracked, optional): 5 §2d VocabGaps (need ISN vocab rotation), 8 docs-pending foundational bases, 3 ISNC validation exclusions + 3 dimensionless-density advisories. Finalize: review RCs → release --final / sn release --final to upstream.</p>
+    </article>
+<article class="r-fu" data-id="f-snsr-005" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-06-30" data-recommends-skill="/reckon-ship sn-structural-repair" data-resolved-at="2026-06-30T05:37:24+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Wrongly-superseded correct parents (108) + 3 code hardenings</h4>
+    <div class="r-fu-body">The post-drain audit surfaced a larger instance of the plan's core defect: 104→108 SUPERSEDED names were the current derive_edges-parent of a LIVE child (208 children under dead parents), including foundational bases (atomic_mass, major_radius, radius, wavelength, power_density, energy_flux, toroidal_angle). They were wrongly superseded by their own MORE-SPECIFIC children via bogus refine cycles. Un-superseded them (name_stage→accepted) + dropped 113 bogus REFINED_FROM edges + reconciled → 0 children under superseded parents. Three root-cause code hardenings landed alongside: orphan-sweep recovers unclaimed 'refining' nodes (was: stale-claim-only, stranding nodes forever); _rewire migrates only to a TRUE rename (same base/subject/component), never a specialization (was recreating projection-under-component tangles); binary-operand children excluded from derived-parent unit inheritance (was: dimensionless ratio polluting m^-3 parents → heterogeneous skip).</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-structural-repair
+Section: wrongly-superseded parents + code hardenings (record)
+Tier: opus
+
+Done (2026-06-30):
+  1. 108 wrongly-superseded correct parents un-superseded (derive_edges-parent of a
+     live child); 113 bogus specialization REFINED_FROM edges dropped; reconciled.
+     Verified 0 live children under a superseded parent, s2b=0, childless=0.
+     Reversible (re-supersede); audit list in scratchpad unsupersede_audit.json.
+  2. orphan_sweep recovers unclaimed refining nodes (commit on this branch).
+  3. _rewire_has_parent_off_superseded migrates only to a true rename.
+  4. binary-operand children excluded from derived-parent unit inheritance.
+  All committed; SN suite green except pre-existing RefinedName/finalize/budget-lease failures.
+
+Residual / next:
+  The 108 un-superseded bases need docs (final drain in progress); then export.</pre>
+    <p class="r-fu-outcome">Un-superseded 108 wrongly-superseded correct parents (208 children re-attached to live parents); 0 children under superseded parents; s2b=0; childless=0. Code hardenings committed: orphan-sweep unclaimed-refining recovery, _rewire rename-only migration, binary-operand unit-inheritance exclusion. Docs top-up for the restored bases in progress (drain #4), then export.</p>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

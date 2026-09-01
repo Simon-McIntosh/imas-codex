@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-catalog-approval-pipeline">
+  <meta name="plan-title" content="Standard-Name Catalog Approval Pipeline (WEST first-review gate)">
+  <meta name="plan-summary" content="Archived 2026-08-10 after its shipped catalog approval, merge, tag, freeze, and unwind mechanisms were absorbed by the later WEST human-review and catalog-release chain.">
+  <meta name="plan-status" content="archived">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Standard-Name Catalog Approval Pipeline | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="5">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-depends-on" content="">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <section class="section-landed" style="border:1px solid #cfe3cf; background:#f3faf3; border-radius:8px; padding:14px 18px; margin-bottom:20px;">
+      <p style="margin:0 0 6px;"><span class="badge badge-shipped">✓ shipped 2026-07-22</span> <strong>All six phases landed; the whole pipeline is built and tested.</strong></p>
+      <p style="margin:0 0 6px;">
+        Gap-only focus (<code>c34bff2e</code>) · two-schema minting (<code>b84825b1</code>) ·
+        additive review-batch export (<code>f4ea9780</code>) · single
+        <code>sn release --review-batch</code> orchestrator (<code>d291c09c</code>) ·
+        SPA fixed review view on the ISN fork (<code>ddf76ef</code>, <code>411d812</code>) ·
+        <code>sn merge</code> approval state machine with the <code>contested</code>
+        holding state (<code>83a77011</code>). Graph-marked tests run against the live
+        Neo4j; full non-graph SN suite green (3 pre-existing prompt/golden drifts
+        unrelated to this work).
+      </p>
+      <p style="margin:0;">
+        Full per-phase record:
+        <a href="../research/archive/sn-catalog-approval-pipeline-landed.html">landed record</a>.
+        <strong>Remaining:</strong> the §10 end-to-end rehearsal on the real WEST
+        corpus is an operational, cost-gated run (drains 355 names through the LLM
+        pipeline) — user-triggered, not autonomous. The design sections below are
+        retained as the reference record.
+      </p>
+    </section>
+
+    <h2 id="s1">§1 — Goal &amp; context</h2>
+    <p>
+      We want the <strong>first human-review gate</strong> for the machine-generated
+      standard-name (SN) set. The vehicle is a concrete, bounded corpus: the DD paths
+      actually populated in the WEST production database (Task 2e DB analysis, shot 62253).
+      The end-to-end intent is:
+    </p>
+    <ol>
+      <li>Ensure every <em>eligible</em> WEST DD source (physical, geometric, coordinate
+        quantities) carries an <strong>accepted</strong> standard name in the local graph —
+        running focused mop-up where names are missing.</li>
+      <li>Export a small <strong>batch</strong> (carrying the already-approved set so the diff is
+        additive) and open a pull request against the upstream catalog repository (ISNC) for
+        human experts to review.</li>
+      <li>On PR merge, promote the reviewed names' lifecycle to a frozen <strong>approved</strong>
+        state immune to further mutation by general <code>sn run</code> pools — untouched names
+        automatically, edited names only if they re-pass the compliance review.</li>
+      <li>Bring the approval back into the local graph — because the graph is the single source
+        of truth and lives locally, the merged PR is the human gate but never itself writes the
+        graph; a local <code>sn merge</code> step always follows approval.</li>
+    </ol>
+    <p>
+      This plan is a <strong>design</strong>. It records what already exists (so we do not
+      rebuild it), isolates the narrow gaps, and specifies the TDD and end-to-end verification
+      for each. The concrete input corpus — <code>imas_codex/standard_names/manifests/west_task_2e.yaml</code>,
+      355 validated DD v4 sources with provenance, governed by the committed schema
+      <code>imas_codex/standard_names/config/sn_sources.schema.json</code> — is already produced
+      and committed; see §3.
+    </p>
+
+    <h2 id="s2">§2 — Pipeline architecture</h2>
+    <p>
+      Two coupled loops. The <strong>local loop</strong> (graph = source of truth) mints
+      accepted names from the manifest. The <strong>upstream loop</strong> is the human gate: an
+      additive batch PR against ISNC, reviewed by experts, whose merge triggers a local
+      <code>sn merge</code> that promotes the reviewed names to <code>approved</code> and freezes
+      them in the graph. A GitHub-hosted CI runner cannot reach the local Neo4j graph, so the
+      authoritative graph write is always a local step run by the maintainer — CI's only role is
+      <code>validate.yml</code> on the PR. Review itself happens in the SPA (served from our ISNC
+      fork), scoped to the PR's SNs and shared by URL (§7).
+    </p>
+    <p>
+      <img src="/imas-codex/figures/sn-approval-pipeline/pipeline.svg"
+           alt="WEST standard-name approval pipeline: local compose/review loop mints accepted names; an additive batch PR to the upstream catalog is the human gate; a local sn merge promotes reviewed names accepted→approved (untouched auto, edited via re-review) and freezes them in the graph."
+           style="max-width:100%; height:auto; border:1px solid #e0e4e8; border-radius:6px; padding:8px; background:#fff;">
+    </p>
+
+    <h2 id="s3">§3 — Input corpus &amp; the sn-sources manifest schema</h2>
+    <p>
+      The WEST workbook lists 744 DD leaf paths across 22 IDS sheets, in DD v3-era spelling.
+      Producing the corpus involved three transforms, all already done and captured in
+      <code>imas_codex/standard_names/manifests/west_task_2e.yaml</code>:
+    </p>
+    <ul>
+      <li><strong>Structural pre-filter</strong> — drop <code>ids_properties/*</code> and
+        <code>code/*</code> (744 → 507).</li>
+      <li><strong>DD v3 → v4 resolution</strong> — every path validated via the imas-dd MCP
+        tools and the migration data; <strong>61 renamed</strong> (e.g.
+        <code>b_field_tor_probe</code> → <code>b_field_phi_probe</code>, <code>j_tor</code> →
+        <code>j_phi</code>, <code>bpol_probe</code> → <code>b_field_pol_probe</code>, ECE
+        <code>t_e</code> → <code>t_radiation</code>; the <code>boundary_separatrix</code> scalars
+        collapse into <code>boundary/*</code>, resolved X-points map to
+        <code>contour_tree/node/{r,z}</code>, and <code>elongation_upper/lower</code> both fold
+        into the single <code>boundary/elongation</code>). Only <strong>8</strong> physical paths
+        have no v4 target — <code>active_limiter_point</code> and <code>strike_point</code> (the
+        latter still covered via the <code>summary</code> IDS) — plus a handful of
+        never-eligible identifiers/flags. The <code>resolution:</code> block records every
+        rename and removal so the conversion is auditable.</li>
+      <li><strong>SN-eligibility filter</strong> — classify each resolved path by the graph's
+        authoritative <code>node_category</code>, keeping only
+        <code>{quantity, geometry, coordinate}</code>
+        (<code>imas_codex.core.node_categories.SN_SOURCE_CATEGORIES</code>). Signal containers
+        collapse to the nameable parent (<code>magnetics/ip/data</code> →
+        <code>magnetics/ip</code>); depth-≥3 <code>time</code> leaves are skipped; structural,
+        metadata, error, identifier, and fit nodes are excluded. Result:
+        <strong>355 distinct eligible v4 sources</strong> (after the classifier fix below and the boundary remap in the resolution record).</li>
+    </ul>
+    <p>
+      <strong>Schema decision — yes, a light schema earns its keep.</strong> A bare path list
+      cannot carry the three things this file must provide: (a) <em>provenance</em> so the
+      v3→v4 conversion is reproducible and auditable, (b) a stable identity so the same file
+      drives <em>both</em> the focus mop-up <em>and</em> the export/approval selection, and (c) a
+      way to surface paths that need a human/classifier decision. The
+      <code>schema_version: 1</code> shape is:
+    </p>
+    <pre style="white-space:pre-wrap; background:#f6f8fa; border:1px solid #e0e4e8; border-radius:6px; padding:12px; font-size:12px;">schema_version: 1
+name: west-task-2e
+title: ...
+description: ...
+provenance:
+  facility: WEST
+  source_document: research/west/Task_2e_WEST_DB_analysis_20251113.xlsx
+  reference_shot: 62253
+  dd_version_target: "4.0.0"
+  eligibility_policy: sn_source_categories   # {quantity, geometry, coordinate}
+  path_form: dd_source_id                    # signal '/data' leaves collapsed to parent
+counts: { raw_leaves, after_structural_filter, eligible_sources, ... }
+sources:                       # canonical, machine-consumable; loader flattens to &lt;ids&gt;/&lt;path&gt;
+  &lt;ids&gt;: [ &lt;ids-relative path&gt;, ... ]
+resolution:                    # informational audit of the v3→v4 conversion
+  renamed: [ { from, to }, ... ]
+  removed: [ { path, reason }, ... ]
+review_candidates:             # dimensionless physical signals mis-gated as structural
+  - { path, note }</pre>
+    <p>
+      The <code>sources</code> mapping is grouped by IDS for human readability; a loader
+      flattens <code>sources.&lt;ids&gt;[]</code> to <code>&lt;ids&gt;/&lt;path&gt;</code>.
+      Entries are DD <strong>source ids</strong> (the nameable node), not raw <code>/data</code>
+      leaves — this matches how the graph stores a <code>StandardNameSource</code> and how
+      export joins names back to paths. Full per-path exclusion detail lives in the
+      <code>west_sn_sources.exclusions.json</code> sidecar to keep the driver file lean.
+    </p>
+    <p>
+      <strong>Classifier gap — found and fixed (landed).</strong> Producing this corpus
+      surfaced a real DD-classifier defect: a whole group of dimensionless physical signals was
+      classified <code>structural</code> and thus invisible to the extractor. Root cause: a
+      signal is stored as a STRUCTURE container with a <code>data</code> leaf and the explicit
+      dimensionless unit <code>'1'</code>, but the container is classified while its unit is
+      still unresolved at build time, so Rule 12 (STRUCTURE-without-unit → structural) demotes
+      it — the same asymmetry that leaves <em>dimensioned</em> signals as quantity only when
+      their unit happens to be present at pass 1. The fix is a pass-2 signal-signature
+      promotion: a <code>structural</code> STRUCTURE/STRUCT_ARRAY carrying unit <code>'1'</code>
+      with a direct <code>data</code> child is promoted to <code>quantity</code>
+      (<code>node_classifier.classify_node_pass2</code> R5;
+      <code>build_dd._reclassify_relational</code>), matching the signal signature the extractor
+      already honours. Scope is exactly the 23 genuine dimensionless quantities across the DD
+      (Z_eff, optical depth, ellipticity, Mach number, flux expansion, beam fractions, strain,
+      j&#8341; skew/kurtosis, …); the 148 <code>'1'</code>-unit containers without a
+      <code>data</code> child (fit artifacts, <code>pulse_schedule</code> reference waveforms,
+      summary structs whose value lives in <code>/value</code>) are deliberately left
+      structural. Landed with unit tests (Red→Green) and applied to the live graph; the four
+      WEST review-candidates now flow into <code>sources</code> (the corpus is 355 after the
+      boundary remap recorded in the resolution block).
+    </p>
+
+    <h2 id="s3b">§3b — Two manifest schemas &amp; minting the SN set</h2>
+    <p>
+      The review operates on two different currencies, so it needs two file schemas:
+    </p>
+    <ul>
+      <li><strong>sn-sources</strong> (<code>sn_sources.schema.json</code>, exists) — a set of
+        <strong>DD paths</strong> (grouped by IDS). This is the extraction/mop-up currency: it
+        drives which sources acquire names. The WEST manifest is one.</li>
+      <li><strong>sn-names</strong> (<code>sn_names.schema.json</code>, to add) — a flat list of
+        <strong>standard-name ids</strong>. This is the review/approval currency: export, PR,
+        merge, and approval all operate on SN ids, not DD paths.</li>
+    </ul>
+    <p>
+      <strong>Minting the SN set from DD paths.</strong> The two are bridged by a deterministic
+      join over graph state: <code>mint_sn_list(dd_paths)</code> = (1) <em>base join</em> — every
+      <code>StandardName</code> whose <code>source_paths</code> list intersects the DD-path set
+      (the link is the <code>dd:&lt;ids&gt;/&lt;path&gt;</code> URI on the SN, not a
+      relationship); then (2) <em>immediate-family closure</em> — because approving a base
+      without its siblings is incoherent, pull in only the <strong>immediate family</strong> of
+      any name touched: its <code>HAS_PARENT</code> parent and that parent's direct children
+      (siblings), one hop in each direction, <em>non-transitive</em>. Sharing a grammar base
+      token (<code>HAS_GEOMETRIC_BASE</code>/<code>HAS_SUBJECT</code>) is deliberately <strong>not</strong>
+      a closure edge — it is too broad — and neither is the transitive descendant tree,
+      <code>IN_CLUSTER</code>, or <code>REFINED_FROM</code> lineage. This is the
+      <strong>path→name join</strong> that the earlier design left unspecified — it is now the
+      heart of the flow.
+    </p>
+    <p>
+      <strong>Do we need a fixed SN file? — derive live, but materialise for the record.</strong>
+      Because the SN set is derivable, <code>--focus &lt;file&gt;</code> need not require a
+      pre-made SN list: it dispatches on the file's schema — an sn-sources file is
+      <em>minted live</em> to the SN set, an sn-names file is used directly. But the live mint
+      depends on graph state at run time (which names exist, current family membership), so it is
+      <strong>not reproducible</strong> across time. Therefore the release CLI should
+      <strong>materialise the resolved SN list as an sn-names artifact</strong> and carry it with
+      the batch — this frozen list is exactly the <em>batch id-set carrier</em> the earlier design
+      lacked: it travels export → PR → merge so <code>sn merge</code> approves precisely the names
+      that were reviewed, not a re-derived (possibly drifted) set. So: sn-sources is the human
+      input; sn-names is the machine-frozen batch record; neither is mandatory as input, but the
+      materialised sn-names list is the authoritative batch identity through the gate.
+    </p>
+
+    <h2 id="s4">§4 — What already exists (build only the gaps)</h2>
+    <p>
+      A machinery scan of imas-codex and ISNC found that most of the target design is
+      <strong>already scaffolded</strong>. This narrows the work sharply — we wire up and fill
+      four gaps rather than build a pipeline. Grounding references:
+    </p>
+    <ul>
+      <li><strong>The <code>approved</code> lifecycle state exists.</strong>
+        <code>NameStage</code> in <code>imas_codex/schemas/standard_name.yaml:305-343</code> is
+        <code>pending → drafted → reviewed → accepted → approved</code>, with
+        <code>approved</code> documented as "accepted through a merged catalog PR … set only
+        when the PR number, URL and merge commit are recorded; RC export/import never grants
+        it." That is exactly the frozen governance state we want.</li>
+      <li><strong>The freeze exists.</strong> <code>sn edit</code> excludes <code>approved</code>
+        from rename eligibility (<code>edit.py:102</code>) and from docs edits
+        (<code>edit.py:1019-1027</code>); field-level <code>protection.py</code> strips protected
+        editorial fields from pipeline writes for any <code>approved</code> /
+        <code>origin='catalog_edit'</code> name (<code>protection.py:119</code>). The name-pipeline
+        pools never re-claim <code>approved</code>/<code>accepted</code>/<code>superseded</code>/<code>exhausted</code>
+        names.</li>
+      <li><strong>Catalog-PR provenance fields exist</strong> on the schema
+        (<code>standard_name.yaml:481-512</code>): <code>catalog_pr_number</code>,
+        <code>catalog_pr_url</code>, <code>catalog_approved_at</code>,
+        <code>catalog_merge_commit_sha</code>, <code>exported_at</code>, <code>origin</code>.</li>
+      <li><strong>Export exists.</strong> <code>sn release --export-only</code>
+        (<code>cli/sn.py:3698-3841</code>, core <code>export.py:run_export</code>) writes one
+        YAML per physics domain plus a <code>catalog.yml</code> manifest — the exact live ISNC
+        layout. Candidate predicate:
+        <code>name_stage IN ['accepted','approved'] AND validation_status='valid' AND docs_stage='accepted'</code>.</li>
+      <li><strong>Approve-on-merge exists.</strong> <code>sn merge</code>
+        (<code>cli/sn.py:4042</code>, <code>merge.py:run_merge</code>) diffs a reviewed PR branch
+        and, with <code>--pr-number/--pr-url/--merge-commit</code>, calls
+        <code>mark_catalog_name_approved</code> (<code>merge.py:653-681</code>) to flip
+        <code>accepted→approved</code> and record the provenance fields.</li>
+      <li><strong>Import/reconcile exists.</strong> <code>catalog_reconcile.reconcile_catalog</code>
+        (<code>catalog_reconcile.py:137</code>) diffs catalog YAML by id and updates editorial
+        fields + provenance for matched names.</li>
+    </ul>
+    <p>The genuine gaps, and only these, are the subject of §5–§8.</p>
+
+    <h2 id="s5">§5 — Gap A: focus mop-up from a manifest file — <strong>SHIPPED</strong></h2>
+    <p>
+      <strong>Landed:</strong> <code>sn run --focus &lt;file.yaml&gt;</code>. No separate flag —
+      the existing <code>--focus</code> entry point now detects when a token is a file on disk,
+      loads it as a <code>schema_version: 1</code> sn-sources manifest, validates it against the
+      committed JSON Schema, and expands <code>sources.&lt;ids&gt;[]</code> to
+      <code>&lt;ids&gt;/&lt;path&gt;</code> focus paths; bare DD paths pass through unchanged and
+      a malformed manifest raises before any processing. Implemented as a pure, tested loader
+      (<code>standard_names/sources_manifest.py</code>: <code>load_sources_file</code>,
+      <code>expand_focus_tokens</code>, <code>SourcesManifestError</code>) wired into
+      <code>cli/sn.py</code> at focus-token flattening; 10 unit tests
+      (<code>tests/standard_names/test_sources_manifest.py</code>) cover valid load, schema
+      violations, non-YAML, dedup, and file-vs-bare-path mixing. The committed WEST manifest
+      expands to its 355 sources through the CLI.
+    </p>
+    <p>
+      Note the standing focus caveat (unchanged by this work): focus seeding mints
+      <code>StandardNameSource</code> nodes directly and <em>bypasses the eligibility gate at
+      seed time</em> — which is exactly why the manifest is pre-filtered to eligible sources in
+      §3; the file is the gate. Whether focus should reseed already-accepted paths on those
+      manifests (churn vs gap-only) remains D-focus below; the file-input mechanism itself is
+      independent of that choice and is done.
+    </p>
+    <p>
+      <strong>Scope of what shipped:</strong> this is the <em>mop-up half</em> — an sn-sources
+      file expands to <strong>DD paths</strong> to seed extraction of missing names. The
+      <em>release/review half</em> consumes the same file differently: it mints the
+      <strong>SN set</strong> (§3b) and also accepts an sn-names list directly (schema dispatch).
+      That minting, the sn-names schema, and the release dispatch are design (§6), not yet built —
+      only the DD-path mop-up loader is code.
+    </p>
+
+    <h2 id="s6">§6 — Gap B: export the growing approved catalog (small PRs, never the full corpus)</h2>
+    <p>
+      The ISNC review catalog is the <strong>approved</strong> nameset, and it builds up
+      slowly. We do <em>not</em> dump the full accepted corpus (~2345 names) into a PR — from the
+      start, and likely ever. Each <code>--focus</code> release exports
+      <strong>the current approved nameset ∪ this focus batch</strong>, deterministically (stable
+      sort by id, canonical field order). Since the already-approved names serialise
+      byte-identically to what is on <code>main</code>, the PR diff is exactly the new batch —
+      additive, no phantom removals. Early PRs are small (approved set ≈ empty, so the diff is
+      just the batch); the approved catalog grows monotonically as batches merge.
+    </p>
+    <p>
+      So the export candidate predicate is <code>name_stage == 'approved' OR id ∈ batch</code>,
+      not the current <code>name_stage IN ['accepted','approved']</code> full dump. The
+      <strong>batch</strong> is the minted SN set (§3b): the release CLI takes a focus input —
+      an sn-sources file, minted live to the SN set, or an sn-names file used directly — resolves
+      it to SN ids, and <strong>materialises that resolved set as an sn-names artifact</strong>.
+      That frozen artifact is the batch's identity from here on: it is committed with the export
+      and carried into the PR so §8's merge approves exactly it. Determinism (stable sort by id +
+      canonical serialisation) is the load-bearing property — without it, incidental reordering
+      pollutes every diff.
+    </p>
+    <p>
+      <strong>Where the frozen artifact lives &amp; how it is traced (D-artifact-cli).</strong>
+      The sn-names records are committed in imas-codex history under
+      <code>imas_codex/standard_names/manifests/reviews/&lt;rc-version&gt;.sn_names.yaml</code>
+      (beside the sn-sources manifests) — durable, reviewable, part of the repo's record. They are
+      <strong>tagged by the RC version</strong> (e.g. <code>v0.2.0rc65</code>), which we assign
+      ourselves and therefore know before any push — so traceability never depends on a PR number.
+      A PR number cannot be reserved ahead of creation (GitHub assigns it on
+      <code>gh pr create</code>), so it is <strong>back-filled</strong>: the artifact carries
+      <code>rc_version</code>, <code>minted_from</code> (the sn-sources file), and the SN id list up
+      front, and <code>pr_number</code>/<code>pr_url</code>/<code>merge_commit</code> are written in
+      after the PR exists.
+    </p>
+    <p>
+      <strong>Fold it into one command so mistakes can't happen.</strong> Mint → freeze artifact
+      (RC-tagged) → export the RC catalog (<code>approved ∪ batch</code> with <code>review_batch</code>
+      stamped, §7) → bump <code>versions.json</code> → commit on a review branch → push to the fork
+      → <code>gh pr create</code> (capture PR#/URL) → back-fill the artifact → commit + push must be
+      a <strong>single <code>sn release</code> (review-batch) invocation</strong>. Doing these by
+      hand risks partial/inconsistent states — an artifact that disagrees with the pushed catalog,
+      a PR with no recorded batch, a forgotten <code>versions.json</code> bump. One orchestrating
+      CLI keeps the artifact, the catalog, and the PR provably in lock-step.
+    </p>
+    <p>
+      Two questions are deferred to a future session (not needed to start): the catalog presently
+      on <code>main</code> holds the full accepted set at <code>status: active</code>, so adopting
+      the approved-only-growing model needs a one-time re-baseline (or a parallel approved
+      catalog); and the batching structure itself — a focus manifest scopes the batch for now.
+    </p>
+
+    <h2 id="s7">§7 — Gap C: the review PR and a PR-scoped SPA view</h2>
+    <p>
+      <strong>The additive PR (data).</strong> A batch's names are new additions to the approved
+      catalog: the PR shows each batch name's full definition being added, on a branch
+      <code>review/&lt;batch&gt;</code>, carrying the already-approved names unchanged so nothing
+      reads as removed. Merging <em>is</em> the human approval act; §8 mirrors it into the graph.
+      ISNC's existing <code>validate.yml</code> gates it — no new validation CI needed.
+    </p>
+    <p>
+      <strong>The existing SPA is the review surface — we do not build a new one.</strong> The
+      catalog SPA (code in the ISN repo, <code>site/src</code>) already renders the catalog and
+      already has a <strong>multi-release version selector</strong>: it deploys per version, each
+      version folder carrying its own <code>data.json</code> (built by
+      <code>imas_standard_names/catalog/dataset.py</code>) with a top-level <code>versions.json</code>
+      driving the dropdown (the rc60…rc64 selector in the live UI). Our fork publishes RCs the
+      same way, so each batch is just <strong>an RC = a catalog version</strong>, browsable and
+      shareable at its version URL (<code>…/imas-standard-names-catalog/&lt;version&gt;/#/browse/…</code>)
+      with no new app or hosting.
+    </p>
+    <p>
+      <strong>PR-scoping = a catalog-shape marker + an ISN-side filter.</strong> "Show only the
+      items in this PR" resolves to: the review RC's catalog carries the batch's SN id-set (the
+      materialised sn_names artifact, §3b), and the SPA, seeing a batch marker, <strong>auto-scopes
+      to those names</strong> (with a toggle to reveal the already-approved context). Concretely,
+      two small pieces:
+    </p>
+    <ul>
+      <li><strong>Driving catalog shape (imas-codex export → dataset.py):</strong> emit the batch
+        id-set into the RC's dataset — a top-level <code>review_batch: [&lt;sn-id&gt;, …]</code>
+        (equivalently the sn_names list). This is the "correct shape" requirement: the export
+        must stamp the batch into <code>data.json</code>. Normal (non-review) builds omit it.</li>
+      <li><strong>Filter (ISN repo SPA):</strong> when <code>data.json</code> carries
+        <code>review_batch</code>, the SPA renders a <strong>fixed view of exactly those names</strong>
+        — no "show all" toggle; the PR view <em>is</em> the batch. It reuses the existing
+        <code>Filters</code>/<code>ResultsList</code> machinery (the batch set constrains the
+        result universe), a small change in <code>site/src</code>, not a new SPA. The
+        already-approved names remain browsable as normal via the version selector (a non-batch
+        version shows the full catalog); the batch RC simply shows only its batch.</li>
+    </ul>
+    <p>
+      <strong>Deep links — advice: reuse what exists, add nothing new.</strong> The SPA already
+      encodes state in the URL (<code>url-state.js</code>: <code>#/&lt;view&gt;/&lt;name&gt;?q=…</code>)
+      and the version is already in the path, so the RC version URL <em>is</em> the shareable
+      per-batch link — fixed to the batch because the catalog itself carries the marker. No
+      PR-number routing, no bespoke deep-link machinery, and no scope toggle/param (the batch RC
+      shows only its own names). The RC version URL is the whole story. Recommendation: ship the
+      <code>review_batch</code> marker + fixed scope; add nothing else.
+    </p>
+
+    <h2 id="s8">§8 — Gap D: <code>sn merge</code> from an accepted PR — the approval state machine</h2>
+    <p>
+      <code>sn merge</code> <strong>is</strong> the correct tool, and it runs only from an
+      <em>accepted</em> (merged) PR — one with a merge commit. Per batch name in the PR:
+    </p>
+    <ul>
+      <li><strong>Untouched</strong> (name and docs identical to the graph's version): the human
+        approved it by merging, so it is <strong>promoted <code>accepted → approved</code>
+        automatically</strong> — human approval plus an implicit LLM rubber-stamp / compliance
+        pass. No re-review is spent on unchanged names.</li>
+      <li><strong>Edited</strong> (name or docs changed by a reviewer): the edit
+        <strong>re-triggers the full review</strong> — this is vital and non-negotiable, so no
+        human wording change reaches the catalog without passing the pipeline's compliance rubric.
+        If the edited form <strong>passes</strong> → <code>approved</code>. If it
+        <strong>fails</strong> → the new <code>contested</code> state below.</li>
+    </ul>
+    <p>
+      <strong>New lifecycle state — <code>contested</code>.</strong> A name that was changed
+      during review but whose edited form failed the compliance re-review lands in
+      <code>contested</code>: neither <code>approved</code> (it failed the rubric) nor silently
+      reverted (a human deliberately changed it). It is a human-vs-machine conflict that needs
+      adjudication, so it is <strong>frozen and excluded from all pools</strong> (like
+      <code>exhausted</code>/<code>superseded</code>) and surfaced in a report. Resolution paths:
+      (a) a maintainer revises the wording via <code>sn edit</code> → re-review → <code>approved</code>;
+      (b) an explicit override-approve (accept the human wording over the rubric, recording a
+      justification) → <code>approved</code>; or (c) revert to the prior accepted form →
+      <code>accepted</code>, re-opening it for a later review batch. The merged PR already
+      records the human intent; <code>contested</code> captures only that the machine could not
+      rubber-stamp that specific edit. The full transition set:
+      <code>accepted →(untouched, merged)→ approved</code>;
+      <code>accepted →(edited)→ re-review → approved | contested</code>;
+      <code>contested →(edit / override / revert)→ approved | accepted</code>.
+    </p>
+    <p>
+      This mostly reuses existing machinery — <code>read_pr_changes</code> already separates
+      edited from unchanged, the re-review/quarantine path exists in <code>run_merge</code>, and
+      <code>mark_catalog_name_approved</code> sets the governance fields. The additions are:
+      auto-approving the <em>untouched</em> batch (merge today only touches diffed rows), and the
+      <code>contested</code> stage below.
+    </p>
+    <p><strong><code>contested</code> — concrete spec.</strong> Worked out against the real schema
+      and worker machinery:</p>
+    <ul>
+      <li><strong>Schema (<code>imas_codex/schemas/standard_name.yaml</code>, NameStage enum
+        ~305-343):</strong> add <code>contested</code> alongside the other non-progressing states
+        (<code>refining</code>/<code>exhausted</code>/<code>superseded</code>). Description: "Edited
+        during human catalog review, but the edited form failed the compliance re-review; frozen
+        pending human adjudication. Not published; not silently reverted." It is orthogonal to
+        <code>validation_status</code> — a contested name simply never reaches the approved catalog
+        because it is not <code>approved</code>, so no <code>validation_status</code> change is
+        needed (leave it as it was; the name_stage gate does the work).</li>
+      <li><strong>Freeze / pool-exclusion:</strong> the pool claim predicates in
+        <code>workers.py</code> that already exclude <code>['superseded','exhausted']</code> (and
+        never re-claim <code>accepted</code>/<code>approved</code>) gain <code>contested</code> in
+        the exclusion set — one predicate change per claim query — so no generate/review/docs pool
+        ever touches it. It is thus as frozen as <code>approved</code>, but unlike
+        <code>approved</code> it is neither published nor terminal — it is a holding state.</li>
+      <li><strong>Entry point:</strong> set only by <code>sn merge</code> on an accepted PR, when a
+        reviewer-edited name fails the re-review (the branch that today would quarantine). Instead
+        of quarantine-on-an-accepted-name, the name moves <code>accepted → contested</code> with a
+        <code>StandardNameChange</code> recording the failing edit and the rubric verdict.</li>
+      <li><strong>Resolution (three explicit exits, all human-driven):</strong>
+        (a) <strong>fix</strong> — <code>sn edit</code> revises the wording → the existing
+        edit→review path → <code>approved</code> if it now passes, else back to
+        <code>contested</code>;
+        (b) <strong>override</strong> — a new <code>sn approve --override &lt;id&gt; --reason
+        "…"</code> that force-sets <code>approved</code> over the rubric, recording the
+        justification in the change ledger (human authority beats the machine rubric, but only
+        deliberately and on the record);
+        (c) <strong>revert</strong> — drop the reviewer edit back to the prior <code>accepted</code>
+        form, returning the name to a future review batch unchanged.</li>
+      <li><strong>Visibility:</strong> a <code>sn status --contested</code> report (or a facet in
+        the pool-status output) lists contested names with their failing edit and verdict, so
+        conflicts are actioned rather than lost. Because it is pool-excluded and unpublished, a
+        contested name is inert until a human resolves it.</li>
+    </ul>
+    <p>
+      <strong>No CI signal/watcher — the merge step is a manual local run.</strong> The graph is
+      local and a GitHub runner cannot reach it, so a CI job could not actually promote anything;
+      there is little value in a watcher emitting a signal. The maintainer simply observes the
+      merged PR (its number is right there) and runs the <strong>local</strong> <code>sn merge
+      --pr-number … --pr-url … --merge-commit …</code> against the sn_names batch artifact. CI's
+      only role stays what it already is — <code>validate.yml</code> on the PR. "The graph is
+      local so we will always need an import step following PR approval," and that step is a
+      deliberate local action, not automation.
+    </p>
+
+    <h2 id="s9">§9 — TDD strategy</h2>
+    <p>
+      Each gap is specified test-first. Tests run against the live Neo4j (graph-marked tests are
+      run, not skipped) per project convention, and pure logic is unit-tested with injected
+      callables where the existing modules already allow it (e.g. <code>campaign.py</code>,
+      <code>merge.py</code> use injectable graph callables).
+    </p>
+    <ul>
+      <li><strong>Manifest loader (Gap A, SHIPPED):</strong> pure loader tests (done) — a fixture
+        sn-sources YAML flattens to the expected <code>&lt;ids&gt;/&lt;path&gt;</code> set; unknown
+        <code>schema_version</code>, mis-shaped <code>sources</code>, and non-YAML raise; file vs
+        bare-path mixing dedups. <em>Owed:</em> a CLI-level test of the <code>sn run --focus
+        &lt;file&gt;</code> wiring (currently only the pure loader is covered), and — once D-focus
+        locks — a gap-only-seeding test proving accepted names on listed paths are not re-staged.</li>
+      <li><strong>Minting (Gap B):</strong> <code>mint_sn_list(dd_paths)</code> is pure over an
+        injected graph view — assert the base join (SN whose <code>source_paths</code> intersect
+        the set, incl. a name with one in / one out path) and the family closure (a touched base
+        pulls its immediate family — <code>HAS_PARENT</code> parent + that parent's direct children
+        (siblings), one hop, non-transitive, and NOT shared-grammar-base names);
+        a DD path with no linked SN is reported, not dropped.</li>
+      <li><strong>Additive export (Gap B):</strong> export of <code>approved ∪ batch</code> is
+        deterministic (stable sort + canonical serialisation) and, against an approved-only
+        baseline, the diff is exactly the batch's additions — nothing else changes or is removed;
+        the resolved sn-names artifact is materialised and matches the minted set.</li>
+      <li><strong>Review PR (Gap C):</strong> the export-into-checkout yields an additive diff
+        (batch definitions added, approved set byte-identical); PR creation exercised via a local
+        bare-repo fixture, not a live GitHub call.</li>
+      <li><strong>Merge state machine (Gap D):</strong> from a merged PR + the sn-names batch
+        artifact — an <em>untouched</em> batch name auto-promotes to <code>approved</code> with
+        provenance set (no re-review); an <em>edited</em> name is re-reviewed (pass →
+        <code>approved</code>); an edit crafted to fail the rubric lands in <code>contested</code>;
+        names outside the batch are untouched; without PR metadata nothing is approved; re-running
+        is idempotent.</li>
+      <li><strong>Freeze &amp; contested (verification + new):</strong> an <code>approved</code>
+        name rejects <code>sn edit</code> rename/docs edits, no pool re-claims it, and
+        <code>protection.py</code> strips editorial writes (existing behaviour — regression
+        guard); a <code>contested</code> name is likewise pool-excluded and is resolvable by
+        edit→re-review, override-approve, or revert-to-accepted (new).</li>
+    </ul>
+
+    <h2 id="s10">§10 — End-to-end verification procedure</h2>
+    <p>
+      A single rehearsal against a throwaway ISNC checkout and the local graph, proving the loop
+      closes before any real upstream PR:
+    </p>
+    <ol>
+      <li><code>sn run --focus imas_codex/standard_names/manifests/west_task_2e.yaml</code> → assert every
+        eligible WEST source has an <code>accepted</code>, <code>valid</code> name (report the
+        residual gaps and their skip reasons).</li>
+      <li>Deterministic export of <code>approved ∪ batch</code> into a scratch ISNC checkout →
+        assert the diff is <strong>additive</strong>: the batch's full definitions are added,
+        every already-approved name byte-identical, nothing removed.</li>
+      <li>Open the PR against a <em>fork/scratch</em> ISNC; assert <code>validate.yml</code>
+        passes and the diff is the batch only.</li>
+      <li>Merge the scratch PR; run the local <code>sn merge --pr-number … --pr-url …
+        --merge-commit …</code> → assert untouched batch names are <code>approved</code> with
+        provenance set (no re-review), an edited name is re-reviewed (pass → <code>approved</code>),
+        and an edit crafted to fail the rubric lands in <code>contested</code> (not approved, not
+        silently reverted).</li>
+      <li>Re-run <code>sn run</code> (no focus) → assert no approved name mutated (frozen),
+        <code>sn edit</code> on one is rejected, and <code>contested</code> names are not
+        claimed by any pool.</li>
+    </ol>
+    <p>
+      Only after this rehearsal passes do we run the real corpus and open the real ISNC PR for
+      expert review — the deliverable that gives the SN set its first human validation.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="focus-seed-scope" data-choice="flag" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-focus — should --focus &lt;file&gt; seed only gap paths or reseed already-accepted ones? (The file-input mechanism itself is shipped, §5.)</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="gap-only">Gap-only: seed only paths lacking a live accepted name; never reset accepted names (Recommended)</button>
+      <button class="r-opt" data-value="reseed-all">Re-seed all manifest paths (current --focus behaviour; re-stages accepted names)</button>
+      <button class="r-opt chosen" data-value="flag">Add an explicit --reseed flag; default gap-only</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="two-schemas" data-choice="two" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-schemas — do we define two file schemas (DD-path sources and SN-id list)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="two">Two: sn_sources (DD paths, exists) drives extraction/mop-up; sn_names (SN ids, new) is the review/approval currency and the frozen batch record (Recommended)</button>
+      <button class="r-opt" data-value="one-sources">Keep only sn_sources; derive the SN set live everywhere, never materialise it</button>
+      </p>
+    <p class="r-dec-rat">Context: extraction speaks DD paths; export/PR/merge/approval speak SN ids. A materialised sn_names list is also the reproducible batch id-set that carries through the gate (§3b).</p>
+    </div>
+<div class="r-dec" data-key="minting-closure" data-choice="immediate-siblings" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-minting-closure — when minting the SN set from DD paths, which relations define the &quot;family&quot; pulled in whole?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="immediate-siblings">Immediate family only: HAS_PARENT parent + that parent&#x27;s direct children (siblings), one hop, non-transitive (Locked)</button>
+      <button class="r-opt" data-value="parent-plus-base">HAS_PARENT hierarchy + shared grammar base token (REJECTED — too broad)</button>
+      <button class="r-opt" data-value="include-cluster">Also close over IN_CLUSTER / REFINED_FROM (REJECTED — too broad)</button>
+      <button class="r-opt" data-value="no-closure">Base join only, no closure (risks partial families)</button>
+      </p>
+    <p class="r-dec-rat">Locked: base join (SN whose source_paths intersect the DD-path set) then immediate family only — parent + siblings, one hop, non-transitive. Grammar-base sharing is deliberately NOT a closure edge (too broad).</p>
+    </div>
+<div class="r-dec" data-key="sn-list-materialisation" data-choice="derive-and-freeze" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-materialise — is the resolved SN list a required input, or derived-live and materialised as a record?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="derive-and-freeze">Derive live from sn_sources (or accept an sn_names file), and materialise the resolved set as an sn_names artifact carried through the gate (Recommended)</button>
+      <button class="r-opt" data-value="required-input">Require a hand-made sn_names file as input</button>
+      <button class="r-opt" data-value="live-only">Derive live only, never materialise (REJECTED — non-reproducible; merge can&#x27;t confirm the exact reviewed set)</button>
+      </p>
+    <p class="r-dec-rat">Context: the live mint depends on graph state at run time; freezing the resolved list makes the batch identity reproducible and lets merge approve exactly the reviewed names.</p>
+    </div>
+<div class="r-dec" data-key="focus-input-dispatch" data-choice="kind-field" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-dispatch — how does --focus &lt;file&gt; tell an sn_sources file from an sn_names file?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="kind-field">Explicit `kind: sn_sources | sn_names` discriminator, validated against the matching schema; raise if absent/ambiguous (Recommended)</button>
+      <button class="r-opt" data-value="key-presence">Detect by which block is present (sources vs names); raise if both/neither</button>
+      </p>
+    <p class="r-dec-rat">Context: release-side --focus must dispatch (mint vs use-directly); the shipped mop-up loader handles only the sources→DD-paths case today.</p>
+    </div>
+<div class="r-dec" data-key="export-additivity" data-choice="approved-plus-batch" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-export — what does a --focus release export so PRs stay small and additive?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="approved-plus-batch">Export approved ∪ this batch, deterministically; approved catalog grows, early PRs small (Recommended)</button>
+      <button class="r-opt" data-value="full-deterministic">Export the full accepted corpus deterministically (REJECTED — dumps ~2345 names, not small/incremental)</button>
+      <button class="r-opt" data-value="subset-replace">Export only the batch into the files (REJECTED — deletes every other name)</button>
+      </p>
+    <p class="r-dec-rat">Locked: do not release the full catalog; each --focus PR carries approved ∪ batch so the approved set builds up slowly via small additive PRs. Transition off the current full published catalog is a deferred detail.</p>
+    </div>
+<div class="r-dec" data-key="batch-scope" data-choice="deferred" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-batching — how is the corpus chunked into reviewable batches?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="deferred">Deferred to a future session — a focus manifest scopes the batch for now (Locked)</button>
+      <button class="r-opt" data-value="facility-x-domain">(facility manifest) ∩ (domain or IDS), ~50–150/PR</button>
+      </p>
+    <p class="r-dec-rat">Locked as deferred: we have a focus file now; batching structure is a later session&#x27;s concern.</p>
+    </div>
+<div class="r-dec" data-key="back-import-tool" data-choice="sn-merge" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-import — what brings the merged (accepted) PR back into the graph?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="sn-merge">sn merge from the accepted PR: untouched names auto-approve; edited names re-trigger full review (pass → approved, fail → contested) (Locked)</button>
+      <button class="r-opt" data-value="sn-import-no-rescore">A dedicated sn import that never re-scores (REJECTED — edits must re-pass compliance)</button>
+      </p>
+    <p class="r-dec-rat">Locked: merge is correct. Edits (name or docs) MUST re-trigger the full review — no human wording change reaches the catalog without passing the compliance rubric. Untouched names auto-promote to approved on merge (human approval + LLM rubber-stamp).</p>
+    </div>
+<div class="r-dec" data-key="contested-resolution" data-choice="contested-park" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-contested — default handling for a name whose in-review edit fails the compliance re-review?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="contested-park">New `contested` stage: frozen, pool-excluded, surfaced in a report; resolve by edit→re-review, override-approve, or revert-to-accepted (Recommended)</button>
+      <button class="r-opt" data-value="quarantine">Reuse validation_status=quarantined on the accepted name</button>
+      <button class="r-opt" data-value="revert">Silently revert to the prior accepted form (REJECTED — discards human intent)</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="merge-trigger" data-choice="manual" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-trigger — what performs the local graph write after upstream merge?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="manual">Maintainer observes the merged PR and runs sn merge locally — no CI automation (Locked)</button>
+      <button class="r-opt" data-value="local-poller">Local poller auto-runs sn merge on merged PRs</button>
+      <button class="r-opt" data-value="ci-signal">CI watcher emits a signal on merge (REJECTED — graph is local, CI can&#x27;t promote; little value)</button>
+      </p>
+    <p class="r-dec-rat">Locked: no CI signal/watcher. The graph is local so CI can&#x27;t do the promotion; the PR number is visible on merge, and the maintainer runs the local sn merge deliberately. CI stays just validate.yml.</p>
+    </div>
+<div class="r-dec" data-key="spa-pr-view" data-choice="marker-plus-filter" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-spa-view — how does the existing catalog SPA show &quot;only the items in this PR/batch&quot;?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="marker-plus-filter">Catalog-driven: the RC&#x27;s data.json carries a review_batch id-set; the existing SPA renders a FIXED view of exactly those names (no show-all toggle). No new app, no GitHub-PR integration (Locked)</button>
+      <button class="r-opt" data-value="spa-queries-github">SPA queries GitHub for the PR&#x27;s changed entries (couples the SPA to GitHub; unnecessary — the RC catalog already carries the set)</button>
+      <button class="r-opt" data-value="new-surface">Build a new PR-listing surface/app (REJECTED — we already have the multi-release SPA)</button>
+      </p>
+    <p class="r-dec-rat">Locked: the batch is an RC (a catalog version the SPA already selects); scoping is driven by a review_batch marker in the RC&#x27;s data.json (imas-codex/dataset.py stamps it) and an ISN-repo SPA filter. The batch RC is a FIXED view of only its names — no show-all toggle. Deep links reuse the existing version URL + url-state; no bespoke machinery.</p>
+    </div>
+<div class="r-dec" data-key="artifact-cli" data-choice="single-cli-rc-tag" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-artifact-cli — where do frozen sn_names artifacts live, how are they traced to a PR, and is the release folded into one command?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="single-cli-rc-tag">Store under manifests/reviews/&lt;rc-version&gt;.sn_names.yaml (committed history), tag by the self-assigned RC version (known before push), back-fill PR#/URL/merge-commit after gh pr create — all in ONE sn release command (Locked)</button>
+      <button class="r-opt" data-value="pr-number-tag">Tag the artifact by PR number (REJECTED — GitHub assigns it only on creation; cannot pre-reserve)</button>
+      <button class="r-opt" data-value="manual-steps">Run mint / export / push / PR as separate manual steps (REJECTED — risks artifact↔catalog↔PR drift)</button>
+      </p>
+    <p class="r-dec-rat">Locked: RC version is our own deterministic id, so it is the traceable key; the PR number is back-filled post-creation. A single orchestrating CLI (mint → freeze → export → versions.json bump → branch → push → gh pr create → back-fill → push) keeps artifact, catalog, and PR in lock-step so partial/inconsistent states can&#x27;t arise.</p>
+    </div>
+<div class="r-dec" data-key="dimensionless-classifier" data-choice="fix-classifier" data-by="Simon McIntosh" data-when="2026-07-21">
+    <p class="r-dec-q">D-classifier — how do we recover the dimensionless physical signals (Z_eff line-average, optical depth, electrons_n) mis-gated as structural?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="fix-classifier">Fix the DD node classifier so a dimensionless signal STRUCTURE with a /data child + real documentation classifies as quantity; they then flow into sources naturally (Recommended)</button>
+      <button class="r-opt" data-value="manifest-override">Add them to the manifest sources manually (focus bypasses the gate anyway)</button>
+      <button class="r-opt" data-value="defer">Defer; leave as review_candidates for this first pass</button>
+      </p>
+    <p class="r-dec-rat">Locked and shipped: pass-2 R5 signal-signature promotion in node_classifier + build_dd._reclassify_relational, with unit tests, applied to the live graph (23 nodes); restored the 4 WEST dimensionless signals (corpus 355 after the boundary remap). See §3.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scap-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="Simon McIntosh">
+    <h4 class="r-fu-title">Gap A — sn run --focus &lt;file.yaml&gt; (SHIPPED)</h4>
+    <div class="r-fu-body"><p>Shipped this session: <code>sources_manifest.py</code> loader + expander wired into
+          <code>--focus</code> token handling, schema-validated, 10 unit tests. The committed WEST
+          manifest expands to its 355 sources through the CLI. See §5.</p></div>
+    <pre class="r-fu-prompt">Superseded by the shipped implementation — see §5. Retained for provenance.</pre>
+    </article>
+<article class="r-fu" data-id="f-scap-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21T22:04:50+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Implement the complete approval pipeline (single long session)</h4>
+    <div class="r-fu-body"><p>All design decisions are locked. Build the whole pipeline (Gaps A-tail → D) in one
+          long TDD session, in the phase order below. Read the full plan first; honour every
+          locked decision (injected live above this brief). Graph-marked tests run against live
+          Neo4j from the main session; subagents cannot write the production graph.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-catalog-approval-pipeline (http://localhost:8765/imas-codex/sn-catalog-approval-pipeline.html)
+Tier:    opus (1M)
+
+Context
+  Design is locked (see the plan §1-§8 and the live Locked decisions above). Gap A&#x27;s
+  --focus &lt;file&gt; loader already shipped. Build the rest end-to-end, TDD, phase by
+  phase, committing each phase. Do NOT re-litigate locked decisions.
+
+State to read (CODE / FILES / DATA)
+  - The FULL plan (all sections + locked decisions).
+  - imas_codex/cli/sn.py                    (sn run --focus; add sn release orchestrator)
+  - imas_codex/standard_names/sources_manifest.py  (shipped loader; extend for kind + sn_names)
+  - imas_codex/standard_names/config/sn_sources.schema.json  (add sn_names.schema.json beside it)
+  - imas_codex/standard_names/export.py     (_fetch_candidates, run_export, _write_domain_yaml)
+  - imas_codex/standard_names/merge.py      (run_merge, read_pr_changes, mark_catalog_name_approved)
+  - imas_codex/standard_names/catalog_reconcile.py
+  - imas_codex/schemas/standard_name.yaml   (NameStage enum)
+  - imas_codex/standard_names/workers.py    (pool claim predicates / stage exclusions)
+  - imas_codex/graph/client.py; StandardName.source_paths + HAS_PARENT for minting
+  - ISN repo (imas-standard-names) site/src: data.js, Filters.jsx, ResultsList.jsx,
+    url-state.js; imas_standard_names/catalog/dataset.py (data.json builder)
+
+Phases (each: test-first, commit on green)
+  1. Focus --reseed: add --reseed (default OFF = gap-only). Gap-only must NOT reprocess
+     paths that already have a live accepted name; --reseed restores today&#x27;s reset-all.
+     Add the missing CLI-level test for sn run --focus &lt;file&gt; wiring.
+  2. Two schemas + minting: add sn_names.schema.json (kind: sn_names) and a `kind:`
+     discriminator on both schemas; extend the loader to dispatch (raise if kind absent/
+     ambiguous). Implement mint_sn_list(dd_paths): source_paths base join + immediate-family
+     closure (HAS_PARENT parent + its direct children/siblings, one hop, non-transitive;
+     NOT grammar base). Pure + graph tests.
+  3. Additive export: _fetch_candidates predicate = name_stage==&#x27;approved&#x27; OR id in batch;
+     deterministic serialisation (stable id sort + canonical fields); stamp review_batch
+     (the minted id-set) into data.json via dataset.py. Test: diff vs approved-only baseline
+     = batch additions only.
+  4. Freeze + single sn release CLI: materialise manifests/reviews/&lt;rc&gt;.sn_names.yaml
+     (RC-tagged, kind: sn_names, minted_from, ids); fold mint → freeze → export → versions.json
+     bump → branch → push(fork) → gh pr create → back-fill pr_number/url → push into ONE command.
+  5. SPA fixed-view (ISN repo): when data.json carries review_batch, render only those names
+     (no toggle), reusing Filters/ResultsList; RC version URL is the shareable link.
+  6. sn merge state machine + contested: untouched batch names auto-promote accepted→approved;
+     edited names re-trigger full review (pass→approved, fail→contested). Add `contested` to
+     NameStage; exclude it from all pool claim predicates; resolution = sn edit (→re-review),
+     sn approve --override --reason (force approve), revert (→accepted); sn status --contested.
+
+Scope locks / constraints (non-decision)
+  - TDD throughout; graph-marked tests RUN against live Neo4j from the main session.
+  - No plan labels / version numbers / PR numbers in symbol, file, or comment names.
+  - No AI co-author trailer; conventional commits; commit + push each phase.
+  - Do not run the full DD rebuild; do not churn accepted names (gap-only default).
+
+Done-when
+  1. All six phases landed with green tests (graph-marked included).
+  2. End-to-end rehearsal (§10) passes against a scratch ISNC checkout + local graph.
+  3. Plan sections collapsed to shipped summaries; this followup resolved.</pre>
+    <p class="r-fu-outcome">All six phases shipped (P1 c34bff2e, P2 b84825b1, P3 f4ea9780, P4 d291c09c, P5 ISN ddf76ef+411d812, P6 83a77011); graph-marked tests green. The live §10 end-to-end rehearsal on the real WEST corpus remains an operational, cost-gated run (see f-scap-rehearsal).</p>
+    </article>
+<article class="r-fu" data-id="f-scap-p1" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Phase 1 — focus --reseed (gap-only default) SHIPPED</h4>
+    <div class="r-fu-body"><p>Gap-only focus seeding landed (commit <code>c34bff2e</code>): <code>sn run --focus</code> no longer churns paths carrying a live accepted/approved name; <code>--reseed</code> restores reset-all. New <code>partition_focus_by_accepted</code> graph helper + 5 tests (4 graph-marked) green.</p></div>
+    <pre class="r-fu-prompt">done — superseded by shipped implementation (commit c34bff2e).</pre>
+    <p class="r-fu-outcome">Phase 1 landed — commit c34bff2e; gap-only default + --reseed, 5 tests green.</p>
+    </article>
+<article class="r-fu" data-id="f-scap-p2" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Phase 2 — two-schema dispatch + mint_sn_list SHIPPED</h4>
+    <div class="r-fu-body"><p>Landed (commit <code>b84825b1</code>): <code>kind</code> discriminator on both schemas + new <code>sn_names.schema.json</code>; <code>load_focus_file</code> dispatches by kind (raises if absent). <code>mint_sn_list</code> = source_paths base join + immediate-family closure (parent, siblings, own children; one hop, non-transitive, dead names excluded), reports unmatched. Pure + graph tests.</p></div>
+    <pre class="r-fu-prompt">done — shipped (commit b84825b1).</pre>
+    <p class="r-fu-outcome">Phase 2 landed — commit b84825b1; two schemas + mint, tests green.</p>
+    </article>
+<article class="r-fu" data-id="f-scap-p3" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Phase 3 — additive review-batch export SHIPPED</h4>
+    <div class="r-fu-body"><p>Landed (commit <code>f4ea9780</code>): <code>_fetch_candidates(batch=...)</code> returns approved ∪ batch (additive diff), still validation/docs gated; <code>run_export</code> stamps <code>export_scope: review</code> + sorted <code>review_batch</code> into catalog.yml. Graph + pure tests; existing export suite green.</p></div>
+    <pre class="r-fu-prompt">done — shipped (commit f4ea9780).</pre>
+    <p class="r-fu-outcome">Phase 3 landed — commit f4ea9780; additive export + review_batch marker.</p>
+    </article>
+<article class="r-fu" data-id="f-scap-p4" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Phase 4 — single sn release --review-batch orchestrator SHIPPED</h4>
+    <div class="r-fu-body"><p>Landed (commit <code>d291c09c</code>): <code>run_review_release</code> folds mint → freeze artifact → export → branch → push(fork) → gh pr create → back-fill into one call; artifact under <code>manifests/reviews/&lt;rc&gt;.sn_names.yaml</code>. Export/publish/PR injectable; 4 tests (offline bare-repo + graph mint).</p></div>
+    <pre class="r-fu-prompt">done — shipped (commit d291c09c).</pre>
+    <p class="r-fu-outcome">Phase 4 landed — commit d291c09c.</p>
+    </article>
+<article class="r-fu" data-id="f-scap-p5" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Phase 5 — SPA fixed review view (ISN repo) SHIPPED</h4>
+    <div class="r-fu-body"><p>Landed on the ISN fork (commits <code>ddf76ef</code>, <code>411d812</code>): manifest model + dataset carry <code>review_batch</code>; the SPA renders a fixed view of exactly those names (no toggle). 4 pytest + 4 vitest green. imas-codex ISN pin bump is optional (raw-write fallback already carries the marker).</p></div>
+    <pre class="r-fu-prompt">done — shipped on the ISN fork (ddf76ef, 411d812).</pre>
+    <p class="r-fu-outcome">Phase 5 landed — ISN fork ddf76ef, 411d812; 8 tests green.</p>
+    </article>
+<article class="r-fu" data-id="f-scap-p6" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Phase 6 — sn merge state machine + contested SHIPPED</h4>
+    <div class="r-fu-body"><p>Landed (commit <code>83a77011</code>): untouched batch names auto-promote accepted→approved; edited names re-review (pass→approved, fail→<code>contested</code>). <code>contested</code> is pool-excluded everywhere; resolved by sn edit / sn approve --override / sn revert; sn status --contested lists them. 6 graph tests + regression fixes green.</p></div>
+    <pre class="r-fu-prompt">done — shipped (commit 83a77011).</pre>
+    <p class="r-fu-outcome">Phase 6 landed — commit 83a77011.</p>
+    </article>
+<article class="r-fu" data-id="f-scap-rehearsal" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22T04:42:56+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Run the §10 end-to-end rehearsal on the real WEST corpus</h4>
+    <div class="r-fu-body"><p>All pipeline code is shipped and unit/graph tested. The remaining step is the §10 operational rehearsal against the live graph + a scratch ISNC checkout: drive the 355 WEST sources to accepted names, cut a review-batch RC, open the scratch PR, merge, and confirm freeze. It is deliberately deferred because step 1 (<code>sn run --focus west_task_2e.yaml</code>) drains 355 names through the LLM pipeline — significant spend + time — so it is a user-triggered run, not autonomous.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-catalog-approval-pipeline
+
+Run the §10 end-to-end rehearsal now that all six phases are shipped:
+1. sn run --focus imas_codex/standard_names/manifests/west_task_2e.yaml  (gap-only default; LLM spend ~355 names) — assert every eligible WEST source has an accepted, valid name; report residual gaps.
+2. sn release --review-batch imas_codex/standard_names/manifests/west_task_2e.yaml --bump minor -m &#x27;...&#x27; against a SCRATCH ISNC checkout — assert the export diff is additive (batch definitions added, approved set byte-identical) and catalog.yml carries review_batch + export_scope: review.
+3. Verify the SPA renders the fixed batch view for the RC (data.json review_batch).
+4. Merge the scratch PR; sn merge --batch manifests/reviews/&lt;rc&gt;.sn_names.yaml --pr-number ... --pr-url ... --merge-commit ... — assert untouched names auto-approve, an edited name re-reviews, a fail lands contested.
+5. Re-run sn run (no focus) — assert no approved name mutated and contested names are pool-excluded.
+Only then open the real upstream ISNC PR for expert review.
+Optional first: bump the imas-codex ISN dep pin to 411d812 so review exports validate the manifest without a warning.</pre>
+    <p class="r-fu-outcome">Superseded by f-scap-rehearsal-2: CLI converged first (commit c2983802 — release --batch, merge --pr <url>, merge --undo, remotes-derived PR target); rehearsal commands updated to the new surface.</url></p>
+    </article>
+<article class="r-fu" data-id="f-scap-rehearsal-2" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-08-10T08:18:06+00:00" data-resolved-by="reckon-edit">
+    <h4 class="r-fu-title">Run the §10 end-to-end rehearsal on the real WEST corpus (converged CLI)</h4>
+    <div class="r-fu-body"><p>All pipeline code is shipped, plus the converged CLI (commit <code>c2983802</code>): <code>sn release --batch</code>, <code>sn merge --pr &lt;url&gt;</code> (URL-only resolution), <code>sn merge --undo</code> (unwind), remotes-derived PR target. The rehearsal is a user-triggered, cost-gated run (drains ~355 WEST names through the LLM pipeline). Snapshot the graph first; use --undo to clear the scratch approvals afterwards — which also exercises the unwind path.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-catalog-approval-pipeline
+
+Run the §10 end-to-end rehearsal with the converged CLI (all against a SCRATCH ISNC fork checkout — point --isnc at it; its remotes drive the PR target):
+0. imas-codex graph export        # snapshot (restore via graph load if needed); optionally graph push --dev for offsite
+1. uv run imas-codex sn run --focus imas_codex/standard_names/manifests/west_task_2e.yaml --cost-limit &lt;N&gt;
+   (gap-only default) — assert every eligible WEST source has an accepted, valid name; report residual gaps.
+2. uv run imas-codex sn release --batch imas_codex/standard_names/manifests/west_task_2e.yaml --bump minor -m &#x27;WEST review batch rehearsal&#x27; --isnc &lt;scratch-isnc&gt;
+   — assert additive diff (batch added, approved set byte-identical), catalog.yml carries review_batch + export_scope: review, artifact frozen under manifests/reviews/&lt;rc&gt;.sn_names.yaml, PR opened against the scratch repo.
+3. Build the RC data.json in the scratch checkout and confirm the SPA fixed batch view.
+4. Merge the scratch PR (with one reviewer edit + one edit crafted to fail), then:
+   uv run imas-codex sn merge --pr &lt;merged-pr-url&gt; --isnc &lt;scratch-isnc&gt;
+   — assert untouched names auto-approve, the good edit re-reviews → approved, the bad edit → contested; sn status --contested lists it.
+5. uv run imas-codex sn run (no focus) — assert no approved name mutated; contested names pool-excluded.
+6. Unwind the scratch state: uv run imas-codex sn merge --undo --pr &lt;merged-pr-url&gt;  (verifies the unwind path; graph back to accepted).
+Only after this passes: re-run steps 2–4 for real against the true ISNC checkout (remotes → iterorganization/imas-standard-names-catalog) and leave the approvals in place.
+Optional first: bump the imas-codex ISN dep pin to 411d812 so review exports validate the manifest cleanly.</pre>
+    <p class="r-fu-outcome">Transferred to the consolidated current Standard Names plans named in this plan's retirement summary; this historical prompt must not be executed.</p>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

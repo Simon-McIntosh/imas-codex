@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-expert-hints">
+  <meta name="plan-title" content="sn edit: human/agent-steered name and doc proposals through the SN pipeline">
+  <meta name="plan-summary" content="Archived 2026-08-10. The shipped governed edit mechanism remains canonical; its remaining rollback, review-grounding, and cascade hardening moved to the consolidated semantic pipeline and typed operator plans.">
+  <meta name="plan-status" content="archived">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <title>sn edit — steered proposals | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-depends-on" content="">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Problem &amp; motivation</h2>
+    <p>
+      We have no robust way to apply human or agent pressure to a standard name
+      or its documentation. Today the only options are: (a) hand-edit the graph
+      text — which <strong>decouples the edit from the pipeline's style rules,
+      grammar validation, RD-quorum review, and scoring</strong> (this produced
+      the rushed, off-house-style Alfvén rewrite earlier in this campaign); or
+      (b) revert to <code>pending</code> and hope the LLM independently lands the
+      desired result (no steering). We want a third path: a tool —
+      <code>imas-codex sn edit</code> — through which a <strong>human or an
+      agent</strong> proposes a change that flows through the normal pipeline as
+      a steered candidate and is gated by the same checks the LLM's own output
+      faces.
+    </p>
+    <p>
+      Canonical motivating case (the dog-food demo, §6): the
+      <strong>plasma-boundary area family</strong>. The pipeline correctly
+      produced the swept-surface quantities
+      (<code>flux_surface_area_at_plasma_boundary</code>,
+      <code>surface_area_of_flux_surface</code>), leaving the bare
+      <code>area_at_plasma_boundary</code> (a derived parent) semantically
+      <strong>ambiguous</strong>. The DD distinguishes them: DD <code>area</code>
+      = the <em>poloidal cross-sectional area</em> enclosed by the surface; DD
+      <code>surface</code> = the swept toroidal surface. The bare "area" should
+      be steered to an explicit poloidal-cross-section framing
+      (e.g. <code>poloidal_cross_section_area_of_plasma_boundary</code>) — and
+      <code>sn edit</code> should realize that through the pipeline, not by hand.
+    </p>
+
+    <h2 id="s2">§2 — Key insight: the rails already exist</h2>
+    <p>
+      The pipeline <strong>already threads a suggestion through regeneration</strong>
+      — it just sources it from the reviewer LLM, not from a human. The RD-quorum
+      reviewer emits an optional <code>revised_name</code> /
+      <code>suggested_name</code> + <code>reviewer_comments</code>, carried into
+      <code>refine_name</code> (<code>render_prompt("sn/refine_name_user", …)</code>,
+      <code>workers.py:5427</code>); docs have the parallel path via
+      <code>refine_docs</code> (<code>workers.py:7623</code>). An
+      <strong>sn edit proposal is the same object from a human/agent origin.</strong>
+      We generalize the existing threading rather than inventing a new path —
+      small blast radius, and the proposal cannot bypass the checks because it
+      enters where suggestions already enter and is gated where results are
+      already gated.
+    </p>
+
+    <h2 id="s3">§3 — Design</h2>
+
+    <h3 id="s3-1">§3.1 — Two modes (flexible by intent)</h3>
+    <p>
+      <code>sn edit</code> supports two entry modes, because an editor sometimes
+      knows the exact end state and sometimes only the direction:
+    </p>
+    <ul>
+      <li><strong>Redesign (full proposal) &#8594; skip GENERATE, enter at REVIEW.</strong>
+        The editor supplies a complete replacement name and/or documentation.
+        The proposal IS the candidate: it is written as a <code>drafted</code>
+        candidate and enters the review cycle directly (no LLM generation step —
+        the human/agent <em>is</em> the generator). Review + score still gate it,
+        so a malformed or low-quality redesign is still caught.</li>
+      <li><strong>Hint (suggest a change) &#8594; injected into GENERATE, then review.</strong>
+        The editor supplies a direction ("frame as poloidal cross-section, not
+        swept surface"); it is injected into the generate/refine prompt, the LLM
+        composes the specifics under the rules, and the candidate flows through
+        review. For nudging when the exact string/text is better left to the
+        composer.</li>
+    </ul>
+    <p>
+      Both modes are gated by the unchanged review + scoring. The difference is
+      only <em>where the candidate originates</em> — from the editor (redesign)
+      or from the LLM steered by the editor (hint).
+    </p>
+
+    <h3 id="s3-2">§3.2 — The reason rides into REVIEW (breaks the pull-back)</h3>
+    <p>
+      <strong>Critical mechanic.</strong> There is an existing pull in the
+      pipeline back toward a name's original/established variant: the grammar
+      canonicalizer prefers established forms, and the reviewer — judging a
+      changed candidate blind to intent — tends to score the deviation below the
+      original it already validated, so refine rotations drag the name back. To
+      counter this, the editor's <code>--reason</code> is passed to the
+      <strong>review gate</strong> (both <code>review_name</code> and
+      <code>review_docs</code>), not only to generate.
+    </p>
+    <p>
+      What review sees: the <em>reason</em> (the intent and justification),
+      framed as "a domain expert has deliberately steered this name/doc for the
+      following reason: &lt;reason&gt;. Judge the candidate on its physical and
+      grammatical merits given this intent; do not penalize it merely for
+      differing from a prior variant." What review does <strong>not</strong> get:
+      a literal "accept this" instruction or the proposed string presented as
+      pre-approved — the reviewer still scores quality independently and can
+      reject. This is the minimal context needed to neutralize the
+      revert-to-original bias while keeping the gate honest. (This refines the
+      earlier "review stays fully blind" stance: review stays blind to the
+      <em>proposal as an answer</em>, but is told the <em>reason</em> a change is
+      intended.)
+    </p>
+
+    <h3 id="s3-3">§3.3 — CLI surface</h3>
+    <p>The SN to edit is the positional argument. Mode flags are mutually
+      exclusive; <code>--reason</code> is mandatory for every edit.</p>
+    <pre class="r-fu-prompt">imas-codex sn edit &lt;standard_name&gt; (--hint TEXT | --rename NAME | --docs TEXT) --reason TEXT
+                       [--axis name|docs|both] [--scope self|family|subtree] [--dry-run]
+
+  positional
+    standard_name            The SN id to steer (required).
+
+  mode (exactly one)
+    --hint TEXT              Suggest-a-change: direction injected into GENERATE; candidate then reviewed.
+    --rename NAME            Redesign the name: full replacement; SKIPS generate, enters at REVIEW_NAME.
+    --docs TEXT              Redesign the docs: full replacement documentation; SKIPS generate, enters REVIEW_DOCS.
+                            (--hint may carry name and/or docs direction via --axis; --rename/--docs are full redesigns)
+
+  always required
+    --reason TEXT           Justification. Rides into GENERATE (hint mode) AND the REVIEW gate
+                            (both modes) to break the pull-back to the original variant.
+
+  axis
+    --axis name|docs|both   Which axis the edit applies to (default inferred from the mode flag).
+
+  family propagation (see §3.5)
+    --scope self|family|subtree
+        self      Only this SN re-enters the pipeline.
+        family    This SN + its siblings re-derive together + parent re-derives (shared-base edits).
+        subtree   This SN (a parent) + all HAS_PARENT children re-derive from the new base.
+        (default: subtree when the SN is a derived parent, self when it is a leaf —
+         a sibling-desync guard blocks a self-scoped edit that would fragment a family
+         and tells you to pass --scope family)
+
+  other
+    --dry-run               Print what would re-enter the pipeline, at which stage, and the cascade — no writes.</pre>
+    <p>
+      An <strong>MCP write tool</strong> mirrors this exactly so an agent can
+      propose edits from the assistant surface ("as if the suggestion comes from
+      us"). The CLI and MCP tool share one implementation.
+    </p>
+
+    <h3 id="s3-4">§3.4 — Schema</h3>
+    <ul>
+      <li><code>edit_mode</code> — <code>hint | rename | docs</code> (records how the candidate originated).</li>
+      <li><code>name_hint</code> / <code>docs_hint</code> — the proposed direction (hint mode) or the full replacement (redesign mode).</li>
+      <li><code>edit_reason</code> — the justification; injected into generate (hint) and review (both modes).</li>
+      <li><code>edit_origin</code> — <code>human | agent</code> (vs the implicit <code>reviewer</code> origin of existing suggestions); provenance for which names carried external steering.</li>
+      <li><code>edit_status</code> — <code>open &#8594; applied | exhausted | rejected</code>, driven by the result's accept/refine/exhaust outcome.</li>
+    </ul>
+    <p>Open decision below: scalar fields (mirrors existing reviewer scalars) vs a dedicated <code>Edit</code>/<code>Suggestion</code> node.</p>
+
+    <h3 id="s3-5">§3.5 — Family handling: parents, children, siblings</h3>
+    <p>
+      Derived parents are abstractions over composed children (the children are
+      the real names; the parent is re-derived from them each rotation by the
+      admission gate). An edit must keep a family internally consistent:
+    </p>
+    <ul>
+      <li><strong>Editing a parent</strong> (the plasma-area case): default
+        <code>--scope subtree</code>. The new base (e.g. <code>area &#8594;
+        poloidal_cross_section_area</code>) cascades to every <code>HAS_PARENT</code>
+        child, which re-derives its name/docs from the new base
+        (<code>radial_area_at_plasma_boundary &#8594;
+        radial_poloidal_cross_section_area_at_plasma_boundary</code>) and re-enters
+        the pipeline with the same reason. The parent re-proposes; children
+        follow.</li>
+      <li><strong>Editing a leaf child</strong>: default <code>--scope self</code>.
+        But a change to a component <em>shared</em> with siblings (the base
+        quantity, a qualifier the family carries) would fragment the family if
+        applied to one child only. The tool detects shared-segment edits and the
+        sibling-desync guard <strong>blocks</strong> a self-scoped edit in that
+        case, directing the editor to <code>--scope family</code>, which
+        re-proposes the whole sibling set together and re-derives the parent.</li>
+      <li><strong>Child &#8594; parent propagation is partly automatic</strong>: because
+        the admission gate re-derives parents from their children each rotation,
+        once an edited child (and its siblings under <code>--scope family</code>)
+        land, the parent re-derives consistently on the next rotation. The tool's
+        job is to ensure the right set re-enters <em>together</em> so the
+        re-derivation sees a coherent family, never a half-edited one.</li>
+      <li><strong>Superseded chain</strong>: a name change supersedes the old SN
+        (existing <code>REFINED_FROM</code> mechanism); inbound doc links to the
+        old name are rewritten to the accepted successor by the existing
+        <code>resolve_doc_links</code> pass — so the family stays linked.</li>
+    </ul>
+
+    <h3 id="s3-6">§3.6 — Worker injection points</h3>
+    <ul>
+      <li><strong>Hint mode</strong>: inject <code>name_hint</code>/<code>docs_hint</code> +
+        <code>edit_reason</code> into the generate/refine prompt context
+        (<code>generate_name_system</code>, <code>refine_name_*</code>,
+        <code>generate_docs_system</code>, <code>refine_docs_*</code>) as a block
+        AFTER the rules, framed as a proposal subordinate to them.</li>
+      <li><strong>Redesign mode</strong>: write the proposed name/docs as a
+        <code>drafted</code> candidate (name change supersedes via the refine
+        persist path), set the stage so REVIEW claims it — no generate.</li>
+      <li><strong>Both modes</strong>: inject <code>edit_reason</code> into the
+        review prompts (<code>review_names_*</code>, <code>review_docs_*</code>)
+        as the intent context per §3.2. This is the one review-prompt change in
+        the whole design.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Flow</h2>
+    <figure>
+      <svg viewBox="0 0 770 280" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="sn edit two-mode flow with reason carried into review"
+           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+        <!-- editor lane -->
+        <rect x="8" y="12" width="754" height="46" rx="6" fill="#fff" stroke="#b45309" stroke-width="1.5"/>
+        <text x="20" y="31" font-size="13" font-weight="600" fill="#b45309">sn edit  (human / agent)</text>
+        <text x="20" y="49" font-size="12" fill="#1f2937">proposal (hint | rename | docs) + reason + origin</text>
+
+        <g font-size="13" fill="#111827">
+          <rect x="40" y="112" width="120" height="50" rx="6" fill="#f5f5f7" stroke="#374151"/>
+          <text x="100" y="133" text-anchor="middle" font-weight="600">generate</text>
+          <text x="100" y="150" text-anchor="middle" font-size="11">hint mode only</text>
+
+          <rect x="250" y="112" width="120" height="50" rx="6" fill="#f5f5f7" stroke="#374151"/>
+          <text x="310" y="133" text-anchor="middle" font-weight="600">review</text>
+          <text x="310" y="150" text-anchor="middle" font-size="11">sees reason</text>
+
+          <rect x="460" y="112" width="120" height="50" rx="6" fill="#f5f5f7" stroke="#374151"/>
+          <text x="520" y="133" text-anchor="middle" font-weight="600">score</text>
+          <text x="520" y="150" text-anchor="middle" font-size="11">accept gate</text>
+
+          <rect x="630" y="112" width="120" height="50" rx="6" fill="#fff" stroke="#16a34a" stroke-width="1.5"/>
+          <text x="690" y="133" text-anchor="middle" font-weight="600" fill="#166534">accepted</text>
+          <text x="690" y="150" text-anchor="middle" font-size="11">status=applied</text>
+        </g>
+
+        <g stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#ah)">
+          <line x1="160" y1="137" x2="248" y2="137"/>
+          <line x1="370" y1="137" x2="458" y2="137"/>
+          <line x1="580" y1="137" x2="628" y2="137"/>
+        </g>
+        <!-- hint mode: editor -> generate -->
+        <line x1="100" y1="58" x2="100" y2="110" stroke="#b45309" stroke-width="1.5" fill="none" marker-end="url(#ao)"/>
+        <text x="100" y="92" text-anchor="middle" font-size="11" fill="#b45309">hint</text>
+        <!-- redesign mode: editor -> review (skip generate) -->
+        <path d="M250 58 Q250 90 290 110" stroke="#b45309" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#ao)"/>
+        <text x="372" y="86" text-anchor="middle" font-size="11" fill="#b45309">redesign (skip generate)</text>
+        <!-- reason -> review (breaks pull-back) -->
+        <path d="M520 58 Q520 86 340 110" stroke="#7c3aed" stroke-width="1.5" fill="none" marker-end="url(#ap)"/>
+        <text x="540" y="80" text-anchor="middle" font-size="11" fill="#7c3aed">reason &#8594; review (breaks pull-back)</text>
+        <!-- refine loop -->
+        <path d="M520 162 L520 232 L100 232 L100 164" stroke="#374151" stroke-width="1.5" fill="none" marker-end="url(#ah)"/>
+        <text x="300" y="248" text-anchor="middle" font-size="11" fill="#1f2937">below threshold &#8594; refine (proposal + reason persist)</text>
+
+        <defs>
+          <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#374151"/></marker>
+          <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#b45309"/></marker>
+          <marker id="ap" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#7c3aed"/></marker>
+        </defs>
+      </svg>
+      <figcaption style="font-size:12px;color:#374151">
+        Hint mode enters at <em>generate</em>; redesign mode skips straight to
+        <em>review</em>. In both, the <span style="color:#7c3aed">reason</span>
+        is carried into review to neutralize the revert-to-original pull, while
+        scoring stays the honest accept gate. Below-threshold results refine with
+        the proposal + reason re-injected; acceptance marks the edit
+        <code>applied</code>.
+      </figcaption>
+    </figure>
+
+    <h2 id="s5">§5 — Implementation plan</h2>
+    <ul>
+      <li><strong>§5a Schema</strong> <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>edit_mode</code>/<code>name_hint</code>/<code>docs_hint</code>/<code>edit_reason</code>/<code>edit_origin</code>/<code>edit_status</code>/<code>edit_scope</code>/<code>edit_requested_at</code>
+        on <code>StandardName</code> + enums <code>EditMode</code>/<code>EditOrigin</code>/<code>EditStatus</code>/<code>EditScope</code>
+        (commit <code>2e338a54</code>; 10/10 schema tests green). Note:
+        <code>EditScope.only_self</code> — a permissible value literally named
+        <code>self</code> crashes gen-pydantic's import-closure resolution.</li>
+      <li><strong>§5b Generate/refine injection (hint mode)</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> — conditional
+        "Expert steering" blocks (subordinate-to-rules wording) in
+        <code>generate_name_dd</code>/<code>_names</code> (via the
+        <code>review_feedback</code> path), <code>refine_name_user</code>,
+        <code>generate_docs_user</code>, <code>refine_docs_user</code>; golden
+        byte-identity test proves no-edit renders unchanged
+        (commit <code>3a304f92</code>; 107 prompt tests green).</li>
+      <li><strong>§5c Review injection (reason only)</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> — per-candidate
+        anti-revert intent block in <code>review_names_user</code>,
+        <code>review_docs_user</code>, <code>review_docs_parent_user</code>;
+        reason + origin only, never the proposal as pre-approved
+        (commit <code>3a304f92</code>).</li>
+      <li><strong>§5d Redesign mode (skip-generate)</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>imas_codex/standard_names/edit.py</code> (<code>apply_edit</code> →
+        <code>EditPlan</code>; 781 lines): rename claims the target through
+        <code>refining</code> and persists a drafted successor via
+        <code>persist_refined_name</code> (+<code>REFINED_FROM</code>, edge
+        migration, edit fields stamped); docs mode persists via the
+        <code>DocsRevision</code> snapshot path; superseded-without-successor
+        targets are resurrectable, superseded-with-successor refused
+        (commit <code>fcf3db0c</code>).</li>
+      <li><strong>§5e CLI + MCP</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>sn edit</code> click command (user-facing <code>--scope self</code>
+        maps to <code>EditScope.only_self</code>) + <code>edit_standard_name</code>
+        MCP write tool (<code>origin="agent"</code>, first write tool on that
+        surface), both over one <code>apply_edit</code>
+        (commits <code>2b6aa969</code> + import-cycle fix <code>95494bd8</code>:
+        module-level edit imports made function-local — the cycle
+        edit&#8594;graph_ops&#8594;discovery&#8594;cli.logging&#8594;cli broke
+        standard_names-first imports). apply_edit also stamps a
+        <code>run_id</code> (<code>sn-edit-&lt;ts&gt;</code>) so
+        <code>sn run --scope-run-id</code> can review just the edited candidate
+        (commit <code>a7fe9487</code>).</li>
+      <li><strong>§5f Family / cascade</strong> — <code>--scope</code> handling +
+        the sibling-desync guard; parent edit cascades to children; family edit
+        re-proposes siblings + re-derives parent. <strong>Reuse, don't reinvent:</strong>
+        <code>imas_codex/standard_names/cascade.py</code> (<code>rename_cascade</code>,
+        already wired as <code>sn run --rename OLD:NEW</code>) implements the
+        HAS_PARENT-edge-driven descendant rename with all-or-nothing ISN round-trip
+        validation, audit log, and <code>override_edits</code>/<code>include_accepted</code>
+        safety knobs — <code>sn edit --scope subtree</code> wraps it, adding the
+        pipeline re-entry (review gate) that the direct cascade lacks.
+        <strong>Approach adjustment (2026-07-03):</strong> descendants do NOT each
+        re-enter LLM review — the root rename is the reviewed semantic decision;
+        per-child review of deterministic, ISN-round-trip-validated follow-renames
+        adds cost and risks <em>partial</em> acceptance (a half-edited family,
+        which §3.5 forbids). Instead the cascade is staged at edit time
+        (dry-run planned, conflicts surfaced) and applied atomically when the
+        root's review accepts (<code>edit_status &#8594; applied</code> hook).
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        scope resolution + sibling-desync guard in <code>edit.py</code>;
+        <code>cascade.py</code> gains <code>cascade_descendants_of</code> +
+        <code>parent_segment_of_child</code>; acceptance hook in
+        <code>persist_reviewed_name</code>/<code>persist_reviewed_docs</code>
+        drives <code>open &#8594; applied|exhausted</code> and applies the staged
+        cascade atomically; acceptance-time conflicts never revert the acceptance
+        (commit <code>fcf3db0c</code>; 180 unit tests + regression slice green).</li>
+      <li><strong>§5g Status lifecycle</strong>
+        <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>edit_status</code> transitions in
+        <code>persist_reviewed_name</code>/<code>persist_reviewed_docs</code>
+        (open&#8594;applied on accept, &#8594;exhausted at the cap; steering
+        propagates across refine rotations; commit <code>fcf3db0c</code>) +
+        an "Edits" table in <code>sn status</code> (counts by status, open-edit
+        list) shown only when edits exist (commit <code>2b6aa969</code>).</li>
+      <li><strong>§5h Agent skill</strong> <span class="badge badge-shipped">✓ landed 2026-07-03</span> —
+        <code>.claude/skills/sn-edit/SKILL.md</code> (132 lines: golden rule, mode
+        choice, reason quality, scope/guard rules, dry-run-first workflow, the §6
+        worked example, MCP mirror) + <code>AGENTS.md</code> cross-listing +
+        <code>docs/architecture/standard-names.md</code> edit side-car section
+        (commit <code>c55c196f</code> — also covers §7).</li>
+    </ul>
+
+    <h2 id="s6">§6 — Dog-food demo: plasma-boundary area <span class="badge badge-shipped">✓ passed 2026-07-03</span></h2>
+    <p class="landed-summary">
+      The steered rename landed through the honest gate: <code>area_of_plasma_boundary</code>
+      (superseded orphan, DD path uncovered) &#8594; <code>cross_section_of_plasma_boundary</code>,
+      <strong>accepted 0.988</strong> (grammar 20/20) with docs generated + accepted at 0.925 in the
+      same $0.72 scoped rotation; <code>edit_status=applied</code>; REFINED_FROM chain + provenance
+      migrated. Attempt 1 (<code>poloidal_cross_section_of_plasma_boundary</code>) was rejected at
+      0.675 by a reviewer hallucinating unregistered vocabulary — the live §3.2 pull-back — which
+      drove the review-grounding fix (<code>85f45373</code>: successors stamped with their parsed ISN
+      decomposition; review told the candidate PARSES). The deliberately-bad control
+      (<code>major_radius_of_secondary_x_point</code> &#8594; <code>toroidal_angle_of_secondary_x_point</code>)
+      was <strong>rejected 0.825</strong> on physics (unit m vs angle) under the same anti-revert
+      directive — scores still discriminate.
+      <strong>Lead-review round (same day):</strong> the lead rejected
+      <code>cross_section_of_plasma_boundary</code> as under-specified — the name
+      says nothing about WHICH property of the section (area? perimeter?) nor
+      which plane (poloidal/toroidal). Fix: ISN grammar replaces the bare
+      <code>cross_section</code> base with <code>cross_sectional_area</code>
+      (compound binds like <code>surface_area</code>; ISN <code>3d7e625</code>,
+      1618 py + 159 JS round-trip tests green, no alias — RC clean replace), and a
+      further <code>sn edit</code> rename landed the final name
+      <strong><code>poloidal_cross_sectional_area_of_plasma_boundary</code></strong>:
+      accepted 0.963 (grammar 20/20), docs accepted 0.919,
+      <code>edit_status=applied</code>, chain intact through all three
+      predecessors. Full record + score figure:
+      <a href="../research/archive/sn-expert-hints-landed.html">landed record</a>.
+    </p>
+
+    <h2 id="s7">§7 — Documentation updates</h2>
+    <p>On landing: <code>AGENTS.md</code> (the <code>sn edit</code> CLI + MCP tool +
+      the edit lifecycle axis + skill cross-listing); <code>.claude/skills/sn-edit/SKILL.md</code>
+      (new); <code>docs/architecture/standard-names.md</code> (the two-mode edit
+      side-car + reason-to-review mechanic); schema reference (auto via
+      <code>build-models</code>); SN prompt-architecture notes.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="edit-storage" data-choice="scalar-fields" data-by="reckon-ship" data-when="2026-07-03T08:44:57+00:00">
+    <p class="r-dec-q">Store edit fields as scalars on StandardName, or as a separate Edit/Suggestion node + edge?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="scalar-fields">scalar-fields</button>
+      <button class="r-opt" data-value="edit-node">edit-node</button>
+      </p>
+    <p class="r-dec-rat">Scalars mirror the existing reviewer_score_name/reviewer_comments_name pattern and keep v1 minimal; edit history via a node can come later if competing proposals become real. Deducible v1-minimal default per the plan&#x27;s own rationale.</p>
+    </div>
+<div class="r-dec" data-key="reason-review-strength" data-choice="anti-revert-directive" data-by="reckon-ship" data-when="2026-07-03T08:44:57+00:00">
+    <p class="r-dec-q">How strongly should the reason steer review — neutral intent context, or an explicit instruction not to favor the prior variant?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="intent-context">intent-context (state the why; reviewer judges freely)</button>
+      <button class="r-opt chosen" data-value="anti-revert-directive">anti-revert-directive (explicitly tell reviewer not to penalize deviation from the original)</button>
+      </p>
+    <p class="r-dec-rat">The plan&#x27;s §3.2 prose already words the review injection as the anti-revert directive (&#x27;judge on merits given this intent; do not penalize merely for differing from a prior variant&#x27;) — locking to match. Guard against rubber-stamping retained: §6 runs a deliberately-bad control edit to verify scores still discriminate. Graph evidence supports the need: area_of_plasma_boundary died in review (disagreement, superseded, no successor) precisely on the ambiguity the reviewer itself named.</p>
+    </div>
+<div class="r-dec" data-key="leaf-edit-default-scope" data-choice="block-and-require" data-by="reckon-ship" data-when="2026-07-03T08:44:57+00:00">
+    <p class="r-dec-q">Default scope for a shared-base leaf edit — block and require explicit --scope family, or auto-promote to family?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="block-and-require">block-and-require (safer; editor opts in)</button>
+      <button class="r-opt" data-value="auto-family">auto-family (fewer steps; risk of surprising blast radius)</button>
+      </p>
+    <p class="r-dec-rat">Blocking a shared-base leaf edit and requiring explicit --scope family avoids silently rewriting a sibling family; matches the plan&#x27;s lean and the existing cascade.py safety-knob style (override_edits / include_accepted opt-ins).</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-snedit-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-expert-hints §5a" data-resolved-at="2026-07-03T11:00:48+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Build sn edit §5a–§5h + dog-food the plasma-area demo §6</h4>
+    <div class="r-fu-body">Implement in a separate session. Two modes: redesign (--rename/--docs) skips generate and enters at REVIEW; hint (--hint) injects into GENERATE. The --reason rides into BOTH generate (hint) and the REVIEW gate (both modes) to break the pull-back to original variants. SN id is the positional arg; --scope self|family|subtree handles parent-&gt;children cascade and the sibling-desync guard. Add an MCP write tool mirroring the CLI and a .claude/skills/sn-edit skill so agents can use it. Resolve the 3 decisions (edit-storage, reason-review-strength, leaf-edit-default-scope) before §5b/§5c. Land sn-coverage-and-hygiene §1 (derived-parent enrichment) first so the §6 demo edits a real-description parent.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-expert-hints (http://localhost:8765/imas-codex/sn-expert-hints.html)
+Section: §5a (schema) through §5h (agent skill), then §6 dog-food demo
+Tier: opus
+
+Context
+  Build `imas-codex sn edit &lt;sn&gt;` + mirrored MCP tool: a human/agent proposes a name/doc change that rides generate-&gt;review-&gt;score. Two modes — redesign (--rename/--docs) skips generate and enters at REVIEW; hint (--hint) injects into GENERATE. --reason is mandatory and rides into generate (hint) AND review (both modes) to neutralize the revert-to-original pull. Review/scoring otherwise unchanged and remain the gate. Generalizes the existing reviewer suggested_name threading to a human/agent origin.
+
+State to read
+  imas_codex/schemas/standard_name.yaml (StandardName)
+  imas_codex/standard_names/workers.py (generate ~2503, refine_name ~5427, generate_docs ~7111, refine_docs ~7623; review_names ~6404, review_docs ~7373)
+  imas_codex/standard_names/graph_ops.py (persist_refined_name for the redesign skip-generate path; claim gates)
+  imas_codex/standard_names/parents.py (derived-parent re-derivation for --scope cascade)
+  imas_codex/cli/sn.py ; the MCP tool registration
+
+Scope locks / constraints
+  review gets the REASON only (intent), never the proposed string presented as pre-approved — scoring stays independent.
+  hint is a proposal subordinate to grammar/style rules, never an override.
+  --scope: parent edit defaults subtree (cascade to children); leaf edit defaults self with a sibling-desync guard that blocks shared-base edits lacking --scope family.
+  never hardcode model strings (get_model); import enums from generated models; agents must go THROUGH the tool, never hand-edit graph text.
+
+Done-when
+  1. §5a schema fields + models regenerate green.
+  2. §5b hint injection (no-hint output byte-identical snapshot).
+  3. §5c review reason-injection (intent only; scores still discriminate — test with a deliberately-bad control edit).
+  4. §5d redesign skip-generate path (rename supersedes old + REFINED_FROM; links migrate).
+  5. §5e CLI + MCP share one impl; --dry-run prints the plan.
+  6. §5f --scope cascade + sibling-desync guard.
+  7. §5g applied/exhausted lifecycle in sn status.
+  8. §5h .claude/skills/sn-edit/SKILL.md + AGENTS.md cross-listing.
+  9. §6 demo: area_at_plasma_boundary renamed to poloidal_cross_section_area_of_plasma_boundary through the pipeline, children re-derived, gates passed.
+  10. uv run pytest tests/standard_names/ green; followup written + this resolved.</pre>
+    <p class="r-fu-outcome">All of §5a–§5h + §6 shipped 2026-07-03 across commits 2e338a54 (schema), 3a304f92 (prompt steering + golden byte-identity), fcf3db0c/a7fe9487 (edit engine, cascade-on-acceptance, run_id scoping), 2b6aa969/95494bd8 (CLI + first MCP write tool + status table; import-cycle fix), c55c196f (skill + docs), 85f45373 (review grammar-grounding fix). Full tests/standard_names suite green. §6 dog-food: area_of_plasma_boundary (superseded orphan) → cross_section_of_plasma_boundary ACCEPTED 0.988 + docs accepted 0.925, edit_status=applied; attempt-1 rejection (0.675, reviewer hallucinated vocabulary) root-caused → grounding fix; bad control rejected 0.825 on physics — scores discriminate. Record: docs/archive/sn-expert-hints-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-snedit-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship sn-expert-hints" data-resolved-at="2026-08-10T08:18:07+00:00" data-resolved-by="reckon-edit">
+    <h4 class="r-fu-title">sn edit hardening: rejected-rename rollback, generalized review grammar-grounding, live cascade exercise</h4>
+    <div class="r-fu-body">Three residuals from the §6 demo. (1) No-rollback gap: a rename edit supersedes the target BEFORE review; a rejected/exhausted edit leaves the predecessor superseded without an accepted successor — fine for orphans, risky for accepted targets (needs restore-predecessor-on-terminal-reject or a propose-without-supersede variant). (2) The reviewer-hallucination fix (deterministic grammar grounding) currently applies only to steered candidates; the failure mode is not edit-specific — consider grounding ALL pool name-reviews. (3) Hint mode, docs mode, and the subtree cascade are unit-tested but not live-exercised; run a live subtree edit on a derived parent with children. Minor residue: the retired control name holds the PRODUCED_NAME provenance for dd source of major_radius_of_secondary_x_point.</div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-expert-hints (http://localhost:8765/imas-codex/sn-expert-hints.html)
+Section: hardening follow-on
+Tier: opus
+
+Context
+  sn edit shipped and passed its dog-food demo (see docs/archive/sn-expert-hints-landed.html). Three hardening items remain.
+
+Work
+  1. Rollback semantics: when a rename edit&#x27;s successor terminally fails (edit_status exhausted/rejected) and the predecessor was accepted before the edit, restore the predecessor to its prior stage (record the prior stage at claim time) OR add a propose-without-supersede mode that only supersedes on acceptance. Decide + implement + test.
+  2. Evaluate generalizing the deterministic grammar-grounding line (review_names_user.md, currently inside the edit_reason block) to ALL pool reviews: stamp parsed segment fields at persist time for pipeline names too, measure score shift on a small gold set before enabling.
+  3. Live exercise: pick a derived parent with 3+ children (e.g. ion_momentum), run sn edit --scope subtree end-to-end, verify cascade applies atomically on acceptance; also exercise hint mode + docs mode live.
+  4. Cleanup: re-point or retire the PRODUCED_NAME provenance now attached to the retired control name toroidal_angle_of_secondary_x_point.
+
+Done-when
+  1. Rollback decision locked + implemented + tested; 2. grounding generalization verdict recorded with data; 3. live cascade/hint/docs exercises recorded in the plan; 4. control provenance cleaned; full suite green; followup resolved.</pre>
+    <p class="r-fu-outcome">Transferred to the consolidated current Standard Names plans named in this plan's retirement summary; this historical prompt must not be executed.</p>
+    </article>
+</section>
+  </main>
+</body>
+</html>
