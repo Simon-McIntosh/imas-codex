@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T07:50:58",
+  "updated": "2026-09-01T08:42:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1312,9 +1312,11 @@
         "id": "impl-reviewdoc",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05b79-caca-79b0-8e1a-14216b9b66fa",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05b79-caca-79b0-8e1a-14216b9b66fa"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1409,9 +1411,11 @@
         "id": "impl-siteddfetch",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05b7a-d73d-7310-a593-1065509275ab",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05b7a-d73d-7310-a593-1065509275ab"
+        },
         "created": "2026-09-01"
       },
       {
@@ -39186,9 +39190,303 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T053916761641-n-catalog-yaml-readability",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-catalog-yaml-readability",
+        "node_definition": {
+          "done_when": "Operational surface: the ISN checkout /home/ITER/mcintos/Code/imas-standard-names and its fork remote Simon-McIntosh/IMAS-Standard-Names only, never upstream; work there directly and commit locally (the orchestrator integrates and pushes). The catalog YAML writer emits one blank line between consecutive entries so a reviewer can see where each standard name begins, real unicode characters rather than escape sequences (today's equilibrium.yml carries 258 sequences such as backslash u 03C6 for phi), and prose scalars wrapped without mid-word backslash continuations. Round-trip safety proven: a file written by the new writer parses back to a structure equal to the input, and an existing catalog file re-written then re-read is unchanged in data. Unit tests cover blank-line separation, unicode output and round-trip equality. The touched module's suite runs once to a persistent log exit 0; report quotes the before and after rendering of one entry; no imas-codex or graph writes",
+          "estimated_hours": null,
+          "goal": "Catalog YAML files read as reviewable documents",
+          "id": "n-catalog-yaml-readability",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053916761641-n-catalog-yaml-readability/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-yaml-readability.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-yamlformat",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T05:39:21Z",
+        "completed_at": "2026-09-01T05:58:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1136,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1136,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "51064f48413de4ca15b3dac81159e859b5680ba9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused suite for the touched module (see manifest tests line)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-yaml-readability.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053916761641-n-catalog-yaml-readability/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05b7a-aff8-7df0-a971-5dc34108d366",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6218240,
+            "cached_input_tokens_cumulative": 6218240,
+            "input_tokens": 6431003,
+            "input_tokens_cumulative": 6431003,
+            "output_tokens": 15702,
+            "output_tokens_cumulative": 15702,
+            "reasoning_output_tokens": 5335,
+            "reasoning_output_tokens_cumulative": 5335
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T053925611345-n-site-dd-retrieval",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-site-dd-retrieval",
+        "node_definition": {
+          "done_when": "Operational surface: the ISN checkout /home/ITER/mcintos/Code/imas-standard-names and its fork remote Simon-McIntosh/IMAS-Standard-Names only, never upstream; work there directly and commit locally (the orchestrator integrates and pushes). The site dataset builder in imas_standard_names/catalog/dataset.py, which today reads dd_documentation and enhanced_context from the entry around lines 300 to 354, instead resolves DD leaf documentation, parent documentation, data type, unit and coordinates from an entry's dd_path and dd_version through the imas-python dependency, so the site shows the same information once those fields leave the catalog file; imas-python is declared as a dependency of the extra the site build uses and the report names it. Behaviour is fail-soft and visible: an unresolvable path or version is recorded as unresolved for that entry and the build completes rather than raising or emitting an empty field silently. Unit tests prove an entry carrying only dd_path and dd_version yields populated DD documentation, an unresolvable path yields the recorded marker with no exception, and an entry still carrying legacy inline fields is accepted. The touched module's suite runs once to a persistent log exit 0; report names the resolution source used for one worked path; no imas-codex or graph writes",
+          "estimated_hours": null,
+          "goal": "The site dataset resolves Data Dictionary content from imas-python rather than the catalog file",
+          "id": "n-site-dd-retrieval",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053925611345-n-site-dd-retrieval/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/site-dd-retrieval.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-siteddfetch",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T05:39:31Z",
+        "completed_at": "2026-09-01T06:00:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1240,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1240,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "51064f48413de4ca15b3dac81159e859b5680ba9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused suite for the touched module (see manifest tests line)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/site-dd-retrieval.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053925611345-n-site-dd-retrieval/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05b7a-d73d-7310-a593-1065509275ab",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7681280,
+            "cached_input_tokens_cumulative": 7681280,
+            "input_tokens": 7923694,
+            "input_tokens_cumulative": 7923694,
+            "output_tokens": 21109,
+            "output_tokens_cumulative": 21109,
+            "reasoning_output_tokens": 7199,
+            "reasoning_output_tokens_cumulative": 7199
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T053818400083-n-reviewing-doc-clarity",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-reviewing-doc-clarity",
+        "node_definition": {
+          "done_when": "Operational surface: the catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog and the fork Simon-McIntosh/imas-standard-names-catalog only, never upstream. Rewrite the paragraph in REVIEWING.md that a reviewer reported as hard to understand, quoting his comment in the report: he asked why it says unchanged entries and said the paragraph is hard to follow. The replacement states plainly, in short sentences, that entries a reviewer does not edit are approved as proposed when the pull request merges, that entries a reviewer edits go back through the naming and review pipeline before they can be approved, and that an edit failing those checks is marked contested and resolved separately. No jargon from the internal pipeline vocabulary beyond what a reviewer needs. Evidence: the before and after paragraph quoted in full in the report, and a check that the file still contains no bulleted enumeration of internal stage names. Commit to the fork main with a conventional subject and body; touch no other file; no graph writes",
+          "estimated_hours": null,
+          "goal": "The reviewer guide explains approval in plain language",
+          "id": "n-reviewing-doc-clarity",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053818400083-n-reviewing-doc-clarity/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/reviewing-doc-clarity.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-reviewdoc",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T05:38:23Z",
+        "completed_at": "2026-09-01T05:52:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 857,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 857,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "51064f48413de4ca15b3dac81159e859b5680ba9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused suite for the touched module (see manifest tests line)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/reviewing-doc-clarity.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T053818400083-n-reviewing-doc-clarity/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05b79-caca-79b0-8e1a-14216b9b66fa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 778240,
+            "cached_input_tokens_cumulative": 778240,
+            "input_tokens": 886167,
+            "input_tokens_cumulative": 886167,
+            "output_tokens": 4118,
+            "output_tokens_cumulative": 4118,
+            "reasoning_output_tokens": 507,
+            "reasoning_output_tokens_cumulative": 507
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1041
+    "_version": 1046
   }
 }

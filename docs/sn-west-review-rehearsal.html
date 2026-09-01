@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="107">
+<meta name="plan-version" content="110">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2490,6 +2490,15 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260901T053759806585-n-catalog-provenance-slim" data-who="impl-yamlslim" data-when="2026-09-01T05:49:58Z">
     <div class="r-comment-body"><p>DD bindings reduced to dd_path + dd_version; equilibrium.yml regenerates at 5127 lines versus 12137 (7010 removed, 57.76%), 133.4 to 56.3 lines per entry across 91 entries; non-DD signal bindings keep signal_id and semantic_facet since no path recovers them; accounting unchanged</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T053916761641-n-catalog-yaml-readability" data-who="impl-yamlformat" data-when="2026-09-01T05:58:17Z">
+    <div class="r-comment-body"><p>Review-friendly YAML writer landed (ISN 25758f0, pushed to fork main): 8/8 single blank-line entry boundaries, 0 unicode escapes, 0 backslash continuations, round-trip equality proven; 5 tests exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T053925611345-n-site-dd-retrieval" data-who="impl-siteddfetch" data-when="2026-09-01T06:00:11Z">
+    <div class="r-comment-body"><p>Site resolves DD metadata from imas-python 2.3.0 by pinned path and version (ISN 592df546, pushed): worked path summary/global_quantities/energy_thermal/value at DD 4.0.0 resolved to leaf, parent doc, FLT, J, coordinates [time]; fail-soft unresolved marker proven; 107 tests exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T053818400083-n-reviewing-doc-clarity" data-who="impl-reviewdoc" data-when="2026-09-01T05:52:40Z">
+    <div class="r-comment-body"><p>REVIEWING.md approval paragraph rewritten in plain language on catalog fork main (3ffddf7d): three outcomes in three sentences, 0 bulleted enumerations, 0 internal stage-name tokens; reviewer comment quoted in the report</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260827T104434424715-n-preflight-snapshot" data-who="impl-actone" data-when="2026-08-27T10:57:20Z">
     <div class="r-comment-body"><p>Restore point: /home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-d4c6ac3.tar.gz (2.46 GB), census StandardName 4668 / fully-clean 2262 identical pre and post, restore via imas-codex graph load; no mutation</p></div>
