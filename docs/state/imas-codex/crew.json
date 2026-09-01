@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T19:28:04",
+  "updated": "2026-09-01T19:38:58",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1363,9 +1363,11 @@
         "id": "impl-receiptrestore",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05dfb-7ae3-76f2-a683-657a94ccc3c7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05dfb-7ae3-76f2-a683-657a94ccc3c7"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1832,6 +1834,17 @@
         "session_model": "gpt-5.6-sol",
         "sessions": {
           "gpt-5.6-sol": "01a05cf2-2cc6-7841-9b9b-7d8073ca8a78"
+        },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "impl-targetname",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05e04-0318-72a1-92a3-e0bcad94cacd",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e04-0318-72a1-92a3-e0bcad94cacd"
         },
         "created": "2026-09-01"
       },
@@ -44472,9 +44485,205 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T171911490921-n-receiptrestore",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712b",
+        "node": "n-receiptrestore",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/receipt-restore.md re-measures the source-lost population live rather than carrying 42 from the plan, names each identity with the exact source its StandardNameChange receipt records and the receipt id that proves it, restores each through the governed signed-manifest operator with a before and after source count per row and refuses any row whose receipted source no longer exists in the current DD naming it instead, reports a free round-trip diagnostic per restored row as evidence WITHOUT letting divergence veto a receipted restore, confirms no identity string changed, and reports attributable USD which must be 0.000000 because the round-trip runs on the local free model",
+          "estimated_hours": 0.8,
+          "goal": "Restore the 42 source-lost identities to the exact bindings their receipts record",
+          "id": "n-receiptrestore",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T171911490921-n-receiptrestore/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712b",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/receipt-restore.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-receiptrestore",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T17:19:16Z",
+        "completed_at": "2026-09-01T17:31:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 731,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 731,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "3421f8ec3892c5a4c24748581772214eb5894b50",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "not-run",
+        "gate_check": {
+          "command": "live receipt/source census plus canonical signed source-migration preview",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/receipt-restore.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T171911490921-n-receiptrestore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dfb-7ae3-76f2-a683-657a94ccc3c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7197184,
+            "cached_input_tokens_cumulative": 7197184,
+            "input_tokens": 7573088,
+            "input_tokens_cumulative": 7573088,
+            "output_tokens": 22492,
+            "output_tokens_cumulative": 22492,
+            "reasoning_output_tokens": 6532,
+            "reasoning_output_tokens_cumulative": 6532
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T172829334748-n-targetnaming",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73b",
+        "node": "n-targetnaming",
+        "node_definition": {
+          "done_when": "graph load and graph clear each require an explicit target name and refuse with a clear message when the resolved active symlink names a different graph, a test fails against the unmodified code and passes after proving a command aimed at a scratch target cannot act on the live codex directory, a second test proves the command still succeeds when the named target and the resolved symlink agree, resolve_neo4j keeps its current signature so the twelve read-only callers named in the plan are untouched with that non-change verified by an unchanged-signature assertion or a grep count, the four test files referencing the load and clear surface are updated where needed, and the targeted graph CLI plus neo4j-ops suites are reported green with exact passed and failed counts",
+          "estimated_hours": 0.8,
+          "goal": "Require a destructive graph command to name its target and refuse a mismatch",
+          "id": "n-targetnaming",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T172829334748-n-targetnaming/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73b",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/cli/graph/data.py",
+            "tests/core/test_graph_cli_package.py",
+            "tests/cli/test_graph_destructive_target.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-targetname",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T17:28:35Z",
+        "completed_at": "2026-09-01T17:34:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 351,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 351,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "f9dbdc7b3a2b7bfdea2e219f4b94e269f883d104",
+        "commits": [
+          "f02560acfacdeb42c81c58f300a6a027d8c2c2d0"
+        ],
+        "changed_lines": {
+          "added": 161,
+          "removed": 2,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/cli/test_graph_destructive_target.py tests/core/test_graph_cli_package.py tests/core/test_neo4j_ops.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T172829334748-n-targetnaming/final-graph-target-and-ops.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T172829334748-n-targetnaming/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e04-0318-72a1-92a3-e0bcad94cacd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2465536,
+            "cached_input_tokens_cumulative": 2465536,
+            "input_tokens": 2602742,
+            "input_tokens_cumulative": 2602742,
+            "output_tokens": 12258,
+            "output_tokens_cumulative": 12258,
+            "reasoning_output_tokens": 3773,
+            "reasoning_output_tokens_cumulative": 3773
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1160
+    "_version": 1165
   }
 }
