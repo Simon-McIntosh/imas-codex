@@ -27,6 +27,49 @@ from imas_codex.graph.neo4j_ops import (
 NEO4J_IMAGE = neo4j_image()
 
 
+def _deploy_compute_neo4j() -> dict:
+    """Deploy Neo4j from graph-owned compute configuration."""
+    from imas_codex.cli.services import (
+        _NEO4J_CPUS,
+        _NEO4J_JOB,
+        _NEO4J_MEM,
+        _ensure_service_job,
+        _get_neo4j_job,
+        _graph_http_port,
+        _neo4j_pre_launch,
+        _neo4j_service_command,
+    )
+
+    job = _get_neo4j_job()
+    if job and job["state"] == "RUNNING":
+        click.echo(
+            f"Neo4j already running: job {job['job_id']} on {job['node']} "
+            f"({job['cpus']} CPUs, {job['time']})"
+        )
+        return job
+
+    click.echo("Deploying Neo4j...")
+    job = _ensure_service_job(
+        _NEO4J_JOB,
+        _neo4j_service_command(),
+        cpus=_NEO4J_CPUS,
+        mem=_NEO4J_MEM,
+        gpus=0,
+        pre_launch=_neo4j_pre_launch(),
+    )
+
+    import time
+
+    for _ in range(30):
+        if is_neo4j_running(_graph_http_port()):
+            return job
+        time.sleep(1)
+    raise click.ClickException(
+        f"Neo4j SLURM job {job['job_id']} is running on {job['node']}, "
+        "but its HTTP endpoint did not become ready."
+    )
+
+
 # ============================================================================
 # Server Commands
 # ============================================================================
@@ -69,10 +112,9 @@ def graph_start(
         from imas_codex.cli.services import (
             _graph_http_port,
             _graph_port,
-            deploy_neo4j,
         )
 
-        job = deploy_neo4j()
+        job = _deploy_compute_neo4j()
         node = job["node"]
 
         if job.get("_fallback"):

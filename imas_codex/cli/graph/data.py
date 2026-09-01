@@ -601,22 +601,35 @@ def graph_export(
             with tarfile.open(output_path, "w:gz") as tar:
                 tar.add(archive_dir, arcname=archive_dir.name)
     else:
-        with Neo4jOperation("graph dump", require_stopped=True) as op:
-            if no_restart:
+        restart_after_export = False
+        try:
+            with Neo4jOperation("graph dump", require_stopped=True) as op:
+                restart_after_export = op.was_running and not no_restart
                 op.was_running = False
 
-            click.echo(f"Creating archive [{profile.name}]: {output_path}")
+                click.echo(f"Creating archive [{profile.name}]: {output_path}")
 
-            with tempfile.TemporaryDirectory() as tmpdir:
-                tmp = Path(tmpdir)
-                archive_dir = tmp / archive_dir_name
-                archive_dir.mkdir()
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    tmp = Path(tmpdir)
+                    archive_dir = tmp / archive_dir_name
+                    archive_dir.mkdir()
 
-                _build_archive(archive_dir)
+                    _build_archive(archive_dir)
 
-                click.echo("  Creating archive...")
-                with tarfile.open(output_path, "w:gz") as tar:
-                    tar.add(archive_dir, arcname=archive_dir.name)
+                    click.echo("  Creating archive...")
+                    with tarfile.open(output_path, "w:gz") as tar:
+                        tar.add(archive_dir, arcname=archive_dir.name)
+        finally:
+            if restart_after_export:
+                from imas_codex.cli.graph.server import graph_start
+
+                click.echo("Restarting Neo4j...")
+                graph_start.callback(
+                    image=None,
+                    data_dir=None,
+                    password=None,
+                    foreground=False,
+                )
 
     size_mb = output_path.stat().st_size / 1024 / 1024
     click.echo(f"Archive created: {output_path} ({size_mb:.1f} MB)")
