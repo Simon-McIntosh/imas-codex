@@ -82,6 +82,21 @@ class TestGraphCLIPackageRegistration:
             ]
         )
 
+    def test_destructive_commands_expose_target_argument(self):
+        from click import Argument
+
+        from imas_codex.cli.graph.data import graph_clear, graph_load
+
+        clear_arguments = [
+            param.name for param in graph_clear.params if isinstance(param, Argument)
+        ]
+        load_arguments = [
+            param.name for param in graph_load.params if isinstance(param, Argument)
+        ]
+
+        assert clear_arguments == ["target"]
+        assert load_arguments == ["archive", "target"]
+
     def test_registry_commands_importable(self):
         from imas_codex.cli.graph.registry import (
             graph_fetch,
