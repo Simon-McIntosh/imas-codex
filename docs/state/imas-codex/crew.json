@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T01:41:46",
+  "updated": "2026-09-02T01:51:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -49236,9 +49236,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T234246363308-n-west-stage6b-repaired-cycle",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage6b-repaired-cycle",
+        "node_definition": {
+          "done_when": "crew/reports/west-stage6b-repaired-cycle.md records, for each of the three commands, exit status, output counts and log path, and the censuses show: after approve 374 auto-approved plus 2 contested where both contested nodes carry non-null catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha and catalog_reviewer_actor and the graph-merged: receipt tag exists; after resolve breakdown_initial_time approved with description equal to 'Timestamp at which plasma breakdown begins and discharge current starts to flow.' and contested_resolution recorded; after undo approved 0, contested 0, all catalog_* fields null on the batch, the receipt tag gone and the cut-time RC tag v0.3.0rc1+west-task-2e present; the review manifest file in this worktree is byte-identical to HEAD throughout",
+          "estimated_hours": null,
+          "goal": "Prove the repaired fold-back cycle end to end on the live graph for PR 3 (IMAS_CODEX_SN_ISNC pointing at the merged fork main): sn approve --pr, followed by sn resolve breakdown_initial_time --override --reason, followed by sn approve --undo, with a Cypher census plus the fork tag list captured before each step",
+          "id": "n-west-stage6b-repaired-cycle",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T234246363308-n-west-stage6b-repaired-cycle/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "crew/reports/west-stage6b-repaired-cycle.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T23:42:51Z",
+        "completed_at": "2026-09-01T23:50:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 432,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 432,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "67da538cd041d559f73788975dc99d5d3c1d759e",
+        "commits": [
+          "8f8f5d99fa7120e97c293d1cb2ced346cdd34bd2"
+        ],
+        "changed_lines": {
+          "added": 219,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "sn approve --pr; sn resolve --override; sn approve --undo; GraphClient censuses; fork ref checks",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T234246363308-n-west-stage6b-repaired-cycle/logs/approve.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T234246363308-n-west-stage6b-repaired-cycle/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 519168,
+            "cached_input_tokens_cumulative": 3067648,
+            "input_tokens": 321450,
+            "input_tokens_cumulative": 3179545,
+            "output_tokens": 7397,
+            "output_tokens_cumulative": 17393,
+            "reasoning_output_tokens": 2007,
+            "reasoning_output_tokens_cumulative": 3694
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1267
+    "_version": 1268
   }
 }

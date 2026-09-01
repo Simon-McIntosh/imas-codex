@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="158">
+<meta name="plan-version" content="159">
 <meta name="plan-impl" content="0.99">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2648,6 +2648,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260902T0142-undo-fallback" data-who="reckon-ship" data-when="2026-09-02T01:42:00Z">
     <div class="r-comment-body">Undo fallback landed at dc5bdcc3 (merged 038b5ae5): undo_approval demotes an approved row when catalog_pr_number matches the PR, or when it is null and the id belongs to the supplied frozen batch; a three-row fixture proves both selected rows revert with all five catalog_* fields cleared while a null-provenance non-member is byte-identical; 56/56 approval tests. Stage 6b next: one live cycle with all repairs in place, sn approve --pr (expect 374 auto-approved, 2 contested WITH provenance, receipt tag), sn resolve --override on breakdown_initial_time (expect the reviewer wording materialized), sn approve --undo (expect approved 0, contested 0, receipt gone, RC tag kept), leaving the graph unwound for the real physicist review under sn-west-catalog-release.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T234246363308-n-west-stage6b-repaired-cycle" data-who="impl-weststage3" data-when="2026-09-01T23:50:03Z">
+    <div class="r-comment-body"><p>approve exited 1 after PARTIAL mutation: 384 auto-approved with full provenance and the catalog materialization pushed to fork main (e631b875) before it blocked on the two edited targets (breakdown_initial_time already approved from the pre-fallback undo, pulse_duration docs_stage drafted) and wrote no receipt; resolve refused (not contested); the repaired undo demoted all 385 including the null-provenance member, graph now approved 0 / contested 0 / accepted 2336, but fork main keeps the receipt-less materialization</p></div>
 </div>
 </section>
 </main>
