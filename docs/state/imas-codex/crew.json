@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T10:06:15",
+  "updated": "2026-09-01T10:24:43",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -990,6 +990,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-mintledger",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-mirrorrepair",
@@ -40278,9 +40287,107 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T075419708195-n-min-safety-factor-adjudication",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-min-safety-factor-adjudication",
+        "node_definition": {
+          "done_when": "reports/min-safety-factor.md answers, read-only with a citation beside every claim: (1) how minimum_safety_factor is DEFINED in the ISN grammar vocabulary \u2014 quote its registry entry, its segment type and its permitted relations with file and line \u2014 and whether the grammar treats it as a locus, a physical base, or both; (2) whether anything actually USES it as a locus, listing every live standard name whose parsed locus is minimum_safety_factor (for example a quantity named at that surface) with counts and examples, and separately every use as a quantity in its own right, each with a positive control for any zero; (3) whether it is published in the current 329-entry WEST cut and what its entry says (kind, unit, description, bindings); (4) the physics question the lead raised: the safety factor is signed under COCOS conventions and can be negative, so state what the minimum of a signed profile means, whether the intended quantity is the minimum of q or the minimum of the absolute value of q, what the DD sources bound to this identity actually contain, and whether other catalog or DD quantities in this family already resolve the sign question by convention; (5) a recommendation covering both halves \u2014 the correct spelling for the quantity (minimum_safety_factor versus minimum_absolute_safety_factor or another form) and whether the locus and the quantity should carry distinct spellings, with the argument for and against each option. No writes outside the report; no graph mutation",
+          "estimated_hours": null,
+          "goal": "A ruling basis for whether minimum safety factor is a locus, a quantity, or both, and whether its spelling must say absolute",
+          "id": "n-min-safety-factor-adjudication",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T075419708195-n-min-safety-factor-adjudication/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/min-safety-factor.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-minq",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:54:26Z",
+        "completed_at": "2026-09-01T08:08:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 846,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 846,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "11afcc1bda34f18a25036c4a67c3a194989420d0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "registry and parser citation, live graph and catalog inspection, DD sign-transform analysis",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/min-safety-factor.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T075419708195-n-min-safety-factor-adjudication/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05bf6-5c5d-7fa2-a6c5-c7c9348a13ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7098624,
+            "cached_input_tokens_cumulative": 7098624,
+            "input_tokens": 7316001,
+            "input_tokens_cumulative": 7316001,
+            "output_tokens": 27896,
+            "output_tokens_cumulative": 27896,
+            "reasoning_output_tokens": 9993,
+            "reasoning_output_tokens_cumulative": 9993
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1060
+    "_version": 1062
   }
 }
