@@ -140,12 +140,46 @@
         <tr><td><strong>Exposure</strong></td><td><strong>4,838,096.778723 s = 55.996490494 days</strong></td></tr>
       </tbody>
     </table>
-    <p><strong>The finding is what the package is, not how old it is.</strong> The only
-    package the registry returned is <em>TCV-scoped</em>, while the newest local restore point
-    carries the full-graph package name. So the two-month figure does not bound what it was
-    assumed to bound &mdash; it dates a facility subset. Whether a full-graph offsite copy
-    exists at all is a question this measurement raised rather than answered, and it is the
-    difference between an assumed floor and a measured one.</p>
+    <p>The package this node returned is <em>TCV-scoped</em>, while the newest local restore
+    point carries the full-graph package name &mdash; so on its own the figure did not date
+    what it was assumed to date. <strong>The follow-up census below corrects the conclusion
+    that invited: a full-graph offsite copy does exist.</strong></p>
+  </section>
+
+  <section id="offsite-inventory">
+    <h2>Four packages, one of them full &mdash; and the aiming error that hid it</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-offsiteinventory</code>, commit
+    <code>a8780e61</code>. Record:
+    <a href="/imas-codex/evidence/graph-operational-safety/offsite-inventory">offsite-inventory</a>.</p>
+    <p><strong>The preceding node reported that the only package the registry returned was
+    TCV-scoped. That was true of what it asked and false as a statement about the
+    registry.</strong> It followed the local manifest&rsquo;s last-push record to <em>one</em>
+    package and queried that one. An account-wide census finds four. This is the aiming
+    failure in its canonical form: the instrument fired correctly, returned a real package
+    with a real timestamp, and answered a question nobody had asked. Worth noting which
+    direction it erred in &mdash; the wrong answer was the <em>alarming</em> one, which is why
+    it survived a reading; a flattering error in the same place would not have been
+    interrogated at all.</p>
+    <table>
+      <caption>Every graph package the account holds, newest version each, scope triangulated
+      from three independent sources rather than inferred from the package name</caption>
+      <thead><tr><th>Package</th><th>Newest version</th><th>Pushed</th><th>Scope</th><th>Layer</th></tr></thead>
+      <tbody>
+        <tr><td><code>imas-codex-graph</code></td><td><code>v5.3.0-rc6</code></td><td>2026-07-07T12:27:23Z</td><td><strong>Full: all facilities plus DD</strong></td><td>2,434,869,050 B</td></tr>
+        <tr><td><code>imas-codex-graph-dd</code></td><td><code>v5.3.0-rc6</code></td><td>2026-07-07T12:36:25Z</td><td>DD-only, current name</td><td>2,096,263,875 B</td></tr>
+        <tr><td><code>imas-codex-graph-imas</code></td><td><code>4.0.1.dev1921-gb863cb4aa-r1</code></td><td>2026-03-19T11:39:46Z</td><td>DD-only, legacy name</td><td>2,029,533,924 B</td></tr>
+        <tr><td><code>imas-codex-graph-tcv</code></td><td><code>5.3.0rc6.dev91-g2479801d7.d20260706-r1</code></td><td>2026-07-07T12:57:57Z</td><td>Per-facility: TCV plus DD</td><td>2,810,090,518 B</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The verdict is unchanged and is now earned rather than assumed: no.</strong>
+    Release-pinned offsite copies are not an adequate disaster-recovery floor for the
+    15,058,189,845-byte live store. The only full recovery point is
+    <strong>56.238229167 days</strong> old, and its cadence is the <em>release</em> cadence
+    rather than a backup cadence, so it drifts with how often software ships rather than with
+    how often data changes; a filtered subset cannot close that gap.</p>
+    <p>The record states plainly what was <em>not</em> established: registry presence and
+    manifest fetchability were verified; trial restore and content equivalence were not
+    claimed.</p>
   </section>
 
   <section id="archive-stamp">
