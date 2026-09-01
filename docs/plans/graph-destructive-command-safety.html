@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac,716a8557,7c2aa040,cfdf8c11,c3eaf56d,a8780e61,fcf0027e,76596e72,b2c1a298,7d86f251,815b848f,0949c2c2,1d4fb8be">
 <meta name="plan-artifacts" content="docs/evidence/archive/graph-destructive-command-safety-landed.html,docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/graph-operational-safety/offsite-currency.md,docs/evidence/graph-operational-safety/offsite-inventory.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py,imas_codex/graph/neo4j_ops.py,imas_codex/graph/remote.py,imas_codex/cli/graph/data.py,imas_codex/cli/graph/registry.py,imas_codex/cli/graph/server.py,imas_codex/cli/graph/__init__.py,imas_codex/cli/release.py,docs/architecture/graph.md,docs/architecture/graph-profiles.md,tests/cli/test_graph_archive_naming.py,tests/cli/test_graph_manifest_scope.py,tests/cli/test_graph_destructive_backup.py,tests/cli/test_graph_destructive_target.py,tests/core/test_backup_currency.py">
 <meta name="plan-impl" content="1.0">
@@ -392,6 +392,9 @@
 </div>
 <div class="r-comment" data-section="§3f" data-id="c-run-r-20260901T190133843009-n-suitecollection" data-who="impl-suitecollect" data-when="2026-09-01T19:16:56Z">
     <div class="r-comment-body"><p>Collection restored: before exit 2 with 0 collected outcomes, after exit 1 with 12021 passed / 49 failed / 145 skipped / 1 xfailed; ruff clean. The gate is the restoration, not a green suite - the coordinator's original done-when demanded exit 0 on an unmeasured assumption and was corrected mid-flight; the 49 exposed failures are pre-existing and none is in a file this plan touched</p></div>
+</div>
+<div class="r-comment" data-section="§3f" data-id="c-20260901T2200-skipnoop" data-who="reckon-ship" data-when="2026-09-01T22:00:00+00:00">
+    <div class="r-comment-body"><strong>CORRECTION TO THIS SECTION'S REASONING, recorded after shipping because it was wrong and the plan should not read as if it were right.</strong> &#167;3f argued that declaring <code>reckon</code> was the wrong repair and that the import should become conditional, keeping the check &ldquo;wherever reckon is available&rdquo;. Measured afterwards in this repository's own environment: <code>import reckon</code> raises <code>ModuleNotFoundError</code>, <code>pyproject.toml</code> names it zero times, and <code>pytest tests/docs/test_documentation_layout.py</code> exits <strong>5 with no tests collected</strong>, the module skipped whole. <strong>So &ldquo;wherever available&rdquo; evaluates to nowhere here, and the fix converted a loud catastrophic failure into a silent no-op</strong> — the suite collects 12,020 tests, which was the point and stands, but the typed-layout invariant has still never executed once in the repository it guards. A conditional guard is only a guard if its condition is sometimes true where it runs, and that half of the sentence went unexamined. The disposition — declare the dependency or delete the check, but not <code>importorskip</code> as a resting state — is a decision for the lead and is owned by <a href="/imas-codex/plans/hidden-suite-failures">hidden-suite-failures</a> &#167;2g. This plan stays shipped; the node's stated deliverable was restoring collection and that was delivered and measured.</div>
 </div>
 </section>
 </main>

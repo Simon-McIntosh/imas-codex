@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -299,6 +299,64 @@ ERROR tests/docs/test_zzz_tmp_probe_abort.py
       decision rather than a defect repair, since <code>cancel-in-progress</code> is the
       correct setting for pull requests. It is therefore recorded as claimed, not as done, and
       wants the lead&rsquo;s agreement before it lands.
+    </p>
+
+    <h2 id="s2g">&#167;2g &mdash; The repair turned a loud failure into a silent no-op</h2>
+    <p>
+      <strong>The <code>importorskip</code> fix recorded in &#167;1 is a real improvement and
+      also introduced a defect of exactly the class this plan exists to name.</strong>
+      Re-measured in this repository&rsquo;s own environment:
+    </p>
+    <pre>uv run --no-sync python -c "import reckon"              ->  ModuleNotFoundError: No module named 'reckon'
+grep -c reckon pyproject.toml                           ->  0
+uv run pytest tests/docs/test_documentation_layout.py   ->  EXIT=5, no tests collected
+SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</pre>
+    <p>
+      <code>reckon</code> is neither declared nor installed here, so the guard is skipped
+      <em>whole</em>, every time. Before the fix: exit 2, the tree aborted &mdash; catastrophic
+      and impossible to miss. After it: 12,020 tests collect, which was the point and is a
+      genuine improvement, <strong>and the typed-layout invariant still never executes, with
+      nothing saying so</strong>. That is precisely the zero-signal state this repository&rsquo;s
+      own testing guidance names for a disabled test: not run, invisible, nobody knows it
+      exists.
+    </p>
+    <p>
+      <strong>The reasoning that produced it is worth recording as wrong, because it was
+      plausible.</strong> The shipped analysis argued that declaring the dependency was the
+      wrong repair &mdash; reckon is a local checkout, not a published package &mdash; and that
+      the import should therefore become conditional, keeping the check &ldquo;wherever reckon
+      is available&rdquo;. The unexamined half of that sentence is the load-bearing one:
+      <strong>in this repository reckon is never available</strong>, so &ldquo;wherever
+      available&rdquo; evaluates to nowhere. A conditional guard is only a guard if its
+      condition is sometimes true where it runs.
+    </p>
+    <p>
+      <strong>The arc completes badly.</strong> <code>651d2367</code> added a guard that could
+      not run and aborted everything; the repair made everything run and left the guard unable
+      to run; and the typed layout migration has now <em>landed</em> while the check that would
+      confirm it has not executed once in the repository it guards.
+    </p>
+    <p>
+      <strong>The decision, which is the lead&rsquo;s.</strong> Two shapes, and
+      <code>importorskip</code> as a resting state is not one of them &mdash; it is the option
+      that resembles both and is neither.
+    </p>
+    <ul>
+      <li><strong>Declare <code>reckon</code> as a test dependency</strong> so the invariant
+        actually runs. Cost: a declared dependency from an operational repository onto its
+        planning tooling. A dev-group or extra scopes it, but the coupling is real and may be
+        deliberate policy to avoid.</li>
+      <li><strong>Remove the check.</strong> If the dependency is unwanted, deleting is more
+        honest than skipping: a check with zero signal is worth less than nothing, because it
+        occupies the space where enforcement appears to exist.</li>
+    </ul>
+    <p>
+      <strong>And a third constraint on the recurrence gate, from the same seam: collecting is
+      not executing.</strong> A gate reading &ldquo;the suite collected&rdquo; passes here today
+      while the layout check runs zero tests. Any measure the gate reads must distinguish
+      ran-and-passed from was-skipped. That makes three instances of absence-as-permission
+      appearing inside the mechanism built to prevent it &mdash; exit 2 read as configuration
+      noise, <code>cancelled</code> read as not-failure, and now skipped read as satisfied.
     </p>
 
     <h2 id="s3">&#167;3 &mdash; What each cluster needs, and from whom</h2>
