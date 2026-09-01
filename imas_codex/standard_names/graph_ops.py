@@ -16259,6 +16259,7 @@ class RefinedNamePersistenceRefusalReason(StrEnum):
     PREDECESSOR_MISSING = "predecessor_missing"
     PREDECESSOR_STAGE = "predecessor_stage_changed"
     CLAIM_LOST = "claim_lost"
+    AUTHORITATIVE_SOURCE_COHORT_EMPTY = "authoritative_source_cohort_empty"
     SUCCESSOR_LIFECYCLE = "successor_lifecycle_collision"
     SUCCESSOR_SCOPE = "successor_scope_collision"
     SUCCESSOR_NOT_PERSISTED = "successor_not_persisted"
@@ -16406,8 +16407,9 @@ def persist_refined_name(
 
     Raises ``ValueError`` if ``new_name == old_name`` — self-referential
     refinement would create a ``REFINED_FROM`` self-loop, or if any source is
-    inconsistent with the successor. A failed stage/claim CAS, partial source
-    migration, or ledger failure also rolls the complete transaction back.
+    inconsistent with the successor. An empty authoritative source cohort, a
+    failed stage/claim CAS, partial source migration, or ledger failure also
+    rolls the complete transaction back.
 
     Edit-steering fields (``edit_mode``, ``name_hint``, ``docs_hint``,
     ``edit_reason``, ``edit_origin``, ``edit_scope``, ``edit_status``,
@@ -16677,9 +16679,18 @@ def persist_refined_name(
                     )
 
                 preflight_row = dict(preflight[0])
+                authoritative_cohort_observed = "source_ids" in preflight_row
                 candidate_source_ids = sorted(
                     set(preflight_row.get("source_ids") or [])
                 )
+                if authoritative_cohort_observed and not candidate_source_ids:
+                    raise RefinedNamePersistenceRefusal(
+                        old_name=old_name,
+                        proposed_name=new_name,
+                        reason=(
+                            RefinedNamePersistenceRefusalReason.AUTHORITATIVE_SOURCE_COHORT_EMPTY
+                        ),
+                    )
                 edit_mode = preflight_row.get("effective_edit_mode", edit_mode)
                 name_hint = preflight_row.get("effective_name_hint", name_hint)
                 docs_hint = preflight_row.get("effective_docs_hint", docs_hint)
@@ -16931,7 +16942,7 @@ def persist_refined_name(
                     expected_current_bindings=dict.fromkeys(
                         candidate_source_ids, old_name
                     ),
-                    _allow_empty_noop=True,
+                    _allow_empty_noop=not authoritative_cohort_observed,
                 )
                 if moved != len(candidate_source_ids):
                     raise RuntimeError(
