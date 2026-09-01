@@ -58,6 +58,7 @@ _DOCS_FIELDS = ("documentation", "description")
 #: Editorial outcomes recorded when catalog review grants approval.
 _APPROVAL_OUTCOMES = frozenset({"unchanged_ratification", "content_edit"})
 _RESOLVED_PR_ACTORS: dict[tuple[int, str, str], str] = {}
+_RESOLVED_PR_REVIEW_BASES: dict[tuple[int, str, str], str] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -464,6 +465,8 @@ def read_pr_changes(isnc_dir: str | Path, base_ref: str) -> list[ApprovalChange]
     """
     isnc = Path(isnc_dir)
     listing = _git(["diff", "--name-only", base_ref, "--", "standard_names"], isnc)
+    if listing is None:
+        raise ValueError(f"cannot read catalog review baseline at {base_ref!r}")
     if not listing:
         return []
     files = [
@@ -966,22 +969,29 @@ def run_approval(
         raise ValueError(
             "catalog approval requires PR number, PR URL, and merge commit SHA"
         )
-    if catalog_reviewer_actor is None and all(
-        value is not None for value in approval_values
-    ):
-        catalog_reviewer_actor = _RESOLVED_PR_ACTORS.get(
-            (
-                int(catalog_pr_number),
-                str(catalog_pr_url),
-                str(catalog_merge_commit_sha),
-            )
+    approval_key = (
+        (
+            int(catalog_pr_number),
+            str(catalog_pr_url),
+            str(catalog_merge_commit_sha),
         )
+        if all(value is not None for value in approval_values)
+        else None
+    )
+    if catalog_reviewer_actor is None and approval_key is not None:
+        catalog_reviewer_actor = _RESOLVED_PR_ACTORS.get(approval_key)
+
+    review_base_ref = (
+        _RESOLVED_PR_REVIEW_BASES.get(approval_key, base_ref)
+        if approval_key is not None
+        else base_ref
+    )
 
     catalog_delta: _AdditiveCatalogDelta | None = None
     if batch and not dry_run and all(value is not None for value in approval_values):
         catalog_delta = _prepare_additive_catalog_delta(isnc_dir, base_ref)
 
-    changes = read_pr_changes(isnc_dir, base_ref)
+    changes = read_pr_changes(isnc_dir, review_base_ref)
     report.changes_seen = len(changes)
     # With no edits AND no batch there is nothing to do. A batch with no edits
     # is the common case (reviewers approved as-is) — fall through to the
@@ -1176,15 +1186,17 @@ class ResolvedPr:
     reviewer_actor: str
     head_ref: str
     base_ref: str
+    review_base_ref: str = ""
 
 
 def resolve_merged_pr(pr_url: str) -> ResolvedPr:
     """Resolve a merged PR's number, merge commit, and branch refs from its URL.
 
     The URL is the only input the maintainer should need: the PR number, the
-    merge-commit SHA (base for the content diff is ``<merge_commit>^1``), and
-    the head branch (``review/<rc>`` — which locates the frozen batch artifact)
-    are all recorded on the PR itself.
+    merge-commit SHA, and the head branch (``review/<rc>`` — which locates both
+    the frozen batch artifact and its cut-time tag) are all recorded on the PR
+    itself. Reviewer edits are compared with that cut-time content, while the
+    merge first parent remains the additive approved-catalog baseline.
 
     Raises ValueError when gh fails, the PR is not merged, or no merge commit
     is recorded.
@@ -1198,7 +1210,7 @@ def resolve_merged_pr(pr_url: str) -> ResolvedPr:
             "view",
             pr_url,
             "--json",
-            "number,url,state,mergeCommit,author,headRefName,baseRefName",
+            "number,url,state,mergeCommit,author,headRefName,baseRefName,commits",
         ],
         capture_output=True,
         text=True,
@@ -1216,18 +1228,26 @@ def resolve_merged_pr(pr_url: str) -> ResolvedPr:
     if not oid:
         raise ValueError("merged PR records no merge commit")
     reviewer_actor = (data.get("author") or {}).get("login") or ""
+    head_ref = data.get("headRefName") or ""
+    cut_tag = approval_tag_name(head_ref) if head_ref.startswith("review/") else None
+    commits = data.get("commits") or []
+    first_pr_commit = (commits[0] or {}).get("oid") if commits else None
+    review_base_ref = cut_tag or first_pr_commit
+    if not review_base_ref:
+        raise ValueError("merged PR records no cut-time catalog revision")
     resolved = ResolvedPr(
         number=int(data["number"]),
         url=data.get("url") or pr_url,
         merge_commit=oid,
         reviewer_actor=reviewer_actor,
-        head_ref=data.get("headRefName") or "",
+        head_ref=head_ref,
         base_ref=data.get("baseRefName") or "main",
+        review_base_ref=review_base_ref,
     )
+    approval_key = (resolved.number, resolved.url, resolved.merge_commit)
     if reviewer_actor:
-        _RESOLVED_PR_ACTORS[(resolved.number, resolved.url, resolved.merge_commit)] = (
-            reviewer_actor
-        )
+        _RESOLVED_PR_ACTORS[approval_key] = reviewer_actor
+    _RESOLVED_PR_REVIEW_BASES[approval_key] = review_base_ref
     return resolved
 
 
