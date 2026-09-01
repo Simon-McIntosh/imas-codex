@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="114">
+<meta name="plan-version" content="116">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2404,6 +2404,9 @@ Done-when
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T065916400950-n-west-demo-rc" data-who="impl-exportpolicy" data-when="2026-09-01T07:32:44Z">
     <div class="r-comment-body"><p>Release exited 1 on a stale LOCAL review branch surviving at the closed PR head 30cfa669 (the remote copy was deleted, the local one was not) — the same failure mode as the 2026-08-27 attempt. Pre-steps otherwise completed: PR 2 closed as superseded, remote branch deleted, fork main clean at 3ffddf7d, upstream untouched; no remote branch, tag, Release, PR, CI run or preview created. Coordinator removed the verified stale local branch; redispatching</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T073409043244-n-west-demo-rc2" data-who="impl-exportpolicy" data-when="2026-09-01T07:45:12Z">
+    <div class="r-comment-body"><p>Demo RC live on the fork: v0.3.0rc1+west-task-2e (annotated tag 665be8f2, visible as a fork Release), PR #3, preview https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-3/ HTTP 200 showing 329 names; diff 18 added / 0 modified / 0 deleted; 329 entries in 17 files / 17937 lines (55 per entry vs 133 before); 1211 generic bindings with 0 forbidden fields; all four fork CI checks green; upstream unchanged at 37dea1ae</p></div>
+</div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
 </div>
@@ -2463,6 +2466,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260827T103322889550-n-agent-authored-pr-text" data-who="impl-relseams" data-when="2026-08-27T10:44:10Z">
     <div class="r-comment-body"><p>sn release --pr-title/--pr-body-file take agent text verbatim after validation (refuses empty/multiline/over-60-char titles, enumerated lists, and problem narration); seat and template demoted to fallbacks with unlinked-source and DD-caveat sentences deleted; live PR #2 body replaced with the authored decisions-only text (954 chars, sha 53df4b7d, byte-identical to source; normalized JSON minus body unchanged, no close/reopen); 44 tests exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T073640674452-n-release-branch-reclaim" data-who="impl-branchreclaim" data-when="2026-09-01T07:46:31Z">
+    <div class="r-comment-body"><p>Both bare checkout -b sites replaced by _prepare_release_branch: missing branch creates as before; a head reachable from main or equal to a closed/merged PR head is reset onto base with its prior SHA recorded; a branch with unique commits is left untouched and refused with branch name and head SHA in the error. test_review_release_reclaims_branch_at_closed_pr_head reproduces the twice-observed live failure and fails on the prior implementation; 48 tests exit 0</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260826T131846395540-n-west-upstream-additivity-review" data-who="rev-west-upstream" data-when="2026-08-26T13:24:56Z">
     <div class="r-comment-body"><p>Workflow HOLD: fork-only branch transport and plain-final PR-then-tag are contradicted by source, and approved-byte identity is unproven.</p></div>

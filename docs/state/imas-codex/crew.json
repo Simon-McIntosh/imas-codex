@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T09:33:32",
+  "updated": "2026-09-01T09:47:24",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -308,6 +308,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-branchreclaim",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-breakdownkind",
@@ -39940,9 +39949,213 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T073640674452-n-release-branch-reclaim",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a72",
+        "node": "n-release-branch-reclaim",
+        "node_definition": {
+          "done_when": "Both release branch-creation sites in imas_codex/standard_names/catalog_release.py \u2014 the review-batch path near line 1241 and the plain-final path near line 688, each currently a bare git checkout -b that aborts the release when the branch name already exists locally \u2014 handle a pre-existing local branch deterministically: when the existing branch is SAFE to reclaim, meaning it is fully contained in the base branch or its head equals the head of a closed or merged pull request for the same identity, the release resets it onto the current base and continues, recording in the report that it reclaimed the branch and the SHA it moved from; when it is NOT safe, meaning it carries commits that exist nowhere else, the release refuses with a message naming the branch, its head SHA, and the exact command to inspect or delete it, never deleting unreviewed work itself. Focused tests on the bare-repo fixture prove all four cases: no pre-existing branch behaves as today; a stale branch contained in base is reclaimed and the release proceeds; a stale branch at a closed PR head is reclaimed; and a branch carrying unique commits is refused with the branch name and SHA present in the error text. This failure has now occurred twice in live cuts, both at the closed-PR-head case, so that case must be covered by a test that would have failed before the change. Tests captured once to a persistent log exit 0; ruff clean; local conventional commit with body; no push, no live gh, no graph writes",
+          "estimated_hours": null,
+          "goal": "A release reclaims a stale local branch instead of failing on it",
+          "id": "n-release-branch-reclaim",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T073640674452-n-release-branch-reclaim/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_review_release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-branchreclaim",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:36:49Z",
+        "completed_at": "2026-09-01T07:46:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 582,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 582,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "4901138c9256e3eb141832900be10c33558a9b1c",
+        "commits": [
+          "aa00205a1a9aa9462038ba7ac0dcb09ff59d1bd5"
+        ],
+        "changed_lines": {
+          "added": 285,
+          "removed": 8,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_review_release.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-demo-rc.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T073640674452-n-release-branch-reclaim/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05be6-38ae-7cf1-b572-a832d4b181c8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3505408,
+            "cached_input_tokens_cumulative": 3505408,
+            "input_tokens": 3663564,
+            "input_tokens_cumulative": 3663564,
+            "output_tokens": 19757,
+            "output_tokens_cumulative": 19757,
+            "reasoning_output_tokens": 5449,
+            "reasoning_output_tokens_cumulative": 5449
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T073409043244-n-west-demo-rc2",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-west-demo-rc2",
+        "node_definition": {
+          "done_when": "You hold exclusive use of the catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog; fork Simon-McIntosh/imas-standard-names-catalog only, never upstream. The coordinator has already closed fork PR 2, deleted both the remote and the stale local review branch (verified 0 local review branches remain), and bumped the ISN pin to 93195dd on imas-codex main. Pre-steps: confirm no local or remote branch named review/v0.3.0rc1+west-task-2e exists and record that check; pull the catalog checkout to fork main; ensure your environment resolves the pinned ISN. Prepare the body: copy /run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/fe0ce76b-3257-4945-a367-2247df554cd3/scratchpad/pr-demo-body.md and replace the single token ENTRY_COUNT with the exact emitted entry count, changing nothing else. With IMAS_CODEX_SN_ISNC set to the catalog checkout, run the release once: uv run imas-codex sn release --batch west_production_dd_paths --bump minor -m 'WEST review batch' --pr-title 'WEST review batch' --pr-body-file pointing at your prepared body. Report: minted RC version; the annotated RC tag with its object SHA and its appearance as a fork Release; the PR URL; proof the diff is pure addition with 0 modified and 0 deleted; the emitted entry count; the emitted standard_names total line count against the 12137-line original equilibrium.yml; confirmation that no emitted binding contains dd_path, dd_version, signal_id or semantic_facet; the frozen artifact path and sha256; the published title and body quoted; and the preview site URL with its HTTP status and reported entry count once CI posts it. Never close or reopen a PR to re-trigger CI. On nonzero exit stop and report without retrying",
+          "estimated_hours": null,
+          "goal": "A demonstration WEST release candidate is open on the fork in the new catalog format",
+          "id": "n-west-demo-rc2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T073409043244-n-west-demo-rc2/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-demo-rc.md",
+            "imas_codex/standard_names/manifests/reviews/"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-exportpolicy",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T07:34:16Z",
+        "completed_at": "2026-09-01T07:45:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 656,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 656,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "4901138c9256e3eb141832900be10c33558a9b1c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "single sn release invocation exit 0 + fork CI conclusions + preview HTTP and entry count",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-demo-rc.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T073409043244-n-west-demo-rc2/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3319808,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3494290,
+            "output_tokens": 5835,
+            "output_tokens_cumulative": 17158,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2232
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1053
+    "_version": 1056
   }
 }
