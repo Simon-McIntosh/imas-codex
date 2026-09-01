@@ -943,6 +943,26 @@ def _name_exists(sn_id: str, gc: GraphClient) -> bool:
     return bool(rows and rows[0].get("n"))
 
 
+def _edited_target_is_eligible(sn_id: str, gc: GraphClient) -> bool:
+    """Return whether an edited target can enter the approval workflow."""
+    if not callable(getattr(gc, "query", None)):
+        return _name_exists(sn_id, gc)
+    rows = gc.query(
+        """
+        // APPROVAL_MATCH_BY_ID
+        // APPROVAL_EDIT_ELIGIBILITY
+        MATCH (sn:StandardName {id: $id})
+        WHERE sn.name_stage = 'accepted'
+          AND sn.docs_stage = 'accepted'
+          AND sn.catalog_pr_number IS NULL
+          AND sn.catalog_approved_at IS NULL
+        RETURN count(sn) AS n
+        """,
+        id=sn_id,
+    )
+    return bool(rows and rows[0].get("n"))
+
+
 def _reason_for(change: ApprovalChange) -> str:
     axis_word = "name" if change.axis == "name" else "documentation"
     return (
@@ -1041,17 +1061,47 @@ def run_approval(
     if gc is None:
         gc = GraphClient()
     try:
+        ineligible_ids: list[str] = []
+        seen_ids: set[str] = set()
         for change in changes:
-            # ── Match by id ──────────────────────────────────────────────
-            if not _name_exists(change.sn_id, gc):
+            if change.sn_id in seen_ids:
+                continue
+            seen_ids.add(change.sn_id)
+            if _edited_target_is_eligible(change.sn_id, gc):
+                continue
+            if _name_exists(change.sn_id, gc):
+                ineligible_ids.append(change.sn_id)
+            else:
                 report.unmatched.append(change.sn_id)
                 report.outcomes.append(
                     ApprovalOutcome(
-                        sn_id=change.sn_id, axis=change.axis, decision="unmatched"
+                        sn_id=change.sn_id,
+                        axis=change.axis,
+                        decision="unmatched",
                     )
                 )
-                continue
 
+        for sn_id in ineligible_ids:
+            reason = (
+                "target is not approval-eligible: edited targets require "
+                "name_stage='accepted', docs_stage='accepted', and no prior "
+                "catalog approval"
+            )
+            report.blocked.append({"sn_id": sn_id, "reason": reason})
+            axis = next(change.axis for change in changes if change.sn_id == sn_id)
+            report.outcomes.append(
+                ApprovalOutcome(
+                    sn_id=sn_id,
+                    axis=axis,
+                    decision="blocked",
+                    reason=reason,
+                )
+            )
+
+        if report.blocked or report.unmatched:
+            return report
+
+        for change in changes:
             if dry_run:
                 report.outcomes.append(
                     ApprovalOutcome(
@@ -1338,6 +1388,7 @@ def undo_approval(
             WHERE sn.catalog_pr_number = $pr
                OR (sn.catalog_pr_number IS NULL AND sn.id IN $batch)
             SET sn.name_stage = 'accepted',
+                sn.docs_stage = 'accepted',
                 sn.catalog_pr_number = null,
                 sn.catalog_pr_url = null,
                 sn.catalog_merge_commit_sha = null,
@@ -1355,6 +1406,7 @@ def undo_approval(
                 MATCH (sn:StandardName {name_stage: 'contested'})
                 WHERE sn.id IN $batch
                 SET sn.name_stage = 'accepted',
+                    sn.docs_stage = 'accepted',
                     sn.contested_reason = null,
                     sn.contested_at = null,
                     sn.contested_resolution = $resolution,
