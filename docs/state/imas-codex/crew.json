@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T01:19:04",
+  "updated": "2026-09-02T01:24:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -823,9 +823,11 @@
         "id": "impl-fixturetorch",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05f3b-4f35-7d52-9824-770f9efd95e7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05f3b-4f35-7d52-9824-770f9efd95e7"
+        },
         "created": "2026-09-01"
       },
       {
@@ -48930,9 +48932,110 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T230807159252-n-orchestrator-fixture-torch-teardown",
+        "plan": "hidden-suite-failures",
+        "section": "\u00a74",
+        "node": "n-orchestrator-fixture-torch-teardown",
+        "node_definition": {
+          "done_when": "the test passes twice consecutively in under 30 s each with the commands, wall times and log paths recorded, the rest of that module still passes, and the fixture change touches only this test file",
+          "estimated_hours": null,
+          "goal": "Stop tests/standard_names/test_pool_orchestrator_integration.py::TestReconcileRunsBeforePools::test_reconcile_runs_before_pools from loading torch during teardown by mocking or disabling embed_description_worker's default executor in the fixture, so the test finishes inside its 30 s timeout now that the test extra provisions torch",
+          "id": "n-orchestrator-fixture-torch-teardown",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T230807159252-n-orchestrator-fixture-torch-teardown/manifest.md",
+          "plan": "hidden-suite-failures",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "tests/standard_names/test_pool_orchestrator_integration.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-fixturetorch",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T23:08:34Z",
+        "completed_at": "2026-09-01T23:24:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 930,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 930,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "4c77b058c72083208ab1b5b16b6689c3c6f9d00a",
+        "commits": [
+          "396d68fb44036579108b0ac0102015a7d9043293"
+        ],
+        "changed_lines": {
+          "added": 4,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_pool_orchestrator_integration.py (twice)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T230807159252-n-orchestrator-fixture-torch-teardown/logs/baseline-target.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T230807159252-n-orchestrator-fixture-torch-teardown/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f3b-4f35-7d52-9824-770f9efd95e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7102976,
+            "cached_input_tokens_cumulative": 7102976,
+            "input_tokens": 7291555,
+            "input_tokens_cumulative": 7291555,
+            "output_tokens": 18377,
+            "output_tokens_cumulative": 18377,
+            "reasoning_output_tokens": 6743,
+            "reasoning_output_tokens_cumulative": 6743
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1263
+    "_version": 1265
   }
 }

@@ -19,8 +19,8 @@
   <title>What the Collection Error Was Hiding | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="25">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="26">
 <meta name="plan-commits" content="37296b5b,9d071bdf,289ed276,abe01f53,a97ce967,fcb22e07">
 <meta name="plan-artifacts" content="docs/evidence/archive/hidden-suite-failures-landed.html,crew/reports/suite-triage.md,crew/reports/suite-final-figure.md,crew/reports/suite-residual-three.md,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204057382688-n-suite-final-figure/logs/pytest-final.log,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
 <meta name="plan-impl" content="1.0">
@@ -455,6 +455,9 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2112-residual-closed" data-who="reckon-ship" data-when="2026-09-01T21:12:00Z">
     <div class="r-comment-body">n-suite-residual-three landed at commit fcb22e07 (merged 8c4a8a24, scope-changed): all three residual ids reproduced green from both the worktree and the main checkout, so they were artifacts of a whole-tree run in a worktree that shares the main checkout's .venv (tests collected from one tree, some modules imported from the other). The four flagged Cypher properties are genuine persistent writers and are now LinkML-declared, ten obsolete checker allowances removed; the two layout-sensitive tests derive their paths from the imported module. build-models clean, 3/3 pass. Coordinator note: the worker needed cypher_property_check.py mid-flight and reckon has no scope-extension primitive, so the grant was given by resume advice and recorded on the pointer before promotion. Plan shipped; drain ledger: f-hsf-001 folded across n-suite-triage-29, n-ci-main-conclusive-expr, n-test-extra-preflight, n-graph-marker-premise, n-suite-final-figure, n-suite-residual-three; f-hsf-002 foreign-owner (reckon promotion-consequence-gate); rows 2, foldable-remaining 0.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T230807159252-n-orchestrator-fixture-torch-teardown" data-who="impl-fixturetorch" data-when="2026-09-01T23:24:04Z">
+    <div class="r-comment-body"><p>test_reconcile_runs_before_pools no longer loads torch in teardown; passes twice under 30 s with the module green</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T202010483788-n-suite-triage-29" data-who="test-suitetriage" data-when="2026-09-01T20:27:01Z">
     <div class="r-comment-body"><p>29 of 29 classified: 28 environmental (missing test extra), 1 wrong-premise (graph-marker credential test); fresh run 162 passed / 1 failed / 6 skipped in 64.87 s with torch 2.10.0+cpu provisioned</p></div>
