@@ -4,23 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="isn-stable-release">
-  <meta name="plan-title"     content="ISN Stable Release">
-  <meta name="plan-summary"   content="Land the grammar work on upstream ISN, publish v0.8.0, and repoint every pin from fork SHAs to that release">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="isn-stable-release">
+  <meta name="plan-title" content="ISN Stable Release">
+  <meta name="plan-summary" content="Land the grammar work on upstream ISN, publish v0.8.0, and repoint every pin from fork SHAs to that release">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="3.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S9">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-blocks"    content="sn-west-review-rehearsal">
+  <meta name="plan-sprint" content="S9">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="sn-west-review-rehearsal">
   <title>ISN Stable Release | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -104,25 +106,30 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="release-kind" data-choice="stable-upstream" data-by="Simon McIntosh" data-when="2026-09-01T10:45:00+00:00">
-        <p class="r-dec-q">Is the tag a fork release candidate or a stable upstream release?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="stable-upstream">Stable v0.8.0 on upstream, published to PyPI</button>
-          <button class="r-opt" data-value="fork-rc">Another fork release candidate</button>
-          </p>
-        <p class="r-dec-rat">Locked by the lead: pull request 19 is cross-repository into iterorganization, so the work lands upstream and deserves the correct stable tag rather than a sixty-eighth release candidate. The lead authorised the PyPI publication after being shown that the tag triggers trusted publishing and that a published version can be yanked but never reused.</p>
-        </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="release-kind" data-choice="stable-upstream" data-by="Simon McIntosh" data-when="2026-09-01T10:45:00+00:00">
+    <p class="r-dec-q">Is the tag a fork release candidate or a stable upstream release?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="stable-upstream">Stable v0.8.0 on upstream, published to PyPI</button>
+      <button class="r-opt" data-value="fork-rc">Another fork release candidate</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead: pull request 19 is cross-repository into iterorganization, so the work lands upstream and deserves the correct stable tag rather than a sixty-eighth release candidate. The lead authorised the PyPI publication after being shown that the tag triggers trusted publishing and that a published version can be yanked but never reused.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
+<h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-isr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship isn-stable-release" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Merge pull request 19, publish v0.8.0, and repoint the three pins</h4>
     <div class="r-fu-body"><p>Checks are green and the pull request is mergeable; the merge needs a token carrying the <code>workflow</code> scope or a maintainer merging through the web interface. After the release publishes, move the two imas-codex declarations and the catalog dependency onto <code>v0.8.0</code> and confirm the exporter no longer reports the stale-vocabulary collision.</p></div>
     <pre class="r-fu-prompt">/reckon-ship isn-stable-release</pre>
     </article>
-    </section>
-  </main>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T111615149216-n-pin-isn-release" data-who="impl-pinversion" data-when="2026-09-01T11:39:43Z">
+    <div class="r-comment-body"><p>Both imas-codex declarations and uv.lock resolve to the published 0.8.0 PyPI wheel with no direct_url.json; a serialized read-only WEST regeneration reports identity_token_collision passed with issue_count 0, so the minimum_safety_factor collision is gone. Merged to main as 0c37fdae. The catalog repository dependency remains, correctly refused as outside the node&#x27;s write fence.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
