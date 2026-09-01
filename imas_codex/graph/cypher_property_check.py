@@ -97,10 +97,6 @@ imas_codex/tools/graph_search.py|IMASNode|units|2182,2245
 imas_codex/tools/version_tool.py|IMASNodeChange|semantic_change_type|344,345
 [runtime]
 imas_codex/tools/graph_search.py|CodeChunk|related_ids|2559,2560
-imas_codex/cli/sn.py|StandardName|review_resubmit_count|443
-imas_codex/cli/sn.py|StandardNameSource|run_id|2312,2312,2379
-imas_codex/discovery/base/executor.py|FacilityPath|claimed_at|222,254
-imas_codex/discovery/base/executor.py|FacilityPath|claimed_by|220,220,221,253,254,287,287
 imas_codex/discovery/base/grouping.py|SignalSource|claim_token|128,260
 imas_codex/discovery/base/grouping.py|SignalSource|claimed_at|128,210,260
 imas_codex/discovery/code/graph_ops.py|FacilityPath|files_claim_token|149
@@ -125,9 +121,7 @@ imas_codex/discovery/mdsplus/graph_ops.py|SignalSource|leaf_name|537,663,744
 imas_codex/discovery/mdsplus/graph_ops.py|SignalSource|node_type|539,665,746
 imas_codex/discovery/mdsplus/graph_ops.py|SignalSource|representative_path|540,666,740,747
 imas_codex/discovery/mdsplus/tdi_linkage.py|FacilitySignal|preferred_accessor|122,123
-imas_codex/discovery/paths/enrichment.py|FacilityPath|claimed_at|559
 imas_codex/discovery/paths/frontier.py|FacilityPath|claim_token|2940,3101
-imas_codex/discovery/paths/frontier.py|FacilityPath|claimed_at|282,1464,2023,2063,2935,2935,2940,3035,3049,3097,3097,3101,3347
 imas_codex/discovery/paths/frontier.py|FacilityPath|score_reason|2715,3349
 imas_codex/discovery/paths/frontier.py|FacilityPath|triage_analysis_code|1468,1582,3122
 imas_codex/discovery/paths/frontier.py|FacilityPath|triage_composite|284,408,1466,1577,1579,1659,1660,3095,3114
@@ -143,7 +137,6 @@ imas_codex/discovery/paths/frontier.py|FacilityPath|triage_visualization|1474,15
 imas_codex/discovery/paths/frontier.py|FacilityPath|triage_workflow|1473,1587,3127
 imas_codex/discovery/paths/frontier.py|FacilityPath|triaged_at|1465
 imas_codex/discovery/paths/parallel.py|FacilityPath|claim_token|495,553,608,738,808
-imas_codex/discovery/paths/parallel.py|FacilityPath|claimed_at|492,492,495,550,550,553,605,605,608,734,734,738,805,805,808,933,956,1057,1196,1245,2007
 imas_codex/discovery/paths/parallel.py|FacilityPath|score_reason|1049
 imas_codex/discovery/paths/parallel.py|FacilityPath|triage_analysis_code|825
 imas_codex/discovery/paths/parallel.py|FacilityPath|triage_composite|217,219,225,272,308,327,491,604,732,754,803,823
@@ -180,7 +173,6 @@ imas_codex/mdsplus/batch_discovery.py|SignalEpoch|boundary_refined|791
 imas_codex/mdsplus/extraction.py|SignalNode|tags|127,944
 imas_codex/standard_names/campaign.py|StandardName|quarantine_reason|302,665,712
 imas_codex/standard_names/edit.py|StandardName|edit_refine|667
-imas_codex/standard_names/edit.py|StandardNameSource|run_id|2684
 imas_codex/standard_names/graph_ops.py|StandardName|_drain_scope_lock|1448,1449
 imas_codex/standard_names/graph_ops.py|StandardName|_lifecycleless_reconcile_lock|5021,5021
 imas_codex/standard_names/graph_ops.py|StandardName|_refine_claim_release_lock|23021,23022
@@ -190,11 +182,9 @@ imas_codex/standard_names/graph_ops.py|StandardName|quarantine_reason|23584
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_seq|10221
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_token|10220
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_source_id|10219
-imas_codex/standard_names/graph_ops.py|StandardName|review_resubmit_count|23507,23509,23568,25102
 imas_codex/standard_names/graph_ops.py|StandardName|updated_at|4327
 imas_codex/standard_names/graph_ops.py|StandardNameSource|_claim_lock|14557,14558,14630,14631,14672,14673,14709,14710
 imas_codex/standard_names/graph_ops.py|StandardNameSource|_drain_scope_lock|1379,1380
-imas_codex/standard_names/graph_ops.py|StandardNameSource|run_id|7241,7538
 imas_codex/standard_names/graph_ops.py|StandardNameSource|skipped_at|10461,10462,11106
 imas_codex/standard_names/provenance_lifecycle.py|StandardNameSource|standard_name_id|176
 imas_codex/standard_names/signed_manifest.py|StandardName|quarantine_reason|1786

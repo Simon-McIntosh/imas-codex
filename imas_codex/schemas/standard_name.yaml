@@ -1202,6 +1202,12 @@ classes:
           ISO 8601 timestamp of the most recent withheld acceptance. Null
           whenever ``review_quorum_shortfall`` is null.
         range: datetime
+      review_resubmit_count:
+        description: >-
+          Number of fresh name-review submissions spent for a pinned rename.
+          This bounds repeated quorum draws without rewriting the requested
+          identity and resets only when an explicit rescore is staged.
+        range: integer
       reviewed_name_at:
         description: >-
           ISO 8601 timestamp of the most recent name-review pass.
@@ -2833,6 +2839,10 @@ classes:
           Timestamp when this source node was first created in the graph.
           Set ON CREATE by the batch/derived-parent materialisers.
         range: datetime
+      run_id:
+        description: >-
+          Scope identifier for the standard-name run currently selecting this
+          source. Focused runs set and clear it to isolate their exact cohort.
       claimed_at:
         description: Timestamp when a worker claimed this source for processing
         range: datetime

@@ -828,6 +828,13 @@ classes:
         description: Exploration status
         range: PathStatus
         required: true
+      claimed_by:
+        description: >-
+          Discovery session holding the branch-level exploration claim. The
+          owner may reacquire its claim; other sessions wait until release.
+      claimed_at:
+        description: Timestamp when the branch-level exploration claim was acquired
+        range: datetime
       in_directory:
         description: Parent directory containing this path (null for root paths)
         range: FacilityPath
