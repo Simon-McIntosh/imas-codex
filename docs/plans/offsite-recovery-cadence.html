@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="offsite-recovery-cadence">
+  <meta name="plan-title" content="Offsite Recovery Cadence">
+  <meta name="plan-summary" content="Release cadence is acting as the backup schedule, leaving the only full offsite copy 56 days behind the live graph">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S10">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="graph-destructive-command-safety">
+  <title>Offsite Recovery Cadence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">&#167;1 &mdash; Why this exists</h2>
+    <p>
+      A measurement commissioned by
+      <a href="/imas-codex/plans/graph-destructive-command-safety">graph-destructive-command-safety</a>
+      asked a narrow question &mdash; how far offsite is the graph, really &mdash; and returned
+      a verdict that plan had no authority to act on.
+      <strong>Release cadence is acting as the backup schedule.</strong> The only full-graph
+      offsite copy is pinned to a software release, so the recovery point drifts with how
+      often code ships rather than with how often data changes.
+    </p>
+    <p>
+      That plan's scope was to <em>measure and decide adequacy</em>, and it did: <strong>not
+      adequate</strong>. Establishing a cadence is new scope, it is outward-facing and
+      recurring, and it needs decisions the measurement cannot make. That is why it lives
+      here rather than as one more section there.
+    </p>
+
+    <h2 id="s2">&#167;2 &mdash; The measured starting state</h2>
+    <p>
+      Nothing below needs re-deriving. It comes from an account-wide registry census and a
+      local filesystem measurement taken on 2026-09-01, recorded in
+      <a href="/imas-codex/evidence/graph-operational-safety/offsite-inventory">offsite-inventory</a>
+      and
+      <a href="/imas-codex/evidence/graph-operational-safety/offsite-currency">offsite-currency</a>.
+    </p>
+    <figure>
+      <svg viewBox="0 0 660 150" width="100%" role="img"
+           aria-label="Timeline from July to September 2026 showing the full offsite copy on 7 July, the TCV subset thirty minutes later, the local restore point on 1 September, and the live store now, with a 56-day gap spanning from the full offsite copy to the present."
+           style="max-width:660px">
+        <line x1="40" y1="96" x2="620" y2="96" stroke="#9a9aa2" stroke-width="1"/>
+
+        <line x1="40" y1="92" x2="40" y2="100" stroke="#9a9aa2" stroke-width="1"/>
+        <text x="40" y="116" font-family="system-ui" font-size="12" fill="#55555c" text-anchor="middle">7 Jul</text>
+        <line x1="620" y1="92" x2="620" y2="100" stroke="#9a9aa2" stroke-width="1"/>
+        <text x="620" y="116" font-family="system-ui" font-size="12" fill="#55555c" text-anchor="middle">1 Sep</text>
+
+        <circle cx="40" cy="96" r="5" fill="#b4341f"/>
+        <text x="40" y="76" font-family="system-ui" font-size="13" fill="#1a1a1c" text-anchor="start">full offsite copy</text>
+        <text x="40" y="60" font-family="ui-monospace,monospace" font-size="12" fill="#55555c" text-anchor="start">imas-codex-graph v5.3.0-rc6</text>
+
+        <circle cx="46" cy="96" r="3.5" fill="none" stroke="#55555c" stroke-width="1"/>
+        <text x="120" y="136" font-family="system-ui" font-size="12" fill="#55555c" text-anchor="start">TCV subset lands 30 min later &mdash; a different scope, not a newer floor</text>
+
+        <circle cx="620" cy="96" r="5" fill="#1a1a1c"/>
+        <text x="620" y="76" font-family="system-ui" font-size="13" fill="#1a1a1c" text-anchor="end">local restore point</text>
+        <text x="620" y="60" font-family="system-ui" font-size="12" fill="#55555c" text-anchor="end">15 GB live store, one GPFS filesystem</text>
+
+        <line x1="40" y1="30" x2="620" y2="30" stroke="#b4341f" stroke-width="1.5"/>
+        <line x1="40" y1="26" x2="40" y2="34" stroke="#b4341f" stroke-width="1.5"/>
+        <line x1="620" y1="26" x2="620" y2="34" stroke="#b4341f" stroke-width="1.5"/>
+        <text x="330" y="22" font-family="system-ui" font-size="13" fill="#b4341f" text-anchor="middle">56.238 days of full-graph data at risk</text>
+      </svg>
+      <figcaption>
+        Every local restore point shares one GPFS filesystem, so a filesystem loss is bounded
+        by the newest <em>offsite</em> copy. The red span is the exposure that bound actually
+        permits.
+      </figcaption>
+    </figure>
+    <table>
+      <caption>Every graph package the account holds, newest version each, scope triangulated
+      from three independent sources rather than inferred from the package name</caption>
+      <thead><tr><th>Package</th><th>Pushed</th><th>Scope</th><th>Layer</th></tr></thead>
+      <tbody>
+        <tr><td><code>imas-codex-graph</code></td><td>2026-07-07T12:27:23Z</td><td><strong>Full: all facilities plus DD</strong></td><td>2,434,869,050 B</td></tr>
+        <tr><td><code>imas-codex-graph-dd</code></td><td>2026-07-07T12:36:25Z</td><td>DD-only, current name</td><td>2,096,263,875 B</td></tr>
+        <tr><td><code>imas-codex-graph-imas</code></td><td>2026-03-19T11:39:46Z</td><td>DD-only, legacy name</td><td>2,029,533,924 B</td></tr>
+        <tr><td><code>imas-codex-graph-tcv</code></td><td>2026-07-07T12:57:57Z</td><td>Per-facility: TCV plus DD</td><td>2,810,090,518 B</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The DD-only packages cannot reconstruct non-TCV facility data, source discoveries,
+      mappings, reviews or costs, so <strong>no combination of the filtered subsets closes the
+      full-store gap</strong>. The positive result is that catastrophic loss of the shared
+      filesystem would not leave zero state &mdash; the full archive still resolves. The
+      unacceptable part is only its age.
+    </p>
+    <p>
+      What was <em>not</em> established, and is this plan's problem: registry presence and
+      manifest fetchability were verified;
+      <strong>no trial restore and no content-equivalence check were ever performed</strong>.
+      An archive that resolves in a registry is not yet a demonstrated recovery path.
+    </p>
+
+    <h2 id="s3">&#167;3 &mdash; What already exists to build on</h2>
+    <p>
+      The prerequisite plan left three pieces of machinery this work should consume rather
+      than reinvent, which is most of why it is cheap to start.
+    </p>
+    <ul>
+      <li><code>get_backup_currency()</code> in <code>imas_codex/graph/neo4j_ops.py</code>
+        already measures the newest non-empty backup against the newest live database file and
+        returns a typed <code>current</code> / <code>stale</code> / <code>no_backup</code>
+        result. It measures the <em>local</em> floor; the offsite equivalent is the same shape
+        against a registry timestamp.</li>
+      <li><code>graph_archive_stamp()</code> gives every archive a filename carrying its code
+        revision and a UTC timestamp, so a scheduled push produces artifacts that can be
+        ordered and retained without a name collision.</li>
+      <li>The archive manifest now carries <code>node_count</code>,
+        <code>relationship_count</code> and <code>label_counts</code> measured from the graph
+        each dump represents &mdash; which is exactly the cheap half of a content-equivalence
+        check, available without a trial restore.</li>
+      <li><code>graph prune</code> already takes <code>--keep</code>, so a retention policy has
+        an existing mechanism and needs a number rather than new code.</li>
+    </ul>
+
+    <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
+    <ul>
+      <li>A full-graph offsite push that runs on its own schedule rather than on the release
+        schedule, so the recovery point tracks data change instead of shipping cadence.</li>
+      <li>A retention policy expressed as a number of full copies kept, applied through the
+        existing <code>--keep</code> mechanism, with the registry storage cost of that choice
+        stated rather than assumed.</li>
+      <li>An offsite currency figure surfaced where the local one already is, so
+        <code>graph status</code> answers both &ldquo;how far behind is my local restore
+        point&rdquo; and &ldquo;how far behind is the copy that survives losing this
+        filesystem&rdquo;.</li>
+      <li>A recovery-path verification whose depth is the decision below &mdash; at minimum a
+        manifest-count comparison against the live graph, since the counts are already
+        recorded and the check costs nothing.</li>
+      <li>A recorded measurement of what one scheduled push actually costs in wall time and
+        registry storage, taken from a real push rather than projected, so the cadence
+        decision can be revisited against a number.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="offsite-cadence" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How often should a full-graph offsite push run?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fixed-interval">On a fixed interval regardless of change</button>
+      <button class="r-opt" data-value="change-triggered">When the local store has drifted past a threshold the currency check already measures</button>
+      <button class="r-opt" data-value="prompted-manual">Never automatically; prompt an operator when status reports staleness</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="offsite-retention" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How many full offsite copies are kept, and what is the acceptable registry storage cost?</p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="recovery-verification-depth" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What must a push prove before the copy counts as a recovery point?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="presence-only">It resolves in the registry and its manifest fetches</button>
+      <button class="r-opt" data-value="manifest-counts">Its manifest counts match the live graph at push time</button>
+      <button class="r-opt" data-value="trial-restore">A periodic trial restore into a scratch graph, compared by counts</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-orc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship offsite-recovery-cadence" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide the cadence, the retention and what a copy must prove before it counts</h4>
+    <div class="r-fu-body"><p>Three decisions gate the work and all three are the lead's, because each commits recurring outward-facing effect or spend: how often a full push runs, how many copies the registry keeps, and what a push must demonstrate before the copy counts as a recovery point. The measured starting state is in §2 and does not need re-deriving — the exposure is 56.238 days, no combination of the filtered subsets closes it, and no trial restore has ever been performed. §3 lists the machinery the prerequisite plan already landed, so most of this is consuming existing pieces rather than building new ones.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship offsite-recovery-cadence</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>
