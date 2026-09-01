@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/embedding-gap.md,docs/evidence/sn-release-readiness/suite-four-disposition.md,docs/evidence/sn-release-readiness/import-order-timeout.md,docs/evidence/sn-release-readiness/strain-ordinal-edit.md,docs/evidence/sn-release-readiness/unsourced-ancestry.md">
 <meta name="plan-impl" content="0.94">
@@ -986,6 +986,9 @@
 </div>
 <div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T163658621197-n-roundtripaudit" data-who="test-roundtrip" data-when="2026-09-01T16:55:52Z">
     <div class="r-comment-body"><p>NEW BINDINGS 2/5 exact (40.0%) against a GROUNDED CONTROL of 6/12 (50.0%), so the new set is comparable to undisputed bindings and round-trip divergence is not itself proof of error; an exact-match gate would reject half the existing grounded corpus. Dispositions: KEEP launched_power_of_ion_cyclotron_heating_antenna and poloidal_magnetic_field_of_magnetic_field_probe; RENAME electron_temperature_at_separatrix to flux_surface_averaged_electron_temperature_at_separatrix; RENAME normalized_toroidal_flux_coordinate_at_ece_channel_emission_position to normalized_toroidal_flux_coordinate_at_measurement_position; UNBIND ion_species_particle_flux_at_wall_due_to_surface_emission because the composer emits its superseded ancestor and a rename would reverse two refinements. USD 0.000000 across 17 calls, 938250 input tokens, 0 graph mutation, before=after census</p></div>
+</div>
+<div class="r-comment" data-section="s12b" data-id="c-20260901T1705-lockedsn" data-who="reckon-ship" data-when="2026-09-01T17:05:00+00:00">
+    <div class="r-comment-body">TWO DISPOSITIONS LOCKED BY THE LEAD 2026-09-01, and they split the population by how each row became ungrounded rather than by what is convenient. THE 42 SOURCE-LOST ROWS: restore from receipts, verify by round-trip. Each is rebound to the exact source its StandardNameChange receipt records, so there is no candidate search, no guessing and no semantic judgement - the ledger already names the prior binding. Round-trip runs afterwards as a free DIAGNOSTIC and does not veto a receipted restore, which is the right weighting given the measured baseline: undisputed grounded bindings regenerate exactly only about half the time, so gating receipted restores on round-trip agreement would discard roughly half of a provably-correct set on a noisy instrument. THE 31 BORN-UNGROUNDED ROWS - 30 empty-cohort successor mints plus 1 legacy pre-ledger: leave them until the cause fix lands, then let the ordinary pipeline regenerate properly-sourced names. The reasoning is the sequencing principle this section learned the hard way: attaching sources to identities that a defect minted repairs the symptom while the generator still runs, and the coordinator had already made that error once by binding five names before the cause was established. AND THE CAUSE FIX ITSELF IS LOCKED: persist_refined_name must REFUSE an empty authoritative source cohort. Its former blocker is gone - current refine-eligible ungrounded rows measure ZERO - so the refusal has no immediate blast radius and needs no sequencing against either disposition. The existing source-less-rename regression asserts the permissive behaviour today and must be updated to expect refusal.</div>
 </div>
 </section>
 </main>
