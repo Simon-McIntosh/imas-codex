@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-west-review-rehearsal-landed">
+  <meta name="plan-title" content="WEST Standard Names review rehearsal — cumulative evidence">
+  <meta name="plan-evidence-for" content="sn-west-review-rehearsal">
+  <title>WEST Standard Names review rehearsal landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>WEST Standard Names review rehearsal — cumulative evidence</h1>
+  <p>This record consolidates what the campaign proved through the live plan's section 3.
+  It is an evidence ledger, not an upstream-release claim: the 329-entry fork preview remains
+  a review artifact, and human review, foldback, and the separately authorized final release
+  remain open.</p>
+
+  <section id="evidence-authority">
+    <h2>Evidence authority and representation</h2>
+    <p>The semantic authority was the live <code>sn-west-review-rehearsal</code> plan at
+    version 123. Every result below was reconciled against the committed run ledger at
+    <code>docs/state/imas-codex/crew.json</code> and the durable manifests or reports under
+    <code>~/.config/reckon/crew/</code>. Repository changes carry their commit. Two production
+    graph results were deliberately receipt-backed rather than code changes; those are labeled
+    <q>no repository commit</q> and name the signed receipt instead of inventing a commit.</p>
+    <p>The dense count-to-authority mappings are tables. The causal results are prose. No figure
+    is included because none of these relationships becomes clearer as a drawing than as exact
+    accounting or a before/after comparison.</p>
+  </section>
+
+  <section id="catalog-format">
+    <h2>Catalog format: 12,137 lines at 133 per entry became 5,620 at 62</h2>
+    <p>The 91-entry <code>equilibrium.yml</code> fixture moved from 12,137 lines
+    (133.37 per entry) to the final generic-binding form at 5,620 lines
+    (61.76 per entry). The DD-specific slimming step first removed 7,010 lines,
+    <strong>57.76%</strong> of the original, by replacing duplicated DD prose with the
+    resolvable path and version. The final generic form added the binding discriminator and
+    still remained 6,517 lines, or 53.70%, below the original. Its 493 bindings all had
+    exactly <code>kind</code>, <code>ref</code>, and <code>version</code>; zero legacy
+    binding keys survived.</p>
+    <table>
+      <thead>
+        <tr><th>Proof</th><th>Quantitative measure</th><th>Commit</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>DD provenance slimming</td>
+          <td>91 entries; 12,137 → 5,127 lines; 133.37 → 56.34 lines/entry;
+          7,010 lines and 57.76% removed</td>
+          <td><code>7d4028b94fb3c6ff54cfcafc595fac14ed125ed1</code></td>
+        </tr>
+        <tr>
+          <td>Generic source binding</td>
+          <td>91 entries; final 5,620 lines and 61.76 lines/entry; 493/493 bindings use
+          only <code>kind/ref/version</code>; 0 forbidden legacy keys</td>
+          <td><code>0c4c0de482ba46135d26201d11fe586ef64de5c1</code></td>
+        </tr>
+        <tr>
+          <td>Readable YAML</td>
+          <td>8/8 adjacent-entry boundaries have one blank line; 0 triple blanks;
+          0 Unicode escapes; 0 backslash continuations; semantic round-trip exact</td>
+          <td><code>25758f068460e98a39475a9c1cb6e2722b36219e</code></td>
+        </tr>
+        <tr>
+          <td>Site DD resolution</td>
+          <td>One pinned DD 4.0.0 reference resolved leaf, parent documentation, FLT type,
+          J unit, and time coordinate through imas-python 2.3.0; 107 tests passed</td>
+          <td><code>592df5461038bcc4d75788ea4ebcb922fcfc45bf</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The format therefore preserves literal Unicode and visible entry boundaries while
+    removing copied DD fields. A site resolves an <code>imas-dd</code> binding from its pinned
+    version through imas-python; the catalog does not become a second DD.</p>
+    <p><small>Evidence: runs <code>n-catalog-provenance-slim</code>,
+    <code>n-exporter-generic-binding</code>, <code>n-catalog-yaml-readability</code>, and
+    <code>n-site-dd-retrieval</code>.</small></p>
+  </section>
+
+  <section id="source-accounting">
+    <h2>Source accounting closes: 355 = 296 emitted + 49 excluded + 10 documented non-nameable</h2>
+    <p>The exporter now partitions rather than drops. Source-free derived scaffolds are excluded
+    as <code>structural_parent</code> before validation. Semantic validation runs once over the
+    complete assembled output instead of validating each entry as a singleton. Approved baseline
+    rows survive byte-for-byte unless the batch replaces them, and candidates withheld by review
+    policy remain present rather than disappearing at overlap.</p>
+    <table>
+      <thead>
+        <tr><th>Accounting contract</th><th>Measured result</th><th>Commit or receipt</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Structural-parent exclusion</td>
+          <td>Source-free derived scaffold excluded; DD-bound bare derived entry fails as
+          <code>invalid_catalog_entry</code>; DD-bound locus-qualified entry emits; 0 validation
+          failures in the focused contract</td>
+          <td><code>6f385c7097e0c0c56d312833a959493f8b76f3c3</code></td>
+        </tr>
+        <tr>
+          <td>Full-set semantic validation</td>
+          <td>Semantic checker invoked once over the assembled set; the paired
+          <code>electron_density</code> and <code>ion_density</code> control emits 2/2;
+          6 focused tests passed</td>
+          <td><code>b002cbc6</code></td>
+        </tr>
+        <tr>
+          <td>Approved baseline preservation</td>
+          <td>2,223 approved rows partition to 206 batch overlaps + 2,017 unchanged;
+          0 missing and 0 byte-changed protected rows; 35 tests passed</td>
+          <td><code>cef237dbe7a67d21ca2456b0cf079b1633704ac1</code></td>
+        </tr>
+        <tr>
+          <td>Withheld overlap retention</td>
+          <td>229 approved candidates partition to 206 replacements + 23 exact retained;
+          all 23 withheld overlaps stayed unchanged and were not double-counted; 30 tests passed</td>
+          <td><code>505978330dab2a3401c9af8d1a51418c078bb17a</code></td>
+        </tr>
+        <tr>
+          <td>Final source closure</td>
+          <td><strong>355/355</strong> WEST sources accounted: 296 emitted + 49 explicitly
+          excluded + 10 documented non-nameable; 7 focused tests passed</td>
+          <td>No repository commit; signed production receipt
+          <code>sn-change:ineligible-source-retirement:c48021f27d…</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The 49 exclusions are themselves closed: 22 invalid validation, 13 without a terminal
+    identity, 7 documentation not accepted, 4 resolution unrecorded, 2 name not accepted, and
+    1 deliberately withheld minimum-safety-factor identity. The 10 documented non-nameable
+    sources are 5 compose skips, 4 bare time sources, and 1 nested temporal source.</p>
+    <p><small>Evidence: runs <code>n-structural-parent-export-policy</code>,
+    <code>n-export-fullset-validation</code>, <code>n-approved-baseline-preservation</code>,
+    <code>n-withheld-overlap-retention</code>, and report
+    <code>crew/reports/unpinned-source-version.md</code>.</small></p>
+  </section>
+
+  <section id="identity-contract">
+    <h2>Identity is segment-aware, multi-role, and clean of five structural source bindings</h2>
+    <p>An exact catalog-name/grammar-token spelling is no longer treated as a global collision.
+    The exporter reads the runtime grammar segment map: an exact match in the
+    <code>quantity</code> segment is a legitimate complete quantity name, while an exact match
+    in any non-quantity segment is a hard collision with identity, token, segment, and source
+    location. It also generates multi-valued roles rather than forcing overlapping identities
+    into one exclusive class.</p>
+    <table>
+      <thead>
+        <tr><th>Identity result</th><th>Quantitative measure</th><th>Commit or receipt</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Segment collision and generated roles</td>
+          <td>Four quantity dual fixtures pass; a 1,863-entry full projection generated
+          1,861 quantity, 165 parent, and 9 grammar-token-dual roles and found exactly one
+          non-quantity collision; 12 tests passed</td>
+          <td><code>6cd94308bc3e545752ea6f19e2c3b2604ede7da0</code></td>
+        </tr>
+        <tr>
+          <td>Minimum-safety-factor semantic split</td>
+          <td>Locus token renamed from <code>minimum_safety_factor</code> to
+          <code>minimum_absolute_safety_factor</code>; the signed scalar quantity retains
+          <code>minimum_safety_factor</code>; 3 accepted locus-qualified names identified for
+          migration; 1,107 grammar tests passed and 32 skipped</td>
+          <td><code>81430fcbccf7402a9b51309076f5453fc90e02ea</code></td>
+        </tr>
+        <tr>
+          <td>Structure-targeting source retirement</td>
+          <td>5 invalid derived-parent bindings to structural containers retired; 5
+          <code>PRODUCED_NAME</code> edges and 5 projections detached; 4 eligible replacements
+          seeded and 1 single-child shadow refused; producing unpinned sources 5 → 0</td>
+          <td>No repository commit; signed receipt
+          <code>sn-change:ineligible-source-retirement:c48021f27d…</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The locus rename records the semantic distinction in plain language: the quantity is the
+    signed minimum value of safety factor, while the locus is the position where the minimum of
+    its absolute value occurs. Reusing one spelling for both made a token collision look like a
+    valid dual role.</p>
+    <p><small>Evidence: runs <code>n-identity-role-rule</code>,
+    <code>n-minq-locus-rename</code>, and report
+    <code>crew/reports/unpinned-source-version.md</code>.</small></p>
+  </section>
+
+  <section id="release-surface">
+    <h2>The release surface is fork-only and separates automation from operator authority</h2>
+    <p>The rehearsal can cut an inspectable release candidate without gaining authority over
+    upstream. Branch transport stays on the fork even when the final remote is named; the tag is
+    cut at the review commit; stale review branches are reclaimed only when their work is already
+    reachable; an agent may supply exact PR prose, while the operator owns the catalog commit
+    subject.</p>
+    <table>
+      <thead>
+        <tr><th>Release result</th><th>Quantitative measure</th><th>Commit</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Fork-only transport</td>
+          <td>3 negative contracts prove branch transport stays on origin and upstream receives
+          no branch, tag, or PR from a fork-final attempt; 25 + 15 tests passed</td>
+          <td><code>84a4550b0598c4ed5ddc11b3fa9d8c62fad61be5</code></td>
+        </tr>
+        <tr>
+          <td>RC tag at the cut</td>
+          <td>Annotated tag targets the review branch head and pushes only to origin;
+          <code>--no-pr</code> stops after branch and tag; final mode remains tag-free;
+          66 tests passed</td>
+          <td><code>d2b8313f999c364f24db751abdb88251e631e55e</code></td>
+        </tr>
+        <tr>
+          <td>Stale-branch reclaim</td>
+          <td>Reachable or closed/merged branch state is reset with prior SHA recorded;
+          a unique-commit branch is refused unchanged with exact recovery commands;
+          48 tests passed</td>
+          <td><code>aa00205a1a9aa9462038ba7ac0dcb09ff59d1bd5</code></td>
+        </tr>
+        <tr>
+          <td>Agent-authored PR text</td>
+          <td>Validated title/body-file inputs are transmitted verbatim; a live update changed
+          only the 954-character PR body; 44 tests passed</td>
+          <td><code>e951cd4510be815b95ba2f573a2d9feccf938234</code></td>
+        </tr>
+        <tr>
+          <td>Operator-owned commit subject</td>
+          <td>Live catalog subject was <code>sn: add WEST review batch rehearsal</code> with a body
+          accounting 332 published and 76 withheld; tree and diff stayed unchanged; 31 tests passed</td>
+          <td><code>4719e974f5b38a68b6b3cff07ae905dfcedaecaf</code>; live catalog commit
+          <code>30cfa669f92d067a021083256203ebcdcf280dd6</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><small>Evidence: runs <code>n-west-release-transport-contract</code>,
+    <code>n-rc-tag-at-cut</code>, <code>n-release-branch-reclaim</code>,
+    <code>n-agent-authored-pr-text</code>, and <code>n-catalog-commit-message</code>.</small></p>
+  </section>
+
+  <section id="upstream-state">
+    <h2>Upstream is cleared at a06e520 and has zero open pull requests</h2>
+    <p>The additive baseline clear landed as upstream commit <code>37dea1ae042b72db03f2c1edfc7ed1b438104c36</code>,
+    removing 309 nested catalog entries. Upstream then advanced through maintenance to
+    <code>a06e52052d4776b25e94fdfaa22c2bc6651a98eb</code>; the clearance commit remains its ancestor and an exact tree census at
+    that commit finds <strong>0 Standard Name YAML files</strong>. A read-only GitHub query on
+    2026-09-01 returned <strong>0 open pull requests</strong>. The fork demonstration did not
+    alter that state.</p>
+    <p><strong>Commit:</strong> clearance <code>37dea1ae042b72db03f2c1edfc7ed1b438104c36</code>;
+    observed upstream head <code>a06e52052d4776b25e94fdfaa22c2bc6651a98eb</code>. The 329-entry fork cut independently records
+    that upstream received 0 branches and 0 tags.</p>
+    <p><small>Evidence: <code>crew/reports/upstream-baseline-clear.md</code>, run
+    <code>n-west-demo-rc2</code>, and the final read-only upstream verification retained with this
+    record's audit logs.</small></p>
+  </section>
+
+  <section id="review-surface">
+    <h2>The PR-scoped review surface serves all 329 entries with correct scalar/vector kinds</h2>
+    <p>The current demonstration cut contains 329 unique entries in 17 YAML files with 1,211
+    generic bindings and zero forbidden binding fields. Its fork PR preview and data endpoints
+    both returned HTTP 200 and displayed all <strong>329/329</strong> scoped entries. The preview
+    is derived from immutable base/head refs and includes added and edited entries only, so it is
+    a PR review surface rather than a view of unrelated catalog history.</p>
+    <table>
+      <thead>
+        <tr><th>Review result</th><th>Quantitative measure</th><th>Commit</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PR-scoped preview</td>
+          <td>329 unique entries, 17 files, 17,937 lines, 1,211 generic bindings,
+          0 forbidden fields, HTTP 200 with 329 names; PR diff 18 added / 0 modified / 0 deleted</td>
+          <td>frozen artifact <code>d52bbc56677b2063560b33586b8c2db65017452d</code>;
+          catalog/tag target <code>b3ad33253a0e4e92d7003d87510090f45dbe1499</code></td>
+        </tr>
+        <tr>
+          <td>Scalar versus vector</td>
+          <td>11/11 fixture entries now match their declarations; magnetic-axis toroidal field
+          and vertical coordinate remain scalar while true magnetic field remains vector;
+          111 tests passed</td>
+          <td><code>3f4343a1dc6893ba9e3f06e300be7371443cb832</code></td>
+        </tr>
+        <tr>
+          <td>Reviewer instructions</td>
+          <td><code>REVIEWING.md</code> describes 3 outcomes in 3 sentences with 0 bullets and
+          0 internal workflow-stage names; the later field contract covers 20/20 required phrases,
+          excludes 9/9 internal names, and remains 19 lines</td>
+          <td><code>3ffddf7d3176015b8519cd941db37547a5859eb0</code>; field contract
+          <code>e9d3044502d78732c76bc8ce304768d0f61fa96f</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The reviewer may edit the Standard Name and its description/documentation. Unit, kind,
+    status, source bindings, generated roles, and ordering remain machine-owned. This makes the
+    preview editable where semantic judgment belongs without turning governed provenance into
+    review prose.</p>
+    <p><small>Evidence: runs <code>n-isn-preview-scope</code>,
+    <code>n-west-demo-rc2</code>, <code>n-vector-family-classification</code>,
+    <code>n-reviewing-doc-clarity</code>, and <code>n-review-editable-fields</code>.</small></p>
+  </section>
+
+  <section id="negative-cohort-delta">
+    <h2>Negative result: the cohort delta found four silently dropped identities and six unproposed sources</h2>
+    <p>The earlier cut had 408 candidates and 332 emitted identities. The current cut has 409
+    candidates and 329 emitted identities. Exact reconciliation proved
+    <code>408 - 4 + 5 = 409</code> at the candidate level and
+    <code>332 - 4 + 1 = 329</code> at the emitted level. The four departures are
+    <code>frequency_of_diagnostic_antenna</code>, <code>gap_at_plasma_boundary</code>,
+    <code>poloidal_magnetic_field_at_constraint_position</code>, and
+    <code>spectral_flux_of_spectrometer_channel</code>. Together they leave
+    <strong>6 WEST source paths</strong> without an accepted proposal. The accounting object is
+    internally sound, but the result changed the plan: this is a demonstration cut, not an
+    upstream-ready semantic cut.</p>
+    <p><strong>Commits:</strong> earlier frozen artifact <code>38173ae1aef54c58eb42abf8ba7f645a350956f3</code> and catalog
+    <code>2a669af8875197adcf1d336e94e3601d692e7016</code>; current frozen artifact <code>d52bbc56677b2063560b33586b8c2db65017452d</code>
+    and catalog <code>b3ad33253a0e4e92d7003d87510090f45dbe1499</code>. The reconciliation itself was report-only,
+    so it has no implementation commit.</p>
+    <p><small>Evidence: <code>crew/reports/cohort-delta.md</code> and run
+    <code>n-cohort-delta-reconcile</code>.</small></p>
+  </section>
+
+  <section id="negative-singleton-validation">
+    <h2>Negative result: singleton semantic validation wrongly excluded 350 of 408 candidates</h2>
+    <p>Running catalog-wide semantic checks once per entry deprived each identity of the complete
+    set needed to resolve parent and reference relationships. On the 408-candidate rehearsal it
+    misclassified <strong>350</strong> entries as excluded. This was not a stricter catalog gate;
+    it was an invalid evaluation shape. The replacement keeps per-entry Pydantic validation but
+    invokes semantic validation once on the assembled emitted set, after dangling-reference prune.
+    The two-entry positive control then emitted 2/2 with one semantic-validator call.</p>
+    <p><strong>Commit:</strong> <code>b002cbc6</code>; 6 focused tests passed.</p>
+    <p><small>Evidence: committed crew ledger and run
+    <code>n-export-fullset-validation</code>.</small></p>
+  </section>
+
+  <section id="negative-mixed-identity-roles">
+    <h2>Negative result: 41 published parents and five grammar-token duals share one catalog</h2>
+    <p>The complete 408-row audit classified 309 measurable identities, 88 structural or
+    abstraction identities, and 11 vocabulary-like identities. Its non-exclusive census found
+    <strong>92</strong> identities serving as live graph parents, of which
+    <strong>41 were published</strong>. An exact join over all 332 then-published identities and
+    816 canonical or alias grammar spellings found <strong>5 published duals</strong>:
+    <code>minimum_safety_factor</code>, <code>normalized_toroidal_flux_coordinate</code>,
+    <code>toroidal_flux_coordinate</code>, <code>poloidal_current_function</code>, and
+    <code>safety_factor</code>. Four are plausible atomic quantity/carrier dual roles; the first
+    was the locus/quantity semantic collision that required a distinct locus spelling.</p>
+    <p>The audit was report-only and therefore has no implementation commit. Its decision landed
+    in segment-aware roles and collision enforcement at commit
+    <code>6cd94308bc3e545752ea6f19e2c3b2604ede7da0</code>; the locus distinction landed at
+    <code>81430fcbccf7402a9b51309076f5453fc90e02ea</code>.</p>
+    <p><small>Evidence: <code>crew/reports/sn-identity-classes.md</code> and run
+    <code>n-sn-identity-classes</code>.</small></p>
+  </section>
+
+  <section id="document-audit">
+    <h2>Document audit</h2>
+    <p>The final authored HTML was checked with Reckon's document auditor. The retained command
+    output is:</p>
+    <pre><code>docs/evidence/archive/sn-west-review-rehearsal-landed.html: OK</code></pre>
+    <p>The final manifest records the command, exit status, and log path. The acceptance condition
+    is exit 0 with no <code>ERROR</code> records.</p>
+  </section>
+
+  <section id="remaining-authority">
+    <h2>What remains</h2>
+    <p>The campaign has proved the export, identity, transport, and review mechanics and has a
+    complete source account. It has not supplied the missing accepted proposals for the six source
+    paths, completed the human review, folded reviewer edits back through governed validation, or
+    authorized an upstream final release. Those are the next decisions; this evidence record does
+    not collapse them into a passing technical rehearsal.</p>
+  </section>
+</main>
+</body>
+</html>
