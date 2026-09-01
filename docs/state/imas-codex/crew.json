@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T18:56:03",
+  "updated": "2026-09-01T19:17:57",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1379,6 +1379,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-refinegate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05def-5609-7990-b23e-d45a344b0f12",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05def-5609-7990-b23e-d45a344b0f12"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "impl-relgap",
@@ -44143,9 +44154,111 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T170547797062-n-refinesourcegate",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712b",
+        "node": "n-refinesourcegate",
+        "node_definition": {
+          "done_when": "a test fails against the unmodified code and passes after, asserting that persist_refined_name raises rather than minting a successor when the authoritative source cohort is empty, with both outputs captured to logs; the existing source-less-rename regression that asserts the permissive behaviour is updated to expect refusal and its change is shown; a live read-only census confirms current refine-eligible ungrounded rows is still 0 so the refusal has no immediate blast radius; and the targeted standard-names refine, persistence and provenance suites are reported green with exact passed and failed counts",
+          "estimated_hours": 0.6,
+          "goal": "Make persist_refined_name refuse an empty authoritative source cohort",
+          "id": "n-refinesourcegate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T170547797062-n-refinesourcegate/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712b",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_atomic_refined_name_persistence.py",
+            "tests/standard_names/test_refine_source_cohort_gate.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-refinegate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T17:06:00Z",
+        "completed_at": "2026-09-01T17:14:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 494,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 494,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c014c25157164d84eb287dab564135ca54eb3db7",
+        "commits": [
+          "9c4403dba738c728166042f89a3f3561242232e3"
+        ],
+        "changed_lines": {
+          "added": 138,
+          "removed": 23,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused TDD gate plus targeted refine, persistence and provenance suites",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T170547797062-n-refinesourcegate/logs/targeted-refine-persistence-provenance.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T170547797062-n-refinesourcegate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05def-5609-7990-b23e-d45a344b0f12",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4127232,
+            "cached_input_tokens_cumulative": 4127232,
+            "input_tokens": 4312529,
+            "input_tokens_cumulative": 4312529,
+            "output_tokens": 16355,
+            "output_tokens_cumulative": 16355,
+            "reasoning_output_tokens": 4752,
+            "reasoning_output_tokens_cumulative": 4752
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1152
+    "_version": 1155
   }
 }

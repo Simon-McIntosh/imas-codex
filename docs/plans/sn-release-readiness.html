@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="91">
+<meta name="plan-version" content="92">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/embedding-gap.md,docs/evidence/sn-release-readiness/suite-four-disposition.md,docs/evidence/sn-release-readiness/import-order-timeout.md,docs/evidence/sn-release-readiness/strain-ordinal-edit.md,docs/evidence/sn-release-readiness/unsourced-ancestry.md">
 <meta name="plan-impl" content="0.94">
@@ -989,6 +989,9 @@
 </div>
 <div class="r-comment" data-section="s12b" data-id="c-20260901T1705-lockedsn" data-who="reckon-ship" data-when="2026-09-01T17:05:00+00:00">
     <div class="r-comment-body">TWO DISPOSITIONS LOCKED BY THE LEAD 2026-09-01, and they split the population by how each row became ungrounded rather than by what is convenient. THE 42 SOURCE-LOST ROWS: restore from receipts, verify by round-trip. Each is rebound to the exact source its StandardNameChange receipt records, so there is no candidate search, no guessing and no semantic judgement - the ledger already names the prior binding. Round-trip runs afterwards as a free DIAGNOSTIC and does not veto a receipted restore, which is the right weighting given the measured baseline: undisputed grounded bindings regenerate exactly only about half the time, so gating receipted restores on round-trip agreement would discard roughly half of a provably-correct set on a noisy instrument. THE 31 BORN-UNGROUNDED ROWS - 30 empty-cohort successor mints plus 1 legacy pre-ledger: leave them until the cause fix lands, then let the ordinary pipeline regenerate properly-sourced names. The reasoning is the sequencing principle this section learned the hard way: attaching sources to identities that a defect minted repairs the symptom while the generator still runs, and the coordinator had already made that error once by binding five names before the cause was established. AND THE CAUSE FIX ITSELF IS LOCKED: persist_refined_name must REFUSE an empty authoritative source cohort. Its former blocker is gone - current refine-eligible ungrounded rows measure ZERO - so the refusal has no immediate blast radius and needs no sequencing against either disposition. The existing source-less-rename regression asserts the permissive behaviour today and must be updated to expect refusal.</div>
+</div>
+<div class="r-comment" data-section="§12b" data-id="c-run-r-20260901T170547797062-n-refinesourcegate" data-who="impl-refinegate" data-when="2026-09-01T17:14:14Z">
+    <div class="r-comment-body"><p>Cause CLOSED: persist_refined_name raises RefinedNamePersistenceRefusal reason authoritative_source_cohort_empty and rolls back before attachment guard, lineage finalization, retarget, event record and commit. Proper fail-before this time - 1 failed on an assertion, not a collection error - then 1 passed; final targeted suites 255 passed 0 failed 0 skipped; ruff clean. The permissive source-less-rename regression now asserts refusal, rollback and no human-edit record. En route it had to distinguish an explicitly empty cohort from an unprojected synthetic row, which first failed 21 tests until legacy fixtures were repaired. Live blast radius confirmed zero: 0 of 24 refine-eligible rows ungrounded, 86 authoritative source rows</p></div>
 </div>
 </section>
 </main>
