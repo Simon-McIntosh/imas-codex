@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import re
+import shlex
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -47,6 +48,7 @@ class ReleaseReport:
     files_copied: int = 0
     commit_sha: str | None = None
     branch: str = ""
+    branch_reclaimed_from: str | None = None
     pr_number: int | None = None
     pr_url: str | None = None
     pushed: bool = False
@@ -62,6 +64,7 @@ class ReleaseReport:
             "files_copied": self.files_copied,
             "commit_sha": self.commit_sha,
             "branch": self.branch,
+            "branch_reclaimed_from": self.branch_reclaimed_from,
             "pr_number": self.pr_number,
             "pr_url": self.pr_url,
             "pushed": self.pushed,
@@ -84,6 +87,125 @@ def _run_git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess
         text=True,
         timeout=30,
     )
+
+
+def _closed_pr_heads(isnc_path: Path, branch: str) -> set[str]:
+    """Return closed or merged PR heads recorded for *branch*.
+
+    Both catalog remotes are queried because rehearsal PRs live on the fork
+    while final review PRs live upstream. A failed lookup contributes no proof:
+    branch reclamation then falls back to ancestry and otherwise refuses.
+    """
+    import json
+
+    repos = {
+        f"{owner}/{repo}"
+        for remote in (_RC_REMOTE, _FINAL_REMOTE)
+        if (slug := _github_slug(isnc_path, remote)) is not None
+        for owner, repo in [slug]
+    }
+    heads: set[str] = set()
+    for repo in sorted(repos):
+        try:
+            result = subprocess.run(
+                [
+                    "gh",
+                    "pr",
+                    "list",
+                    "--repo",
+                    repo,
+                    "--state",
+                    "closed",
+                    "--head",
+                    branch,
+                    "--limit",
+                    "100",
+                    "--json",
+                    "headRefName,headRefOid,state",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            logger.warning(
+                "Could not inspect closed pull requests for %s in %s: %s",
+                branch,
+                repo,
+                exc,
+            )
+            continue
+        if result.returncode != 0:
+            logger.warning(
+                "Could not inspect closed pull requests for %s in %s: %s",
+                branch,
+                repo,
+                result.stderr.strip(),
+            )
+            continue
+        try:
+            rows = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            logger.warning("gh returned invalid PR data for %s in %s", branch, repo)
+            continue
+        heads.update(
+            row["headRefOid"]
+            for row in rows
+            if row.get("headRefName") == branch
+            and row.get("state") in {"CLOSED", "MERGED"}
+            and row.get("headRefOid")
+        )
+    return heads
+
+
+def _prepare_release_branch(
+    isnc_path: Path,
+    branch: str,
+    *,
+    base_ref: str = "main",
+    pr_head_reader: Any | None = None,
+) -> tuple[str | None, str | None]:
+    """Create *branch* or safely move a stale local copy onto *base_ref*.
+
+    Returns ``(reclaimed_from, error)``. A branch is reclaimable only when its
+    head is already contained in the base or exactly matches the recorded head
+    of a closed or merged pull request with the same branch identity.
+    """
+    existing = _run_git("rev-parse", "--verify", f"refs/heads/{branch}", cwd=isnc_path)
+    if existing.returncode != 0:
+        created = _run_git("checkout", "-b", branch, base_ref, cwd=isnc_path)
+        if created.returncode != 0:
+            return None, f"failed to create branch {branch}: {created.stderr.strip()}"
+        return None, None
+
+    old_head = existing.stdout.strip()
+    contained = (
+        _run_git(
+            "merge-base", "--is-ancestor", old_head, base_ref, cwd=isnc_path
+        ).returncode
+        == 0
+    )
+    reader = pr_head_reader or _closed_pr_heads
+    pr_heads = set() if contained else set(reader(isnc_path, branch))
+    if not contained and old_head not in pr_heads:
+        repo = shlex.quote(str(isnc_path))
+        branch_arg = shlex.quote(branch)
+        base_arg = shlex.quote(base_ref)
+        inspect = f"git -C {repo} log --oneline {base_arg}..{branch_arg}"
+        delete = f"git -C {repo} branch -D {branch_arg}"
+        return None, (
+            f"refusing to reclaim local branch {branch} at {old_head}: its commits "
+            "are not contained in the current base and no closed or merged pull "
+            f"request records that exact head. Inspect with: {inspect}. If those "
+            f"commits should be discarded, delete explicitly with: {delete}"
+        )
+
+    moved = _run_git("checkout", "-B", branch, base_ref, cwd=isnc_path)
+    if moved.returncode != 0:
+        return None, (
+            f"failed to reclaim branch {branch} from {old_head}: {moved.stderr.strip()}"
+        )
+    return old_head, None
 
 
 def sanitize_build_metadata(label: str) -> str:
@@ -548,6 +670,7 @@ def run_release(
     pr_creator: Any | None = None,
     upstream_repo: str | None = None,
     fork_owner: str | None = None,
+    pr_head_reader: Any | None = None,
 ) -> ReleaseReport:
     """Run the full catalog release workflow.
 
@@ -685,12 +808,15 @@ def run_release(
     if final:
         report.branch = f"release/{git_tag}"
         if not dry_run:
-            branch_result = _run_git("checkout", "-b", report.branch, cwd=isnc_path)
-            if branch_result.returncode != 0:
-                report.errors.append(
-                    f"Failed to create branch {report.branch}: {branch_result.stderr}"
-                )
+            reclaimed_from, branch_error = _prepare_release_branch(
+                isnc_path,
+                report.branch,
+                pr_head_reader=pr_head_reader,
+            )
+            if branch_error:
+                report.errors.append(branch_error)
                 return report
+            report.branch_reclaimed_from = reclaimed_from
 
     logger.info("Publishing to %s", isnc_path)
     pub_report = publisher(
@@ -843,6 +969,7 @@ class ReviewReleaseReport:
     artifact_path: str | None = None
     commit_sha: str | None = None
     branch: str = ""
+    branch_reclaimed_from: str | None = None
     remote: str = ""
     pushed: bool = False
     tag_created: bool = False
@@ -862,6 +989,7 @@ class ReviewReleaseReport:
             "artifact_path": self.artifact_path,
             "commit_sha": self.commit_sha,
             "branch": self.branch,
+            "branch_reclaimed_from": self.branch_reclaimed_from,
             "remote": self.remote,
             "pushed": self.pushed,
             "tag_created": self.tag_created,
@@ -1054,6 +1182,7 @@ def run_review_release(
     open_pr: bool = True,
     pr_title: str | None = None,
     pr_body: str | None = None,
+    pr_head_reader: Any | None = None,
 ) -> ReviewReleaseReport:
     """Mint → freeze → export → branch → tag → optional PR, in one call.
 
@@ -1238,10 +1367,15 @@ def run_review_release(
         return report
 
     # ── 5. Branch, publish (copy + commit), push to the fork ───────────
-    br = _run_git("checkout", "-b", report.branch, cwd=isnc_path)
-    if br.returncode != 0:
-        report.errors.append(f"failed to create branch {report.branch}: {br.stderr}")
+    reclaimed_from, branch_error = _prepare_release_branch(
+        isnc_path,
+        report.branch,
+        pr_head_reader=pr_head_reader,
+    )
+    if branch_error:
+        report.errors.append(branch_error)
         return report
+    report.branch_reclaimed_from = reclaimed_from
     try:
         pub = publisher(
             staging_dir=str(staging_dir),

@@ -125,6 +125,13 @@ def _write_domain_catalog(root: Path, text: str) -> None:
     (standard_names / "equilibrium.yml").write_text(text, encoding="utf-8")
 
 
+def _commit_file(repo: Path, name: str, text: str) -> str:
+    (repo / name).write_text(text, encoding="utf-8")
+    _git("add", name, cwd=repo)
+    _git("commit", "-m", f"add {name}", cwd=repo)
+    return _git("rev-parse", "HEAD", cwd=repo).stdout.strip()
+
+
 def test_review_release_full_flow(isnc_repo, tmp_path):
     focus = _write_names_focus(tmp_path)
     reviews = tmp_path / "reviews"
@@ -155,6 +162,7 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     )
 
     assert report.errors == [], report.errors
+    assert report.branch_reclaimed_from is None
     # The batch identity rides the version as semver build metadata.
     assert report.rc_version == "v0.1.0rc1+demo-batch"
     assert report.batch_label == "demo-batch"
@@ -202,6 +210,97 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     assert "plasma_current" not in subject + body
     assert "poloidal_flux" not in subject + body
     assert ".yml" not in subject + body
+
+
+def test_review_release_reclaims_branch_contained_in_main(isnc_repo, tmp_path):
+    focus = _write_names_focus(tmp_path)
+    branch = "review/v0.1.0rc1+demo-batch"
+    old_head = _git("rev-parse", "HEAD", cwd=isnc_repo).stdout.strip()
+    _git("branch", branch, old_head, cwd=isnc_repo)
+    base_head = _commit_file(isnc_repo, "BASE.md", "current base\n")
+    _git("push", "origin", "main", cwd=isnc_repo)
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Review batch demo",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert report.branch_reclaimed_from == old_head
+    assert _git("rev-parse", "HEAD^", cwd=isnc_repo).stdout.strip() == base_head
+
+
+def test_review_release_reclaims_branch_at_closed_pr_head(isnc_repo, tmp_path):
+    focus = _write_names_focus(tmp_path)
+    branch = "review/v0.1.0rc1+demo-batch"
+    _git("checkout", "-b", "candidate", cwd=isnc_repo)
+    old_head = _commit_file(isnc_repo, "reviewed.md", "preserved by PR\n")
+    _git("checkout", "main", cwd=isnc_repo)
+    _git("branch", branch, old_head, cwd=isnc_repo)
+    observed = {}
+
+    def closed_pr_heads(path, identity):
+        observed["path"] = path
+        observed["identity"] = identity
+        return {old_head}
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Review batch demo",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        pr_head_reader=closed_pr_heads,
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert report.branch_reclaimed_from == old_head
+    assert observed == {"path": isnc_repo, "identity": branch}
+
+
+def test_review_release_refuses_branch_with_unique_commits(isnc_repo, tmp_path):
+    focus = _write_names_focus(tmp_path)
+    branch = "review/v0.1.0rc1+demo-batch"
+    _git("checkout", "-b", "candidate", cwd=isnc_repo)
+    old_head = _commit_file(isnc_repo, "unreviewed.md", "local only\n")
+    _git("checkout", "main", cwd=isnc_repo)
+    _git("branch", branch, old_head, cwd=isnc_repo)
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Review batch demo",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        pr_head_reader=lambda _path, _branch: set(),
+        **_PR_TARGET,
+    )
+
+    assert len(report.errors) == 1
+    error = report.errors[0]
+    assert branch in error
+    assert old_head in error
+    assert f"git -C {isnc_repo} log --oneline main..{branch}" in error
+    assert f"git -C {isnc_repo} branch -D {branch}" in error
+    assert _git("rev-parse", branch, cwd=isnc_repo).stdout.strip() == old_head
+    assert _git("branch", "--show-current", cwd=isnc_repo).stdout.strip() == "main"
 
 
 def test_review_release_can_cut_and_tag_without_opening_pr(isnc_repo, tmp_path):
@@ -579,6 +678,50 @@ def test_plain_final_uses_fork_branch_and_defers_tag(isnc_repo, tmp_path):
     assert "v0.1.0" not in _git("tag", cwd=isnc_repo).stdout.splitlines()
     assert (
         _git("ls-remote", "--tags", "origin", "v0.1.0", cwd=isnc_repo).stdout.strip()
+        == ""
+    )
+
+
+def test_plain_final_reclaims_branch_contained_in_main(isnc_repo, tmp_path):
+    upstream = _add_upstream_remote(isnc_repo, tmp_path)
+    _git("tag", "v0.1.0rc1", cwd=isnc_repo)
+    branch = "release/v0.1.0"
+    old_head = _git("rev-parse", "HEAD", cwd=isnc_repo).stdout.strip()
+    _git("branch", branch, old_head, cwd=isnc_repo)
+    base_head = _commit_file(isnc_repo, "BASE.md", "current base\n")
+    _git("push", "origin", "main", cwd=isnc_repo)
+    _git("push", "upstream", "main", cwd=isnc_repo)
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    (staging / "catalog.yml").write_text("catalog_name: t\n", encoding="utf-8")
+
+    def publisher(*, staging_dir, isnc_path, push, dry_run, allow_dirty):
+        commit = _commit_file(Path(isnc_path), "catalog.yml", "catalog_name: final\n")
+        return SimpleNamespace(errors=[], commit_sha=commit, files_copied=1)
+
+    report = run_release(
+        isnc_repo,
+        "Final catalog review",
+        staging_dir=staging,
+        final=True,
+        remote="upstream",
+        skip_export=True,
+        publisher=publisher,
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert report.branch_reclaimed_from == old_head
+    assert _git("rev-parse", "HEAD^", cwd=isnc_repo).stdout.strip() == base_head
+    assert (
+        report.branch
+        in _git("ls-remote", "--heads", "origin", report.branch, cwd=isnc_repo).stdout
+    )
+    assert (
+        _git(
+            "ls-remote", "--heads", str(upstream), report.branch, cwd=isnc_repo
+        ).stdout.strip()
         == ""
     )
 
