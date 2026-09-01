@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:11:16",
+  "updated": "2026-09-01T23:15:58",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -47876,9 +47876,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T210518913032-n-west-stage4-approve-live",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage4-approve-live",
+        "node_definition": {
+          "done_when": "crew/reports/west-stage4-approve.md records the dry-run plus live sn approve outputs with exit statuses, log paths, the counts of names auto-promoted accepted-to-approved, the counts of edited names approved versus contested, the score with reason attached to pulse_duration plus breakdown_initial_time, a Cypher read proving PR URL plus reviewer provenance on those two StandardName nodes, the fold-back tag name with its graph-merged: message on the fork, plus a second sn approve --pr invocation refused by the idempotency guard",
+          "estimated_hours": null,
+          "goal": "Fold the merged fork PR 3 (https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3, merge 6a5c44d3) back into the graph with imas-codex sn approve --pr (ISNC checkout pulled to the merged fork main, a dry-run expecting 2 changed entries preceding the live run), recording how the two reviewer edits route (breakdown_initial_time expected approved, pulse_duration expected contested) alongside the untouched batch auto-promotion",
+          "id": "n-west-stage4-approve-live",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T210518913032-n-west-stage4-approve-live/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "crew/reports/west-stage4-approve.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:05:26Z",
+        "completed_at": "2026-09-01T21:14:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 514,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 514,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "86714b0a4e47ae51fdbeb7b26a59c9b0c4a592cb",
+        "commits": [
+          "973028ef0a19323ce85b14e0f0ea0408ecbb45f1"
+        ],
+        "changed_lines": {
+          "added": 237,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "imas-codex sn approve --pr .../pull/3 --dry-run; imas-codex sn approve --pr .../pull/3; second invocation; Cypher provenance read",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:104ab638bd40b2feea3fad8aea958bc5479db8f0836e3976a2f2c316d7a4a6a4"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T210518913032-n-west-stage4-approve-live/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 2430720,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2581106,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 11750,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 2238
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1246
+    "_version": 1247
   }
 }

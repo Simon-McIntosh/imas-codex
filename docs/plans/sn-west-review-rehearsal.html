@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="136">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="138">
+<meta name="plan-impl" content="0.96">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef">
 </head>
 <body>
   <main class="plan-doc">
@@ -2582,6 +2582,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260901T2104-approve-base-fix" data-who="reckon-ship" data-when="2026-09-01T21:04:00Z">
     <div class="r-comment-body">Negative result turned repair. The first stage-4 attempt refused correctly: sn approve diffed PR 3 against its merge first parent, which under the blank-main additive chain holds none of the batch files, so it saw 0 reviewer edits and would have bypassed compliant-versus-contested routing. Fixed at commit 6059a234 (merged 9f1c6a59): reviewer-edit detection now resolves the cut-time RC tag v0.3.0rc1+west-task-2e while the merge first parent stays the additive approved baseline for untouched-entry promotion; a blank-main fixture pins exactly one edited entry with exact before/after text; 52 approval tests pass. Live dry-run on PR 3 now sees exactly 2 changed entries, breakdown_initial_time and pulse_duration, with no writes. Stage 4 redispatched.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T210518913032-n-west-stage4-approve-live" data-who="impl-weststage3" data-when="2026-09-01T21:14:00Z">
+    <div class="r-comment-body"><p>live fold-back of PR 3: 374 untouched names auto-approved with PR provenance, both reviewer edits contested (compliant edit 0.708 and false edit 0.508 against 0.850), contested nodes carry no PR provenance, graph-merged: tag written on the fork, second invocation refused; CLI also wrote merge_commit into the frozen review manifest</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260901T2116-stage4-live" data-who="reckon-ship" data-when="2026-09-01T21:16:00Z">
+    <div class="r-comment-body">Stage 4 ran LIVE (report commit 973028ef, merged 45b4ba48). sn approve --pr on PR 3: dry-run saw 2 changes; live run auto-promoted 374 untouched batch names accepted-to-approved with PR 3 provenance, and routed both reviewer edits through the docs re-review: breakdown_initial_time contested at 0.708 and pulse_duration contested at 0.508 against the 0.850 threshold. The graph-merged: receipt tag was written on the fork (approved=0 staged_for_review=0 auto_approved=374 contested=2) and a second invocation was refused by the idempotency guard. Negative results: (1) the edit intended as compliant was contested, so the accept path for an edited entry is not yet demonstrated; a quorum reading of 0.708 on a shorter rewording is within the docs-gate noise band and may be legitimate, so the contested-to-approved path will be exercised with sn resolve --override rather than by loosening the threshold; (2) DEFECT: the two contested StandardName nodes carry null catalog_pr_number/url/merge sha/reviewer actor while the 374 auto-approved carry them; (3) the CLI wrote merge_commit into the frozen review manifest imas_codex/standard_names/manifests/reviews/v0.3.0rc1+west-task-2e.sn_names.yaml, left unstaged in the worktree. Fix node dispatched for (2) and (3); stages 4b (resolve), 5 (freeze-check) and 6 (undo) follow.</div>
 </div>
 </section>
 </main>
