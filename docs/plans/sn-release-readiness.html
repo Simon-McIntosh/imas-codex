@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/closure-audit.md,docs/evidence/sn-release-readiness/residue-disposition.md">
 <meta name="plan-impl" content="1.0">
@@ -860,6 +860,9 @@
 <div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T123740388875-n-s9regression" data-who="test-s9regress" data-when="2026-09-01T12:51:09Z">
     <div class="r-comment-body"><p>SUITE REGRESSED: 6807 passed / 11 failed / 8 skipped at current main; 7 NEW failures all in test_sn_approve_tag.py from ResolvedPr.reviewer_actor becoming a required constructor arg while two fixture helpers omit it; 4 failures verified pre-existing at the merge-base with identical errors; the embedding-drain merge caused none</p></div>
 </div>
+<div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T140354372814-n-importordertimeout" data-who="impl-importorder" data-when="2026-09-01T14:12:33Z">
+    <div class="r-comment-body"><p>CLEARED as non-regression: the test passes at merge-base AND current, standalone wall 6.50s to 6.79s a +0.29s or 4.5% delta against a 30s timeout, so today&#x27;s loop.py services.py and promote.py changes are exonerated; earlier timeout was transient load. Full suite now 6818 passed / 8 skipped / 0 FAILED. No code change made because none was warranted</p></div>
+</div>
 <div class="r-comment" data-section="s7a" data-id="c-20260901T1235-producerdrain" data-who="reckon-ship" data-when="2026-09-01T12:35:00+00:00">
     <div class="r-comment-body">n-producerembeddrain landed — commit 13db4468; gate scoped-run-embedding-drain passed; measure the new regression FAILED against the unmodified code at 1 failed and 0 passed, failing precisely at 'assert state["embedded"] is True', then PASSED after the change at 2 passed and 0 failed, with the targeted pool suites at 52 passed and 0 failed and ruff check and format clean on both paths; 2 tests added; no LLM call and no spend. THE FAIL-FIRST EVIDENCE IS THE POINT: a test that passes both before and after proves nothing and would have closed this section on an assertion. The pre-change failure shows the scoped idle exit performing ZERO embedding work, which is the defect stated rather than inferred. THE FIX DOES NOT TRUST ITSELF, which is what makes it a gate rather than a hope: after transient scope residue clears, and only on a successful scope_run_id exit, it drains through the existing claim, process and persist path in run-id-bounded batches of 100, releases claims and RAISES on an embedding exception or a written-count mismatch, and then INDEPENDENTLY re-queries the same run scope for accepted described StandardName rows whose embedding is null, raising on any nonzero result. So a partial or silently-short drain fails the run instead of completing it. This closes the producer half of the embedding gap: the two repaired rows can no longer be recreated by the next scoped run.</div>
 </div>
@@ -867,7 +870,7 @@
     <div class="r-comment-body"><p>REDUNDANT: main removed the arbitrary bulk-import writer and its two replacements make catalog-supplied origin and status unreachable, 23 passed 0 failed; only an uncalled provenance-stamping helper would be lost, so the 7-day-old orphan is safe to discard</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20260901T134852783119-n-suitefourfix" data-who="impl-suitefour" data-when="2026-09-01T14:00:25Z">
-    <div class="r-comment-body"><p>All 4 dispositioned stale-test-asserting-a-changed-contract; exact four-id gate 4 failed to 4 passed; both export paths demonstrated sound with evidence; full suite 6817 passed / 1 failed, the 1 being a NEWLY failing fresh-process import-order timeout outside this node&#x27;s scope, reported without a rerun</p></div>
+    <div class="r-comment-body"><p>All 4 dispositioned stale-test-asserting-a-changed-contract; exact four-id gate 4 failed to 4 passed; both export paths demonstrated sound with evidence; full suite 6817 passed / 1 failed, the 1 being a NEWLY failing fresh-process import-order timeout outside this node's scope, reported without a rerun</p></div>
 </div>
 </section>
 </main>

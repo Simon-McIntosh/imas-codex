@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T16:03:39",
+  "updated": "2026-09-01T16:15:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -879,9 +879,11 @@
         "id": "impl-importorder",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05d48-b30c-7761-b8e4-b719512615b5",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d48-b30c-7761-b8e4-b719512615b5"
+        },
         "created": "2026-09-01"
       },
       {
@@ -1121,6 +1123,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-ordinaledit",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-originrule",
@@ -2116,6 +2127,15 @@
         "role": "investigate",
         "session_id": "01a00b75-7986-7512-be84-ebf7b673b4ea",
         "created": "2026-08-16"
+      },
+      {
+        "id": "inv-unsourced",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "inv-west",
@@ -43011,9 +43031,199 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T134922401332-n-tail32rescore",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a76",
+        "node": "n-tail32rescore",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/tail-rescore.md names all 32 identities taken from the rescore-candidate section of docs/evidence/sn-benchmark-evolution/exhausted-tail-triage.md, reports per name whether it accepted or returned to the tail with its new score, gives the accept count out of 32 and the exact USD spent from LLMCost rows attributable to the run, confirms no name was reworded or hand-accepted by showing each retained its prior identity string, and states whether repeated exhaustion of structurally sound names indicates a prompt or quorum defect rather than an unlucky draw",
+          "estimated_hours": 0.6,
+          "goal": "Resubmit the 32 identified rescore-candidate names for a fresh quorum draw and record what it returned",
+          "id": "n-tail32rescore",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T134922401332-n-tail32rescore/manifest.md",
+          "plan": "sn-benchmark-evolution",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/tail-rescore.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-tail32",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T13:49:28Z",
+        "completed_at": "2026-09-01T14:13:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1471,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1471,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "0dc0bf4d24c33e1e2e00cdb5a42125577aa9b374",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": {
+          "command": "live 32-identity preflight, paid scoped rescore, post-run graph census over stages scores successors validation SNRun and LLMCost",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/tail-rescore.md",
+          "log_digest": null
+        },
+        "failure_classification": "pre-existing-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T134922401332-n-tail32rescore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d3b-67a5-71c2-a4e0-4cfb5a22ea83",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9148928,
+            "cached_input_tokens_cumulative": 9148928,
+            "input_tokens": 9369956,
+            "input_tokens_cumulative": 9369956,
+            "output_tokens": 20181,
+            "output_tokens_cumulative": 20181,
+            "reasoning_output_tokens": 5642,
+            "reasoning_output_tokens_cumulative": 5642
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T140354372814-n-importordertimeout",
+        "plan": "sn-release-readiness",
+        "section": "\u00a77a",
+        "node": "n-importordertimeout",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/import-order-timeout.md states whether tests/standard_names/test_pool_registry_imports.py::test_pool_phase_import_orders_succeed_in_fresh_process passes at the pre-change merge-base 711038bf and fails at current main, thereby attributing or clearing it as a regression from today's loop.py services.py or promote.py changes, reports the measured fresh-process import wall time against the 30s per-test timeout for the failing parameter case, names the import whose cost changed if it is a regression, and shows the test passing afterwards with a full tests/standard_names capture reporting 0 failures",
+          "estimated_hours": 0.5,
+          "goal": "Establish whether the fresh-process import-order timeout is a regression from today's merges and clear it",
+          "id": "n-importordertimeout",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T140354372814-n-importordertimeout/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a77a",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/standard_names/loop.py",
+            "tests/standard_names/test_pool_registry_imports.py",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/import-order-timeout.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-importorder",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:04:00Z",
+        "completed_at": "2026-09-01T14:12:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 513,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 513,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c938435fc266ccc51b0526bacdfad101c1e200eb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "exact import-order test at merge-base 711038bf and at current, plus full tests/standard_names capture",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T140354372814-n-importordertimeout/logs/full-standard-names.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T140354372814-n-importordertimeout/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d48-b30c-7761-b8e4-b719512615b5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3409408,
+            "cached_input_tokens_cumulative": 3409408,
+            "input_tokens": 3570631,
+            "input_tokens_cumulative": 3570631,
+            "output_tokens": 9223,
+            "output_tokens_cumulative": 9223,
+            "reasoning_output_tokens": 2424,
+            "reasoning_output_tokens_cumulative": 2424
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1123
+    "_version": 1128
   }
 }
