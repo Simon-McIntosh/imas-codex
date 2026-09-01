@@ -45,9 +45,9 @@
 </header>
 
 <section class="quick-status">
-  <div class="status-card"><strong>Exact absent names</strong>
-    <span class="badge badge-blocked">six</span>
-    <p>Six object-specific identities are absent from both the live graph query and the current ISNC release candidate.</p></div>
+  <div class="status-card"><strong>Six-row identity manifest</strong>
+    <span class="badge badge-blocked">four absent · two superseded</span>
+    <p>A controlled live census on 2026-09-01 found four identities absent and two present only as superseded history; neither superseded row is a bindable current identity.</p></div>
   <div class="status-card"><strong>Wrong attachments</strong>
     <span class="badge badge-blocked">confirmed</span>
     <p>Iron-core and flux-surface names are attached to different physical objects.</p></div>
@@ -84,14 +84,14 @@ also expose three separate states that must not be collapsed:</p>
 even where the name and path association is otherwise correct. It is a provenance validation step,
 not a request to invent different semantics.</p>
 
-<h2>The six absent Standard Names</h2>
+<h2>The current six-row Standard Name manifest</h2>
 <table>
-  <thead><tr><th>Required identity</th><th>Target DD source</th><th>Why the existing record cannot be reused</th><th>Which side is wrong</th></tr></thead>
+  <thead><tr><th>Required identity</th><th>Target DD source</th><th>Current disposition</th><th>Which side is wrong</th></tr></thead>
   <tbody>
     <tr>
       <td><code>vertical_outline_of_coil_conductor_element</code></td>
       <td><code>pf_active/coil/element/geometry/outline/z</code></td>
-      <td>The graph currently attaches the path to generic <code>vertical_outline</code>. That text
+      <td><strong>Absent on 2026-09-01.</strong> The graph currently attaches the path to generic <code>vertical_outline</code>. That text
       can describe a vertical outline in general, but does not say the points belong to an active
       coil conductor element and does not pair with the object-specific radial identity.</td>
       <td><strong>SN record absent</strong>; existing source attachment is under-specific.</td>
@@ -99,17 +99,15 @@ not a request to invent different semantics.</p>
     <tr>
       <td><code>radial_outline_of_passive_loop</code></td>
       <td><code>pf_passive/loop/element/geometry/outline/r</code></td>
-      <td><code>radial_outline_of_iron_core_segment</code> is attached here, but its description is
-      explicitly an iron-core outline. A passive conducting loop is a different physical object.
-      <code>radial_outline_of_coil_conductor_element</code> is also not a safe substitute because
-      its wording describes a coil conductor element and its only live source is a passive
-      arcs-of-circle radius field, not this outline.</td>
-      <td><strong>SN record absent</strong> and wrong graph source edges are present.</td>
+      <td><strong>Superseded on 2026-09-01.</strong> The historical identity refined toward
+      <code>radial_outline_of_conductor_cross_section</code>; only that successor may be
+      evaluated as the current binding target. The superseded spelling must not receive a source.</td>
+      <td><strong>Current successor exists</strong>; source suitability and lifecycle readiness still require the guarded repair workflow.</td>
     </tr>
     <tr>
       <td><code>vertical_outline_of_passive_loop</code></td>
       <td><code>pf_passive/loop/element/geometry/outline/z</code></td>
-      <td>The generic <code>vertical_outline</code> attachment omits passive-loop identity. Reusing
+      <td><strong>Absent on 2026-09-01.</strong> The generic <code>vertical_outline</code> attachment omits passive-loop identity. Reusing
       it would make the R and Z leaves of the same vector resolve through different semantic
       families and would not distinguish this loop from iron core, active coil or cryostat.</td>
       <td><strong>SN record absent</strong>; existing source attachment is under-specific.</td>
@@ -117,7 +115,7 @@ not a request to invent different semantics.</p>
     <tr>
       <td><code>radial_outline_of_vacuum_vessel</code></td>
       <td><code>wall/description_2d/vessel/unit/element/outline/r</code></td>
-      <td>The vertical sibling exists, is accepted and has a description that correctly says
+      <td><strong>Absent on 2026-09-01.</strong> The vertical sibling exists, is accepted and has a description that correctly says
       vacuum-vessel element. The radial half is absent, so the object-specific R/Z pair is
       incomplete. A generic wall outline is not equivalent to one vessel element's outline.</td>
       <td><strong>SN record absent</strong>; the vertical sibling proves the intended family.</td>
@@ -125,7 +123,7 @@ not a request to invent different semantics.</p>
     <tr>
       <td><code>poloidal_angle_of_poloidal_magnetic_field_probe</code></td>
       <td><code>magnetics/b_field_pol_probe/poloidal_angle</code></td>
-      <td>The live source is attached to <code>poloidal_angle_of_flux_surface</code>. That name and
+      <td><strong>Absent on 2026-09-01.</strong> The live source is attached to <code>poloidal_angle_of_flux_surface</code>. That name and
       description are internally correct for a point around the magnetic axis, but the DD leaf is
       the orientation of a probe's sensitive axis. These are different vectors, origins and uses;
       the mismatch changes the B<sub>R</sub>/B<sub>Z</sub> projection and is physics-significant.</td>
@@ -134,11 +132,10 @@ not a request to invent different semantics.</p>
     <tr>
       <td><code>radial_coordinate_of_toroidal_magnetic_field_probe</code></td>
       <td><code>magnetics/b_field_phi_probe/position/r</code> at DD 4.1.1</td>
-      <td>A generic measurement-position coordinate could carry the units, but not the diagnostic
-      object. A line-of-sight coordinate is definitely wrong because a point probe is not a ray.
-      The DD4 canonical family is <code>b_field_phi_probe</code>; legacy
-      <code>b_field_tor_probe</code> aliases must not be used as the current publication anchor.</td>
-      <td><strong>SN record absent</strong>; current-family DD source must be selected explicitly.</td>
+      <td><strong>Superseded on 2026-09-01.</strong> This row is historical and must not be rebound.
+      No admissible live successor was established by the census, so the current-family DD source
+      remains unbound until the guarded workflow produces or identifies one on merit.</td>
+      <td><strong>Superseded identity, successor unresolved</strong>; current-family DD source must be selected explicitly.</td>
     </tr>
   </tbody>
 </table>

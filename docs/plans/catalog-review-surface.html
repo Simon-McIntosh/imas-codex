@@ -62,8 +62,9 @@
       silently correcting someone's edit is worse than refusing it.
     </p>
     <p>
-      The same discipline has a second half that is not yet built: after a review merges,
-      the fold-back has to carry each edit back into the graph so that an accepted human
+      The same discipline has a second half whose fold-back is built but has not yet been
+      exercised live: after a review merges, the fold-back has to carry each edit back into
+      the graph so that an accepted human
       change is traceable to the reviewer and the pull request that made it, and a change
       that fails the naming grammar is marked contested rather than absorbed. Proving that
       end to end, including that a trial run leaves no lasting change, is the work this
@@ -101,7 +102,7 @@
       <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-crs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship catalog-review-surface" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Exercise the approval fold-back with accepted and refused edits, and prove the unwind</h4>
-    <div class="r-fu-body"><p>The reviewer guidance is written and the metadata guard is being proven against scratch branches. What remains is the approval half: run the fold-back on the fork demonstration pull request with one accepted edit and one edit the pipeline must refuse, show the refusal reaches the reviewer, prove the unwind leaves no lasting change, and confirm an accepted edit is traceable to its author and pull request in the graph.</p></div>
+    <div class="r-fu-body"><p>The reviewer guidance, metadata guard and approval fold-back are built. What remains is the live exercise: run the fold-back on the fork demonstration pull request with one accepted edit and one edit the pipeline must refuse, show the refusal reaches the reviewer, unwind the exercise with no lasting graph or catalog change, and capture a traceability receipt proving the accepted edit records its author and pull request.</p></div>
     <pre class="r-fu-prompt">/reckon-ship catalog-review-surface</pre>
     </article>
     </section>

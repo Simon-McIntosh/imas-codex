@@ -34,29 +34,26 @@
       <p>The old benchmark-v1 plan is consolidated here. A production-faithful frozen corpus first measures critical-defect recall, clean-name false positives, calibration, repeatability and hosted-quorum agreement. Only after locked gates pass may DSv4 run a full zero-mutation advisory census.</p>
     </section>
     <h1>SN Benchmark Evolution Strategy</h1>
-    <p>This HTML migration keeps plan 33 in design / research state. The implementation fraction remains <strong>0.05</strong>: the problem statement, phases, and acceptance criteria are explicit, but the code and benchmark integration work were still queued.</p>
+    <p>The advisory benchmark implementation is <strong>0.97</strong>: the non-persisting production panel adapter, frozen runner, controlled domain-balanced corpus, calibrated gates, request pinning and nondeterminism diagnosis have landed. The sole current gate is <code>f-benchmark-deterministicserving</code>, which requires dedicated two-H200 capacity before the graph-wide advisory census may be authorized. The measured endpoint nondeterminism and the census authority boundary remain in force.</p>
 
     <h2 id="s1">§1 — Why the plan exists</h2>
     <p>The benchmark had converged into a narrow score band and still suffered from single-reviewer bias, sparse and biased anchors, coarse grammar docking, and isolation from the production workflow. Plan 33 exists to make the benchmark discriminate better, mirror production review policy, and become operationally useful.</p>
 
-    <h2 id="s2">§2 — Open phases</h2>
+    <h2 id="s2">§2 — Phase state</h2>
     <table>
       <thead>
         <tr><th>Phase</th><th>Purpose</th><th>Status</th></tr>
       </thead>
       <tbody>
-        <tr><td>Phase A</td><td>Use the production review panel as the benchmark reviewer and surface median / spread / contested rows.</td><td>Open</td></tr>
-        <tr><td>Phase B</td><td>Expand calibration anchors to domain-balanced coverage and automate proposal generation.</td><td>Open</td></tr>
-        <tr><td>Phase C</td><td>Split grammar scoring into sub-dimensions and add semantic-equivalence consensus lift.</td><td>Open</td></tr>
+        <tr><td>Phase A</td><td>The production three-seat panel adapter and frozen advisory runner retain raw judgments and surface median, spread and contested rows.</td><td>Landed</td></tr>
+        <tr><td>Phase B</td><td>The controlled 40-row corpus covers 18 domains with reconstruction provenance, and the two-pass calibration derives all five gates.</td><td>Landed</td></tr>
+        <tr><td>Phase C</td><td>The benchmark scoring and within-batch semantic-equivalence policy are integrated into the frozen, non-persisting benchmark surface.</td><td>Landed</td></tr>
+        <tr><td>Current gate</td><td>Test a controlled deterministic-serving variant before buying 57 repeats or authorizing a zero-mutation census.</td><td><code>f-benchmark-deterministicserving</code></td></tr>
       </tbody>
     </table>
 
-    <h2 id="s3">§3 — Current blockers</h2>
-    <ul>
-      <li><strong>Reviewer bias persists.</strong> Single-model scoring still tilts the benchmark away from real disagreement patterns.</li>
-      <li><strong>Anchor sparsity persists.</strong> Most physics domains remain unrepresented in calibration anchors.</li>
-      <li><strong>Workflow integration is absent.</strong> The benchmark still lacks graph persistence, status visibility, grammar-sync hooks, and the planned regression gate.</li>
-    </ul>
+    <h2 id="s3">§3 — Current gate</h2>
+    <p><code>f-benchmark-deterministicserving</code> is the sole current gate. Equal complete semantic requests still produced a 0.043953 Brier band with 30 of 40 rows moving, so single-run verdicts near the 0.103764 threshold are not authoritative. The dedicated two-H200 experiment must determine whether the serving variance can be collapsed; until then the graph-wide advisory census remains unauthorized.</p>
 
     <h2 id="s4">§4 — Plan 34 dependency</h2>
     <p>Plan 33 directly informs and partially blocks the benchmark-v1 build-out, especially where the eval set wants multi-reviewer consensus, grammar-equivalence scoring, and expanded anchor coverage.</p>
