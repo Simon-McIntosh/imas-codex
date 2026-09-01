@@ -15,7 +15,7 @@ requires = [
     "linkml>=1.9.3",
     "linkml-runtime>=1.9.5",
     "neo4j>=5.28.0,<6.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@1f3d7224549253d492bcd56f21f22628954c735f",
+    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@93195dde4d9d546a6b3e65597b0da39cbf8c7e7d",
 ]
 build-backend = "hatchling.build"
 
@@ -181,7 +181,7 @@ dev = [
     # --- Catalog preview (mkdocs-driven via 'standard-names serve') ---
     "mkdocs>=1.6.1,<2.0.0",
     "mkdocs-material>=9.6.5,<10.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@1f3d7224549253d492bcd56f21f22628954c735f",
+    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@93195dde4d9d546a6b3e65597b0da39cbf8c7e7d",
 ]
 
 [project.urls]
