@@ -597,6 +597,7 @@ class TestApprovalCliTag:
             number=7,
             url="https://github.com/o/r/pull/7",
             merge_commit=merged_repo["merge_commit"],
+            reviewer_actor="catalog-reviewer",
             head_ref=f"review/{merged_repo['rc']}",
             base_ref="main",
         )
@@ -901,6 +902,7 @@ class TestApprovalCliLabelledVersion:
             number=7,
             url="https://github.com/o/r/pull/7",
             merge_commit=repo["merge_commit"],
+            reviewer_actor="catalog-reviewer",
             head_ref=f"review/{repo['rc']}",
             base_ref="main",
         )
