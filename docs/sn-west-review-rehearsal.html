@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="121">
+<meta name="plan-version" content="122">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2532,6 +2532,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260901T075419708195-n-min-safety-factor-adjudication" data-who="test-minq" data-when="2026-09-01T08:08:32Z">
     <div class="r-comment-body"><p>minimum_safety_factor is BOTH: locus_registry.yml:655-658 defines it as a position locus selected by |q|, and the cut publishes it as a signed scalar bound to equilibrium/time_slice/global_quantities/q_min/value (DD q_like, sign-flipping). argmin|-q|=argmin|q| but min(-q)=-max(q), so only the locus is COCOS-invariant. Lead ruled against keeping the ambiguous spelling and against naming the signed value absolute; adopted synthesis puts absolute on the locus</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T101639637796-n-identity-role-rule" data-who="impl-rolegate" data-when="2026-09-01T10:36:12Z">
+    <div class="r-comment-body"><p>Mechanical collision rule live: segment membership read from the installed ISN runtime vocabulary, the four base/carrier duals pass silently, a non-quantity exact match is a non-overridable pre-write failure carrying identity, token, segment and registry file:line; every entry gains generated multi-valued roles (electron_temperature quantity+parent, ion_temperature quantity only). 12 tests exit 0, ruff no new findings</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260827T104434424715-n-preflight-snapshot" data-who="impl-actone" data-when="2026-08-27T10:57:20Z">
     <div class="r-comment-body"><p>Restore point: /home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-d4c6ac3.tar.gz (2.46 GB), census StandardName 4668 / fully-clean 2262 identical pre and post, restore via imas-codex graph load; no mutation</p></div>
