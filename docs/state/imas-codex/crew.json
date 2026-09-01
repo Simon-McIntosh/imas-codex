@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T16:24:11",
+  "updated": "2026-09-01T17:40:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1395,6 +1395,17 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-rescorecontract",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05d9a-9550-7df1-8b73-3e9e3a51673c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d9a-9550-7df1-8b73-3e9e3a51673c"
+        },
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-rescorepilot",
         "harness": "codex",
         "role": "implement",
@@ -2496,6 +2507,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a05d57-5462-7c50-b463-b01776a8a79e"
         },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "test-unsourcedorigin",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-01"
       },
       {
@@ -43516,9 +43536,111 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T153318261328-n-rescorecontractfix",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a76",
+        "node": "n-rescorecontractfix",
+        "node_definition": {
+          "done_when": "a new test fails against the unmodified code and passes after, asserting that a rescored name retains its exact prior identity string and that no REFINED_FROM successor is minted by the rescore path, with the pre-change failure output and post-change pass output both captured to logs, plus a second test asserting that an unaffordable mandatory reviewer seat terminates the scoped run as budget_exhausted rather than repeating a budget-refused deferral, and the targeted rescore and pool suites reported green with exact passed and failed counts",
+          "estimated_hours": 0.7,
+          "goal": "Make sn rescore resubmit the unchanged identity for a fresh quorum draw without entering the refine pool",
+          "id": "n-rescorecontractfix",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T153318261328-n-rescorecontractfix/manifest.md",
+          "plan": "sn-benchmark-evolution",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/standard_names/rescore.py",
+            "imas_codex/standard_names/loop.py",
+            "tests/standard_names/test_rescore_identity_contract.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-rescorecontract",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T15:33:26Z",
+        "completed_at": "2026-09-01T15:40:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 400,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 400,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "537918be4bd8714b27c5ac4160c09d051aa7c734",
+        "commits": [
+          "90444b9eda100a053a56a6fe9595011eb0a77d87"
+        ],
+        "changed_lines": {
+          "added": 155,
+          "removed": 1,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_rescore_identity_contract.py + targeted rescore and pool suites",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T153318261328-n-rescorecontractfix/logs/final-targeted-rescore-pool-suites.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T153318261328-n-rescorecontractfix/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d9a-9550-7df1-8b73-3e9e3a51673c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4875264,
+            "cached_input_tokens_cumulative": 4875264,
+            "input_tokens": 5075436,
+            "input_tokens_cumulative": 5075436,
+            "output_tokens": 12629,
+            "output_tokens_cumulative": 12629,
+            "reasoning_output_tokens": 2851,
+            "reasoning_output_tokens_cumulative": 2851
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1134
+    "_version": 1138
   }
 }
