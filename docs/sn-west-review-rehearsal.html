@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="106">
+<meta name="plan-version" content="107">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2487,6 +2487,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T111318423434-n-upstream-baseline-clear" data-who="impl-upstreambase" data-when="2026-08-27T11:17:52Z">
     <div class="r-comment-body"><p>Upstream ISNC main cleared to a blank additive baseline: catalog commit 37dea1ae removed the 309 legacy nested entries, pushed direct to iterorganization main per lead authorization; legacy content recoverable at the pre-clearance SHA (commit lives in the catalog repo, not this one)</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T053759806585-n-catalog-provenance-slim" data-who="impl-yamlslim" data-when="2026-09-01T05:49:58Z">
+    <div class="r-comment-body"><p>DD bindings reduced to dd_path + dd_version; equilibrium.yml regenerates at 5127 lines versus 12137 (7010 removed, 57.76%), 133.4 to 56.3 lines per entry across 91 entries; non-DD signal bindings keep signal_id and semantic_facet since no path recovers them; accounting unchanged</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260827T104434424715-n-preflight-snapshot" data-who="impl-actone" data-when="2026-08-27T10:57:20Z">
     <div class="r-comment-body"><p>Restore point: /home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-d4c6ac3.tar.gz (2.46 GB), census StandardName 4668 / fully-clean 2262 identical pre and post, restore via imas-codex graph load; no mutation</p></div>
