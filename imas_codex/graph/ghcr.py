@@ -545,6 +545,34 @@ def get_ghcr_owner_and_type(registry: str, token: str) -> tuple[str, str]:
     return owner, api_type
 
 
+def list_package_versions(
+    registry: str,
+    token: str | None = None,
+    pkg_name: str = "imas-codex-graph",
+) -> list[dict]:
+    """Return the registry's package-version records for one exact package."""
+    resolved = resolve_token(token)
+    owner, api_type = get_ghcr_owner_and_type(registry, resolved)
+    path = f"/{api_type}/{owner}/packages/container/{pkg_name}/versions"
+    status, data = github_api_paginated(path, resolved)
+
+    if status == 403:
+        message = ""
+        if data and isinstance(data[0], dict):
+            message = data[0].get("message", "")
+        raise click.ClickException(
+            f"Permission denied listing package versions: {message}{SCOPE_FIX_HINT}"
+        )
+    if status != 200:
+        message = ""
+        if data and isinstance(data[0], dict):
+            message = data[0].get("message", "")
+        raise click.ClickException(
+            f"Failed to query package versions (HTTP {status}): {message}"
+        )
+    return [item for item in data if isinstance(item, dict)]
+
+
 def get_package_version_id(
     owner: str,
     api_type: str,

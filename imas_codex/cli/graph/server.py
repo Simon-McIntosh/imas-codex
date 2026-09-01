@@ -18,6 +18,7 @@ from imas_codex.graph.neo4j_ops import (
     check_database_locks,
     check_stale_neo4j_process,
     get_backup_currency,
+    get_offsite_currency,
     is_neo4j_running,
     neo4j_image,
     secure_data_directory,
@@ -315,7 +316,8 @@ def graph_stop(data_dir: str | None) -> None:
 
 @click.command()
 @click.option("--registry", envvar="IMAS_DATA_REGISTRY", default=None)
-def graph_status(registry: str | None) -> None:
+@click.option("--token", envvar="GHCR_TOKEN", hidden=True)
+def graph_status(registry: str | None, token: str | None) -> None:
     """Show Neo4j graph status with color-coded SLURM resource usage."""
     git_info = get_git_info()
     target_registry = get_registry(git_info, registry)
@@ -370,6 +372,24 @@ def graph_status(registry: str | None) -> None:
         click.echo(
             f"  Behind live data: {currency.age_seconds:.0f} s ({currency.status})"
         )
+
+    try:
+        offsite = get_offsite_currency(target_registry, token)
+    except click.ClickException as exc:
+        click.echo(f"  Newest offsite copy: unavailable ({exc.format_message()})")
+    else:
+        if offsite.offsite_ref is None:
+            click.echo("  Newest offsite copy: none")
+            click.echo("  Offsite behind live data: unavailable (no offsite copy)")
+        else:
+            click.echo(
+                f"  Newest offsite copy: {offsite.offsite_ref}"
+                f" ({offsite.offsite_modified_at.isoformat()})"
+            )
+            click.echo(
+                "  Offsite behind live data: "
+                f"{offsite.age_seconds:.0f} s ({offsite.status})"
+            )
 
     # SLURM job status with color-coded resource usage
     try:
