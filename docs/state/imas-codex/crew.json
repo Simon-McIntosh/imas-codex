@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-27T13:10:38",
+  "updated": "2026-09-01T07:30:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -828,6 +828,15 @@
         "role": "implement",
         "session_id": "01a028c3-afbf-7cf1-be2e-5922a73023cc",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-isnrelease",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-27"
       },
       {
         "id": "impl-isnvocab",
@@ -38841,9 +38850,200 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260827T111446910263-n-isn-upstream-merge",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-isn-upstream-merge",
+        "node_definition": {
+          "done_when": "EXPLICIT LEAD AUTHORIZATION recorded 2026-08-27 to open AND merge this pull request. Operate in the ISN checkout /home/ITER/mcintos/Code/imas-standard-names. Open one pull request from the fork Simon-McIntosh/IMAS-Standard-Names main into iterorganization/IMAS-Standard-Names main, carrying the 452 commits by which the fork leads upstream dca738e0519877cd794be3bc810833855fccbc5b. Its title is a short human phrase naming the change in words and its body is prose of at most six sentences describing what the grammar work delivers and why it is being released as a stable version, with no bulleted or comma-enumerated lists and no problem narration. Wait for upstream checks to reach a conclusion and record every check name with its conclusion; if any check concludes failure, STOP and report the failing check and its log line rather than merging. When all checks conclude success, merge the pull request and record the merge commit SHA and the new upstream main SHA. Evidence in the report: the PR URL and number, the exact title and body, the per-check conclusions, the merge SHA, git ls-remote proving upstream main advanced from dca738e0519877cd794be3bc810833855fccbc5b, and a recursive listing count of the upstream grammar vocabulary directory afterwards. Create no tags in this node. Never close or reopen a pull request to re-trigger CI. Do not touch the catalog repositories or imas-codex; make no graph writes",
+          "estimated_hours": null,
+          "goal": "The ISN grammar work is merged into the upstream ISN repository",
+          "id": "n-isn-upstream-merge",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T111446910263-n-isn-upstream-merge/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/isn-upstream-merge.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-isnrelease",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T11:14:50Z",
+        "completed_at": "2026-08-27T11:19:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 254,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 254,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e4380eb5a6414ebe52ca432d225f996aa16af407",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T111446910263-n-isn-upstream-merge/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a042ee-05a8-7750-a81b-bcbcc429661b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2788096,
+            "cached_input_tokens_cumulative": 2788096,
+            "input_tokens": 2950288,
+            "input_tokens_cumulative": 2950288,
+            "output_tokens": 8670,
+            "output_tokens_cumulative": 8670,
+            "reasoning_output_tokens": 3300,
+            "reasoning_output_tokens_cumulative": 3300
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260827T111318423434-n-upstream-baseline-clear",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-upstream-baseline-clear",
+        "node_definition": {
+          "done_when": "EXPLICIT LEAD AUTHORIZATION recorded 2026-08-27: push DIRECTLY to iterorganization/imas-standard-names-catalog main, which is unprotected, so the WEST batch stays a clean first PR. The lead chose clear-now with git history as the recovery path, having been shown that 41 of the 309 legacy identities exist in the graph and 29 of those carry name_stage accepted plus docs_stage accepted plus validation_status valid. Operate in the catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog. Remove exactly the 309 legacy nested standard_names entry files in ONE commit whose body names the pre-clearance upstream SHA as the recovery point and states that 268 of those identities have no graph counterpart and are recoverable only from history, then push that single commit to upstream main. Evidence recorded in the report: the pre-clearance upstream SHA and the new SHA; a recursive listing of upstream main afterwards returns 0 nested entry files and 0 flat entry files; git show of one legacy path at the pre-clearance SHA prints its content, proving retrievability; the removed-file count equals 309. Touch no workflow files, no fork branch, and nothing in imas-codex; make no graph writes. If any step fails, stop and report without improvising",
+          "estimated_hours": null,
+          "goal": "Upstream main holds no catalog entries",
+          "id": "n-upstream-baseline-clear",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T111318423434-n-upstream-baseline-clear/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/upstream-baseline-clear.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-upstreambase",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-27T11:13:21Z",
+        "completed_at": "2026-08-27T11:17:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 271,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 271,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "e4380eb5a6414ebe52ca432d225f996aa16af407",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "recursive listing of upstream main entry files after push + retrievability check at pre-clearance SHA",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/upstream-baseline-clear.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260827T111318423434-n-upstream-baseline-clear/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a042ec-adc5-72d1-8c5c-3fa29cee2c15",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2021120,
+            "cached_input_tokens_cumulative": 2021120,
+            "input_tokens": 2157959,
+            "input_tokens_cumulative": 2157959,
+            "output_tokens": 10761,
+            "output_tokens_cumulative": 10761,
+            "reasoning_output_tokens": 2658,
+            "reasoning_output_tokens_cumulative": 2658
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1031
+    "_version": 1034
   }
 }

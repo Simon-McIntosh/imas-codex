@@ -16,8 +16,8 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-27">
-<meta name="plan-version" content="104">
+<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-version" content="106">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2399,7 +2399,7 @@ Done-when
     <div class="r-comment-body"><p>On-demand preview rebuild without touching PR state: workflow_dispatch takes a PR number, resolves base/head via API and runs the shared preview build/deploy/comment steps (fork commit 5068a645). Live dispatch 33064614947 succeeded, preview HTTP 200, comment 5437311459 updated in place, diff digest unchanged, and ZERO new closed/reopened timeline events — the cycling hack is retired</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260827T105910666880-n-act-one-approval-loop" data-who="impl-actone" data-when="2026-08-27T11:04:10Z">
-    <div class="r-comment-body"><p>Correct refusal before any mutation: the undo clause requires restoring a prior RC tag, but PR 2&#x27;s RC was cut before RC-tagging-at-cut landed so no such tag exists; backfilling one would be an improvised repair. Resolved by re-cutting a tagged RC first (which the stale-content issue required anyway); 0 edits, 0 merges, 0 graph writes, $0 spend</p></div>
+    <div class="r-comment-body"><p>Correct refusal before any mutation: the undo clause requires restoring a prior RC tag, but PR 2's RC was cut before RC-tagging-at-cut landed so no such tag exists; backfilling one would be an improvised repair. Resolved by re-cutting a tagged RC first (which the stale-content issue required anyway); 0 edits, 0 merges, 0 graph writes, $0 spend</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
@@ -2481,6 +2481,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260827T104439669518-n-upstream-compat-audit" data-who="test-upstreamfit" data-when="2026-08-27T10:55:35Z">
     <div class="r-comment-body"><p>HOLD on the upstream batch PR with a measured reason: 25 identities exist in both upstream's 309 nested files and the flat batch, so the PR would read 307 additions + 25 edits + 284 DELETIONS, not a pure addition. Upstream validate passes while validating 0/332 (pinned loader ignores flat lists); release.yml calls validate.yml which has no workflow_call; catalog.yml skips PR deploy; Pages returns 404 and an external-fork PR cannot push Pages, so artifact fallback is required. Verdict: clear the 309 nested entries in a separate upstream baseline/infrastructure PR, then recut the batch against the blank upstream main</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T111446910263-n-isn-upstream-merge" data-who="impl-isnrelease" data-when="2026-08-27T11:19:04Z">
+    <div class="r-comment-body"><p>ISN upstream PR #19 opened but NOT merged: the fork head lacks 3 upstream-only commits and the merge conflicts; the node correctly refused to merge or push a primary branch under a report-only fence. Needs a reconcile-and-resolve node before the stable v0.8.0 tag</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260827T111318423434-n-upstream-baseline-clear" data-who="impl-upstreambase" data-when="2026-08-27T11:17:52Z">
+    <div class="r-comment-body"><p>Upstream ISNC main cleared to a blank additive baseline: catalog commit 37dea1ae removed the 309 legacy nested entries, pushed direct to iterorganization main per lead authorization; legacy content recoverable at the pre-clearance SHA (commit lives in the catalog repo, not this one)</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260827T104434424715-n-preflight-snapshot" data-who="impl-actone" data-when="2026-08-27T10:57:20Z">
     <div class="r-comment-body"><p>Restore point: /home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-d4c6ac3.tar.gz (2.46 GB), census StandardName 4668 / fully-clean 2262 identical pre and post, restore via imas-codex graph load; no mutation</p></div>
