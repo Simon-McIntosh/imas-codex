@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T12:59:15",
+  "updated": "2026-09-01T13:00:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -40987,9 +40987,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T105259363236-n-review-editable-fields",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-review-editable-fields",
+        "node_definition": {
+          "done_when": "Operational surface: the catalog checkout /home/ITER/mcintos/Code/imas-standard-names-catalog and fork Simon-McIntosh/imas-standard-names-catalog only, never upstream. REVIEWING.md gains a section distinguishing what a reviewer is invited to change from what is machine-owned and must not be edited by hand, written in plain sentences for a physicist rather than pipeline vocabulary. Invited: the standard name itself and its description and documentation prose, because those carry the physics judgement the review exists to capture. Machine-owned and not to be edited: the unit, which is taken from the Data Dictionary and never from an author; the entry kind; the status; every source binding field kind, ref and version; the generated identity roles; and the file's structure and formatting such as entry ordering, blank-line separation and key order. The section says plainly what happens if a machine-owned field is changed anyway, namely that continuous integration flags the pull request and the change is not carried into the graph, and it explains that this protects a reviewer from silently breaking provenance rather than restricting their judgement. Evidence: the added section quoted in full in the report, a grep showing every one of the named protected fields appears in it, and a check that the file still contains no internal pipeline stage names. Commit to fork main with a conventional subject and body; touch no other file; no graph writes",
+          "estimated_hours": null,
+          "goal": "The reviewer guide states which fields a reviewer may change",
+          "id": "n-review-editable-fields",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T105259363236-n-review-editable-fields/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/review-editable-fields.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-reviewfields",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T10:53:07Z",
+        "completed_at": "2026-09-01T10:59:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 373,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 373,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c3a8d2236e4b31b9eba6fe7d2768c7d9560fb399",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "section quoted in full + grep proving every named protected field present + no internal stage names",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/review-editable-fields.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T105259363236-n-review-editable-fields/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a05c99-f0d6-7ed3-893c-6a59c092c0fe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1801728,
+            "cached_input_tokens_cumulative": 1801728,
+            "input_tokens": 1913870,
+            "input_tokens_cumulative": 1913870,
+            "output_tokens": 9412,
+            "output_tokens_cumulative": 9412,
+            "reasoning_output_tokens": 2639,
+            "reasoning_output_tokens_cumulative": 2639
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1078
+    "_version": 1079
   }
 }
