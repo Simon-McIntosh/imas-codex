@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="7">
-<meta name="plan-commits" content="03433bfd,8c850276">
+<meta name="plan-version" content="9">
+<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log">
-<meta name="plan-impl" content="0.33">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -199,6 +199,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2044-retention-landing" data-who="reckon-ship" data-when="2026-09-01T20:44:00Z">
     <div class="r-comment-body">n-offsite-retention landed at commit 8c850276 (merged 890f64f6): graph prune now applies the locked tiered policy. Live dry-run over the 47 imas-codex-graph versions: 25 keep (4 weekly, 3 monthly, 18 release or latest) and 22 delete (10 untagged, 2 test-prefixed, 10 thinned), zero deletions performed; 3 unit tests over a synthetic 47-version census prove release-tagged versions are never selected. Two legacy test tags without the test- prefix (v5.0.0-fix-test, v-direct-test) fall into the weekly tier and will thin out on their own. The one-off live prune is its own node and awaits the lead's go, since it deletes 22 registry versions.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
+    <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T2052-launcher-landing" data-who="reckon-ship" data-when="2026-09-01T20:52:00Z">
+    <div class="r-comment-body">n-graph-launcher-config landed at commit af2f8c3c (merged ef7690ca): graph export now restarts Neo4j in a finally block outside the exception-swallowing Neo4jOperation context, so the 'No compute config in iter_private.yaml' error the restore-point run hit is surfaced; a graph-only graph start submits through graph-location-owned service configuration and a regression fails if the embedding compute section is read. 2 regressions added, 7 focused tests pass, no live Neo4j operation performed. Remaining: scheduled push command (in flight), first real push with wall time and bytes, one-off prune apply, trial restore.</div>
 </div>
 </section>
 </main>

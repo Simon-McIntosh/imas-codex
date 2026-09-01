@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:50:56",
+  "updated": "2026-09-01T22:52:09",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -174,6 +174,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-approvebase",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-archivestamp",
@@ -888,9 +897,11 @@
         "id": "impl-graphlauncher",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05eb8-c21f-7740-8a85-9d837715a3b2",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eb8-c21f-7740-8a85-9d837715a3b2"
+        },
         "created": "2026-09-01"
       },
       {
@@ -47330,9 +47341,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T204546056598-n-graph-launcher-config",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a73",
+        "node": "n-graph-launcher-config",
+        "node_definition": {
+          "done_when": "a regression test reproduces the swallowed-error path and now asserts the named error surfaces, a second test proves graph start's config resolution for a graph-only launch does not read the embedding compute section, focused tests pass with recorded command and exit status, and the live Neo4j service is never restarted by this node",
+          "estimated_hours": null,
+          "goal": "Make the graph-only launch path honest about compute configuration: graph export's automatic restart must surface a missing compute-configuration error instead of swallowing it, and graph start for a graph-only launch must not require embedding compute configuration, as observed by the restore-point run on 2026-09-01",
+          "id": "n-graph-launcher-config",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204546056598-n-graph-launcher-config/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/cli/graph/server.py",
+            "imas_codex/cli/graph/data.py",
+            "tests/cli/test_graph_start_config.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-graphlauncher",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:46:00Z",
+        "completed_at": "2026-09-01T20:51:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 355,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 355,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "5922b6b640d27d945ace06ab91a598110aed89e2",
+        "commits": [
+          "af2f8c3c0e50f08136a6caf801d1dc47d1a8fb3d"
+        ],
+        "changed_lines": {
+          "added": 205,
+          "removed": 13,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/cli/test_graph_start_config.py tests/cli/test_graph_archive_naming.py tests/cli/test_graph_manifest_scope.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204546056598-n-graph-launcher-config/logs/final-focused-tests.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204546056598-n-graph-launcher-config/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eb8-c21f-7740-8a85-9d837715a3b2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3013632,
+            "cached_input_tokens_cumulative": 3013632,
+            "input_tokens": 3171995,
+            "input_tokens_cumulative": 3171995,
+            "output_tokens": 13314,
+            "output_tokens_cumulative": 13314,
+            "reasoning_output_tokens": 4058,
+            "reasoning_output_tokens_cumulative": 4058
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1234
+    "_version": 1237
   }
 }
