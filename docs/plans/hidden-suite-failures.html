@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -150,6 +150,117 @@
       <strong>the outage window was itself a period in which new breakage could land and be
       invisible</strong>, and at least one did. That is a strictly worse property than a stale
       backlog, and it raises the priority of the recurrence guard in &#167;4 above the repairs.
+    </p>
+
+    <h2 id="s2c">&#167;2c &mdash; One commit produced both the damage and the blindness to it</h2>
+    <p>
+      &#167;1 treats the broken import as an accident that happened to a working suite. It was
+      not. <strong>Commit <code>651d2367</code> performed a 34-file documentation migration,
+      wrote the guard that would have verified it, and shipped that guard with the import
+      already broken.</strong> Verified from the commit itself rather than inferred: 60 files
+      changed, <strong>34 renames</strong>, <code>tests/docs/test_documentation_layout.py</code>
+      added with <code>from reckon.resources import TYPE_ROOTS</code> on line 4 of the added
+      file.
+    </p>
+    <p>
+      So the guard <strong>never ran once</strong> &mdash; not degraded over time, dead on
+      arrival &mdash; and because a collection error aborts the tree, <strong>it took the entire
+      suite with it from the same instant</strong>. One commit therefore produced the
+      half-migrated corpus, the check that would have caught it, and the blindness that stopped
+      the check ever reporting. The check&rsquo;s own subject was the thing it failed to see.
+    </p>
+    <p>
+      The corpus damage is measured, from a fresh before-state captured at
+      <code>55db4635</code> by the layout migration now in flight: <strong>214 HTML resources,
+      346 internal links, 299 resolving, 46 missing targets and 1 missing anchor</strong>. The
+      46 is up from 45 at an older revision, so the class is still growing. These are broken
+      links that predate any current migration; they are what a half-completed rename looks like
+      when nothing has validated it for a week.
+    </p>
+
+    <h2 id="s2d">&#167;2d &mdash; The repair fixed the instance, not the class</h2>
+    <p>
+      <strong>Proven by controlled probe, not by reading the code.</strong> A deliberately
+      broken import was written into a collectable test file and the tree run:
+    </p>
+    <pre>EXIT=2
+ERROR tests/docs/test_zzz_tmp_probe_abort.py
+!!! Interrupted: 1 error during collection !!!</pre>
+    <p>
+      The probe was then removed and <code>tests/</code> confirmed clean.
+      <code>pytest.importorskip</code> is file-local &mdash; line 5 of one file &mdash; and
+      <code>addopts</code> carries no <code>--continue-on-collection-errors</code>. So
+      <strong>one undeclared import in any collectable file still silences the whole suite
+      exactly as before</strong>, and today&rsquo;s green is a property of nobody having broken
+      it again yet rather than of anything preventing it. Per-file protection would require
+      predicting which file breaks next, which is a guess rather than a guard. <strong>The guard
+      belongs at the runner.</strong>
+    </p>
+    <p>
+      <strong>Recommendation against the <code>collection-failure-visibility</code> decision,
+      offered rather than locked, because it changes how everyone in this repository runs
+      tests.</strong> Two shapes were proposed; one of them is ruled out by this plan&rsquo;s own
+      argument.
+    </p>
+    <ul>
+      <li><strong><code>--continue-on-collection-errors</code> alone recreates the defect at
+        file granularity.</strong> A bad import would stop zeroing the suite and instead report
+        <code>1 error, 12021 passed</code>. That file&rsquo;s tests still never ran, and nothing
+        loud says so &mdash; the blast radius shrinks from the tree to one file and
+        <em>the signal shrinks with it</em>. &ldquo;1 error&rdquo; in a summary line is precisely
+        the register that was misread for a week.</li>
+      <li><strong>An explicit collection check is NOT the missing half, and asking for one was
+        this plan&rsquo;s own aiming error.</strong> See &#167;2e: it already exists, it has been
+        failing on every push for a week, and nobody read it. A second emitter would duplicate
+        a signal that is already produced and already ignored.</li>
+    </ul>
+
+    <h2 id="s2e">&#167;2e &mdash; The guard exists, it is CI, and it has been red on every push</h2>
+    <p>
+      <strong>Verified independently over 120 workflow runs, because a claim this alarming
+      deserves its own check rather than acceptance.</strong>
+      <code>.github/workflows/test.yml</code> runs
+      <code>uv run pytest --cov=imas_codex --cov-report=xml --cov-report=term-missing
+      --timeout=120</code> &mdash; the bare whole-tree invocation, no path restriction &mdash;
+      on every push to <code>main</code> and every pull request, with no
+      <code>continue-on-error</code>, so a collection error is fatal to the job.
+    </p>
+    <table>
+      <caption>Every run of the test workflow on record, by conclusion</caption>
+      <thead><tr><th>Date</th><th>success</th><th>failure</th><th>cancelled</th></tr></thead>
+      <tbody>
+        <tr><td>2026-08-27</td><td><strong>0</strong></td><td>9</td><td>13</td></tr>
+        <tr><td>2026-09-01</td><td><strong>0</strong></td><td>46</td><td>52</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong>0</strong></td><td>55</td><td>65</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>Zero successes across every run on record.</strong> So exit 2 was not merely
+      visible in principle &mdash; it was a red job on every push for a week, and the outage
+      persisted regardless. <strong>The failure mode is delivery, not detection</strong>, and no
+      pytest flag addresses it. That reframes this plan&rsquo;s recurrence deliverable: the
+      problem was never that nothing said the suite was broken, it is that saying so had no
+      consequence.
+    </p>
+    <p>
+      <strong>And 65 of the 120 runs were destroyed rather than failed.</strong> The workflow
+      sets <code>concurrency: cancel-in-progress: true</code> with group
+      <code>${{ github.workflow }}-${{ github.ref }}</code>, so every push to <code>main</code>
+      cancels the one before it. A cancelled run has <em>no conclusion at all</em> &mdash;
+      neither pass nor fail. With several agent sessions pushing in quick succession, rapid
+      pushing does not delay the signal, it <strong>erases</strong> it. That policy is right for
+      pull requests, where a superseded commit&rsquo;s result is genuinely uninteresting, and
+      wrong for <code>main</code>, where each commit&rsquo;s result is the record.
+    </p>
+    <p>
+      <strong>The consequence gate must judge by delta, not by absolute redness</strong> &mdash;
+      and this plan is its own proof. A gate refusing to promote work while the tree&rsquo;s
+      suite is red would have blocked <em>every</em> node of the session that discovered this
+      problem, including the one that made the redness visible at all. The repository already
+      holds the correct form of this rule for lint (judge your own change by delta against a
+      baseline, since a file may carry findings that are not yours to fix in passing); the same
+      shape applies here. What a promotion must demonstrate is that it added no failure, not
+      that the tree is clean.
     </p>
 
     <h2 id="s3">&#167;3 &mdash; What each cluster needs, and from whom</h2>
