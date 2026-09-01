@@ -883,6 +883,7 @@ def resolve_contested_override(
                 sn.description = approved_description,
                 sn.documentation = approved_documentation,
                 sn.name_stage = 'approved',
+                sn.docs_stage = 'accepted',
                 sn.edit_status = CASE WHEN sn.edit_mode IN ['docs', 'rename']
                                       THEN 'applied' ELSE sn.edit_status END,
                 sn.contested_resolution = $reason,
@@ -1396,6 +1397,7 @@ def mark_catalog_name_approved(
         WHERE sn.name_stage IN ['accepted', 'approved']
           AND sn.docs_stage = 'accepted'
         SET sn.name_stage = 'approved',
+            sn.docs_stage = 'accepted',
             sn.catalog_pr_number = $pr_number,
             sn.catalog_pr_url = $pr_url,
             sn.catalog_merge_commit_sha = $merge_commit,

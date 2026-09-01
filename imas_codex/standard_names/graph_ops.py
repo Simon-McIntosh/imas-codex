@@ -5862,6 +5862,7 @@ def update_review_aggregates(
             """
             UNWIND $ids AS sid
             MATCH (sn:StandardName {id: sid})
+            WHERE NOT (coalesce(sn.name_stage, '') IN $frozen_name_stages)
             OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
             WITH sn, count(r) AS n, avg(r.score) AS mean,
                  CASE WHEN count(r) > 1 THEN max(r.score) - min(r.score) ELSE 0.0 END AS spread
@@ -5872,6 +5873,7 @@ def update_review_aggregates(
             """,
             ids=standard_name_ids,
             threshold=float(threshold),
+            frozen_name_stages=list(_PIPELINE_FROZEN_NAME_STAGES),
         )
         return len(list(rows or []))
 
@@ -13880,6 +13882,8 @@ def update_sn_per_phase_costs(run_id: str) -> int:
 
 DEFAULT_POOL_BATCH_SIZE = 25
 
+_PIPELINE_FROZEN_NAME_STAGES = ("approved", "contested")
+
 # Maximum times a single StandardNameSource may be CLAIMED for name generation
 # before it is treated as un-composable and excluded from further claims and
 # from the pending-count.  Without this cap a source whose batch repeatedly
@@ -13981,7 +13985,12 @@ def _claim_sn_atomic(
     """
     token = str(uuid.uuid4())
     cutoff = f"PT{timeout_seconds}S"
-    params: dict[str, Any] = {**query_params, "token": token, "cutoff": cutoff}
+    params: dict[str, Any] = {
+        **query_params,
+        "token": token,
+        "cutoff": cutoff,
+        "frozen_name_stages": list(_PIPELINE_FROZEN_NAME_STAGES),
+    }
 
     # Build optional SET clause for atomic stage transition.
     stage_set = ""
@@ -14032,6 +14041,8 @@ def _claim_sn_atomic(
                         f"""
                         MATCH (sn:StandardName)
                         WHERE {eligibility_where}
+                          AND NOT (coalesce(sn.name_stage, '')
+                                   IN $frozen_name_stages)
                           AND (sn.claimed_at IS NULL
                                OR sn.claimed_at < datetime()
                                     - duration($cutoff))
@@ -14079,6 +14090,8 @@ def _claim_sn_atomic(
                             f"""
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
+                              AND NOT (coalesce(sn.name_stage, '')
+                                       IN $frozen_name_stages)
                               AND sn.claimed_at IS NULL
                               {scope_where}
                             MATCH (sn)-[:IN_CLUSTER]
@@ -14100,6 +14113,8 @@ def _claim_sn_atomic(
                             f"""
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
+                              AND NOT (coalesce(sn.name_stage, '')
+                                       IN $frozen_name_stages)
                               AND sn.claimed_at IS NULL
                               {scope_where}
                             MATCH (sn)-[:IN_CLUSTER]
@@ -14119,6 +14134,8 @@ def _claim_sn_atomic(
                             f"""
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
+                              AND NOT (coalesce(sn.name_stage, '')
+                                       IN $frozen_name_stages)
                               AND sn.claimed_at IS NULL
                               {scope_where}
                               AND sn.physics_domain = $fallback_domain
@@ -14138,6 +14155,8 @@ def _claim_sn_atomic(
                             f"""
                             MATCH (sn:StandardName)
                             WHERE {eligibility_where}
+                              AND NOT (coalesce(sn.name_stage, '')
+                                       IN $frozen_name_stages)
                               AND sn.claimed_at IS NULL
                               {scope_where}
                               AND sn.physics_domain = $fallback_domain
@@ -14158,6 +14177,9 @@ def _claim_sn_atomic(
                         MATCH (sn:StandardName {{claim_token: $token}})
                         WHERE $drain_scope_id IS NULL
                            OR sn.drain_scope_id = $drain_scope_id
+                        WITH sn
+                        WHERE NOT (coalesce(sn.name_stage, '')
+                                   IN $frozen_name_stages)
                         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
                         OPTIONAL MATCH (sn)-[:IN_CLUSTER]
                             ->(c:IMASSemanticCluster)
@@ -14250,6 +14272,7 @@ def claim_generate_name_batch(
     facility_where = ""
     facility_where_sns2 = ""
     extra_params: dict[str, Any] = {}
+    extra_params["frozen_name_stages"] = list(_PIPELINE_FROZEN_NAME_STAGES)
     if facility:
         facility_where = (
             "AND (sns.source_type = 'dd' OR EXISTS {"
@@ -14321,6 +14344,10 @@ def claim_generate_name_batch(
                         f"""
                         MATCH (sns:StandardNameSource)
                         WHERE sns.status = 'extracted'
+                          AND NOT EXISTS {{
+                            MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
+                            WHERE frozen.name_stage IN $frozen_name_stages
+                          }}
                           AND coalesce(sns.attempt_count, 0) < $max_attempts
                           AND (sns.claimed_at IS NULL
                                OR sns.claimed_at < datetime()
@@ -14334,6 +14361,10 @@ def claim_generate_name_batch(
                         MATCH (sns2:StandardNameSource)
                               -[:FROM_DD_PATH]->(imas2:IMASNode)
                         WHERE sns2.status = 'extracted'
+                          AND NOT EXISTS {{
+                            MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)
+                            WHERE frozen.name_stage IN $frozen_name_stages
+                          }}
                           AND coalesce(sns2.attempt_count, 0) < $max_attempts
                           AND (sns2.claimed_at IS NULL
                                OR sns2.claimed_at < datetime()
@@ -14346,6 +14377,10 @@ def claim_generate_name_batch(
                         REMOVE sns2._claim_lock
                         WITH sns2
                         WHERE sns2.status = 'extracted'
+                          AND NOT EXISTS {{
+                            MATCH (sns2)-[:PRODUCED_NAME]->(frozen:StandardName)
+                            WHERE frozen.name_stage IN $frozen_name_stages
+                          }}
                           AND coalesce(sns2.attempt_count, 0) < $max_attempts
                           AND (sns2.claimed_at IS NULL
                                OR sns2.claimed_at < datetime()
@@ -14402,6 +14437,10 @@ def claim_generate_name_batch(
                             f"""
                             MATCH (sns:StandardNameSource)
                             WHERE sns.status = 'extracted'
+                              AND NOT EXISTS {{
+                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
+                                WHERE frozen.name_stage IN $frozen_name_stages
+                              }}
                               AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND sns.claimed_at IS NULL
                               {facility_where}
@@ -14419,6 +14458,10 @@ def claim_generate_name_batch(
                             REMOVE sns._claim_lock
                             WITH sns
                             WHERE sns.status = 'extracted'
+                              AND NOT EXISTS {{
+                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
+                                WHERE frozen.name_stage IN $frozen_name_stages
+                              }}
                               AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND (sns.claimed_at IS NULL
                                    OR sns.claimed_at < datetime()
@@ -14445,6 +14488,10 @@ def claim_generate_name_batch(
                             f"""
                             MATCH (sns:StandardNameSource)
                             WHERE sns.status = 'extracted'
+                              AND NOT EXISTS {{
+                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
+                                WHERE frozen.name_stage IN $frozen_name_stages
+                              }}
                               AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND sns.claimed_at IS NULL
                               {facility_where}
@@ -14461,6 +14508,10 @@ def claim_generate_name_batch(
                             REMOVE sns._claim_lock
                             WITH sns
                             WHERE sns.status = 'extracted'
+                              AND NOT EXISTS {{
+                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
+                                WHERE frozen.name_stage IN $frozen_name_stages
+                              }}
                               AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND (sns.claimed_at IS NULL
                                    OR sns.claimed_at < datetime()
@@ -14487,6 +14538,10 @@ def claim_generate_name_batch(
                             f"""
                             MATCH (sns:StandardNameSource)
                             WHERE sns.status = 'extracted'
+                              AND NOT EXISTS {{
+                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
+                                WHERE frozen.name_stage IN $frozen_name_stages
+                              }}
                               AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND sns.claimed_at IS NULL
                               AND sns.batch_key = $batch_key
@@ -14498,6 +14553,10 @@ def claim_generate_name_batch(
                             REMOVE sns._claim_lock
                             WITH sns
                             WHERE sns.status = 'extracted'
+                              AND NOT EXISTS {{
+                                MATCH (sns)-[:PRODUCED_NAME]->(frozen:StandardName)
+                                WHERE frozen.name_stage IN $frozen_name_stages
+                              }}
                               AND coalesce(sns.attempt_count, 0) < $max_attempts
                               AND (sns.claimed_at IS NULL
                                    OR sns.claimed_at < datetime()
