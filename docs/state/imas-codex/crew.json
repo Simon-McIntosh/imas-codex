@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T08:58:48",
+  "updated": "2026-09-01T09:16:49",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -39616,9 +39616,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T065751118903-n-sn-identity-classes",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a74",
+        "node": "n-sn-identity-classes",
+        "node_definition": {
+          "done_when": "reports/sn-identity-classes.md answers, read-only, with the producing command or file citation beside every claim: (1) search imas-codex plans, research and evidence records under docs/ and the ISN repository docs and decision records for any RECORDED decision distinguishing measurable standard names from grammar vocabulary terms such as loci (last_closed_flux_surface, magnetic_axis, strike_point) and from structural parent names such as a bare electron_temperature \u2014 quote each decision found with its source file, or state clearly that no such decision exists; (2) classify every identity in the current WEST cohort into measurable standard name, structural parent or abstraction, and vocabulary-like term, giving exact counts and naming at least five examples per class, using live graph state (origin, whether the identity has DD bindings, whether it is a HAS_PARENT parent) with a positive control for every reported zero; (3) determine whether any term defined in the ISN locus registry or other grammar vocabulary file also appears as a published catalog entry in the WEST export, listing every such identity; (4) state how the current export already separates these (the structural_parent exclusion introduced in this campaign withheld 44 identities from the WEST batch) and what it does NOT separate; (5) recommend whether the remaining classes should be published in separate files, marked with an explicit class field, or left as they are, with the argument for and against each option and a clear recommendation. No writes outside the report; no graph mutation",
+          "estimated_hours": null,
+          "goal": "A verdict on whether the catalog mixes standard names with vocabulary terms and structural abstractions",
+          "id": "n-sn-identity-classes",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T065751118903-n-sn-identity-classes/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sn-identity-classes.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-identities",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T06:57:57Z",
+        "completed_at": "2026-09-01T07:15:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1031,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1031,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "caf667fd82f9b9ecbd2f5050e128f69a45786489",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live graph census with positive controls + frozen export accounting + vocabulary join + recorded-decision search",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sn-identity-classes.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T065751118903-n-sn-identity-classes/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05bc2-a675-70a0-9f95-46891bf33b6a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11445504,
+            "cached_input_tokens_cumulative": 11445504,
+            "input_tokens": 11776719,
+            "input_tokens_cumulative": 11776719,
+            "output_tokens": 35030,
+            "output_tokens_cumulative": 35030,
+            "reasoning_output_tokens": 9763,
+            "reasoning_output_tokens_cumulative": 9763
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1050
+    "_version": 1051
   }
 }
