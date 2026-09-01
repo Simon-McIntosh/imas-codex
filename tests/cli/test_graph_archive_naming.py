@@ -56,6 +56,10 @@ def test_default_archive_names_share_revision_and_utc_timestamp(tmp_path, monkey
         lambda: git_info,
     )
     monkeypatch.setattr(
+        "imas_codex.cli.graph.data._measure_dump_scope",
+        lambda _dump: {"nodes": 0, "relationships": 0, "labels": {}},
+    )
+    monkeypatch.setattr(
         "imas_codex.graph.ghcr.get_git_info",
         lambda: git_info,
     )
