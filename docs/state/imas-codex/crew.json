@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T20:06:24",
+  "updated": "2026-09-01T20:13:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -244,6 +244,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-24"
+      },
+      {
+        "id": "impl-backupcurrency",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05e27-6f63-7ff2-a319-a266f961f5b5",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e27-6f63-7ff2-a319-a266f961f5b5"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "impl-barecensus",
@@ -1060,6 +1071,15 @@
         "role": "implement",
         "session_id": "01a02407-7723-79e1-8140-131958616bc9",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-manifestscope",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-massdensity",
@@ -2469,6 +2489,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a05e1e-d200-7233-810d-3d955b436f90"
         },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "test-offsiteinv",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-01"
       },
       {
@@ -45117,9 +45146,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T180710794051-n-backupcurrency",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a73c",
+        "node": "n-backupcurrency",
+        "node_definition": {
+          "done_when": "A helper beside backup_graph_dump reports the newest backup artifact in BACKUPS_DIR, the newest file under the resolved live data directory, and the age between them, distinguishing the no-backup case from a stale one; graph status prints that answer; a new test in tests/core/test_backup_currency.py pins the three cases with synthetic mtimes and is shown failing before the change; tests/core/test_neo4j_ops.py plus the new file report 0 failures with ruff clean on the staged paths",
+          "estimated_hours": null,
+          "goal": "Let a caller ask how far behind the newest restorable backup is and get a measured answer",
+          "id": "n-backupcurrency",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180710794051-n-backupcurrency/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73c",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/graph/neo4j_ops.py",
+            "imas_codex/cli/graph/server.py",
+            "tests/core/test_backup_currency.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-backupcurrency",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T18:07:17Z",
+        "completed_at": "2026-09-01T18:13:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 383,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 383,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "6849f268b59ebf13a97c3b422726a0ab77fdfd5f",
+        "commits": [
+          "c3eaf56dc54ce24499513e773802d6d36833cf50"
+        ],
+        "changed_lines": {
+          "added": 168,
+          "removed": 1,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider tests/core/test_backup_currency.py; pytest -p no:cacheprovider tests/core/test_neo4j_ops.py tests/core/test_backup_currency.py; ruff check",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180710794051-n-backupcurrency/logs/final-tests-after-live-root-fix.log",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T180710794051-n-backupcurrency/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e27-6f63-7ff2-a319-a266f961f5b5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3507456,
+            "cached_input_tokens_cumulative": 3507456,
+            "input_tokens": 3666872,
+            "input_tokens_cumulative": 3666872,
+            "output_tokens": 13360,
+            "output_tokens_cumulative": 13360,
+            "reasoning_output_tokens": 4702,
+            "reasoning_output_tokens_cumulative": 4702
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1175
+    "_version": 1180
   }
 }
