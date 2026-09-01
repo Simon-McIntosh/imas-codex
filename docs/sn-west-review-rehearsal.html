@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="122">
+<meta name="plan-version" content="123">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2418,6 +2418,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T094146165152-n-mint-drop-accounting2" data-who="impl-mintledger" data-when="2026-09-01T09:53:51Z">
     <div class="r-comment-body"><p>Manifest accounting is now total: all 355 WEST sources retained through minting, produced names followed through HAS_SUCCESSOR to their terminal identity, and every source assigned exactly one of emitted, excluded or documented_non_nameable with duplicate and incomplete accounting gated. Live reconciliation closes 355 = 297 emitted + 48 excluded + 10 documented non-nameable; 9 tests exit 0</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T103744910655-n-unpinned-source-version" data-who="impl-pinversion" data-when="2026-09-01T10:53:40Z">
+    <div class="r-comment-body"><p>Not missing pins but wrong bindings: all five unpinned producing sources were derived_parent records targeting DD STRUCTURE or STRUCT_ARRAY containers rather than leaves, so they were retired via retire_ineligible_standard_name_sources with a signed preview manifest plus exact-scope reconcile_orphan_parent_sources (receipt sn-change:ineligible-source-retirement:c48021f2). Producing-unpinned 5 to 0 with controls 9079 DD-prefixed / 8929 pinned / 150 unpinned; the 145 name-less rows untouched. Full reconciliation 355 = 296 emitted + 49 excluded + 10 documented non-nameable</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>

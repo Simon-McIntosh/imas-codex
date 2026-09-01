@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T12:36:23",
+  "updated": "2026-09-01T12:54:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1156,6 +1156,17 @@
         "created": "2026-08-25"
       },
       {
+        "id": "impl-pinversion",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05c8b-fc28-7261-9fc8-62e8d8ffb56a",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05c8b-fc28-7261-9fc8-62e8d8ffb56a"
+        },
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-predicatediff",
         "harness": "codex",
         "role": "implement",
@@ -1354,6 +1365,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-reviewci",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-reviewdoc",
         "harness": "codex",
         "role": "implement",
@@ -1362,6 +1382,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a05b79-caca-79b0-8e1a-14216b9b66fa"
         },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "impl-reviewfields",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-01"
       },
       {
@@ -40847,9 +40876,107 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T103744910655-n-unpinned-source-version",
+        "plan": "sn-west-review-rehearsal",
+        "section": "\u00a73",
+        "node": "n-unpinned-source-version",
+        "node_definition": {
+          "done_when": "Full source-bearing regeneration currently stops because a binding has no version to emit under the kind/ref/version shape; the live graph holds 150 dd-prefixed StandardNameSource rows with a null or empty dd_version against 8929 pinned, and exactly 5 of those 150 produce a name, all name_stage accepted: dd:distributions/distribution/global_quantities/collisions/electrons producing electron_torque_due_to_collisions, dd:distributions/distribution/global_quantities/collisions/ion producing torque_due_to_collisions, dd:spi/injector/shatter_cone producing angle_of_pellet_injector, dd:summary/local producing tritium_velocity, and one further row you must identify and name. First establish WHY each of those five lacks a version, since several look like Data Dictionary structure paths rather than leaves, and say for each whether the correct repair is to pin the version it was extracted under or to treat the binding itself as wrong; a pin is immutable provenance, so never re-stamp a source that already carries one. Apply the repair through sanctioned instruments only, never a hand-written Cypher SET on dd_version where an existing writer or reconcile can do it, and state which instrument you used. Evidence: the count of dd-prefixed sources with a null or empty dd_version that also produce a name falls to 0 with the 8929-row pinned count as positive control, the 145 name-less unpinned rows are reported unchanged with their disposition stated, a full source-bearing export regeneration runs read-only past the point that previously stopped and reports its three-state reconciliation, and graph mutation is proven confined to the repaired rows by before and after counts. Tests captured once to a persistent log with exit status 0; local conventional commit with body if any code changed; no push",
+          "estimated_hours": null,
+          "goal": "Every emitted source binding carries a Data Dictionary version",
+          "id": "n-unpinned-source-version",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T103744910655-n-unpinned-source-version/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/unpinned-source-version.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-pinversion",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T10:37:52Z",
+        "completed_at": "2026-09-01T10:53:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 948,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 948,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c3a8d2236e4b31b9eba6fe7d2768c7d9560fb399",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only full source reconciliation with before/after DD-source controls",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T103744910655-n-unpinned-source-version/manifest.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T103744910655-n-unpinned-source-version/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05c8b-fc28-7261-9fc8-62e8d8ffb56a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10765824,
+            "cached_input_tokens_cumulative": 10765824,
+            "input_tokens": 11094892,
+            "input_tokens_cumulative": 11094892,
+            "output_tokens": 27224,
+            "output_tokens_cumulative": 27224,
+            "reasoning_output_tokens": 6053,
+            "reasoning_output_tokens_cumulative": 6053
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1070
+    "_version": 1075
   }
 }
