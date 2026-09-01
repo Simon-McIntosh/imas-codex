@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -411,6 +411,15 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 <div class="r-dec" data-key="collection-failure-visibility" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">What should make a zero-collection suite impossible to mistake for a passing one?</p>
     <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="layout-check-home" data-choice="move-into-reckon" data-by="Simon McIntosh" data-when="2026-09-01T20:15:38+00:00">
+    <p class="r-dec-q">Where should the typed-layout check live, given it has never run in imas-codex?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="move-into-reckon">Move the check into reckon, where TYPE_ROOTS is a local import and the corpus is reachable through the project mount</button>
+      <button class="r-opt" data-value="declare-dev-dependency">Declare reckon as a dev dependency of imas-codex so the check runs in its own suite</button>
+      <button class="r-opt" data-value="delete-the-check">Delete the check as more honest than a skip</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead 2026-09-01. The check moves to reckon. Grounds measured rather than preferred: in imas-codex reckon is not importable, pyproject.toml names it zero times, and the module skips whole at EXIT=5 with no tests collected - so the guard has never executed once in the repository it guards, and the conditional import made a loud failure silent rather than making the check portable. Reckon already holds both halves the check needs: TYPE_ROOTS is a local import there, and reckon reads imas-codex&#x27;s docs corpus through the registered project mount - not theoretically, since the layout migration&#x27;s own link checker ran across that corpus from reckon this evening. So enforcement becomes real with no declared dependency from an operational repository onto its planning tooling. Rejected alternatives and why: declaring a dev dependency puts enforcement where the files are, but couples imas-codex to a local checkout that is not a published package, so the declaration cannot be expressed portably and fails in every environment lacking that checkout; deleting the check is honest about today&#x27;s zero signal but removes the typed-path invariant entirely, immediately after a 149-file migration that depended on it. The cost accepted is DISTANCE: the check will live one repository away from the corpus it guards, so a contributor working only in imas-codex will not see it fail - which makes it reckon&#x27;s responsibility to surface a violation somewhere a codex reader encounters it, or the same invisibility returns in a new place. Sequencing: the check produces zero signal today, so removing it from imas-codex reduces no enforcement, but it should follow reckon&#x27;s implementation rather than precede it so the invariant is never orphaned in the record as well as in fact.</p>
     </div>
 </section>
 
