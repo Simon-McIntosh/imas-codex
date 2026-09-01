@@ -453,11 +453,39 @@ class BackupCurrency:
     age_seconds: float | None
 
 
+@dataclass(frozen=True, slots=True)
+class OffsiteCurrency:
+    """Measured lag between the newest full registry copy and live graph data."""
+
+    status: Literal["current", "stale", "no_offsite"]
+    offsite_ref: str | None
+    offsite_modified_at: datetime | None
+    live_path: Path | None
+    live_modified_at: datetime | None
+    age_seconds: float | None
+
+
+def _newest_live_file() -> tuple[Path | None, datetime | None]:
+    from imas_codex.graph.profiles import resolve_neo4j
+
+    live_data_dir = resolve_neo4j().data_dir / "data"
+    live_files = (
+        [path for path in live_data_dir.rglob("*") if path.is_file()]
+        if live_data_dir.exists()
+        else []
+    )
+    live_path = max(live_files, key=lambda path: path.stat().st_mtime, default=None)
+    live_modified_at = (
+        datetime.fromtimestamp(live_path.stat().st_mtime, tz=UTC)
+        if live_path is not None
+        else None
+    )
+    return live_path, live_modified_at
+
+
 def get_backup_currency() -> BackupCurrency:
     """Measure how far the newest graph backup is behind the live data directory."""
-    from imas_codex.graph.profiles import BACKUPS_DIR, resolve_neo4j
-
-    profile = resolve_neo4j()
+    from imas_codex.graph.profiles import BACKUPS_DIR
 
     backup_files = (
         [
@@ -468,23 +496,11 @@ def get_backup_currency() -> BackupCurrency:
         if BACKUPS_DIR.exists()
         else []
     )
-    live_data_dir = profile.data_dir / "data"
-    live_files = (
-        [path for path in live_data_dir.rglob("*") if path.is_file()]
-        if live_data_dir.exists()
-        else []
-    )
-
     backup_path = max(backup_files, key=lambda path: path.stat().st_mtime, default=None)
-    live_path = max(live_files, key=lambda path: path.stat().st_mtime, default=None)
+    live_path, live_modified_at = _newest_live_file()
     backup_modified_at = (
         datetime.fromtimestamp(backup_path.stat().st_mtime, tz=UTC)
         if backup_path is not None
-        else None
-    )
-    live_modified_at = (
-        datetime.fromtimestamp(live_path.stat().st_mtime, tz=UTC)
-        if live_path is not None
         else None
     )
 
@@ -507,6 +523,71 @@ def get_backup_currency() -> BackupCurrency:
         status="stale" if age_seconds > 0 else "current",
         backup_path=backup_path,
         backup_modified_at=backup_modified_at,
+        live_path=live_path,
+        live_modified_at=live_modified_at,
+        age_seconds=age_seconds,
+    )
+
+
+def get_offsite_currency(
+    registry: str,
+    token: str | None = None,
+) -> OffsiteCurrency:
+    """Measure full-scope GHCR copy lag against the newest live database file."""
+    from imas_codex.graph.ghcr import list_package_versions
+
+    versions = list_package_versions(
+        registry,
+        token,
+        pkg_name="imas-codex-graph",
+    )
+    live_path, live_modified_at = _newest_live_file()
+
+    timestamped: list[tuple[datetime, dict]] = []
+    for version in versions:
+        created_at = version.get("created_at")
+        if not isinstance(created_at, str):
+            continue
+        try:
+            timestamp = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=UTC)
+        timestamped.append((timestamp.astimezone(UTC), version))
+
+    if not timestamped:
+        return OffsiteCurrency(
+            status="no_offsite",
+            offsite_ref=None,
+            offsite_modified_at=None,
+            live_path=live_path,
+            live_modified_at=live_modified_at,
+            age_seconds=None,
+        )
+
+    offsite_modified_at, newest = max(timestamped, key=lambda item: item[0])
+    tags = newest.get("metadata", {}).get("container", {}).get("tags", [])
+    named_tags = [tag for tag in tags if tag != "latest"]
+    identity = (
+        named_tags[0] if named_tags else (tags[0] if tags else newest.get("name"))
+    )
+    offsite_ref = (
+        f"{registry}/imas-codex-graph:{identity}"
+        if identity and not str(identity).startswith("sha256:")
+        else f"{registry}/imas-codex-graph@{identity}"
+        if identity
+        else None
+    )
+    age_seconds = (
+        max(0.0, (live_modified_at - offsite_modified_at).total_seconds())
+        if live_modified_at is not None
+        else 0.0
+    )
+    return OffsiteCurrency(
+        status="stale" if age_seconds > 0 else "current",
+        offsite_ref=offsite_ref,
+        offsite_modified_at=offsite_modified_at,
         live_path=live_path,
         live_modified_at=live_modified_at,
         age_seconds=age_seconds,

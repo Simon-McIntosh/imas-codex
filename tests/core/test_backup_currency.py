@@ -68,3 +68,69 @@ def test_reports_zero_lag_when_backup_is_newer_than_live_data(tmp_path, monkeypa
     assert result.backup_path == newest_backup
     assert result.live_path == newest_live
     assert result.age_seconds == 0.0
+
+
+def test_offsite_currency_reports_newest_full_registry_copy(tmp_path, monkeypatch):
+    data_dir = tmp_path / "neo4j"
+    live_file = _file_with_mtime(data_dir / "data" / "store", 500.0)
+    _configure_paths(monkeypatch, tmp_path / "backups", data_dir)
+    monkeypatch.setattr(
+        "imas_codex.graph.ghcr.list_package_versions",
+        lambda registry, token, pkg_name: [
+            {
+                "name": "sha256:older",
+                "created_at": "1970-01-01T00:01:40Z",
+                "metadata": {"container": {"tags": ["v5.2.0"]}},
+            },
+            {
+                "name": "sha256:newer",
+                "created_at": "1970-01-01T00:03:20Z",
+                "metadata": {"container": {"tags": ["v5.3.0-rc6", "latest"]}},
+            },
+        ],
+    )
+
+    result = neo4j_ops.get_offsite_currency("ghcr.io/example")
+
+    assert result.status == "stale"
+    assert result.offsite_ref == "ghcr.io/example/imas-codex-graph:v5.3.0-rc6"
+    assert result.live_path == live_file
+    assert result.age_seconds == 300.0
+
+
+def test_offsite_currency_is_current_when_registry_copy_is_newer(tmp_path, monkeypatch):
+    data_dir = tmp_path / "neo4j"
+    _file_with_mtime(data_dir / "data" / "store", 200.0)
+    _configure_paths(monkeypatch, tmp_path / "backups", data_dir)
+    monkeypatch.setattr(
+        "imas_codex.graph.ghcr.list_package_versions",
+        lambda registry, token, pkg_name: [
+            {
+                "name": "sha256:newer",
+                "created_at": "1970-01-01T00:05:00Z",
+                "metadata": {"container": {"tags": ["fresh"]}},
+            }
+        ],
+    )
+
+    result = neo4j_ops.get_offsite_currency("ghcr.io/example")
+
+    assert result.status == "current"
+    assert result.age_seconds == 0.0
+
+
+def test_offsite_currency_reports_no_offsite_copy(tmp_path, monkeypatch):
+    data_dir = tmp_path / "neo4j"
+    live_file = _file_with_mtime(data_dir / "data" / "store", 200.0)
+    _configure_paths(monkeypatch, tmp_path / "backups", data_dir)
+    monkeypatch.setattr(
+        "imas_codex.graph.ghcr.list_package_versions",
+        lambda registry, token, pkg_name: [],
+    )
+
+    result = neo4j_ops.get_offsite_currency("ghcr.io/example")
+
+    assert result.status == "no_offsite"
+    assert result.offsite_ref is None
+    assert result.live_path == live_file
+    assert result.age_seconds is None
