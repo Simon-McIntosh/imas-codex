@@ -5081,6 +5081,7 @@ def sn_approve(
     # The PR's head branch (review/<rc> or release/<version>) names the version
     # tag that certifies this fold-back; captured from --pr resolution.
     resolved_head_ref: str | None = None
+    reviewer_actor: str | None = None
 
     if isnc:
         isnc_path: Path | None = Path(isnc)
@@ -5105,6 +5106,7 @@ def sn_approve(
         pr_number = pr_number or resolved.number
         pr_url = pr_url or resolved.url
         merge_commit = merge_commit or resolved.merge_commit
+        reviewer_actor = resolved.reviewer_actor
         resolved_head_ref = resolved.head_ref
         if base_ref is None:
             base_ref = f"{resolved.merge_commit}^1"
@@ -5194,6 +5196,7 @@ def sn_approve(
         catalog_pr_number=pr_number,
         catalog_pr_url=pr_url,
         catalog_merge_commit_sha=merge_commit,
+        catalog_reviewer_actor=reviewer_actor,
         batch=batch,
     )
 
@@ -5235,18 +5238,6 @@ def sn_approve(
         for b in report.blocked[:10]:
             console.print(f"  - {b.get('sn_id', '?')}: {b.get('reason', '')}")
         raise SystemExit(1)
-
-    # Record the merge commit on the frozen artifact so the batch record
-    # carries its full PR provenance (number, URL, merge commit).
-    if batch_file and merge_commit and not dry_run:
-        from imas_codex.standard_names.catalog_release import backfill_review_artifact
-
-        backfill_review_artifact(
-            Path(batch_file),
-            pr_number=pr_number,
-            pr_url=pr_url,
-            merge_commit=merge_commit,
-        )
 
     # ── Write the fold-back receipt: tag the merge commit ──────────────
     # The tag on the merge commit (contract block + grounded human summary) is
