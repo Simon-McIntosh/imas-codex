@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T16:19:21",
+  "updated": "2026-09-01T16:24:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1128,9 +1128,11 @@
         "id": "impl-ordinaledit",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05d50-2566-7fc2-9646-443c536d038d",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d50-2566-7fc2-9646-443c536d038d"
+        },
         "created": "2026-09-01"
       },
       {
@@ -2489,9 +2491,11 @@
         "id": "test-unsourced",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05d57-5462-7c50-b463-b01776a8a79e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05d57-5462-7c50-b463-b01776a8a79e"
+        },
         "created": "2026-09-01"
       },
       {
@@ -43324,9 +43328,197 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T141201247800-n-strainordinaledit",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712",
+        "node": "n-strainordinaledit",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/strain-ordinal-edit.md names all six current identities and the sn edit invocation issued for each with its mandatory reason, shows a dry run was inspected before any live edit, reports for each whether the pipeline produced a non-ordinal replacement or reported a vocabulary gap, confirms via graph query that no identity was hand-edited by showing each change carries pipeline provenance rather than a direct write, and records the exact USD spent from LLMCost rows attributable to the run against a 12 dollar ceiling",
+          "estimated_hours": 0.6,
+          "goal": "Propose non-ordinal identities for the six strain-gauge measurement-direction names through the sanctioned edit path",
+          "id": "n-strainordinaledit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141201247800-n-strainordinaledit/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/strain-ordinal-edit.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-ordinaledit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:12:08Z",
+        "completed_at": "2026-09-01T14:21:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 570,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 570,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "6b492507f04b67063e6d77945277a830c4c110ec",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "six sn edit --rename dry runs inspected, six live sanctioned invocations, post-run graph verification of identity coverage originals proposed-nodes and LLMCost",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/strain-ordinal-edit.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141201247800-n-strainordinaledit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d50-2566-7fc2-9646-443c536d038d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4712704,
+            "cached_input_tokens_cumulative": 4712704,
+            "input_tokens": 4879848,
+            "input_tokens_cumulative": 4879848,
+            "output_tokens": 14904,
+            "output_tokens_cumulative": 14904,
+            "reasoning_output_tokens": 3444,
+            "reasoning_output_tokens_cumulative": 3444
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T141942505247-n-unsourcedancestry",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712",
+        "node": "n-unsourcedancestry",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/unsourced-ancestry.md executes the four read-only queries preserved in /home/ITER/mcintos/.config/reckon/crew/reports/unsourced-refines.md against the live graph, reports a positive control proving the source relationship and chain_length properties exist rather than evaluating null, restates the population as measured rather than carried from the plan, gives the count whose REFINED_FROM ancestry reaches a sourced predecessor beside the count with no sourced ancestor anywhere summing to the unsourced total, and ends with a one-line verdict of repair or rebuild",
+          "estimated_hours": 0.4,
+          "goal": "Partition the unsourced chain-cap refine products into recoverable mint loss and already-unsourced lineage",
+          "id": "n-unsourcedancestry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141942505247-n-unsourcedancestry/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a712",
+          "spec_level": "exact",
+          "time_budget": "16m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/unsourced-ancestry.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-unsourced",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T14:19:58Z",
+        "completed_at": "2026-09-01T14:23:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 222,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 222,
+        "stalled": false,
+        "time_budget": "16m",
+        "base_sha": "31831128a3c397b1f4fcfa137795110ff3e3ae7f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "four preserved read-only Cypher queries executed unchanged against the live graph with positive control",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/unsourced-ancestry.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T141942505247-n-unsourcedancestry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05d57-5462-7c50-b463-b01776a8a79e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1827072,
+            "cached_input_tokens_cumulative": 1827072,
+            "input_tokens": 1965061,
+            "input_tokens_cumulative": 1965061,
+            "output_tokens": 9677,
+            "output_tokens_cumulative": 9677,
+            "reasoning_output_tokens": 3840,
+            "reasoning_output_tokens_cumulative": 3840
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1130
+    "_version": 1134
   }
 }
