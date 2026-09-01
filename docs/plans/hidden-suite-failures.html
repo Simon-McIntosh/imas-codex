@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="17">
-<meta name="plan-commits" content="37296b5b,9d071bdf,289ed276">
+<meta name="plan-version" content="19">
+<meta name="plan-commits" content="37296b5b,9d071bdf,289ed276,abe01f53">
 <meta name="plan-artifacts" content="crew/reports/suite-triage.md,/home/ITER/mcintos/.config/reckon/crew/reports/s10-reuse-map.md">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
   <main class="plan-doc">
@@ -455,6 +455,12 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T202010483788-n-suite-triage-29" data-who="test-suitetriage" data-when="2026-09-01T20:27:01Z">
     <div class="r-comment-body"><p>29 of 29 classified: 28 environmental (missing test extra), 1 wrong-premise (graph-marker credential test); fresh run 162 passed / 1 failed / 6 skipped in 64.87 s with torch 2.10.0+cpu provisioned</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260901T203025855867-n-graph-marker-premise" data-who="impl-markerpremise" data-when="2026-09-01T20:39:14Z">
+    <div class="r-comment-body"><p>credential probe overridden inside the subprocess conftest so the credentialless branch is deterministic; 1/1 with live graph reachable, 1/1 with every NEO4J variable cleared, module 3/3; assertion still pins the missing-credential message</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260901T2040-marker-landing" data-who="reckon-ship" data-when="2026-09-01T20:40:00Z">
+    <div class="r-comment-body">n-graph-marker-premise landed at commit abe01f53 (merged fd47a951): the subprocess conftest overrides the credential probe so the credentialless branch no longer depends on ambient profiles or the project .env; the earlier NEO4J_PASSWORD=DEFAULT_PASSWORD premise was ineffective because environment loading supplied the live credential. Passed 1/1 with the live graph reachable and 1/1 with every NEO4J variable cleared, module 3/3. All 29 remaining census rows are now closed: 28 environmental, 1 wrong-premise repaired. Remaining node: the closing full-suite figure.</div>
 </div>
 </section>
 </main>
