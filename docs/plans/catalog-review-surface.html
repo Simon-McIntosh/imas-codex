@@ -86,6 +86,45 @@
         which pull request carried it.</li>
     </ul>
 
+
+    <h2 id="s4a">§4a — Measured starting state, 2026-09-01</h2>
+    <p>
+      A currency audit against the two repositories before dispatch found the first two
+      deliverables already landed, so the work that remains is narrower than the plan
+      body above implies. Recorded here because a worker must not re-derive it.
+    </p>
+    <p>
+      The catalog fork is <code>~/Code/imas-standard-names-catalog</code>
+      (<code>origin</code> Simon-McIntosh, <code>upstream</code> iterorganization).
+      The reviewer guide states the editable-versus-machine-owned distinction at commit
+      <code>e9d3044</code>; the guard job lives in
+      <code>.github/workflows/catalog.yml</code> at commit <code>dd70ba6</code>.
+      <strong>The guard is proven live in both directions:</strong> fork pull request 4
+      edits the machine-owned <code>unit</code> and its <code>review-edit-guard</code>
+      check <strong>fails</strong>, while pull request 5 carries only a description
+      clarification and the same check <strong>passes</strong>. Both ran on
+      2026-09-01 and both branches were left unrewritten, which is the locked
+      <em>report-never-rewrite</em> posture behaving as specified.
+    </p>
+    <p>
+      <strong>What is therefore still owed is deliverables three, four and five only</strong> —
+      the approval fold-back exercised with an accepted edit and a pipeline-refused edit
+      whose refusal reaches the reviewer, evidence the exercise unwinds leaving no lasting
+      graph or catalog change, and a traceability receipt showing an accepted edit records
+      its author and the pull request that carried it.
+    </p>
+    <p>
+      One measurement bounds that last item and must be accounted for rather than
+      rediscovered: a controlled census over 4,666 <code>StandardName</code> rows found
+      <code>catalog_approved_at</code>, <code>catalog_pr_number</code>,
+      <code>catalog_merge_commit_sha</code> and <code>exported_at</code>
+      <strong>all zero</strong>. No run has ever written the traceability fields, so the
+      receipt cannot be assumed to fall out of an existing working path — which code path
+      is supposed to write them, and whether it does, is part of the work.
+      Fork pull request 3 (<code>review/v0.3.0rc1+west-task-2e</code>) is open and is the
+      candidate demonstration branch.
+    </p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
       <h2><span class="sec">§</span> Decisions</h2>
       <div class="r-dec" data-key="guard-posture" data-choice="report-never-rewrite" data-by="Simon McIntosh" data-when="2026-09-01T10:50:00+00:00">
