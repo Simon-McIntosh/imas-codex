@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="signed-repair-snapshot-cost">
+  <meta name="plan-title"     content="Signed Repair Collateral Snapshot Cost">
+  <meta name="plan-summary"   content="The collateral snapshot every signed repair takes is graph-wide, so it costs more than the repairs it protects and arguably measures the wrong thing">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="medium">
+  <meta name="plan-effort-hours" content="3.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S12">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Signed Repair Collateral Snapshot Cost | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why this is its own plan</h2>
+    <p>
+      Every signed repair takes a collateral snapshot before it acts and another
+      after, so that anything it changed outside its declared scope is detectable.
+      That guard is the reason signed repairs are trusted, and it is not in question
+      here. What is in question is its cost and its aim.
+    </p>
+    <p>
+      <code>signed_manifest._collateral_snapshot</code> matches every node carrying
+      any tracked label and every relationship of any tracked type, returns a full
+      <code>properties()</code> map for each, ships those maps over bolt, and hashes
+      them client-side — then does it again for the after-snapshot. Against the
+      current graph that is tens of thousands of rows with complete property payloads,
+      twice per apply. It drove a twelve-row repair past a five-minute boundary twice
+      before the repair completed. The guard costs more than the work it guards, and
+      the ratio gets worse as the graph grows, which means every future signed repair
+      inherits a tax that nobody chose.
+    </p>
+    <p>
+      This surfaced while applying an unrelated repair and was deliberately left
+      outside that repair's fence rather than fixed in passing. It is shared
+      repair-authority machinery that every future signed repair depends on, so it
+      needs its own scope, its own before-and-after timing measurement, and its guard
+      tests left intact. It was tracked as a follow-up on the embedding coverage gate,
+      which is the plan that happened to surface it and has since closed with nothing
+      else outstanding; a pointer on a finished plan is invisible to the pending-work
+      view, so it moves here.
+    </p>
+
+    <h2 id="s2">§2 — Two candidate fixes, both needing measurement</h2>
+    <p>
+      Two shapes of fix are visible. Neither should be adopted on reasoning alone,
+      because the argument for each rests on a cost model that has not been measured.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Approach</th><th>What changes</th><th>What has to be shown</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Digest server-side</td>
+          <td>The hash is computed in Cypher so full property maps never cross the
+            wire; only a digest returns.</td>
+          <td>That the server-side digest is stable across driver versions and
+            property orderings, and that the wire saving is where the time actually
+            went rather than in the match itself.</td>
+        </tr>
+        <tr>
+          <td>Narrow the snapshot</td>
+          <td>The snapshot covers only the dimensions the operation actually owns,
+            instead of every tracked label and relationship type.</td>
+          <td>That narrowing does not blind the guard to a real collateral change,
+            and that the owned dimensions can be derived from the operation rather
+            than hand-declared per repair.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The second has precedent worth reading before choosing. The relocation and
+      retirement apply proved collateral on external non-cohort <code>HAS_PARENT</code>
+      edges alone, 1,411 rows, and argued in its own plan that a digest covering an
+      axis another session is concurrently writing measures <em>their</em> work rather
+      than the repair's. On that argument a graph-wide snapshot is not merely slow but
+      actively wrong: it can fail a clean repair because a peer wrote elsewhere, and
+      a guard that fires on other people's work is one operators learn to override.
+    </p>
+
+    <h2 id="s3">§3 — Deliverables</h2>
+    <ul>
+      <li>A before-and-after timing measurement of a representative signed repair,
+        so the improvement is a number rather than an expectation.</li>
+      <li>A chosen approach with the measurement that decided it, including what the
+        rejected approach would have cost.</li>
+      <li>The existing collateral guard tests passing unchanged, plus a test proving
+        the narrowed or re-implemented snapshot still detects a genuine out-of-scope
+        change.</li>
+      <li>Evidence on the concurrency question: whether the snapshot, as changed, can
+        still be failed by a peer session writing an unrelated axis.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="snapshot-approach" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Does the collateral snapshot get cheaper by digesting server-side, or by covering only the dimensions the operation owns?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="server-side-digest">Digest in Cypher so property maps never cross the wire</button>
+          <button class="r-opt" data-value="narrow-to-owned">Cover only the dimensions the operation owns</button>
+          <button class="r-opt" data-value="both">Both, if the measurement shows each carries a distinct share of the cost</button>
+          </p>
+        <p class="r-dec-rat">Open. The measurement in §3 decides it; the concurrency argument in §2 is a reason to prefer narrowing if the two are close on cost, because narrowing also stops a peer's unrelated write from failing a clean repair.</p>
+        </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-srsc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship signed-repair-snapshot-cost" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the snapshot cost, then choose between digesting server-side and narrowing to owned dimensions</h4>
+    <div class="r-fu-body"><p>Time a representative signed repair as it stands, so the baseline is a number. Then implement whichever approach the measurement favours and time it again on the same repair. Keep the existing collateral guard tests passing and add one proving the changed snapshot still catches a genuine out-of-scope write. Answer the concurrency question explicitly: can a peer session writing an unrelated axis still fail a clean repair?</p></div>
+    <pre class="r-fu-prompt">/reckon-ship signed-repair-snapshot-cost</pre>
+    </article>
+    </section>
+  </main>
+</body>
+</html>
