@@ -520,6 +520,42 @@
   term, which is why this was counted by inspection rather than by pattern.
 </p>
 
+<h2 id="s12a">&#167;12a &mdash; The six live ungrounded names are attachable, not disposable</h2>
+<p>
+  <strong>Lead direction 2026-09-01: the DD paths exist, find them and reconnect.</strong>
+  Confirmed on the hardest case before dispatch rather than assumed:
+  <code>electron_temperature_at_separatrix</code> (unit <code>eV</code>) matches
+  <code>summary/local/separatrix_average/t_e/value</code>, unit <code>eV</code> &mdash; an
+  exact unit match. So these are attachment candidates, and the earlier framing that they
+  were either retired or left ungrounded was too narrow.
+</p>
+<p>
+  <strong>Unit equality is the hard discriminator.</strong> A candidate whose unit differs
+  from the standard name's is not a match, however close the wording, because the unit is
+  DD-authoritative and injected post-LLM &mdash; the same property that exposed
+  <code>toroidal_angle_of_secondary_x_point</code> asserting an angle while carrying
+  <code>m</code>. Unit agreement is necessary, not sufficient: the separatrix case shows why.
+  The DD quantity is a flux-surface <em>average</em> while the name says only
+  <em>at separatrix</em>, so the aggregation is unstated. Each attachment must therefore
+  report its semantic delta rather than attach silently, and a name whose physics does not
+  match its candidate is a rename question, not a binding question.
+</p>
+<p>
+  <strong>Attachment is a semantic retarget and must travel the governed path.</strong>
+  Choosing a source changes what a name means, so it goes through the sanctioned operator
+  with a recorded reason &mdash; never a raw Cypher <code>MERGE</code>. Five of the six are
+  in scope for attachment.
+</p>
+<p>
+  <strong>The sixth is out of scope and is a naming defect, not a binding one.</strong>
+  <code>first_local_tangential_back_surface_radius_of_optical_element</code> names an
+  <em>ordinal index</em>, which the naming rule bans outright &mdash; ordered sample
+  positions never enter identity. It is also the only one of the six whose documentation is
+  <code>reviewed</code> rather than <code>accepted</code>, so it is the weakest of the set on
+  two independent grounds. Attaching a source to it would ground a name that should not
+  exist in that form; it routes to regeneration through the sanctioned edit path instead.
+</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="unreviewed-in-first-release" data-choice="include-structural-only" data-by="Simon McIntosh" data-when="2026-08-23T08:42:13+00:00">
