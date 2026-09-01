@@ -7,7 +7,9 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
-from imas_codex.standard_names.export import run_export
+import yaml
+
+from imas_codex.standard_names.export import _entry_model, run_export
 
 
 class _ReadOnlyGraphClient:
@@ -46,6 +48,9 @@ def _run_fixture_export(
     population: list[dict],
     *,
     validate_entries: bool = False,
+    include_sources: bool = False,
+    source_bindings: list[dict] | None = None,
+    write_domain_yaml: bool = False,
 ):
     with ExitStack() as stack:
         stack.enter_context(
@@ -79,14 +84,22 @@ def _run_fixture_export(
                 return_value=([], set()),
             )
         )
-        stack.enter_context(
-            patch("imas_codex.standard_names.export._write_domain_yaml")
-        )
+        if source_bindings is not None:
+            stack.enter_context(
+                patch(
+                    "imas_codex.standard_names.export._fetch_sources_for_entry",
+                    return_value=source_bindings,
+                )
+            )
+        if not write_domain_yaml:
+            stack.enter_context(
+                patch("imas_codex.standard_names.export._write_domain_yaml")
+            )
         return run_export(
             staging_dir,
             skip_gate=True,
             force=True,
-            include_sources=False,
+            include_sources=include_sources,
         )
 
 
@@ -120,6 +133,75 @@ def test_export_ledger_closes_over_fixture_population(tmp_path: Path) -> None:
     assert rows["invalid_validation_status"]["identities"] == ["invalid_name"]
     assert rows["unreviewed_name"]["identities"] == ["unreviewed_name"]
     assert report.exported_count + sum(row["count"] for row in rows.values()) == 4
+
+
+def test_export_emits_only_pinned_dd_reference_and_preserves_accounting(
+    tmp_path: Path,
+) -> None:
+    population = [
+        _candidate("emitted_name", physics_domain="equilibrium"),
+        _candidate("invalid_name", validation_status="quarantined"),
+    ]
+    copied_dd_content = {
+        "dd_path": "equilibrium/time_slice/profiles_1d/psi",
+        "dd_version": "4.1.0",
+        "dd_documentation_url": "https://example.invalid/dd/psi",
+        "dd_documentation": {
+            "leaf": "Poloidal magnetic flux.",
+            "parent_path": "equilibrium/time_slice/profiles_1d",
+            "parent": "One-dimensional equilibrium profiles.",
+            "data_type": "FLT_1D",
+            "unit": "Wb",
+            "coordinates": ["equilibrium/time_slice/profiles_1d/rho_tor_norm"],
+        },
+        "enhanced_context": {
+            "description": "Generated explanatory context.",
+            "kind": "llm",
+        },
+        "semantic_facet": "reconstructed",
+    }
+
+    report = _run_fixture_export(
+        tmp_path,
+        population,
+        validate_entries=True,
+        include_sources=True,
+        source_bindings=[
+            copied_dd_content,
+            {
+                "signal_id": "west:magnetics/ip",
+                "semantic_facet": "measured",
+            },
+        ],
+        write_domain_yaml=True,
+    )
+
+    emitted = yaml.safe_load(
+        (tmp_path / "standard_names" / "equilibrium.yml").read_text(encoding="utf-8")
+    )[0]
+    assert emitted["sources"] == [
+        {
+            "dd_path": "equilibrium/time_slice/profiles_1d/psi",
+            "dd_version": "4.1.0",
+        },
+        {
+            "signal_id": "west:magnetics/ip",
+            "semantic_facet": "measured",
+        },
+    ]
+    assert set(emitted["sources"][0]) == {"dd_path", "dd_version"}
+
+    strict_projection = {
+        key: value
+        for key, value in emitted.items()
+        if key not in {"physics_domain", "sources"}
+    }
+    assert _entry_model(strict_projection).name == "emitted_name"
+
+    rows = {row.reason: row for row in report.exclusion_records}
+    assert report.exported_count == 1
+    assert rows["invalid_validation_status"].standard_name_id == "invalid_name"
+    assert report.exported_count + len(report.exclusion_records) == len(population)
 
 
 def test_export_refuses_when_ledger_does_not_close(tmp_path: Path) -> None:
