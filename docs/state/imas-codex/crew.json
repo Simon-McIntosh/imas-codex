@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T19:17:57",
+  "updated": "2026-09-01T19:21:51",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1347,6 +1347,26 @@
         "role": "implement",
         "session_id": "01a0379c-5682-7fc0-9e32-1fe8f9576f91",
         "created": "2026-08-25"
+      },
+      {
+        "id": "impl-realbackup",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05dfb-25b3-7e62-8f8c-5b67a0733f0c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05dfb-25b3-7e62-8f8c-5b67a0733f0c"
+        },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "impl-receiptrestore",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-recompare",
@@ -44256,9 +44276,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T171848143089-n-realbackup",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a72",
+        "node": "n-realbackup",
+        "node_definition": {
+          "done_when": "both call sites at cli/graph/data.py pre-load and cli/graph/registry.py pre-pull invoke the real dump rather than the marker writer, the marker-only function is renamed to state that it writes a marker with every reference updated, a test fails against the unmodified code and passes after asserting that a destructive command ABORTS when the dump cannot be produced rather than proceeding, a second test asserts a successful path leaves a real artifact whose size is greater than zero rather than a zero-byte marker, and the targeted graph CLI and neo4j-ops suites are reported green with exact passed and failed counts",
+          "estimated_hours": 0.7,
+          "goal": "Make the two destructive graph commands take a real recoverable dump or abort",
+          "id": "n-realbackup",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T171848143089-n-realbackup/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/graph/neo4j_ops.py",
+            "imas_codex/cli/graph/data.py",
+            "imas_codex/cli/graph/registry.py",
+            "tests/cli/test_graph_destructive_backup.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-realbackup",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T17:18:54Z",
+        "completed_at": "2026-09-01T17:20:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 107,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 107,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "3421f8ec3892c5a4c24748581772214eb5894b50",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "not-run",
+        "gate_check": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T171848143089-n-realbackup/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05dfb-25b3-7e62-8f8c-5b67a0733f0c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 856320,
+            "cached_input_tokens_cumulative": 856320,
+            "input_tokens": 961313,
+            "input_tokens_cumulative": 961313,
+            "output_tokens": 3610,
+            "output_tokens_cumulative": 3610,
+            "reasoning_output_tokens": 985,
+            "reasoning_output_tokens_cumulative": 985
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1155
+    "_version": 1159
   }
 }

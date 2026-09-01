@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-commits" content="68e79fb2">
 <meta name="plan-artifacts" content="docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py">
 <meta name="plan-impl" content="0.25">
@@ -235,6 +235,9 @@
 </div>
 <div class="r-comment" data-section="§2" data-id="c-20260901T1715-backuplocked" data-who="reckon-ship" data-when="2026-09-01T17:15:00+00:00">
     <div class="r-comment-body">backup-failure-posture is now locked, and the context that decided it is worth keeping because it inverted the question. The coordinator had offered abort-versus-proceed while stating it could not size the blast radius. Enumerating the callers answered that and dissolved the framing: there are TWO, both destructive - pre-load and pre-pull - so nothing routine is affected, and BACKUP_GRAPH_DUMP ALREADY EXISTS UNUSED IN THE SAME FILE. So the real finding is not that failure handling is wrong but that two destructive commands call a marker-writer while a genuine neo4j-admin dump sits immediately below it. The name is the defect: the docstring says 'Create a marker for pre-operation recovery (lightweight)' and the function honestly touches a zero-byte marker - it is the NAME backup_existing_data that promises recovery, which is precisely why the defect survived, since reading the function would have revealed it and no caller needed to. This also closes a coordinator error recorded above: an earlier version of the sibling comment asserted this decision was already locked when it had never been put to the lead.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260901T171848143089-n-realbackup" data-who="impl-realbackup" data-when="2026-09-01T17:20:41Z">
+    <div class="r-comment-body"><p>COORDINATOR SCOPING ERROR, no work lost: the node was fenced to three source files plus a new test, but renaming backup_existing_data requires updating tests/core/test_neo4j_ops.py which imports and calls the old name. The worker stopped at its fence with a complete NEEDS-HELP brief and wrote nothing. Its leaning was correct - extend scope for one atomic rename - and it correctly self-rejected a compatibility alias as deviating from this repo&#x27;s no-alias rule. Second instance today of the same coordinator error: changing a name without scoping the tests that reference it. Re-dispatched to the same member with the reference test in scope</p></div>
 </div>
 </section>
 </main>
