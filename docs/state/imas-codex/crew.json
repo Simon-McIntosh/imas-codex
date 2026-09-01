@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T00:44:38",
+  "updated": "2026-09-02T01:07:46",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -693,6 +693,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-dryrun",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05f26-6b9d-7343-8043-6e9046c757ec",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05f26-6b9d-7343-8043-6e9046c757ec"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "impl-dualapplyrun",
@@ -48716,9 +48727,113 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T224541761007-n-sn-run-dry-run-is-dry",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-sn-run-dry-run-is-dry",
+        "node_definition": {
+          "done_when": "a focused test with a mocked graph client and a spy LLM entry point runs the dry-run path and asserts zero write queries, zero claims, zero LLM calls and a printed plan; the existing sn run CLI tests pass; a recorded live 'imas-codex sn run --dry-run' from this worktree completes with exit 0 and a Cypher census before and after proving StandardName and StandardNameSource counts and claimed_at counts are unchanged",
+          "estimated_hours": null,
+          "goal": "Make 'imas-codex sn run --dry-run' actually dry: it previews the extraction and pool plan without seeding StandardNameSource nodes, claiming, calling any LLM, spending, or writing graph state, as its own help text promises",
+          "id": "n-sn-run-dry-run-is-dry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T224541761007-n-sn-run-dry-run-is-dry/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/cli/sn.py",
+            "imas_codex/standard_names/loop.py",
+            "imas_codex/standard_names/pool_adapter.py",
+            "tests/standard_names/test_sn_run_dry_run.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-dryrun",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T22:45:48Z",
+        "completed_at": "2026-09-01T23:07:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1288,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1288,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "548176ffc47303d396ad1d36963c714c1ebead1b",
+        "commits": [
+          "80c661617bd8c5f1cbb03bc379c12e4945711dd9"
+        ],
+        "changed_lines": {
+          "added": 328,
+          "removed": 48,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_run_dry_run.py <cli routing subset>; imas-codex sn run --dry-run with Cypher census before and after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T224541761007-n-sn-run-dry-run-is-dry/after-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T224541761007-n-sn-run-dry-run-is-dry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05f26-6b9d-7343-8043-6e9046c757ec",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10877696,
+            "cached_input_tokens_cumulative": 10877696,
+            "input_tokens": 11123891,
+            "input_tokens_cumulative": 11123891,
+            "output_tokens": 20974,
+            "output_tokens_cumulative": 20974,
+            "reasoning_output_tokens": 5225,
+            "reasoning_output_tokens_cumulative": 5225
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1258
+    "_version": 1261
   }
 }
