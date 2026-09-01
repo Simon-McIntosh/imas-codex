@@ -15,7 +15,7 @@ requires = [
     "linkml>=1.9.3",
     "linkml-runtime>=1.9.5",
     "neo4j>=5.28.0,<6.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@93195dde4d9d546a6b3e65597b0da39cbf8c7e7d",
+    "imas-standard-names==0.8.0",
 ]
 build-backend = "hatchling.build"
 
@@ -138,7 +138,7 @@ dev = [
     # --- Interactive dev ---
     "ipython>=9.2.0",
     "ipykernel>=6.29.5",
-    # --- Standard Names catalog (install manually: uv pip install -e ../imas-standard-names) ---
+    # --- Standard Names catalog tooling ---
     # --- LLM & Discovery ---
     "litellm>=1.83.10",         # CVE-2026-40217, CVE-2026-42271, CVE-2026-42203, CVE-2026-35030, CVE-2026-35029
     # --- Graph build & schema ---
@@ -181,7 +181,7 @@ dev = [
     # --- Catalog preview (mkdocs-driven via 'standard-names serve') ---
     "mkdocs>=1.6.1,<2.0.0",
     "mkdocs-material>=9.6.5,<10.0.0",
-    "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@93195dde4d9d546a6b3e65597b0da39cbf8c7e7d",
+    "imas-standard-names==0.8.0",
 ]
 
 [project.urls]
