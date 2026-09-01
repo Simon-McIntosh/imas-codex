@@ -138,6 +138,22 @@
         documented procedure are the same procedure.</li>
       <li>A regression proving a destructive command aimed at a scratch target cannot
         touch the live directory, failing against the current code.</li>
+      <li>An archive naming contract carrying the code revision and a UTC timestamp, so
+        no filename asserts a property that decays. The 2026-09-01 dump landed as
+        <code>codex-current-20260901T125005Z.tar.gz</code> while its own internal
+        manifest already recorded <code>git_commit 6fc745cf</code>, version
+        <code>5.3.0rc7.dev2213</code> and its timestamp, and its inner directory already
+        followed the established <code>imas-codex-graph-dev-&lt;sha&gt;</code>
+        convention &mdash; so the producer discarded identity it was holding and stamped a
+        mutable claim in its place. <strong>&ldquo;Current&rdquo; is not a name, it is a
+        computed comparison</strong> between archive and live modification times, which is
+        the check above; a filename that asserts it will be wrong within days and cannot be
+        corrected without breaking every receipt that cites the path. Note the existing
+        <code>exports/</code> convention omits a timestamp, so two dumps at one revision
+        collide &mdash; the contract must carry both.</li>
+      <li>Node and label counts recorded in the archive manifest, so a backup can state
+        what it contains without a trial restore. The current manifest carries the code
+        revision and format only, which identifies compatibility but not scope.</li>
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
