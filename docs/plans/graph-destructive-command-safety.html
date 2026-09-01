@@ -151,6 +151,14 @@
         corrected without breaking every receipt that cites the path. Note the existing
         <code>exports/</code> convention omits a timestamp, so two dumps at one revision
         collide &mdash; the contract must carry both.</li>
+      <li>An offsite currency figure, measured rather than assumed. Every local restore
+        point shares one GPFS filesystem, so a filesystem loss is bounded by the newest
+        <em>offsite</em> copy, not the newest local one. The local graph manifest records
+        its last push as <code>5.3.0rc6.dev91-g2479801d7.d20260706-r1</code>, indicating
+        roughly two months of exposure &mdash; but that is the local record of what was
+        pushed, not a registry query, so the first task is to confirm it against the
+        registry and only then decide whether release-pinned offsite copies are an
+        adequate floor.</li>
       <li>Node and label counts recorded in the archive manifest, so a backup can state
         what it contains without a trial restore. The current manifest carries the code
         revision and format only, which identifies compatibility but not scope.</li>
