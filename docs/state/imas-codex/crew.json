@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T10:24:43",
+  "updated": "2026-09-01T11:22:58",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -992,6 +992,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-minqvocab",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-mintledger",
         "harness": "codex",
         "role": "implement",
@@ -1344,6 +1353,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a05b79-caca-79b0-8e1a-14216b9b66fa"
         },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "impl-rolegate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-01"
       },
       {
@@ -40388,6 +40406,6 @@
       }
     ],
     "holds": [],
-    "_version": 1062
+    "_version": 1064
   }
 }

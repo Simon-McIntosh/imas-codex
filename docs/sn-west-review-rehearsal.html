@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="117">
+<meta name="plan-version" content="118">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2520,6 +2520,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260901T071637221157-n-isn-pin-bump" data-who="impl-yamlslim" data-when="2026-09-01T07:22:14Z">
     <div class="r-comment-body"><p>Both ISN pins and uv.lock resolve to fork commit 93195dd (generic bindings, review-friendly writer, declared-algebra fix); installed distribution reports the same VCS commit; focused exporter contract green</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T075419708195-n-min-safety-factor-adjudication" data-who="test-minq" data-when="2026-09-01T08:08:32Z">
+    <div class="r-comment-body"><p>minimum_safety_factor is BOTH: locus_registry.yml:655-658 defines it as a position locus selected by |q|, and the cut publishes it as a signed scalar bound to equilibrium/time_slice/global_quantities/q_min/value (DD q_like, sign-flipping). argmin|-q|=argmin|q| but min(-q)=-max(q), so only the locus is COCOS-invariant. Lead ruled against keeping the ambiguous spelling and against naming the signed value absolute; adopted synthesis puts absolute on the locus</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260827T104434424715-n-preflight-snapshot" data-who="impl-actone" data-when="2026-08-27T10:57:20Z">
     <div class="r-comment-body"><p>Restore point: /home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-d4c6ac3.tar.gz (2.46 GB), census StandardName 4668 / fully-clean 2262 identical pre and post, restore via imas-codex graph load; no mutation</p></div>
