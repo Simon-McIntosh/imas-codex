@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="90">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/embedding-gap.md,docs/evidence/sn-release-readiness/suite-four-disposition.md,docs/evidence/sn-release-readiness/import-order-timeout.md,docs/evidence/sn-release-readiness/strain-ordinal-edit.md,docs/evidence/sn-release-readiness/unsourced-ancestry.md">
 <meta name="plan-impl" content="0.94">
@@ -556,6 +556,50 @@
   exist in that form; it routes to regeneration through the sanctioned edit path instead.
 </p>
 
+<h2 id="s12b">&#167;12b &mdash; Cause established, and round-trip is a diagnostic rather than a gate</h2>
+<p>
+  <strong>Verdict: cause-live.</strong> The 73 remaining ungrounded chain-cap rows partition
+  by <em>receipt</em> rather than by present topology, which is what makes the disposition
+  tractable: <strong>42 once held an authoritative source and lost it</strong>, 30 are
+  empty-cohort successor mints, and 1 is legacy pre-ledger. The earlier
+  &ldquo;never grounded&rdquo; framing was therefore wrong for the majority, and the 42
+  need no candidate search at all &mdash; the ledger names what they were bound to.
+</p>
+<p>
+  Mechanism, narrowed. <code>retarget_standard_name_sources</code> is
+  <strong>exonerated</strong>: predecessor delete, successor merge, scalar update,
+  postflight, receipt and rollback are one transaction, so it cannot half-move a non-empty
+  cohort. <code>write_standard_names</code> <em>is</em> live to production
+  (<code>graph_ops.py:6852</code>) and its bare merge <em>can</em> persist a source-less
+  name, though the current caller gates it transactionally. The live mechanism is
+  <code>persist_refined_name</code>'s empty-cohort no-op &mdash; and current
+  refine-eligible ungrounded rows are <strong>0</strong>, so refusing that no-op has no
+  immediate blast radius.
+</p>
+<p>
+  <strong>The round-trip test &mdash; would the composer regenerate this name from this
+  path &mdash; is cheap and useful, and it is not a gate.</strong> Run free on the local
+  model across 17 calls at USD 0.000000 with no graph mutation: the five new bindings
+  scored <strong>2 of 5 exact (40%)</strong> against a control of twelve long-standing
+  <em>grounded</em> bindings at <strong>6 of 12 (50%)</strong>. So the new set performs
+  comparably to bindings nobody disputes, and <strong>an exact-match bar would reject half
+  the existing grounded corpus.</strong> The control is what makes the figure readable;
+  without it, 40% reads as failure against a baseline nobody measured.
+</p>
+<p>
+  Per row it is decisive. Keep <code>launched_power_of_ion_cyclotron_heating_antenna</code>
+  and <code>poloidal_magnetic_field_of_magnetic_field_probe</code>, both exact. Rename
+  <code>electron_temperature_at_separatrix</code> to
+  <code>flux_surface_averaged_electron_temperature_at_separatrix</code>, and
+  <code>normalized_toroidal_flux_coordinate_at_ece_channel_emission_position</code> to
+  <code>normalized_toroidal_flux_coordinate_at_measurement_position</code>. Unbind
+  <code>ion_species_particle_flux_at_wall_due_to_surface_emission</code>, and the reason
+  generalises: <strong>the composer there emits a superseded ancestor, so renaming to its
+  output would reverse two refinements.</strong> A composer suggestion can regress a name
+  that later review improved, which is why round-trip output is evidence and not an
+  instruction.
+</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="unreviewed-in-first-release" data-choice="include-structural-only" data-by="Simon McIntosh" data-when="2026-08-23T08:42:13+00:00">
@@ -932,13 +976,16 @@
     <div class="r-comment-body">n-unsourcedorigin landed — gate origin-fully-attributed passed; measure 72 of 72 attributed with no residual; artifact docs/evidence/sn-release-readiness/unsourced-origin.md; positive control 4675 StandardName, 3104 chain_length-populated, 126 at chain cap, 3576 origin-populated, 9678 StandardNameSource, 5299 PRODUCED_NAME. THE SPLIT IS EXACT AND BOTH MINTING PATHS ARE ALREADY CLOSED, which changes the risk profile entirely: 37 roots came from the legacy generic writer write_standard_names and 35 from catalog_import._write_import_entries, WHICH CURRENT MAIN HAS REMOVED. Zero roots carry a derived origin and zero carry consolidation provenance, so the fold and dedup hypotheses in this section's text were wrong about the mechanism while right that it was not the composer. The current generated-name persist is TRANSACTIONALLY SOURCE-GATED, so no new unsourced root can be minted today. Independently corroborated by the same day's import-guard audit, which found main had removed the only arbitrary bulk-import writer and that its replacements make catalog-supplied origin and status unreachable. WHAT REMAINS OPEN IS PROPAGATION, NOT MINTING, and that distinction is the actionable finding: persist_refined_name still passes _allow_empty_noop=True and carries an unsourced predecessor forward, so an existing ungrounded identity can still multiply through refine even though none can be created from scratch. The 72 are therefore a bounded legacy population rather than a growing one, and the open decision is whether that persist must REFUSE an empty authoritative source cohort. IMPL IS SET TO 0.94 RATHER THAN 1.0: this section gained rebuild work after impl first reached 1.0, and carrying 1.0 while section 12 held open work was a defect in this plan's own record.</div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20260901T162447045562-n-strandcause" data-who="test-strandcause" data-when="2026-09-01T16:35:50Z">
-    <div class="r-comment-body"><p>CAUSE-LIVE. Chain-cap 126 = 53 grounded + 73 ungrounded; the 73 partition as 42 receipt-proven SOURCE-LOST, 30 receipt-proven empty-cohort successor mints, 1 legacy pre-ledger. Positive controls 4675/4675 StandardName, 9678/9678 StandardNameSource, 8707/8707 StandardNameChange. write_standard_names is live to production at graph_ops.py:6852 and its bare MERGE can persist a source-less name, though the current caller source-gates it transactionally; retarget_standard_name_sources is EXONERATED as it cannot half-move a non-empty cohort; persist_refined_name&#x27;s empty-cohort no-op is the live mechanism. Current refine-eligible ungrounded rows 0; 4 passed 0 failed</p></div>
+    <div class="r-comment-body"><p>CAUSE-LIVE. Chain-cap 126 = 53 grounded + 73 ungrounded; the 73 partition as 42 receipt-proven SOURCE-LOST, 30 receipt-proven empty-cohort successor mints, 1 legacy pre-ledger. Positive controls 4675/4675 StandardName, 9678/9678 StandardNameSource, 8707/8707 StandardNameChange. write_standard_names is live to production at graph_ops.py:6852 and its bare MERGE can persist a source-less name, though the current caller source-gates it transactionally; retarget_standard_name_sources is EXONERATED as it cannot half-move a non-empty cohort; persist_refined_name's empty-cohort no-op is the live mechanism. Current refine-eligible ungrounded rows 0; 4 passed 0 failed</p></div>
 </div>
 <div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T160441383261-n-sourceattach" data-who="impl-sourceattach" data-when="2026-09-01T16:13:02Z">
     <div class="r-comment-body"><p>5/5 bound via apply_signed_manifest with receipts, 0 identity changes, idempotent on replay, USD 0.000000 of 15.00; 5 further candidates refused on unit mismatch. CRITERION WAS INSUFFICIENT AND THE BINDINGS NEED RE-JUDGING: the node met its stated done-when exactly, but that done-when made unit equality the discriminator, and every one of the five carries an unstated semantic element - aggregation, GGD locus, module locus, central-measurement locus, non-linear-response qualifier - so under the lead's stricter test of whether a pipeline run on that source would regenerate the same name, each is inexact by the amount its delta names</p></div>
 </div>
 <div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T160505079160-n-opticalordinal" data-who="impl-ordinaloptic" data-when="2026-09-01T16:11:17Z">
     <div class="r-comment-body"><p>VOCABULARY GAP, 0 graph mutations, 0 LLM calls, USD 0.000000 of 10.00: the non-ordinal form local_tangential_back_surface_radius_of_optical_element fails ISN grammar round-trip, same gap as the strain gauges. The ordinal traces to spectrometer_visible/channel/optical_element/back_surface/x1_curvature where x1 enumerates the first local tangential direction. Inconsistency surfaced: the x2 sibling is bound to vertical_back_surface_curvature_of_optical_element, so one index became an ordinal and the other a direction</p></div>
+</div>
+<div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T163658621197-n-roundtripaudit" data-who="test-roundtrip" data-when="2026-09-01T16:55:52Z">
+    <div class="r-comment-body"><p>NEW BINDINGS 2/5 exact (40.0%) against a GROUNDED CONTROL of 6/12 (50.0%), so the new set is comparable to undisputed bindings and round-trip divergence is not itself proof of error; an exact-match gate would reject half the existing grounded corpus. Dispositions: KEEP launched_power_of_ion_cyclotron_heating_antenna and poloidal_magnetic_field_of_magnetic_field_probe; RENAME electron_temperature_at_separatrix to flux_surface_averaged_electron_temperature_at_separatrix; RENAME normalized_toroidal_flux_coordinate_at_ece_channel_emission_position to normalized_toroidal_flux_coordinate_at_measurement_position; UNBIND ion_species_particle_flux_at_wall_due_to_surface_emission because the composer emits its superseded ancestor and a rename would reverse two refinements. USD 0.000000 across 17 calls, 938250 input tokens, 0 graph mutation, before=after census</p></div>
 </div>
 </section>
 </main>
