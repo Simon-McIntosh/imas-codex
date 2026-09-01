@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="graph-destructive-command-safety-landed">
+  <meta name="plan-title" content="graph-destructive-command-safety &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="graph-destructive-command-safety">
+  <title>Graph Operational Safety landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Graph Operational Safety &mdash; cumulative execution evidence</h1>
+  <p>An audit commissioned to answer an unrelated question found three safeguards that were
+  named, documented, and did not hold. Every one of them read as protective from the outside;
+  none was found by reading the documentation, which asserted the opposite in each case. What
+  is recorded here is what each fix actually changed, measured, rather than that it was
+  applied.</p>
+
+  <section id="s3a">
+    <h2>The service ignored its configured partition, and that took the graph down</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-graphpartition</code>, commit
+    <code>68e79fb2</code>. Record:
+    <a href="/imas-codex/evidence/graph-operational-safety/partition-fix">partition-fix</a>.</p>
+    <p>Fifteen lines in <code>_submit_service_job()</code>. CPU graph partition resolution
+    moved from <code>_general_partition_name()</code>, whose live value was <code>sun</code>,
+    to the partition the graph&rsquo;s own compute location declares, so
+    <code>partition: titan</code> stopped being dead config. An invalid non-compute target now
+    fails loudly instead of falling back &mdash; a misconfigured location should not quietly
+    land on a shared queue.</p>
+    <p>It ended a live outage rather than merely correcting a setting: job
+    <code>1260741</code> had been sitting <code>PENDING</code> on reason
+    <code>Priority</code> with port 7687 refused. Its replacement <code>1260760</code> reached
+    <code>RUNNING</code> on <code>98dci4-gpu-0002</code>.</p>
+    <table>
+      <caption>Data verified against values measured <em>before</em> the backup stopped the
+      service &mdash; a service that restarts is not the same claim as data that survived</caption>
+      <thead><tr><th>Measure</th><th>Pre-stop</th><th>Post-restart</th></tr></thead>
+      <tbody>
+        <tr><td>Total nodes</td><td>1,612,957</td><td>1,612,957</td></tr>
+        <tr><td>StandardName</td><td>4,670</td><td>4,670</td></tr>
+        <tr><td>Accepted</td><td>2,318</td><td>2,318</td></tr>
+        <tr><td>Accepted carrying an embedding</td><td>2,318</td><td>2,318</td></tr>
+        <tr><td>Accepted <strong>missing</strong> an embedding</td><td>0</td><td>0</td></tr>
+        <tr><td>LLMCost rows</td><td>35,065 (USD 1715.78)</td><td>35,065 (USD 1715.78)</td></tr>
+      </tbody>
+    </table>
+    <p>Every figure identical, so the morning&rsquo;s embedding repair survived the dump, the
+    shutdown and the migration. Suites 31 passed, 0 failed, ruff clean.</p>
+    <p><strong>Carried trade, recorded because an operator will meet it:</strong> the graph now
+    shares <code>98dci4-gpu-0002</code> with the embedding server. One drained node now takes
+    both services where they previously failed independently. The compensation is that the
+    graph starts in seconds on idle capacity instead of queueing behind 38 jobs.</p>
+  </section>
+
+  <section id="s2">
+    <h2>The function named for backing up data now backs up data</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-realbackup</code>, commit
+    <code>d9f54eff</code> (merged <code>4edf6c30</code>).</p>
+    <p>The defect was in the name, not the docstring, and that is why it survived.
+    <code>backup_existing_data()</code> was documented as &ldquo;Create a marker for
+    pre-operation recovery (lightweight)&rdquo; and did exactly that &mdash; it touched a
+    zero-byte <code>graph_data_existed.marker</code>. Its own docstring never claimed a
+    backup. Only the <em>name</em> did, so anyone who opened the function would have seen the
+    truth and nobody needed to. Meanwhile <code>backup_graph_dump()</code>, which produces a
+    genuine <code>neo4j-admin</code> dump, sat unused immediately below it in the same file.
+    This was never a trade between protection and speed: two destructive commands were calling
+    a marker-writer while the real thing was in reach.</p>
+    <ul>
+      <li>Both destructive sites &mdash; pre-load in <code>cli/graph/data.py</code> and
+      pre-pull in <code>cli/graph/registry.py</code> &mdash; now call
+      <code>backup_graph_dump</code>.</li>
+      <li>A failed dump <strong>blocks</strong> archive extraction and registry fetch, per the
+      locked fail-closed posture.</li>
+      <li>Pre-pull dumps with the service stopped and restores it even when the operation
+      aborts.</li>
+      <li><code>backup_existing_data</code> renamed to <code>write_data_presence_marker</code>
+      with zero remaining references and no compatibility alias.</li>
+      <li>The helper rejects a missing <em>or zero-byte</em> output, which closes the defect
+      class rather than the instance &mdash; the original fault was an artifact that existed
+      and contained nothing.</li>
+    </ul>
+    <p>Pre-fix <strong>0 passed / 2 failed</strong>, because both commands continued without
+    calling the dump helper. Post-fix 2 passed; final suite 14 passed, 0 failed, ruff clean.
+    Regression: <code>tests/cli/test_graph_destructive_backup.py</code>.</p>
+    <p><strong>A coordinator error is recorded here rather than tidied away</strong>, because
+    it recurred twice in one day. The node was first fenced to three source files plus a new
+    test, but renaming the function requires updating
+    <code>tests/core/test_neo4j_ops.py</code>, which imports it. The worker stopped at its
+    fence with a complete <code>NEEDS-HELP</code> brief and wrote nothing; its leaning was
+    correct, and it self-rejected a compatibility alias as contrary to this repository&rsquo;s
+    no-alias rule. The failure mode is <em>changing a name without scoping the tests that
+    reference it</em>.</p>
+  </section>
+
+  <section id="s3b">
+    <h2>Destructive commands now name their target</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-targetname</code>, commit
+    <code>f02560ac</code> (merged <code>fb8a8b7c</code>).</p>
+    <p><code>graph load ARCHIVE TARGET</code> and <code>graph clear TARGET</code> now require
+    an explicit destination and refuse when the resolved symlink disagrees, with a message
+    naming both the requested and the active graph.</p>
+    <p><strong>Where the check runs is the substance of the fix.</strong>
+    <code>_require_matching_graph_target</code> runs immediately after
+    <code>resolve_neo4j</code> and <em>before</em> password lookup, remote transfer,
+    service-state checks, backup, and any graph-client write &mdash; so a mismatch costs no
+    side effect at all, rather than being caught partway through a stop-the-world operation.
+    <code>resolve_neo4j</code> is <strong>unmodified</strong>, its signature pinned by
+    assertion, so the twelve read-only callers stay untouched: a two-command problem did not
+    acquire a twelve-file blast radius.</p>
+    <p>Pre-fix <strong>1 passed / 4 failed</strong>; post-fix 24 passed, 0 failed. Proven in
+    <code>tests/cli/test_graph_destructive_target.py</code>: both commands refuse a scratch
+    target while the active graph is <code>codex</code>, with zero backup and zero client
+    calls and an unchanged live-data sentinel &mdash; and a <em>matching</em> scratch clear
+    still succeeds, so the guard blocks the mistake rather than the operation.</p>
+  </section>
+
+  <section id="ledger-repair">
+    <h2>The ledger disagreed with the tree, and looked healthy while it did</h2>
+    <p><strong>Recorded 2026-09-01</strong> &mdash; commit <code>da9b8ced</code>.</p>
+    <p>Both landings above wrote a comment to the plan and neither advanced
+    <code>impl</code>, <code>commits</code> or <code>artifacts</code>. The plan therefore read
+    0.25 with a single commit while three fixes were on <code>origin/main</code>, so a reader
+    consulting the ledger rather than the prose would have seen a quarter of the work done and
+    one fix landed. <strong>A landing beat that writes only a comment is not a landing
+    beat</strong> &mdash; the comment is the account, but the state write is what
+    <code>roadmap</code> and the next session read.</p>
+    <p>Corrected against the tree rather than from the comments: all three commits verified
+    reachable from <code>origin/main</code> with
+    <code>git merge-base --is-ancestor</code>; <code>_require_matching_graph_target</code>
+    present at <code>data.py:52</code> with call sites at 531 (load) and 1263 (clear);
+    <code>backup_graph_dump</code> called at <code>data.py:603</code> and
+    <code>registry.py:810</code>; <code>backup_existing_data</code> absent with zero
+    references.</p>
+  </section>
+</main>
+</body>
+</html>

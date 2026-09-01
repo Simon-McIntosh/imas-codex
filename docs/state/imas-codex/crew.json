@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T19:38:58",
+  "updated": "2026-09-01T20:00:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -163,6 +163,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-archivestamp",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-armreplay",
@@ -2106,6 +2115,17 @@
         "created": "2026-08-23"
       },
       {
+        "id": "inv-graphreuse",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a05e1a-c62b-7502-8285-c0560cd0ea17",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05e1a-c62b-7502-8285-c0560cd0ea17"
+        },
+        "created": "2026-09-01"
+      },
+      {
         "id": "inv-graphsubstrate",
         "harness": "codex",
         "role": "investigate",
@@ -2431,6 +2451,15 @@
       },
       {
         "id": "test-minq",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
+      },
+      {
+        "id": "test-offsite",
         "harness": "codex",
         "role": "test",
         "session_id": null,
@@ -44681,9 +44710,109 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T175321499048-n-reusemap",
+        "plan": "graph-destructive-command-safety",
+        "section": "\u00a74",
+        "node": "n-reusemap",
+        "node_definition": {
+          "done_when": "The report names, for each of the five capability areas (backup currency comparison, archive naming contract, archive manifest scope counts, offsite registry currency, graph target documentation), the existing modules, symbols, tests and config already in reach, each with a one-line fitness verdict, and states explicitly where nothing exists",
+          "estimated_hours": null,
+          "goal": "Produce a reuse map for the five remaining Graph Operational Safety deliverables",
+          "id": "n-reusemap",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T175321499048-n-reusemap/manifest.md",
+          "plan": "graph-destructive-command-safety",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "open",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/graph-operational-safety-reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-graphreuse",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-01T17:53:27Z",
+        "completed_at": "2026-09-01T17:59:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 354,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 354,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "fa42c7739b2fbaeeaff731486f19bfe1e19944d4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "test -s $REP && rg -c '^## [1-5]\\.' $REP && rg -c '^\\*\\*Nothing currently exists\\*\\*' $REP",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/graph-operational-safety-reuse-map.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T175321499048-n-reusemap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05e1a-c62b-7502-8285-c0560cd0ea17",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4377600,
+            "cached_input_tokens_cumulative": 4377600,
+            "input_tokens": 4583347,
+            "input_tokens_cumulative": 4583347,
+            "output_tokens": 15279,
+            "output_tokens_cumulative": 15279,
+            "reasoning_output_tokens": 4246,
+            "reasoning_output_tokens_cumulative": 4246
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 3,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260825T141822953638-n-reusemap",
+          "root_run_id": "r-20260823T092453383925-n-reusemap"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 3,
+        "attempt_kind": "redispatch",
+        "no_commit": "read-only investigate node; delivery is the fenced report outside the repository",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1165
+    "_version": 1170
   }
 }

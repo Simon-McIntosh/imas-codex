@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="13">
 <meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac">
 <meta name="plan-artifacts" content="docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py,imas_codex/graph/neo4j_ops.py,imas_codex/cli/graph/data.py,tests/cli/test_graph_destructive_backup.py,tests/cli/test_graph_destructive_target.py">
 <meta name="plan-impl" content="0.33">
@@ -43,33 +43,25 @@
       What belongs here is the reason the answer was no.
     </p>
 
-    <h2 id="s2">&#167;2 &mdash; The function named for backing up data does not back up data</h2>
-    <p>
-      <code>backup_existing_data()</code> writes zero-byte
-      <code>graph_data_existed.marker</code> files. It records <em>that</em> data was
-      present, not the data. So the recovery directory looks populated to anyone who
-      lists it, the call site reads as protective, and there is nothing to restore from.
-    </p>
-    <p>
-      Measured state at the time of the audit: the backups directory contained
-      <strong>no dump at all</strong>. The newest archive anywhere was
-      <strong>2,457,088,786 bytes</strong> dated <strong>2026-08-27 12:49</strong>, while
-      live database files had been written the same afternoon as the audit
-      &mdash; <code>data/transactions/neo4j/checkpoint.0</code> at
-      <strong>2026-09-01 14:16:59</strong>. The live directory was
-      <strong>15,058,189,845 bytes</strong>. A five-day-old archive against a 15 GB live
-      store is not a backup, and the thing that was supposed to make one produces a
-      placeholder.
-    </p>
-    <p>
-      This is the more dangerous of the two defects, because it is silent in the
-      direction that flatters: a marker file present in a recovery directory reads as
-      evidence of safety. The fix is that a function claiming to back up data either
-      produces a restorable artifact or fails loudly, and that a caller can ask
-      &ldquo;is there a current backup?&rdquo; and get an answer derived from the
-      artifact's own modification time against the live store's, not from a marker's
-      existence.
-    </p>
+    <section id="s2" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-09-01</span>
+    <h2>&#167;2 &mdash; The function named for backing up data does not back up data</h2></header>
+  <p class="landed-summary">
+    Both destructive sites &mdash; pre-load in <code>cli/graph/data.py</code>, pre-pull in
+    <code>cli/graph/registry.py</code> &mdash; now call the real
+    <code>backup_graph_dump</code>, a failed dump blocks archive extraction and registry
+    fetch per the locked fail-closed posture, and pre-pull restores the service even on
+    abort. <code>backup_existing_data</code> is renamed to
+    <code>write_data_presence_marker</code> with zero remaining references and no alias.
+    The helper now rejects a missing <em>or zero-byte</em> output, which closes the defect
+    class rather than the instance &mdash; the original fault was an artifact that existed
+    and contained nothing. Pre-fix <strong>0 passed / 2 failed</strong>; post-fix 2 passed;
+    suite 14 passed, 0 failed, ruff clean (commit <code>d9f54eff</code>).
+    Still open from this section&rsquo;s deliverables: the currency answer
+    (&ldquo;is there a current backup?&rdquo;), which &#167;3c re-measures.
+    Full record: <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#s2">§2 landed</a>.
+  </p>
+</section>
 
     <h2 id="s3">&#167;3 &mdash; The environment variable does not select the target; the symlink does</h2>
     <p>
@@ -149,31 +141,24 @@
   </p>
 </section>
 
-<h2 id="s3b">&#167;3b &mdash; Where the target check belongs, and where it must not spread</h2>
-<p>
-  Measured before dispatch so the fix does not widen unnecessarily.
-  <code>graph_load</code> and <code>graph_clear</code> both live in
-  <code>imas_codex/cli/graph/data.py</code> (lines 496 and 1231), so the check has one
-  natural home. <strong><code>resolve_neo4j</code> has twelve callers</strong> &mdash;
-  <code>settings</code>, <code>graph/__init__</code>, <code>neo4j_ops</code>,
-  <code>client</code>, <code>profiles</code>, <code>health</code>,
-  <code>cli/graph/registry</code>, <code>cli/tunnel</code>, <code>cli/graph/data</code>,
-  <code>cli/release</code>, <code>cli/compute</code>, <code>cli/services</code> &mdash; and
-  most are read-only consumers that connect rather than destroy.
-</p>
-<p>
-  <strong>So the destination requirement belongs at the destructive command boundary, not
-  threaded through the selector.</strong> Adding a destination parameter to
-  <code>resolve_neo4j</code> would put a twelve-file blast radius behind a two-command
-  problem, and would oblige every read-only caller to name a target it has no opinion
-  about. The check the locked decision requires &mdash; the command names its destination
-  and refuses when the resolved symlink disagrees &mdash; is expressible where the symlink
-  is already resolved for a destructive purpose. Four test files reference the load or clear
-  surface (<code>test_graph_cli_package</code>, <code>test_dd_resolutions</code>,
-  <code>test_docker_embedded</code>, <code>graph_mcp/conftest</code>) and must be in scope
-  from the start, because a rename or signature change whose references are left unscoped is
-  exactly what stopped the backup node at its fence.
-</p>
+<section id="s3b" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-09-01</span>
+    <h2>&#167;3b &mdash; Where the target check belongs, and where it must not spread</h2></header>
+  <p class="landed-summary">
+    <code>graph load ARCHIVE TARGET</code> and <code>graph clear TARGET</code> now require an
+    explicit destination and refuse a mismatch by name.
+    <code>_require_matching_graph_target</code> runs immediately after
+    <code>resolve_neo4j</code> and <strong>before</strong> password lookup, remote transfer,
+    service-state checks, backup and any graph-client write, so a mismatch costs no side
+    effect at all. <code>resolve_neo4j</code> is unmodified with its signature pinned by
+    assertion, so the twelve read-only callers stayed untouched and a two-command problem did
+    not acquire a twelve-file blast radius. Pre-fix <strong>1 passed / 4 failed</strong>;
+    post-fix 24 passed, 0 failed (commit <code>f02560ac</code>). Proven: both commands refuse
+    a scratch target while active is <code>codex</code> with zero backup and client calls and
+    an unchanged live-data sentinel, and a <em>matching</em> scratch clear still succeeds.
+    Full record: <a href="/imas-codex/evidence/archive/graph-destructive-command-safety-landed#s3b">§3b landed</a>.
+  </p>
+</section>
 
     <h2 id="s3c">&#167;3c &mdash; Measured state before the remaining work</h2>
 <p>
@@ -231,6 +216,68 @@
   <code>docs/architecture/graph-profiles.md</code> presents <code>name</code> /
   <code>IMAS_CODEX_GRAPH</code> as selecting <em>&ldquo;what data&rdquo;</em> (lines 8, 21
   and 191), which is the sentence &#167;3 measured as false.
+</p>
+
+    <h2 id="s3d">&#167;3d &mdash; What the reconnaissance found, and the one defect it found in landed work</h2>
+<p>
+  A read-only prior-art pass over the tree returned 5/5 capability areas inventoried, 0/5
+  already implemented, 5/5 with reusable primitives in reach, and 0/5 carrying a regression
+  for the behaviour still owed. Four of its findings bind the remaining nodes; the first is
+  a defect in work this plan already landed.
+</p>
+<p>
+  <strong>The backup regression stopped regressing the moment the target check landed.</strong>
+  <code>tests/cli/test_graph_destructive_backup.py:43</code> invokes
+  <code>graph_load</code> as <code>[str(archive), "--force"]</code> &mdash; without the
+  <code>TARGET</code> argument that <code>n-targetname</code> then made mandatory. Click now
+  exits at argument parsing, so the command under test never reaches the dump-failure path
+  the test exists to pin, and <code>dump.assert_called_once_with()</code> cannot hold.
+  <strong>This is the third instance today of one failure mode &mdash; a change whose
+  references were not scoped &mdash; and the first to escape.</strong> The other two were
+  caught by a worker&rsquo;s own fence, because the reference and the change sat in one
+  node&rsquo;s scope. This one crossed a node boundary: each node was green in isolation and
+  the interaction broke the earlier one, which is precisely the arrangement no single fence
+  can see. Both nodes are on <code>origin/main</code>, so it is fixed here rather than
+  recorded as a lesson.
+</p>
+<p>
+  <strong>Archive identity has four producers, not two.</strong> &#167;3c named the local
+  pair; reconnaissance found the same grammar owed by
+  <code>graph/remote.py</code>&rsquo;s <code>build_remote_export_script</code>,
+  <code>build_remote_push_script</code> and <code>build_remote_release_push_script</code>,
+  each forming PID-based outer names (<code>imas-codex-graph-export-$$.tar.gz</code>) and a
+  generic inner directory while <em>already holding</em> the version tag and commit it
+  discards, plus <code>cli/graph/registry.py::graph_push</code>, whose local temporary
+  archive carries no timestamp. So the contract is one shared helper composing package
+  identity, revision and UTC stamp, whose resolved names are passed <em>into</em> the remote
+  builders. Embedding a copy of the grammar in each generated shell script would preserve
+  exactly the split authority that produced the defect, and fixing only the local CLI would
+  leave every operational archive inconsistent with it.
+</p>
+<p>
+  <strong>Manifest counts must describe the artifact, not the source graph.</strong>
+  <code>GraphClient.get_stats</code> gives totals directly, but facility and DD-only exports
+  filter through <code>graph/temp_neo4j.py</code>&rsquo;s <code>create_facility_dump</code>
+  and <code>create_dd_only_dump</code>, and only the post-filter graph can state what the
+  shipped archive contains &mdash; a live count on a filtered export is a wrong number that
+  looks right. One trap beneath that: <code>get_label_counts</code> keys on
+  <code>labels(n)[0]</code>, so a multi-labelled node is counted once under its primary
+  label; if the manifest means every label, it must count with <code>UNWIND labels(n)</code>.
+</p>
+<p>
+  <strong>Two bindings for the remaining pair.</strong> For the offsite figure, the seam is
+  <code>ghcr.py::get_package_version_id</code> with <code>github_api_paginated</code>, which
+  already reads the authoritative GitHub Packages version record and then discards
+  everything but the id &mdash; <code>resolve_latest_tag</code> orders by tag grammar and
+  revision rather than registry time and <strong>must not</strong> be used as a currency
+  oracle. For the documentation, five surfaces carry the false claim:
+  <code>docs/architecture/graph-profiles.md</code>,
+  <code>docs/architecture/graph.md</code>, the root <code>AGENTS.md</code> graph-access
+  paragraph, the <code>README.md</code> graph section, and the help banner in
+  <code>cli/graph/__init__.py</code>. Two of them are now actively unsafe rather than merely
+  stale: <code>graph.md</code> and the help banner both show <code>load</code> and
+  <code>clear</code> invocations <em>without</em> the target argument the command now
+  requires, so a reader following either gets a usage error at best.
 </p>
 
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
@@ -331,6 +378,9 @@
 </div>
 <div class="r-comment" data-section="§3b" data-id="c-run-r-20260901T172829334748-n-targetnaming" data-who="impl-targetname" data-when="2026-09-01T17:34:26Z">
     <div class="r-comment-body"><p>Pre-fix 1 passed / 4 FAILED, post-fix 24 passed / 0 failed. graph load ARCHIVE TARGET and graph clear TARGET now require an explicit target; _require_matching_graph_target runs immediately after resolve_neo4j and BEFORE password lookup, remote transfer, service-state checks, backup and any graph-client write, so a mismatch costs no side effect. Mismatch message names requested and active graphs. resolve_neo4j UNMODIFIED with its signature pinned by assertion, so the twelve read-only callers stay untouched exactly as scoped. Proven: both commands refuse a scratch target while active is codex with zero backup/client calls and an unchanged live-data sentinel, and a matching scratch clear still succeeds</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T175321499048-n-reusemap" data-who="inv-graphreuse" data-when="2026-09-01T17:59:21Z">
+    <div class="r-comment-body"><p>Reuse map delivered: 5/5 areas inventoried, 0/5 already implemented, 5/5 with reusable primitives; found the archive identity contract is split across four producers and that the landed backup regression omits the now-required load target</p></div>
 </div>
 </section>
 </main>
