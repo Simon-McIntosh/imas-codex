@@ -1,7 +1,12 @@
 from pathlib import Path
 
 import pytest
-from reckon.resources import TYPE_ROOTS
+
+reckon_resources = pytest.importorskip(
+    "reckon.resources",
+    reason="reckon is not installed; typed documentation layout checks require TYPE_ROOTS",
+)
+TYPE_ROOTS = reckon_resources.TYPE_ROOTS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
