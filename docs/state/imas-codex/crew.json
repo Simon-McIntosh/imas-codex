@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T22:56:40",
+  "updated": "2026-09-01T22:58:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1240,9 +1240,11 @@
         "id": "impl-offsitepush",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05eb8-7f54-7393-81f9-23d6489ac1b4",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eb8-7f54-7393-81f9-23d6489ac1b4"
+        },
         "created": "2026-09-01"
       },
       {
@@ -47555,9 +47557,114 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260901T204535271634-n-offsite-push-job",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-push-job",
+        "node_definition": {
+          "done_when": "unit tests with mocked registry, export and census cover the no-op, the successful push with matching counts, and the count-mismatch refusal; a recorded live 'graph offsite-push --dry-run' prints the decision for the current 56-day-stale state and the sbatch script it would submit without pushing anything; ruff clean on the changed paths",
+          "estimated_hours": null,
+          "goal": "Add an 'imas-codex graph offsite-push' command that performs one scheduled full-graph offsite push cycle: it reads the registry-backed offsite currency, records a no-op receipt when the live store has not changed since the newest offsite copy, otherwise exports through the existing graph push path with graph_archive_stamp naming, refuses to count the copy unless the archive manifest node/relationship/label counts equal a live census taken at push time, writes a JSON receipt with wall time and archive bytes under the imas-codex data directory, and when given --schedule submits itself as a weekly self-resubmitting SLURM job through the existing service submission helper",
+          "id": "n-offsite-push-job",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "imas_codex/graph/offsite.py",
+            "imas_codex/cli/graph/offsite.py",
+            "imas_codex/cli/graph/__init__.py",
+            "tests/core/test_offsite_push.py",
+            "tests/cli/test_graph_offsite_push.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-offsitepush",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T20:45:43Z",
+        "completed_at": "2026-09-01T20:57:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 690,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 690,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5922b6b640d27d945ace06ab91a598110aed89e2",
+        "commits": [
+          "7e09dc9840e2053500e41351720e6a3c39dbc72b"
+        ],
+        "changed_lines": {
+          "added": 753,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/core/test_offsite_push.py tests/cli/test_graph_offsite_push.py; uv run --no-sync imas-codex graph offsite-push --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eb8-7f54-7393-81f9-23d6489ac1b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5176576,
+            "cached_input_tokens_cumulative": 5176576,
+            "input_tokens": 5356386,
+            "input_tokens_cumulative": 5356386,
+            "output_tokens": 26831,
+            "output_tokens_cumulative": 26831,
+            "reasoning_output_tokens": 8433,
+            "reasoning_output_tokens_cumulative": 8433
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1240
+    "_version": 1242
   }
 }

@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="9">
-<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c">
-<meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="11">
+<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98">
+<meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log">
+<meta name="plan-impl" content="0.57">
 </head>
 <body>
   <main class="plan-doc">
@@ -199,6 +199,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2044-retention-landing" data-who="reckon-ship" data-when="2026-09-01T20:44:00Z">
     <div class="r-comment-body">n-offsite-retention landed at commit 8c850276 (merged 890f64f6): graph prune now applies the locked tiered policy. Live dry-run over the 47 imas-codex-graph versions: 25 keep (4 weekly, 3 monthly, 18 release or latest) and 22 delete (10 untagged, 2 test-prefixed, 10 thinned), zero deletions performed; 3 unit tests over a synthetic 47-version census prove release-tagged versions are never selected. Two legacy test tags without the test- prefix (v5.0.0-fix-test, v-direct-test) fall into the weekly tier and will thin out on their own. The one-off live prune is its own node and awaits the lead's go, since it deletes 22 registry versions.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260901T204535271634-n-offsite-push-job" data-who="impl-offsitepush" data-when="2026-09-01T20:57:13Z">
+    <div class="r-comment-body"><p>imas-codex graph offsite-push: registry-backed decision, no-op receipt when current, count-gated export and push under a graph_archive_stamp dev tag, --schedule submits a weekly self-resubmitting SLURM job; live dry-run reports 56.352 days stale and the sbatch body, nothing pushed; 7 tests pass</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260901T2058-pushjob-landing" data-who="reckon-ship" data-when="2026-09-01T20:58:00Z">
+    <div class="r-comment-body">n-offsite-push-job landed at commit 7e09dc98 (merged cc63f174): imas-codex graph offsite-push runs one cycle: registry-backed currency decision, no_op receipt when current, otherwise an independent live node/relationship/label census, graph export under a graph_archive_stamp name, refusal before upload if the manifest census differs, upload via graph push --source-dump under a dev tag, and an atomic JSON receipt with wall_time_seconds and archive_bytes under ~/.local/share/imas-codex/offsite-push/receipts. --schedule submits a 2 CPU / 8 GB SLURM job whose script resubmits itself with sbatch --begin=now+7days. Live dry-run: decision push, 56.352 days stale, nothing exported or pushed; 7 tests pass. Operational note for the lead: the export path stops Neo4j for the dump, so each weekly cycle takes the live graph down for the dump duration; the first real cycle will measure it. The GHCR_TOKEN in .env is still stale and the command falls back to the gh credential. Remaining: first real cycle with --schedule (after the in-flight graph readers finish), one-off prune apply, trial restore.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>
