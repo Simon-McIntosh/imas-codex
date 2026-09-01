@@ -581,7 +581,7 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
       <li><strong>Spend authorization:</strong> full 355-source processing approved
         (D-pilot locked full-355) with a <strong>500 USD ceiling</strong>; expected
         total well below it. Size <code>--cost-limit</code> accordingly and note that
-        it is a soft cap (observed overshoot ~1.7–2.7×) — set the flag conservatively
+        it held at 1.000&times; on the only cap-stopped run since 2026-08 (75.037 against 75.00); the ~1.7&ndash;2.7&times; overshoot was July-2026 behaviour and is corrected here 2026-09-01 &mdash; still set the flag conservatively
         below the ceiling.</li>
       <li><strong>Known deferred items</strong> (out of scope here, tracked in the
         parent plan): the batching structure for future corpora; the one-time
@@ -598,7 +598,7 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
       <button class="r-opt" data-value="pilot-first">Pilot subset first (one IDS manifest), then the full 355 (Recommended — bounds spend while the loop is unproven)</button>
       <button class="r-opt chosen" data-value="full-355">Full 355 directly (one pass, higher spend at risk)</button>
       </p>
-    <p class="r-dec-rat">Locked: full spend — all 355 sn-sources need processing regardless, so a pilot only delays. Authorization: 500 USD ceiling; expected total well below. --cost-limit is a soft cap (observed overshoot ~1.7–2.7×) — set it conservatively under the ceiling.</p>
+    <p class="r-dec-rat">Locked: full spend — all 355 sn-sources need processing regardless, so a pilot only delays. Authorization: 500 USD ceiling; expected total well below. CORRECTED 2026-09-01: --cost-limit holds as of 2026-08 - the single cap-stopped run since then spent 75.037 against a 75.00 limit (1.000x). The former ~1.7-2.7x overshoot was July-2026 behaviour (23 cap-stopped runs, median 1.179x) and is no longer observed; the post-fix evidence is one run, so treat the cap as reliable rather than proven at scale. Still set it conservatively under the ceiling.</p>
     </div>
 <div class="r-dec" data-key="final-release-shape" data-choice="pr-then-tag" data-by="Simon McIntosh" data-when="2026-07-22T06:00:03+00:00">
     <p class="r-dec-q">D-final-shape — restructure the plain (full-catalog) `sn release --final` to match the batch flow: content travels by fork→upstream PR from a release branch, with the stable tag applied to the merge commit afterwards (no direct upstream-main push)?</p>
@@ -712,7 +712,7 @@ Tier:    opus
 
 Context
   Decisions are locked (full-355, tag contract). Budget: 500 USD hard ceiling,
-  authorized; --cost-limit is a SOFT cap with ~1.7–2.7× observed overshoot, so
+  authorized; --cost-limit held at 1.000&times; on the only cap-stopped run since 2026-08, the ~1.7&ndash;2.7&times; figure being July-2026 behaviour corrected 2026-09-01, so
   start around --cost-limit 150–200 and iterate in capped runs rather than one
   large one. f-swrr-002 (tag contract) should land before stage 4 but does not
   block stages 0–2.
@@ -783,7 +783,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-swrr-005" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22T10:45:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-07-22T11:46:41+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Resume §3 stages 1–2 once the OpenRouter key limit is lifted</h4>
-    <div class="r-fu-body"><p>Stage 0 (snapshot) is done and the focus/batch seeding defect is fixed (commit <code>8c4b1f54</code>) — the mop-up now seeds cleanly. Stage 1 is blocked only by billing: <code>OPENROUTER_API_KEY_IMAS_CODEX</code> reached its total spend limit (403 on every call). Once the key's total limit is raised (or credits topped up) on the OpenRouter workspace, re-run the full-355 gap mop-up (gap-only retries the 150 failed sources), then cut the fork-PR batch RC. Corpus at 209/355 accepted; ~146 nameable residual. 500 USD ceiling still authorized; --cost-limit is soft (~1.7–2.7× overshoot).</p></div>
+    <div class="r-fu-body"><p>Stage 0 (snapshot) is done and the focus/batch seeding defect is fixed (commit <code>8c4b1f54</code>) — the mop-up now seeds cleanly. Stage 1 is blocked only by billing: <code>OPENROUTER_API_KEY_IMAS_CODEX</code> reached its total spend limit (403 on every call). Once the key's total limit is raised (or credits topped up) on the OpenRouter workspace, re-run the full-355 gap mop-up (gap-only retries the 150 failed sources), then cut the fork-PR batch RC. Corpus at 209/355 accepted; ~146 nameable residual. 500 USD ceiling still authorized; --cost-limit held at 1.000&times; on the only cap-stopped run since 2026-08; the ~1.7&ndash;2.7&times; figure was July-2026 behaviour, corrected 2026-09-01.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
 Plan:    sn-west-review-rehearsal (http://localhost:8765/imas-codex/sn-west-review-rehearsal.html)
 Section: §3 stages 1–2 (resume)
@@ -810,7 +810,8 @@ State to read
 Scope locks / constraints
   - Gap-only default — never --reseed on this corpus (protects the 209 accepted).
   - PR target stays fork (auto for an RC batch) — no --final in act 1.
-  - 500 USD ceiling; --cost-limit soft (~1.7–2.7x). Start ~150 and iterate.
+  - 500 USD ceiling; --cost-limit held at 1.000x on the only cap-stopped run
+    since 2026-08 (75.037 of 75.00). Start ~150 and iterate.
   - The stage-0 snapshot already exists; do NOT re-snapshot unless the graph was
     reloaded.
 
@@ -990,8 +991,8 @@ Do
 Scope / constraints
   - Gap-only; never --reseed. PR target stays fork.
   - Snapshot already exists (stage 0); do NOT re-snapshot.
-  - Budget: ~$40 of the 500 USD ceiling spent to date; --cost-limit is SOFT
-    (~1.7–2.7x overshoot).
+  - Budget: ~$40 of the 500 USD ceiling spent to date; --cost-limit held at
+    1.000x on the only cap-stopped run since 2026-08 (75.037 of 75.00).
   - No AI attribution in ANY commit, issue, PR, or comment (see ~/.agents/AGENTS.md).
 
 Done-when
@@ -1027,7 +1028,8 @@ Verified state (2026-07-27, end of session)
   WEST 325/355 accepted (10 deliberately mid-repair).
   Unit-disagreeing attachments: ~354 graph-wide, 262 on accepted/approved names.
   DD pins: 8741 at 4.1.0, 21 at 4.1.1, 74 null — UNCHANGED and immutable by design.
-  ~$40 of the 500 USD ceiling spent; --cost-limit is SOFT (~1.7–2.7x overshoot).
+  ~$40 of the 500 USD ceiling spent; --cost-limit held at 1.000x on the only
+  cap-stopped run since 2026-08 (75.037 of 75.00).
 
 Do, in order
   1. HEAL. Run the retroactive attachment audit against the live graph and record
