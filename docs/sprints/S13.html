@@ -5,30 +5,14 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="sprint">
   <meta name="reckon-id" content="S13">
-  <meta name="reckon-version" content="1">
-  <title>Release, once the gates are shut | sprint</title>
+  <meta name="reckon-version" content="3">
+  <title>Release, once the gates are actually shut | sprint</title>
 </head>
 <body>
 <main class="reckon-resource" data-type="sprint" data-id="S13">
   <ol data-reckon="sprint-items">
-  <li data-slug="sn-west-catalog-release" data-item="{&quot;done_when&quot;: &quot;The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release state while retaining audit history.&quot;, &quot;slug&quot;: &quot;sn-west-catalog-release&quot;, &quot;why_now&quot;: &quot;Every barrier this release must not ship around now lives in S12: the embedding-coverage gate and the 78 unauthorized relocations. Scheduling the RC in S10 put it BEFORE both, which is the premature release those plans exist to prevent - two error-level sprint-order inversions. S13 places it downstream of the whole barrier set.&quot;}">sn-west-catalog-release</li>
   </ol>
-  <script type="application/json" id="reckon-resource-state">{
-  "description": "Cut the WEST release candidate once, after every barrier is cleared rather than around it. Reachable as the derived closure graph:west-rc, whose membership is computed from declared dependencies rather than authored here.",
-  "id": "S13",
-  "items": [
-    {
-      "done_when": "The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release state while retaining audit history.",
-      "slug": "sn-west-catalog-release",
-      "why_now": "Every barrier this release must not ship around now lives in S12: the embedding-coverage gate and the 78 unauthorized relocations. Scheduling the RC in S10 put it BEFORE both, which is the premature release those plans exist to prevent - two error-level sprint-order inversions. S13 places it downstream of the whole barrier set."
-    }
-  ],
-  "status": "planned",
-  "summary": "The WEST release candidate, downstream of every barrier that could make it premature.",
-  "theme": "Release, once the gates are actually shut",
-  "type": "sprint",
-  "version": 1
-}</script>
+  <script type="application/json" id="reckon-resource-state">{"description":"Retired without executing. Splitting the catalog release from the review rehearsal that gates it put one subject across two sprints and left the release parked behind a sprint boundary rather than behind its actual prerequisite. Its single item moved into S10, which now carries the review and the release it leads to.","ends":"","id":"S13","items":[],"starts":"","status":"done","summary":"The WEST release candidate, downstream of every barrier that could make it premature.","theme":"Release, once the gates are actually shut","type":"sprint","version":3}</script>
 </main>
 </body>
 </html>

@@ -5,44 +5,18 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="sprint">
   <meta name="reckon-id" content="S10">
-  <meta name="reckon-version" content="3">
-  <title>WEST expert review and catalog release | sprint</title>
+  <meta name="reckon-version" content="9">
+  <title>Put the WEST batch in front of a physicist, and release what comes back | sprint</title>
 </head>
 <body>
 <main class="reckon-resource" data-type="sprint" data-id="S10">
   <ol data-reckon="sprint-items">
   <li data-slug="sn-west-review-rehearsal" data-item="{&quot;done_when&quot;: &quot;Every WEST row has an explicit human accept/change/hold disposition with complete current name, source, description, and review evidence; requested changes pass the ordinary pipeline.&quot;, &quot;slug&quot;: &quot;sn-west-review-rehearsal&quot;, &quot;why_now&quot;: &quot;Human experts review the refreshed cohort at the new docs standard; the census pre-screen and 14-source residual close first.&quot;}">sn-west-review-rehearsal</li>
-    <li data-slug="sn-schema-ownership-residue" data-item="{&quot;done_when&quot;: &quot;Each of the three properties has one owner that the code, the data and the schema agree on, proven by the queried property carrying non-zero live coverage after the change and the abandoned property being gone rather than merely unused.&quot;, &quot;slug&quot;: &quot;sn-schema-ownership-residue&quot;, &quot;why_now&quot;: &quot;The property audit that closed S9 left three measured disagreements between the schema and the live graph parked in a permanent allowance; an allowance is honest but it is not a decision, and every one of them is a query whose correctness depends on which side is right.&quot;}">sn-schema-ownership-residue</li>
-  <li data-slug="sn-schema-version-authority" data-item="{&quot;done_when&quot;: &quot;A schema digest derived from the LinkML sources is written as a node when the schema is applied, a server refuses to serve when its loaded digest differs from that node, and both directions are proven by test - a deliberately mismatched digest refuses and a matching one serves.&quot;, &quot;slug&quot;: &quot;sn-schema-version-authority&quot;, &quot;why_now&quot;: &quot;A schema migration just left 21 long-lived MCP servers serving a pre-rename schema against a post-rename graph, with no way for either side to detect it; the graph records a version node for its other two external authorities and none for the schema, so this is a gap in an existing pattern rather than new machinery.&quot;}">sn-schema-version-authority</li>
+  <li data-slug="sn-west-catalog-release" data-item="{&quot;done_when&quot;: &quot;The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release state while retaining audit history.&quot;, &quot;slug&quot;: &quot;sn-west-catalog-release&quot;, &quot;why_now&quot;: &quot;Every barrier this release must not ship around now lives in S12: the embedding-coverage gate and the 78 unauthorized relocations. Scheduling the RC in S10 put it BEFORE both, which is the premature release those plans exist to prevent - two error-level sprint-order inversions. S13 places it downstream of the whole barrier set.&quot;}">sn-west-catalog-release</li>
+  <li data-slug="sn-embedding-coverage-gate" data-item="{&quot;done_when&quot;: &quot;The coverage shortfall is measured over the release set and the whole accepted corpus with sanity counts; missing embeddings on real descriptions are separated from missing descriptions; Gate A&#x27;s assertion and threshold are recovered; and the gate is fixed, deliberately relaxed with a written threshold, or the affected identities withheld with named reasons.&quot;, &quot;slug&quot;: &quot;sn-embedding-coverage-gate&quot;, &quot;why_now&quot;: &quot;A gate that fails and is downgraded to advisory has stopped being a gate, and the next consumer of that export is a release candidate.&quot;}">sn-embedding-coverage-gate</li>
+  <li data-slug="sn-relocation-retirement-apply" data-item="{&quot;done_when&quot;: &quot;Fresh authority built and hashed inside the applying invocation; admitted and refused counts with verbatim reasons; receipts recovered by run_id plus manifest digest; replay write-free; the unauthorized-relocation class re-measured to zero or to named refusals; the two export-cycle identities released.&quot;, &quot;slug&quot;: &quot;sn-relocation-retirement-apply&quot;, &quot;why_now&quot;: &quot;The only residual with no external dependency. Program proved at a495fb07 and prevention landed at b926b8dd, so retirement is now durable where an earlier governed deletion was undone.&quot;}">sn-relocation-retirement-apply</li>
   </ol>
-  <script type="application/json" id="reckon-resource-state">{
-  "description": "The visible milestone, now consuming the S9 quality standard: freeze the reviewer packet from the refreshed WEST cohort, close the 14-source residual, conduct human accept/change/hold review, then publish exactly those dispositions, fold the reviewed state back into the graph, and prove the undo path.",
-  "ends": "2026-10-02",
-  "id": "S10",
-  "items": [
-    {
-      "done_when": "Every WEST row has an explicit human accept/change/hold disposition with complete current name, source, description, and review evidence; requested changes pass the ordinary pipeline.",
-      "slug": "sn-west-review-rehearsal",
-      "why_now": "Human experts review the refreshed cohort at the new docs standard; the census pre-screen and 14-source residual close first."
-    },
-    {
-      "done_when": "Each of the three properties has one owner that the code, the data and the schema agree on, proven by the queried property carrying non-zero live coverage after the change and the abandoned property being gone rather than merely unused.",
-      "slug": "sn-schema-ownership-residue",
-      "why_now": "The property audit that closed S9 left three measured disagreements between the schema and the live graph parked in a permanent allowance; an allowance is honest but it is not a decision, and every one of them is a query whose correctness depends on which side is right."
-    },
-    {
-      "done_when": "A schema digest derived from the LinkML sources is written as a node when the schema is applied, a server refuses to serve when its loaded digest differs from that node, and both directions are proven by test - a deliberately mismatched digest refuses and a matching one serves.",
-      "slug": "sn-schema-version-authority",
-      "why_now": "A schema migration just left 21 long-lived MCP servers serving a pre-rename schema against a post-rename graph, with no way for either side to detect it; the graph records a version node for its other two external authorities and none for the schema, so this is a gap in an existing pattern rather than new machinery."
-    }
-  ],
-  "starts": "2026-09-14",
-  "status": "planned",
-  "summary": "Planned behind S9 at the lead's direction (2026-08-12): quality lands before human review so reviewer attention is never spent on docs the pipeline was about to improve.",
-  "theme": "WEST expert review and catalog release",
-  "type": "sprint",
-  "version": 3
-}</script>
+  <script type="application/json" id="reckon-resource-state">{"description":"One subject in two acts: the rehearsal that proves the review surface behaves, and the upstream release it leads to. They were split across two sprints, which parked the release behind a sprint boundary rather than behind its real prerequisite; they are now one sprint so the gate that opens the release is visible from the release itself.","ends":"2026-10-02","id":"S10","items":[{"done_when":"Every WEST row has an explicit human accept/change/hold disposition with complete current name, source, description, and review evidence; requested changes pass the ordinary pipeline.","slug":"sn-west-review-rehearsal","why_now":"Human experts review the refreshed cohort at the new docs standard; the census pre-screen and 14-source residual close first."},{"done_when":"The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release state while retaining audit history.","slug":"sn-west-catalog-release","why_now":"Every barrier this release must not ship around now lives in S12: the embedding-coverage gate and the 78 unauthorized relocations. Scheduling the RC in S10 put it BEFORE both, which is the premature release those plans exist to prevent - two error-level sprint-order inversions. S13 places it downstream of the whole barrier set."},{"done_when":"The coverage shortfall is measured over the release set and the whole accepted corpus with sanity counts; missing embeddings on real descriptions are separated from missing descriptions; Gate A's assertion and threshold are recovered; and the gate is fixed, deliberately relaxed with a written threshold, or the affected identities withheld with named reasons.","slug":"sn-embedding-coverage-gate","why_now":"A gate that fails and is downgraded to advisory has stopped being a gate, and the next consumer of that export is a release candidate."},{"done_when":"Fresh authority built and hashed inside the applying invocation; admitted and refused counts with verbatim reasons; receipts recovered by run_id plus manifest digest; replay write-free; the unauthorized-relocation class re-measured to zero or to named refusals; the two export-cycle identities released.","slug":"sn-relocation-retirement-apply","why_now":"The only residual with no external dependency. Program proved at a495fb07 and prevention landed at b926b8dd, so retirement is now durable where an earlier governed deletion was undone."}],"starts":"2026-09-14","status":"planned","summary":"Planned behind S9 at the lead's direction (2026-08-12): quality lands before human review so reviewer attention is never spent on docs the pipeline was about to improve.","theme":"Put the WEST batch in front of a physicist, and release what comes back","type":"sprint","version":9}</script>
 </main>
 </body>
 </html>
