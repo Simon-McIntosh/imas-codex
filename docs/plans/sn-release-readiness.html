@@ -475,6 +475,51 @@
   ones must not be closed as cosmetic without demonstrating the export path is sound.
 </p>
 
+<h2 id="s12">&#167;12 &mdash; Two defect classes a rescore surfaced before spending</h2>
+<p>
+  A bounded 32-name rescore on 2026-09-01 hit its admission gate before any review spend
+  and re-quarantined three candidates. Tracing them found two unrelated defects, both
+  measured graph-wide rather than left as anecdotes.
+</p>
+<p>
+  <strong>A name contradicting its own DD-authoritative unit.</strong>
+  <code>toroidal_angle_of_secondary_x_point</code> is bound to
+  <code>dd:equilibrium/time_slice/boundary_secondary_separatrix/x_point/r</code> &mdash;
+  the major-radius coordinate, unit <code>m</code>. The composer named a length an angle,
+  contradicting a unit the pipeline injects post-LLM and therefore already held. Only
+  <strong>3</strong> names carry an angle-word against a length unit and 2 are superseded,
+  so the class is small; the check that would catch it &mdash; nothing named
+  <code>*_angle</code> may carry a length unit &mdash; does not exist.
+</p>
+<p>
+  <strong>Refine products with no source binding.</strong>
+  <code>flux_surface_normal_neutral_energy_diffusion_coefficient</code> and
+  <code>flux_surface_normal_momentum_convection_velocity</code> both sit at
+  <code>chain_length 3</code>, the refine cap, with <strong>zero</strong>
+  <code>StandardNameSource</code>. Graph-wide: <strong>126</strong> names at
+  <code>chain_length &ge; 3</code>, of which <strong>78 (62%) are unsourced</strong>.
+  An unsourced name cannot be validated against a DD path, re-derived, or explained, and
+  would ship ungrounded. What this owes first is a read-only determination of whether the
+  78 lost their binding at mint time or had it migrated away later, and how many are
+  recoverable from their <code>REFINED_FROM</code> predecessor &mdash; that decides whether
+  the remedy is a repair or a rebuild.
+</p>
+<p>
+  <strong>Ordered-position tokens in live accepted identities.</strong> The naming rule holds
+  that ordered sample positions never enter identity and that an unavailable non-ordinal
+  identity is a vocabulary gap, never a nearest-object substitution. Seven accepted names
+  breach it: the six strain-gauge direction enumerations
+  <code>x/y/z_first_</code> and <code>x/y/z_second_measurement_direction_unit_vector_of_strain_gauge</code>,
+  plus <code>vertical_coordinate_of_primary_x_point</code>. <strong>The six strain-gauge names
+  are to be corrected through <code>sn edit</code></strong> &mdash; the sanctioned path, with a
+  mandatory reason, never a hand edit &mdash; accepting that a non-ordinal identity may prove
+  to be the vocabulary gap the rule anticipates. The primary/secondary X-point pair is left
+  alone: that distinction is established tokamak terminology rather than an arbitrary index.
+  Nine further hits are legitimate physics and are NOT violations &mdash;
+  <code>first_wall</code> is a component and <code>first orbit loss</code> a fast-particle
+  term, which is why this was counted by inspection rather than by pattern.
+</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="unreviewed-in-first-release" data-choice="include-structural-only" data-by="Simon McIntosh" data-when="2026-08-23T08:42:13+00:00">
