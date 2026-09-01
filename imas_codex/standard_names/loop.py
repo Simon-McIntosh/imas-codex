@@ -238,6 +238,96 @@ def _count_scope_names(
         return 0
 
 
+async def _drain_scoped_standard_name_embeddings(
+    scope_run_id: str,
+    mgr: Any,
+    *,
+    on_event: Callable[[dict[str, Any]], None] | None = None,
+) -> int:
+    """Embed every pending StandardName in one run scope and prove coverage.
+
+    Operational pools can write or replace descriptions until they quiesce, so
+    a background embed worker is not a completion barrier. This final bounded
+    drain uses the StandardName embed claim protocol, then independently checks
+    accepted described rows so an active claim or partial write cannot make an
+    empty claim batch look like complete coverage.
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import (
+        claim_embed_batch,
+        release_embed_claims,
+    )
+    from imas_codex.standard_names.workers import process_embed_batch
+
+    written_total = 0
+    drain_stop_event = asyncio.Event()
+    while True:
+        items = await asyncio.to_thread(
+            claim_embed_batch,
+            limit=100,
+            scope_run_id=scope_run_id,
+        )
+        if not items:
+            break
+        try:
+            written = await process_embed_batch(
+                items,
+                mgr,
+                drain_stop_event,
+                on_event=on_event,
+            )
+        except Exception:
+            await asyncio.to_thread(
+                release_embed_claims,
+                [item["id"] for item in items],
+                items[0]["claim_token"],
+            )
+            raise
+        if written != len(items):
+            await asyncio.to_thread(
+                release_embed_claims,
+                [item["id"] for item in items],
+                items[0]["claim_token"],
+            )
+            raise RuntimeError(
+                "scoped StandardName embedding drain persisted "
+                f"{written} of {len(items)} claimed rows"
+            )
+        written_total += written
+
+    with GraphClient() as gc:
+        rows = list(
+            gc.query(
+                """
+                MATCH (sn:StandardName)
+                WHERE sn.run_id = $scope_run_id
+                  AND sn.name_stage = 'accepted'
+                  AND coalesce(sn.description, '') <> ''
+                  AND sn.embedding IS NULL
+                WITH sn ORDER BY sn.id
+                RETURN count(sn) AS gap_count,
+                       collect(sn.id)[0..50] AS gap_ids
+                """,
+                scope_run_id=scope_run_id,
+            )
+        )
+    residue = dict(rows[0]) if rows else {}
+    gap_count = int(residue.get("gap_count") or 0)
+    if gap_count:
+        raise RuntimeError(
+            "scoped StandardName embedding coverage remains incomplete: "
+            f"{gap_count} accepted described row(s), ids="
+            f"{list(residue.get('gap_ids') or [])}"
+        )
+    logger.info(
+        "run_sn_pools: scoped StandardName embedding drain wrote %d row(s); "
+        "no accepted described embedding gaps remain (run_id=%s)",
+        written_total,
+        scope_run_id,
+    )
+    return written_total
+
+
 def _build_pool_specs(
     mgr: Any,
     stop_event: asyncio.Event,
@@ -2170,6 +2260,13 @@ async def run_sn_pools(
                         "completion: %s",
                         _json.dumps(terminal_residue, sort_keys=True, default=str),
                     )
+
+        if summary.stop_reason in {"completed", "no_eligible_work"} and scope_run_id:
+            await _drain_scoped_standard_name_embeddings(
+                scope_run_id,
+                shared_mgr,
+                on_event=on_event,
+            )
 
     except KeyboardInterrupt:
         summary.stop_reason = "interrupted"
