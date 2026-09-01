@@ -423,7 +423,9 @@ def check_graph_exists(data_dir: Path | None = None) -> bool:
 # ============================================================================
 
 
-def backup_existing_data(reason: str, data_dir: Path | None = None) -> Path | None:
+def write_data_presence_marker(
+    reason: str, data_dir: Path | None = None
+) -> Path | None:
     """Create a marker for pre-operation recovery (lightweight)."""
     target = data_dir or DATA_DIR
     timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
@@ -463,10 +465,12 @@ def backup_graph_dump(
     run_neo4j_dump(profile, dumps_dir)
 
     neo4j_dump = dumps_dir / "neo4j.dump"
-    if neo4j_dump.exists():
-        shutil.move(str(neo4j_dump), str(dump_path))
-    else:
+    if not neo4j_dump.exists():
         raise click.ClickException("Dump file not created by neo4j-admin")
+    if neo4j_dump.stat().st_size == 0:
+        raise click.ClickException("Dump file created by neo4j-admin is empty")
+
+    shutil.move(str(neo4j_dump), str(dump_path))
 
     return dump_path
 

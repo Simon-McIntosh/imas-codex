@@ -7,14 +7,17 @@ All subprocess calls and filesystem access are mocked.
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
+import click
 import pytest
 
 from imas_codex.graph.neo4j_ops import (
     RECOVERY_DIR,
-    backup_existing_data,
+    backup_graph_dump,
     check_stale_neo4j_process,
     parse_dump_error,
+    write_data_presence_marker,
 )
 
 # ============================================================================
@@ -62,15 +65,15 @@ class TestCheckStaleNeo4j:
 
 
 # ============================================================================
-# backup_existing_data
+# write_data_presence_marker
 # ============================================================================
 
 
-class TestBackupExistingData:
-    """Tests for backup_existing_data()."""
+class TestWriteDataPresenceMarker:
+    """Tests for write_data_presence_marker()."""
 
     def test_creates_recovery_dir(self, tmp_path, monkeypatch):
-        """Backup creates a timestamped recovery directory."""
+        """Marker writing creates a timestamped recovery directory."""
         data_dir = tmp_path / "data"
         data_dir.mkdir()
         (data_dir / "databases").mkdir()
@@ -82,9 +85,73 @@ class TestBackupExistingData:
             tmp_path / "recovery",
         )
 
-        result = backup_existing_data("test-backup", data_dir=data_dir)
+        result = write_data_presence_marker("test-backup", data_dir=data_dir)
         assert result is not None
         assert result.exists()
+
+
+# ============================================================================
+# backup_graph_dump
+# ============================================================================
+
+
+class TestBackupGraphDump:
+    """Tests for backup_graph_dump()."""
+
+    def test_creates_nonempty_recoverable_artifact(self, tmp_path, monkeypatch):
+        data_dir = tmp_path / "neo4j"
+        profile = SimpleNamespace(name="test", data_dir=data_dir)
+        output = tmp_path / "backups" / "test.dump"
+
+        monkeypatch.setattr(
+            "imas_codex.graph.profiles.resolve_neo4j",
+            lambda: profile,
+        )
+        monkeypatch.setattr(
+            "imas_codex.graph.profiles.BACKUPS_DIR",
+            output.parent,
+        )
+
+        def create_dump(_profile, dumps_dir):
+            (dumps_dir / "neo4j.dump").write_bytes(b"recoverable graph dump")
+
+        monkeypatch.setattr(
+            "imas_codex.graph.neo4j_ops.run_neo4j_dump",
+            create_dump,
+        )
+
+        result = backup_graph_dump(output=output)
+
+        assert result == output
+        assert result.stat().st_size > 0
+        assert result.read_bytes() == b"recoverable graph dump"
+
+    def test_rejects_empty_dump_artifact(self, tmp_path, monkeypatch):
+        data_dir = tmp_path / "neo4j"
+        profile = SimpleNamespace(name="test", data_dir=data_dir)
+        output = tmp_path / "backups" / "test.dump"
+
+        monkeypatch.setattr(
+            "imas_codex.graph.profiles.resolve_neo4j",
+            lambda: profile,
+        )
+        monkeypatch.setattr(
+            "imas_codex.graph.profiles.BACKUPS_DIR",
+            output.parent,
+        )
+
+        def create_empty_dump(_profile, dumps_dir):
+            (dumps_dir / "neo4j.dump").touch()
+
+        monkeypatch.setattr(
+            "imas_codex.graph.neo4j_ops.run_neo4j_dump",
+            create_empty_dump,
+        )
+
+        with pytest.raises(click.ClickException, match="is empty"):
+            backup_graph_dump(output=output)
+
+        assert not output.exists()
 
 
 # ============================================================================
