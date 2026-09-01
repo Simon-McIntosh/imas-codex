@@ -368,7 +368,7 @@ imas-codex sn run --physics-domain magnetics --dry-run
 imas-codex sn run --min-score 0.85 --rotation-cap 5 --escalation-model openrouter/anthropic/claude-opus-4.7 -c 20
 ```
 
-**Refine-pipeline flags (Phase 8.1):**
+**Refine-pipeline flags:**
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -1020,7 +1020,7 @@ The search system is the core component that provides fast, flexible search capa
 
 ## Future Work
 
-### MCP Resources Implementation (Phase 2 - Planned)
+### MCP Resources (Planned)
 
 We plan to implement MCP resources to provide efficient access to pre-computed IMAS data:
 
@@ -1038,7 +1038,7 @@ We plan to implement MCP resources to provide efficient access to pre-computed I
 - `ids://physics-domains` - Physics domain mappings and relationships
 - `examples://search-patterns` - Common search patterns and workflows
 
-### MCP Prompts Implementation (Phase 3 - Planned)
+### MCP Prompts (Planned)
 
 Specialized prompts for physics analysis and workflow automation:
 
@@ -1056,7 +1056,7 @@ Specialized prompts for physics analysis and workflow automation:
 - `cross-ids-analysis` - Analyze relationships between multiple IDS
 - `imas-python-code` - Generate Python code for data analysis
 
-### Performance Optimization (Phase 4 - In Progress)
+### Performance Optimization (In Progress)
 
 Continued optimization of search and tool performance:
 
@@ -1074,7 +1074,7 @@ Continued optimization of search and tool performance:
 - **Multi-Format Export**: Optimized export formats (raw, structured, enhanced)
 - **Selective AI Enhancement**: Conditional AI enhancement based on request context
 
-### Testing and Quality Assurance (Phase 5 - Planned)
+### Testing and Quality Assurance (Planned)
 
 Comprehensive testing strategy for all MCP components:
 
