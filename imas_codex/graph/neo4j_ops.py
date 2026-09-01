@@ -34,6 +34,23 @@ DATA_DIR = Path.home() / ".local" / "share" / "imas-codex" / "neo4j"
 NEO4J_LOCK_FILE = Path.home() / ".config" / "imas-codex" / "neo4j-operation.lock"
 
 
+def graph_archive_stamp(
+    commit_short: str | None = None,
+    created_at: datetime | None = None,
+) -> str:
+    """Return the immutable revision and UTC time stamp used by graph archives."""
+    if commit_short is None:
+        from imas_codex.graph.ghcr import get_git_info
+
+        commit_short = get_git_info()["commit_short"]
+    if not commit_short:
+        raise click.ClickException("Cannot name graph archive without a git revision")
+
+    timestamp = created_at or datetime.now(UTC)
+    utc_timestamp = timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M%SZ")
+    return f"dev-{commit_short}-{utc_timestamp}"
+
+
 def neo4j_image() -> Path:
     """Resolve the Neo4j Apptainer SIF image path."""
     from imas_codex.settings import get_neo4j_image_path
@@ -446,7 +463,8 @@ def backup_graph_dump(
 
     Args:
         output: Output path override.  Defaults to
-            ``~/.local/share/imas-codex/backups/{profile}-{timestamp}.dump``.
+            ``~/.local/share/imas-codex/backups/`` with a filename carrying
+            the graph profile, short git revision, and UTC timestamp.
 
     Returns:
         Path to the created dump file.
@@ -456,8 +474,7 @@ def backup_graph_dump(
     profile = resolve_neo4j()
     BACKUPS_DIR.mkdir(parents=True, exist_ok=True)
 
-    timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
-    dump_path = output or (BACKUPS_DIR / f"{profile.name}-{timestamp}.dump")
+    dump_path = output or (BACKUPS_DIR / f"{profile.name}-{graph_archive_stamp()}.dump")
 
     dumps_dir = profile.data_dir / "dumps"
     dumps_dir.mkdir(parents=True, exist_ok=True)
