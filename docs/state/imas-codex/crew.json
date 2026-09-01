@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T23:41:00",
+  "updated": "2026-09-01T23:56:57",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2775,6 +2775,17 @@
         "session_model": "gpt-5.6-sol",
         "sessions": {
           "gpt-5.6-sol": "01a05dd4-d637-7143-95d2-82f1120bb3ec"
+        },
+        "created": "2026-09-01"
+      },
+      {
+        "id": "test-s10freeze",
+        "harness": "codex",
+        "role": "test",
+        "session_id": "01a05eec-45af-7642-8253-def99404124e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05eec-45af-7642-8253-def99404124e"
         },
         "created": "2026-09-01"
       },
@@ -48285,9 +48296,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T214211133054-n-west-stage5-freeze-check",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage5-freeze-check",
+        "node_definition": {
+          "done_when": "crew/reports/west-stage5-freeze-check.md records the before snapshot summary (375 approved, 1 contested expected), the sn run command with exit status, log path and spend, the after snapshot, and a row-level diff proving zero changes to any approved or contested row while stating how many non-frozen names the run did touch",
+          "estimated_hours": null,
+          "goal": "Prove the folded PR 3 state is frozen against the ordinary pipeline by snapshotting every approved and contested StandardName (id, name_stage, docs_stage, description hash, reviewer scores, catalog_* provenance) with Cypher, running one unscoped 'imas-codex sn run --flush --cost-limit 5' to completion, and re-taking the identical snapshot",
+          "id": "n-west-stage5-freeze-check",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T214211133054-n-west-stage5-freeze-check/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "crew/reports/west-stage5-freeze-check.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s10freeze",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T21:42:17Z",
+        "completed_at": "2026-09-01T21:56:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 869,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 869,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "af3fb7c08b75bfde7f43f4efdbb8ef953b8c4dbb",
+        "commits": [
+          "7ef24d292973a23fa821ae31916b13b73f2c90fa"
+        ],
+        "changed_lines": {
+          "added": 146,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "Cypher snapshot; imas-codex sn run --flush --cost-limit 5; Cypher snapshot; canonical diff",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": "sha256:f73fd2a66a88bdb1eb3d1a8a0caeb45b7e5fdddc259810bd67127a3c992fc461"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T214211133054-n-west-stage5-freeze-check/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eec-45af-7642-8253-def99404124e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6251264,
+            "cached_input_tokens_cumulative": 6251264,
+            "input_tokens": 6561352,
+            "input_tokens_cumulative": 6561352,
+            "output_tokens": 19096,
+            "output_tokens_cumulative": 19096,
+            "reasoning_output_tokens": 6781,
+            "reasoning_output_tokens_cumulative": 6781
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1250
+    "_version": 1253
   }
 }

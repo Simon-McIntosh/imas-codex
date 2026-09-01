@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="143">
+<meta name="plan-version" content="145">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29">
 </head>
 <body>
   <main class="plan-doc">
@@ -2603,6 +2603,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260901T2141-resolve-fix" data-who="reckon-ship" data-when="2026-09-01T21:41:00Z">
     <div class="r-comment-body">Stage 4b (report 4d078c6f) was a negative result: sn resolve breakdown_initial_time --override moved the name to approved with contested_resolution recorded and left pulse_duration contested (contested_total 1), but the node kept its pre-edit description and the catalog_* provenance stayed null, so the resolver approved wording it never applied. Repaired at 5f0799f5 (merged ccb712da): resolve_contested_override now materializes the stored steered edit (docs_hint into description and documentation, or name_hint into the id) atomically with the approved transition; 58 approval tests plus 4 CLI tests pass. Live graph state after 4b: 375 approved (374 auto plus breakdown_initial_time with the OLD text), 1 contested. Stage 5 freeze-check next, then stage 6 undo and 6b re-fold with the repaired code, which will also materialize the correct wording and provenance.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T214211133054-n-west-stage5-freeze-check" data-who="test-s10freeze" data-when="2026-09-01T21:56:46Z">
+    <div class="r-comment-body"><p>freeze gate FAILED: one unscoped sn run --flush --cost-limit 5 left 375 approved + 1 contested census intact but changed review_mean_score 0.9375-&gt;0.903125 and review_disagreement false-&gt;true on approved breakdown_initial_time (docs_stage still drafted, so the docs review pool claimed it); 135 non-frozen names touched; run spent 5.4396 against a 5.00 cap (1.088x)</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260901T2157-freeze-fail" data-who="reckon-ship" data-when="2026-09-01T21:57:00Z">
+    <div class="r-comment-body">Stage 5 freeze-check FAILED (report 7ef24d29, merged c3377902), and that is the rehearsal doing its job. One unscoped sn run --flush --cost-limit 5 kept the census at 375 approved + 1 contested and touched 135 non-frozen names (12 created, 5 deleted, 118 changed), but on the approved breakdown_initial_time it changed review_mean_score 0.9375 to 0.903125 and review_disagreement false to true: the name was approved with docs_stage still drafted, the docs review pool claimed it, the final docs persistence became a no-op on a stage mismatch, yet the aggregate review fields were written. Defect: pool claims and review aggregate writes do not exclude name_stage approved or contested. Cost note: the run spent 5.4396 against a 5.00 cap (1.088x, in-flight reviews completing after the budget signal), a second post-July data point on cap overshoot. Fix node dispatched; stage 5 repeats after it, then stage 6 undo and 6b re-fold.</div>
 </div>
 </section>
 </main>
