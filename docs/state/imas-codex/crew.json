@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T00:07:45",
+  "updated": "2026-09-02T00:20:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -48513,9 +48513,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T220832290350-n-west-stage5-freeze-check-2",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-west-stage5-freeze-check-2",
+        "node_definition": {
+          "done_when": "crew/reports/west-stage5-freeze-check-2.md records the before snapshot summary, the sn run command with exit status, SNRun id, log path and exact spend against the cap, the after snapshot, and a row-level diff over all approved and contested rows reporting zero modified fields (naming breakdown_initial_time explicitly as the drafted-docs positive control), while stating how many non-frozen names the run touched",
+          "estimated_hours": null,
+          "goal": "Repeat the freeze-check with the frozen-stage guard in place: snapshot every approved and contested StandardName (id, name_stage, docs_stage, description hash, reviewer scores, review_mean_score, review_disagreement, catalog_* provenance) with the same ordered Cypher projection as crew/reports/west-stage5-freeze-check.md, run one unscoped 'imas-codex sn run --flush --cost-limit 5' to completion, and re-take the identical snapshot",
+          "id": "n-west-stage5-freeze-check-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T220832290350-n-west-stage5-freeze-check-2/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "crew/reports/west-stage5-freeze-check-2.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s10freeze",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T22:08:38Z",
+        "completed_at": "2026-09-01T22:19:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 661,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 661,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "897b2b6db0b7a8fa91a79f340e2c4c46d36897e4",
+        "commits": [
+          "bfe3e39078c4ec0c617d3e4db6b13bed172a7ea1"
+        ],
+        "changed_lines": {
+          "added": 171,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "Cypher snapshot; imas-codex sn run --flush --cost-limit 5; Cypher snapshot",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": "sha256:ea4e407b46ea4f5ae8b26140c1da618916d6f4c98767008abc408512ec44ca1c"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T220832290350-n-west-stage5-freeze-check-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eec-45af-7642-8253-def99404124e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 5836032,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 5989736,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15136,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4167
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1256
+    "_version": 1257
   }
 }

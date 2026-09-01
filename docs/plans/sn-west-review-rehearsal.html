@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="147">
+<meta name="plan-version" content="148">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2615,6 +2615,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260902T0008-freeze-guard" data-who="reckon-ship" data-when="2026-09-02T00:08:00Z">
     <div class="r-comment-body">Frozen-stage guard landed at 81b3e71d (merged c0c0bd07): approved and contested are the shared frozen name stages; all six pool claims exclude them at seed, expansion and token readback; generate_name skips sources already bound to a frozen name; update_review_aggregates skips them; persist_reviewed_docs already required accepted; automatic approval and contested override now settle docs_stage to accepted. 10 focused regressions, 282/282 in the pools/workers/approve/promote subset. Stage 5 freeze-check repeats against the live cohort (breakdown_initial_time still sits at docs_stage drafted from the pre-fix approval, which makes it the positive control for the claim exclusion).</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T220832290350-n-west-stage5-freeze-check-2" data-who="test-s10freeze" data-when="2026-09-01T22:19:39Z">
+    <div class="r-comment-body"><p>freeze-check blocked by a regression in the guard: _claim_sn_atomic read-back references $frozen_name_stages but binds only token and drain_scope_id, so five pools raised 1,343 ParameterMissing errors, processed 0 names, spent 0.00; frozen rows unchanged 376/376 but that proves nothing about the guard</p></div>
 </div>
 </section>
 </main>
