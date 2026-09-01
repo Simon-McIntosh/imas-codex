@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="86">
+<meta name="plan-version" content="88">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/embedding-gap.md,docs/evidence/sn-release-readiness/suite-four-disposition.md,docs/evidence/sn-release-readiness/import-order-timeout.md,docs/evidence/sn-release-readiness/strain-ordinal-edit.md,docs/evidence/sn-release-readiness/unsourced-ancestry.md">
 <meta name="plan-impl" content="0.94">
@@ -930,6 +930,12 @@
 </div>
 <div class="r-comment" data-section="s12" data-id="c-20260901T1545-unsourcedorigin" data-who="reckon-ship" data-when="2026-09-01T15:45:00+00:00">
     <div class="r-comment-body">n-unsourcedorigin landed — gate origin-fully-attributed passed; measure 72 of 72 attributed with no residual; artifact docs/evidence/sn-release-readiness/unsourced-origin.md; positive control 4675 StandardName, 3104 chain_length-populated, 126 at chain cap, 3576 origin-populated, 9678 StandardNameSource, 5299 PRODUCED_NAME. THE SPLIT IS EXACT AND BOTH MINTING PATHS ARE ALREADY CLOSED, which changes the risk profile entirely: 37 roots came from the legacy generic writer write_standard_names and 35 from catalog_import._write_import_entries, WHICH CURRENT MAIN HAS REMOVED. Zero roots carry a derived origin and zero carry consolidation provenance, so the fold and dedup hypotheses in this section's text were wrong about the mechanism while right that it was not the composer. The current generated-name persist is TRANSACTIONALLY SOURCE-GATED, so no new unsourced root can be minted today. Independently corroborated by the same day's import-guard audit, which found main had removed the only arbitrary bulk-import writer and that its replacements make catalog-supplied origin and status unreachable. WHAT REMAINS OPEN IS PROPAGATION, NOT MINTING, and that distinction is the actionable finding: persist_refined_name still passes _allow_empty_noop=True and carries an unsourced predecessor forward, so an existing ungrounded identity can still multiply through refine even though none can be created from scratch. The 72 are therefore a bounded legacy population rather than a growing one, and the open decision is whether that persist must REFUSE an empty authoritative source cohort. IMPL IS SET TO 0.94 RATHER THAN 1.0: this section gained rebuild work after impl first reached 1.0, and carrying 1.0 while section 12 held open work was a defect in this plan's own record.</div>
+</div>
+<div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T160441383261-n-sourceattach" data-who="impl-sourceattach" data-when="2026-09-01T16:13:02Z">
+    <div class="r-comment-body"><p>5/5 bound via apply_signed_manifest with receipts, 0 identity changes, idempotent on replay, USD 0.000000 of 15.00; 5 further candidates refused on unit mismatch. CRITERION WAS INSUFFICIENT AND THE BINDINGS NEED RE-JUDGING: the node met its stated done-when exactly, but that done-when made unit equality the discriminator, and every one of the five carries an unstated semantic element - aggregation, GGD locus, module locus, central-measurement locus, non-linear-response qualifier - so under the lead's stricter test of whether a pipeline run on that source would regenerate the same name, each is inexact by the amount its delta names</p></div>
+</div>
+<div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T160505079160-n-opticalordinal" data-who="impl-ordinaloptic" data-when="2026-09-01T16:11:17Z">
+    <div class="r-comment-body"><p>VOCABULARY GAP, 0 graph mutations, 0 LLM calls, USD 0.000000 of 10.00: the non-ordinal form local_tangential_back_surface_radius_of_optical_element fails ISN grammar round-trip, same gap as the strain gauges. The ordinal traces to spectrometer_visible/channel/optical_element/back_surface/x1_curvature where x1 enumerates the first local tangential direction. Inconsistency surfaced: the x2 sibling is bound to vertical_back_surface_curvature_of_optical_element, so one index became an ordinal and the other a direction</p></div>
 </div>
 </section>
 </main>

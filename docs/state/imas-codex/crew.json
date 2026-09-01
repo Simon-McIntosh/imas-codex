@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T17:44:40",
+  "updated": "2026-09-01T18:23:49",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1136,6 +1136,17 @@
         "created": "2026-09-01"
       },
       {
+        "id": "impl-ordinaloptic",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05db7-a0ae-7703-bd73-214af4f8b3da",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05db7-a0ae-7703-bd73-214af4f8b3da"
+        },
+        "created": "2026-09-01"
+      },
+      {
         "id": "impl-originrule",
         "harness": "codex",
         "role": "implement",
@@ -1628,6 +1639,17 @@
         "role": "implement",
         "session_id": "01a02e10-63ca-7872-892b-3f2a2a2891c2",
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-sourceattach",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a05db7-4d9d-7a62-bd28-045d9ff50128",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05db7-4d9d-7a62-bd28-045d9ff50128"
+        },
+        "created": "2026-09-01"
       },
       {
         "id": "impl-sourcesearch",
@@ -2490,6 +2512,15 @@
         "role": "test",
         "session_id": "01a02f75-6f0b-7883-a6f0-75a8542fabee",
         "created": "2026-08-23"
+      },
+      {
+        "id": "test-strandcause",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "test-surfacerecovery",
@@ -43734,9 +43765,197 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260901T160441383261-n-sourceattach",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712a",
+        "node": "n-sourceattach",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/source-attach.md names each of the five identities with the DD path chosen, both units shown equal, the candidates rejected and why, and the semantic delta between name and DD quantity stated per row including whether an aggregation or locus is unstated; confirms via graph query that each of the five now resolves a StandardNameSource where it previously resolved none with a before and after count, that no identity string changed, and that the binding was written by the sanctioned operator rather than a raw Cypher write; reports the exact USD spent from attributable LLMCost rows against a 15 dollar ceiling; and refuses any row whose unit does not match, naming it rather than binding it",
+          "estimated_hours": 0.8,
+          "goal": "Bind the five attachable ungrounded standard names to their unit-matched DD paths through the governed path",
+          "id": "n-sourceattach",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T160441383261-n-sourceattach/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712a",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/source-attach.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-sourceattach",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T16:04:48Z",
+        "completed_at": "2026-09-01T16:13:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 494,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 494,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "c1288bf9e6a9bdfa1fed98c857409ac354f89db5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "signed operator preview, live graph postflight, idempotent replay, cost postflight",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/source-attach.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T160441383261-n-sourceattach/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05db7-4d9d-7a62-bd28-045d9ff50128",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4520960,
+            "cached_input_tokens_cumulative": 4520960,
+            "input_tokens": 4751794,
+            "input_tokens_cumulative": 4751794,
+            "output_tokens": 20101,
+            "output_tokens_cumulative": 20101,
+            "reasoning_output_tokens": 7278,
+            "reasoning_output_tokens_cumulative": 7278
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260901T160505079160-n-opticalordinal",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712a",
+        "node": "n-opticalordinal",
+        "node_definition": {
+          "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/optical-ordinal.md records the sn edit invocation issued for first_local_tangential_back_surface_radius_of_optical_element with its mandatory reason naming the ordinal-index breach, shows a dry run inspected before any live edit, states whether the pipeline produced a non-ordinal replacement or reported a vocabulary gap, names the DD path the ordinal derives from so the reader can see what the index was enumerating, confirms via graph query that the identity was not hand-edited and that its sibling second_local variant received the same treatment or is named as out of scope, and reports the exact USD spent against a 10 dollar ceiling",
+          "estimated_hours": 0.5,
+          "goal": "Dispose the optical-element name that carries an ordinal index through the sanctioned edit path",
+          "id": "n-opticalordinal",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T160505079160-n-opticalordinal/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712a",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/optical-ordinal.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-ordinaloptic",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-01T16:05:10Z",
+        "completed_at": "2026-09-01T16:11:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 367,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 367,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c1288bf9e6a9bdfa1fed98c857409ac354f89db5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn edit dry-run then live sanctioned invocation, graph and LLMCost verification",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/optical-ordinal.md",
+          "log_digest": null
+        },
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T160505079160-n-opticalordinal/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05db7-a0ae-7703-bd73-214af4f8b3da",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2581248,
+            "cached_input_tokens_cumulative": 2581248,
+            "input_tokens": 2733340,
+            "input_tokens_cumulative": 2733340,
+            "output_tokens": 11980,
+            "output_tokens_cumulative": 11980,
+            "reasoning_output_tokens": 3040,
+            "reasoning_output_tokens_cumulative": 3040
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1140
+    "_version": 1147
   }
 }
