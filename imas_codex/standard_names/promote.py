@@ -778,6 +778,10 @@ def _contest(
     score: float,
     threshold: float,
     reason: str,
+    catalog_pr_number: int | None,
+    catalog_pr_url: str | None,
+    catalog_merge_commit_sha: str | None,
+    catalog_reviewer_actor: str | None,
     gc: GraphClient,
 ) -> None:
     """Move a reviewer edit that failed the compliance re-review to 'contested'.
@@ -802,6 +806,10 @@ def _contest(
             sn.contested_reason = $reason,
             sn.contested_at = $ts,
             sn.contested_resolution = null,
+            sn.catalog_pr_number = $pr_number,
+            sn.catalog_pr_url = $pr_url,
+            sn.catalog_merge_commit_sha = $merge_commit,
+            sn.catalog_reviewer_actor = $reviewer_actor,
             sn.claim_token = null,
             sn.claimed_at = null
         """,
@@ -809,6 +817,10 @@ def _contest(
         score=score,
         reason=detail,
         ts=datetime.now(UTC).isoformat(),
+        pr_number=catalog_pr_number,
+        pr_url=catalog_pr_url,
+        merge_commit=catalog_merge_commit_sha,
+        reviewer_actor=catalog_reviewer_actor,
     )
 
 
@@ -1122,6 +1134,10 @@ def run_approval(
                     score=score,
                     threshold=thr,
                     reason=reason,
+                    catalog_pr_number=catalog_pr_number,
+                    catalog_pr_url=catalog_pr_url,
+                    catalog_merge_commit_sha=catalog_merge_commit_sha,
+                    catalog_reviewer_actor=catalog_reviewer_actor,
                     gc=gc,
                 )
                 report.contested.append(
@@ -1152,6 +1168,7 @@ def run_approval(
                     catalog_pr_number=int(catalog_pr_number),
                     catalog_pr_url=str(catalog_pr_url),
                     catalog_merge_commit_sha=str(catalog_merge_commit_sha),
+                    catalog_reviewer_actor=catalog_reviewer_actor,
                     editorial_outcome="unchanged_ratification",
                     gc=gc,
                 ):
@@ -1312,7 +1329,11 @@ def undo_approval(
                     sn.contested_reason = null,
                     sn.contested_at = null,
                     sn.contested_resolution = $resolution,
-                    sn.edit_status = null
+                    sn.edit_status = null,
+                    sn.catalog_pr_number = null,
+                    sn.catalog_pr_url = null,
+                    sn.catalog_merge_commit_sha = null,
+                    sn.catalog_reviewer_actor = null
                 RETURN sn.id AS id ORDER BY id
                 """,
                 batch=batch,
