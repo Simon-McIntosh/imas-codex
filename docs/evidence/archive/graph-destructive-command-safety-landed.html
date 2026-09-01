@@ -232,6 +232,137 @@
     a suite run that is green only within a fence as unverified outside it.</p>
   </section>
 
+  <section id="backup-currency">
+    <h2>How far behind the backup is, rather than whether it is current</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-backupcurrency</code>, commit
+    <code>c3eaf56d</code>.</p>
+    <p><strong>The deliverable asked for a verdict and the measurement showed why a verdict is
+    the wrong answer.</strong> A running store checkpoints continuously, so it is
+    <em>always</em> newer than its last backup: a boolean &ldquo;is the backup current&rdquo;
+    reads false forever and teaches nothing. <code>get_backup_currency()</code> therefore
+    returns a typed <code>current</code> / <code>stale</code> / <code>no_backup</code> result
+    carrying both paths, both UTC modification times, and the lag in seconds, and
+    <code>graph status</code> prints all of it.</p>
+    <p>Zero-byte files are excluded from selection, so an artifact that exists and contains
+    nothing cannot present itself as a restore point. That is the same defect class the dump
+    helper closed one level down, and closing it in both places is what stops the marker shape
+    reappearing under a new name.</p>
+    <p><strong>The worker caught its own aiming error and reported it.</strong> Its first live
+    verification scanned the profile <em>root</em> and selected <code>logs/debug.log</code> as
+    the newest live file &mdash; an instrument firing correctly while pointed one directory too
+    high. Narrowing to <code>data/</code> made the reported authority the database checkpoint
+    the deliverable names.</p>
+    <p>Pre-change <strong>3 failed / 0 passed</strong>; post-change 3 passed; combined core run
+    15 passed / 0 failed, ruff clean. Live reading at merge: newest backup
+    <code>2026-09-01T12:52:53Z</code> against <code>checkpoint.0</code> at
+    <code>16:10:20Z</code> &mdash; <strong>11,847 s stale</strong>, identical to the figure
+    measured independently before dispatch.</p>
+  </section>
+
+  <section id="manifest-scope">
+    <h2>An archive manifest that states what the archive contains</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-manifestscope</code>, commits
+    <code>fcf0027e</code> and <code>76596e72</code>.</p>
+    <p>The manifest now carries <code>node_count</code>, <code>relationship_count</code> and
+    <code>label_counts</code> measured from the graph each dump actually represents, so a
+    facility-scoped or DD-only export reports its own post-filter contents rather than the
+    unfiltered source &mdash; a live count on a filtered export is a wrong number that looks
+    right. Labels are counted with <code>UNWIND labels(n)</code>, so a multi-labelled node
+    contributes to every label rather than only its primary one. Unfiltered counts are captured
+    <em>before</em> the service stop, because the dump path has already stopped Neo4j by the
+    time the manifest is written.</p>
+    <p>Focused regression <strong>0 passed / 2 failed &rarr; 2 passed / 0 failed</strong>;
+    <code>tests/cli</code> <strong>171 passed / 1 failed &rarr; 172 passed / 0 failed</strong>.
+    The regression pins 11 nodes / 7 relationships unfiltered and 4 / 2 post-filter.</p>
+  </section>
+
+  <section id="documentation">
+    <h2>The documented procedure is now the implemented one</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-selectordocs</code>, commits
+    <code>b2c1a298</code> and <code>7d86f251</code>.</p>
+    <p>The audit found one false sentence. Enumerating the documented surface against the live
+    help output found that sentence was the <em>smallest</em> of three defects.</p>
+    <table>
+      <caption>What the documentation claimed, measured against <code>imas-codex graph --help</code></caption>
+      <thead><tr><th>Claim</th><th>Where</th><th>Reality</th></tr></thead>
+      <tbody>
+        <tr><td><code>graph backup</code>, <code>graph restore</code></td><td><code>graph.md</code>, <code>README.md</code></td><td>Not commands</td></tr>
+        <tr><td><code>graph db start/status/shell</code></td><td><code>README.md</code></td><td>No such subgroup</td></tr>
+        <tr><td><code>graph tunnel …</code></td><td><code>README.md</code></td><td>Lives at <code>imas-codex tunnel</code></td></tr>
+        <tr><td><code>prune --backups --older-than</code></td><td>both</td><td>Neither flag exists; <code>prune</code> prunes registry tags</td></tr>
+        <tr><td><code>graph load ARCHIVE</code>, <code>graph clear</code></td><td>three places</td><td>Both now require a target &mdash; usage error as written</td></tr>
+        <tr><td>&ldquo;all graph commands take <code>--graph/-g</code>&rdquo;</td><td><code>AGENTS.md</code></td><td><code>status</code> takes only <code>--registry</code>; <code>clear</code> only <code>--force</code></td></tr>
+        <tr><td><code>resolve_graph()</code> as an accessor</td><td><code>AGENTS.md</code></td><td>Function does not exist</td></tr>
+      </tbody>
+    </table>
+    <p>The last two matter beyond staleness: they told an <em>agent</em> that a destructive
+    command could be aimed with a flag that does not exist, and pointed it at a function that
+    does not exist. That is the selector defect one level further out.</p>
+    <p>Verification: a live Click audit of <strong>100 checks across all 18 graph commands, 0
+    failures</strong>, carrying its own positive control confirming the removed names are
+    genuinely absent rather than merely unsearched. Coordinator check before merge confirmed
+    all four newly-cited accessors exist &mdash; because a documentation fix that introduces a
+    new false claim is the defect it was sent to repair.</p>
+  </section>
+
+  <section id="naming-parity">
+    <h2>One archive grammar across every producer</h2>
+    <p><strong>Landed 2026-09-01</strong> &mdash; node <code>n-namingparity</code>, commit
+    <code>815b848f</code>.</p>
+    <p>The local pair was only half the problem. Three remote script builders and the local
+    push layer formed PID-based names such as
+    <code>imas-codex-graph-export-$$.tar.gz</code> while <em>already holding</em> the version
+    tag and commit they discarded. They now receive outer and inner names from a
+    caller-computed <code>graph_archive_stamp</code>, so the grammar lives in one helper
+    instead of being copied into each generated shell script &mdash; which was the split
+    authority that produced the defect.</p>
+    <p><strong>Working names changed; published identities did not</strong>, and the worker
+    drew that line itself. Every final GHCR reference remains
+    <code>&lt;registry&gt;/&lt;package&gt;:&lt;git-tag&gt;</code>, the OCI version and commit
+    annotations remain the release tag and full commit, and latest-tagging is unchanged. The
+    only tag-bearing name replaced was the local temporary ORAS layer.</p>
+    <p>An exported <code>remote_export_graph</code> duplicate with zero callers was
+    <em>removed</em> rather than converted, so no producer retains PID naming &mdash; verified
+    unreferenced across the tree against a positive control, because removing an exported
+    symbol is the same reference-scoping class that bit this plan four times.</p>
+    <p>Focused regression <strong>1 passed / 1 failed &rarr; 3 passed / 0 failed</strong>;
+    <code>tests/cli</code> 174 passed / 0 failed; ruff clean on five paths. The test asserts one
+    grammar across nine producers.</p>
+  </section>
+
+  <section id="reference-scoping">
+    <h2>The failure that recurred four times in one day</h2>
+    <p>Not a node &mdash; a pattern worth extracting, because it accounted for more disruption
+    than any single defect here and every instance looked different from inside.</p>
+    <p><strong>The shape: a change is made to a shared surface, and something that references
+    that surface is not in the changing node&rsquo;s write scope.</strong> Four instances:</p>
+    <table>
+      <thead><tr><th>#</th><th>Change</th><th>Unscoped reference</th><th>Caught by</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rename <code>backup_existing_data</code></td><td><code>tests/core/test_neo4j_ops.py</code> imports it</td><td>the worker&rsquo;s own fence</td></tr>
+        <tr><td>2</td><td><code>graph load</code> requires a target</td><td><code>test_graph_destructive_backup.py</code> invokes it</td><td><strong>nothing &mdash; it reached main</strong></td></tr>
+        <tr><td>3</td><td>New dump inspector in the export path</td><td><code>test_graph_archive_naming.py</code> feeds a synthetic dump</td><td>the worker&rsquo;s own fence</td></tr>
+        <tr><td>4</td><td>Remote builders take caller-supplied names</td><td><code>cli/release.py</code> is the sole caller</td><td>the worker&rsquo;s own fence</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Instances 1, 3 and 4 were caught because the reference and the change sat inside
+    one node&rsquo;s view. Instance 2 crossed a node boundary and escaped</strong> &mdash; each
+    node was green in isolation, and the interaction broke the earlier one. That is precisely
+    the arrangement no single fence can see, and it left the suite red on
+    <code>origin/main</code> until two independent measurements found it minutes apart.</p>
+    <p>Two countermeasures the record supports. <strong>Enumerate every reference to a surface
+    before fencing a node that changes it</strong> &mdash; that is a coordinator duty, and its
+    absence caused all four. And <strong>treat a suite run that is green only within a fence as
+    unverified outside it</strong>: the node that changed <code>graph load</code> reported 24
+    passed on its own tests while leaving a sibling file failing.</p>
+    <p>One process gap surfaced alongside them and is recorded because it will recur: a worker
+    raised a peer scope request that <strong>expired unanswered</strong>, and the verbal grant
+    that replaced it was <em>prose</em>. The ledger correctly refused the promotion for
+    changing a path outside the run&rsquo;s declared scope, and the authorisation record had to
+    be amended by hand to match the authorisation actually given. A mid-flight scope extension
+    has no recorded form.</p>
+  </section>
+
   <section id="ledger-repair">
     <h2>The ledger disagreed with the tree, and looked healthy while it did</h2>
     <p><strong>Recorded 2026-09-01</strong> &mdash; commit <code>da9b8ced</code>.</p>
