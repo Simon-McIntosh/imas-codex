@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names import pipeline_version
 from imas_codex.standard_names.pipeline_version import (
     PIPELINE_CODE,
     PIPELINE_PROMPTS,
@@ -46,7 +47,7 @@ def test_pipeline_hash_changes_when_prompt_changes(
 ) -> None:
     """Modifying a tracked prompt file must change the composite hash."""
     # Use a real prompt file that exists
-    project_root = Path(__file__).parents[2]
+    project_root = Path(pipeline_version.__file__).resolve().parents[2]
     existing_prompts = [p for p in PIPELINE_PROMPTS if (project_root / p).exists()]
     if not existing_prompts:
         pytest.skip("No tracked prompt files exist in this checkout")

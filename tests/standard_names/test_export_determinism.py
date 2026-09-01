@@ -17,6 +17,7 @@ import yaml
 
 pytest.importorskip("imas_standard_names")
 
+import imas_codex.standard_names.export as export_module  # noqa: E402
 from imas_codex.standard_names.export import (  # noqa: E402
     _commit_iso_timestamp,
     _get_codex_commit_sha,
@@ -125,9 +126,9 @@ class TestCommitTimestamp:
             patch.dict("os.environ", {"SOURCE_DATE_EPOCH": "1783591200"}),
         ):
             distribution.return_value.version = "0.13.dev42+gabc123def"
-            distribution.return_value.locate_file.return_value = (
-                Path(__file__).parents[2] / "imas_codex/standard_names/export.py"
-            )
+            distribution.return_value.locate_file.return_value = Path(
+                export_module.__file__
+            ).resolve()
             sha = _get_codex_commit_sha()
             assert sha == "abc123def"
             assert _manifest_iso_timestamp(sha, require_provenance=True) == (
