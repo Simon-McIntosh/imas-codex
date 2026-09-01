@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-01T21:00:44",
+  "updated": "2026-09-01T21:01:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1844,6 +1844,15 @@
         "role": "implement",
         "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
         "created": "2026-08-16"
+      },
+      {
+        "id": "impl-suitecollect",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-01"
       },
       {
         "id": "impl-suitefour",
@@ -45895,6 +45904,6 @@
       }
     ],
     "holds": [],
-    "_version": 1196
+    "_version": 1197
   }
 }
