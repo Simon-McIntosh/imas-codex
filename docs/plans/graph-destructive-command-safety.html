@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-commits" content="68e79fb2,d9f54eff,f02560ac,716a8557,7c2aa040,cfdf8c11">
 <meta name="plan-artifacts" content="docs/evidence/archive/graph-destructive-command-safety-landed.html,docs/evidence/graph-operational-safety/partition-fix.md,docs/evidence/graph-operational-safety/offsite-currency.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,docs/evidence/catalog-review-surface/graph-backup-receipt.md,imas_codex/cli/services.py,imas_codex/graph/neo4j_ops.py,imas_codex/cli/graph/data.py,tests/cli/test_graph_archive_naming.py,tests/cli/test_graph_destructive_backup.py,tests/cli/test_graph_destructive_target.py">
 <meta name="plan-impl" content="0.58">
@@ -278,6 +278,60 @@
   stale: <code>graph.md</code> and the help banner both show <code>load</code> and
   <code>clear</code> invocations <em>without</em> the target argument the command now
   requires, so a reader following either gets a usage error at best.
+</p>
+
+    <h2 id="s3e">&#167;3e &mdash; The documentation defect is larger than the selector claim</h2>
+<p>
+  &#167;3 found one false sentence. Enumerating the documented graph surface against
+  <code>imas-codex graph --help</code> found that the false sentence is the <em>smallest</em>
+  of three defects, and that two of them would stop an operator before the selector claim
+  ever mattered. Measured against the real command list &mdash; <code>clear</code>,
+  <code>export</code>, <code>facility</code>, <code>fetch</code>, <code>init</code>,
+  <code>list</code>, <code>load</code>, <code>profiles</code>, <code>prune</code>,
+  <code>pull</code>, <code>push</code>, <code>secure</code>, <code>shell</code>,
+  <code>start</code>, <code>status</code>, <code>stop</code>, <code>switch</code>,
+  <code>tags</code>:
+</p>
+<p>
+  <strong>Documented commands that do not exist.</strong>
+  <code>graph backup</code> and <code>graph restore</code> are documented in both
+  <code>docs/architecture/graph.md</code> (lines 125&ndash;128) and <code>README.md</code>
+  (lines 717&ndash;724) and are not commands. <code>README.md</code> also documents a
+  <code>graph db</code> subgroup (lines 664&ndash;668) that does not exist &mdash; the real
+  forms are <code>graph start</code>, <code>graph status</code>, <code>graph shell</code>
+  &mdash; and <code>graph tunnel</code> (lines 702&ndash;711), which lives at
+  <code>imas-codex tunnel</code>, not under <code>graph</code>. Both files document
+  <code>graph prune --backups --older-than 30d</code>; <code>prune</code> exists but takes
+  <code>--registry</code>, <code>-F/--facility</code>, <code>--keep</code>,
+  <code>--dev-only</code>, <code>--dry-run</code> and <code>--force</code>, so
+  <strong>neither flag is real</strong> and the command it belongs to prunes registry tags
+  rather than local backups.
+</p>
+<p>
+  <strong>Documented invocations that now fail.</strong> <code>graph.md</code> line 114 shows
+  <code>graph load archive.tar.gz</code> and line 129 shows <code>graph clear</code>;
+  <code>README.md</code> line 727 shows <code>graph clear</code>. All three omit the target
+  the command now requires, so a reader following them gets a usage error. The command help
+  is already correct &mdash; <code>graph clear TARGET</code> reads &ldquo;TARGET must name the
+  graph selected by the active symlink&rdquo; &mdash; which gives the prose its wording.
+</p>
+<p>
+  <strong>And one false claim outside the documentation set &#167;3 named.</strong> The root
+  <code>AGENTS.md</code> graph-access paragraph states that <em>all</em> CLI
+  <code>graph</code> commands take <code>--graph/-g</code>. They do not:
+  <code>graph status</code> takes only <code>--registry</code>, and <code>graph clear</code>
+  takes only <code>--force</code>. That matters more than an ordinary stale line, because it
+  tells an agent a destructive command can be aimed with a flag that does not exist &mdash;
+  the same absence-as-permission shape as the selector claim, one level further out.
+</p>
+<p>
+  <strong>The correction has a positive form, and the command for it already exists.</strong>
+  <code>graph switch NAME</code> stops Neo4j, repoints the <code>neo4j/</code> symlink and
+  restarts &mdash; so it, not an environment variable, is how data identity changes. The
+  accurate account is one sentence per object: the active symlink selects the data,
+  <code>IMAS_CODEX_GRAPH_LOCATION</code> selects where the server runs and on which ports,
+  <code>graph switch NAME</code> changes data identity, and
+  <code>load ARCHIVE TARGET</code> / <code>clear TARGET</code> name what they destroy.
 </p>
 
     <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
