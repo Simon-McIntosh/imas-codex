@@ -514,9 +514,21 @@ def _submit_service_job(
         # 'resv' and never schedule, so the job must name the reservation.
         reservation = partition.get("reservation")
     else:
-        # CPU-only services (e.g. Neo4j) use a general partition —
-        # don't pin to the GPU node where embed runs.
-        partition_name = _general_partition_name()
+        from imas_codex.graph.profiles import get_graph_location
+        from imas_codex.remote.locations import resolve_location
+
+        graph_location = get_graph_location()
+        graph_target = resolve_location(graph_location)
+        if (
+            not graph_target.is_compute
+            or graph_target.scheduler != "slurm"
+            or not graph_target.partition
+        ):
+            raise click.ClickException(
+                f"Graph location {graph_location!r} does not resolve to one "
+                "SLURM compute partition."
+            )
+        partition_name = graph_target.partition
         host = None
         reservation = None
 
