@@ -21,11 +21,11 @@
   <title>Offsite Recovery Cadence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="12">
-<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98">
+<meta name="plan-modified" content="2026-09-02">
+<meta name="plan-version" content="14">
+<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log">
-<meta name="plan-impl" content="0.57">
+<meta name="plan-impl" content="0.63">
 </head>
 <body>
   <main class="plan-doc">
@@ -211,6 +211,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260901T2058-pushjob-landing" data-who="reckon-ship" data-when="2026-09-01T20:58:00Z">
     <div class="r-comment-body">n-offsite-push-job landed at commit 7e09dc98 (merged cc63f174): imas-codex graph offsite-push runs one cycle: registry-backed currency decision, no_op receipt when current, otherwise an independent live node/relationship/label census, graph export under a graph_archive_stamp name, refusal before upload if the manifest census differs, upload via graph push --source-dump under a dev tag, and an atomic JSON receipt with wall_time_seconds and archive_bytes under ~/.local/share/imas-codex/offsite-push/receipts. --schedule submits a 2 CPU / 8 GB SLURM job whose script resubmits itself with sbatch --begin=now+7days. Live dry-run: decision push, 56.352 days stale, nothing exported or pushed; 7 tests pass. Operational note for the lead: the export path stops Neo4j for the dump, so each weekly cycle takes the live graph down for the dump duration; the first real cycle will measure it. The GHCR_TOKEN in .env is still stale and the command falls back to the gh credential. Remaining: first real cycle with --schedule (after the in-flight graph readers finish), one-off prune apply, trial restore.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T062026757019-n-graph-push-schedule-flag" data-who="impl-offsitepush" data-when="2026-09-02T06:34:59Z">
+    <div class="r-comment-body"><p>graph push owns --schedule (weekly self-resubmitting job codex-graph-push) and --cycle (one verified push cycle); graph offsite-push removed without alias; 10/10 focused tests; live --cycle --dry-run prints the decision (56.528 days stale) and pushes nothing</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260902T0835-push-flags" data-who="reckon-ship" data-when="2026-09-02T08:35:00Z">
+    <div class="r-comment-body">Lead direction 2026-09-02: one push command. Landed at ecce4695 (merged 04f5d299): graph push now carries --schedule (submits the weekly self-resubmitting SLURM job codex-graph-push, whose body runs graph push --cycle) and --cycle (one verified cycle: registry-currency no-op check, live census, count-gated export and upload, JSON receipt); the separate graph offsite-push command and its CLI module are removed with no alias; cycle logic stays in imas_codex/graph/offsite.py. 10/10 focused tests; live --cycle --dry-run reports 56.528 days stale and pushes nothing. The lead regenerated GHCR_TOKEN and asked for the first real cycle to run now.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>
