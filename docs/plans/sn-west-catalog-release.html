@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -136,6 +136,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T1121-pr20" data-who="reckon-ship" data-when="2026-09-02T11:21:00Z">
     <div class="r-comment-body">Upstream PR 20 opened (iterorganization/IMAS-Standard-Names#20) from fork main e1b661f: 'Make physics domain a first-class entry field', 3-sentence body, no attribution, docs build success, Python 3.13 build pass, 3.12 build running at capture; upstream main untouched at 8f4fd829. Merge and the v0.8.1 tag are the lead's (PyPI publish). Pin bumps and the WEST re-cut follow the release (f-wcr-isn-release).</div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
+    <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
 </div>
 </section>
 </main>

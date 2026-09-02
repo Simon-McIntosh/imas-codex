@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T11:30:55",
+  "updated": "2026-09-02T11:52:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1641,12 +1641,25 @@
         "created": "2026-09-01"
       },
       {
+        "id": "impl-releasecheckout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0617d-75eb-7ec2-8074-b5c2e3a30795",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a0617d-75eb-7ec2-8074-b5c2e3a30795"
+        },
+        "created": "2026-09-02"
+      },
+      {
         "id": "impl-releasegates",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a0616f-1e7d-70b3-98cd-dbd8120c5e82",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a0616f-1e7d-70b3-98cd-dbd8120c5e82"
+        },
         "created": "2026-09-02"
       },
       {
@@ -51333,9 +51346,112 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T094001846179-n-release-restores-catalog-main",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-release-restores-catalog-main",
+        "node_definition": {
+          "done_when": "a focused test with a temporary git repository asserts that after a review release the checkout's current branch is main with a clean status while the review branch and tag exist on the remote, and that a pre-existing dirty checkout makes the release refuse before any branch switch; the review-release suite passes with command, exit status and log path recorded; ruff clean; the live catalog checkout is not modified by this node",
+          "estimated_hours": null,
+          "goal": "Make sn release --batch leave the ISNC catalog checkout on a clean main after pushing the review branch and tag, so the shared checkout is never left on the review branch for the next approve or dry-run to trip over (measured twice on 2026-09-02)",
+          "id": "n-release-restores-catalog-main",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T094001846179-n-release-restores-catalog-main/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_review_release_checkout.py",
+            "tests/standard_names/test_review_release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-releasecheckout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T09:40:06Z",
+        "completed_at": "2026-09-02T09:52:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 733,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 733,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a4e9eb993933addcd968a8849d0ab675a3765d88",
+        "commits": [
+          "dbb9a8338c7c7e4945011a2e58074b3bf23272e0"
+        ],
+        "changed_lines": {
+          "added": 15,
+          "removed": 5,
+          "files": 1
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_review_release.py tests/standard_names/test_review_release_checkout.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T094001846179-n-release-restores-catalog-main/logs/review-release-suite-after-scope-extension.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T094001846179-n-release-restores-catalog-main/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0617d-75eb-7ec2-8074-b5c2e3a30795",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2906496,
+            "cached_input_tokens_cumulative": 2906496,
+            "input_tokens": 3059168,
+            "input_tokens_cumulative": 3059168,
+            "output_tokens": 13685,
+            "output_tokens_cumulative": 13685,
+            "reasoning_output_tokens": 4891,
+            "reasoning_output_tokens_cumulative": 4891
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1302
+    "_version": 1306
   }
 }
