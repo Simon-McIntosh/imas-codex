@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T22:57:26",
+  "updated": "2026-09-02T23:42:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -53943,6 +53943,219 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T210026656586-n-sn-flush-kind-reconcile",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-sn-flush-kind-reconcile",
+        "node_definition": {
+          "done_when": "the command exits 0 with its own log under ~/.local/share/imas-codex/logs naming the reconcile counts, while a graph census run afterwards through the repository GraphClient reports zero live StandardName rows whose stored kind differs from derive_kind applied to the same id, with the reconcile count, the pool drain counts, the total spend recorded in the manifest",
+          "estimated_hours": 1.5,
+          "goal": "Run one unscoped drain of the standard-name pipeline from this worktree with UV_PROJECT_ENVIRONMENT pointed at /home/ITER/mcintos/Code/imas-codex/.venv, PYTHONPATH set to the worktree, invoking uv run --no-sync imas-codex sn run --flush --cost-limit 30 so the startup kind reconcile rewrites every stored kind that disagrees with the canonical identity while the mid-pipeline backlog reaches terminal stages",
+          "id": "n-sn-flush-kind-reconcile",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sn-flush-kind-reconcile.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sn-flush-kind-reconcile.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-westgate",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T21:00:33Z",
+        "completed_at": "2026-09-02T21:06:40.056Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 361,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 367,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "76cd1525dde6f904f3c536aa71b89960c01a2212",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live-name census comparing sn.kind against derive_kind(sn.id) through GraphClient",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sn-flush-kind-reconcile.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sn-flush-kind-reconcile.json",
+        "scope_changed": false,
+        "session_id": "70f7bab9-a48b-4cbf-be94-366875b24b05",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 119244,
+            "cache_creation_input_tokens_cumulative": 119244,
+            "cache_read_input_tokens": 5465794,
+            "cache_read_input_tokens_cumulative": 5465794,
+            "inference_geo": "not_available",
+            "input_tokens": 104,
+            "input_tokens_cumulative": 104,
+            "output_tokens": 17673,
+            "output_tokens_cumulative": 17673,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.367681999999999,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.367681999999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an operational drain changes graph state rather than repository files; its evidence is the report plus the CLI auto-log",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260902T213253838006-n-codex-isn-pin-0-8-4",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-codex-isn-pin-0-8-4",
+        "node_definition": {
+          "done_when": "grep -c 'imas-standard-names==0.8.4' pyproject.toml prints 2 while uv lock exits 0 with uv.lock recording imas-standard-names 0.8.4",
+          "estimated_hours": 0.3,
+          "goal": "Bump the imas-standard-names dependency pin from 0.8.3 to 0.8.4 in both places it appears in pyproject.toml, refreshing uv.lock with uv lock so the exporter resolves the folded-block catalog writer",
+          "id": "n-codex-isn-pin-0-8-4",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-4.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "pyproject.toml",
+            "uv.lock"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-isnpin",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "backend": "clive",
+          "effort": "medium",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T21:33:00Z",
+        "completed_at": "2026-09-02T21:38:47.635Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 340,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 347,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "e7e1085e58bb754200b83fe3fc9d85bc324cd1dc",
+        "commits": [
+          "ffb9ec40c7d4f72656996db68a230d265bcbe52d"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c 'imas-standard-names==0.8.4' pyproject.toml",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-4.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-4.json",
+        "scope_changed": false,
+        "session_id": "9122aa1a-cfc5-4e84-b015-834d2144ec7c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1715572,
+            "input_tokens_cumulative": 1715572,
+            "output_tokens": 10062,
+            "output_tokens_cumulative": 10062,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 8.82941,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 8.82941
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -53989,6 +54202,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1371
+    "_version": 1373
   }
 }
