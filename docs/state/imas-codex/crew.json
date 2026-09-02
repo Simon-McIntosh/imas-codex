@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T15:25:18",
+  "updated": "2026-09-02T15:47:43",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3186,9 +3186,11 @@
         "id": "test-westdrain",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06238-9324-7b91-82ba-56c1a628badf",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06238-9324-7b91-82ba-56c1a628badf"
+        },
         "created": "2026-09-02"
       },
       {
@@ -52654,9 +52656,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T130422511580-n-west-batch-drain",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-batch-drain",
+        "node_definition": {
+          "done_when": "crew/reports/west-batch-drain.md records the sn run command, exit status, SNRun id, exact spend against the cap and log path, a per-name table of the 28 non-structural withheld names with name_stage, docs_stage, validation_status before and after, the count that became fully accepted, the quarantine reasons of any still quarantined, and a GraphClient census proving approved 0 and contested 0",
+          "estimated_hours": null,
+          "goal": "Advance the withheld WEST names before external review with one scoped 'imas-codex sn run --batch west_production_dd_paths --cost-limit 25' drain (13 names not yet accepted, 10 quarantined, 4 resolution-unrecorded, 1 docs not accepted), recording per-name before and after lifecycle states so the next cut publishes more of the 355 sources",
+          "id": "n-west-batch-drain",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130422511580-n-west-batch-drain/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "crew/reports/west-batch-drain.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-westdrain",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T13:04:29Z",
+        "completed_at": "2026-09-02T13:46:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2527,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2527,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e091fb3bc9d261cfde8da58473d66a10ef26d61d",
+        "commits": [
+          "b6aeac204b7cbce9e80d425ec483445dc64ba1f2"
+        ],
+        "changed_lines": {
+          "added": 150,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "imas-codex sn run --batch west_production_dd_paths --cost-limit 25; GraphClient before/after snapshots",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:3043f828d621434d3462dabe6f58cbab780b00ce832e91238d4bc634a9acc0d0"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130422511580-n-west-batch-drain/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06238-9324-7b91-82ba-56c1a628badf",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15028224,
+            "cached_input_tokens_cumulative": 15028224,
+            "input_tokens": 15315667,
+            "input_tokens_cumulative": 15315667,
+            "output_tokens": 24400,
+            "output_tokens_cumulative": 24400,
+            "reasoning_output_tokens": 6737,
+            "reasoning_output_tokens_cumulative": 6737
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1335
+    "_version": 1337
   }
 }
