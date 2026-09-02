@@ -15171,9 +15171,10 @@ def persist_reviewed_name(
                    sn.validation_status AS validation_status,
                    sn.edit_status AS edit_status,
                    sn.edit_scope AS edit_scope,
+                   sn.edit_mode AS edit_mode,
                    sn.edit_override_edits AS edit_override_edits,
                    sn.edit_include_accepted AS edit_include_accepted,
-                   sn.run_id AS scope_run_id
+                   sn.id AS current_id
             """,
             id=sn_id,
             token=claim_token,
@@ -15192,23 +15193,26 @@ def persist_reviewed_name(
     refine_attempts: int = int(rows[0].get("refine_attempts") or chain_length)
     edit_status_before: str | None = rows[0].get("edit_status")
     edit_scope_before: str | None = rows[0].get("edit_scope")
+    edit_mode_before: str | None = rows[0].get("edit_mode")
     # Cascade-authorization opt-in recorded at edit time (coalesce to False —
     # a rename edit that did not opt in must NOT silently clobber protected
     # (catalog_edit) or accepted descendants when the root rename is accepted).
     edit_override_before: bool = bool(rows[0].get("edit_override_edits"))
     edit_include_before: bool = bool(rows[0].get("edit_include_accepted"))
-    scope_run_id_before: str | None = rows[0].get("scope_run_id")
+    current_id: str | None = rows[0].get("current_id")
 
-    # A rescore submits the existing identity to a fresh quorum draw.  An old
-    # family/subtree edit scope can remain on that node, but accepting the same
-    # spelling authorizes no rename and therefore has no descendant cascade to
-    # preflight or apply.  The persisted scope is the semantic operation id;
-    # ``run_id`` identifies the enclosing SNRun cost ledger and is intentionally
-    # independent.  Claim-token and drafted-stage CAS guards bind this review to
-    # the currently staged node.
-    from imas_codex.standard_names.rescore import is_rescore_scope
+    # A same-spelling review authorizes no rename and therefore has no
+    # descendant cascade to preflight or apply.  Run ids cannot establish this:
+    # a later scoped drain legitimately replaces them.  Compare the spelling
+    # submitted to the quorum with the id read under the stage/token guard, while
+    # retaining cascade semantics for an explicit rename successor.
+    from imas_codex.standard_names.rescore import review_preserves_identity
 
-    identity_preserving_rescore = is_rescore_scope(scope_run_id_before)
+    identity_preserving_review = review_preserves_identity(
+        reviewed_spelling=sn_id,
+        current_id=current_id,
+        edit_mode=edit_mode_before,
+    )
 
     # ── Stage decision ────────────────────────────────────────────────
     # Score is canonical (rubric-driven 0–1).
@@ -15304,7 +15308,7 @@ def persist_reviewed_name(
     cascade_preflight_conflicts: list[str] = []
     if (
         target_stage == "accepted"
-        and not identity_preserving_rescore
+        and not identity_preserving_review
         and edit_scope_before in ("family", "subtree")
     ):
         from imas_codex.standard_names.cascade import cascade_descendants_of
@@ -15471,7 +15475,7 @@ def persist_reviewed_name(
     # validated plan against the LIVE subtree.
     if (
         target_stage == "accepted"
-        and not identity_preserving_rescore
+        and not identity_preserving_review
         and new_edit_status == "applied"
         and edit_scope_before in ("family", "subtree")
     ):

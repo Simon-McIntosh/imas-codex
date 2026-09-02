@@ -34,8 +34,10 @@ class _RescoreGraph(FakeGraph):
             return [{"prior_stage": prior_stage}]
 
         rows = super().query(cypher, **params)
-        if "sn.run_id AS scope_run_id" in cypher and rows:
-            rows[0]["scope_run_id"] = self.nodes[params["id"]].get("run_id")
+        if "sn.id AS current_id" in cypher and rows:
+            node = self.nodes[params["id"]]
+            rows[0]["current_id"] = params["id"]
+            rows[0]["edit_mode"] = node.get("edit_mode")
         return rows
 
 
@@ -69,6 +71,7 @@ def test_rescore_accepts_parent_without_touching_accepted_child() -> None:
 
     with _patched_graph(graph):
         staged = stage_name_for_rescore("temperature", run_id=run_id)
+        graph.nodes["temperature"]["run_id"] = "sn-run-unrelated-batch"
         stage = _accept_reviewed_name("temperature", ledger_run_id="run-ledger-uuid")
 
     assert staged == {
@@ -92,6 +95,7 @@ def test_rename_acceptance_still_refuses_conflicting_descendant() -> None:
         name_stage="drafted",
         edit_status="open",
         edit_scope="subtree",
+        edit_mode="rename",
         edit_include_accepted=False,
         edit_override_edits=False,
         claim_token="tok",
