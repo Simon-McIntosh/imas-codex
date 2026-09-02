@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="20">
-<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a">
-<meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log">
-<meta name="plan-impl" content="0.7">
+<meta name="plan-version" content="22">
+<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a,be90eb62,c7b0fcba,c18221be,3c5e9e25">
+<meta name="plan-artifacts" content="/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json,ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log">
+<meta name="plan-impl" content="0.86">
 </head>
 <body>
   <main class="plan-doc">
@@ -235,6 +235,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260902T084540868856-n-graph-push-service-path" data-who="impl-offsitepush" data-when="2026-09-02T08:53:57Z">
     <div class="r-comment-body"><p>service unit Environment carries the oras directory resolved at install time, installation refuses when oras is absent, failed upload preparation writes a failure receipt; dry-run on this host renders PATH with /home/ITER/mcintos/bin</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T085416040332-n-offsite-first-cycle-login-2" data-who="test-s10offsite2" data-when="2026-09-02T09:22:05Z">
+    <div class="r-comment-body"><p>first real offsite cycle on the login node: receipt outcome pushed, counts_match true (1,614,780 nodes, 4,259,356 relationships, 70 labels), wall 991.46 s, archive 2,461,580,565 bytes, new registry tag dev-198ec82-20260902T085827Z-r1 (package 47 to 48 versions), graph status offsite current at 0 s, timer active with next elapse 2026-09-07 00:00 CEST</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260902T1123-first-cycle" data-who="reckon-ship" data-when="2026-09-02T11:23:00Z">
+    <div class="r-comment-body">First real offsite cycle succeeded (report 3c5e9e25, merged bcab7b84) after two infrastructure findings: the compute node cannot reach GHCR (moved to a login-node systemd user timer, 2066a50a) and the generated unit lacked ~/bin on PATH (resolved at install time, c18221be). Measured: wall 991.46 s, archive 2,461,580,565 bytes, counts_match true at 1,614,780 nodes / 4,259,356 relationships / 70 labels, registry tag dev-198ec82-20260902T085827Z-r1 (package 47 to 48 versions), graph status offsite current at 0 s, timer next elapse 2026-09-07 00:00 CEST. Exposure went from 56.5 days to 0. Remaining: the one-off tiered prune apply (22 versions, now safe with the fresh copy present) and the one trial restore into a scratch graph.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>
