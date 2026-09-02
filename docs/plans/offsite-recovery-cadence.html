@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="24">
-<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a,be90eb62,c7b0fcba,c18221be,3c5e9e25,8a496efc">
+<meta name="plan-version" content="26">
+<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a,be90eb62,c7b0fcba,c18221be,3c5e9e25,8a496efc,3e59a749">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json,ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-impl" content="0.93">
 </head>
 <body>
   <main class="plan-doc">
@@ -247,6 +247,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260902T1131-prune-applied" data-who="reckon-ship" data-when="2026-09-02T11:31:00Z">
     <div class="r-comment-body">One-off tiered prune applied (report 8a496efc): fresh dry-run 25 keep / 23 delete over 48 versions (the weekly copy had added one), apply pruned 23/23 with zero failures (10 untagged, 2 test-prefixed, 11 thinned); package now 25 versions: 4 weekly, 3 monthly, 17 release-tagged, latest on v5.3.0-rc6; the new weekly copy dev-198ec82-20260902T085827Z-r1 survives; post-apply scan reports nothing to prune. Registry storage bound is now the tiered ceiling rather than unbounded growth. Remaining: the one trial restore into a scratch graph, sequenced after the in-flight graph readers because graph load requires switching the active instance.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T100716787038-n-offsite-trial-restore" data-who="test-s10restore" data-when="2026-09-02T10:43:34Z">
+    <div class="r-comment-body"><p>trial restore from the registry copy: fetch 97.9 s, load 41.4 s, scratch census 1,614,780 nodes / 4,259,356 relationships / 70 labels with zero label differences and matching sha 1e1c11a2, scratch instance removed reclaiming about 9.0 GB, codex active and serving; whole drill 574 s; finding: graph init binds new instances to localhost so ordinary discovery cannot reach them</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260902T1244-trial-restore" data-who="reckon-ship" data-when="2026-09-02T12:44:00Z">
+    <div class="r-comment-body">Trial restore PASSED (report 3e59a749, merged 08d6ef92): the registry copy dev-198ec82-20260902T085827Z-r1 was fetched (97.9 s, 2,461,580,657 bytes, sha256 ecc8dc29), loaded into a scratch instance offsite-trial (41.4 s), and its census matched the receipt exactly: 1,614,780 nodes, 4,259,356 relationships, 70/70 labels with zero differences, label-count sha 1e1c11a2. The scratch instance was removed (about 9.0 GB reclaimed) and codex is active and serving. Whole drill 574 s of timed commands. The offsite copy is a demonstrated recovery path, not just a registry entry. Two defects found by the drill and folded as nodes: graph init writes listen_address 127.0.0.1 for new instances (server.py:222, data.py:1046) so ordinary discovery cannot reach them and the census had to run on the node through the remote executor; and the global graph manifest now reads 'Loaded from offsite-trial...' for the codex instance because load bookkeeping is not per instance.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>

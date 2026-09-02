@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:26:14",
+  "updated": "2026-09-02T12:43:52",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -51580,9 +51580,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T100716787038-n-offsite-trial-restore",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-trial-restore",
+        "node_definition": {
+          "done_when": "crew/reports/offsite-trial-restore.md records every command with exit status plus wall time, the fetched archive path, bytes, SHA-256, the scratch census equal to the receipt census (1,614,780 nodes, 4,259,356 relationships, 70 labels, label_counts_sha256 1e1c11a2), 'graph status' after switching back showing codex active with Neo4j running plus a GraphClient query succeeding, the scratch directory removed with the space reclaimed, the total elapsed time for the restore path",
+          "estimated_hours": null,
+          "goal": "Prove the offsite copy is a real recovery point: fetch ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1 from the registry with the existing graph fetch or pull path, load it into a scratch graph instance named offsite-trial through graph init plus graph load, compare its node, relationship, label counts with the receipt at ~/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json, switch the active graph back to codex, confirm it serves, remove the scratch instance's data",
+          "id": "n-offsite-trial-restore",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T100716787038-n-offsite-trial-restore/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "crew/reports/offsite-trial-restore.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s10restore",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T10:07:21Z",
+        "completed_at": "2026-09-02T10:43:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2173,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2173,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c987057a9fcb08a0f2431f380487739be143094b",
+        "commits": [
+          "3e59a749f562f295fb152d0de85a693364db4140"
+        ],
+        "changed_lines": {
+          "added": 46,
+          "removed": 23,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex graph fetch; graph init offsite-trial; graph load; run_python_script census on the node; graph switch codex; graph status; GraphClient GraphMeta query",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:bef36146d3ddc2e2c10d196e24a43d8892968e737c47fe98c3b51af28b98bc52"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T100716787038-n-offsite-trial-restore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06196-6562-7be1-acf1-9cc53883d017",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6255872,
+            "cached_input_tokens_cumulative": 6255872,
+            "input_tokens": 6329332,
+            "input_tokens_cumulative": 6329332,
+            "output_tokens": 27058,
+            "output_tokens_cumulative": 27058,
+            "reasoning_output_tokens": 11058,
+            "reasoning_output_tokens_cumulative": 11058
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1311
+    "_version": 1312
   }
 }
