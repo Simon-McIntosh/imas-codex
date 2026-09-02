@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -193,6 +193,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T161020764438-n-west-review-pr10-cut" data-who="impl-weststage3" data-when="2026-09-02T16:51:18Z">
     <div class="r-comment-body"><p>PR 9 closed; RC v0.3.0rc6+west-task-2e cut and fork PR 10 opened: literal-block prose with blank lines between entries, schema-loadable frozen artifact, honest exclusion body, all catalog checks green, preview categories populated, graph and upstream untouched</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-20260902T2027-isn-0-8-3" data-who="reckon-ship" data-when="2026-09-02T20:27:00Z">
+    <div class="r-comment-body">On the lead's authority: upstream ISN PR 22 (momentum, torque, torque_density as vector bases; a frozen-digest test pins every other base) merged, v0.8.3 tagged, release workflow 33666922199 published to PyPI. Pin bumps to 0.8.3 dispatched in both repositories. The lead's second review-surface request, wrapping prose paragraphs inside the literal blocks at about 80 columns with a byte-identical load round-trip, is a further ISN writer change in flight and will be 0.8.4; equations, fences and blank lines stay untouched. PR 10 still shows the stored tensor kind because its worktree predates the kind-refresh merge; the flush after the 0.8.3 pin runs the kind reconcile, and the next cut publishes scalar for it.</div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
