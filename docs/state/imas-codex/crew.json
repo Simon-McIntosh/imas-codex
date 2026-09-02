@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:43:52",
+  "updated": "2026-09-02T12:54:51",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -969,6 +969,17 @@
           "gpt-5.6-sol": "01a05d03-9adc-72e1-8e2d-fbc890a3240e"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-graphinit",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a061b8-a19c-7e50-a110-31323185ccd5",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a061b8-a19c-7e50-a110-31323185ccd5"
+        },
+        "created": "2026-09-02"
       },
       {
         "id": "impl-graphlauncher",
@@ -51681,9 +51692,112 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T104439684708-n-graph-init-listeners",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a73",
+        "node": "n-graph-init-listeners",
+        "node_definition": {
+          "done_when": "a test asserts the generated neo4j.conf for a new instance carries the same listener settings as the codex instance's generator path, with the loopback default gone from both call sites; the graph CLI test suites for init, load and start pass with command, exit status and log path recorded; ruff clean; the live Neo4j service is not restarted by this node",
+          "estimated_hours": null,
+          "goal": "Make graph init and graph load configure new graph instances with the same Bolt and HTTP listen addresses the production codex instance uses under the SLURM topology (0.0.0.0 rather than the 127.0.0.1 written at server.py:222 and data.py:1046), so a freshly initialised or restored scratch instance is reachable through ordinary GraphClient discovery from the login node",
+          "id": "n-graph-init-listeners",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T104439684708-n-graph-init-listeners/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/cli/graph/server.py",
+            "imas_codex/cli/graph/data.py",
+            "tests/cli/test_graph_init_listeners.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-graphinit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T10:44:44Z",
+        "completed_at": "2026-09-02T10:54:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 595,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 595,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "9e09238dd13feaa8c29fd2aec262eac5e796306f",
+        "commits": [
+          "65dee98f03f7be37c4d663228aa3c527f6d8a7fd"
+        ],
+        "changed_lines": {
+          "added": 109,
+          "removed": 7,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/cli/test_graph_init_listeners.py plus the graph init/load/start suites",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T104439684708-n-graph-init-listeners/ruff.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T104439684708-n-graph-init-listeners/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a061b8-a19c-7e50-a110-31323185ccd5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1871360,
+            "cached_input_tokens_cumulative": 1871360,
+            "input_tokens": 1991594,
+            "input_tokens_cumulative": 1991594,
+            "output_tokens": 9775,
+            "output_tokens_cumulative": 9775,
+            "reasoning_output_tokens": 3869,
+            "reasoning_output_tokens_cumulative": 3869
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1312
+    "_version": 1315
   }
 }

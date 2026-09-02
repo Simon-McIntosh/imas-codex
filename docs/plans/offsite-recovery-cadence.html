@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a,be90eb62,c7b0fcba,c18221be,3c5e9e25,8a496efc,3e59a749">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json,ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log">
 <meta name="plan-impl" content="0.93">
@@ -259,6 +259,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260901T2052-launcher-landing" data-who="reckon-ship" data-when="2026-09-01T20:52:00Z">
     <div class="r-comment-body">n-graph-launcher-config landed at commit af2f8c3c (merged ef7690ca): graph export now restarts Neo4j in a finally block outside the exception-swallowing Neo4jOperation context, so the 'No compute config in iter_private.yaml' error the restore-point run hit is surfaced; a graph-only graph start submits through graph-location-owned service configuration and a regression fails if the embedding compute section is read. 2 regressions added, 7 focused tests pass, no live Neo4j operation performed. Remaining: scheduled push command (in flight), first real push with wall time and bytes, one-off prune apply, trial restore.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260902T104439684708-n-graph-init-listeners" data-who="impl-graphinit" data-when="2026-09-02T10:54:39Z">
+    <div class="r-comment-body"><p>new and restored graph instances now render the same 0.0.0.0 Bolt and HTTP listeners as the production codex instance; loopback defaults removed from both call sites; init, load and start suites green</p></div>
 </div>
 </section>
 </main>
