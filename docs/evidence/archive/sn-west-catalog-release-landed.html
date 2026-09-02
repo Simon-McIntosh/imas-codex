@@ -90,6 +90,67 @@
     registered for exactly this case. A distinct backend entry is required rather than an
     effort override, because a roster session must never cross models.</p>
   </section>
+
+  <section id="review-candidate">
+    <h2>The candidate a physicist can read</h2>
+    <p>Fork pull request 11 is the single open review candidate on the catalog fork; its
+    predecessor is closed with a comment naming the replacement. It publishes 351 entries
+    across 18 physics-domain files out of a frozen 410-name batch, and it is the first cut
+    whose prose a reviewer can read side by side.</p>
+    <table>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Spreadsheet paths</td><td>469</td></tr>
+        <tr><td>Excluded by data-dictionary node category</td><td>114 — 55 metadata, 29 structural, 26 coordinate, 4 fit or representation</td></tr>
+        <tr><td>Eligible sources in the manifest</td><td>355</td></tr>
+        <tr><td>Frozen batch</td><td>410 names</td></tr>
+        <tr><td>Published entries</td><td>351 across 18 domain files</td></tr>
+        <tr><td>Withheld</td><td>59 — 45 structural parents, 7 invalid validation status, 3 not accepted, 2 grammar-parse failures, 1 invalid catalog entry, 1 short of review quorum</td></tr>
+      </tbody>
+    </table>
+    <p>Each clause of the measure was checked against the published bytes rather than asserted.
+    The candidate tag resolves to the pull-request head commit exactly. Of 22,190 added YAML
+    lines, 211 exceed 88 columns and every one is a single unbreakable atom — 97 equation
+    lines left deliberately untouched, 69 cross-reference links whose token alone is longer
+    than the column, and 45 long identifiers used as keys or source paths; zero description
+    prose lines exceed it. The flux-surface metric the lead queried records
+    <code>kind: scalar</code> against a cut that is 350 scalar and 1 vector. All 351 entries
+    carry an enum-valid physics domain, none missing. Catalog validation and all three build
+    jobs pass, with the reviewer-edit guard green. Report:
+    <code>crew/reports/west-recut-readable.md</code>.</p>
+  </section>
+
+  <section id="release-path-repairs">
+    <h2>Two defects the cut exposed, both closed the same night</h2>
+    <p>The release created the pull request and the tag, then exited 1 at its own preview-link
+    invariant. The invariant was right and the transport under it was wrong: the body update
+    shelled out to <code>gh pr edit</code>, which now fails against this repository with the
+    Projects-classic GraphQL deprecation and leaves the body unchanged. Every batch release
+    would have opened a pull request with no preview address for the reviewer to follow. The
+    body update now issues a REST patch, proven by three new tests with 104 passing in the
+    focused release suites.</p>
+    <p>The second defect was quieter. Twenty live names carried no physics domain at all, and
+    since the field became required the exporter substituted a placeholder that catalog
+    validation rejects — which is how one name left the batch as an invalid entry rather than
+    as a physics judgement. The recovery took each name's domain from its bound
+    data-dictionary source where one existed and from the configured classifier seat
+    otherwise, never hand-picked. Null domains went from 20 to 0, every written value an enum
+    member, each with exactly one matching domain edge and a recorded change; 4694 of 4694
+    names now carry a domain. Sixteen of the twenty were superseded or exhausted, which says
+    no domain route had ever run over non-live stages.</p>
+  </section>
+
+  <section id="what-remains">
+    <h2>What remains</h2>
+    <p>The physicist review of pull request 11 is the human gate and nothing downstream of it
+    can start early. After the review returns: the reviewed disposition folds back through
+    <code>sn approve</code>, the upstream catalog pull request and its stable tag follow, and
+    the undo rehearsal proves the fold is reversible. The 59 withheld names follow as a later
+    additive batch under their recorded reason groups. The release recipe in
+    <code>imas_codex/standard_names/AGENTS.md</code> now gates pin-before-reconcile with a
+    runnable census and gates the candidate on the published bytes, so a session that has not
+    lived through this one can cut the next candidate without rediscovering any of it.</p>
+  </section>
 </main>
 </body>
 </html>

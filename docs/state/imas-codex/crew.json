@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T00:28:12",
+  "updated": "2026-09-03T00:29:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -54486,6 +54486,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T221644442790-n-runbook-readable-release",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-runbook-readable-release",
+        "node_definition": {
+          "done_when": "the release recipe carries the pin-before-reconcile ordering as a numbered gate with the census command that proves zero kind disagreements, and grep for 'physics_domain' plus 'derive_kind' in that file each return at least one hit inside the recipe section, with the file passing the naming and prose checks from the shared guidelines",
+          "estimated_hours": 1.0,
+          "goal": "Extend the release recipe in imas_codex/standard_names/AGENTS.md so a new session can cut a readable review candidate without rediscovering this session's findings, recording that the standard-names pin must move before the kind reconcile fires (a reconcile under an older grammar flips correct vectors to scalar), that catalog prose readability is owned by the package writer rather than the exporter, that the review candidate gate includes an enum-valid physics domain on every entry alongside a kind that matches the canonical identity",
+          "id": "n-runbook-readable-release",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/runbook-readable-release.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-releaseread",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T22:16:50Z",
+        "completed_at": "2026-09-02T22:27:46.003Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 650,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 656,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "ee616ff64ae9d330f957ef7d418b250204328ebc",
+        "commits": [
+          "208b9128da427be48dc34a388a956d8473850f41"
+        ],
+        "changed_lines": {
+          "added": 122,
+          "removed": 26,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "the recipe's own census plus candidate-gate commands, extracted verbatim and executed against the live graph and the real candidate tag",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/runbook-readable-release.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/runbook-readable-release.json",
+        "scope_changed": false,
+        "session_id": "ead7ece2-618c-4569-b6c1-01326a0ec728",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 140693,
+            "cache_creation_input_tokens_cumulative": 140693,
+            "cache_read_input_tokens": 6334512,
+            "cache_read_input_tokens_cumulative": 6334512,
+            "inference_geo": "not_available",
+            "input_tokens": 116,
+            "input_tokens_cumulative": 116,
+            "output_tokens": 39525,
+            "output_tokens_cumulative": 39525,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.5628910000000005,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.5628910000000005
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -54532,6 +54640,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1377
+    "_version": 1378
   }
 }

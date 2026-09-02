@@ -27,8 +27,8 @@
 <meta name="plan-capability-tool-autonomy" content="guided">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="52">
+<meta name="plan-impl" content="0.7">
+<meta name="plan-version" content="54">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -91,9 +91,15 @@
     <div class="r-fu-body"><p>Consume the completed expert-review disposition, cut the governed catalog release, fold the reviewed catalog state back into the graph with exact receipts, and prove that undo restores the pre-release state without losing source or review history.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-catalog-release</pre>
     </article>
-<article class="r-fu" data-id="f-wcr-isn-release" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship sn-west-catalog-release" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-wcr-isn-release" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-02" data-recommends-skill="/reckon-ship sn-west-catalog-release" data-resolved-at="2026-09-02T22:32:09+00:00" data-resolved-by="ship-s10-20260901">
     <h4 class="r-fu-title">Merge upstream ISN PR 20 and tag v0.8.1, then bump both pins and re-cut the WEST candidate</h4>
     <div class="r-fu-body"><p>authority-required. Upstream PR <a href="https://github.com/iterorganization/IMAS-Standard-Names/pull/20">iterorganization/IMAS-Standard-Names#20</a> carries the first-class <code>physics_domain</code> entry field from fork merge <code>e1b661f</code>. Merging it and pushing the <code>v0.8.1</code> tag publish a package to PyPI through the release workflow, so both are the lead's. After the release appears on PyPI: bump <code>imas-standard-names==0.8.1</code> at both sites in imas-codex <code>pyproject.toml</code> (plus <code>uv.lock</code>) and in the catalog's <code>pyproject.toml</code> dev group, regenerate models, run the export suites, close PR 7 with a successor comment, and re-cut the WEST review candidate with <code>sn release --batch west_production_dd_paths --target auto</code>; the preview must then show the Domain grouping populated and a detail page for every name.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-west-catalog-release</pre>
+    <p class="r-fu-outcome">Delivered well past its original scope. The physics-domain field went upstream as v0.8.1 and three further releases followed as the review surface exposed more authority-side defects: v0.8.2 moved catalog emission into the package writer, v0.8.3 corrected momentum, torque and torque_density to vector bases, v0.8.4 folded prose so paragraphs wrap near 80 columns with a byte-identical reload. Both consumers pin 0.8.4. One unscoped drain then took stored-kind disagreements from 62 to 0 over 2480 live names for 8.52 USD, repairing 45 vectors an earlier sweep under the 0.8.2 pin had flipped to scalar. Fork PR 11 replaced PR 10 as the single open candidate: 351 entries across 18 domain files, folded wrapped prose, an enum-valid physics domain on every entry, scalar kind on the flux-surface metric, catalog CI green. Evidence: docs/evidence/archive/sn-west-catalog-release-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-wcr-release-path-residue" data-status="open" data-written-by="ship-s10-20260901" data-written-at="2026-09-03" data-recommends-skill="/reckon-ship sn-west-catalog-release" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Retire the stale domain reclassifier and the remaining pull-request calls that go through the gh CLI</h4>
+    <div class="r-fu-body"><p>Three residues found while cutting the readable candidate, none blocking the review. <code>imas_codex/standard_names/edit.py</code> still defines an older <code>reclassify_domain</code> that writes <code>physics_domain</code> without the <code>HAS_PHYSICS_DOMAIN</code> edge or a transactional guard; nothing imports it and the CLI uses the atomic version in <code>graph_ops</code>, so it is a footgun for the next caller who finds it first rather than a live defect. Deleting it leaves one route that writes a domain. <code>read_pull_request_body</code> and the pull-request create path in <code>catalog_release.py</code> still shell out to the <code>gh</code> CLI; both work today, but the body-update path had to move to REST when the Projects-classic deprecation broke <code>gh pr edit</code>, and the same substitution applies if that removal extends. Sixteen of the twenty names whose physics domain was recovered are superseded or exhausted, so a decision is owed on whether the domain routes should cover non-live stages or deliberately skip them.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-catalog-release</pre>
     </article>
 </section>
@@ -238,6 +244,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T221601033310-n-domain-recovery-null" data-who="impl-westrecut" data-when="2026-09-02T22:23:32.020Z">
     <div class="r-comment-body"><p>null physics domains went from 20 to 0 with every value an enum member, each carrying one matching domain edge and a recorded change, routed from the bound data-dictionary source or the classifier seat</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T221644442790-n-runbook-readable-release" data-who="doc-releaseread" data-when="2026-09-02T22:27:46.003Z">
+    <div class="r-comment-body"><p>the release recipe now gates pin-before-reconcile with a runnable census (0 kind disagreements over 2474 live names, momentum/torque/torque_density controls vector) and a candidate gate over the published bytes (18 files, 351 entries, 0 invalid domains, 0 kind disagreements)</p></div>
 </div>
 </section>
 </main>
