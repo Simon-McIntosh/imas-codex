@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T20:35:04",
+  "updated": "2026-09-02T22:52:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1126,6 +1126,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "impl-isnpin",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "impl-isnpr",
         "harness": "codex",
         "role": "implement",
@@ -1176,6 +1185,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-isnwrap",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-isnwriter",
@@ -2414,6 +2432,24 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-westdrain",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "impl-westrecut",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "impl-westrefresh",
         "harness": "codex",
         "role": "implement",
@@ -3285,6 +3321,15 @@
           "gpt-5.6-sol": "01a03ffa-8713-7082-a25a-caca24d450b2"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "test-westgate",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "test-westobjections",
@@ -53832,6 +53877,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1362
+    "_version": 1367
   }
 }
