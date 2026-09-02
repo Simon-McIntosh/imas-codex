@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:23:29",
+  "updated": "2026-09-02T09:45:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -50339,9 +50339,99 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T072441771421-n-west-review-pr-recut",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-review-pr-recut",
+        "node_definition": {
+          "done_when": "crew/reports/west-review-pr-recut.md records PR 6 closed with its comment, the sn release status output, the exact command and exit status, the new RC tag and object, the new PR URL and number with the published title and body, the PR diff summary proving pure addition, all catalog CI checks including validate at conclusion success, the preview URL returning 200, the frozen review artifact path and entry count, a GraphClient census showing approved 0 and contested 0 unchanged, and an upstream default-branch SHA read proving upstream untouched",
+          "estimated_hours": null,
+          "goal": "Replace the schema-failing fork PR 6 with a validated WEST review candidate for the physicist by running 'imas-codex sn release --batch west_production_dd_paths --target auto' from this worktree (exporter parity merged, catalog checkout on a clean main, IMAS_CODEX_SN_ISNC bound) with -m, an agent-authored --pr-title naming the batch in words and a --pr-body-file of two to five decisions-only sentences linking REVIEWING.md and the PR-scoped preview, closing PR 6 beforehand with a one-sentence comment naming its successor",
+          "id": "n-west-review-pr-recut",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T072441771421-n-west-review-pr-recut/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "crew/reports/west-review-pr-recut.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T07:24:46Z",
+        "completed_at": "2026-09-02T07:44:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1194,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1194,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5173d980a92a490c027754070a6da27c4ac5f744",
+        "commits": [
+          "c8329ed50ae87ffff4890a211655f1aa8101c1a3"
+        ],
+        "changed_lines": {
+          "added": 124,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn release status; sn release --batch west_production_dd_paths --target auto ...; gh pr checks 7; GraphClient census; upstream SHA read",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T072441771421-n-west-review-pr-recut/logs/release-recut.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T072441771421-n-west-review-pr-recut/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1284
+    "_version": 1285
   }
 }

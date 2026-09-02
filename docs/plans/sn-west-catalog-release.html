@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.15">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23">
 </head>
 <body>
@@ -103,6 +103,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0924-schema-parity" data-who="reckon-ship" data-when="2026-09-02T09:24:00Z">
     <div class="r-comment-body">Exporter schema parity landed at e56b3c23 (merged da817af6): catalog YAML now carries only fields the installed imas-standard-names 0.8.0 entry model declares, every emitted entry is re-validated through create_standard_name_entry before the file is written, and the generated roles list stays internal to the identity-token collision gate and the ExportReport. 133 exporter tests pass. Dry-run of the WEST batch exits 0 with no extra_forbidden at the same frozen size (368 names, 295 published). The RC-mode advisory findings are unchanged from the PR 6 cut and are pre-existing: Gate A graph test failures, 331 dangling doc links, 175 divergence entries, 28 unmatched manifest sources, 2 grammar-parse exclusions; they are dispositioned before the human review is called complete but do not block cutting the candidate. Next: close PR 6 with a pointer and cut the validated candidate as a new RC and PR.</div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T072441771421-n-west-review-pr-recut" data-who="impl-weststage3" data-when="2026-09-02T07:44:40Z">
+    <div class="r-comment-body"><p>PR 6 closed with a successor comment; RC v0.3.0rc3+west-task-2e cut and fork PR 7 opened (368 frozen, 295 published, 73 withheld, 28 unmatched): 18 files added, 0 modified, 0 deleted; validate, build and guard all success; preview 200; graph approved 0 / contested 0; upstream unchanged</p></div>
 </div>
 </section>
 </main>
