@@ -11,12 +11,12 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="WEST Catalog Release and Graph Fold-Back">
 <meta name="plan-summary" content="Publish the reviewed WEST cohort through the catalog release workflow, fold reviewed state into the graph, and prove reversible source and lifecycle parity.">
-<meta name="plan-status" content="pending">
+<meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="M">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-01">
+<meta name="plan-modified" content="2026-09-02">
 <meta name="plan-graph-handle" content="west-rc">
 <meta name="plan-depends-on" content="sn-west-review-rehearsal">
 <meta name="plan-blocks" content="">
@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
 <main class="plan-doc">
@@ -84,6 +84,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260901T124446173292-n-weststrandedcommit" data-who="impl-exportpolicy" data-when="2026-09-01T12:50:03Z">
     <div class="r-comment-body"><p>LAND: the refreshed manifest is the PR-3 receipt and the exact fold-back cohort; main held the superseded PR-2 artifact which would feed 4 removed and 5 added identities into a governed approval; stranding cause is a coordinator completion omission, the worker manifest did record the revision</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
+    <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>
 </div>
 </section>
 </main>
