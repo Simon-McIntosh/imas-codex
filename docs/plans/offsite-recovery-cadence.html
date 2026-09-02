@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log">
 <meta name="plan-impl" content="0.63">
@@ -220,6 +220,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260902T074614916892-n-offsite-first-cycle" data-who="test-s10offsite" data-when="2026-09-02T08:01:55Z">
     <div class="r-comment-body"><p>graph push --schedule submitted the SLURM job but the titan compute node resolves api.github.com and cannot open HTTPS and no proxy exists, so the cycle failed before export: the registry upload must run from a login node, not a compute node</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T080407772406-n-graph-push-schedule-login-node" data-who="impl-offsitepush" data-when="2026-09-02T08:17:25Z">
+    <div class="r-comment-body"><p>graph push --schedule installs a host-pinned systemd user oneshot service plus weekly persistent timer on the login node running graph push --cycle; --schedule-status and --remove-schedule added; SLURM scheduling removed from the production path; 11/11 focused tests; dry-run renders both units with zero writes</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>

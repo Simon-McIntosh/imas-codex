@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:16:17",
+  "updated": "2026-09-02T10:17:26",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -50725,9 +50725,113 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T080407772406-n-graph-push-schedule-login-node",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-graph-push-schedule-login-node",
+        "node_definition": {
+          "done_when": "unit tests cover the generated unit and timer files and the install, status and remove paths with a mocked systemctl; the SLURM submission path for --schedule is removed; 'graph push --schedule --dry-run' prints the unit and timer text with a weekly OnCalendar and the --cycle command; 'graph push --help' documents that the timer runs on the login node; ruff clean; the live systemd user instance is not modified by this node",
+          "estimated_hours": null,
+          "goal": "Make 'graph push --schedule' run the weekly cycle from the login node instead of a SLURM compute job, because titan compute nodes cannot open HTTPS to GHCR (measured 2026-09-02): install a weekly systemd user timer and service on the login node following the existing 'embed service install' pattern, whose service runs 'graph push --cycle' so the dump still happens through the existing remote Neo4j path and the upload happens where the network allows",
+          "id": "n-graph-push-schedule-login-node",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T080407772406-n-graph-push-schedule-login-node/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/graph/offsite.py",
+            "imas_codex/cli/graph/registry.py",
+            "tests/core/test_offsite_push.py",
+            "tests/cli/test_graph_push_schedule.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-offsitepush",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T08:04:11Z",
+        "completed_at": "2026-09-02T08:17:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 794,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 794,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "29e8a76da5b35f6a43642c0a0204f85ae1b32231",
+        "commits": [
+          "2066a50a2a84bfabacd9ebda99304fe7c2602448"
+        ],
+        "changed_lines": {
+          "added": 324,
+          "removed": 64,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/core/test_offsite_push.py tests/cli/test_graph_push_schedule.py; graph push --schedule --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T080407772406-n-graph-push-schedule-login-node/logs/live-schedule-dry-run.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T080407772406-n-graph-push-schedule-login-node/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eb8-7f54-7393-81f9-23d6489ac1b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 233472,
+            "cached_input_tokens_cumulative": 4752896,
+            "input_tokens": 112802,
+            "input_tokens_cumulative": 4945998,
+            "output_tokens": 2823,
+            "output_tokens_cumulative": 18897,
+            "reasoning_output_tokens": 2961,
+            "reasoning_output_tokens_cumulative": 5659
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1292
+    "_version": 1293
   }
 }
