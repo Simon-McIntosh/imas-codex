@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:22:49",
+  "updated": "2026-09-02T10:45:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2892,6 +2892,17 @@
         "session_model": "gpt-5.6-sol",
         "sessions": {
           "gpt-5.6-sol": "01a06115-4653-7952-8a6c-8b4b2a6cd324"
+        },
+        "created": "2026-09-02"
+      },
+      {
+        "id": "test-s10offsite2",
+        "harness": "codex",
+        "role": "test",
+        "session_id": "01a06137-1e98-7ff0-9474-9449e01490c6",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06137-1e98-7ff0-9474-9449e01490c6"
         },
         "created": "2026-09-02"
       },
@@ -50919,9 +50930,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T082313093957-n-offsite-first-cycle-login",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-first-cycle-login",
+        "node_definition": {
+          "done_when": "crew/reports/offsite-first-cycle.md records the systemctl --user status of the timer plus service, the receipt JSON path with counts_match true, wall_time_seconds plus archive_bytes, the new registry tag as listed by the GitHub Packages API, 'imas-codex graph status' showing the offsite row current with its age in seconds, the timer's next elapse seven days out, plus a GraphClient census after Neo4j is back that matches the receipt's live census",
+          "estimated_hours": null,
+          "goal": "Run the first real weekly offsite push cycle on the login node: install the timer with 'imas-codex graph push --schedule', start the service once immediately with systemctl --user start so the cycle runs now instead of at the next calendar elapse, record the measured wall time plus archive bytes from its receipt",
+          "id": "n-offsite-first-cycle-login",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T082313093957-n-offsite-first-cycle-login/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "crew/reports/offsite-first-cycle.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s10offsite2",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T08:23:16Z",
+        "completed_at": "2026-09-02T08:44:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1263,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1263,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7fa960e7b698434dc585e537cc488b29fe43e31a",
+        "commits": [
+          "c7b0fcba9c6651e031988558b5929b27cae57e27"
+        ],
+        "changed_lines": {
+          "added": 131,
+          "removed": 21,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "imas-codex graph push --schedule; systemctl --user start; journal; GitHub Packages API; graph status",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": "sha256:5769350eff8fe789c01fc40f5b43d8de51b71aceb3398c65a309526886a74480"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T082313093957-n-offsite-first-cycle-login/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06137-1e98-7ff0-9474-9449e01490c6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7610880,
+            "cached_input_tokens_cumulative": 7610880,
+            "input_tokens": 7821597,
+            "input_tokens_cumulative": 7821597,
+            "output_tokens": 30172,
+            "output_tokens_cumulative": 30172,
+            "reasoning_output_tokens": 11878,
+            "reasoning_output_tokens_cumulative": 11878
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1294
+    "_version": 1297
   }
 }
