@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T00:14:00",
+  "updated": "2026-09-03T00:28:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -105,6 +105,15 @@
         "role": "documentation",
         "session_id": "01a02da5-3a01-7d21-86aa-5a416ea7ca0e",
         "created": "2026-08-23"
+      },
+      {
+        "id": "doc-releaseread",
+        "harness": "claude-opus",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "doc-releaserecipe",
@@ -54265,6 +54274,218 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T221432032843-n-release-preview-transport",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-release-preview-transport",
+        "node_definition": {
+          "done_when": "a test proving the body update issues a REST patch against the pull-request endpoint carrying the new body passes with the surrounding catalog-release module suite green under uv run --no-sync pytest tests/standard_names -q, while a live check against the open review pull request rewrites its body successfully",
+          "estimated_hours": 1.0,
+          "goal": "Make _GitHubClient.update_pull_request_body in imas_codex/standard_names/catalog_release.py write the pull-request body through the GitHub REST API rather than gh pr edit, because gh pr edit now fails on this repository with a Projects-classic GraphQL deprecation error, leaving sn release exiting 1 with the preview address unwritten after the pull request is already open",
+          "id": "n-release-preview-transport",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/release-preview-transport.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_catalog_release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-westdrain",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T22:14:39Z",
+        "completed_at": "2026-09-02T22:22:09.762Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 445,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 450,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ee616ff64ae9d330f957ef7d418b250204328ebc",
+        "commits": [
+          "244de3ee5c118d0243afc179002be7106ecdb058"
+        ],
+        "changed_lines": {
+          "added": 79,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_catalog_release.py tests/standard_names/test_review_release_preview_link.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/release-preview-transport.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/release-preview-transport.json",
+        "scope_changed": false,
+        "session_id": "ddab82a5-d539-4494-b0b2-e62bbc986310",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 78512,
+            "cache_creation_input_tokens_cumulative": 78512,
+            "cache_read_input_tokens": 2106473,
+            "cache_read_input_tokens_cumulative": 2106473,
+            "inference_geo": "not_available",
+            "input_tokens": 56,
+            "input_tokens_cumulative": 56,
+            "output_tokens": 12443,
+            "output_tokens_cumulative": 12443,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.1497115,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.1497115
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260902T221601033310-n-domain-recovery-null",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-domain-recovery-null",
+        "node_definition": {
+          "done_when": "a census query run through the repository GraphClient counting live standard names whose physics_domain is null returns 20 before the work, 0 after, with a second query returning 0 rows whose stored physics_domain is outside the PhysicsDomain enum, with both query outputs, the per-name before and after domain, the provenance route, the spend recorded in the report",
+          "estimated_hours": 1.0,
+          "goal": "Recover a physics domain for the twenty live standard names that carry none, taking each name's domain from the physics domain already held by its bound data-dictionary source where one exists, otherwise from the configured classifier seat, never hand-picked, so the exporter stops substituting an out-of-vocabulary placeholder that catalog validation rejects",
+          "id": "n-domain-recovery-null",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/domain-recovery-null.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/domain-recovery-null.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-westrecut",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T22:16:06Z",
+        "completed_at": "2026-09-02T22:23:32.020Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 438,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 446,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ee616ff64ae9d330f957ef7d418b250204328ebc",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "census of live standard names with a null physics_domain through GraphClient",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/domain-recovery-null.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/domain-recovery-null.json",
+        "scope_changed": false,
+        "session_id": "67ef01bd-7374-41a4-967a-7dbb5b98fe08",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 104651,
+            "cache_creation_input_tokens_cumulative": 104651,
+            "cache_read_input_tokens": 2869217,
+            "cache_read_input_tokens_cumulative": 2869217,
+            "inference_geo": "not_available",
+            "input_tokens": 68,
+            "input_tokens_cumulative": 68,
+            "output_tokens": 23571,
+            "output_tokens_cumulative": 23571,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.0707335000000007,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.0707335000000007
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "the recovery writes graph state rather than repository files; its evidence is the report with the before and after censuses",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -54311,6 +54532,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1374
+    "_version": 1377
   }
 }
