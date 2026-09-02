@@ -15096,7 +15096,8 @@ def persist_reviewed_name(
                    sn.edit_status AS edit_status,
                    sn.edit_scope AS edit_scope,
                    sn.edit_override_edits AS edit_override_edits,
-                   sn.edit_include_accepted AS edit_include_accepted
+                   sn.edit_include_accepted AS edit_include_accepted,
+                   sn.run_id AS scope_run_id
             """,
             id=sn_id,
             token=claim_token,
@@ -15120,6 +15121,18 @@ def persist_reviewed_name(
     # (catalog_edit) or accepted descendants when the root rename is accepted).
     edit_override_before: bool = bool(rows[0].get("edit_override_edits"))
     edit_include_before: bool = bool(rows[0].get("edit_include_accepted"))
+    scope_run_id_before: str | None = rows[0].get("scope_run_id")
+
+    # A rescore submits the existing identity to a fresh quorum draw.  An old
+    # family/subtree edit scope can remain on that node, but accepting the same
+    # spelling authorizes no rename and therefore has no descendant cascade to
+    # preflight or apply.  The persisted scope is the semantic operation id;
+    # ``run_id`` identifies the enclosing SNRun cost ledger and is intentionally
+    # independent.  Claim-token and drafted-stage CAS guards bind this review to
+    # the currently staged node.
+    from imas_codex.standard_names.rescore import is_rescore_scope
+
+    identity_preserving_rescore = is_rescore_scope(scope_run_id_before)
 
     # ── Stage decision ────────────────────────────────────────────────
     # Score is canonical (rubric-driven 0–1).
@@ -15213,7 +15226,11 @@ def persist_reviewed_name(
     # achieved by gating the accept on a clean preflight; the residual
     # accept→apply window is the same TOCTOU the pool path carries.
     cascade_preflight_conflicts: list[str] = []
-    if target_stage == "accepted" and edit_scope_before in ("family", "subtree"):
+    if (
+        target_stage == "accepted"
+        and not identity_preserving_rescore
+        and edit_scope_before in ("family", "subtree")
+    ):
         from imas_codex.standard_names.cascade import cascade_descendants_of
 
         with GraphClient() as gc:
@@ -15378,6 +15395,7 @@ def persist_reviewed_name(
     # validated plan against the LIVE subtree.
     if (
         target_stage == "accepted"
+        and not identity_preserving_rescore
         and new_edit_status == "applied"
         and edit_scope_before in ("family", "subtree")
     ):
