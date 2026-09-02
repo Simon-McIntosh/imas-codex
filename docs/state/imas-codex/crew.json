@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T15:03:28",
+  "updated": "2026-09-02T15:16:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -722,9 +722,11 @@
         "id": "impl-domainfix",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06238-72c2-7073-a478-ae0c0da41175",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06238-72c2-7073-a478-ae0c0da41175"
+        },
         "created": "2026-09-02"
       },
       {
@@ -52437,9 +52439,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T130415357165-n-west-domainless-names",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-domainless-names",
+        "node_definition": {
+          "done_when": "crew/reports/west-domainless-names.md records for each name its bound source paths and their DD physics_domain, the command that assigned the domain and its exit status, and a Cypher read after showing all six non-null and in the PhysicsDomain enum; if any name has no source and no classifier route, it is listed with the reason instead of a guessed domain",
+          "estimated_hours": null,
+          "goal": "Give the six WEST frozen-batch names with a null physics_domain (ipb98y2_confinement_time, intensity_at_spectral_line, radiative_temperature_at_ece_channel, voltage_of_ion_cyclotron_heating_antenna, voltage_of_ion_cyclotron_heating_antenna_amplitude, coolant_mass) their DD-authoritative domain through the existing classification path (the domain inherits from the bound DD source's physics_domain, or the sn-classifier seat where no source binds), never by hand-picking a value",
+          "id": "n-west-domainless-names",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130415357165-n-west-domainless-names/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "crew/reports/west-domainless-names.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-domainfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T13:04:21Z",
+        "completed_at": "2026-09-02T13:16:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 707,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 707,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "e091fb3bc9d261cfde8da58473d66a10ef26d61d",
+        "commits": [
+          "51a10f30e1e55baf7199ff5bf5cb82a07585c1b3"
+        ],
+        "changed_lines": {
+          "added": 109,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn reclassify; scoped edge writer; Cypher verification",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:5da86aeecdedaa97b29e33b259c22f34d6435f165360cc0429f37cc481855d63"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T130415357165-n-west-domainless-names/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06238-72c2-7073-a478-ae0c0da41175",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4034560,
+            "cached_input_tokens_cumulative": 4034560,
+            "input_tokens": 4228787,
+            "input_tokens_cumulative": 4228787,
+            "output_tokens": 17782,
+            "output_tokens_cumulative": 17782,
+            "reasoning_output_tokens": 5451,
+            "reasoning_output_tokens_cumulative": 5451
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1330
+    "_version": 1332
   }
 }
