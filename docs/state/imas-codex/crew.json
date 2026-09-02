@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:35:13",
+  "updated": "2026-09-02T08:50:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -121,9 +121,11 @@
         "id": "doc-releaserunbook",
         "harness": "codex",
         "role": "documentation",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a060cb-ae77-7370-9726-93cd22d1bdd9",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a060cb-ae77-7370-9726-93cd22d1bdd9"
+        },
         "created": "2026-09-02"
       },
       {
@@ -49939,9 +49941,100 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T062550934314-n-release-runbook-gated",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-release-runbook-gated",
+        "node_definition": {
+          "done_when": "the section is at most about 200 lines and has numbered steps covering: choosing or defining the batch manifest (where manifests live under imas_codex/standard_names/manifests, how a physics-domain batch is expressed, and how sn run --batch consumes it), the pre-cut gates (graph restore point exists, sn release status shows the expected series, fork main holds only previously approved entries and the PR diff will be pure addition, REVIEWING.md linked), the cut (sn release --batch with the required flags and the agent-authored title and body contract), the review handoff (what the reviewer may edit, how to hold an entry, how CI guards machine fields, the preview URL shape and the no-close-reopen rule), the fold-back (dry-run then live approve, the eligibility preflight and what a refusal means, expected counts, provenance and receipt checks, repeat-approval refusal), adjudication (sn resolve --override --reason), the freeze-check, and undo semantics for rehearsals only; every gate has a check command and expected result; no plan labels, sprint ids, stage numbers or run figures appear in the prose; the detached-worktree environment block and the additive-baseline rule are kept; the root AGENTS.md Release Workflow pointer stays at most 7 lines; both files parse as CommonMark, ruff is irrelevant, and the four commands' current --help output is re-verified and cited",
+          "estimated_hours": null,
+          "goal": "Restructure the Release recipe section of imas_codex/standard_names/AGENTS.md into a concise numbered operator runbook that a fresh session can follow to cut a batch or physics-domain catalog release without rediscovery: each step states the command, the gate check that proves the step succeeded (a command plus its expected output or count), and the stop condition, with all rehearsal chronology, stage numbers, run figures and the per-report link list moved out to a single pointer to docs/evidence/archive/sn-west-review-rehearsal-landed.html",
+          "id": "n-release-runbook-gated",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062550934314-n-release-runbook-gated/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md",
+            "AGENTS.md"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-releaserunbook",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:25:55Z",
+        "completed_at": "2026-09-02T06:49:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1436,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1436,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "67863a8b0155ebdbf097b1ff6ef75cbe88452bff",
+        "commits": [
+          "815241d57aa5dde8c95be15813cf119768a9117c"
+        ],
+        "changed_lines": {
+          "added": 170,
+          "removed": 247,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn run/release/approve/resolve --help; manifest graph gate; CommonMark and structural validation; git diff --check",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062550934314-n-release-runbook-gated/validation.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062550934314-n-release-runbook-gated/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060cb-ae77-7370-9726-93cd22d1bdd9",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1277
+    "_version": 1279
   }
 }
