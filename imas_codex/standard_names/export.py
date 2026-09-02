@@ -1241,11 +1241,16 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
         pick_primary_domain(physics_domains) if physics_domains else "unscoped"
     )
 
+    from imas_codex.standard_names.kind_derivation import derive_kind
+
     entry: dict[str, Any] = {
         "name": node["id"],
         "description": node.get("description") or "",
         "documentation": node.get("documentation") or "",
-        "kind": node.get("kind") or "scalar",
+        # Kind is structural and therefore derives from the canonical identity.
+        # Stored graph metadata can predate the current ISN grammar rules, so a
+        # publication projection must never freeze the compose-time value.
+        "kind": derive_kind(node["id"]),
         "unit": node.get("unit") or "",
         # Every candidate reaching this function has passed the accepted /
         # docs-accepted / valid export gate, so it is published as 'active'.
