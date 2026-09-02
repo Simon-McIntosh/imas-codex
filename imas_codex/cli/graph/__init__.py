@@ -56,7 +56,6 @@ def _register_graph_commands() -> None:
         graph_secure,
         graph_switch,
     )
-    from imas_codex.cli.graph.offsite import graph_offsite_push
     from imas_codex.cli.graph.registry import (
         graph_fetch,
         graph_prune,
@@ -95,7 +94,6 @@ def _register_graph_commands() -> None:
     graph.add_command(graph_pull, "pull")
     graph.add_command(graph_tags, "tags")
     graph.add_command(graph_prune, "prune")
-    graph.add_command(graph_offsite_push, "offsite-push")
 
 
 _register_graph_commands()

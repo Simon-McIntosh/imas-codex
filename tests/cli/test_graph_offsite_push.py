@@ -9,7 +9,7 @@ from subprocess import CompletedProcess
 import click
 from click.testing import CliRunner
 
-from imas_codex.cli.graph.offsite import graph_offsite_push
+from imas_codex.cli.graph.registry import graph_push
 from imas_codex.graph.neo4j_ops import OffsiteCurrency
 from imas_codex.graph.offsite import OffsitePushResult
 
@@ -27,15 +27,15 @@ def _stale_currency() -> OffsiteCurrency:
 
 def _common(monkeypatch) -> None:
     monkeypatch.setattr(
-        "imas_codex.cli.graph.offsite.get_git_info",
+        "imas_codex.cli.graph.registry.get_git_info",
         lambda: {"is_fork": True, "remote_owner": "example"},
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.offsite.get_offsite_currency",
+        "imas_codex.cli.graph.registry.get_offsite_currency",
         lambda registry, token: _stale_currency(),
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.offsite.graph_archive_stamp", lambda: "dev-abc-stamp"
+        "imas_codex.cli.graph.registry.graph_archive_stamp", lambda: "dev-abc-stamp"
     )
 
 
@@ -49,14 +49,14 @@ def test_dry_run_prints_decision_and_self_resubmitting_script(monkeypatch):
         raise AssertionError(kwargs)
 
     monkeypatch.setattr(
-        "imas_codex.cli.graph.offsite.run_offsite_push_cycle", run_cycle
+        "imas_codex.cli.graph.registry.run_offsite_push_cycle", run_cycle
     )
 
-    result = CliRunner().invoke(graph_offsite_push, ["--dry-run"])
+    result = CliRunner().invoke(graph_push, ["--cycle", "--dry-run"])
 
     assert result.exit_code == 0
     assert "56.000 days stale" in result.output
-    assert "#SBATCH --job-name=codex-offsite-push" in result.output
+    assert "#SBATCH --job-name=codex-graph-push" in result.output
     assert 'sbatch --begin=now+7days "$0"' in result.output
     assert "No archive was exported or pushed" in result.output
     assert not pushed
@@ -70,13 +70,13 @@ def test_schedule_uses_service_submission_helper(monkeypatch):
         lambda *args, **kwargs: submissions.append((args, kwargs)),
     )
 
-    result = CliRunner().invoke(graph_offsite_push, ["--schedule"])
+    result = CliRunner().invoke(graph_push, ["--schedule"])
 
     assert result.exit_code == 0
     assert len(submissions) == 1
     args, kwargs = submissions[0]
-    assert args[0] == "codex-offsite-push"
-    assert "uv run --no-sync imas-codex graph offsite-push" in args[1]
+    assert args[0] == "codex-graph-push"
+    assert "uv run --no-sync imas-codex graph push --cycle" in args[1]
     assert 'sbatch --begin=now+7days "$0"' in args[1]
     assert kwargs == {"cpus": 2, "mem": "8G"}
 
@@ -92,7 +92,7 @@ def test_rejected_environment_token_falls_back_to_gh_credential(monkeypatch):
         return _stale_currency()
 
     monkeypatch.setattr(
-        "imas_codex.cli.graph.offsite.get_offsite_currency",
+        "imas_codex.cli.graph.registry.get_offsite_currency",
         lambda registry, token: (
             (_ for _ in ()).throw(click.ClickException("HTTP 401"))
             if token == "stale-token"
@@ -100,12 +100,12 @@ def test_rejected_environment_token_falls_back_to_gh_credential(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        "imas_codex.cli.graph.offsite.subprocess.run",
+        "imas_codex.cli.graph.registry.subprocess.run",
         lambda *args, **kwargs: CompletedProcess(args[0], 0, "gh-token\n", ""),
     )
 
     result = CliRunner().invoke(
-        graph_offsite_push, ["--dry-run", "--token", "stale-token"]
+        graph_push, ["--cycle", "--dry-run", "--token", "stale-token"]
     )
 
     assert result.exit_code == 0
@@ -116,7 +116,7 @@ def test_cycle_reports_success_receipt(monkeypatch, tmp_path):
     _common(monkeypatch)
     receipt = tmp_path / "receipt.json"
     monkeypatch.setattr(
-        "imas_codex.cli.graph.offsite.run_offsite_push_cycle",
+        "imas_codex.cli.graph.registry.run_offsite_push_cycle",
         lambda **kwargs: OffsitePushResult(
             outcome="pushed",
             receipt_path=receipt,
@@ -126,7 +126,7 @@ def test_cycle_reports_success_receipt(monkeypatch, tmp_path):
         ),
     )
 
-    result = CliRunner().invoke(graph_offsite_push)
+    result = CliRunner().invoke(graph_push, ["--cycle"])
 
     assert result.exit_code == 0
     assert "2434869050 bytes in 91.250 s" in result.output

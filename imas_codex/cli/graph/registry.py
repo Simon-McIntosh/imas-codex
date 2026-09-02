@@ -39,12 +39,17 @@ from imas_codex.graph.ghcr import (
 )
 from imas_codex.graph.neo4j_ops import (
     Neo4jOperation,
+    OffsiteCurrency,
     backup_graph_dump,
     check_graph_exists,
+    get_offsite_currency,
     graph_archive_stamp,
 )
+from imas_codex.graph.offsite import OffsiteCountMismatch, run_offsite_push_cycle
 
 _RELEASE_TAG = re.compile(r"^v?\d+\.\d+\.\d+(?:-rc\d+)?$")
+_PUSH_JOB_NAME = "codex-graph-push"
+_PUSH_INTERVAL = "now+7days"
 
 
 @dataclass(frozen=True)
@@ -212,11 +217,226 @@ def _resolve_partition(profile) -> str | None:
         return None
 
 
+def _scheduled_push_command() -> str:
+    """Return the batch body that runs one cycle and schedules its successor."""
+    return (
+        "uv run --no-sync imas-codex graph push --cycle\n"
+        "cycle_status=$?\n"
+        f'sbatch --begin={_PUSH_INTERVAL} "$0"\n'
+        "schedule_status=$?\n"
+        'if [ "$cycle_status" -ne 0 ]; then exit "$cycle_status"; fi\n'
+        'exit "$schedule_status"'
+    )
+
+
+def _scheduled_push_preview() -> str:
+    """Render the material batch lines shown by cycle dry-runs."""
+    return (
+        "#!/bin/bash\n"
+        f"#SBATCH --job-name={_PUSH_JOB_NAME}\n"
+        "#SBATCH --cpus-per-task=2\n"
+        "#SBATCH --mem=8G\n"
+        "# partition and log path are resolved by the graph service helper\n"
+        "cd $HOME/Code/imas-codex\n"
+        "source .env 2>/dev/null || true\n"
+        f"{_scheduled_push_command()}"
+    )
+
+
+def _submit_push_schedule() -> None:
+    from imas_codex.cli.services import _submit_service_job
+
+    _submit_service_job(
+        _PUSH_JOB_NAME,
+        _scheduled_push_command(),
+        cpus=2,
+        mem="8G",
+    )
+
+
+def _invoke_graph_command(command, args: list[str], operation: str) -> None:
+    from click.testing import CliRunner
+
+    result = CliRunner().invoke(command, args)
+    if result.exit_code == 0:
+        if result.output:
+            click.echo(result.output, nl=not result.output.endswith("\n"))
+        return
+    detail = result.output.strip()
+    if not detail and result.exception:
+        detail = f"{type(result.exception).__name__}: {result.exception}"
+    raise click.ClickException(f"{operation} failed: {detail}")
+
+
+def _export_cycle_archive(stamp: str) -> Path:
+    from imas_codex.cli.graph.data import graph_export
+    from imas_codex.graph.dirs import ensure_exports_dir
+
+    archive = ensure_exports_dir() / f"imas-codex-graph-{stamp}.tar.gz"
+    _invoke_graph_command(
+        graph_export,
+        [
+            "--output",
+            str(archive),
+            "--version-label",
+            stamp,
+            "--archive-dir-name",
+            f"imas-codex-graph-{stamp}",
+        ],
+        "graph export",
+    )
+    return archive
+
+
+def _extract_cycle_dump(archive: Path, target: Path) -> None:
+    with tarfile.open(archive, "r:gz") as bundle:
+        members = [
+            member
+            for member in bundle.getmembers()
+            if member.isfile() and Path(member.name).name == "graph.dump"
+        ]
+        if len(members) != 1:
+            raise click.ClickException(
+                f"Expected one graph.dump in {archive}, found {len(members)}"
+            )
+        stream = bundle.extractfile(members[0])
+        if stream is None:
+            raise click.ClickException(f"Cannot read graph.dump in {archive}")
+        with target.open("wb") as output:
+            shutil.copyfileobj(stream, output)
+
+
+def _push_cycle_archive(
+    archive: Path,
+    stamp: str,
+    *,
+    registry: str,
+    token: str | None,
+) -> str:
+    with tempfile.TemporaryDirectory() as temporary:
+        source_dump = Path(temporary) / "graph.dump"
+        _extract_cycle_dump(archive, source_dump)
+        version_tag = f"{stamp}-r1"
+        args = [
+            "--dev",
+            "--version",
+            version_tag,
+            "--registry",
+            registry,
+            "--source-dump",
+            str(source_dump),
+            "--message",
+            "Scheduled full-graph offsite recovery point",
+        ]
+        if token:
+            args.extend(["--token", token])
+        _invoke_graph_command(graph_push, args, "graph push")
+    return f"{registry}/imas-codex-graph:{version_tag}"
+
+
+def _push_cycle_decision(status: str, age_seconds: float | None) -> str:
+    if status == "current":
+        return "no-op: live graph has not changed since the newest offsite copy"
+    if status == "no_offsite":
+        return "push: no full-graph offsite copy exists"
+    days = (age_seconds or 0.0) / 86_400
+    return f"push: newest full-graph offsite copy is {days:.3f} days stale"
+
+
+def _read_offsite_currency(
+    registry: str, token: str | None
+) -> tuple[OffsiteCurrency, str | None]:
+    """Read registry currency, recovering from an invalid stored token."""
+    try:
+        return get_offsite_currency(registry, token), token
+    except click.ClickException as exc:
+        if "401" not in exc.format_message():
+            raise
+
+    credential = subprocess.run(
+        ["gh", "auth", "token"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    fallback = credential.stdout.strip()
+    if credential.returncode != 0 or not fallback:
+        raise click.ClickException(
+            "The configured GHCR token was rejected and gh has no usable credential."
+        )
+    return get_offsite_currency(registry, fallback), fallback
+
+
+def _run_scheduled_push(
+    *,
+    registry: str | None,
+    token: str | None,
+    schedule: bool,
+    dry_run: bool,
+) -> None:
+    target_registry = get_registry(get_git_info(), registry)
+    currency, token = _read_offsite_currency(target_registry, token)
+    click.echo(
+        f"Decision: {_push_cycle_decision(currency.status, currency.age_seconds)}"
+    )
+
+    if dry_run:
+        click.echo(
+            f"Archive stamp: {graph_archive_stamp()} "
+            "(a fresh UTC stamp is generated when the cycle runs)"
+        )
+        click.echo("\n[DRY RUN] SLURM script:")
+        click.echo(_scheduled_push_preview())
+        click.echo("\n[DRY RUN] No archive was exported or pushed.")
+        return
+
+    if schedule:
+        _submit_push_schedule()
+        click.echo(
+            "Scheduled one immediate push cycle; each job submits its successor "
+            "for seven days later."
+        )
+        return
+
+    try:
+        result = run_offsite_push_cycle(
+            currency=currency,
+            export_archive=_export_cycle_archive,
+            push_archive=lambda archive, stamp: _push_cycle_archive(
+                archive,
+                stamp,
+                registry=target_registry,
+                token=token,
+            ),
+        )
+    except OffsiteCountMismatch as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if result.outcome == "no_op":
+        click.echo(f"No-op receipt: {result.receipt_path}")
+    else:
+        click.echo(f"Pushed: {result.archive_ref}")
+        click.echo(
+            f"Archive: {result.archive_bytes} bytes in {result.wall_time_seconds:.3f} s"
+        )
+        click.echo(f"Receipt: {result.receipt_path}")
+
+
 @click.command()
 @click.option("--dev", is_flag=True, help="Push as dev-{commit} tag")
 @click.option("--registry", envvar="IMAS_DATA_REGISTRY", default=None)
 @click.option("--token", envvar="GHCR_TOKEN")
 @click.option("--dry-run", is_flag=True, help="Show what would be pushed")
+@click.option(
+    "--schedule",
+    is_flag=True,
+    help="Submit the weekly self-resubmitting push job.",
+)
+@click.option(
+    "--cycle",
+    is_flag=True,
+    help="Run one verified full-graph push cycle.",
+)
 @click.option(
     "--facility",
     "-F",
@@ -270,6 +490,8 @@ def graph_push(
     verbose: bool = False,
     version_tag_override: str | None = None,
     source_dump: str | None = None,
+    schedule: bool = False,
+    cycle: bool = False,
 ) -> None:
     """Push graph archive to GHCR.
 
@@ -278,6 +500,33 @@ def graph_push(
     Use -m/--message to attach a short description (like a git commit message).
     """
     from imas_codex.cli.graph_progress import GraphProgress, run_oras_with_progress
+
+    if schedule and cycle:
+        raise click.UsageError("--schedule and --cycle are mutually exclusive")
+    if schedule or cycle:
+        incompatible = any(
+            (
+                dev,
+                facilities,
+                without_dd,
+                dd_only,
+                message,
+                verbose,
+                version_tag_override,
+                source_dump,
+            )
+        )
+        if incompatible:
+            raise click.UsageError(
+                "--schedule/--cycle cannot be combined with push variant options"
+            )
+        _run_scheduled_push(
+            registry=registry,
+            token=token,
+            schedule=schedule,
+            dry_run=dry_run,
+        )
+        return
 
     git_info = get_git_info()
 
