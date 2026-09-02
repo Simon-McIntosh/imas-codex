@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
 <main class="plan-doc">
@@ -87,6 +87,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
     <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T062313591737-n-fork-main-blank-baseline" data-who="impl-weststage3" data-when="2026-09-02T06:29:46Z">
+    <div class="r-comment-body"><p>fork main reverted the PR 3 merge (fork revert 1a752add): zero standard_names yml at the new head, CI build and validate green, RC tag kept, no receipt, upstream unchanged at a06e5205, graph untouched at approved 0 / contested 0 / accepted 2336</p></div>
 </div>
 </section>
 </main>

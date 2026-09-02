@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T03:15:17",
+  "updated": "2026-09-02T08:30:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -115,6 +115,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a05fa6-f132-7641-bc7d-4ccaacbd95d1"
         },
+        "created": "2026-09-02"
+      },
+      {
+        "id": "doc-releaserunbook",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-02"
       },
       {
@@ -49733,9 +49742,99 @@
           "role": "documentation",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T062313591737-n-fork-main-blank-baseline",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-fork-main-blank-baseline",
+        "node_definition": {
+          "done_when": "crew/reports/fork-main-blank-baseline.md records fork main SHA before and after, the revert commit SHA and diffstat, 'git ls-tree' proving zero standard_names/*.yml files at the new head, the catalog CI conclusion on the new head, the tag list (cut-time RC tag present, no graph-merged receipt), an upstream default-branch SHA read proving upstream unchanged, and a GraphClient census proving the graph is untouched (approved 0, contested 0)",
+          "estimated_hours": null,
+          "goal": "Restore the blank-main baseline on the fork catalog Simon-McIntosh/imas-standard-names-catalog by reverting the PR 3 merge commit 6a5c44d3 on main with 'git revert -m 1' (history kept, no force push), so that main holds zero standard_names/*.yml entries again as it did at 1b596f3c",
+          "id": "n-fork-main-blank-baseline",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062313591737-n-fork-main-blank-baseline/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "write_paths": [
+            "crew/reports/fork-main-blank-baseline.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:23:17Z",
+        "completed_at": "2026-09-02T06:29:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 389,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 389,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "67863a8b0155ebdbf097b1ff6ef75cbe88452bff",
+        "commits": [
+          "337f93d860cb95d5cc1c5ab0159b3077ef56868f"
+        ],
+        "changed_lines": {
+          "added": 72,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "git revert -m 1 6a5c44d3 on fork main; git ls-tree count; fork checks; tag list; upstream SHA read; GraphClient census",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:a4b656a881318dac0c7a8bca584f92103ffe2e459c7ab5e5498a6513ca885aa8"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T062313591737-n-fork-main-blank-baseline/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1274
+    "_version": 1276
   }
 }
