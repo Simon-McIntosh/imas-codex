@@ -19,7 +19,6 @@ from imas_codex import __version__
 from imas_codex.graph.ghcr import (
     get_git_info,
     get_package_name,
-    save_local_graph_manifest,
 )
 from imas_codex.graph.neo4j_ops import (
     Neo4jOperation,
@@ -28,6 +27,7 @@ from imas_codex.graph.neo4j_ops import (
     is_neo4j_running,
     neo4j_image,
     run_neo4j_dump as _run_neo4j_dump,
+    save_graph_instance_manifest,
     secure_data_directory,
 )
 from imas_codex.graph.temp_neo4j import (
@@ -714,7 +714,7 @@ def graph_load(
                         break
         except Exception:
             pass
-        save_local_graph_manifest(manifest)
+        save_graph_instance_manifest(profile.name, manifest)
         return
     # ── End remote dispatch ──────────────────────────────────────────────
 
@@ -787,7 +787,7 @@ def graph_load(
                 manifest = json.loads(manifest_file.read_text())
                 manifest["pushed"] = False
                 manifest["loaded_from"] = str(archive_path)
-                save_local_graph_manifest(manifest)
+                save_graph_instance_manifest(profile.name, manifest)
 
     click.echo("✓ Load complete")
 

@@ -33,6 +33,48 @@ SERVICES_DIR = Path("imas_codex/config/services")
 RECOVERY_DIR = Path.home() / ".local" / "share" / "imas-codex" / "recovery"
 DATA_DIR = Path.home() / ".local" / "share" / "imas-codex" / "neo4j"
 NEO4J_LOCK_FILE = Path.home() / ".config" / "imas-codex" / "neo4j-operation.lock"
+INSTANCE_MANIFESTS_KEY = "instances"
+
+
+def get_graph_instance_manifest(instance_name: str | None) -> dict | None:
+    """Return global graph metadata overlaid with one instance's load record."""
+    from imas_codex.graph.ghcr import get_local_graph_manifest
+
+    manifest = get_local_graph_manifest()
+    if manifest is None:
+        return None
+
+    scoped = {
+        key: value
+        for key, value in manifest.items()
+        if key not in {INSTANCE_MANIFESTS_KEY, "loaded_from"}
+    }
+    records = manifest.get(INSTANCE_MANIFESTS_KEY, {})
+    if instance_name is not None and isinstance(records, dict):
+        record = records.get(instance_name)
+        if isinstance(record, dict):
+            scoped.update(record)
+    return scoped
+
+
+def save_graph_instance_manifest(instance_name: str, manifest: dict) -> None:
+    """Persist archive-load bookkeeping under the graph instance identity."""
+    from imas_codex.graph.ghcr import (
+        get_local_graph_manifest,
+        save_local_graph_manifest,
+    )
+
+    stored = get_local_graph_manifest() or {}
+    records = stored.setdefault(INSTANCE_MANIFESTS_KEY, {})
+    if not isinstance(records, dict):
+        records = {}
+        stored[INSTANCE_MANIFESTS_KEY] = records
+    records[instance_name] = {
+        **manifest,
+        "loaded_at": datetime.now(UTC).isoformat(),
+    }
+    stored.pop("loaded_from", None)
+    save_local_graph_manifest(stored)
 
 
 def graph_archive_stamp(
