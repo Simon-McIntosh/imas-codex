@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T16:00:53",
+  "updated": "2026-09-02T17:12:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3230,9 +3230,11 @@
         "id": "test-westrescore",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06260-9605-7290-8e96-bde9697c39f9",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06260-9605-7290-8e96-bde9697c39f9"
+        },
         "created": "2026-09-02"
       },
       {
@@ -52869,9 +52871,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T134805682558-n-west-withheld-recovery",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-withheld-recovery",
+        "node_definition": {
+          "done_when": "crew/reports/west-withheld-recovery.md records every command with exit status, SNRun ids and exact spend, a per-name table of the 28 with before and after lifecycle triplets and the route taken, the count now fully accepted, the quarantined names grouped by classification with the recorded issue text, and a GraphClient census proving approved 0 and contested 0; no direct acceptance or graph-text Cypher",
+          "estimated_hours": null,
+          "goal": "Recover the WEST withheld names through their sanctioned routes as recorded in crew/reports/west-batch-drain.md: 'imas-codex sn rescore' for the reviewed-but-sound names (13 name-not-accepted plus 4 resolution-unrecorded plus the 1 docs-pending regression), a docs review pass for the 1 docs-not-accepted, and for the 10 quarantined names a per-name classification of the recorded validation_issues into grammar gap, semantic defect fixable by governed sn edit --hint with a reason, or legitimately withheld, applying only the edits whose reason is a clear-cut grammar or spelling correction, all under a total --cost-limit 30",
+          "id": "n-west-withheld-recovery",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T134805682558-n-west-withheld-recovery/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "crew/reports/west-withheld-recovery.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-westrescore",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T13:48:11Z",
+        "completed_at": "2026-09-02T14:43:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3311,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3311,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "07ba8ffef403320f825f74bfa9c766e070add583",
+        "commits": [
+          "caa81a93015e5fbd80384fa037d4172b9b0e1a0f"
+        ],
+        "changed_lines": {
+          "added": 153,
+          "removed": 111,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "sn rescore x13; sn edit x5; GraphClient census",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": "sha256:6203ea0a92b8bae810ac9c72d4f1e895e7642244e842b7382faeb58d20ce0738"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T134805682558-n-west-withheld-recovery/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06260-9605-7290-8e96-bde9697c39f9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12305920,
+            "cached_input_tokens_cumulative": 12305920,
+            "input_tokens": 12573727,
+            "input_tokens_cumulative": 12573727,
+            "output_tokens": 36789,
+            "output_tokens_cumulative": 36789,
+            "reasoning_output_tokens": 10079,
+            "reasoning_output_tokens_cumulative": 10079
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1339
+    "_version": 1341
   }
 }
