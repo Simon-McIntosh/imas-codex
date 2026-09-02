@@ -10,6 +10,7 @@ State machine:
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 import shlex
@@ -60,8 +61,25 @@ class _GitHubClient:
         )
 
     def update_pull_request_body(self, *, repo: str, number: int, body: str) -> None:
+        """Patch the body through the REST pull-request endpoint.
+
+        The body is sent as a JSON document on stdin so no length or quoting
+        limit of the command line applies. REST is the transport because the
+        CLI's own edit verb resolves pull-request metadata through GraphQL,
+        which fails outright on a repository whose response still carries
+        Projects-classic fields.
+        """
         result = subprocess.run(
-            ["gh", "pr", "edit", str(number), "--repo", repo, "--body", body],
+            [
+                "gh",
+                "api",
+                "--method",
+                "PATCH",
+                f"repos/{repo}/pulls/{number}",
+                "--input",
+                "-",
+            ],
+            input=json.dumps({"body": body}),
             capture_output=True,
             text=True,
             timeout=30,
