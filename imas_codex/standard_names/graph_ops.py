@@ -13080,7 +13080,12 @@ def reconcile_grammar_segments() -> dict[str, int]:
     ISN grammar cannot parse are skipped (their segments are owned by the
     quarantine path, never wiped here). Safe to run every rotation.
 
-    Returns ``{"names_realigned": n}``.
+    Kind is another deterministic projection of the canonical name. The same
+    maintenance step refreshes a stale stored kind and records every change in
+    the internal ledger so publication and graph state converge on one rule.
+
+    Returns ``{"names_realigned": n}``; the stable result shape remains scoped
+    to grammar segments while kind refresh reports through its own log entry.
     """
     from imas_codex.standard_names.ledger import LIVE_NAME
 
@@ -13113,7 +13118,78 @@ def reconcile_grammar_segments() -> dict[str, int]:
             "id parse",
             len(batch),
         )
+    reconcile_standard_name_kinds()
     return {"names_realigned": len(batch)}
+
+
+def reconcile_standard_name_kinds(gc: Any | None = None) -> dict[str, int]:
+    """Refresh live names whose stored kind disagrees with ``derive_kind``.
+
+    The canonical identity is the authority for structural kind. Every changed
+    value is written with a linked ``StandardNameChange`` in the same query;
+    matching rows are omitted from the write entirely. A compare-and-set guard
+    prevents a concurrent update from being overwritten after the read.
+    """
+    from imas_codex.standard_names.kind_derivation import derive_kind
+    from imas_codex.standard_names.ledger import LIVE_NAME
+
+    own = gc is None
+    client = gc or GraphClient()
+    try:
+        rows = client.query(
+            f"MATCH (sn:StandardName) WHERE {LIVE_NAME} "
+            "RETURN sn.id AS id, sn.kind AS stored_kind"
+        )
+        updates = [
+            {
+                "id": str(row["id"]),
+                "stored_kind": row.get("stored_kind"),
+                "derived_kind": derive_kind(str(row["id"])),
+            }
+            for row in rows
+        ]
+        updates = [row for row in updates if row["stored_kind"] != row["derived_kind"]]
+        changed = (
+            list(
+                client.query(
+                    """
+                    UNWIND $updates AS row
+                    MATCH (sn:StandardName {id: row.id})
+                    WHERE sn.kind = row.stored_kind
+                       OR (sn.kind IS NULL AND row.stored_kind IS NULL)
+                    CREATE (change:StandardNameChange {
+                      id: 'sn-change:' + randomUUID(),
+                      from_name: row.stored_kind,
+                      to_name: row.derived_kind,
+                      operation: 'refresh_derived_kind',
+                      reason: 'stored kind disagreed with canonical-name derivation',
+                      origin: 'graph_reconcile',
+                      changed_at: datetime(),
+                      internal: true
+                    })
+                    MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+                    SET sn.kind = row.derived_kind,
+                        sn.updated_at = datetime()
+                    RETURN sn.id AS id
+                    ORDER BY id
+                    """,
+                    updates=updates,
+                )
+            )
+            if updates
+            else []
+        )
+    finally:
+        if own:
+            client.close()
+
+    if changed:
+        logger.info(
+            "reconcile_standard_name_kinds: refreshed %d stored kind(s) from "
+            "canonical-name derivation",
+            len(changed),
+        )
+    return {"names_refreshed": len(changed)}
 
 
 def _open_graph_client() -> GraphClient:
