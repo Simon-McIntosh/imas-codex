@@ -452,11 +452,7 @@ def test_generated_roles_mark_quantity_parent_and_leaf(tmp_path: Path) -> None:
     emitted = yaml.safe_load(
         (tmp_path / "standard_names" / "equilibrium.yml").read_text(encoding="utf-8")
     )
-    roles = {entry["name"]: entry["roles"] for entry in emitted}
-    assert roles == {
-        "electron_temperature": ["quantity", "parent"],
-        "ion_temperature": ["quantity"],
-    }
+    assert all("roles" not in entry for entry in emitted)
     assert report.to_dict()["role_metadata"] == {
         "entries": 2,
         "counts": {
