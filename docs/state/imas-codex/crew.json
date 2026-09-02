@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:28:18",
+  "updated": "2026-09-02T17:34:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1170,9 +1170,11 @@
         "id": "impl-ledgermethod",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a062af-a57f-7f73-b912-c49d29cf0fde",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a062af-a57f-7f73-b912-c49d29cf0fde"
+        },
         "created": "2026-09-02"
       },
       {
@@ -53007,6 +53009,6 @@
       }
     ],
     "holds": [],
-    "_version": 1346
+    "_version": 1347
   }
 }
