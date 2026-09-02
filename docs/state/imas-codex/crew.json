@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:24:42",
+  "updated": "2026-09-02T17:28:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -445,9 +445,11 @@
         "id": "impl-cascade",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a062ae-ebe6-7382-bde5-fa35745fcb92",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a062ae-ebe6-7382-bde5-fa35745fcb92"
+        },
         "created": "2026-09-02"
       },
       {
@@ -53005,6 +53007,6 @@
       }
     ],
     "holds": [],
-    "_version": 1345
+    "_version": 1346
   }
 }
