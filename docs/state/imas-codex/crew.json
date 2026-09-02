@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:24:13",
+  "updated": "2026-09-02T12:26:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2950,9 +2950,11 @@
         "id": "test-s10restore",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06196-6562-7be1-acf1-9cc53883d017",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06196-6562-7be1-acf1-9cc53883d017"
+        },
         "created": "2026-09-02"
       },
       {
@@ -51581,6 +51583,6 @@
       }
     ],
     "holds": [],
-    "_version": 1310
+    "_version": 1311
   }
 }
