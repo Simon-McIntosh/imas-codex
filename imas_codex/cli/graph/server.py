@@ -18,6 +18,7 @@ from imas_codex.graph.neo4j_ops import (
     check_database_locks,
     check_stale_neo4j_process,
     get_backup_currency,
+    get_graph_instance_manifest,
     get_offsite_currency,
     is_neo4j_running,
     neo4j_image,
@@ -382,7 +383,19 @@ def graph_status(registry: str | None, token: str | None) -> None:
     click.echo(f"  Is fork: {git_info['is_fork']}")
     click.echo(f"  Target registry: {target_registry}")
 
-    manifest = get_local_graph_manifest()
+    from imas_codex.graph.profiles import resolve_neo4j
+
+    try:
+        manifest_profile = resolve_neo4j(auto_tunnel=False)
+        manifest_instance = manifest_profile.name
+    except Exception:
+        manifest_instance = None
+
+    manifest = (
+        get_graph_instance_manifest(manifest_instance)
+        if get_local_graph_manifest() is not None
+        else None
+    )
     if manifest:
         click.echo("\nGraph manifest:")
         click.echo(f"  Version: {manifest.get('version', 'unknown')}")
@@ -462,7 +475,6 @@ def graph_status(registry: str | None, token: str | None) -> None:
     )
     click.echo(f"\nNeo4j: {state_str}")
 
-    from imas_codex.graph.profiles import resolve_neo4j
     from imas_codex.remote.executor import is_local_host
 
     try:
