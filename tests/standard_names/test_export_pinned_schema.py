@@ -36,7 +36,7 @@ def test_graph_entry_carries_physics_domain_into_initial_validation() -> None:
 def test_fixture_cohort_round_trips_through_pinned_entry_factory(
     tmp_path: Path,
 ) -> None:
-    assert importlib.metadata.version("imas-standard-names") == "0.8.1"
+    assert importlib.metadata.version("imas-standard-names") == "0.8.2"
     cohort = [
         {
             "name": "electron_temperature",
