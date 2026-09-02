@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:45:10",
+  "updated": "2026-09-02T09:46:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2865,6 +2865,15 @@
           "gpt-5.6-sol": "01a05eb4-342d-7322-ab21-f3b08533ce0e"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "test-s10offsite",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "test-s8closure",
@@ -50432,6 +50441,6 @@
       }
     ],
     "holds": [],
-    "_version": 1285
+    "_version": 1286
   }
 }
