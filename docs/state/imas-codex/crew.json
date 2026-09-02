@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:34:04",
+  "updated": "2026-09-02T17:55:09",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -225,6 +225,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-artifactschema",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-attachapply",
@@ -871,6 +880,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a060ea-afc0-7f90-8d69-c2903fd0dd4d"
         },
+        "created": "2026-09-02"
+      },
+      {
+        "id": "impl-exportwriter",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-02"
       },
       {
@@ -53009,6 +53027,6 @@
       }
     ],
     "holds": [],
-    "_version": 1347
+    "_version": 1349
   }
 }
