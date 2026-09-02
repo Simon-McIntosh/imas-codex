@@ -33,6 +33,104 @@ _RC_REMOTE = "origin"
 _FINAL_REMOTE = "upstream"
 
 
+class ReviewPreviewLinkInvariantError(RuntimeError):
+    """The created review PR does not expose its exact Pages preview address."""
+
+
+class _GitHubClient:
+    """Small GitHub CLI boundary for creating and verifying review PRs."""
+
+    def create_pull_request(
+        self,
+        *,
+        branch: str,
+        base: str,
+        title: str,
+        body: str,
+        repo: str,
+        head_owner: str,
+    ) -> tuple[int | None, str | None]:
+        return _gh_pr_create(
+            branch=branch,
+            base=base,
+            title=title,
+            body=body,
+            repo=repo,
+            head_owner=head_owner,
+        )
+
+    def update_pull_request_body(self, *, repo: str, number: int, body: str) -> None:
+        result = subprocess.run(
+            ["gh", "pr", "edit", str(number), "--repo", repo, "--body", body],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            raise ReviewPreviewLinkInvariantError(
+                f"could not write the preview address to {repo}#{number}: "
+                f"{result.stderr.strip()}"
+            )
+
+    def read_pull_request_body(self, *, repo: str, number: int) -> str:
+        result = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "view",
+                str(number),
+                "--repo",
+                repo,
+                "--json",
+                "body",
+                "--jq",
+                ".body",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            raise ReviewPreviewLinkInvariantError(
+                f"could not read back the body of {repo}#{number}: "
+                f"{result.stderr.strip()}"
+            )
+        return result.stdout
+
+
+def _review_preview_url(repo: str, pr_number: int) -> str:
+    """Return the deterministic Pages address for a same-repository review PR."""
+    owner, catalog = repo.split("/", 1)
+    return f"https://{owner}.github.io/{catalog}/pr-{pr_number}/"
+
+
+def _write_and_verify_review_preview_link(
+    github_client: Any,
+    *,
+    repo: str,
+    pr_number: int,
+    body: str,
+) -> str:
+    """Write the exact preview address and require GitHub to return it."""
+    preview_url = _review_preview_url(repo, pr_number)
+    body_with_preview = f"{body.rstrip()}\n\nPreview: {preview_url}\n"
+    github_client.update_pull_request_body(
+        repo=repo,
+        number=pr_number,
+        body=body_with_preview,
+    )
+    persisted_body = github_client.read_pull_request_body(
+        repo=repo,
+        number=pr_number,
+    )
+    if preview_url not in persisted_body:
+        raise ReviewPreviewLinkInvariantError(
+            f"read-back body for {repo}#{pr_number} lacks exact preview address "
+            f"{preview_url}"
+        )
+    return preview_url
+
+
 # =============================================================================
 # Report model
 # =============================================================================
@@ -1211,6 +1309,7 @@ def run_review_release(
     exporter: Any | None = None,
     publisher: Any | None = None,
     pr_creator: Any | None = None,
+    github_client: Any | None = None,
     upstream_repo: str | None = None,
     fork_owner: str | None = None,
     pr_target: str = "upstream",
@@ -1238,8 +1337,8 @@ def run_review_release(
     ``review/<rc>`` branch, and the frozen artifact, so a batch RC is
     recognisable as such from its version alone.
 
-    ``exporter``/``publisher``/``pr_creator`` are injectable so the flow is
-    testable against a local bare repo with no live GitHub call.
+    ``exporter``/``publisher``/``pr_creator``/``github_client`` are injectable
+    so the flow is testable against a local bare repo with no live GitHub call.
     """
     from imas_codex.standard_names.minting import mint_sn_list
     from imas_codex.standard_names.sources_manifest import load_focus_file
@@ -1280,7 +1379,9 @@ def run_review_release(
 
     exporter = exporter or _default_exporter
     publisher = publisher or _default_publisher
-    pr_creator = pr_creator or _gh_pr_create
+    if github_client is None and pr_creator is None:
+        github_client = _GitHubClient()
+    pr_creator = pr_creator or github_client.create_pull_request
 
     # ── 1. Resolve the focus file to the batch SN set ──────────────────
     try:
@@ -1582,6 +1683,25 @@ def run_review_release(
         return report
     report.pr_number = pr_number
     report.pr_url = pr_url
+    target_owner = upstream_repo.split("/", 1)[0]
+    if target_owner.casefold() == fork_owner.casefold():
+        if pr_number is None:
+            report.errors.append(
+                "ReviewPreviewLinkInvariantError: GitHub did not return a PR "
+                "number, so the preview address cannot be constructed"
+            )
+            return report
+        if github_client is not None:
+            try:
+                _write_and_verify_review_preview_link(
+                    github_client,
+                    repo=upstream_repo,
+                    pr_number=pr_number,
+                    body=body,
+                )
+            except ReviewPreviewLinkInvariantError as exc:
+                report.errors.append(f"{type(exc).__name__}: {exc}")
+                return report
     backfill_review_artifact(artifact, pr_number=pr_number, pr_url=pr_url)
 
     return report
