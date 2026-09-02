@@ -45,7 +45,11 @@ from imas_codex.graph.neo4j_ops import (
     get_offsite_currency,
     graph_archive_stamp,
 )
-from imas_codex.graph.offsite import OffsiteCountMismatch, run_offsite_push_cycle
+from imas_codex.graph.offsite import (
+    OffsiteCountMismatch,
+    OffsitePushFailed,
+    run_offsite_push_cycle,
+)
 
 _RELEASE_TAG = re.compile(r"^v?\d+\.\d+\.\d+(?:-rc\d+)?$")
 _PUSH_SERVICE_NAME = "imas-codex-graph-push"
@@ -244,9 +248,19 @@ def _push_schedule_service_text(
     project_dir: Path,
     *,
     uv_path: str,
+    oras_path: str,
     hostname: str,
 ) -> str:
     """Build the host-pinned login-node oneshot unit."""
+    executable_dirs = dict.fromkeys(
+        (
+            str(Path(oras_path).parent),
+            str(Path.home() / ".local" / "bin"),
+            "/usr/local/bin",
+            "/usr/bin",
+        )
+    )
+    service_path = ":".join(executable_dirs)
     return f"""[Unit]
 Description=IMAS Codex verified full-graph offsite push
 After=network-online.target
@@ -257,7 +271,7 @@ ConditionHost={hostname}
 Type=oneshot
 WorkingDirectory={project_dir}
 EnvironmentFile=-{project_dir / ".env"}
-Environment="PATH={Path.home()}/.local/bin:/usr/local/bin:/usr/bin"
+Environment="PATH={service_path}"
 ExecStart={uv_path} run --no-sync --project {project_dir} imas-codex graph push --cycle
 """
 
@@ -293,9 +307,15 @@ def _manage_push_schedule(action: str, *, dry_run: bool = False) -> None:
     if action == "install":
         project_dir = _push_schedule_project_dir()
         uv_path = shutil.which("uv") or str(Path.home() / ".local" / "bin" / "uv")
+        oras_path = shutil.which("oras")
+        if not oras_path:
+            raise click.ClickException(
+                "oras not found; cannot install the weekly graph push service"
+            )
         service_text = _push_schedule_service_text(
             project_dir,
             uv_path=uv_path,
+            oras_path=oras_path,
             hostname=socket.getfqdn(),
         )
         timer_text = _push_schedule_timer_text()
@@ -499,7 +519,7 @@ def _run_offsite_cycle(
                 token=token,
             ),
         )
-    except OffsiteCountMismatch as exc:
+    except (OffsiteCountMismatch, OffsitePushFailed) as exc:
         raise click.ClickException(str(exc)) from exc
 
     if result.outcome == "no_op":
