@@ -141,6 +141,7 @@ class TestReleaseGateFindings:
 
         command = run.call_args.args[0]
         assert "-x" not in command
+        assert run.call_args.kwargs["timeout"] == 900
         assert result.scope == "graph-wide"
         assert [issue["test_id"] for issue in result.issues] == [
             "tests/graph/test_alpha.py::test_one",

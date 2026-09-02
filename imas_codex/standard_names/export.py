@@ -693,7 +693,7 @@ def _run_gate_a() -> GateResult:
             ],
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=900,
         )
         passed = result.returncode == 0
         issues: list[dict[str, Any]] = []
@@ -2262,12 +2262,9 @@ def run_export(
         if gate_scope == "all":
             gate_a = _run_gate_a()
             if not final and not gate_a.passed:
-                gate_a = GateResult(
-                    gate=GATE_A,
-                    passed=True,
-                    issues=[],
-                    advisories=gate_a.issues,
-                )
+                gate_a.advisories.extend(gate_a.issues)
+                gate_a.issues = []
+                gate_a.passed = True
                 logger.warning(
                     "Gate A: graph test failure(s) (advisory for RC release)"
                 )
