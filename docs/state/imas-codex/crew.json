@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:54:09",
+  "updated": "2026-09-02T08:59:32",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -819,6 +819,15 @@
           "gpt-5.6-sol": "01a03f75-7c35-79f0-a2f6-98d4a8caed2c"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "impl-exportschema",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-facilityprop",
@@ -50133,9 +50142,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T065509694984-n-export-pinned-schema-parity",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-export-pinned-schema-parity",
+        "node_definition": {
+          "done_when": "a focused test exports a fixture cohort with the installed imas-standard-names 0.8.0 and asserts every emitted YAML entry round-trips through create_standard_name_entry with no extra_forbidden error and contains no roles key, while the collision rule tests still pass; the existing export test suites pass with command, exit status and log path recorded; a recorded 'sn release --batch west_production_dd_paths --dry-run' from this worktree reports the same batch size and zero validation findings; the live graph is not modified",
+          "estimated_hours": null,
+          "goal": "Make the catalog exporter emit only entries the pinned imas-standard-names 0.8.0 entry model accepts: the machine-generated roles field (added at export.py around line 2325 after validation) is kept internal for the collision rule and not serialized into catalog YAML unless the installed model declares it, and every emitted entry is re-validated after final serialization with the installed create_standard_name_entry so a schema mismatch fails the export locally instead of in catalog CI",
+          "id": "n-export-pinned-schema-parity",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065509694984-n-export-pinned-schema-parity/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_pinned_schema.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-exportschema",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:55:13Z",
+        "completed_at": "2026-09-02T06:58:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 215,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 215,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "600bf50eee458c0e200a90d5a53a626581374052",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065509694984-n-export-pinned-schema-parity/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060e6-8162-70b3-9f90-f209f5c027fd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1345024,
+            "cached_input_tokens_cumulative": 1345024,
+            "input_tokens": 1457254,
+            "input_tokens_cumulative": 1457254,
+            "output_tokens": 6046,
+            "output_tokens_cumulative": 6046,
+            "reasoning_output_tokens": 1868,
+            "reasoning_output_tokens_cumulative": 1868
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "worker stopped correctly at its fence before any edit",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1280
+    "_version": 1282
   }
 }
