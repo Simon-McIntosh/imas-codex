@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 </head>
 <body>
 <main class="plan-doc">
@@ -90,6 +90,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T062313591737-n-fork-main-blank-baseline" data-who="impl-weststage3" data-when="2026-09-02T06:29:46Z">
     <div class="r-comment-body"><p>fork main reverted the PR 3 merge (fork revert 1a752add): zero standard_names yml at the new head, CI build and validate green, RC tag kept, no receipt, upstream unchanged at a06e5205, graph untouched at approved 0 / contested 0 / accepted 2336</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T063017239136-n-west-review-pr-cut" data-who="impl-weststage3" data-when="2026-09-02T06:53:24Z">
+    <div class="r-comment-body"><p>sn release cut v0.3.0rc2+west-task-2e and opened fork PR 6 (295 entries, pure addition, preview 200, graph and upstream untouched) but catalog CI validate fails deterministically: the exported machine-owned scalar.roles field is extra_forbidden under the catalog&#x27;s pinned schema, so PR 6 is not yet a valid review candidate</p></div>
 </div>
 </section>
 </main>
