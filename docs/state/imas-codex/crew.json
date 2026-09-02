@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T09:46:14",
+  "updated": "2026-09-02T10:04:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2519,6 +2519,15 @@
         "created": "2026-08-26"
       },
       {
+        "id": "inv-westadvisories",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "inv-westcohort",
         "harness": "codex",
         "role": "investigate",
@@ -2870,9 +2879,11 @@
         "id": "test-s10offsite",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06115-4653-7952-8a6c-8b4b2a6cd324",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a06115-4653-7952-8a6c-8b4b2a6cd324"
+        },
         "created": "2026-09-02"
       },
       {
@@ -50438,9 +50449,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T074614916892-n-offsite-first-cycle",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-first-cycle",
+        "node_definition": {
+          "done_when": "crew/reports/offsite-first-cycle.md records the sbatch job id, the receipt JSON path with counts_match true, wall_time_seconds and archive_bytes, the new registry tag as listed by the GitHub Packages API, 'imas-codex graph status' showing the offsite row current with its age in seconds, squeue showing the successor job pending with a begin time seven days out, and a GraphClient census after Neo4j is back that matches the receipt's live census",
+          "estimated_hours": null,
+          "goal": "Run the first real weekly offsite push cycle by submitting 'imas-codex graph push --schedule' from this worktree, waiting for the SLURM cycle job to finish, and recording the measured wall time and archive bytes from its receipt",
+          "id": "n-offsite-first-cycle",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T074614916892-n-offsite-first-cycle/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "crew/reports/offsite-first-cycle.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-s10offsite",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T07:46:18Z",
+        "completed_at": "2026-09-02T08:01:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 937,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 937,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "ab7e8cb01d3c913fa17f7a68f882eef51bdc5cf9",
+        "commits": [
+          "a724ef57bd5168dec469dc89517e2a1df660ac79"
+        ],
+        "changed_lines": {
+          "added": 38,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "imas-codex graph push --schedule; squeue; job log",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": "sha256:cce7b3a97bc0924353b90ab7d2a957f3311ba436555d28ce1be4616db6fa860a"
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T074614916892-n-offsite-first-cycle/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06115-4653-7952-8a6c-8b4b2a6cd324",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3983872,
+            "cached_input_tokens_cumulative": 3983872,
+            "input_tokens": 4149490,
+            "input_tokens_cumulative": 4149490,
+            "output_tokens": 18241,
+            "output_tokens_cumulative": 18241,
+            "reasoning_output_tokens": 7910,
+            "reasoning_output_tokens_cumulative": 7910
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1286
+    "_version": 1289
   }
 }
