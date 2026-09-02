@@ -424,13 +424,14 @@ baseline; reviewer-edit detection separately compares merged content with the cu
    ```bash
    gh pr checks "$PR"
    gh api "repos/$PR_REPO/pulls/$PR_NUMBER" --jq '.body | contains("REVIEWING.md")'
+   gh api "repos/$PR_REPO/pulls/$PR_NUMBER" --jq ".body | contains(\"https://${PR_REPO%%/*}.github.io/${PR_REPO#*/}/pr-$PR_NUMBER/\")"
    gh api "repos/$PR_REPO/pulls/$PR_NUMBER/files" --paginate --jq '[.[].status] | unique | join(",")'
    curl -sS -o /dev/null -w '%{http_code}\n' "$PREVIEW"
    ```
 
-   **Gate:** all required checks pass; queries print `true` and only `added`; the same-repository URL
-   `https://<owner>.github.io/<catalog>/pr-<number>/` returns `200` with identities equal to PR additions/edits.
-   External-fork review instead exposes `catalog-preview-pr-<number>`. **Stop:** CI, ownership, additivity, link,
+   **Gate:** required checks pass; both body queries print `true`, file statuses print only `added`, and `$PREVIEW`
+   returns `200` with PR-identical content. `sn release` writes and reads back the derived Pages address; catalog CI
+   enforces it. Same-repository PRs have no bot comment; only external forks retain the artifact comment. **Stop:** CI, ownership, additivity, link,
    preview, or hold failure. Rebuild with `gh workflow run catalog.yml --repo "$PR_REPO" -f
    pull-request-number="$PR_NUMBER"` or `gh run rerun <run-id>`; require `success`. Never close/reopen the PR.
 
