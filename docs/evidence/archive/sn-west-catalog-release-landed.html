@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-west-catalog-release-landed">
+  <meta name="plan-title" content="WEST catalog release — cumulative evidence">
+  <meta name="plan-evidence-for" content="sn-west-catalog-release">
+  <title>WEST catalog release landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>WEST catalog release — cumulative evidence</h1>
+  <p>This record consolidates what the <code>sn-west-catalog-release</code> plan proved while
+  building a review surface a physicist can actually read. It is an evidence ledger, not a
+  release claim: the fork candidate is a review artifact, and the human review plus the
+  upstream leg remain ahead. Every result below is reconciled against the committed run
+  ledger at <code>docs/state/imas-codex/crew.json</code> and the reports the runs left on
+  disk under <code>~/.config/reckon/crew/reports/</code>.</p>
+
+  <section id="authority-not-workaround">
+    <h2>Every review-surface defect was fixed at the authority, never worked around</h2>
+    <p>Four defects made the first candidates unreviewable, and each one was traced to the
+    <code>imas-standard-names</code> package rather than patched in the codex exporter, on
+    the lead's explicit direction. A physics domain could not be carried by a catalog entry
+    at all, so the review site grouped every name under <em>Uncategorized</em>; the fix makes
+    <code>physics_domain</code> a first-class required field of the entry model. The exporter
+    was writing its own YAML, so review formatting could drift from what the schema accepted;
+    the fix moves emission into the package's own <code>dump_catalog_yaml</code>. Prose then
+    arrived as one unreadable line per paragraph; the fix emits description and documentation
+    as folded blocks whose paragraphs fold near 80 columns while equations, display-math
+    fences, list items and blank lines keep their authored layout, with a byte-identical
+    reload proven over a 300-character paragraph carrying display math. Three physical bases
+    were registered with the wrong structural kind, which is what put <code>tensor</code>
+    beside a flux-surface-averaged gradient magnitude.</p>
+    <table>
+      <thead><tr><th>Defect at the authority</th><th>Release</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Catalog entries could not carry a physics domain</td><td><code>v0.8.1</code></td><td>review site groups by domain instead of Uncategorized</td></tr>
+        <tr><td>Exporter emitted its own YAML rather than the package writer</td><td><code>v0.8.2</code></td><td>literal-block writer in <code>dump_catalog_yaml</code>, exporter calls it</td></tr>
+        <tr><td>momentum, torque, torque_density registered as scalars</td><td><code>v0.8.3</code></td><td><code>derive_kind</code> returns vector for all three, electron_temperature stays scalar as control</td></tr>
+        <tr><td>Prose emitted one paragraph per line</td><td><code>v0.8.4</code></td><td>folded blocks, no emitted prose line over 88 characters, byte-identical reload; suite 2021 passed</td></tr>
+      </tbody>
+    </table>
+    <p>Both consumers pin the same release at every step, so the writer that produced an
+    artifact is the writer that validates it: the codex tooling at both of its pin sites and
+    the catalog tooling in its validation workflow.</p>
+  </section>
+
+  <section id="kind-reconcile">
+    <h2>Stored kinds reconciled to zero disagreements, and an earlier sweep repaired</h2>
+    <p>Structural kind is derived from the canonical identity, but the value stored on each
+    name is a snapshot taken when the name was composed. A snapshot taken against a registry
+    that mis-classified three bases is wrong in both directions, so the reconcile had to fire
+    <em>after</em> the pin moved. The lead locked that ordering, and it mattered: a reconcile
+    had already run at 16:49 UTC under the 0.8.2 pin and flipped 40 correct vectors to scalar
+    among its 181 rows. The single unscoped drain under the 0.8.3 pin repaired them.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td>Live names whose stored kind disagrees with <code>derive_kind</code></td><td>62</td><td>0</td></tr>
+        <tr><td>Live names carrying a non-null kind</td><td>2480 of 2480</td><td>2480 of 2480</td></tr>
+        <tr><td>Kind distribution</td><td>—</td><td>scalar 2257, vector 182, complex 41</td></tr>
+        <tr><td>Composition of the disagreements</td><td>torque_density 42, torque 15, momentum 5</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p>The instrument was proven both to fire and to be aimed: the same query against the same
+    2480-row live set read 62 before the run and 0 after, and the run's own log line
+    (<code>reconcile_standard_name_kinds: refreshed 62 stored kind(s)</code>) matches the
+    census prediction exactly. The name the lead asked about,
+    <code>flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude</code>,
+    now records <code>scalar</code>. The drain that carried the reconcile also drained the
+    mid-pipeline backlog for 8.52 USD across 90 calls, resolved 5 documentation links and
+    restamped 6 harmonized families. Report:
+    <code>crew/reports/sn-flush-kind-reconcile.md</code>.</p>
+  </section>
+
+  <section id="negative-quota-loss">
+    <h2>Negative result: four verified workers were lost to an exhausted metered quota</h2>
+    <p>Late in the session every OpenAI-backed lane reported 100% weekly utilisation with a
+    reset six days out, and the backend dropped four in-flight sessions mid-turn. One had
+    already accepted six of ten staged names for 0.42 USD before it died. None of the four
+    committed. The recovery was not to wait: each run was ledgered as an infrastructure
+    failure with its partial outcome recorded, the trivial mechanical nodes were repointed at
+    the locally served backend, and the judgement-heavy nodes at a frontier Claude backend
+    registered for exactly this case. A distinct backend entry is required rather than an
+    effort override, because a roster session must never cross models.</p>
+  </section>
+</main>
+</body>
+</html>
