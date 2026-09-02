@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:13:39",
+  "updated": "2026-09-02T17:24:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -749,9 +749,11 @@
         "id": "impl-driftrefresh",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a062af-4c55-73e0-b62e-54d74be5448e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a062af-4c55-73e0-b62e-54d74be5448e"
+        },
         "created": "2026-09-02"
       },
       {
@@ -53003,6 +53005,6 @@
       }
     ],
     "holds": [],
-    "_version": 1344
+    "_version": 1345
   }
 }
