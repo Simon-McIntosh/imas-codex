@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T18:24:00",
+  "updated": "2026-09-02T18:37:34",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2583,6 +2583,17 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-01"
+      },
+      {
+        "id": "inv-kindbases",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a062f2-724f-7500-b556-ad856c972ba9",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a062f2-724f-7500-b556-ad856c972ba9"
+        },
+        "created": "2026-09-02"
       },
       {
         "id": "inv-objectstore",
@@ -53300,9 +53311,106 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T162432991668-n-rescore-identity-by-name",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-rescore-identity-by-name",
+        "node_definition": {
+          "done_when": "a focused test seeds a reviewed parent with an accepted child, stamps an unrelated batch run_id on the parent, runs the accept path with a passing score for the unchanged spelling and asserts the parent becomes accepted with the child untouched, while a real rename with a conflicting descendant is still refused; the rescore, review and cascade suites pass with command, exit status and log path recorded; ruff clean; live graph not modified",
+          "estimated_hours": null,
+          "goal": "Make the descendant-cascade bypass for identity-preserving reviews key on the fact that the reviewed spelling equals the node's current id rather than on the sn-rescore run-id prefix, because a scoped sn run drain overwrites StandardName.run_id with its own id and ten rescores at 1.000 were refused as rename conflicts on 2026-09-02 even though the fix was present",
+          "id": "n-rescore-identity-by-name",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T162432991668-n-rescore-identity-by-name/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/standard_names/rescore.py",
+            "tests/standard_names/test_rescore_descendant_acceptance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-cascade",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T16:24:40Z",
+        "completed_at": "2026-09-02T16:37:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 749,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 749,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "6be4fce3e7793126adb1b059b6f070a349b38e25",
+        "commits": [
+          "3d28224e8b97c1e7f6394e66c404162d0de0f246"
+        ],
+        "changed_lines": {
+          "added": 41,
+          "removed": 17,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_rescore_descendant_acceptance.py plus rescore, review and cascade suites",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T162432991668-n-rescore-identity-by-name/logs/ruff.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T162432991668-n-rescore-identity-by-name/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a062ae-ebe6-7382-bde5-fa35745fcb92",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1353
+    "_version": 1356
   }
 }
