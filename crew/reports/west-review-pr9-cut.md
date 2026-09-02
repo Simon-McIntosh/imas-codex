@@ -127,3 +127,5 @@ This directly contradicts the node’s done-when requirement for literal-block d
 ## Frozen artifact
 
 The live cut back-filled PR 9 into `imas_codex/standard_names/manifests/reviews/v0.3.0rc5+west-task-2e.sn_names.yaml`. The file contains 412 unique names and 27 unmatched sources. It is preserved and committed with this blocked report so a repair node can audit the exact failed cut identity; it must not be treated as approval evidence.
+
+A post-cut loader check exposed a second independent blocker: `load_focus_file` rejects the generated artifact because its top-level `manifest_sources` field is not declared by `sn_names.schema.json` (`Additional properties are not allowed`). This means the exact frozen artifact written by the live release cannot currently serve as the later `sn approve` currency promised by the workflow. The repair must either add and validate the emitted source-reconciliation field in the frozen-manifest schema or stop emitting it; that code and schema are outside this node's exclusive write scope.
