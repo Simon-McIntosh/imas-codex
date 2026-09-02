@@ -200,10 +200,17 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     branches = _git("branch", cwd=isnc_repo).stdout
     assert "review/v0.1.0rc1+demo-batch" in branches
 
-    subject = _git("log", "-1", "--format=%s", cwd=isnc_repo).stdout.strip()
-    body = _git("log", "-1", "--format=%b", cwd=isnc_repo).stdout.strip()
+    subject = _git(
+        "log", "-1", "--format=%s", report.commit_sha, cwd=isnc_repo
+    ).stdout.strip()
+    body = _git(
+        "log", "-1", "--format=%b", report.commit_sha, cwd=isnc_repo
+    ).stdout.strip()
     assert subject == "sn: add Review batch demo"
-    assert report.commit_sha == _git("rev-parse", "HEAD", cwd=isnc_repo).stdout.strip()
+    assert (
+        _git("rev-parse", report.branch, cwd=isnc_repo).stdout.strip()
+        == report.commit_sha
+    )
     assert "Published 2 entries" in body
     assert "withheld 0" in body
     assert "v0.1.0rc1+demo-batch" in body
@@ -235,7 +242,10 @@ def test_review_release_reclaims_branch_contained_in_main(isnc_repo, tmp_path):
 
     assert report.errors == [], report.errors
     assert report.branch_reclaimed_from == old_head
-    assert _git("rev-parse", "HEAD^", cwd=isnc_repo).stdout.strip() == base_head
+    assert (
+        _git("rev-parse", f"{report.commit_sha}^", cwd=isnc_repo).stdout.strip()
+        == base_head
+    )
 
 
 def test_review_release_reclaims_branch_at_closed_pr_head(isnc_repo, tmp_path):
@@ -328,7 +338,7 @@ def test_review_release_can_cut_and_tag_without_opening_pr(isnc_repo, tmp_path):
     assert report.pr_number is None and report.pr_url is None
     assert (
         _git("rev-list", "-n1", report.rc_version, cwd=isnc_repo).stdout.strip()
-        == _git("rev-parse", "HEAD", cwd=isnc_repo).stdout.strip()
+        == report.commit_sha
     )
     assert (
         report.rc_version in _git("ls-remote", "--tags", "origin", cwd=isnc_repo).stdout
