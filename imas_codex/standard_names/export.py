@@ -1911,6 +1911,8 @@ def _write_domain_yaml(
 
     Returns the path of the written file.
     """
+    from imas_standard_names.yaml_store import dump_catalog_yaml
+
     sn_dir = staging_dir / "standard_names"
     sn_dir.mkdir(parents=True, exist_ok=True)
     filepath = sn_dir / f"{domain}.yml"
@@ -1953,7 +1955,7 @@ def _write_domain_yaml(
         }
         clean_entries.append(reorder_entry_dict(publishable))
 
-    content = yaml.safe_dump(clean_entries, sort_keys=False, default_flow_style=False)
+    content = dump_catalog_yaml(clean_entries)
 
     # Re-load the exact serialized representation and validate it through the
     # installed ISN factory. This is intentionally after YAML serialization:
