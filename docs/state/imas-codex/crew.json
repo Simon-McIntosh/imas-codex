@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T14:05:43",
+  "updated": "2026-09-02T14:14:00",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -52001,9 +52001,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T120645836032-n-runbook-preview-link-gate",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-runbook-preview-link-gate",
+        "node_definition": {
+          "done_when": "the step's gate block gains one gh api command asserting the body contains the derived preview address using the PR_REPO plus PR_NUMBER variables the runbook already binds, the prose about the preview pointer is at most three lines, no other step changes, the file parses as CommonMark, one focused commit",
+          "estimated_hours": null,
+          "goal": "Update the Release recipe runbook's review-handoff step in imas_codex/standard_names/AGENTS.md so its gate checks that the PR body contains the PR's own GitHub Pages preview address (owner github.io host, catalog repository path, pr- prefix with the PR number) alongside the existing REVIEWING.md check, stating that sn release writes plus reads back that address while catalog CI enforces it, with no separate bot comment on same-repository PRs (the artifact comment remains only for external forks)",
+          "id": "n-runbook-preview-link-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T120645836032-n-runbook-preview-link-gate/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "15m",
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "doc-releaserunbook",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T12:06:50Z",
+        "completed_at": "2026-09-02T12:13:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 383,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 383,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "3ddc27f70becf745f34f78dd444221ce49c5e41f",
+        "commits": [
+          "cc0c63d35e9314de68432d2d2a1c324df5bfe56b"
+        ],
+        "changed_lines": {
+          "added": 4,
+          "removed": 3,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "CommonMark parse; runbook invariant check",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T120645836032-n-runbook-preview-link-gate/validation.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T120645836032-n-runbook-preview-link-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060cb-ae77-7370-9726-93cd22d1bdd9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1468416,
+            "cached_input_tokens_cumulative": 1468416,
+            "input_tokens": 1815497,
+            "input_tokens_cumulative": 1815497,
+            "output_tokens": 8586,
+            "output_tokens_cumulative": 8586,
+            "reasoning_output_tokens": 2845,
+            "reasoning_output_tokens_cumulative": 2845
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1322
+    "_version": 1323
   }
 }
