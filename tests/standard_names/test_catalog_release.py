@@ -12,6 +12,7 @@ itself as semver **build metadata** (``v0.2.0rc65+<label>``). These tests pin:
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -19,8 +20,10 @@ import pytest
 import yaml
 
 from imas_codex.standard_names.catalog_release import (
+    ReviewPreviewLinkInvariantError,
     _format_tag,
     _get_semver_tags,
+    _GitHubClient,
     _parse_build,
     _parse_version,
     batch_build_metadata,
@@ -274,3 +277,60 @@ class TestComputeNextVersion:
         tag, version = compute_next_version(tagged_repo, None)
         assert tag == "v0.2.0rc66"
         assert "+" not in tag and "+" not in version
+
+
+class TestPullRequestBodyTransport:
+    """The body update goes over REST, not the GraphQL-backed CLI edit verb."""
+
+    def _patch_run(self, monkeypatch, returncode=0, stderr=""):
+        calls: list[dict] = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append({"cmd": cmd, "input": kwargs.get("input")})
+            return subprocess.CompletedProcess(cmd, returncode, "", stderr)
+
+        monkeypatch.setattr(
+            "imas_codex.standard_names.catalog_release.subprocess.run", fake_run
+        )
+        return calls
+
+    def test_update_patches_the_pull_request_endpoint_with_the_body(self, monkeypatch):
+        calls = self._patch_run(monkeypatch)
+
+        _GitHubClient().update_pull_request_body(
+            repo="owner/catalog", number=11, body="new body\n\nPreview: https://x/"
+        )
+
+        assert len(calls) == 1
+        assert calls[0]["cmd"] == [
+            "gh",
+            "api",
+            "--method",
+            "PATCH",
+            "repos/owner/catalog/pulls/11",
+            "--input",
+            "-",
+        ]
+        assert json.loads(calls[0]["input"]) == {
+            "body": "new body\n\nPreview: https://x/"
+        }
+
+    def test_update_never_shells_out_to_the_cli_edit_verb(self, monkeypatch):
+        calls = self._patch_run(monkeypatch)
+
+        _GitHubClient().update_pull_request_body(
+            repo="owner/catalog", number=11, body="body"
+        )
+
+        assert calls[0]["cmd"][:3] != ["gh", "pr", "edit"]
+
+    def test_update_names_the_pull_request_when_the_patch_fails(self, monkeypatch):
+        self._patch_run(monkeypatch, returncode=1, stderr="Not Found\n")
+
+        with pytest.raises(ReviewPreviewLinkInvariantError) as excinfo:
+            _GitHubClient().update_pull_request_body(
+                repo="owner/catalog", number=11, body="body"
+            )
+
+        assert "owner/catalog#11" in str(excinfo.value)
+        assert "Not Found" in str(excinfo.value)
