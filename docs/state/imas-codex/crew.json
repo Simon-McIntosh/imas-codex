@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T15:47:43",
+  "updated": "2026-09-02T15:48:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3225,6 +3225,15 @@
           "gpt-5.6-sol": "01a037be-f739-7d50-8406-1bb8540bda4c"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "test-westrescore",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "verify-a",
@@ -52760,6 +52769,6 @@
       }
     ],
     "holds": [],
-    "_version": 1337
+    "_version": 1338
   }
 }
