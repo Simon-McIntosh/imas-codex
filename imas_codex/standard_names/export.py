@@ -160,10 +160,12 @@ class GateResult:
     issues: list[dict[str, Any]] = field(default_factory=list)
     advisories: list[dict[str, Any]] = field(default_factory=list)
     skipped: bool = False
+    scope: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "gate": self.gate,
+            "scope": self.scope,
             "passed": self.passed,
             "skipped": self.skipped,
             "issue_count": len(self.issues),
@@ -523,6 +525,30 @@ def _fetch_export_population(
     return [population_by_id[name] for name in sorted(population_by_id)]
 
 
+def _fetch_graph_name_ids() -> set[str]:
+    """Return the complete graph identity set used to classify link targets."""
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName)
+            RETURN count(sn) AS candidates,
+                   count(sn.id) AS candidates_with_id,
+                   collect(sn.id) AS ids
+            """
+        )
+    row = (rows or [{}])[0]
+    candidates = int(row.get("candidates") or 0)
+    candidates_with_id = int(row.get("candidates_with_id") or 0)
+    if candidates and candidates_with_id != candidates:
+        raise RuntimeError(
+            "StandardName identity census is incomplete: "
+            f"{candidates_with_id}/{candidates} nodes carry the schema id key"
+        )
+    return {str(name) for name in row.get("ids") or [] if name}
+
+
 def _classify_export_population(
     population: list[dict[str, Any]],
     *,
@@ -649,8 +675,8 @@ def _classify_export_population(
 def _run_gate_a() -> GateResult:
     """Gate A: Run existing graph test suites via subprocess pytest.
 
-    Stub implementation — runs pytest with the ``graph or corpus_health``
-    marker. Returns a GateResult.
+    Runs the complete ``graph or corpus_health`` selection and reports every
+    failing test identity. This is a graph-wide gate even during batch export.
     """
     try:
         result = subprocess.run(
@@ -658,7 +684,6 @@ def _run_gate_a() -> GateResult:
                 "uv",
                 "run",
                 "pytest",
-                "-x",
                 "-q",
                 "--tb=short",
                 "-m",
@@ -668,24 +693,53 @@ def _run_gate_a() -> GateResult:
             ],
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=900,
         )
         passed = result.returncode == 0
-        issues = []
+        issues: list[dict[str, Any]] = []
         if not passed:
-            issues.append(
-                {
-                    "type": "test_suite_failure",
-                    "detail": result.stdout[-2000:] if result.stdout else "",
-                    "stderr": result.stderr[-500:] if result.stderr else "",
-                }
+            failure_ids = list(
+                dict.fromkeys(
+                    re.findall(
+                        r"(?m)^FAILED\s+(.+?)(?:\s+-\s+.*)?$", result.stdout or ""
+                    )
+                )
             )
-        return GateResult(gate=GATE_A, passed=passed, issues=issues)
+            issues.extend(
+                {
+                    "type": "test_failure",
+                    "scope": "graph-wide",
+                    "test_id": test_id,
+                }
+                for test_id in failure_ids
+            )
+            if not issues:
+                issues.append(
+                    {
+                        "type": "test_suite_failure",
+                        "scope": "graph-wide",
+                        "detail": result.stdout[-2000:] if result.stdout else "",
+                        "stderr": result.stderr[-500:] if result.stderr else "",
+                    }
+                )
+        return GateResult(
+            gate=GATE_A,
+            scope="graph-wide",
+            passed=passed,
+            issues=issues,
+        )
     except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
         return GateResult(
             gate=GATE_A,
+            scope="graph-wide",
             passed=False,
-            issues=[{"type": "execution_error", "detail": str(exc)}],
+            issues=[
+                {
+                    "type": "execution_error",
+                    "scope": "graph-wide",
+                    "detail": str(exc),
+                }
+            ],
         )
 
 
@@ -693,6 +747,7 @@ def _run_gate_b(
     candidates: list[dict[str, Any]],
     cocos_convention: int,
     *,
+    graph_names: set[str] | None = None,
     final: bool = False,
 ) -> GateResult:
     """Gate B: Cross-field consistency checks.
@@ -700,7 +755,8 @@ def _run_gate_b(
     - Every non-null ``cocos`` equals ``cocos_convention``.
     - Grammar version matches ISN package version.
     - All names parse via ISN grammar.
-    - Links resolve within the export set (advisory for RC, hard for final).
+    - Link targets absent from the graph are defects (hard for final).
+    - Graph-known targets absent from this publication are always advisory.
     """
     issues: list[dict[str, Any]] = []
     advisories: list[dict[str, Any]] = []
@@ -763,28 +819,34 @@ def _run_gate_b(
             exc,
         )
 
-    # Gate: links resolve to known names
-    # For RC releases (final=False): dangling links are advisory only.
-    # For final releases: dangling links block export.
-    all_names = {c["id"] for c in candidates}
+    # Gate: classify missing publication targets against the full graph census.
+    # The output-copy pruning pass removes both classes after final publication
+    # membership is known; this gate never mutates graph-derived link values.
+    published_names = {c["id"] for c in candidates}
+    known_graph_names = graph_names if graph_names is not None else published_names
     for cand in candidates:
         for link in cand.get("links") or []:
-            # Links can be "name:foo" format or plain "foo"
-            link_target = link.split(":")[-1] if ":" in link else link
-            if link_target not in all_names:
+            link_target = _internal_link_target(link)
+            if link_target is not None and link_target not in published_names:
+                target_status = (
+                    "known_but_unpublished"
+                    if link_target in known_graph_names
+                    else "unknown_to_graph"
+                )
                 entry = {
                     "type": "dangling_link",
                     "name": cand["id"],
                     "link_target": link_target,
+                    "target_status": target_status,
                 }
-                if final:
+                if final and target_status == "unknown_to_graph":
                     issues.append(entry)
                 else:
                     advisories.append(entry)
 
     if advisories:
         logger.warning(
-            "Gate B: %d dangling doc links (advisory for RC release)",
+            "Gate B: %d unpublished internal link target(s) (advisory)",
             len(advisories),
         )
 
@@ -1021,22 +1083,37 @@ def _run_exclusion_accounting_gate(
 
 def detect_divergence(
     candidates: list[dict[str, Any]],
+    catalog_root: str | Path | None = None,
 ) -> list[DivergenceEntry]:
-    """Gate D: Detect divergence in catalog-edited names.
+    """Compare graph protected fields with their catalog-authoritative values.
 
     For each node with ``origin='catalog_edit'``, check whether any
     protected field has been modified since import (which would indicate
     a pipeline write bypassed the protection system).
 
-    Without an ISNC checkout to compare against, we use a heuristic:
-    if ``origin='catalog_edit'`` but ``exported_at`` is newer than
-    ``imported_at``, the node was re-exported after being edited
-    (expected). If any protected field hash differs from what was
-    recorded, that's a divergence.
+    ``catalog_root`` must name the ISNC checkout whose entries supplied the
+    catalog lineage. When omitted, the legacy direct-call behavior is retained
+    for callers outside the release gate; :func:`run_export` never uses that
+    heuristic and skips the gate when no checkout is available.
 
     Returns a list of divergence findings.
     """
     findings: list[DivergenceEntry] = []
+    catalog_entries: dict[str, dict[str, Any]] | None = None
+    if catalog_root is not None:
+        catalog_entries = {}
+        standard_names = Path(catalog_root) / "standard_names"
+        for path in sorted(standard_names.glob("*.yml")):
+            payload = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+            if not isinstance(payload, list):
+                raise ValueError(f"{path}: domain catalog is not a YAML sequence")
+            for entry in payload:
+                if not isinstance(entry, dict) or not entry.get("name"):
+                    raise ValueError(f"{path}: catalog entry has no scalar name")
+                name = str(entry["name"])
+                if name in catalog_entries:
+                    raise ValueError(f"duplicate catalog entry identity: {name}")
+                catalog_entries[name] = canonicalise_entry(entry)
 
     for cand in candidates:
         if cand.get("origin") != "catalog_edit":
@@ -1044,7 +1121,7 @@ def detect_divergence(
 
         name = cand["id"]
 
-        # Compute a hash of the current protected field values
+        # Compute a hash of the current protected field values.
         protected_values = {
             f: cand.get(f) for f in sorted(PROTECTED_FIELDS) if cand.get(f) is not None
         }
@@ -1052,10 +1129,9 @@ def detect_divergence(
             json.dumps(protected_values, sort_keys=True, default=str).encode()
         ).hexdigest()[:16]
 
-        # Check if catalog_commit_sha is set — if so, the node was
-        # imported from a specific commit. We can't compare without
-        # the ISNC checkout, but we flag the node for awareness.
-        if cand.get("catalog_commit_sha"):
+        if catalog_entries is None:
+            if not cand.get("catalog_commit_sha"):
+                continue
             findings.append(
                 DivergenceEntry(
                     name=name,
@@ -1065,6 +1141,49 @@ def detect_divergence(
                         f"catalog-edited node with commit lineage "
                         f"{cand['catalog_commit_sha'][:8]}; "
                         f"verify protected fields match catalog"
+                    ),
+                )
+            )
+            continue
+
+        catalog_entry = catalog_entries.get(name)
+        if catalog_entry is None:
+            findings.append(
+                DivergenceEntry(
+                    name=name,
+                    field="name",
+                    graph_hash=current_hash,
+                    detail="catalog-lineage identity is absent from the supplied catalog",
+                )
+            )
+            continue
+
+        graph_entry = canonicalise_entry(
+            {
+                "name": name,
+                **{
+                    field: cand[field]
+                    for field in PROTECTED_FIELDS
+                    if cand.get(field) is not None
+                },
+            }
+        )
+        for protected_field in sorted(PROTECTED_FIELDS):
+            graph_value = graph_entry.get(protected_field)
+            catalog_value = catalog_entry.get(protected_field)
+            if graph_value == catalog_value:
+                continue
+            field_hash = hashlib.sha256(
+                json.dumps(graph_value, sort_keys=True, default=str).encode()
+            ).hexdigest()[:16]
+            findings.append(
+                DivergenceEntry(
+                    name=name,
+                    field=protected_field,
+                    graph_hash=field_hash,
+                    detail=(
+                        f"protected field {protected_field!r} differs from the "
+                        "supplied catalog checkout"
                     ),
                 )
             )
@@ -2050,6 +2169,7 @@ def run_export(
     final: bool = False,
     review_batch: list[str] | None = None,
     manifest_sources: list[dict[str, Any]] | None = None,
+    isnc_dir: str | Path | None = None,
 ) -> ExportReport:
     """Export standard names from the graph to a staging directory.
 
@@ -2098,6 +2218,10 @@ def run_export(
         Exact source membership and terminal target projection from cohort
         minting. When supplied, every row is reconciled as emitted, excluded,
         or documented non-nameable in the export report.
+    isnc_dir:
+        ISNC checkout used for the protected-field comparison. When omitted,
+        the configured checkout is resolved; if none is available Gate D is
+        skipped rather than emitting unverifiable rows.
 
     Returns
     -------
@@ -2118,6 +2242,9 @@ def run_export(
         names_only=names_only,
     )
     population_ids = [candidate["id"] for candidate in population]
+    graph_names = set(population_ids)
+    if not skip_gate:
+        graph_names.update(_fetch_graph_name_ids())
     report.total_candidates = len(population_ids)
     report.record_exclusions(eligibility_exclusions)
     logger.info(
@@ -2135,12 +2262,9 @@ def run_export(
         if gate_scope == "all":
             gate_a = _run_gate_a()
             if not final and not gate_a.passed:
-                gate_a = GateResult(
-                    gate=GATE_A,
-                    passed=True,
-                    issues=[],
-                    advisories=gate_a.issues,
-                )
+                gate_a.advisories.extend(gate_a.issues)
+                gate_a.issues = []
+                gate_a.passed = True
                 logger.warning(
                     "Gate A: graph test failure(s) (advisory for RC release)"
                 )
@@ -2160,7 +2284,12 @@ def run_export(
         report.record_exclusions(_gate_c_exclusion_records(gate_c))
 
         # Gate B: Cross-field consistency (on filtered candidates)
-        gate_b = _run_gate_b(candidates, cocos_convention, final=final)
+        gate_b = _run_gate_b(
+            candidates,
+            cocos_convention,
+            graph_names=graph_names,
+            final=final,
+        )
         report.gate_results.append(gate_b)
 
         # For RC: exclude names that fail grammar parse rather than
@@ -2197,12 +2326,22 @@ def run_export(
                 ]
                 gate_b.passed = len(gate_b.issues) == 0
 
-        # Gate D: Divergence detection
-        # For RC (final=False): advisory only — catalog-edited nodes
-        # are expected to diverge from the pipeline-generated version.
-        divergence = detect_divergence(candidates)
+        # Gate D: compare catalog-authoritative fields with the supplied or
+        # configured ISNC checkout. No checkout means no claim, not one
+        # unverifiable row per catalog-lineage identity.
+        if isnc_dir is None:
+            from imas_codex.settings import get_sn_isnc_dir
+
+            isnc_dir = get_sn_isnc_dir()
+        divergence = (
+            detect_divergence(candidates, catalog_root=isnc_dir)
+            if isnc_dir is not None
+            else []
+        )
         report.divergence_entries = divergence
-        if final:
+        if isnc_dir is None:
+            gate_d = GateResult(gate=GATE_D, passed=True, skipped=True)
+        elif final:
             gate_d = GateResult(
                 gate=GATE_D,
                 passed=len(divergence) == 0,
