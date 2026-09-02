@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -172,6 +172,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T153642489962-n-west-withheld-rescore-2" data-who="test-westrescore" data-when="2026-09-02T16:15:27Z">
     <div class="r-comment-body"><p>second recovery pass (2.03 USD): docs re-accepted for the two regressions and toroidal_coordinate_at_detector_pixel fully accepted, but nine rescores at 1.000 and one at 0.969 were still refused as rename conflicts because the merged fix keys on the sn-rescore run-id prefix, which a following scoped drain overwrites with its own run id; two multiply-bound edits refused by the source CAS; two grammar-valid successors exhausted below threshold</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-20260902T1820-ledger-gap" data-who="reckon-ship" data-when="2026-09-02T18:20:00Z">
+    <div class="r-comment-body">LEDGER GAP, recorded rather than hidden. Six runs were verified in their worktrees and merged to main but are absent from docs/state/imas-codex/crew.json: n-drift-refresh-requeues-docs (097c326f), n-rescore-accept-with-descendants (0c16d4df), n-export-ledger-winning-method (merge 43709196), n-export-uses-isn-writer (merge d2f238d8), n-review-artifact-schema-parity (merge 70ed903d), and the failed n-west-review-pr9-cut (merge 9c65401e). Cause: a concurrent session's uncommitted reckon change made every promotion fail with a stray-write refusal that compared the main checkout tree instead of the run's worktree; to keep dispatching, the coordinator merged first and discarded the live pointers, and discard leaves no ledger record. Manifests remain under ~/.config/reckon/crew/runs/<run-id>/manifest.md and the pointer JSON is backed up at ~/.config/reckon/crew/reports/pointer-backup-<run-id>.json for each. Lesson for the runbook: promote before merge, and never discard a pointer to clear a claim while promotion is refused; wait or use the waiver. Rescore fix follow-on: the run-id-prefix key is overwritten by a following scoped drain, so identity-preserving reviews must be recognised by the unchanged spelling (node n-rescore-identity-by-name queued behind n-kind-stale-refresh on graph_ops.py).</div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
