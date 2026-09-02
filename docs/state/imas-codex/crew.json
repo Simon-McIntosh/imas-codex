@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:04:01",
+  "updated": "2026-09-02T10:05:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -50550,9 +50550,90 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T080451749560-n-export-physics-domain-restore",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-export-physics-domain-restore",
+        "node_definition": {
+          "done_when": "the pinned-schema test asserts every emitted YAML entry carries a non-empty physics_domain, loads through imas_standard_names.yaml_store without error, and has no roles key; the export suites pass with command, exit status and log path recorded; a recorded 'sn release --batch west_production_dd_paths --dry-run' from this worktree exits 0 at batch size 368 with no extra_forbidden; the live graph is not modified",
+          "estimated_hours": null,
+          "goal": "Restore physics_domain in exported catalog YAML: the pinned imas-standard-names 0.8.0 yaml_store lists physics_domain in _STRIPPED_FIELDS (tolerated on load, stripped before model validation) while its catalog site reads entry physics_domain for the Domain grouping (catalog/dataset.py, 'uncategorized' fallback), so the exporter's serialized field set must be the entry model's declared fields plus the store-tolerated physics_domain, with emitted entries validated through the same yaml_store load path catalog CI uses rather than the bare entry model, and roles still withheld",
+          "id": "n-export-physics-domain-restore",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T080451749560-n-export-physics-domain-restore/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_pinned_schema.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-exportschema",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T08:04:56Z",
+        "completed_at": "2026-09-02T08:05:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 24,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 24,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "29e8a76da5b35f6a43642c0a0204f85ae1b32231",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T080451749560-n-export-physics-domain-restore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060ea-afc0-7f90-8d69-c2903fd0dd4d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "stopped before any edit at the lead's direction",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1289
+    "_version": 1290
   }
 }
