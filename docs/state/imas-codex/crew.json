@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:55:09",
+  "updated": "2026-09-02T18:07:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1170,6 +1170,15 @@
       },
       {
         "id": "impl-isnwriter",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "impl-kindrule",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -53027,6 +53036,6 @@
       }
     ],
     "holds": [],
-    "_version": 1349
+    "_version": 1350
   }
 }
