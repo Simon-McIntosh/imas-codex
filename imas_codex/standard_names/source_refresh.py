@@ -334,6 +334,7 @@ def refresh_drifted_sources(
     *,
     dry_run: bool = False,
     include_accepted: bool = True,
+    scope_run_id: str | None = None,
     gc: GraphClient | None = None,
 ) -> dict[str, Any]:
     """Detect DD-source drift and steer a refine pass for each drifted name.
@@ -341,7 +342,10 @@ def refresh_drifted_sources(
     Effective content drift attaches a docs-axis ``apply_edit`` carrying the
     precise DD delta and resets the docs into the refine/review queue. A rename
     also re-points the source to the new path. Provenance-only drift re-stamps
-    without steering. Returns a summary dict; an unchanged source is a no-op.
+    without steering. When *scope_run_id* is supplied, each successfully reset
+    name is attached to that active run so its docs pools can prioritize the
+    work without weakening the ordinary global claim gate. Returns a summary
+    dict; an unchanged source is a no-op.
     """
     # Local import avoids a module-load cycle (edit.py imports graph_ops heavily).
     from imas_codex.standard_names.edit import apply_edit
@@ -405,6 +409,15 @@ def refresh_drifted_sources(
                 summary["blocked"].append({"sn_id": d["sn_id"], "why": plan.blocked})
                 logger.warning("  refresh blocked for %s: %s", d["sn_id"], plan.blocked)
                 continue
+            if scope_run_id:
+                gc.query(
+                    """
+                    MATCH (sn:StandardName {id: $id})
+                    SET sn.run_id = $scope_run_id
+                    """,
+                    id=d["sn_id"],
+                    scope_run_id=scope_run_id,
+                )
             # Re-stamp so this exact change is not re-detected next run (idempotent).
             stamp_source_snapshots([d["sn_id"]], gc=gc)
             summary["restamped"] += 1
