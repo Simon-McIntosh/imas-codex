@@ -341,6 +341,7 @@ def _build_pool_specs(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
     scope_run_id: str | None = None,
+    drift_scope_run_id: str | None = None,
     scope_size_hint: int | None = None,
     drain_scope_id: str | None = None,
     edits_only: bool = False,
@@ -366,6 +367,11 @@ def _build_pool_specs(
     generate/refine pools (generate_name, generate_docs, refine_name,
     refine_docs) so they pause when their downstream review queues exceed the
     configured cap.  ``enrich_parents`` is intentionally NOT throttled.
+
+    *drift_scope_run_id* gives the docs adapters a first claim against names
+    reset by this run's startup refresh. That bounded claim drops the regular
+    name-score gate for those accepted names only; an empty result falls back
+    to the ordinary unscoped backlog.
 
     The ``enrich_parents`` pool drains the *existing* placeholder-derived-parent
     backlog, synthesising a children-grounded description and accepting the
@@ -433,12 +439,22 @@ def _build_pool_specs(
 
     def _make_claim_adapter(
         claim_fn: Callable[..., list[dict[str, Any]]],
+        *,
+        priority_scope_run_id: str | None = None,
         **kwargs: Any,
     ) -> Callable[[], Awaitable[dict[str, Any] | None]]:
         """Wrap a sync claim function as an async ``ClaimFn``."""
 
         async def _adapter() -> dict[str, Any] | None:
-            items = await asyncio.to_thread(claim_fn, **kwargs)
+            items = []
+            if priority_scope_run_id:
+                items = await asyncio.to_thread(
+                    claim_fn,
+                    **kwargs,
+                    scope_run_id=priority_scope_run_id,
+                )
+            if not items:
+                items = await asyncio.to_thread(claim_fn, **kwargs)
             if not items:
                 return None
             # Alias source_id → path for DD items so compose/grouping helpers
@@ -677,6 +693,7 @@ def _build_pool_specs(
             name="generate_docs",
             claim=_make_claim_adapter(
                 claim_generate_docs_batch,
+                priority_scope_run_id=drift_scope_run_id,
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
@@ -690,6 +707,7 @@ def _build_pool_specs(
             name="review_docs",
             claim=_make_claim_adapter(
                 claim_review_docs_batch,
+                priority_scope_run_id=drift_scope_run_id,
                 min_score=regen_score,
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
@@ -1827,12 +1845,17 @@ async def run_sn_pools(
         # reason. Unstamped names are baselined first (no mass-refine on first
         # run). No-op when nothing drifted. Runs whenever docs are in scope —
         # skipped only in names-only mode, where the docs pools it feeds do not run.
+        sr: dict[str, Any] = {}
         if not names_only:
             from imas_codex.standard_names.source_refresh import (
                 refresh_drifted_sources,
             )
 
-            sr = await _global_maintenance_call(refresh_drifted_sources, default={})
+            sr = await _global_maintenance_call(
+                refresh_drifted_sources,
+                scope_run_id=run_id,
+                default={},
+            )
             if sr.get("baselined") or sr.get("detected"):
                 logger.info(
                     "run_sn_pools: source-drift refresh — %d baselined, "
@@ -2027,6 +2050,7 @@ async def run_sn_pools(
             on_event=on_event,
             only_domain=_only_domain_for_pools,
             scope_run_id=scope_run_id,
+            drift_scope_run_id=(run_id if sr.get("steered") else None),
             scope_size_hint=scope_size_hint,
             drain_scope_id=drain_scope_id,
             edits_only=edits_only,
