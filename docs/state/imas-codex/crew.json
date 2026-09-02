@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:17:26",
+  "updated": "2026-09-02T10:22:49",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -50829,9 +50829,99 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T081733205756-n-offsite-legacy-test-repoint",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-legacy-test-repoint",
+        "node_definition": {
+          "done_when": "the module passes together with tests/cli/test_graph_push_schedule.py and tests/core/test_offsite_push.py with command, exit status and log path recorded; a grep proves the module contains no SBATCH, sbatch or _submit_service_job reference and every --schedule invocation in it is either --dry-run or runs against a mocked systemctl; ruff clean",
+          "estimated_hours": null,
+          "goal": "Repoint tests/cli/test_graph_offsite_push.py from the retired SLURM scheduling (SBATCH preview assertions and the mocked submission helper) to the systemd schedule behaviour, so that no test in that module can reach the real user systemd installer through a non-dry-run --schedule call",
+          "id": "n-offsite-legacy-test-repoint",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T081733205756-n-offsite-legacy-test-repoint/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "tests/cli/test_graph_offsite_push.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-offsitepush",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T08:17:37Z",
+        "completed_at": "2026-09-02T08:22:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 296,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 296,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "e07e6875507251a6f49fb70332d956eeb513aef6",
+        "commits": [
+          "be90eb6202c1aba5cca72d43ec5f09c29291d185"
+        ],
+        "changed_lines": {
+          "added": 20,
+          "removed": 15,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/cli/test_graph_offsite_push.py tests/cli/test_graph_push_schedule.py tests/core/test_offsite_push.py; grep for SBATCH/sbatch/_submit_service_job",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T081733205756-n-offsite-legacy-test-repoint/logs/focused-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T081733205756-n-offsite-legacy-test-repoint/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eb8-7f54-7393-81f9-23d6489ac1b4",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1293
+    "_version": 1294
   }
 }
