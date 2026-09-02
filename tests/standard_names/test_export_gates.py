@@ -7,9 +7,146 @@ Tests _run_gate_c directly.
 
 from __future__ import annotations
 
-import pytest
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
-from imas_codex.standard_names.export import _run_gate_c
+import pytest
+import yaml
+
+from imas_codex.standard_names.export import (
+    _prune_dangling_links,
+    _run_gate_a,
+    _run_gate_b,
+    _run_gate_c,
+    detect_divergence,
+)
+
+
+def _write_catalog_entry(root: Path, entry: dict) -> None:
+    standard_names = root / "standard_names"
+    standard_names.mkdir(parents=True)
+    (standard_names / "general.yml").write_text(
+        yaml.safe_dump([entry], sort_keys=False), encoding="utf-8"
+    )
+
+
+class TestReleaseGateFindings:
+    """Release gates distinguish actionable defects from export projection gaps."""
+
+    def test_unknown_graph_link_blocks_final(self) -> None:
+        result = _run_gate_b(
+            [{"id": "electron_temperature", "links": ["name:missing"]}],
+            17,
+            graph_names={"electron_temperature"},
+            final=True,
+        )
+
+        assert result.passed is False
+        assert result.issues == [
+            {
+                "type": "dangling_link",
+                "name": "electron_temperature",
+                "link_target": "missing",
+                "target_status": "unknown_to_graph",
+            }
+        ]
+
+    def test_accepted_unpublished_link_is_advisory_and_pruned_from_copy(self) -> None:
+        candidates = [{"id": "electron_temperature", "links": ["name:withheld"]}]
+        accepted_graph_names = {"electron_temperature", "withheld"}
+        result = _run_gate_b(
+            candidates,
+            17,
+            graph_names=accepted_graph_names,
+            final=True,
+        )
+        domain_entries = {
+            "general": [{"name": "electron_temperature", "links": ["name:withheld"]}]
+        }
+
+        pruned, _ = _prune_dangling_links(domain_entries, {"electron_temperature"})
+
+        assert result.passed is True
+        assert result.issues == []
+        assert result.advisories == [
+            {
+                "type": "dangling_link",
+                "name": "electron_temperature",
+                "link_target": "withheld",
+                "target_status": "known_but_unpublished",
+            }
+        ]
+        assert pruned == 1
+        assert domain_entries["general"][0]["links"] == []
+        assert candidates[0]["links"] == ["name:withheld"]
+
+    def test_protected_fields_matching_catalog_produce_no_rows(
+        self, tmp_path: Path
+    ) -> None:
+        entry = {
+            "name": "catalog_name",
+            "kind": "scalar",
+            "status": "active",
+            "description": "Catalog description",
+            "documentation": "Catalog documentation",
+            "links": [],
+        }
+        _write_catalog_entry(tmp_path, entry)
+        candidate = {
+            "id": "catalog_name",
+            "origin": "catalog_edit",
+            **{key: value for key, value in entry.items() if key != "name"},
+        }
+
+        assert detect_divergence([candidate], catalog_root=tmp_path) == []
+
+    def test_protected_field_difference_names_the_field(self, tmp_path: Path) -> None:
+        entry = {
+            "name": "catalog_name",
+            "kind": "scalar",
+            "status": "active",
+            "description": "Catalog description",
+            "documentation": "Catalog documentation",
+            "links": [],
+        }
+        _write_catalog_entry(tmp_path, entry)
+        candidate = {
+            "id": "catalog_name",
+            "origin": "catalog_edit",
+            **{key: value for key, value in entry.items() if key != "name"},
+            "documentation": "Graph rewrite",
+        }
+
+        findings = detect_divergence([candidate], catalog_root=tmp_path)
+
+        assert len(findings) == 1
+        assert findings[0].name == "catalog_name"
+        assert findings[0].field == "documentation"
+
+    def test_graph_suite_collects_every_failure_without_fail_fast(self) -> None:
+        completed = SimpleNamespace(
+            returncode=1,
+            stdout=(
+                "FAILED tests/graph/test_alpha.py::test_one - AssertionError\n"
+                "FAILED tests/graph/test_beta.py::test_two - ValueError\n"
+            ),
+            stderr="",
+        )
+        with patch(
+            "imas_codex.standard_names.export.subprocess.run",
+            return_value=completed,
+        ) as run:
+            result = _run_gate_a()
+
+        command = run.call_args.args[0]
+        assert "-x" not in command
+        assert result.scope == "graph-wide"
+        assert [issue["test_id"] for issue in result.issues] == [
+            "tests/graph/test_alpha.py::test_one",
+            "tests/graph/test_beta.py::test_two",
+        ]
+
 
 # ============================================================================
 # Fixture candidates with varied scores
