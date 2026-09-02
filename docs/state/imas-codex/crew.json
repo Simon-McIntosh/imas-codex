@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:05:32",
+  "updated": "2026-09-02T12:06:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2938,6 +2938,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "test-s10restore",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "test-s8closure",
         "harness": "codex",
         "role": "test",
@@ -2990,6 +2999,15 @@
         "role": "test",
         "session_id": "01a02f75-6f0b-7883-a6f0-75a8542fabee",
         "created": "2026-08-23"
+      },
+      {
+        "id": "test-spa-rca",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "test-strandcause",
@@ -51554,6 +51572,6 @@
       }
     ],
     "holds": [],
-    "_version": 1307
+    "_version": 1309
   }
 }
