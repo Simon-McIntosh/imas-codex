@@ -1202,6 +1202,9 @@ def _freeze_review_artifact(
         )
     path = reviews_dir / f"{rc_version}.sn_names.yaml"
     path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+    from imas_codex.standard_names.sources_manifest import load_names_file
+
+    load_names_file(path)
     return path
 
 
