@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T13:57:10",
+  "updated": "2026-09-02T14:05:43",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1532,9 +1532,11 @@
         "id": "impl-previewlink",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a061fb-60dc-75f0-93a9-c964d9ce686e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a061fb-60dc-75f0-93a9-c964d9ce686e"
+        },
         "created": "2026-09-02"
       },
       {
@@ -51908,9 +51910,100 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T115733569773-n-release-preview-link-invariant",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-release-preview-link-invariant",
+        "node_definition": {
+          "done_when": "a focused test with a mocked GitHub client asserts the body sent after PR creation contains the exact address for the created number, that a read-back missing it raises the named error, and that the release exits non-zero in that case; the review-release suites pass with command, exit status and log path recorded; ruff clean",
+          "estimated_hours": null,
+          "goal": "Make the PR-scoped preview address in the review PR body a checked invariant of sn release --batch: the release already writes the deterministic GitHub Pages address for the created PR number into the body, so it must now also read the PR back through the same GitHub client and fail loudly with a named error when the body lacks that exact address, guaranteeing the link for every release so the CI comment can be stood down",
+          "id": "n-release-preview-link-invariant",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T115733569773-n-release-preview-link-invariant/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_review_release_preview_link.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-previewlink",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T11:57:38Z",
+        "completed_at": "2026-09-02T12:05:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 480,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 480,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "0eaa4257a684888ea8df600b918d5e692a3f3dbc",
+        "commits": [
+          "a97fbb426176bc645a608f78d49e2229d7904c40"
+        ],
+        "changed_lines": {
+          "added": 282,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_review_release_preview_link.py tests/standard_names/test_review_release*.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T115733569773-n-release-preview-link-invariant/ruff.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T115733569773-n-release-preview-link-invariant/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a061fb-60dc-75f0-93a9-c964d9ce686e",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1320
+    "_version": 1322
   }
 }

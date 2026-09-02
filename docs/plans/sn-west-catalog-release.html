@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -151,6 +151,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-20260902T1207-gates-honest" data-who="reckon-ship" data-when="2026-09-02T12:07:00Z">
     <div class="r-comment-body">Release gates made honest (commits 1f34bf5c, 94f050c1, merged c987057a's parent): Gate B classifies each dangling link as unknown_to_graph (real defect, blocks a final release) or known_but_unpublished (advisory in every mode, pruned only from the exported copy; graph links untouched and re-derived at every export so they heal when the target publishes). Live WEST dry-run: unknown 0, known-but-unpublished 331. Gate D now compares protected fields against the ISNC checkout and skips without one; on the blank fork main it reports 183 exact rows whose cause is that the identities are absent from the baseline, so the additive-chain case (new entries) still needs to read as not-divergent rather than as 183 findings. Gate A runs without -x, labelled graph-wide, and reports all 48 failing hygiene test ids the -x had hidden. Also landed: sn release refuses on a dirty catalog checkout and returns it to a clean main after the cut (bb4ec4f2, dbb9a833), which had tripped two nodes today. SPA blank-detail root cause is under investigation in the ISN site harness; the missing physics_domain explains the Uncategorized grouping and may or may not explain the blank detail.</div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T115733569773-n-release-preview-link-invariant" data-who="impl-previewlink" data-when="2026-09-02T12:05:38Z">
+    <div class="r-comment-body"><p>sn release reads the created PR back and fails with a named error if the body lacks its exact preview address; review-release suites green</p></div>
 </div>
 </section>
 </main>
