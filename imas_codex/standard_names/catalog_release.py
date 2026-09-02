@@ -15,6 +15,7 @@ import re
 import shlex
 import subprocess
 from dataclasses import dataclass, field
+from functools import wraps
 from pathlib import Path
 from typing import Any
 
@@ -542,6 +543,33 @@ def _check_clean_tree(isnc_path: Path, *, strict: bool = True) -> list[str]:
             "(allowed for RC)"
         ]
     return []
+
+
+def _restore_main_after_review_release(func: Any) -> Any:
+    """Return the shared catalog checkout to ``main`` after a review cut."""
+
+    @wraps(func)
+    def wrapped(isnc_path: Path, *args: Any, **kwargs: Any) -> Any:
+        path = Path(isnc_path)
+        report = None
+        try:
+            report = func(path, *args, **kwargs)
+            return report
+        finally:
+            branch = _run_git("branch", "--show-current", cwd=path).stdout.strip()
+            if branch and branch != "main":
+                restored = _run_git("checkout", "main", cwd=path)
+                if restored.returncode != 0:
+                    message = (
+                        "failed to restore ISNC checkout to main: "
+                        f"{restored.stderr.strip()}"
+                    )
+                    if report is not None:
+                        report.errors.append(message)
+                    else:
+                        logger.error(message)
+
+    return wrapped
 
 
 def _check_synced(isnc_path: Path, remote: str, *, strict: bool = True) -> list[str]:
@@ -1167,6 +1195,7 @@ def _assert_approved_entries_unchanged(
         )
 
 
+@_restore_main_after_review_release
 def run_review_release(
     isnc_path: Path,
     focus_file: str | Path,
@@ -1320,6 +1349,7 @@ def run_review_release(
     # ── 2. Pre-flight ISNC + compute the RC version ────────────────────
     try:
         _check_on_main(isnc_path)
+        _check_clean_tree(isnc_path)
     except ValueError as exc:
         report.errors.append(str(exc))
         return report
