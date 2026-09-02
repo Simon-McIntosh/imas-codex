@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:05:23",
+  "updated": "2026-09-02T10:16:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1035,6 +1035,15 @@
         "role": "implement",
         "session_id": "01a035a5-6631-7a90-a07a-ee711c04649d",
         "created": "2026-08-24"
+      },
+      {
+        "id": "impl-isndomain",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-isnpreview",
@@ -50631,9 +50640,94 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T075923313287-n-west-advisory-disposition",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-advisory-disposition",
+        "node_definition": {
+          "done_when": "the report has one table per advisory with counts split into batch-affecting versus graph-wide, the list of 73 withheld names grouped by reason, the 28 unmatched sources, and a one-paragraph verdict on whether anything must change before a physicist reviews PR 7, with a positive-control row proving the artifact and log were actually read",
+          "estimated_hours": null,
+          "goal": "Determine, for fork PR 7 (RC v0.3.0rc3+west-task-2e, frozen artifact imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml), exactly which of the RC-mode advisories in the recut log ~/.config/reckon/crew/runs/r-20260902T072441771421-n-west-review-pr-recut/logs/release-recut.log touch the published WEST batch: the Gate A graph test failure ids and whether any assertion involves a batch identity, how many of the 331 dangling doc links (329 pruned) originate from published batch entries and which cross-link targets they lost, whether any of the 175 Gate D divergence entries is a batch member, and a reasoned list of the 73 withheld names with their withholding gate plus the 28 unmatched manifest sources",
+          "id": "n-west-advisory-disposition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T075923313287-n-west-advisory-disposition/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "8m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-pr7-advisory-disposition.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-westadvisories",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T07:59:27Z",
+        "completed_at": "2026-09-02T08:16:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 1004,
+        "stalled": true,
+        "time_budget": "8m",
+        "base_sha": "8e08ca920d9514caecb19b45c52bc5963e7eaef8",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "test -s report; accounting 368 = 295 + 73; 331 = 329 + 2",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:dde141511377fa7c0dddf648c87ce9e0325750d072e6776d3352ff3795ff8634"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T075923313287-n-west-advisory-disposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06121-4f40-7591-ab38-1e54695968c5",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only investigation; deliverable is the report under ~/.config/reckon/crew/reports",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1290
+    "_version": 1292
   }
 }
