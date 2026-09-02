@@ -110,9 +110,7 @@ _ISN_UNSUPPORTED_FIELDS = frozenset({"constraints"})
 # model. They are stamped onto an entry after build-time validation because the
 # exporter uses them for reports and release gates. A field reaches catalog
 # YAML only when the selected entry model declares it.
-_GRAPH_ONLY_RENDERED_FIELDS = frozenset(
-    {"physics_domain", "validity_domain", "roles", "sources"}
-)
+_GRAPH_ONLY_RENDERED_FIELDS = frozenset({"validity_domain", "roles", "sources"})
 
 # These identity-specific holds take precedence over generic lifecycle gates.
 # Each reason names the unresolved authority condition so the exclusion ledger
@@ -1202,6 +1200,13 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
     Maps graph property names to ISN StandardNameEntry field names,
     and excludes all graph-only / pipeline-only fields.
     """
+    physics_domains = node.get("physics_domain") or []
+    if isinstance(physics_domains, str):
+        physics_domains = [physics_domains]
+    primary_physics_domain = (
+        pick_primary_domain(physics_domains) if physics_domains else "unscoped"
+    )
+
     entry: dict[str, Any] = {
         "name": node["id"],
         "description": node.get("description") or "",
@@ -1213,6 +1218,7 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
         # 'draft' and 'deprecated' therefore never appear in the released
         # status vocabulary.
         "status": "active",
+        "physics_domain": primary_physics_domain,
         "links": list(node.get("links") or []),
     }
 
@@ -1888,7 +1894,11 @@ def _write_domain_yaml(
     # Canonicalise, reorder, and clean each entry
     clean_entries: list[dict[str, Any]] = []
     for entry_dict in entries:
-        canon = canonicalise_entry(entry_dict)
+        catalog_entry = {
+            **entry_dict,
+            "physics_domain": entry_dict.get("physics_domain") or domain,
+        }
+        canon = canonicalise_entry(catalog_entry)
         # Remove None values and ISN-unsupported fields for clean YAML output
         clean = {
             k: v
@@ -2426,17 +2436,10 @@ def run_export(
             for pf in _PROVENANCE_FIELDS:
                 entry_dict.pop(pf, None)
 
-            # Determine domain (multi-valued list → primary by domain
-            # priority, with alphabetical tie-break). Priority is derived
-            # from Cluster.mapping_relevance — see domain_priority.py.
-            physics_domain_list = cand.get("physics_domain") or []
-            if isinstance(physics_domain_list, str):
-                physics_domain_list = [physics_domain_list]
-            primary = (
-                pick_primary_domain(physics_domain_list)
-                if physics_domain_list
-                else "unscoped"
-            )
+            # The graph conversion selects the primary domain before model
+            # validation so the required catalog field participates in every
+            # validation and serialization pass.
+            primary = entry_dict["physics_domain"]
 
             # Validate against ISN model — invalid entries are excluded.
             validated = _validate_entry(entry_dict)
@@ -2447,9 +2450,6 @@ def run_export(
                 continue
             entry_dict = validated
 
-            # Write physics_domain AFTER ISN validation (graph-only field).
-            # ISN CatalogRenderer expects a scalar string, not a list.
-            entry_dict["physics_domain"] = primary if primary != "unscoped" else ""
             entry_dict["roles"] = _published_identity_roles(cand)
 
             # Derive computed fields from graph edges

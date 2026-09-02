@@ -205,11 +205,7 @@ def test_export_emits_generic_source_bindings_and_preserves_accounting(
         "semantic_facet",
     }.intersection(key for binding in emitted["sources"] for key in binding)
 
-    strict_projection = {
-        key: value
-        for key, value in emitted.items()
-        if key not in {"physics_domain", "roles"}
-    }
+    strict_projection = {key: value for key, value in emitted.items() if key != "roles"}
     strict_entry = _entry_model(strict_projection)
     assert strict_entry.name == "emitted_name"
     assert strict_entry.model_dump(mode="json")["sources"] == emitted["sources"]
