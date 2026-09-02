@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log">
 <meta name="plan-impl" content="0.7">
@@ -232,6 +232,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260902T082313093957-n-offsite-first-cycle-login" data-who="test-s10offsite2" data-when="2026-09-02T08:44:19Z">
     <div class="r-comment-body"><p>timer installed on the login node and the immediate service ran 203 s but failed before upload: the generated unit PATH omits ~/bin where oras lives; no receipt written; archive and live census agree (1,614,780 nodes, 4,259,356 relationships, 70 labels); OnCalendar=weekly elapses next Monday (4.56 d) rather than seven days after install</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260902T084540868856-n-graph-push-service-path" data-who="impl-offsitepush" data-when="2026-09-02T08:53:57Z">
+    <div class="r-comment-body"><p>service unit Environment carries the oras directory resolved at install time, installation refuses when oras is absent, failed upload preparation writes a failure receipt; dry-run on this host renders PATH with /home/ITER/mcintos/bin</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>

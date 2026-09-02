@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:45:10",
+  "updated": "2026-09-02T10:54:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -51031,9 +51031,102 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T084540868856-n-graph-push-service-path",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-graph-push-service-path",
+        "node_definition": {
+          "done_when": "unit tests assert the rendered service Environment contains the resolved oras directory, that installation refuses when oras is absent, that a failed upload writes a receipt with counts_match false or an error field; 'graph push --schedule --dry-run' on this host renders a PATH containing /home/ITER/mcintos/bin; the focused schedule plus offsite suites pass with command, exit status, log path recorded; ruff clean; the live systemd instance is not modified",
+          "estimated_hours": null,
+          "goal": "Make the generated graph push service unit run the cycle unattended on the login node: the unit's Environment carries the oras executable's directory resolved with shutil.which at install time (installation refuses with a named error when oras is absent), with a failed upload preparation still leaving a durable failure receipt carrying wall time plus archive identity",
+          "id": "n-graph-push-service-path",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T084540868856-n-graph-push-service-path/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/cli/graph/registry.py",
+            "imas_codex/graph/offsite.py",
+            "tests/cli/test_graph_push_schedule.py",
+            "tests/core/test_offsite_push.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-offsitepush",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T08:45:46Z",
+        "completed_at": "2026-09-02T08:53:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 491,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 491,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "21d87a32979b4842f16ce35cc11a4c1d261663ad",
+        "commits": [
+          "c18221bef917d4005bb0f9d3b73f881fa07f6ee9"
+        ],
+        "changed_lines": {
+          "added": 118,
+          "removed": 6,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/cli/test_graph_push_schedule.py tests/core/test_offsite_push.py; graph push --schedule --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T084540868856-n-graph-push-service-path/logs/focused-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T084540868856-n-graph-push-service-path/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eb8-7f54-7393-81f9-23d6489ac1b4",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1297
+    "_version": 1298
   }
 }
