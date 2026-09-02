@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T14:57:25",
+  "updated": "2026-09-02T15:03:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -719,6 +719,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "impl-domainfix",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "impl-drain",
         "harness": "codex",
         "role": "implement",
@@ -1116,6 +1125,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-isnwriter",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-lastbind",
@@ -3150,6 +3168,15 @@
         "role": "test",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "test-westdrain",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "test-westexport",
@@ -52318,9 +52345,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T125803600439-n-catalog-yaml-review-format",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-catalog-yaml-review-format",
+        "node_definition": {
+          "done_when": "a focused test exports a fixture with two entries whose documentation contains a display equation and asserts the output has exactly one blank line between the entries, documentation uses the literal block style, the equation block is surrounded by single blank lines, and the file round-trips through imas_standard_names.yaml_store to identical entries; the exporter suites pass with command, exit status and log path recorded; ruff clean",
+          "estimated_hours": null,
+          "goal": "Make the exported catalog YAML review-friendly as the lead asked: one blank line between consecutive entries in every domain file, and description plus documentation written as literal block scalars (the | style) so authored newlines around equations appear exactly once instead of being doubled by the quoted flow style seen in PR 8's equilibrium.yml (export.py line 1922 uses a plain yaml.safe_dump instead of the installed imas_standard_names.yaml_store.dump_catalog_yaml writer whose contract is exactly this format)",
+          "id": "n-catalog-yaml-review-format",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T125803600439-n-catalog-yaml-review-format/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_yaml_format.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-yamlwriter",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T12:58:09Z",
+        "completed_at": "2026-09-02T13:02:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 235,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 235,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "9832bba699a3a4daccd14e90683a21bf63401757",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T125803600439-n-catalog-yaml-review-format/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06232-c7ed-7f51-ba29-77ea0947e0bd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1786112,
+            "cached_input_tokens_cumulative": 1786112,
+            "input_tokens": 1920149,
+            "input_tokens_cumulative": 1920149,
+            "output_tokens": 6404,
+            "output_tokens_cumulative": 6404,
+            "reasoning_output_tokens": 2326,
+            "reasoning_output_tokens_cumulative": 2326
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "stopped at its fence; the literal-block contract belongs to the ISN writer",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1326
+    "_version": 1330
   }
 }
