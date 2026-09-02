@@ -495,7 +495,36 @@ def _fetch_export_population(
          EXISTS {{
              MATCH (:StandardName)-[:HAS_PARENT]->(sn)
          }} AS is_parent,
-         {docs_review_eligibility_where()} AS has_winning_docs_review
+         {docs_review_eligibility_where()} AS strict_docs_review_eligibility,
+         COLLECT {{
+             MATCH (sn)-[:HAS_REVIEW]->(accepting_review:StandardNameReview)
+             WHERE accepting_review.review_axis = 'docs'
+               AND accepting_review.review_group_id IS NOT NULL
+               AND accepting_review.resolution_method
+                   IN $docs_review_winning_methods
+               AND NOT EXISTS {{
+                   MATCH (sn)-[:HAS_REVIEW]->(non_winner:StandardNameReview)
+                   WHERE non_winner.review_axis = 'docs'
+                     AND non_winner.review_group_id =
+                         accepting_review.review_group_id
+                     AND non_winner.resolution_method
+                         IN $docs_review_non_winning_methods
+               }}
+             RETURN accepting_review {{
+                 .review_group_id,
+                 review_id: accepting_review.id,
+                 .resolution_method,
+                 .reviewed_at
+             }} AS winner
+             ORDER BY accepting_review.reviewed_at DESC,
+                      accepting_review.review_group_id DESC,
+                      accepting_review.id DESC
+             LIMIT 1
+         }} AS accepting_docs_reviews
+    WITH sn, has_dd_source_binding, has_derived_producer,
+         has_non_derived_producer, has_docs_review, is_parent,
+         strict_docs_review_eligibility,
+         accepting_docs_reviews[0] AS accepting_docs_review
     OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
     OPTIONAL MATCH (sn)-[:HAS_COCOS]->(c:COCOS)
     RETURN sn {{
@@ -507,7 +536,12 @@ def _fetch_export_population(
         _has_non_derived_producer: has_non_derived_producer,
         _is_parent: is_parent,
         _has_docs_review: has_docs_review,
-        _has_winning_docs_review: has_winning_docs_review
+        _has_winning_docs_review:
+            accepting_docs_review IS NOT NULL OR strict_docs_review_eligibility,
+        docs_review_resolution_method:
+            accepting_docs_review.resolution_method,
+        _docs_review_group_id: accepting_docs_review.review_group_id,
+        _docs_review_id: accepting_docs_review.review_id
     }} AS record
     ORDER BY sn.id
     """
