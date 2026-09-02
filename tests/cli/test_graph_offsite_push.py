@@ -39,7 +39,7 @@ def _common(monkeypatch) -> None:
     )
 
 
-def test_dry_run_prints_decision_and_self_resubmitting_script(monkeypatch):
+def test_cycle_dry_run_prints_decision_without_export(monkeypatch):
     _common(monkeypatch)
     pushed = False
 
@@ -56,29 +56,34 @@ def test_dry_run_prints_decision_and_self_resubmitting_script(monkeypatch):
 
     assert result.exit_code == 0
     assert "56.000 days stale" in result.output
-    assert "#SBATCH --job-name=codex-graph-push" in result.output
-    assert 'sbatch --begin=now+7days "$0"' in result.output
     assert "No archive was exported or pushed" in result.output
     assert not pushed
 
 
-def test_schedule_uses_service_submission_helper(monkeypatch):
-    _common(monkeypatch)
-    submissions: list[tuple] = []
+def test_schedule_dry_run_prints_login_node_units(monkeypatch, tmp_path):
+    project_dir = tmp_path / "project"
+    project_dir.mkdir()
+    (project_dir / "pyproject.toml").write_text("[project]\nname='imas-codex'\n")
     monkeypatch.setattr(
-        "imas_codex.cli.services._submit_service_job",
-        lambda *args, **kwargs: submissions.append((args, kwargs)),
+        "imas_codex.cli.graph.registry._push_schedule_project_dir",
+        lambda: project_dir,
     )
+    monkeypatch.setattr(
+        "imas_codex.cli.graph.registry.shutil.which",
+        lambda command: f"/usr/bin/{command}",
+    )
+    monkeypatch.setattr("platform.system", lambda: "Linux")
+    monkeypatch.setattr("socket.getfqdn", lambda: "login.example.org")
 
-    result = CliRunner().invoke(graph_push, ["--schedule"])
+    result = CliRunner().invoke(graph_push, ["--schedule", "--dry-run"])
 
     assert result.exit_code == 0
-    assert len(submissions) == 1
-    args, kwargs = submissions[0]
-    assert args[0] == "codex-graph-push"
-    assert "uv run --no-sync imas-codex graph push --cycle" in args[1]
-    assert 'sbatch --begin=now+7days "$0"' in args[1]
-    assert kwargs == {"cpus": 2, "mem": "8G"}
+    assert "[DRY RUN] systemd user service:" in result.output
+    assert "ConditionHost=login.example.org" in result.output
+    assert "imas-codex graph push --cycle" in result.output
+    assert "[DRY RUN] systemd user timer:" in result.output
+    assert "OnCalendar=weekly" in result.output
+    assert "No files were written and systemctl was not called" in result.output
 
 
 def test_rejected_environment_token_falls_back_to_gh_credential(monkeypatch):
