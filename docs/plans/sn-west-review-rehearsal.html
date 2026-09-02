@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-west-review-rehearsal">
   <meta name="plan-title" content="WEST Expert Review Preparation and Human Disposition">
-  <meta name="plan-summary" content="Fork RC authorized: 408 = 375 emitted + 33 explicit withholds; zero hard CLI/export failures. Fork only; upstream PR remains held for additivity assert.">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-summary" content="Fold-back cycle proven live on fork PR 3 after repairing seven defects it found; graph and fork unwound; the physicist review moves to sn-west-catalog-release">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="165">
-<meta name="plan-impl" content="0.99">
+<meta name="plan-version" content="167">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23,b5ed3fae,dc5bdcc3,8f8f5d99,e5df9970,ea575887,b62057db">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23,b5ed3fae,dc5bdcc3,8f8f5d99,e5df9970,ea575887,b62057db,32655414">
 </head>
 <body>
   <main class="plan-doc">
@@ -2276,10 +2276,11 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     <p class="r-fu-outcome">All three recipe documents landed and verified against the live CLI: the Release Recipe section in imas_codex/standard_names/AGENTS.md (three-verb chain, additive baseline, PR text contract with examples, both approval routes, undo semantics), the root AGENTS.md Release Workflow corrected as a thin pointer (merged 1f4f17ff via ac718c67), and REVIEWING.md on fork catalog main (e1ce1a2) telling reviewers edits are welcome and machine-rechecked. Residual auto-linking of REVIEWING.md in generated PR bodies is carried by f-west-stages-3-6.</p>
     </article>
-<article class="r-fu" data-id="f-final-release-recipe" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-27" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-final-release-recipe" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-27" data-recommends-skill="" data-resolved-at="2026-09-02T01:15:46+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Rewrite the SN release recipe as the proven end-to-end process, after act 1 runs</h4>
     <div class="r-fu-body">Lead direction 2026-08-27: the whole release / review / approve process must be documented in imas_codex/standard_names/AGENTS.md as the FINAL WORKING VERSION for future workers, committed. Write it only after act 1 has been executed end to end, so it records what actually happened rather than what was designed: sn approve has never run live and its half of the recipe would otherwise be prediction. The rewrite must cover, each verified against the live CLI help and the act-1 evidence: the three-verb chain with every flag that now exists (--batch, --bump, -m, --pr-title, --pr-body-file, --no-pr, --notes/--no-notes; approve --pr/--undo; resolve --override --reason); the additive-baseline chain (blank main, pure-addition PRs, approval-materialized baselines); RC tags at cut versus the final fold-back receipt and how the guard distinguishes them; the PR-scoped preview site, how CI builds and links it, and the workflow_dispatch re-trigger input (with the standing ban on closing or reopening a live PR to force CI); the PR title and body contract with good and banned examples; the reviewer contract in the catalog REVIEWING.md; the two integration routes for untouched versus edited entries, the contested path, and what --undo does and does not reverse; and the act-1 rehearsal procedure itself as a runbook a future worker can repeat. Record the act-1 evidence paths so the recipe's claims are traceable.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
+    <p class="r-fu-outcome">Landed 2026-09-02 at commit 32655414 (merged a6741cc0): imas_codex/standard_names/AGENTS.md Release recipe rewritten as the proven runbook, each of the four verbs verified against live help output; covers the additive-baseline chain, RC tag at cut versus the graph-merged receipt, the PR-scoped preview and its workflow_dispatch re-trigger, the title and body contract with examples, the reviewer contract, untouched versus edited integration routes, the contested path and resolve, undo semantics with docs_stage restoration and the batch-membership fallback, the fail-closed eligibility preflight, the IMAS_CODEX_SN_ISNC requirement in detached worktrees, and the rehearsal runbook linking eleven evidence reports with the final-cycle figures. Root AGENTS.md Release Workflow stays a thin pointer. done — no followup on this plan; the human review of the real packet and any upstream release are owned by sn-west-catalog-release.</p>
     </article>
 </section>
 
@@ -2670,6 +2671,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-20260902T0305-6c-pass" data-who="reckon-ship" data-when="2026-09-02T03:05:00Z">
     <div class="r-comment-body">Stage 6c PASSED (report b62057db, merged 737d35c7). With every repair in place: both edited names restored drafted-to-accepted (pre-fix undo residue, recorded); sn approve --pr gave 384 auto-approved plus 2 contested, both contested nodes carrying all four PR provenance fields, receipt tag graph-merged: at 2026-09-02T00:55:25Z; the 384 (not 374) is explained by three intervening cost-capped flush passes moving batch names to accepted, confirmed by an eligible-batch count of 386 = 384 + 2; sn resolve materialized the exact reviewer description with the recorded reason; sn approve --undo reverted 385 approved plus 1 contested, deleted the receipt, kept the RC tag; final graph approved 0 / contested 0 / accepted 2336 with all five catalog_* fields null on all 409 batch rows; fork main tree equals the PR 3 merge tree; review manifest byte-identical; upstream unchanged. LLM spend this session on the rehearsal: three freeze runs about 10.54 USD plus about 1.22 USD from the non-dry dry-run, all inside the 500 USD ceiling.</div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260902T010606191674-n-release-recipe-final" data-who="doc-releaserecipe" data-when="2026-09-02T01:15:11Z">
+    <div class="r-comment-body"><p>release recipe rewritten as the proven runbook: four verbs verified against live help, additive chain, RC tag versus receipt, PR preview and re-trigger, prose contract, reviewer contract, integration routes, undo semantics, fail-closed preflight, ISNC path requirement, and the act-1 runbook linking 11 evidence reports; root AGENTS.md is a 7-line pointer</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260902T0316-shipped" data-who="reckon-ship" data-when="2026-09-02T03:16:00Z">
+    <div class="r-comment-body">Plan shipped 2026-09-02. DRAIN LEDGER: f-west-stages-3-6 folded across n-west-stage3-restore-point, n-west-stage3-review-merge, n-west-stage4-approve (refused), n-approve-reviewer-diff-base, n-west-stage4-approve-live, n-approve-contested-provenance, n-west-stage4b-resolve, n-resolve-materializes-wording, n-west-stage5-freeze-check (x3), n-frozen-stage-pool-guard, n-frozen-guard-param-binding, n-sn-run-dry-run-is-dry, n-west-stage6-undo, n-undo-batch-membership-fallback, n-west-stage6b-repaired-cycle, n-approve-eligibility-preflight, n-west-catalog-main-inverse, n-west-stage6c-final-cycle; f-final-release-recipe folded to n-release-recipe-final; all 24 earlier followups already resolved; rows 26, foldable-remaining 0. Session live pointers for this plan: 0 after promotion. The stage-4 worktree is retained dirty as evidence of the now-removed manifest rewrite and is listed for the lead. Cumulative evidence: docs/evidence/archive/sn-west-review-rehearsal-landed.html#fold-back-rehearsal.</div>
 </div>
 </section>
 </main>

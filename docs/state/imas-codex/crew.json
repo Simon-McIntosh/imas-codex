@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T03:04:42",
+  "updated": "2026-09-02T03:15:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -110,9 +110,11 @@
         "id": "doc-releaserecipe",
         "harness": "codex",
         "role": "documentation",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a05fa6-f132-7641-bc7d-4ccaacbd95d1",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a05fa6-f132-7641-bc7d-4ccaacbd95d1"
+        },
         "created": "2026-09-02"
       },
       {
@@ -49640,9 +49642,100 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T010606191674-n-release-recipe-final",
+        "plan": "sn-west-review-rehearsal",
+        "section": "followups",
+        "node": "n-release-recipe-final",
+        "node_definition": {
+          "done_when": "the rewritten section covers, each checked against the quoted or flag-cited help output of the four commands: the three-verb chain (sn run --batch, sn release --batch with --bump/-m/--pr-title/--pr-body-file/--no-pr/--notes, sn approve --pr/--undo, sn resolve --override --reason); the additive-baseline chain; RC tag at cut versus the graph-merged: receipt and how the guard distinguishes them; the PR-scoped preview site, its CI build and the workflow_dispatch re-trigger with the ban on closing or reopening a live PR; the PR title and body contract with one good and one banned example; the reviewer contract in the catalog REVIEWING.md; the two integration routes for untouched versus edited entries, the contested path and resolve, what undo does and does not reverse including docs_stage restoration and the batch-membership fallback; the eligibility preflight that fails closed; the IMAS_CODEX_SN_ISNC requirement in detached worktrees; the act-1 runbook with the evidence report paths and the final-cycle figures (384 auto-approved plus 2 contested, 385 plus 1 reverted); no plan labels, sprint ids or stage numbers in the prose; both files render as valid Markdown and the pre-stage naming checks from the global guidelines pass on both paths",
+          "estimated_hours": null,
+          "goal": "Rewrite the Release recipe section of imas_codex/standard_names/AGENTS.md as the proven end-to-end process a future worker can repeat, verified against the live help output of sn run, sn release, sn approve and sn resolve and against the act-1 evidence reports under crew/reports/west-stage*.md and crew/reports/west-catalog-main-inverse.md, keeping the root AGENTS.md Release Workflow subsection a thin pointer",
+          "id": "n-release-recipe-final",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T010606191674-n-release-recipe-final/manifest.md",
+          "plan": "sn-west-review-rehearsal",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "followups",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md",
+            "AGENTS.md"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-releaserecipe",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T01:06:10Z",
+        "completed_at": "2026-09-02T01:15:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 541,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 541,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "95a5a92a1111787c1d7db2dc6ac7bf0096fb2f42",
+        "commits": [
+          "32655414e7f03e67c2afdc1569d886d61c569b9f"
+        ],
+        "changed_lines": {
+          "added": 240,
+          "removed": 110,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn run/release/approve/resolve --help; CommonMark parse and link validation; git diff --check; global naming scans",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T010606191674-n-release-recipe-final/logs/doc-validation.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T010606191674-n-release-recipe-final/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05fa6-f132-7641-bc7d-4ccaacbd95d1",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1272
+    "_version": 1274
   }
 }
