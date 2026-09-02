@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -124,7 +124,10 @@
     <div class="r-comment-body"><p>superseded: the lead ruled that tolerating physics_domain as a stripped legacy field in ISN is a workaround; the field is made first-class in the ISN entry model instead</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T075923313287-n-west-advisory-disposition" data-who="inv-westadvisories" data-when="2026-09-02T08:16:11Z">
-    <div class="r-comment-body"><p>PR 7 needs no advisory-driven change before physicist review: Gate A is one graph-wide empty-description hygiene test with no batch identity; Gate B&#x27;s 329 pruned links all originate from 224 published entries losing 205 targets; all 175 Gate D rows are provenance advisories on published entries; 73 withheld = 43 structural parents, 13 name not accepted, 10 invalid validation status, 4 resolution unrecorded, 2 grammar parse, 1 docs not accepted; 28 unmatched = 18 no terminal identity, 10 documented non-nameable</p></div>
+    <div class="r-comment-body"><p>PR 7 needs no advisory-driven change before physicist review: Gate A is one graph-wide empty-description hygiene test with no batch identity; Gate B's 329 pruned links all originate from 224 published entries losing 205 targets; all 175 Gate D rows are provenance advisories on published entries; 73 withheld = 43 structural parents, 13 name not accepted, 10 invalid validation status, 4 resolution unrecorded, 2 grammar parse, 1 docs not accepted; 28 unmatched = 18 no terminal identity, 10 documented non-nameable</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-20260902T1113-isn-domain-landed" data-who="reckon-ship" data-when="2026-09-02T11:13:00Z">
+    <div class="r-comment-body">ISN change landed on the fork main at merge e1b661f (commits 511c63e8, 536483aa, ac65b9ba): StandardNameEntryBase.physics_domain is required and typed PhysicsDomain with a before-validator naming the enum on rejection; _STRIPPED_FIELDS keeps only dd_paths; the committed entry_schema.json declares and requires the field; the catalog site's Domain grouping reads the model field; 41 fixture modules and the 8 bundled example catalogs carry domains (file stem = domain). Focused 5/5; affected census 444 passed / 1 xfailed; full ISN suite 2,019 passed / 34 skipped / 82 xfailed / 0 failed at 91% coverage. Pushed to the fork only. Next: upstream PR from the fork, then the lead merges and tags v0.8.1 (PyPI trusted publishing), then both repos bump the pin and the WEST candidate is re-cut.</div>
 </div>
 </section>
 </main>
