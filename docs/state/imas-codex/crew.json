@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T11:22:14",
+  "updated": "2026-09-02T11:30:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1639,6 +1639,15 @@
           "gpt-5.6-sol": "01a05def-5609-7990-b23e-d45a344b0f12"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-releasegates",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-relgap",
@@ -51234,9 +51243,99 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T092350943233-n-offsite-prune-apply",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a74",
+        "node": "n-offsite-prune-apply",
+        "node_definition": {
+          "done_when": "crew/reports/offsite-prune-apply.md records the dry-run listing, the apply command with exit status, the before and after version counts from the GitHub Packages API, proof that every release-tagged version, latest, and the new weekly tag survive, and the set of deleted versions equal to the dry-run's delete set",
+          "estimated_hours": null,
+          "goal": "Apply the locked tiered retention once against the live registry with 'imas-codex graph prune --registry ghcr.io/simon-mcintosh --force' after a fresh --dry-run, now that the weekly copy dev-198ec82-20260902T085827Z-r1 exists, recording every version kept or deleted with its tier",
+          "id": "n-offsite-prune-apply",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092350943233-n-offsite-prune-apply/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "crew/reports/offsite-prune-apply.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-s10offsite",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T09:23:56Z",
+        "completed_at": "2026-09-02T09:30:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 409,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 409,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "e8d5625ba4f3e38b636ae8ab3b0f55d9337c8901",
+        "commits": [
+          "8a496efcde7e1cb25cb1fde85a6c4ad79780e392"
+        ],
+        "changed_lines": {
+          "added": 82,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex graph prune --registry ghcr.io/simon-mcintosh --dry-run; graph prune --force; GitHub Packages API before and after",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:23f86ee6b7e2c59f51e48e325ca01e3362a98ed9698faea7a16abc640131a574"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092350943233-n-offsite-prune-apply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06115-4653-7952-8a6c-8b4b2a6cd324",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1300
+    "_version": 1302
   }
 }
