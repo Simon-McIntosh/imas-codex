@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T10:54:08",
+  "updated": "2026-09-02T11:14:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1038,6 +1038,15 @@
       },
       {
         "id": "impl-isndomain",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
+        "id": "impl-isnpr",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -51127,6 +51136,6 @@
       }
     ],
     "holds": [],
-    "_version": 1298
+    "_version": 1299
   }
 }
