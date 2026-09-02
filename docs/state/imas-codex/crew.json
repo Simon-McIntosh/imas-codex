@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T18:44:15",
+  "updated": "2026-09-02T18:51:49",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -53518,9 +53518,105 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T161020764438-n-west-review-pr10-cut",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-review-pr10-cut",
+        "node_definition": {
+          "done_when": "crew/reports/west-review-pr10-cut.md records PR 9 closed with its comment, the sn release status output, the command with exit status, the new RC tag plus object, the new PR URL plus number with the published title plus body containing the preview address plus the exclusion accounting, the diff summary proving pure addition, all catalog CI checks success, an equilibrium.yml sample from the review branch showing literal-block documentation with one blank line between entries plus single blank lines around a display equation, the frozen artifact loading through load_names_file, the preview data.json CATEGORIES with zero uncategorized, a GraphClient census approved 0 contested 0, upstream SHA unchanged, the frozen artifact committed",
+          "estimated_hours": null,
+          "goal": "Replace fork PR 9 with the WEST review candidate written through the standard-names 0.8.2 writer (literal-block prose, one blank line between entries) with a schema-loadable frozen artifact, by running 'imas-codex sn release --batch west_production_dd_paths --target auto' from this worktree with -m, an agent-authored --pr-title naming the batch in words plus a --pr-body-file following the body contract recorded in the plan's entry-gate comment of 2026-09-02T17:15, closing PR 9 beforehand with a one-sentence successor comment, committing the frozen artifact",
+          "id": "n-west-review-pr10-cut",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T161020764438-n-west-review-pr10-cut/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "crew/reports/west-review-pr10-cut.md",
+            "imas_codex/standard_names/manifests/reviews"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T16:10:27Z",
+        "completed_at": "2026-09-02T16:51:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2451,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2451,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9b7f830644a32d50d1f547c435fabc3f1e9ae726",
+        "commits": [
+          "ef5485ed28af07ae64c79104e8bdbdf418670fc1"
+        ],
+        "changed_lines": {
+          "added": 2324,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn release --batch west_production_dd_paths --target auto; gh pr checks 10; equilibrium.yml format check; load_names_file on the artifact",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:92ab6c2fc3a84edaaf9213722e6bf0d359c3652462053d30725c4f731b502399"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T161020764438-n-west-review-pr10-cut/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1358
+    "_version": 1359
   }
 }
