@@ -1039,11 +1039,10 @@ def _start_neo4j_after_switch(profile: Neo4jProfile) -> None:
     # Ensure neo4j.conf exists with proper memory/recovery settings
     conf_file = data_path / "conf" / "neo4j.conf"
     if not conf_file.exists():
-        from imas_codex.graph.dirs import DEFAULT_NEO4J_CONF
+        from imas_codex.cli.graph.server import _compute_neo4j_conf
 
         conf_file.write_text(
-            DEFAULT_NEO4J_CONF.format(
-                listen_address="127.0.0.1",
+            _compute_neo4j_conf(
                 bolt_port=profile.bolt_port,
                 http_port=profile.http_port,
             )
@@ -1235,6 +1234,17 @@ def graph_init(
         )
     except FileExistsError as e:
         raise click.ClickException(str(e)) from e
+
+    # New graph instances run on a SLURM compute node and must be reachable
+    # from GraphClient discovery on the login node.
+    from imas_codex.cli.graph.server import _compute_neo4j_conf
+
+    (info.path / "conf" / "neo4j.conf").write_text(
+        _compute_neo4j_conf(
+            bolt_port=profile.bolt_port,
+            http_port=profile.http_port,
+        )
+    )
 
     # Point symlink to the new directory
     try:
