@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T14:15:59",
+  "updated": "2026-09-02T14:57:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2393,6 +2393,15 @@
           "gpt-5.6-sol": "01a05b79-8edc-7982-b4f7-1ea4c0eea1c8"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-yamlwriter",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "inv-attachreuse",
@@ -52207,9 +52216,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T121608010702-n-west-review-pr8-cut",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-review-pr8-cut",
+        "node_definition": {
+          "done_when": "crew/reports/west-review-pr8-cut.md records PR 7 closed with its comment, the sn release status output, the exact command and exit status, the new RC tag and object, the new PR URL and number with the published title and body containing its own preview address, the PR diff summary proving pure addition, all catalog CI checks including validate at conclusion success, the preview data.json showing CATEGORIES with more than one domain and zero uncategorized entries, a GraphClient census showing approved 0 and contested 0 unchanged, an upstream default-branch SHA read proving upstream untouched, and the frozen artifact committed",
+          "estimated_hours": null,
+          "goal": "Replace fork PR 7 with the WEST review candidate whose YAML carries physics_domain, by running 'imas-codex sn release --batch west_production_dd_paths --target auto' from this worktree (imas-standard-names 0.8.1 pinned, catalog checkout on a clean main, IMAS_CODEX_SN_ISNC bound) with -m, an agent-authored --pr-title naming the batch in words and a --pr-body-file of two to five decisions-only sentences linking REVIEWING.md, closing PR 7 beforehand with a one-sentence comment naming its successor, committing the frozen review artifact the cut writes under manifests/reviews",
+          "id": "n-west-review-pr8-cut",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T121608010702-n-west-review-pr8-cut/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "crew/reports/west-review-pr8-cut.md",
+            "imas_codex/standard_names/manifests/reviews"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-weststage3",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T12:16:13Z",
+        "completed_at": "2026-09-02T12:51:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2095,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2095,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d25ab519fefbe943c36af436f19ddbf54c85a8bc",
+        "commits": [
+          "6fdce118818648aa912bf47014393e93560fd89d"
+        ],
+        "changed_lines": {
+          "added": 2329,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn release --batch west_production_dd_paths --target auto; gh pr checks 8; preview data.json CATEGORIES",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:afdd9b026fc854519643ac4ea765fa351c92e5ec5557b37e3e031ac809f1e60a"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T121608010702-n-west-review-pr8-cut/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a05eae-37b8-7a01-a104-a336b09e2048",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15542016,
+            "cached_input_tokens_cumulative": 15542016,
+            "input_tokens": 15831301,
+            "input_tokens_cumulative": 15831301,
+            "output_tokens": 23704,
+            "output_tokens_cumulative": 23704,
+            "reasoning_output_tokens": 4553,
+            "reasoning_output_tokens_cumulative": 4553
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1324
+    "_version": 1326
   }
 }
