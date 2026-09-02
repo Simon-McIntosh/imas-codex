@@ -13,6 +13,7 @@ from imas_codex.graph.neo4j_ops import OffsiteCurrency
 from imas_codex.graph.offsite import (
     GraphCensus,
     OffsiteCountMismatch,
+    OffsitePushFailed,
     run_offsite_push_cycle,
 )
 
@@ -128,3 +129,36 @@ def test_count_mismatch_refuses_push_and_records_receipt(tmp_path, monkeypatch):
     assert receipt["counts_match"] is False
     assert receipt["live_census"]["node_count"] == 11
     assert receipt["archive_census"]["node_count"] == 10
+
+
+def test_upload_failure_records_archive_and_error_receipt(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        "imas_codex.graph.offsite.graph_archive_stamp", lambda created_at: "stamp"
+    )
+    counts = GraphCensus(11, 7, {"Facility": 2})
+    archive = _archive(tmp_path, counts)
+
+    def fail_upload(path: Path, stamp: str) -> str:
+        assert path == archive
+        assert stamp == "stamp"
+        raise RuntimeError("oras unavailable during upload preparation")
+
+    with pytest.raises(OffsitePushFailed) as caught:
+        run_offsite_push_cycle(
+            currency=_currency("stale"),
+            export_archive=lambda stamp: archive,
+            push_archive=fail_upload,
+            census=lambda: counts,
+            receipt_dir=tmp_path / "receipts",
+        )
+
+    receipt = json.loads(caught.value.result.receipt_path.read_text())
+    assert receipt["outcome"] == "failed"
+    assert receipt["archive_stamp"] == "stamp"
+    assert receipt["archive_path"] == str(archive)
+    assert receipt["archive_bytes"] == archive.stat().st_size
+    assert receipt["wall_time_seconds"] >= 0
+    assert receipt["counts_match"] is True
+    assert receipt["error"] == (
+        "RuntimeError: oras unavailable during upload preparation"
+    )

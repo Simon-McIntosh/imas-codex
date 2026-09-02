@@ -35,7 +35,9 @@ def _configure_schedule(
     monkeypatch.setattr(
         registry.shutil,
         "which",
-        lambda command: f"/usr/bin/{command}",
+        lambda command: (
+            "/opt/oras/bin/oras" if command == "oras" else f"/usr/bin/{command}"
+        ),
     )
     monkeypatch.setattr("platform.system", lambda: "Linux")
     monkeypatch.setattr("socket.getfqdn", lambda: "login.example.org")
@@ -62,6 +64,7 @@ def test_generated_service_and_timer_run_weekly_on_login_node() -> None:
     service = registry._push_schedule_service_text(
         Path("/srv/imas-codex"),
         uv_path="/usr/bin/uv",
+        oras_path="/opt/oras/bin/oras",
         hostname="login.example.org",
     )
     timer = registry._push_schedule_timer_text()
@@ -69,6 +72,7 @@ def test_generated_service_and_timer_run_weekly_on_login_node() -> None:
     assert "ConditionHost=login.example.org" in service
     assert "Type=oneshot" in service
     assert "WorkingDirectory=/srv/imas-codex" in service
+    assert 'Environment="PATH=/opt/oras/bin:' in service
     assert (
         "ExecStart=/usr/bin/uv run --no-sync --project /srv/imas-codex "
         "imas-codex graph push --cycle"
@@ -119,6 +123,25 @@ def test_schedule_install_writes_and_enables_timer(monkeypatch, tmp_path) -> Non
         ],
     ]
     assert "installed and enabled" in result.output
+
+
+def test_schedule_install_refuses_without_oras(monkeypatch, tmp_path) -> None:
+    service_file, timer_file, calls = _configure_schedule(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        registry.shutil,
+        "which",
+        lambda command: None if command == "oras" else f"/usr/bin/{command}",
+    )
+
+    result = CliRunner().invoke(graph_push, ["--schedule"])
+
+    assert result.exit_code != 0
+    assert (
+        "oras not found; cannot install the weekly graph push service" in result.output
+    )
+    assert not service_file.exists()
+    assert not timer_file.exists()
+    assert calls == []
 
 
 def test_schedule_status_uses_systemctl(monkeypatch, tmp_path) -> None:

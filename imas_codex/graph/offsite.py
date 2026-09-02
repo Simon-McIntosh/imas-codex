@@ -53,7 +53,7 @@ class GraphCensus:
 class OffsitePushResult:
     """Outcome and durable receipt path for one scheduled cycle."""
 
-    outcome: Literal["no_op", "pushed", "refused"]
+    outcome: Literal["no_op", "pushed", "refused", "failed"]
     receipt_path: Path
     archive_ref: str | None
     archive_bytes: int
@@ -67,6 +67,16 @@ class OffsiteCountMismatch(RuntimeError):
         super().__init__(
             f"archive census does not match the live graph; receipt: "
             f"{result.receipt_path}"
+        )
+        self.result = result
+
+
+class OffsitePushFailed(RuntimeError):
+    """An archive passed census verification but could not be uploaded."""
+
+    def __init__(self, result: OffsitePushResult, error: str):
+        super().__init__(
+            f"offsite upload failed: {error}; receipt: {result.receipt_path}"
         )
         self.result = result
 
@@ -121,6 +131,7 @@ def _receipt_payload(
     currency: OffsiteCurrency,
     live_census: GraphCensus | None,
     archive_census: GraphCensus | None,
+    error: str | None = None,
 ) -> dict[str, Any]:
     return {
         "schema": "imas-codex.offsite-push-receipt",
@@ -155,6 +166,7 @@ def _receipt_payload(
             if live_census and archive_census
             else None
         ),
+        "error": error,
     }
 
 
@@ -233,7 +245,30 @@ def run_offsite_push_cycle(
         result = OffsitePushResult("refused", receipt, None, archive_bytes, elapsed)
         raise OffsiteCountMismatch(result)
 
-    archive_ref = push_archive(archive_path, stamp)
+    try:
+        archive_ref = push_archive(archive_path, stamp)
+    except Exception as exc:
+        completed_at = clock()
+        elapsed = monotonic() - started
+        error = f"{type(exc).__name__}: {exc}"
+        payload = _receipt_payload(
+            outcome="failed",
+            stamp=stamp,
+            started_at=started_at,
+            completed_at=completed_at,
+            wall_time_seconds=elapsed,
+            archive_ref=None,
+            archive_path=archive_path,
+            archive_bytes=archive_bytes,
+            currency=currency,
+            live_census=live_census,
+            archive_census=archive_census,
+            error=error,
+        )
+        receipt = _write_receipt(receipt_dir, stamp, payload)
+        result = OffsitePushResult("failed", receipt, None, archive_bytes, elapsed)
+        raise OffsitePushFailed(result, error) from exc
+
     completed_at = clock()
     elapsed = monotonic() - started
     payload = _receipt_payload(
