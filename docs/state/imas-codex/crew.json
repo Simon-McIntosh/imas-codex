@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T17:12:42",
+  "updated": "2026-09-02T17:13:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -442,6 +442,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-cascade",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
+      },
+      {
         "id": "impl-catalog",
         "harness": "codex",
         "role": "implement",
@@ -735,6 +744,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-driftrefresh",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-dryrun",
@@ -1143,6 +1161,15 @@
         "role": "implement",
         "session_id": "01a01ee6-4099-71c0-991b-4ea213ed0d53",
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-ledgermethod",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-lexicalgates",
@@ -52976,6 +53003,6 @@
       }
     ],
     "holds": [],
-    "_version": 1341
+    "_version": 1344
   }
 }

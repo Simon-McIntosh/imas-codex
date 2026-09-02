@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -163,6 +163,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T134805682558-n-west-withheld-recovery" data-who="test-westrescore" data-when="2026-09-02T14:43:22Z">
     <div class="r-comment-body"><p>rescore of 13 reviewed names (1.40 USD): 1 accepted, 10 scored 0.97-1.00 but blocked by an accepted-descendant cascade rule, 2 scored 0.30; 4 resolution_unrecorded rows are an export-ledger method-recording gap; 2 governed successors drafted, 1 edit refused on a source-migration conflict, 1 rejected by grammar; docs drains not reached before the time fence; one degraded SNRun d435f0df left by an interrupted --edits review</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-20260902T1715-pr9-body-contract" data-who="reckon-ship" data-when="2026-09-02T17:15:00Z">
+    <div class="r-comment-body">PR body contract for the next candidate (lead's request 2026-09-02 that the exclusion accounting be honest): the body must state that of the 469 spreadsheet paths 114 are excluded by DD node category (55 metadata, 29 structural, 26 temporal coordinates, 4 fit or representation artifacts) with the ledger committed beside the manifest; that of the frozen names the withheld count and its reason groups (structural parents, names not yet accepted, quarantined, resolution unrecorded, grammar parse) follow in a later additive batch; link REVIEWING.md; the preview address is written by sn release. Five sentences at most; no entry enumeration. Root-cause fixes running in parallel: rescore acceptance blocked by accepted descendants, drift refresh demoting docs without re-queue, export ledger missing the winning docs-review method.</div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
