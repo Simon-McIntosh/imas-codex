@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T11:52:28",
+  "updated": "2026-09-02T12:05:32",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -51449,9 +51449,111 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T092422218955-n-release-gates-honesty",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-release-gates-honesty",
+        "node_definition": {
+          "done_when": "tests cover a link to a name absent from the graph (blocking on final), a link to an accepted-but-unpublished name (advisory, pruned in output, graph links untouched), Gate D producing zero rows when protected fields match and one specific-field row when they differ (or Gate D absent with its constant and tests removed), and Gate A collecting all failures; the export suites pass with command, exit status and log path recorded; a recorded 'sn release --batch west_production_dd_paths --dry-run' shows the reclassified Gate B and Gate D output; ruff clean; live graph not modified",
+          "estimated_hours": null,
+          "goal": "Make the catalog release gates report only actionable findings: Gate B classifies each dangling link as target-unknown-to-the-graph (a real defect, blocks final) versus target-known-but-unpublished (pruned from the exported copy only, advisory in every mode, expected to heal when the target publishes since links are re-derived from the graph at each export), Gate D either performs the real protected-field comparison against the ISNC checkout it is handed or is removed rather than emitting one uninformative 'verify' row per catalog-lineage name, Gate A runs the graph hygiene suite without -x so every failing test id is reported and its result is labelled graph-wide rather than batch",
+          "id": "n-release-gates-honesty",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092422218955-n-release-gates-honesty/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_gates.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-releasegates",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T09:24:26Z",
+        "completed_at": "2026-09-02T10:00:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2142,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2142,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "e8d5625ba4f3e38b636ae8ab3b0f55d9337c8901",
+        "commits": [
+          "94f050c1b6566a2bef7051f7afe6088f4c021bac"
+        ],
+        "changed_lines": {
+          "added": 5,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_export*.py; sn release --batch west_production_dd_paths --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092422218955-n-release-gates-honesty/logs/dry-run-attempts.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T092422218955-n-release-gates-honesty/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0616f-1e7d-70b3-98cd-dbd8120c5e82",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7942144,
+            "cached_input_tokens_cumulative": 7942144,
+            "input_tokens": 8171506,
+            "input_tokens_cumulative": 8171506,
+            "output_tokens": 15555,
+            "output_tokens_cumulative": 15555,
+            "reasoning_output_tokens": 4587,
+            "reasoning_output_tokens_cumulative": 4587
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1306
+    "_version": 1307
   }
 }
