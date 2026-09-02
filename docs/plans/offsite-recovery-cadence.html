@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="16">
-<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695">
+<meta name="plan-version" content="17">
+<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a">
 <meta name="plan-artifacts" content="/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203042577067-n-offsite-currency/live-status.txt,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T204535271634-n-offsite-push-job/logs/live-dry-run.log">
-<meta name="plan-impl" content="0.63">
+<meta name="plan-impl" content="0.7">
 </head>
 <body>
   <main class="plan-doc">
@@ -223,6 +223,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260902T080407772406-n-graph-push-schedule-login-node" data-who="impl-offsitepush" data-when="2026-09-02T08:17:25Z">
     <div class="r-comment-body"><p>graph push --schedule installs a host-pinned systemd user oneshot service plus weekly persistent timer on the login node running graph push --cycle; --schedule-status and --remove-schedule added; SLURM scheduling removed from the production path; 11/11 focused tests; dry-run renders both units with zero writes</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260902T0818-login-node-timer" data-who="reckon-ship" data-when="2026-09-02T08:18:00Z">
+    <div class="r-comment-body">The first real cycle (report a724ef57) failed in infrastructure, not code: SLURM job 1261097 on titan resolved api.github.com but could not open HTTPS and no proxy exists, so the cycle stopped in get_offsite_currency before any export; its self-resubmitted successor 1261098 was cancelled. Redesign landed at 2066a50a (merged in e07e6875's parent): graph push --schedule now writes a host-pinned systemd user oneshot service and a weekly persistent timer on the login node (the same pattern as the embed service install), running graph push --cycle where the network allows; --schedule-status and --remove-schedule added; --schedule --dry-run renders both units with zero writes; the SLURM scheduling path is gone. Remaining before the first real cycle: repoint the legacy offsite CLI test module, then install the timer and run one cycle.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>
