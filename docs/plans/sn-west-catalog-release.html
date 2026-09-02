@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="41">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -181,6 +181,12 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T162432991668-n-rescore-identity-by-name" data-who="impl-cascade" data-when="2026-09-02T16:37:09Z">
     <div class="r-comment-body"><p>identity-preserving review is recognised by the unchanged spelling, not the run-id prefix, so a passing rescore accepts over accepted descendants even after a scoped drain restamps run_id; rename cascades with conflicts still refused</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T162609352552-n-kind-census-bases" data-who="inv-kindbases" data-when="2026-09-02T16:44:10Z">
+    <div class="r-comment-body"><p>173 kind disagreements grouped by ISN base: 125 are stale stored kinds the rule corrects (36 scalar-to-vector, 89 vector-to-scalar); 45 come from three ISN bases misregistered as scalar (momentum, torque, torque_density) which must become vector; 2 are scalar binary ratios; 1 unregistered unit-vector token</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-20260902T1845-kind-census" data-who="reckon-ship" data-when="2026-09-02T18:45:00Z">
+    <div class="r-comment-body">Kind census verdict (report ~/.config/reckon/crew/reports/kind-census-bases.md). The lead asked why flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude was a tensor: it is a scalar (DD gm3, FLT_1D, one averaged metric component per surface); the stored kind was a compose-time snapshot from an older rule, never re-derived. The census of all 173 accepted-name disagreements between stored kind and the current derive_kind rule splits: 125 are stale stored kinds the rule corrects (36 scalar-to-vector such as unprojected magnetic_field and current_density; 89 vector-to-scalar such as diffusivity, pressure, flux, source); 45 come from three ISN base declarations that are physically wrong (momentum, torque, torque_density registered scalar; all three are vectors); 2 are scalar binary ratios; 1 is an unregistered unit-vector token. So the merged kind-refresh (stored kind follows the rule at export and reconcile) is safe to run only after the three ISN bases are corrected and pinned; until then a reconcile would flip 45 correct vectors to scalar. The ISN base correction is dispatched; the reconcile fires at sn run startup, and no sn run has executed against the live graph since the kind-refresh merge.</div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>

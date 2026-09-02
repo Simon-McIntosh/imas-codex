@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T18:37:34",
+  "updated": "2026-09-02T18:44:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1106,6 +1106,15 @@
         "role": "implement",
         "session_id": "01a035a5-6631-7a90-a07a-ee711c04649d",
         "created": "2026-08-24"
+      },
+      {
+        "id": "impl-isnbases",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-isndomain",
@@ -53408,9 +53417,110 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T162609352552-n-kind-census-bases",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-kind-census-bases",
+        "node_definition": {
+          "done_when": "the report /home/ITER/mcintos/.config/reckon/crew/reports/kind-census-bases.md exists with one table per direction whose rows are parsed base, registered kind, name count, and proposed correction (vector, scalar, or registry-correct meaning the stored kind was wrong), whose per-direction row counts sum to exactly 135 and 38, a closing line stating how many of the 173 names would change stored kind under the corrected registry, and a positive-control row showing the parse returned vector for magnetic_field",
+          "estimated_hours": null,
+          "goal": "Explain the 135 vector-to-scalar and 38 scalar-to-vector kind disagreements listed in crew/reports/kind-tensor-misclassification.md by grouping each name under the ISN physical_base its parse returns together with that base's registered structural kind in the installed imas-standard-names 0.8.2, producing the precise list of bases whose registered kind must change for derive_kind to agree with physics (a torque density is a vector, an unprojected magnetic field is a vector)",
+          "id": "n-kind-census-bases",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T162609352552-n-kind-census-bases/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "8m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/kind-census-bases.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-kindbases",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-02T16:27:30Z",
+        "completed_at": "2026-09-02T16:44:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 1000,
+        "stalled": true,
+        "time_budget": "8m",
+        "base_sha": "6be4fce3e7793126adb1b059b6f070a349b38e25",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "strict parse plus load_physical_bases over the 173 names; row sums 38 and 135; magnetic_field positive control",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "sha256:01fd373a3a63571a120b101f9ecd9e8c1c14c15a2a778b2e39207d938eb458bb"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T162609352552-n-kind-census-bases/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a062f2-724f-7500-b556-ad856c972ba9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1670912,
+            "cached_input_tokens_cumulative": 1670912,
+            "input_tokens": 1786921,
+            "input_tokens_cumulative": 1786921,
+            "output_tokens": 6140,
+            "output_tokens_cumulative": 6140,
+            "reasoning_output_tokens": 1660,
+            "reasoning_output_tokens_cumulative": 1660
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "read-only investigation; deliverable is ~/.config/reckon/crew/reports/kind-census-bases.md",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1356
+    "_version": 1358
   }
 }
