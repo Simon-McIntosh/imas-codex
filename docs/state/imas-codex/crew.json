@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T23:42:30",
+  "updated": "2026-09-03T00:14:00",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -54156,6 +54156,115 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T214552417010-n-west-recut-readable",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-recut-readable",
+        "node_definition": {
+          "done_when": "the catalog fork carries one open review PR whose head is a fresh RC tag, whose added catalog YAML folds every description across wrapped lines none longer than 88 characters, whose entry for flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude records kind scalar, whose every entry carries a non-empty physics_domain, with catalog CI validate plus build green on that PR, with PR 10 closed, with the published count, withheld count, exclusion ledger path, PR number recorded in the manifest",
+          "estimated_hours": 2.0,
+          "goal": "Recut the WEST review candidate on the catalog fork from imas_codex/standard_names/manifests/west_production_dd_paths.yaml with uv run --no-sync imas-codex sn release --batch pointed at that manifest, targeting the fork, opening the review PR with an explicit five-sentence body file stating that of the 469 spreadsheet paths 114 are excluded by DD node category (55 metadata, 29 structural, 26 temporal coordinates, 4 fit or representation artifacts) with the ledger committed beside the manifest, that the withheld frozen names follow in a later additive batch under their reason groups, linking REVIEWING.md, leaving the preview address to be written by sn release, closing the superseded candidate PR 10 with a comment naming the replacement",
+          "id": "n-west-recut-readable",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-readable.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "write_paths": [
+            "imas_codex/standard_names/manifests/reviews",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-readable.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-westrecut",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T21:45:59Z",
+        "completed_at": "2026-09-02T22:12:44.338Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1600,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1605,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7ed08e562d9d00bfd81e8de6ab51ebfedab6f6dd",
+        "commits": [
+          "7a21780a09034364f65749f9e4f9c84bab0028d6"
+        ],
+        "changed_lines": {
+          "added": 2227,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "gh pr checks 11 --repo simon-mcintosh/imas-standard-names-catalog",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-readable.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-readable.json",
+        "scope_changed": false,
+        "session_id": "fd2165af-c502-4baa-a6b6-fce61cb2999d",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 134658,
+            "cache_creation_input_tokens_cumulative": 134658,
+            "cache_read_input_tokens": 5548763,
+            "cache_read_input_tokens_cumulative": 5548763,
+            "inference_geo": "not_available",
+            "input_tokens": 102,
+            "input_tokens_cumulative": 102,
+            "output_tokens": 25257,
+            "output_tokens_cumulative": 25257,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.752896500000001,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.752896500000001
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -54202,6 +54311,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1373
+    "_version": 1374
   }
 }
