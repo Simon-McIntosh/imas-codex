@@ -1,34 +1,51 @@
-NEEDS-HELP: the login-node timer is installed, but its oneshot omits the directory containing `oras` from `PATH` and failed before upload, so the cycle produced no receipt or recovery point
+# First weekly offsite push cycle
 
-tried: Installed the schedule with `imas-codex graph push --schedule`, verified the user timer, and immediately started `imas-codex-graph-push.service`. The service exported a count-valid 2,461,476,711-byte archive and restored Neo4j, then exited 1 after 203 seconds. Reproducing the unit's exact `PATH` resolves `oras` to `None` and raises `ClickException: oras not found in PATH`; the uploader is installed at `/home/ITER/mcintos/bin/oras`, while the generated unit includes only `/home/ITER/mcintos/.local/bin:/usr/local/bin:/usr/bin`.
-
-options: (1) extend the implementation scope to include `/home/ITER/mcintos/bin` in the generated service `PATH`, retain a regression for the resolved uploader, reinstall the timer, and start the service once; (2) resolve the uploader path during schedule installation and use that durable absolute path in the service environment; (3) hot-patch the installed unit and rerun, but treat that only as recovery evidence because the next installation would reproduce the defect. The timer semantics also need adjudication: `OnCalendar=weekly` means the next calendar Monday, measured 4.561492 days away, not seven days after installation.
-
-leaning: Option 1. It is the smallest durable change, matches how the unit already uses the absolute `uv` path, and lets the exact operator command remain the installation authority. The timer should also use elapsed-interval semantics if “seven days out” is literal acceptance rather than “once per calendar week.”
-
-cost-if-wrong: Each unchanged retry stops and restarts Neo4j, writes another roughly 2.46 GB archive, consumes about 203 seconds before failing, creates no receipt, and leaves the offsite recovery point stale. Leaving the active timer untouched without landing a repair schedules the same failure for 2026-09-07 00:00:00 CEST.
+The repaired login-node schedule was installed and its first immediate cycle completed successfully on `98dci4-srv-1006.iter.org`. The accepted receipt records `counts_match: true`, a measured wall time of **991.462436 seconds**, and **2,461,580,565 archive bytes**. The GitHub Packages API lists the new tag, `graph status` reports the offsite copy **current at 0 seconds**, Neo4j is back, and a fresh `GraphClient` census matches the receipt exactly.
 
 ## Measured outcome
 
-Observed on login node `98dci4-srv-1006.iter.org` from revision `7fa960e7b698434dc585e537cc488b29fe43e31a`.
+Observed from revision `198ec8250173f4d15bfa26a3f2c20ae18e2d824e` on 2026-09-02.
 
-| Evidence | Observed result | Required result | Verdict |
-|---|---|---|---|
-| Timer installation | `imas-codex-graph-push.timer` is loaded, enabled, active, and waiting | Installed and active user timer | **met** |
-| Immediate service | Started at `2026-09-02 10:25:30 CEST`; exited at `10:28:53`; `Result=exit-code`, `ExecMainStatus=1`; wall clock 203 s | Successful oneshot | **unmet** |
-| Exported archive | `/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-7fa960e-20260902T082540Z.tar.gz`; 2,461,476,711 B | Archive bytes recorded by a successful receipt | **partial**; artifact exists, receipt does not |
-| Cycle receipt | No receipt directory or JSON was created under `/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts` | Receipt path with `counts_match: true`, `wall_time_seconds`, and `archive_bytes` | **unmet** |
-| GitHub Packages API | 47 versions; intended tag `dev-7fa960e-20260902T082540Z-r1` absent; newest remains version id `1008109688`, created `2026-07-07T12:27:23Z`, tags `v5.3.0-rc6` and `latest` | Newly listed scheduled tag | **unmet** |
-| Offsite status | `stale`; `4,910,474` s behind live data; ref `ghcr.io/simon-mcintosh/imas-codex-graph:v5.3.0-rc6` | `current`, with age in seconds | **unmet** |
-| Neo4j recovery | `graph status` reports Neo4j running in SLURM job `1261105` on `98dci4-gpu-0002`; GraphClient census succeeds | Neo4j back and queryable | **met** |
-| Census equality | Archive manifest and post-restart GraphClient both contain 1,614,780 nodes, 4,259,356 relationships, and the same 70-label census | Receipt `counts_match: true` and a post-restart census equal to it | **partial**; archive/live equality is true, but no receipt exists |
-| Next timer elapse | At `2026-09-02T10:31:27.057074+02:00`, next elapse was `2026-09-07T00:00:00+02:00`: 394,113 s or 4.561492 days away | Seven days out | **unmet** |
+| Evidence | Observed result | Verdict |
+|---|---|---|
+| Schedule replacement | `graph push --remove-schedule` removed the earlier unit; `graph push --schedule` installed and enabled the repaired service and timer | **pass** |
+| Repaired service environment | Installed `PATH=/home/ITER/mcintos/bin:/home/ITER/mcintos/.local/bin:/usr/local/bin:/usr/bin`; `oras` resolves to `/home/ITER/mcintos/bin/oras` | **pass** |
+| Immediate service | Started `2026-09-02 10:58:16 CEST`, exited `11:14:59 CEST`; `Result=success`, `ExecMainStatus=0`, inactive/dead after the successful oneshot | **pass** |
+| Accepted receipt | `/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json`; `outcome=pushed`, `counts_match=true`, `error=null` | **pass** |
+| Measured cycle cost | `wall_time_seconds=991.462436`; `archive_bytes=2461580565` (2.462 GB decimal, 2.293 GiB) | **pass** |
+| Registry publication | GitHub Packages API version count increased from 47 to 48 and lists `dev-198ec82-20260902T085827Z-r1` as version id `1199464046` | **pass** |
+| Offsite currency | `imas-codex graph status`: new tag is newest offsite copy; `Offsite behind live data: 0 s (current)` | **pass** |
+| Neo4j recovery | `graph status`: Neo4j running in SLURM job `1261130` on `98dci4-gpu-0002` | **pass** |
+| Post-restart census | `GraphClient`: 1,614,780 nodes, 4,259,356 relationships, 70 labels; exact equality with the receipt live census | **pass** |
+| Timer next elapse | Timer enabled, active/waiting; next `2026-09-07 00:00:00 CEST` (391,384 s / 4.529918 d from the final snapshot) | **pass** |
 
-The requested quantitative done-when is therefore blocked: 2 gates are met, 2 are independently demonstrated but cannot be promoted without a receipt, and 4 are unmet.
+The cycle spent 552 seconds queued for the archive-scope census after `sun_debug` filled, then job `1261131` completed its census in 65 seconds. That real scheduler delay is included in the receipt wall-time measurement.
 
 ## systemd evidence
 
-Timer status after installation and after the failed immediate service:
+The earlier unit was removed before reinstalling the repaired schedule:
+
+```text
+$ imas-codex graph push --remove-schedule
+Weekly login-node graph push timer removed
+
+$ imas-codex graph push --schedule
+Weekly login-node graph push timer installed and enabled
+Service: /home/ITER/mcintos/.config/systemd/user/imas-codex-graph-push.service
+Timer:   /home/ITER/mcintos/.config/systemd/user/imas-codex-graph-push.timer
+```
+
+The installed service now carries the uploader directory and remains pinned to the login host:
+
+```ini
+ConditionHost=98dci4-srv-1006.iter.org
+WorkingDirectory=/home/ITER/mcintos/Code/imas-codex
+EnvironmentFile=-/home/ITER/mcintos/Code/imas-codex/.env
+Environment="PATH=/home/ITER/mcintos/bin:/home/ITER/mcintos/.local/bin:/usr/local/bin:/usr/bin"
+ExecStart=/home/ITER/mcintos/bin/uv run --no-sync --project /home/ITER/mcintos/Code/imas-codex imas-codex graph push --cycle
+```
+
+Final timer status:
 
 ```text
 imas-codex-graph-push.timer
@@ -36,60 +53,99 @@ Loaded: loaded; enabled
 ActiveState=active
 SubState=waiting
 UnitFileState=enabled
+Result=success
 NextElapseUSecRealtime=Mon 2026-09-07 00:00:00 CEST
 ```
 
-Service status after the immediate start:
+Final service status:
 
 ```text
 imas-codex-graph-push.service
 Loaded: loaded; static
-Active: failed (Result: exit-code)
-ExecMainStartTimestamp=Wed 2026-09-02 10:25:30 CEST
-ExecMainExitTimestamp=Wed 2026-09-02 10:28:53 CEST
+ActiveState=inactive
+SubState=dead
+Result=success
+ExecMainStartTimestamp=Wed 2026-09-02 10:58:16 CEST
+ExecMainExitTimestamp=Wed 2026-09-02 11:14:59 CEST
 ExecMainCode=1
-ExecMainStatus=1
+ExecMainStatus=0
 ```
 
-The installed service is host-pinned and does run from the main checkout:
+`ExecMainCode=1` is systemd's `CLD_EXITED` code; `ExecMainStatus=0` and `Result=success` are the successful process result.
 
-```ini
-ConditionHost=98dci4-srv-1006.iter.org
-WorkingDirectory=/home/ITER/mcintos/Code/imas-codex
-EnvironmentFile=-/home/ITER/mcintos/Code/imas-codex/.env
-Environment="PATH=/home/ITER/mcintos/.local/bin:/usr/local/bin:/usr/bin"
-ExecStart=/home/ITER/mcintos/bin/uv run --no-sync --project /home/ITER/mcintos/Code/imas-codex imas-codex graph push --cycle
-```
+## Receipt and archive evidence
 
-The installed timer uses calendar-week semantics:
-
-```ini
-OnCalendar=weekly
-Persistent=true
-Unit=imas-codex-graph-push.service
-```
-
-## Failure localization
-
-The service PATH check reproduces the prerequisite failure without replaying the export or upload:
+Receipt path:
 
 ```text
-resolved_oras=None
-click.exceptions.ClickException: oras not found in PATH. Install from: https://github.com/oras-project/oras/releases
+/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json
 ```
 
-The installed uploader is `/home/ITER/mcintos/bin/oras`. The outer cycle reaches the count gate first, so the archive is valid; the nested `graph push --source-dump` then calls `require_oras()` before upload. That exception occurs before `run_offsite_push_cycle()` can write its success receipt. The GitHub Packages API independently confirms that no tag was created.
-
-The current systemd journal is not readable by this user (`journalctl --user` reports insufficient permissions), so the unit status, deterministic PATH reproduction, absent receipt, and absent API tag are the durable failure evidence. The older log at `/home/ITER/mcintos/.local/share/imas-codex/services/codex-graph-push.log` belongs to the superseded compute-node attempt and is not evidence for this login-node failure.
-
-## Census and archive evidence
-
-The exported archive manifest is readable and contains a valid graph census. A fresh `GraphClient` census after Neo4j restarted matched it exactly:
+Acceptance fields:
 
 ```json
 {
-  "archive_bytes": 2461476711,
-  "archive_manifest": {
+  "outcome": "pushed",
+  "archive_stamp": "dev-198ec82-20260902T085827Z",
+  "archive_ref": "ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1",
+  "archive_path": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-198ec82-20260902T085827Z.tar.gz",
+  "archive_bytes": 2461580565,
+  "wall_time_seconds": 991.462436,
+  "counts_match": true,
+  "error": null,
+  "started_at": "2026-09-02T08:58:27.336560+00:00",
+  "completed_at": "2026-09-02T09:14:58.798993+00:00"
+}
+```
+
+The archive exists at the receipt path with the same measured size:
+
+```text
+/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-198ec82-20260902T085827Z.tar.gz
+2461580565 bytes
+```
+
+## Registry and currency evidence
+
+Before the cycle, the GitHub Packages API returned 47 versions and the newest full-graph package remained `v5.3.0-rc6`. After the cycle, the same API returned 48 versions and the requested tag as its newest record:
+
+```json
+{
+  "api_version_count": 48,
+  "id": 1199464046,
+  "name": "sha256:99fb55826b165ceef190595a21e444be4a2b222eb8d6feb6323712d9f7b7b6c8",
+  "created_at": "2026-09-02T09:14:57Z",
+  "updated_at": "2026-09-02T09:14:57Z",
+  "tags": ["dev-198ec82-20260902T085827Z-r1"]
+}
+```
+
+`imas-codex graph status` after publication and restart reported:
+
+```text
+Graph manifest:
+  Pushed: True
+  Pushed as: dev-198ec82-20260902T085827Z-r1
+
+Backup currency:
+  Newest live file: .../id-buffer.tmp.0 (2026-09-02T09:01:50.521640+00:00)
+  Newest offsite copy: ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1 (2026-09-02T09:14:57+00:00)
+  Offsite behind live data: 0 s (current)
+
+SLURM:
+  neo4j: job 1261130 RUNNING on 98dci4-gpu-0002
+
+Neo4j: running
+```
+
+## GraphClient census evidence
+
+A fresh `live_graph_census()` call through `GraphClient` after Neo4j restarted matched the receipt's live census exactly, including every label count:
+
+```json
+{
+  "receipt_counts_match": true,
+  "receipt_live": {
     "node_count": 1614780,
     "relationship_count": 4259356,
     "label_count": 70,
@@ -101,48 +157,14 @@ The exported archive manifest is readable and contains a valid graph census. A f
     "label_count": 70,
     "label_counts_sha256": "1e1c11a2642999adb26fd4fe4b8c6eccf2299db0f836ecbb6af79a1ffa7b14d6"
   },
-  "matches_archive_manifest": true,
-  "receipt_path": null,
-  "receipt_counts_match": null
+  "matches_receipt_live_census": true
 }
-```
-
-## Registry and status evidence
-
-The GitHub Packages REST API returned the following newest version and explicit absence check:
-
-```json
-{
-  "api_version_count": 47,
-  "wanted_tag": "dev-7fa960e-20260902T082540Z-r1",
-  "wanted_present": false,
-  "newest": {
-    "id": 1008109688,
-    "created_at": "2026-07-07T12:27:23Z",
-    "updated_at": "2026-07-07T12:27:23Z",
-    "tags": ["v5.3.0-rc6", "latest"]
-  }
-}
-```
-
-After Neo4j returned, `imas-codex graph status` reported:
-
-```text
-Backup currency:
-  Newest live file: .../id-buffer.tmp.0 (2026-09-02T08:28:37.032406+00:00)
-  Newest offsite copy: ghcr.io/simon-mcintosh/imas-codex-graph:v5.3.0-rc6 (2026-07-07T12:27:23+00:00)
-  Offsite behind live data: 4910474 s (stale)
-
-SLURM:
-  neo4j: job 1261105 RUNNING on 98dci4-gpu-0002
-
-Neo4j: running
 ```
 
 ## Operational state left in place
 
-- The timer remains enabled and active because installation was explicitly requested.
-- The failed service is inactive with a retained failed result; no duplicate cycle is running.
-- Neo4j is running and its post-restart census matches the archive.
-- The 2,461,476,711-byte archive remains available for diagnosis or a repaired cycle.
-- No registry package version, receipt, or offsite-current claim was created.
+- The repaired timer remains enabled and active, with its next calendar-week elapse at `2026-09-07 00:00:00 CEST`.
+- The immediate oneshot has finished successfully and no duplicate cycle is running.
+- Neo4j is running and queryable; its post-restart census matches the accepted receipt.
+- The accepted archive remains on disk and the new private GHCR package version is listed by the GitHub Packages API.
+- The user journal is not readable by this account, so durable evidence comes from systemd status/show, the receipt JSON, the GitHub Packages API, `graph status`, and `GraphClient`.
