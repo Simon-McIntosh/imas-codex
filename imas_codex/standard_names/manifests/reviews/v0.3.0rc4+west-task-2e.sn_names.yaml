@@ -1,0 +1,2185 @@
+kind: sn_names
+schema_version: 1
+name: review-v0-3-0rc4-west-task-2e
+rc_version: v0.3.0rc4+west-task-2e
+batch_label: west-task-2e
+minted_from: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260901/n-west-review-pr8-cut/imas_codex/standard_names/manifests/west_production_dd_paths.yaml
+minted_at: '2026-09-02T12:32:38.508490+00:00'
+names:
+- accumulated_deposited_energy_of_plasma_facing_component
+- accumulated_total_particle_count_due_to_gas_injection
+- alfven_time
+- area_of_diagnostic_aperture
+- area_of_poloidal_magnetic_field_probe
+- area_of_toroidal_magnetic_field_probe
+- argon_density_at_divertor_target
+- argon_density_at_magnetic_axis
+- atomic_count
+- atomic_mass
+- atomic_number
+- beryllium_density_at_divertor_target
+- beryllium_density_at_magnetic_axis
+- beryllium_density_at_plasma_boundary
+- beta
+- boron_density_at_divertor_target
+- boron_density_at_magnetic_axis
+- boron_density_at_plasma_boundary
+- breakdown_initial_time
+- breakdown_magnetic_field
+- capacitance_of_ion_cyclotron_heating_antenna
+- carbon_density_at_divertor_target
+- carbon_density_at_magnetic_axis
+- carbon_density_at_plasma_boundary
+- cold_neutral_fraction
+- cold_neutral_temperature
+- coolant_mass
+- coolant_temperature_at_inlet
+- coolant_temperature_at_outlet
+- coolant_transit_time_of_plant_component_port
+- current_of_passive_loop
+- density_at_divertor_target
+- density_at_magnetic_axis
+- density_at_plasma_boundary
+- derivative_with_respect_to_normalized_poloidal_flux_coordinate_of_area_of_flux_surface
+- derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_volume_of_flux_surface
+- derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface
+- derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface
+- deuterium_density_at_divertor_target
+- deuterium_density_at_magnetic_axis
+- deuterium_density_at_plasma_boundary
+- deuterium_deuterium_neutron_flux
+- deuterium_tritium_density_at_divertor_target
+- deuterium_tritium_density_at_magnetic_axis
+- deuterium_tritium_density_at_plasma_boundary
+- difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function
+- effective_charge
+- effective_turn_count_of_coil_conductor_element
+- effective_turn_count_of_passive_loop
+- electron_density
+- electron_density_at_divertor_target
+- electron_density_at_magnetic_axis
+- electron_density_at_plasma_boundary
+- electron_pressure
+- electron_temperature
+- electron_temperature_at_divertor_target
+- electron_temperature_at_magnetic_axis
+- elongation_of_flux_surface
+- elongation_of_plasma_boundary
+- energy_confinement_enhancement_factor
+- energy_flux_at_divertor_target
+- equilibrium_weight_of_flux_loop
+- equilibrium_weight_of_poloidal_magnetic_field_probe
+- etendue_of_hard_xray_detector
+- etendue_of_spectrometer_channel
+- external_magnetic_flux
+- faraday_angle
+- fast_electron_density
+- fast_electron_pressure
+- flux_surface_averaged_current_density_due_to_wave_driven_current_drive
+- flux_surface_averaged_electron_density_at_plasma_boundary
+- flux_surface_averaged_inverse_of_major_radius
+- flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude
+- flux_surface_averaged_inverse_of_square_of_major_radius
+- flux_surface_averaged_magnetic_field_magnitude
+- flux_surface_averaged_major_radius
+- flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude
+- flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+- flux_surface_averaged_square_of_magnetic_field_magnitude
+- flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude
+- flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude
+- forward_power_of_ion_cyclotron_heating_antenna
+- forward_wave_phase_of_ion_cyclotron_heating_antenna
+- frequency_of_ion_cyclotron_heating_antenna
+- frequency_of_wave_diagnostic_channel
+- gap_at_outboard_midplane
+- gas_flow
+- greenwald_density
+- hard_xray_brightness
+- hard_xray_emissivity
+- height_of_poloidal_field_coil
+- helium_3_density_at_divertor_target
+- helium_3_density_at_magnetic_axis
+- helium_3_density_at_plasma_boundary
+- helium_4_density_at_divertor_target
+- helium_4_density_at_magnetic_axis
+- helium_4_density_at_plasma_boundary
+- hot_neutral_fraction
+- hot_neutral_temperature
+- hydrogen_density_at_divertor_target
+- hydrogen_density_at_magnetic_axis
+- hydrogen_density_at_plasma_boundary
+- incident_soft_xray_radiance
+- initial_polarization_ellipticity_of_polarimeter_beam
+- inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width
+- intensity_at_spectral_line
+- inverse_of_major_radius
+- inverse_of_square_of_magnetic_field_magnitude
+- inverse_of_square_of_major_radius
+- ion_atomic_mass
+- ion_current_of_mass_spectrometer_channel
+- ion_density_at_plasma_boundary
+- ion_temperature_at_divertor_target
+- ipb98y2_confinement_time
+- iron_density_at_divertor_target
+- iron_density_at_magnetic_axis
+- iron_density_at_plasma_boundary
+- krypton_density_at_divertor_target
+- krypton_density_at_magnetic_axis
+- krypton_density_at_plasma_boundary
+- launched_power_of_lower_hybrid_antenna
+- length_of_interferometer_beam
+- length_of_poloidal_magnetic_field_probe
+- length_of_toroidal_magnetic_field_probe
+- line_averaged_effective_charge
+- line_averaged_electron_density
+- line_averaged_electron_temperature
+- line_averaged_hydrogen_density
+- line_integrated_electron_number_density
+- line_integrated_spectral_wave_opacity_at_ece_channel_emission_position
+- lithium_density_at_divertor_target
+- lithium_density_at_magnetic_axis
+- lithium_density_at_plasma_boundary
+- logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel
+- loop_voltage_at_plasma_boundary
+- lower_bound_photon_energy
+- lower_triangularity_of_flux_surface
+- lower_triangularity_of_plasma_boundary
+- lower_wavelength_of_filter
+- magnetic_field
+- magnetic_field_at_pedestal_top_low_field_side
+- magnetic_flux
+- magnetic_flux_due_to_diamagnetic_drift
+- magnetic_shear_at_flux_surface
+- maximum_gas_flow
+- maximum_magnetic_field
+- maximum_magnetic_field_magnitude
+- maximum_of_energy_flux_at_divertor_target
+- mhd_energy
+- minimum_gas_flow
+- minimum_over_flux_surface_magnetic_field_magnitude
+- minimum_safety_factor
+- minor_radius_of_plasma_boundary
+- motional_stark_photon_radiance_at_spectral_line
+- neon_density_at_divertor_target
+- neon_density_at_magnetic_axis
+- neon_density_at_plasma_boundary
+- neutral_species_atomic_mass
+- neutral_temperature
+- neutron_flux
+- nitrogen_density_at_divertor_target
+- nitrogen_density_at_magnetic_axis
+- nitrogen_density_at_plasma_boundary
+- non_axisymmetric_magnetic_field
+- normalized_plasma_internal_inductance
+- normalized_poloidal_flux_coordinate
+- normalized_poloidal_flux_coordinate_at_measurement_position
+- normalized_poloidal_flux_coordinate_at_minimum_safety_factor
+- normalized_poloidal_flux_coordinate_of_pedestal
+- normalized_poloidal_flux_coordinate_of_plasma_boundary
+- normalized_toroidal_flux_coordinate
+- normalized_toroidal_flux_coordinate_at_measurement_position
+- normalized_toroidal_flux_coordinate_at_minimum_safety_factor
+- normalized_toroidal_plasma_beta
+- oxygen_density_at_divertor_target
+- oxygen_density_at_magnetic_axis
+- oxygen_density_at_plasma_boundary
+- parallel_flux_surface_averaged_current_density_due_to_wave_driven_current_drive
+- parallel_magnetic_field
+- per_toroidal_and_poloidal_mode_number_launched_power_of_lower_hybrid_antenna
+- per_toroidal_mode_launched_power_of_lower_hybrid_antenna
+- perturbed_plasma_pressure
+- perturbed_vacuum_magnetic_field
+- phase_of_ion_cyclotron_heating_antenna
+- photon_radiance_at_spectral_line
+- plasma_beta
+- plasma_current
+- plasma_magnetic_field
+- plasma_pressure
+- plasma_pressure_imaginary_part
+- plasma_pressure_real_part
+- polarization_ellipticity_of_polarimeter_beam
+- poloidal_angle_of_flux_surface
+- poloidal_angle_of_measurement_position
+- poloidal_angle_of_toroidal_magnetic_field_probe
+- poloidal_beta
+- poloidal_current_function
+- poloidal_length_of_flux_surface
+- poloidal_magnetic_field
+- poloidal_magnetic_flux
+- poloidal_magnetic_flux_at_flux_surface
+- poloidal_magnetic_flux_at_magnetic_axis
+- poloidal_magnetic_flux_at_measurement_position
+- poloidal_magnetic_flux_at_plasma_boundary
+- poloidal_magnetic_flux_of_flux_loop
+- poloidal_plane_cross_sectional_area_of_flux_surface
+- poloidal_plane_cross_sectional_area_of_plasma_boundary
+- power_due_to_ion_cyclotron_heating
+- power_of_soft_xray_detector
+- pressure_of_ion_cyclotron_heating_antenna
+- product_of_poloidal_current_function_and_derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_poloidal_current_function
+- radial_coordinate_at_inboard_midplane
+- radial_coordinate_at_outboard_midplane
+- radial_coordinate_of_camera
+- radial_coordinate_of_conductor_cross_section
+- radial_coordinate_of_detector_pixel
+- radial_coordinate_of_flux_loop
+- radial_coordinate_of_geometric_axis
+- radial_coordinate_of_line_of_sight
+- radial_coordinate_of_magnetic_axis
+- radial_coordinate_of_measurement_position
+- radial_coordinate_of_poloidal_magnetic_field_probe
+- radial_coordinate_of_strike_point
+- radial_coordinate_of_x_point
+- radial_derivative_of_poloidal_magnetic_flux
+- radial_magnetic_field
+- radial_outline_of_antenna_strap
+- radial_outline_of_limiter_tile
+- radial_outline_of_plasma_boundary
+- radial_outline_of_wall
+- radiated_power_over_core_region
+- radiative_temperature_at_ece_channel
+- radiative_temperature_at_magnetic_axis
+- ratio_of_coolant_mass_to_time
+- ratio_of_electron_temperature_at_magnetic_axis_to_volume_averaged_electron_temperature
+- ratio_of_ion_density_to_electron_density
+- ratio_of_iron_density_to_electron_density
+- ratio_of_line_averaged_electron_density_to_greenwald_density
+- ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density
+- ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope
+- ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude
+- ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+- ratio_of_total_ion_density_to_electron_density
+- ratio_of_volume_averaged_argon_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_beryllium_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_deuterium_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_deuterium_tritium_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_helium_3_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_helium_4_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_krypton_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_neon_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_nitrogen_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_tritium_density_to_volume_averaged_electron_density
+- ratio_of_volume_averaged_tungsten_density_to_volume_averaged_electron_density
+- reference_magnetic_field
+- reference_major_radius
+- reflected_phase_of_ion_cyclotron_heating_antenna
+- reflected_power_of_ion_cyclotron_heating_antenna
+- root_mean_square_of_wave_current_of_antenna_strap
+- safety_factor
+- safety_factor_at_magnetic_axis
+- safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95
+- spectral_bremsstrahlung_radiance
+- spectral_calibration_factor_at_line_of_sight
+- spectral_etendue_of_spectrometer_channel
+- spectral_flux_of_spectrometer_channel
+- spectral_radiance
+- spectral_signal_to_noise_ratio_of_spectrometer_channel
+- spectral_wavelength_of_optical_element
+- square_of_magnetic_field_magnitude
+- square_of_toroidal_flux_coordinate_gradient_magnitude
+- surface_area_of_flux_surface
+- temperature_at_divertor_target
+- temperature_at_magnetic_axis
+- temperature_of_soft_xray_detector
+- tendency_of_derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface
+- thermal_electron_density
+- thermal_electron_pressure_at_post_sawtooth_crash
+- thermal_plasma_pressure
+- thickness_of_filter
+- time
+- toroidal_angle_of_antenna_strap
+- toroidal_angle_of_measurement_position
+- toroidal_angle_of_poloidal_magnetic_field_probe
+- toroidal_angle_of_toroidal_magnetic_field_probe
+- toroidal_angular_width_of_limiter_tile
+- toroidal_beta
+- toroidal_coordinate_of_aperture
+- toroidal_coordinate_of_camera
+- toroidal_coordinate_of_detector_pixel
+- toroidal_coordinate_of_line_of_sight
+- toroidal_flux_coordinate
+- toroidal_flux_coordinate_gradient_magnitude
+- toroidal_flux_surface_averaged_current_density
+- toroidal_magnetic_field
+- toroidal_magnetic_field_at_magnetic_axis
+- toroidal_magnetic_flux
+- toroidal_magnetic_flux_due_to_diamagnetic_drift
+- toroidal_vacuum_magnetic_field
+- total_electron_density
+- total_electron_pressure
+- total_external_heating_power
+- total_neutral_source_rate_due_to_gas_injection
+- total_plasma_pressure
+- total_plasma_radiated_power
+- total_power_at_separatrix
+- total_power_due_to_ion_cyclotron_heating
+- total_power_due_to_ohmic_dissipation
+- triangularity_of_flux_surface
+- triangularity_of_plasma_boundary
+- tritium_density_at_divertor_target
+- tritium_density_at_magnetic_axis
+- tritium_density_at_plasma_boundary
+- tritium_tritium_neutron_flux
+- tungsten_density_at_divertor_target
+- tungsten_density_at_magnetic_axis
+- tungsten_density_at_plasma_boundary
+- turn_count_of_poloidal_magnetic_field_probe
+- turn_count_of_toroidal_magnetic_field_probe
+- upper_photon_energy
+- upper_triangularity_of_flux_surface
+- upper_triangularity_of_plasma_boundary
+- upper_wavelength_of_filter
+- vacuum_magnetic_field
+- vacuum_poloidal_current_function
+- variation_of_length_of_interferometer_beam
+- vertical_coordinate_of_camera
+- vertical_coordinate_of_conductor_cross_section
+- vertical_coordinate_of_detector_pixel
+- vertical_coordinate_of_flux_loop
+- vertical_coordinate_of_geometric_axis
+- vertical_coordinate_of_line_of_sight
+- vertical_coordinate_of_magnetic_axis
+- vertical_coordinate_of_measurement_position
+- vertical_coordinate_of_poloidal_magnetic_field_probe
+- vertical_coordinate_of_primary_x_point
+- vertical_coordinate_of_strike_point
+- vertical_coordinate_of_toroidal_magnetic_field_probe
+- vertical_magnetic_field
+- vertical_outline_of_antenna_strap
+- vertical_outline_of_limiter_tile
+- vertical_outline_of_plasma_facing_component
+- voltage_of_ion_cyclotron_heating_antenna
+- voltage_of_ion_cyclotron_heating_antenna_amplitude
+- voltage_of_mass_spectrometer_channel
+- voltage_of_poloidal_magnetic_field_probe
+- volume_averaged_effective_charge
+- volume_averaged_electron_density
+- volume_averaged_electron_temperature
+- volume_averaged_neutral_temperature
+- volume_integrated_total_electron_density
+- volume_of_flux_surface
+- volume_of_plasma_boundary
+- wave_current_of_antenna_strap
+- wave_current_of_antenna_strap_amplitude
+- wave_phase_of_antenna_strap
+- wave_phase_of_ion_cyclotron_heating_antenna
+- wave_phase_of_wave_beam
+- wavelength_of_filter
+- wavelength_of_spectral_line
+- wavelength_of_wave_beam
+- width_of_poloidal_field_coil
+- xenon_density_at_divertor_target
+- xenon_density_at_magnetic_axis
+- xenon_density_at_plasma_boundary
+unmatched_sources:
+- barometry/gauge/pressure
+- calorimetry/group/component/energy_cumulated
+- calorimetry/group/component/power
+- camera_ir/channel/camera/frame/apparent_temperature
+- camera_x_rays/camera/camera_dimensions
+- camera_x_rays/detector_humidity
+- camera_x_rays/detector_humidity/time
+- camera_x_rays/detector_temperature/time
+- camera_x_rays/frame/time
+- core_profiles/profiles_1d/time
+- ece/channel/position/z
+- equilibrium/time_slice/boundary/geometric_axis/z
+- equilibrium/time_slice/boundary/outline/z
+- equilibrium/time_slice/constraints/faraday_angle/weight
+- equilibrium/time_slice/constraints/n_e_line/weight
+- equilibrium/time_slice/contour_tree/node/z
+- equilibrium/time_slice/convergence/iterations_n
+- equilibrium/time_slice/time
+- hard_x_rays/emissivity_profile_1d/half_width_external
+- hard_x_rays/emissivity_profile_1d/time
+- ic_antennas/antenna/module/strap/distance_to_conductor
+- ic_antennas/antenna/module/strap/width_phi
+- pf_active/coil/current
+- summary/boundary/gap_limiter_wall/value
+- summary/disruption/time/value
+- summary/global_quantities/power_steady/value
+- summary/global_quantities/tau_energy/value
+- summary/plasma_duration/value
+pr_number: 8
+pr_url: https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/8
+merge_commit: null
+manifest_sources:
+- source_path: barometry/gauge/pressure
+  source_status: failed
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/filter/wavelength_lower
+  source_status: attached
+  standard_name_id: lower_wavelength_of_filter
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/filter/wavelength_upper
+  source_status: attached
+  standard_name_id: upper_wavelength_of_filter
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/line_of_sight/first_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/line_of_sight/first_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/line_of_sight/first_point/z
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/line_of_sight/second_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/line_of_sight/second_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/line_of_sight/second_point/z
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/radiance_spectral
+  source_status: composed
+  standard_name_id: spectral_bremsstrahlung_radiance
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: bremsstrahlung_visible/channel/zeff_line_average
+  source_status: attached
+  standard_name_id: line_averaged_effective_charge
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/cooling_loop/mass_flow
+  source_status: attached
+  standard_name_id: ratio_of_coolant_mass_to_time
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/cooling_loop/temperature_in
+  source_status: attached
+  standard_name_id: coolant_temperature_at_inlet
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/cooling_loop/temperature_out
+  source_status: attached
+  standard_name_id: coolant_temperature_at_outlet
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/group/component/energy_cumulated
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: calorimetry/group/component/energy_total/data
+  source_status: composed
+  standard_name_id: accumulated_deposited_energy_of_plasma_facing_component
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/group/component/mass_flow
+  source_status: attached
+  standard_name_id: ratio_of_coolant_mass_to_time
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/group/component/power
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: calorimetry/group/component/temperature_in
+  source_status: composed
+  standard_name_id: coolant_temperature_at_inlet
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/group/component/temperature_out
+  source_status: composed
+  standard_name_id: coolant_temperature_at_outlet
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: calorimetry/group/component/transit_time
+  source_status: attached
+  standard_name_id: coolant_transit_time_of_plant_component_port
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_ir/channel/camera/frame/apparent_temperature
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: camera_x_rays/aperture/centre/phi
+  source_status: composed
+  standard_name_id: toroidal_coordinate_of_aperture
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/aperture/centre/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/aperture/centre/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/camera_dimensions
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/centre/phi
+  source_status: composed
+  standard_name_id: toroidal_coordinate_of_camera
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/centre/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_camera
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/centre/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_camera
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/line_of_sight/first_point/phi
+  source_status: composed
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/line_of_sight/first_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/line_of_sight/first_point/z
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/line_of_sight/second_point/phi
+  source_status: composed
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/line_of_sight/second_point/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/line_of_sight/second_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/pixel_position/phi
+  source_status: composed
+  standard_name_id: toroidal_coordinate_of_detector_pixel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/pixel_position/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_detector_pixel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/camera/pixel_position/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_detector_pixel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/detector_humidity
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: camera_x_rays/detector_humidity/time
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: compose_model_skipped
+- source_path: camera_x_rays/detector_temperature
+  source_status: composed
+  standard_name_id: temperature_of_soft_xray_detector
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/detector_temperature/time
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: 'non_nameable_coordinate:time: bare non-nameable token: time'
+- source_path: camera_x_rays/filter_window/thickness
+  source_status: composed
+  standard_name_id: thickness_of_filter
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: camera_x_rays/frame/time
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: compose_model_skipped
+- source_path: core_profiles/global_quantities/z_eff_resistive
+  source_status: attached
+  standard_name_id: effective_charge
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/electrons/density
+  source_status: attached
+  standard_name_id: total_electron_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/electrons/density_thermal
+  source_status: attached
+  standard_name_id: thermal_electron_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/electrons/pressure
+  source_status: composed
+  standard_name_id: total_electron_pressure
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/electrons/pressure_thermal
+  source_status: composed
+  standard_name_id: thermal_electron_pressure_at_post_sawtooth_crash
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/electrons/temperature
+  source_status: attached
+  standard_name_id: electron_temperature
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/area
+  source_status: composed
+  standard_name_id: poloidal_plane_cross_sectional_area_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/psi
+  source_status: attached
+  standard_name_id: poloidal_magnetic_flux_at_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/psi_boundary
+  source_status: attached
+  standard_name_id: poloidal_magnetic_flux_at_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/psi_magnetic_axis
+  source_status: attached
+  standard_name_id: poloidal_magnetic_flux_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/rho_pol_norm
+  source_status: attached
+  standard_name_id: normalized_poloidal_flux_coordinate
+  terminal_stage: reviewed
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/rho_tor
+  source_status: attached
+  standard_name_id: toroidal_flux_coordinate
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/rho_tor_norm
+  source_status: composed
+  standard_name_id: normalized_toroidal_flux_coordinate
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/grid/volume
+  source_status: attached
+  standard_name_id: volume_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/profiles_1d/time
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: 'non_nameable_coordinate:time: bare non-nameable token: time'
+- source_path: core_profiles/profiles_1d/zeff
+  source_status: attached
+  standard_name_id: effective_charge
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/vacuum_toroidal_field/b0
+  source_status: attached
+  standard_name_id: toroidal_vacuum_magnetic_field
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: core_profiles/vacuum_toroidal_field/r0
+  source_status: attached
+  standard_name_id: reference_major_radius
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/channel/frequency
+  source_status: attached
+  standard_name_id: frequency_of_wave_diagnostic_channel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/channel/optical_depth
+  source_status: composed
+  standard_name_id: line_integrated_spectral_wave_opacity_at_ece_channel_emission_position
+  terminal_stage: drafted
+  non_nameable_reason: ''
+- source_path: ece/channel/position/phi
+  source_status: composed
+  standard_name_id: toroidal_angle_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/channel/position/psi
+  source_status: composed
+  standard_name_id: poloidal_magnetic_flux_at_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/channel/position/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/channel/position/rho_tor_norm
+  source_status: attached
+  standard_name_id: normalized_toroidal_flux_coordinate_at_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/channel/position/theta
+  source_status: composed
+  standard_name_id: poloidal_angle_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/channel/position/z
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: ece/channel/t_radiation
+  source_status: composed
+  standard_name_id: radiative_temperature_at_ece_channel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ece/t_radiation_central
+  source_status: composed
+  standard_name_id: radiative_temperature_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/elongation
+  source_status: attached
+  standard_name_id: elongation_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/geometric_axis/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_geometric_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/geometric_axis/z
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/minor_radius
+  source_status: composed
+  standard_name_id: minor_radius_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/outline/r
+  source_status: composed
+  standard_name_id: radial_outline_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/outline/z
+  source_status: failed
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/psi
+  source_status: attached
+  standard_name_id: poloidal_magnetic_flux_at_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/psi_norm
+  source_status: attached
+  standard_name_id: normalized_poloidal_flux_coordinate_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/triangularity
+  source_status: composed
+  standard_name_id: triangularity_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/triangularity_lower
+  source_status: attached
+  standard_name_id: lower_triangularity_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/boundary/triangularity_upper
+  source_status: composed
+  standard_name_id: upper_triangularity_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/b_field_pol_probe/measured
+  source_status: composed
+  standard_name_id: poloidal_magnetic_field
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/b_field_pol_probe/reconstructed
+  source_status: attached
+  standard_name_id: poloidal_magnetic_field
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/b_field_pol_probe/weight
+  source_status: attached
+  standard_name_id: equilibrium_weight_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/faraday_angle/measured
+  source_status: attached
+  standard_name_id: faraday_angle
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/faraday_angle/reconstructed
+  source_status: composed
+  standard_name_id: faraday_angle
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/faraday_angle/weight
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: compose_model_skipped
+- source_path: equilibrium/time_slice/constraints/flux_loop/measured
+  source_status: composed
+  standard_name_id: poloidal_magnetic_flux_of_flux_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/flux_loop/reconstructed
+  source_status: attached
+  standard_name_id: poloidal_magnetic_flux_of_flux_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/flux_loop/weight
+  source_status: composed
+  standard_name_id: equilibrium_weight_of_flux_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/n_e_line/measured
+  source_status: attached
+  standard_name_id: line_integrated_electron_number_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/n_e_line/reconstructed
+  source_status: attached
+  standard_name_id: line_integrated_electron_number_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/constraints/n_e_line/weight
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/contour_tree/node/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/contour_tree/node/z
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: compose_model_skipped
+- source_path: equilibrium/time_slice/convergence/iterations_n
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: compose_model_skipped
+- source_path: equilibrium/time_slice/global_quantities/area
+  source_status: attached
+  standard_name_id: poloidal_plane_cross_sectional_area_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/beta_pol
+  source_status: attached
+  standard_name_id: poloidal_beta
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/beta_tor
+  source_status: composed
+  standard_name_id: normalized_toroidal_plasma_beta
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/beta_tor_norm
+  source_status: composed
+  standard_name_id: normalized_toroidal_plasma_beta
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/energy_mhd
+  source_status: composed
+  standard_name_id: mhd_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/ip
+  source_status: attached
+  standard_name_id: plasma_current
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/length_pol
+  source_status: composed
+  standard_name_id: poloidal_length_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/li_3
+  source_status: composed
+  standard_name_id: normalized_plasma_internal_inductance
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi
+  source_status: composed
+  standard_name_id: toroidal_magnetic_field_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/magnetic_axis/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/magnetic_axis/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/psi_axis
+  source_status: composed
+  standard_name_id: poloidal_magnetic_flux_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/psi_boundary
+  source_status: composed
+  standard_name_id: poloidal_magnetic_flux_at_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/q_95
+  source_status: attached
+  standard_name_id: safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/q_axis
+  source_status: attached
+  standard_name_id: safety_factor_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/q_min/rho_tor_norm
+  source_status: composed
+  standard_name_id: normalized_toroidal_flux_coordinate_at_minimum_safety_factor
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/q_min/value
+  source_status: composed
+  standard_name_id: minimum_safety_factor
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/surface
+  source_status: attached
+  standard_name_id: surface_area_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/global_quantities/volume
+  source_status: composed
+  standard_name_id: volume_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/area
+  source_status: composed
+  standard_name_id: poloidal_plane_cross_sectional_area_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/b_field_average
+  source_status: composed
+  standard_name_id: flux_surface_averaged_magnetic_field_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/b_field_max
+  source_status: composed
+  standard_name_id: maximum_magnetic_field_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/b_field_min
+  source_status: attached
+  standard_name_id: minimum_over_flux_surface_magnetic_field_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/darea_dpsi
+  source_status: attached
+  standard_name_id: derivative_with_respect_to_normalized_poloidal_flux_coordinate_of_area_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/darea_drho_tor
+  source_status: composed
+  standard_name_id: derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/dpsi_drho_tor
+  source_status: composed
+  standard_name_id: radial_derivative_of_poloidal_magnetic_flux
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/dvolume_dpsi
+  source_status: composed
+  standard_name_id: derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_volume_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/dvolume_drho_tor
+  source_status: composed
+  standard_name_id: derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/elongation
+  source_status: composed
+  standard_name_id: elongation_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/f_df_dpsi
+  source_status: attached
+  standard_name_id: product_of_poloidal_current_function_and_derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_poloidal_current_function
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm1
+  source_status: composed
+  standard_name_id: flux_surface_averaged_inverse_of_square_of_major_radius
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm2
+  source_status: composed
+  standard_name_id: flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm3
+  source_status: composed
+  standard_name_id: flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm4
+  source_status: composed
+  standard_name_id: flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm5
+  source_status: composed
+  standard_name_id: flux_surface_averaged_square_of_magnetic_field_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm6
+  source_status: composed
+  standard_name_id: flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm7
+  source_status: attached
+  standard_name_id: flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm8
+  source_status: composed
+  standard_name_id: flux_surface_averaged_major_radius
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/gm9
+  source_status: attached
+  standard_name_id: flux_surface_averaged_inverse_of_major_radius
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/j_parallel
+  source_status: composed
+  standard_name_id: parallel_flux_surface_averaged_current_density_due_to_wave_driven_current_drive
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/j_phi
+  source_status: composed
+  standard_name_id: toroidal_flux_surface_averaged_current_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/magnetic_shear
+  source_status: attached
+  standard_name_id: magnetic_shear_at_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/phi
+  source_status: composed
+  standard_name_id: toroidal_magnetic_flux
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/pressure
+  source_status: composed
+  standard_name_id: plasma_pressure
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/psi
+  source_status: attached
+  standard_name_id: poloidal_magnetic_flux_at_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/q
+  source_status: attached
+  standard_name_id: safety_factor
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/r_inboard
+  source_status: composed
+  standard_name_id: radial_coordinate_at_inboard_midplane
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/r_outboard
+  source_status: attached
+  standard_name_id: radial_coordinate_at_outboard_midplane
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/rho_tor
+  source_status: composed
+  standard_name_id: toroidal_flux_coordinate
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/rho_tor_norm
+  source_status: composed
+  standard_name_id: normalized_toroidal_flux_coordinate
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/surface
+  source_status: composed
+  standard_name_id: surface_area_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/triangularity_lower
+  source_status: composed
+  standard_name_id: lower_triangularity_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/triangularity_upper
+  source_status: composed
+  standard_name_id: upper_triangularity_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/profiles_1d/volume
+  source_status: composed
+  standard_name_id: volume_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/time_slice/time
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: "temporal_coordinate: Nested time coordinate array \u2014 dimension\
+    \ axis for time-varying data, not a physical quantity."
+- source_path: equilibrium/vacuum_toroidal_field/b0
+  source_status: composed
+  standard_name_id: toroidal_vacuum_magnetic_field
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: equilibrium/vacuum_toroidal_field/r0
+  source_status: composed
+  standard_name_id: reference_major_radius
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: gas_injection/valve/flow_rate
+  source_status: attached
+  standard_name_id: gas_flow
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/detector/surface
+  source_status: attached
+  standard_name_id: area_of_diagnostic_aperture
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/energy_band/lower_bound
+  source_status: attached
+  standard_name_id: lower_bound_photon_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/energy_band/upper_bound
+  source_status: attached
+  standard_name_id: upper_photon_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/etendue
+  source_status: attached
+  standard_name_id: etendue_of_hard_xray_detector
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/line_of_sight/first_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/line_of_sight/first_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/line_of_sight/second_point/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/line_of_sight/second_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/channel/radiance
+  source_status: composed
+  standard_name_id: hard_xray_brightness
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/emissivity_profile_1d/emissivity
+  source_status: composed
+  standard_name_id: hard_xray_emissivity
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/emissivity_profile_1d/half_width_external
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: hard_x_rays/emissivity_profile_1d/half_width_internal
+  source_status: attached
+  standard_name_id: inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width
+  terminal_stage: drafted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/emissivity_profile_1d/lower_bound
+  source_status: attached
+  standard_name_id: lower_bound_photon_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/emissivity_profile_1d/peak_position
+  source_status: attached
+  standard_name_id: normalized_toroidal_flux_coordinate_at_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/emissivity_profile_1d/rho_tor_norm
+  source_status: composed
+  standard_name_id: normalized_toroidal_flux_coordinate
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: hard_x_rays/emissivity_profile_1d/time
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: 'non_nameable_coordinate:time: bare non-nameable token: time'
+- source_path: hard_x_rays/emissivity_profile_1d/upper_bound
+  source_status: attached
+  standard_name_id: upper_photon_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/frequency
+  source_status: attached
+  standard_name_id: frequency_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/current/amplitude
+  source_status: composed
+  standard_name_id: wave_current_of_antenna_strap_amplitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/matching_element/capacitance
+  source_status: attached
+  standard_name_id: capacitance_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/phase_forward
+  source_status: composed
+  standard_name_id: forward_wave_phase_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/phase_reflected
+  source_status: attached
+  standard_name_id: reflected_phase_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/power_forward
+  source_status: attached
+  standard_name_id: forward_power_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/power_reflected
+  source_status: attached
+  standard_name_id: reflected_power_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/pressure/amplitude
+  source_status: composed
+  standard_name_id: pressure_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/strap/distance_to_conductor
+  source_status: failed
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/strap/outline/phi
+  source_status: attached
+  standard_name_id: toroidal_angle_of_antenna_strap
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/strap/outline/r
+  source_status: composed
+  standard_name_id: radial_outline_of_antenna_strap
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/strap/outline/z
+  source_status: composed
+  standard_name_id: vertical_outline_of_antenna_strap
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/strap/phase
+  source_status: attached
+  standard_name_id: wave_phase_of_antenna_strap
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/strap/width_phi
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/voltage/amplitude
+  source_status: composed
+  standard_name_id: voltage_of_ion_cyclotron_heating_antenna_amplitude
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/module/voltage/phase
+  source_status: attached
+  standard_name_id: wave_phase_of_ion_cyclotron_heating_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: ic_antennas/antenna/power_launched
+  source_status: attached
+  standard_name_id: power_due_to_ion_cyclotron_heating
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/first_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/first_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/first_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/second_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/second_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/second_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/third_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/third_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/line_of_sight/third_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/n_e_line
+  source_status: attached
+  standard_name_id: line_integrated_electron_number_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/n_e_line_average
+  source_status: composed
+  standard_name_id: line_averaged_electron_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/path_length_variation
+  source_status: attached
+  standard_name_id: variation_of_length_of_interferometer_beam
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/wavelength/phase_corrected
+  source_status: composed
+  standard_name_id: wave_phase_of_wave_beam
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/wavelength/phase_to_n_e_line
+  source_status: attached
+  standard_name_id: spectral_calibration_factor_at_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/channel/wavelength/value
+  source_status: attached
+  standard_name_id: wavelength_of_wave_beam
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/electrons_n
+  source_status: composed
+  standard_name_id: volume_integrated_total_electron_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: interferometer/n_e_volume_average
+  source_status: attached
+  standard_name_id: volume_averaged_electron_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/area
+  source_status: attached
+  standard_name_id: area_of_toroidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/field
+  source_status: composed
+  standard_name_id: toroidal_magnetic_field
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/length
+  source_status: composed
+  standard_name_id: length_of_toroidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/poloidal_angle
+  source_status: composed
+  standard_name_id: poloidal_angle_of_toroidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/position/phi
+  source_status: attached
+  standard_name_id: toroidal_angle_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/position/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/position/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_toroidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/toroidal_angle
+  source_status: attached
+  standard_name_id: toroidal_angle_of_toroidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_phi_probe/turns
+  source_status: composed
+  standard_name_id: turn_count_of_toroidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/area
+  source_status: composed
+  standard_name_id: area_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/field
+  source_status: composed
+  standard_name_id: poloidal_magnetic_field
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/length
+  source_status: attached
+  standard_name_id: length_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/poloidal_angle
+  source_status: composed
+  standard_name_id: poloidal_angle_of_flux_surface
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/position/phi
+  source_status: attached
+  standard_name_id: toroidal_angle_of_measurement_position
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/position/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/position/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/toroidal_angle
+  source_status: attached
+  standard_name_id: toroidal_angle_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/turns
+  source_status: composed
+  standard_name_id: turn_count_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/b_field_pol_probe/voltage
+  source_status: composed
+  standard_name_id: voltage_of_poloidal_magnetic_field_probe
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/diamagnetic_flux
+  source_status: composed
+  standard_name_id: toroidal_magnetic_flux_due_to_diamagnetic_drift
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/flux_loop/flux
+  source_status: composed
+  standard_name_id: poloidal_magnetic_flux_of_flux_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/flux_loop/position/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_flux_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/flux_loop/position/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_flux_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: magnetics/ip
+  source_status: attached
+  standard_name_id: plasma_current
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: pf_active/coil/current
+  source_status: failed
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: pf_active/coil/element/geometry/rectangle/height
+  source_status: composed
+  standard_name_id: height_of_poloidal_field_coil
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: pf_active/coil/element/geometry/rectangle/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_conductor_cross_section
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: pf_active/coil/element/geometry/rectangle/width
+  source_status: composed
+  standard_name_id: width_of_poloidal_field_coil
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: pf_active/coil/element/geometry/rectangle/z
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_conductor_cross_section
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: pf_active/coil/element/turns_with_sign
+  source_status: composed
+  standard_name_id: effective_turn_count_of_coil_conductor_element
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: pf_passive/loop/current
+  source_status: composed
+  standard_name_id: current_of_passive_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: pf_passive/loop/element/turns_with_sign
+  source_status: attached
+  standard_name_id: effective_turn_count_of_passive_loop
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/ellipticity_initial
+  source_status: attached
+  standard_name_id: initial_polarization_ellipticity_of_polarimeter_beam
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/faraday_angle
+  source_status: attached
+  standard_name_id: faraday_angle
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/first_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/first_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/first_point/z
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/second_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/second_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/second_point/z
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/third_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/third_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/line_of_sight/third_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/polarization_initial
+  source_status: composed
+  standard_name_id: initial_polarization_ellipticity_of_polarimeter_beam
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: polarimeter/channel/wavelength
+  source_status: attached
+  standard_name_id: wavelength_of_wave_beam
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/brightness
+  source_status: composed
+  standard_name_id: incident_soft_xray_radiance
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/energy_band/lower_bound
+  source_status: attached
+  standard_name_id: lower_bound_photon_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/energy_band/upper_bound
+  source_status: attached
+  standard_name_id: upper_photon_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/etendue
+  source_status: attached
+  standard_name_id: etendue_of_spectrometer_channel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/line_of_sight/first_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/line_of_sight/first_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/line_of_sight/first_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/line_of_sight/second_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/line_of_sight/second_point/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/line_of_sight/second_point/z
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: soft_x_rays/channel/power
+  source_status: composed
+  standard_name_id: power_of_soft_xray_detector
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_mass/channel/a
+  source_status: composed
+  standard_name_id: atomic_mass
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_mass/channel/current
+  source_status: attached
+  standard_name_id: ion_current_of_mass_spectrometer_channel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_mass/channel/photomultiplier_voltage
+  source_status: composed
+  standard_name_id: voltage_of_mass_spectrometer_channel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/grating_spectrometer/intensity_spectrum
+  source_status: attached
+  standard_name_id: spectral_flux_of_spectrometer_channel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/grating_spectrometer/processed_line/intensity
+  source_status: composed
+  standard_name_id: intensity_at_spectral_line
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/grating_spectrometer/processed_line/radiance
+  source_status: attached
+  standard_name_id: photon_radiance_at_spectral_line
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/grating_spectrometer/processed_line/wavelength_central
+  source_status: attached
+  standard_name_id: wavelength_of_spectral_line
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/grating_spectrometer/radiance_spectral
+  source_status: attached
+  standard_name_id: spectral_radiance
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/grating_spectrometer/wavelengths
+  source_status: attached
+  standard_name_id: spectral_wavelength_of_optical_element
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/cold_neutrals_fraction
+  source_status: composed
+  standard_name_id: cold_neutral_fraction
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/cold_neutrals_temperature
+  source_status: attached
+  standard_name_id: cold_neutral_temperature
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/density_ratio
+  source_status: composed
+  standard_name_id: ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/element/a
+  source_status: composed
+  standard_name_id: atomic_mass
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/element/atoms_n
+  source_status: attached
+  standard_name_id: atomic_count
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/element/z_n
+  source_status: attached
+  standard_name_id: atomic_number
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_fraction
+  source_status: composed
+  standard_name_id: hot_neutral_fraction
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_temperature
+  source_status: attached
+  standard_name_id: hot_neutral_temperature
+  terminal_stage: reviewed
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/isotope_ratios/signal_to_noise
+  source_status: composed
+  standard_name_id: spectral_signal_to_noise_ratio_of_spectrometer_channel
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/line_of_sight/first_point/phi
+  source_status: composed
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/line_of_sight/first_point/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/line_of_sight/first_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/line_of_sight/second_point/phi
+  source_status: attached
+  standard_name_id: toroidal_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/line_of_sight/second_point/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: spectrometer_visible/channel/line_of_sight/second_point/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_line_of_sight
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/distance_inner_outer_separatrices/value
+  source_status: attached
+  standard_name_id: gap_at_outboard_midplane
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/elongation/value
+  source_status: attached
+  standard_name_id: elongation_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/gap_limiter_wall/value
+  source_status: failed
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: summary/boundary/geometric_axis_r/value
+  source_status: composed
+  standard_name_id: radial_coordinate_of_geometric_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/geometric_axis_z/value
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_geometric_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/magnetic_axis_r/value
+  source_status: composed
+  standard_name_id: radial_coordinate_of_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/magnetic_axis_z/value
+  source_status: attached
+  standard_name_id: vertical_coordinate_of_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/minor_radius/value
+  source_status: attached
+  standard_name_id: minor_radius_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/strike_point_inner_r/value
+  source_status: composed
+  standard_name_id: radial_coordinate_of_strike_point
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/strike_point_inner_z/value
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_strike_point
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/strike_point_outer_r/value
+  source_status: composed
+  standard_name_id: radial_coordinate_of_strike_point
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/strike_point_outer_z/value
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_strike_point
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/triangularity_lower/value
+  source_status: attached
+  standard_name_id: lower_triangularity_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/triangularity_upper/value
+  source_status: attached
+  standard_name_id: upper_triangularity_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/x_point_main/r
+  source_status: composed
+  standard_name_id: radial_coordinate_of_x_point
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/boundary/x_point_main/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_primary_x_point
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/disruption/time/value
+  source_status: skipped
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: 'non_nameable_coordinate:time: bare non-nameable token: time'
+- source_path: summary/fusion/neutron_rates/total/value
+  source_status: attached
+  standard_name_id: neutron_flux
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/gas_injection_accumulated/total/value
+  source_status: attached
+  standard_name_id: accumulated_total_particle_count_due_to_gas_injection
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/gas_injection_rates/total/value
+  source_status: composed
+  standard_name_id: total_neutral_source_rate_due_to_gas_injection
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/b0/value
+  source_status: attached
+  standard_name_id: toroidal_vacuum_magnetic_field
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/beta_pol_mhd/value
+  source_status: attached
+  standard_name_id: poloidal_beta
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/beta_tor/value
+  source_status: composed
+  standard_name_id: plasma_beta
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/beta_tor_norm_mhd/value
+  source_status: attached
+  standard_name_id: normalized_toroidal_plasma_beta
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/energy_mhd
+  source_status: attached
+  standard_name_id: mhd_energy
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/greenwald_fraction/value
+  source_status: composed
+  standard_name_id: ratio_of_line_averaged_electron_density_to_greenwald_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/h_98/value
+  source_status: composed
+  standard_name_id: energy_confinement_enhancement_factor
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/ip/value
+  source_status: attached
+  standard_name_id: plasma_current
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/li_3/value
+  source_status: attached
+  standard_name_id: normalized_plasma_internal_inductance
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/power_loss/value
+  source_status: composed
+  standard_name_id: total_power_at_separatrix
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/power_ohm/value
+  source_status: composed
+  standard_name_id: total_power_due_to_ohmic_dissipation
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/power_radiated/value
+  source_status: composed
+  standard_name_id: total_plasma_radiated_power
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/power_radiated_inside_lcfs/value
+  source_status: attached
+  standard_name_id: radiated_power_over_core_region
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/power_steady/value
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/q_95/value
+  source_status: composed
+  standard_name_id: safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/r0/value
+  source_status: attached
+  standard_name_id: reference_major_radius
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/tau_energy/value
+  source_status: failed
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/tau_energy_98/value
+  source_status: composed
+  standard_name_id: ipb98y2_confinement_time
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/v_loop/value
+  source_status: attached
+  standard_name_id: loop_voltage_at_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/global_quantities/volume/value
+  source_status: composed
+  standard_name_id: volume_of_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/heating_current_drive/ic/power/value
+  source_status: composed
+  standard_name_id: power_due_to_ion_cyclotron_heating
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/heating_current_drive/lh/power/value
+  source_status: attached
+  standard_name_id: launched_power_of_lower_hybrid_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/heating_current_drive/power_additional/value
+  source_status: composed
+  standard_name_id: total_external_heating_power
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/heating_current_drive/power_ic/value
+  source_status: composed
+  standard_name_id: total_power_due_to_ion_cyclotron_heating
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/heating_current_drive/power_lh/value
+  source_status: attached
+  standard_name_id: launched_power_of_lower_hybrid_antenna
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/line_average/isotope_fraction_hydrogen/value
+  source_status: attached
+  standard_name_id: ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/line_average/n_e/value
+  source_status: attached
+  standard_name_id: line_averaged_electron_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/line_average/zeff/value
+  source_status: composed
+  standard_name_id: line_averaged_effective_charge
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/divertor_target/n_e/value
+  source_status: attached
+  standard_name_id: electron_density_at_divertor_target
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/divertor_target/power_flux_peak/value
+  source_status: composed
+  standard_name_id: maximum_of_energy_flux_at_divertor_target
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/divertor_target/t_e/value
+  source_status: composed
+  standard_name_id: electron_temperature_at_divertor_target
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/magnetic_axis/b_field_tor/value
+  source_status: attached
+  standard_name_id: toroidal_magnetic_field_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/magnetic_axis/n_e/value
+  source_status: composed
+  standard_name_id: electron_density_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/magnetic_axis/position/r
+  source_status: attached
+  standard_name_id: radial_coordinate_of_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/magnetic_axis/position/z
+  source_status: composed
+  standard_name_id: vertical_coordinate_of_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/magnetic_axis/q/value
+  source_status: attached
+  standard_name_id: safety_factor_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/magnetic_axis/t_e/value
+  source_status: composed
+  standard_name_id: electron_temperature_at_magnetic_axis
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/local/separatrix/n_e/value
+  source_status: attached
+  standard_name_id: electron_density_at_plasma_boundary
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/plasma_duration/value
+  source_status: extracted
+  standard_name_id: null
+  terminal_stage: null
+  non_nameable_reason: ''
+- source_path: summary/time_breakdown/value
+  source_status: attached
+  standard_name_id: breakdown_initial_time
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: summary/volume_average/n_e/value
+  source_status: attached
+  standard_name_id: volume_averaged_electron_density
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: tf/b_field_phi_vacuum_r
+  source_status: composed
+  standard_name_id: vacuum_poloidal_current_function
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: tf/delta_b_field_phi_vacuum_r
+  source_status: attached
+  standard_name_id: difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: wall/description_2d/limiter/unit/outline/r
+  source_status: composed
+  standard_name_id: radial_outline_of_limiter_tile
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: wall/description_2d/limiter/unit/outline/z
+  source_status: composed
+  standard_name_id: vertical_outline_of_limiter_tile
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: wall/description_2d/limiter/unit/phi_extensions
+  source_status: composed
+  standard_name_id: toroidal_angular_width_of_limiter_tile
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: wall/description_2d/mobile/unit/outline/r
+  source_status: composed
+  standard_name_id: radial_outline_of_wall
+  terminal_stage: accepted
+  non_nameable_reason: ''
+- source_path: wall/description_2d/mobile/unit/outline/z
+  source_status: composed
+  standard_name_id: vertical_outline_of_plasma_facing_component
+  terminal_stage: accepted
+  non_nameable_reason: ''
