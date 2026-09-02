@@ -314,144 +314,274 @@ that folds the operators into one base and silently drops the division. An hones
 
 ## Release recipe
 
-Use one manifest token through the complete catalog-review cycle. Check the
-live `--help` before operating because it is authoritative for optional flags;
-the deterministic chain is:
+This is the repeatable catalog workflow proven by the live fork rehearsal. Use
+one committed manifest token from graph drain through approval. Immediately
+before an operator effect, read the live help for all four commands; the flag
+surface below was checked on 2026-09-02 with:
 
 ```bash
-uv run imas-codex sn run --batch <manifest>
-uv run imas-codex sn release --batch <manifest> --bump minor -m "<batch in words>"
-uv run imas-codex sn approve --pr <merged-pr-url>
+uv run --no-sync imas-codex sn run --help
+uv run --no-sync imas-codex sn release --help
+uv run --no-sync imas-codex sn approve --help
+uv run --no-sync imas-codex sn resolve --help
 ```
 
-`sn run --batch` drains the manifest through the ordinary pipeline. The
-gap-only default preserves sources that already have a live accepted or
-approved name. `sn release --batch` freezes the cohort, exports it, pushes the
-review branch to the fork, and opens the review PR. After human review and
-merge, pull catalog `main`, then `sn approve --pr` resolves the merge and frozen
-batch from the URL and folds the result back into the graph.
+The command contract is:
+
+| Command | Required role in the chain | Help-backed controls |
+|---|---|---|
+| `sn run --batch <manifest>` | Resolve the manifest by name or path and drain exactly that cohort through the ordinary pools. | `--batch` is the same identity consumed by release. The default is gap-only; use `--reseed` only when a deliberate full rerun is authorized. |
+| `sn release --batch <manifest>` | Mint and freeze the review cohort, export approved plus batch entries, push a review branch to the fork, create the cut-time RC tag, and normally open the review PR. | `--bump {major,minor,patch}` starts a series from a stable tag; `-m/--message` supplies the commit and tag message; `--pr-title` and `--pr-body-file` are a required pair whose validated bytes override generated text; `--notes` asks the release-notes seat for fallback prose; `--no-notes` uses deterministic fallback prose; `--no-pr` still pushes the branch and RC tag but opens no PR. |
+| `sn approve --pr <merged-pr-url>` | Resolve the PR number, merge commit, additive baseline, reviewer-edit baseline, and frozen batch from the URL, then fold the reviewed result into the graph. | `--dry-run` reports the routing without graph writes; `--undo` unwinds a completed fold-back; `--notes/--no-notes` controls only the optional human summary below the deterministic receipt block. |
+| `sn resolve <name> --override --reason <justification>` | Deliberately accept one contested human proposal over the rubric. | Both `--override` and `--reason` are required, and the justification is stored as `contested_resolution`. Only a contested name is eligible. |
+
+The ordinary happy-path commands are:
+
+```bash
+uv run --no-sync imas-codex sn run --batch <manifest>
+uv run --no-sync imas-codex sn release --batch <manifest> \
+  --bump minor \
+  -m "<batch in words>" \
+  --pr-title "<short batch title>" \
+  --pr-body-file <decisions-only-body.md>
+uv run --no-sync imas-codex sn approve --pr <merged-pr-url> --dry-run
+uv run --no-sync imas-codex sn approve --pr <merged-pr-url>
+```
+
+`sn release --target auto` keeps an RC review on the fork and directs a final
+review PR upstream; either way the branch pushes to the fork and upstream
+`main` is never pushed directly. Omit `--bump` only when `sn release status`
+shows that the current tag already places the checkout in an RC series.
+
+### Detached-worktree setup
+
+Approval and undo need the separate catalog checkout. A detached imas-codex
+worktree cannot discover it through the sibling-directory fallback, so bind it
+explicitly before either operation; the first live undo proved that omitting
+this variable exits before mutation:
+
+```bash
+export IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog
+export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+export PYTHONPATH="$PWD"
+```
+
+Use the real checkout path on the current host. Pull its merged `main` before
+approval, keep it clean, and pass `--isnc <path>` instead when an explicit
+one-command binding is clearer. Never infer a credential failure from a missing
+catalog path.
 
 ### Additive baseline
 
-Catalog `main` starts blank and accumulates approved entries only. A review PR
-is therefore a pure addition over the entries approved by earlier PRs; it is
-not a new full-catalog dump. Approval materializes the newly approved entries
-onto `main`. Those entries become part of the next PR's base, so they are
-byte-identical and invisible in later diffs. Accepted-but-unapproved and
-contested entries never enter that baseline. Never restore a legacy catalog
-dump, carry every accepted entry into a review branch, or use an earlier dump
-as the comparison base.
+Catalog `main` starts blank and accumulates approved entries only. The first
+review PR is a pure addition over nothing; each later PR is a pure addition over
+entries materialized by earlier approvals. The release branch may contain the
+approved baseline plus the new frozen batch, but approved baseline entries must
+remain byte-identical and therefore disappear from the diff. Never restore the
+legacy full-catalog dump or treat it as a comparison base.
 
-### Commit and PR prose
+After merge, approval materializes only the entries that earned approval onto
+catalog `main`. Untouched entries and reviewer edits that pass re-review join
+the next baseline; contested or otherwise unapproved bytes are removed. The
+merge first parent remains the additive catalog baseline, while reviewer-edit
+detection compares the merged content with the cut-time RC tag. Conflating
+those two bases made the first blank-baseline approval see zero reviewer edits.
 
-The submitting agent authors the PR title and body at release time, just as it
-authors a commit message. Agent-authored text wins after contract validation.
-The notes seat and deterministic template are headless fallbacks only; they do
-not displace an agent preparing a review PR. Check the live `sn release --help`
-for the current agent-facing title and body inputs. Its `--notes / --no-notes`
-switch remains the documented synthesized-versus-deterministic fallback seam.
+### Pull-request prose
 
-Use a facility-level title for a multi-domain batch. A dominant domain must not
-make a broad batch look domain-scoped. A genuinely single-domain batch may name
-that domain when the release evidence proves the scope.
+The submitting agent authors the title and body. `--pr-title` and
+`--pr-body-file` publish the validated agent text unchanged and take precedence
+over `--notes`; the model-backed notes seat and `--no-notes` deterministic text
+are headless fallbacks only. The title is a short phrase naming the batch in
+words. Use a facility-level title for a multi-domain batch; name a domain only
+when the evidence proves that the whole batch has that scope.
 
-Good PR title:
+Good title and body:
 
 ```text
 WEST standard names review batch
-```
 
-Banned PR title:
-
-```text
-WEST equilibrium, transport, and magnetics entry update
-```
-
-The PR body is decisions-only prose: one paragraph of two to five grounded
-sentences stating what the batch is (facility, source manifest, and published
-count), the review decisions that materially shaped it, the review instruction,
-and the PR-scoped preview link. Problems are resolved before release, not
-narrated in the PR. Do not report missing names, unlinked-source counts,
-unresolved caveats, or defect lists. A policy decision may identify a semantic
-class when the distinction explains what the batch deliberately excludes.
-
-Good PR body:
-
-```text
-This WEST standard names review batch publishes 337 entries from the
+This WEST standard names review batch publishes 329 entries from the
 west_production_dd_paths manifest. Coordinate grids and ordinates are excluded
-by policy because they are structural indexing, not physical quantities.
-Review the names, documentation, units, and physics meaning in the PR-scoped
-preview before approving: https://example.invalid/review/current/.
+because they are structural indexing rather than physical quantities. Follow
+the catalog REVIEWING.md contract and inspect the names, prose, units, and
+physics meaning at the PR-scoped preview before approving:
+https://simon-mcintosh.github.io/imas-standard-names-catalog/pr-3/.
 ```
 
-Banned PR body:
+Banned title and body:
 
 ```text
+WEST equilibrium, transport, and magnetics entries: plasma_current, q_min, ...
+
 This batch still has 27 source paths without names and 5 unresolved caveats.
 Missing entries include plasma_current, electron_temperature, and more.
 ```
 
-The operator-owned commit subject comes from the release message supplied with
-`-m/--message`, which the live help identifies as commit input. The publisher
-renders it as `sn: add <message>` and writes a short body with aggregate counts
-and release identity. The subject and body never enumerate entry names, paths,
-or domain files.
+The body is two to five grounded, decisions-only sentences: identify the
+facility, source manifest, published count, any deliberate policy exclusion,
+the review instruction, a link to catalog `REVIEWING.md`, and the PR-scoped
+preview. Resolve problems before cutting the PR. Do not enumerate entries or
+narrate missing names, unlinked sources, defects, or unresolved caveats; the
+diff is the inventory.
 
-Good commit:
+`-m/--message` is operator-owned commit and tag input. The publisher renders a
+subject such as `sn: add WEST standard names review batch` and a short body with
+aggregate counts and release identity. Neither commit surface enumerates entry
+names, paths, or domain files.
 
-```text
-sn: add WEST standard names review batch
+### Reviewer contract and preview
 
-Publish 337 approved candidates from the WEST production manifest.
-Release identity is recorded in the frozen review artifact.
-```
+The catalog's `REVIEWING.md` is the reviewer authority and every review PR body
+links it. Review physics meaning first. Reviewers may change the standard name
+and its description or documentation prose; the pipeline, not the reviewer,
+enforces grammar, spelling, links, and prose style. Unit, kind, status, source
+binding kind/ref/version, generated identity roles, file structure, ordering,
+and formatting are machine-owned. Catalog CI rejects a machine-owned-field
+change so it cannot silently corrupt provenance.
 
-Banned commit:
+Catalog CI builds a PR-scoped site containing only entries added or edited by
+that PR. A same-repository review is deployed at
+`https://<owner>.github.io/<catalog>/pr-<number>/`; an external-fork review gets
+an uploaded `catalog-preview-pr-<number>` artifact instead. The workflow
+upserts one marker-bearing PR comment with the preview URL and workflow-run
+link, updating that comment on later runs instead of appending duplicates.
 
-```text
-sn: update equilibrium.yml, transport.yml, magnetics.yml (plasma_current, ...)
-```
-
-For the batch recipe, an RC tag is created on the review-branch head and pushed
-to the fork when `sn release --batch` cuts the candidate. This preserves each
-candidate and its site build as a historic release record. Pass `--no-pr` to
-cut, tag, and build an in-work RC without opening a pull request; the review
-branch and RC tag still go only to the fork.
-
-After a PR merges and `sn approve --pr` successfully folds it into the graph,
-approval replaces that RC ref with the `graph-merged:` receipt on the merge
-commit. The receipt shape, not tag existence alone, means catalog and graph are
-synchronized. `sn approve --undo` removes that receipt and restores the exact
-RC tag that existed before approval. Stable releases differ: `sn release
---final` creates no release-time tag, so their first version tag is the
-fold-back receipt created by `sn approve`.
-
-### Approval routes and undo
-
-`sn approve --pr` has two integration routes:
-
-- An unedited batch entry auto-promotes from `accepted` to `approved` with the
-  PR number, URL, merge commit, and approval time recorded as provenance.
-- A reviewer-edited name or documentation record re-enters the ordinary review
-  pipeline as a human-steered proposal. A passing review becomes `approved`; a
-  failing review becomes `contested` and is frozen for human disposition. Only
-  `sn resolve <name> --override --reason <justification>` may approve a
-  contested result. Never hand-accept it or bypass the recorded reason.
-
-Undo the fold-back with:
+A branch push retriggers the pull-request build. For an explicit rebuild with
+no content change, dispatch the workflow with its exact `pull-request-number`
+input:
 
 ```bash
-uv run imas-codex sn approve --undo --pr <merged-pr-url>
+gh workflow run catalog.yml \
+  --repo <owner>/<catalog> \
+  -f pull-request-number=<number>
 ```
 
-Undo removes that PR's approval provenance, returns its auto-approved entries
-to `accepted`, returns its contested entries to `accepted`, and removes the
-fold-back receipt locally and remotely. For an RC it restores the exact cut-time
-tag; for a stable release it deletes the receipt tag. Accepted human edits
-remain graph history; revert wording through `sn edit`, never by rewriting
-graph properties. Undo is scoped to the named PR and does not disturb approvals
-owned by another PR.
+`gh run rerun <run-id>` is also valid for the same commit. Never close or
+reopen a live PR to force CI: that churns reviewer notifications, briefly hides
+the review surface, and is unnecessary because push, rerun, and
+`workflow_dispatch` are supported.
+
+### Cut-time tag and fold-back receipt
+
+`sn release --batch` creates an annotated RC tag on the review-branch head and
+pushes it to the fork at cut time. This is the immutable candidate and site
+build record, not proof of graph synchronization. `--no-pr` deliberately stops
+after that tagged build without opening a PR.
+
+After merge and a successful approval, the same tag ref is replaced on the
+merge commit by an annotation whose first line begins `graph-merged:`. Its
+deterministic block records the PR, frozen batch, outcome counts, and the prior
+tag object as `prior-tag-ref`; optional notes appear below a separator and are
+never parsed. The idempotency guard reads the annotation shape, not mere tag
+existence: a cut-time tag is allowed, while a `graph-merged:` receipt refuses a
+second fold-back.
+
+Undo removes the receipt and force-restores the exact prior cut-time RC object.
+A stable release has no cut-time tag, so approval creates its first version tag
+as the receipt and undo deletes it. Do not call a plain RC tag proof that the
+catalog and graph agree.
+
+### Approval routes, preflight, and undo
+
+Before the first graph write or catalog materialization, approval preflights
+every reviewer-edited target. Each must exist with `name_stage='accepted'`,
+`docs_stage='accepted'`, no prior PR provenance, and no prior approval. Any
+ineligible or unmatched target makes the command fail closed before edit
+application, automatic promotions, catalog pushes, or receipt creation. This
+gate exists because the earlier partial path promoted 384 entries and pushed a
+receipt-less catalog commit before discovering two ineligible edits.
+
+Once the complete preflight passes, `sn approve --pr` uses two routes:
+
+- An untouched batch entry auto-promotes from `accepted` to `approved` with
+  the PR number, URL, merge commit, reviewer actor, and approval time recorded.
+- A reviewer-edited name or documentation value becomes a human-steered
+  proposal and receives the full ordinary re-review without refinement. A pass
+  becomes `approved`; a failure becomes `contested`. Both routes retain the PR
+  provenance. Resolve a contested result only with `sn resolve <name>
+  --override --reason <justification>`; resolution materializes the stored name
+  or documentation proposal, sets `docs_stage='accepted'`, and records the
+  justification. Never hand-accept or rewrite the graph directly.
+
+For a rehearsal, unwind only after the merge, approval, any explicit contested
+resolution, and the frozen-row check have been recorded:
+
+```bash
+uv run --no-sync imas-codex sn approve --undo --pr <merged-pr-url>
+```
+
+Undo demotes names approved by that PR and contested names in its frozen batch
+to `accepted`, restores `docs_stage='accepted'`, and clears all catalog PR
+provenance. An approved row with missing PR provenance is included only when
+its identity belongs to the same frozen batch; a null-provenance non-member is
+unchanged. The catalog correction is inverted before the receipt disappears,
+then the RC tag is restored or the stable receipt is deleted.
+
+Undo does not un-apply accepted reviewer wording, erase its internal change
+record, or rewrite the immutable frozen review manifest. Revert wording through
+`sn edit`. Undo is scoped to the named PR and must not disturb another PR's
+approval. A receipt-less catalog materialization from old or broken code cannot
+be inferred safe from graph state; it requires an explicitly authorized Git
+inverse followed by complete-tree equality, as the recorded inverse report
+demonstrates.
+
+### Recorded rehearsal runbook
+
+- **Prepare.** Read all four live help surfaces; verify the catalog checkout,
+  fork/upstream remotes, GitHub authentication, clean branches, manifest token,
+  and detached-worktree environment. Export and hash a graph restore point
+  before the first live graph mutation.
+- **Drain and cut.** Run `sn run --batch` gap-only until the release gates and
+  complete source accounting pass. Author the title and decisions-only body,
+  then run `sn release --batch` with the required bump, message, title, and body
+  file. Confirm the branch and RC tag exist only on the fork and the PR diff is
+  additive.
+- **Inspect.** Require the validation and reviewer-edit guard checks, open the
+  PR-scoped preview, and confirm its visible identities equal the PR additions
+  and edits. Make only reviewer-owned changes. Use the dispatch input above for
+  a no-content rebuild; never cycle PR state.
+- **Merge and fold back.** Merge only after the checks pass, pull catalog
+  `main`, run approval dry first, then run live approval. Confirm the untouched,
+  edited-pass, and contested counts; verify every folded or contested row has
+  complete PR provenance; verify the receipt begins `graph-merged:`; and prove
+  a repeated approval is refused.
+- **Adjudicate.** For each contested proposal, either leave it frozen or run
+  `sn resolve --override --reason` with a substantive human justification.
+  Confirm that the exact reviewed proposal, accepted docs stage, resolution,
+  and provenance are present afterward.
+- **Freeze-check.** Snapshot all approved and contested rows, run an ordinary
+  unscoped pipeline drain with a conservative cost cap, and compare the same
+  projection afterward. Non-frozen work must execute while every frozen row is
+  byte-identical.
+- **Unwind only a rehearsal.** Run `sn approve --undo`, then require approved
+  and contested counts to return to their baseline, all frozen-batch PR fields
+  to be null, the receipt to be absent, the exact cut-time RC tag to be back,
+  the fork tree to equal the merged-PR baseline, the review manifest to be
+  byte-identical, and upstream to be unchanged. A real accepted release stops
+  before this bullet.
+
+The fully repaired live cycle produced **384 auto-approved plus 2 contested**.
+After one contested override, undo reverted **385 approved plus 1 contested**.
+It finished with 0 approved, 0 contested, 2,336 accepted globally, all five PR
+fields null on all 409 frozen-batch rows, fork-tree equality with the PR merge,
+the receipt removed, the cut-time RC tag restored, and upstream unchanged.
+
+### Rehearsal evidence
+
+These are the durable reports, including failures that changed the recipe:
+
+- [`crew/reports/west-stage3-restore-point.md`](../../crew/reports/west-stage3-restore-point.md) — pre-write graph archive, hash, and identical before/after census.
+- [`crew/reports/west-stage3-review-merge.md`](../../crew/reports/west-stage3-review-merge.md) — two reviewer edits, three successful checks, fork merge, and zero upstream delta.
+- [`crew/reports/west-stage4-approve.md`](../../crew/reports/west-stage4-approve.md) — initial 374-plus-2 fold-back, receipt/idempotency proof, and the missing contested-provenance defect.
+- [`crew/reports/west-stage4b-resolve.md`](../../crew/reports/west-stage4b-resolve.md) — initial override transition and the defect where accepted wording was not materialized.
+- [`crew/reports/west-stage5-freeze-check.md`](../../crew/reports/west-stage5-freeze-check.md) — frozen-row mutation under ordinary pool work.
+- [`crew/reports/west-stage5-freeze-check-2.md`](../../crew/reports/west-stage5-freeze-check-2.md) — blocked repeat with 1,343 parameter-binding failures; a zero diff was correctly rejected as vacuous.
+- [`crew/reports/west-stage5-freeze-check-3.md`](../../crew/reports/west-stage5-freeze-check-3.md) — passing freeze proof: 376 rows by 19 fields unchanged while 51 non-frozen names changed.
+- [`crew/reports/west-stage6-undo.md`](../../crew/reports/west-stage6-undo.md) — first undo, detached-worktree ISNC requirement, exact RC-tag restoration, and the provenance-less residual.
+- [`crew/reports/west-stage6b-repaired-cycle.md`](../../crew/reports/west-stage6b-repaired-cycle.md) — partial-promotion failure that required the all-target eligibility preflight and docs-stage restoration.
+- [`crew/reports/west-catalog-main-inverse.md`](../../crew/reports/west-catalog-main-inverse.md) — authorized fork-only inverse of the receipt-less materialization, with complete-tree equality and zero upstream or graph delta.
+- [`crew/reports/west-stage6c-final-cycle.md`](../../crew/reports/west-stage6c-final-cycle.md) — final 384-plus-2 approval, contested resolution, 385-plus-1 undo, provenance clearance, tag/receipt behavior, manifest identity, fork-tree equality, and upstream isolation.
 
 ## The catalog is not the source of truth
 
