@@ -48,8 +48,8 @@ from imas_codex.graph.neo4j_ops import (
 from imas_codex.graph.offsite import OffsiteCountMismatch, run_offsite_push_cycle
 
 _RELEASE_TAG = re.compile(r"^v?\d+\.\d+\.\d+(?:-rc\d+)?$")
-_PUSH_JOB_NAME = "codex-graph-push"
-_PUSH_INTERVAL = "now+7days"
+_PUSH_SERVICE_NAME = "imas-codex-graph-push"
+_PUSH_TIMER_NAME = f"{_PUSH_SERVICE_NAME}.timer"
 
 
 @dataclass(frozen=True)
@@ -217,41 +217,142 @@ def _resolve_partition(profile) -> str | None:
         return None
 
 
-def _scheduled_push_command() -> str:
-    """Return the batch body that runs one cycle and schedules its successor."""
+def _push_schedule_paths() -> tuple[Path, Path]:
+    service_dir = Path.home() / ".config" / "systemd" / "user"
     return (
-        "uv run --no-sync imas-codex graph push --cycle\n"
-        "cycle_status=$?\n"
-        f'sbatch --begin={_PUSH_INTERVAL} "$0"\n'
-        "schedule_status=$?\n"
-        'if [ "$cycle_status" -ne 0 ]; then exit "$cycle_status"; fi\n'
-        'exit "$schedule_status"'
+        service_dir / f"{_PUSH_SERVICE_NAME}.service",
+        service_dir / _PUSH_TIMER_NAME,
     )
 
 
-def _scheduled_push_preview() -> str:
-    """Render the material batch lines shown by cycle dry-runs."""
-    return (
-        "#!/bin/bash\n"
-        f"#SBATCH --job-name={_PUSH_JOB_NAME}\n"
-        "#SBATCH --cpus-per-task=2\n"
-        "#SBATCH --mem=8G\n"
-        "# partition and log path are resolved by the graph service helper\n"
-        "cd $HOME/Code/imas-codex\n"
-        "source .env 2>/dev/null || true\n"
-        f"{_scheduled_push_command()}"
+def _push_schedule_project_dir() -> Path:
+    candidates = (
+        Path.home() / "Code" / "imas-codex",
+        Path.home() / "imas-codex",
+        Path.cwd(),
+    )
+    for candidate in candidates:
+        if (candidate / "pyproject.toml").exists():
+            return candidate
+    raise click.ClickException(
+        "Project not found under ~/Code/imas-codex, ~/imas-codex, or the current "
+        "directory"
     )
 
 
-def _submit_push_schedule() -> None:
-    from imas_codex.cli.services import _submit_service_job
+def _push_schedule_service_text(
+    project_dir: Path,
+    *,
+    uv_path: str,
+    hostname: str,
+) -> str:
+    """Build the host-pinned login-node oneshot unit."""
+    return f"""[Unit]
+Description=IMAS Codex verified full-graph offsite push
+After=network-online.target
+Wants=network-online.target
+ConditionHost={hostname}
 
-    _submit_service_job(
-        _PUSH_JOB_NAME,
-        _scheduled_push_command(),
-        cpus=2,
-        mem="8G",
-    )
+[Service]
+Type=oneshot
+WorkingDirectory={project_dir}
+EnvironmentFile=-{project_dir / ".env"}
+Environment="PATH={Path.home()}/.local/bin:/usr/local/bin:/usr/bin"
+ExecStart={uv_path} run --no-sync --project {project_dir} imas-codex graph push --cycle
+"""
+
+
+def _push_schedule_timer_text() -> str:
+    """Build the persistent weekly timer for verified offsite pushes."""
+    return f"""[Unit]
+Description=Weekly IMAS Codex verified full-graph offsite push
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+Unit={_PUSH_SERVICE_NAME}.service
+
+[Install]
+WantedBy=timers.target
+"""
+
+
+def _manage_push_schedule(action: str, *, dry_run: bool = False) -> None:
+    """Install, inspect, or remove the login-node user timer."""
+    import platform
+    import socket
+
+    if platform.system() != "Linux":
+        raise click.ClickException("systemd services only supported on Linux")
+    systemctl = shutil.which("systemctl")
+    if not systemctl:
+        raise click.ClickException("systemctl not found")
+
+    service_file, timer_file = _push_schedule_paths()
+
+    if action == "install":
+        project_dir = _push_schedule_project_dir()
+        uv_path = shutil.which("uv") or str(Path.home() / ".local" / "bin" / "uv")
+        service_text = _push_schedule_service_text(
+            project_dir,
+            uv_path=uv_path,
+            hostname=socket.getfqdn(),
+        )
+        timer_text = _push_schedule_timer_text()
+        if dry_run:
+            click.echo("[DRY RUN] systemd user service:")
+            click.echo(service_text)
+            click.echo("[DRY RUN] systemd user timer:")
+            click.echo(timer_text)
+            click.echo("[DRY RUN] No files were written and systemctl was not called.")
+            return
+
+        service_file.parent.mkdir(parents=True, exist_ok=True)
+        service_file.write_text(service_text)
+        timer_file.write_text(timer_text)
+        subprocess.run([systemctl, "--user", "daemon-reload"], check=True)
+        subprocess.run(
+            [systemctl, "--user", "enable", "--now", _PUSH_TIMER_NAME],
+            check=True,
+        )
+        click.echo("Weekly login-node graph push timer installed and enabled")
+        click.echo(f"  Service: {service_file}")
+        click.echo(f"  Timer:   {timer_file}")
+        return
+
+    if action == "status":
+        if not service_file.exists() or not timer_file.exists():
+            click.echo("Weekly login-node graph push timer is not installed")
+            return
+        result = subprocess.run(
+            [systemctl, "--user", "status", _PUSH_TIMER_NAME],
+            capture_output=True,
+            text=True,
+        )
+        click.echo(result.stdout, nl=not result.stdout.endswith("\n"))
+        if result.stderr:
+            click.echo(result.stderr, err=True, nl=not result.stderr.endswith("\n"))
+        return
+
+    if action == "remove":
+        if not service_file.exists() and not timer_file.exists():
+            click.echo("Weekly login-node graph push timer is not installed")
+            return
+        subprocess.run(
+            [systemctl, "--user", "disable", "--now", _PUSH_TIMER_NAME],
+            capture_output=True,
+        )
+        subprocess.run(
+            [systemctl, "--user", "stop", f"{_PUSH_SERVICE_NAME}.service"],
+            capture_output=True,
+        )
+        service_file.unlink(missing_ok=True)
+        timer_file.unlink(missing_ok=True)
+        subprocess.run([systemctl, "--user", "daemon-reload"], check=True)
+        click.echo("Weekly login-node graph push timer removed")
+        return
+
+    raise ValueError(f"Unknown graph push schedule action: {action}")
 
 
 def _invoke_graph_command(command, args: list[str], operation: str) -> None:
@@ -367,11 +468,10 @@ def _read_offsite_currency(
     return get_offsite_currency(registry, fallback), fallback
 
 
-def _run_scheduled_push(
+def _run_offsite_cycle(
     *,
     registry: str | None,
     token: str | None,
-    schedule: bool,
     dry_run: bool,
 ) -> None:
     target_registry = get_registry(get_git_info(), registry)
@@ -385,17 +485,7 @@ def _run_scheduled_push(
             f"Archive stamp: {graph_archive_stamp()} "
             "(a fresh UTC stamp is generated when the cycle runs)"
         )
-        click.echo("\n[DRY RUN] SLURM script:")
-        click.echo(_scheduled_push_preview())
         click.echo("\n[DRY RUN] No archive was exported or pushed.")
-        return
-
-    if schedule:
-        _submit_push_schedule()
-        click.echo(
-            "Scheduled one immediate push cycle; each job submits its successor "
-            "for seven days later."
-        )
         return
 
     try:
@@ -430,7 +520,17 @@ def _run_scheduled_push(
 @click.option(
     "--schedule",
     is_flag=True,
-    help="Submit the weekly self-resubmitting push job.",
+    help="Install the weekly login-node push timer.",
+)
+@click.option(
+    "--schedule-status",
+    is_flag=True,
+    help="Show the weekly login-node push timer status.",
+)
+@click.option(
+    "--remove-schedule",
+    is_flag=True,
+    help="Remove the weekly login-node push timer.",
 )
 @click.option(
     "--cycle",
@@ -491,6 +591,8 @@ def graph_push(
     version_tag_override: str | None = None,
     source_dump: str | None = None,
     schedule: bool = False,
+    schedule_status: bool = False,
+    remove_schedule: bool = False,
     cycle: bool = False,
 ) -> None:
     """Push graph archive to GHCR.
@@ -501,9 +603,13 @@ def graph_push(
     """
     from imas_codex.cli.graph_progress import GraphProgress, run_oras_with_progress
 
-    if schedule and cycle:
-        raise click.UsageError("--schedule and --cycle are mutually exclusive")
-    if schedule or cycle:
+    operational_modes = sum((schedule, schedule_status, remove_schedule, cycle))
+    if operational_modes > 1:
+        raise click.UsageError(
+            "--schedule, --schedule-status, --remove-schedule, and --cycle are "
+            "mutually exclusive"
+        )
+    if operational_modes:
         incompatible = any(
             (
                 dev,
@@ -518,14 +624,20 @@ def graph_push(
         )
         if incompatible:
             raise click.UsageError(
-                "--schedule/--cycle cannot be combined with push variant options"
+                "schedule/cycle options cannot be combined with push variant options"
             )
-        _run_scheduled_push(
-            registry=registry,
-            token=token,
-            schedule=schedule,
-            dry_run=dry_run,
-        )
+        if schedule:
+            _manage_push_schedule("install", dry_run=dry_run)
+        elif schedule_status:
+            _manage_push_schedule("status")
+        elif remove_schedule:
+            _manage_push_schedule("remove")
+        else:
+            _run_offsite_cycle(
+                registry=registry,
+                token=token,
+                dry_run=dry_run,
+            )
         return
 
     git_info = get_git_info()
