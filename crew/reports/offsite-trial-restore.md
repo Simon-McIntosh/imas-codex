@@ -1,18 +1,10 @@
-NEEDS-HELP: The registry archive loaded into the scratch graph, but the generated scratch configuration binds Neo4j to compute-node loopback and both allowed client access attempts failed, so the required census comparison and scratch removal gate remain unproven.
-
-tried: Fetched the exact registry tag with `graph fetch`, created `offsite-trial` with `graph init`, loaded it with `graph load`, started its SLURM-owned Neo4j service, then queried first from the login node and once from inside the assigned compute node. The login-node `GraphClient` received connection refused because the scratch listener is bound to `localhost`; direct SSH to the compute node was closed before the command ran. I then stopped the scratch service, switched back to `codex`, started it, and proved a `GraphClient` query succeeds.
-
-options: (1) Authorize a narrowly scoped correction so new graph instances bind Bolt/HTTP on the SLURM node's reachable interface, then rerun the census against the preserved loaded scratch directory. (2) Restore or authorize an approved compute-node execution channel (`srun --jobid` or equivalent) and run the canonical `GraphClient` census with `NEO4J_URI=bolt://localhost:7687`. (3) If neither runtime route is allowed, treat the drill as failed, remove the scratch directory through the graph lifecycle tooling, and schedule a new trial after the graph-init networking defect lands.
-
-leaning: Option 1, because the existing `codex` graph already binds to `0.0.0.0` and is reachable through the normal SLURM discovery path, while the newly generated scratch config explicitly binds both listeners to `127.0.0.1`. Making initialized instances follow the supported serving topology fixes the recovery path rather than adding a one-off access route.
-
-cost-if-wrong: The preserved 9,998,934,641-byte scratch instance may need to be discarded and the 41.38-second load repeated; the 2,461,580,657-byte fetched archive is already local, so a repeated registry download is avoidable unless artifact identity is questioned.
+COMPLETE: The exact offsite archive was fetched and loaded into `offsite-trial`; a canonical `GraphClient` census executed on its SLURM node matched all receipt counts exactly; `codex` was restored and queried successfully; the inactive scratch directory was removed with measured space reclamation.
 
 # Offsite trial restore report
 
 ## Outcome
 
-Status: **blocked**. The registry fetch and archive load succeeded, and the production graph was returned to a healthy serving state. The required scratch census was not observed, so no equality claim is made and the scratch graph was deliberately not removed.
+Status: **complete**. The registry fetch, archive load, scratch census, production recovery, and scratch removal gates all succeeded.
 
 The push receipt requires:
 
@@ -21,7 +13,13 @@ The push receipt requires:
 - distinct labels: `70`
 - canonical sorted label-count SHA-256: `1e1c11a2642999adb26fd4fe4b8c6eccf2299db0f836ecbb6af79a1ffa7b14d6` (required prefix `1e1c11a2`)
 
-Observed from the restored scratch graph: **absent evidence**. Neither aggregate counts nor the 70-label census were returned by a successful query.
+Observed from the restored scratch graph on `98dci4-gpu-0002` through `run_python_script`:
+
+- nodes: `1,614,780` — exact match
+- relationships: `4,259,356` — exact match
+- distinct labels: `70` — all 70 receipt labels compared
+- label differences: `0`
+- canonical sorted label-count SHA-256: `1e1c11a2642999adb26fd4fe4b8c6eccf2299db0f836ecbb6af79a1ffa7b14d6` — exact match
 
 ## Registry artifact
 
@@ -63,10 +61,33 @@ All project commands used the shared root environment with `env -u VIRTUAL_ENV U
 | `du -sb <scratch-dir>` | 0 | 0.59 s | Preserved scratch directory consumes 9,998,934,641 bytes. |
 | `readlink -f <active-graph-link>` | 0 | 0.03 s | Resolves to `/home/ITER/mcintos/.local/share/imas-codex/.neo4j/codex`. |
 | `test -d <scratch-dir>` | 0 | 0.00 s | Scratch directory remains present by design. |
+| resumed `imas-codex graph status` | 0 | 13.81 s | `codex` remained active and serving before the authorized continuation. |
+| `du -sb <scratch-dir>` | 0 | 0.41 s | Scratch apparent size was 9,998,934,641 bytes. |
+| `du -s -B1 <scratch-dir>` | 0 | 0.42 s | Scratch allocated size was 9,999,472,640 bytes. |
+| `imas-codex graph stop` while `codex` active | 0 | 7.32 s | Stopped production cleanly before reactivating scratch. |
+| `imas-codex graph switch offsite-trial` | 0 | 7.48 s | Selected the preserved loaded scratch instance. |
+| `imas-codex graph start` for scratch | 1 | 40.77 s | Submitted job `1261206`; the login-node readiness probe could not reach the loopback-only listener, while the job remained running. |
+| repository `_get_neo4j_job()` query | 0 | 7.69 s | Derived job `1261206`, node `98dci4-gpu-0002`, state `RUNNING`, exactly as graph status does. |
+| direct-node `run_python_script` census | 1 / remote 255 | 7.73 s | Executor reported site SSH closing direct compute-node connections before script execution. |
+| direct-node executor hostname probe using FQDN | 1 / remote 255 | 7.88 s | Confirmed the same direct SSH policy refusal. |
+| executor-over-login plus allocation census using system Python | 1 | 8.54 s | Reached the allocation but lacked the Neo4j Python dependency. |
+| executor-over-login plus allocation hostname probe | 0 | 8.05 s | Executed on `98dci4-gpu-0002.iter.org`, proving the sanctioned allocation route. |
+| executor-over-login census with captured failure detail | 1 | 7.93 s | Confirmed `ModuleNotFoundError: neo4j` from system Python; no graph query executed. |
+| `run_python_script` census via overlapping allocation step and shared project Python | 0 | 25.16 s | Compared 70/70 labels with zero differences; exact node, relationship, label, and SHA-256 matches. |
+| `imas-codex graph stop` while scratch active | 0 | 8.52 s | Stopped job `1261206` before switching away. |
+| `imas-codex graph switch codex` | 0 | 7.53 s | Restored the production active symlink. |
+| `imas-codex graph start` for `codex` | 0 | 36.07 s | Submitted job `1261209`; Bolt and HTTP became reachable on `98dci4-gpu-0002`. |
+| final `imas-codex graph status` | 0 | 15.90 s | `codex` active, Neo4j running, GraphMeta name `codex`, facilities `tcv, jet, iter`. |
+| final pre-delete `GraphClient` GraphMeta query | 0 | 6.86 s | Returned `{"facilities":["tcv","jet","iter"],"name":"codex"}`. |
+| resolved-target deletion guards | 0 | 0.10 s | Active target was `.neo4j/codex`; scratch resolved exactly to inactive `.neo4j/offsite-trial` and was not a symlink. |
+| `rm -rf -- /home/ITER/mcintos/.local/share/imas-codex/.neo4j/offsite-trial` | 0 | 2.51 s | Removed only the explicit inactive scratch directory. |
+| post-delete absence and filesystem-space checks | 0 | 0.10 s | Scratch path absent; filesystem available bytes increased from 388,671,421,284,352 to 388,680,397,094,912. |
+| post-delete `imas-codex graph list` | 0 | 7.09 s | Lists only active `codex`, `imas`, and `titan-test`; `offsite-trial` is absent. |
+| post-delete `GraphClient` GraphMeta query | 0 | 7.15 s | Production graph still serves the expected identity after scratch deletion. |
 
-The explicitly timed fetch-to-safe-baseline commands total 339.19 seconds. This is an attempt duration, not the required successful restore-path elapsed time: the census and deletion gates never completed, and diagnosis between commands is excluded.
+The explicitly timed commands across the complete restore drill total **574.01 seconds** of active command wall time, including failed readiness and access attempts but excluding the human approval pause and untimed read-only source inspection. The registry fetch was 97.93 seconds, archive load 41.38 seconds, successful scratch census 25.16 seconds, final production start 36.07 seconds, and scratch deletion 2.51 seconds.
 
-## Failure evidence
+## Recovered access and follow-on
 
 The scratch service log at `/home/ITER/mcintos/.local/share/imas-codex/services/codex-neo4j.log` recorded:
 
@@ -74,17 +95,19 @@ The scratch service log at `/home/ITER/mcintos/.local/share/imas-codex/services/
 - `HTTP enabled on 127.0.0.1:7474`
 - Neo4j `2026.01.4` reached `Started.`
 
-The preserved scratch configuration was generated by `graph init`; no manual config edit was made because the worker's exclusive repository write scope is only this report. The production graph's subsequent startup log instead recorded Bolt and HTTP on `0.0.0.0`, and the normal `GraphClient` query succeeded.
+The scratch configuration was generated by `graph init`; no manual config edit was made because the worker's exclusive repository write scope is only this report. Direct compute-node SSH is also closed by site policy. The successful sanctioned route used the repository's `run_python_script` executor to transmit an in-memory Python 3.12 script, with an overlapping step inside the already-owned Neo4j SLURM allocation and `NEO4J_URI=bolt://localhost:7687`. Both executor and allocation carried explicit timeouts.
+
+Follow-on: align new graph-instance listener configuration with the supported SLURM topology. Production `codex` binds Bolt and HTTP on `0.0.0.0`, while `graph init` currently emits `127.0.0.1`; this makes ordinary graph-status readiness and login-node `GraphClient` discovery fail for a new instance even when Neo4j is healthy. This node records the defect but does not alter source or configuration.
 
 ## Cleanup and recovery state
 
 - active graph: `codex`
 - Neo4j: running under SLURM
-- production client query: succeeded
-- scratch directory: `/home/ITER/mcintos/.local/share/imas-codex/.neo4j/offsite-trial`
-- scratch bytes retained: `9,998,934,641`
+- production client query before deletion: succeeded
+- production client query after deletion: succeeded
+- scratch path removed: `/home/ITER/mcintos/.local/share/imas-codex/.neo4j/offsite-trial`
+- scratch apparent bytes removed: `9,998,934,641`
+- scratch allocated bytes removed: `9,999,472,640`
+- measured filesystem available-space increase: `8,975,810,560` bytes
 - fetched archive bytes retained: `2,461,580,657`
-- space reclaimed: `0` bytes
-
-Scratch removal is intentionally withheld. Removing it would erase the successfully loaded recovery candidate before a corrected, authorized census route can inspect it. After a successful census comparison, the concrete final action is to stop Neo4j, ensure `codex` remains active, and remove `offsite-trial` through the supported graph lifecycle path, then measure reclaimed bytes.
-
+- post-delete local graph count: `3` (`codex`, `imas`, `titan-test`)
