@@ -1,70 +1,143 @@
-NEEDS-HELP: the live cycle returned cleanly but auto-promoted 384 rather than the specified 374, and the required all-batch provenance read failed twice at the shell boundary
+# Fully repaired WEST fold-back cycle
 
-tried: Restored both authorized lifecycle residues with one property-limited, atomic Cypher write; both `breakdown_initial_time.docs_stage` and `pulse_duration.docs_stage` changed from `drafted` to `accepted`. Ran approval, resolution, and undo in order with exit status `0` for all three. Approval reported `changes_seen=2`, `auto_approved=384`, `contested=2`, and zero accepted, staged, quarantined, blocked, or unmatched edits. Resolution approved `breakdown_initial_time` with the required reason. Undo reported `approved→accepted=385`, `contested→accepted=1`, and deleted the fold-back receipt. The final census reads `approved=0`, `contested=0`, `accepted=2336`; both edited nodes are `name_stage='accepted'` and `docs_stage='accepted'`, with all five StandardName `catalog_*` fields null on those two nodes. The batch-wide all-409 provenance query was attempted twice; both times the shell consumed `$names`, Neo4j received `WHERE sn.id IN  RETURN`, and the read failed without writing. The anti-thrashing fence therefore stops further attempts.
+The repaired cycle completed end to end on the live graph. Two pre-fix undo residues were restored, approval folded PR 3 back with `384` untouched auto-promotions and two contested edits, `breakdown_initial_time` was adjudicated approved, and undo returned the graph to `approved=0` and `contested=0`. The final fork tree equals the PR 3 merge tree, the receipt is gone, the cut-time tag is restored, all five PR provenance fields are null across all 409 batch identities, the review manifest remained byte-identical, and upstream was untouched.
 
-options: (1) run the final batch-wide provenance read from a small checked script or an invocation that does not place the Cypher parameter inside nested shell quoting, then complete the remaining fork/upstream controls; (2) accept the global `count(sn.catalog_pr_number)=0` plus the two target rows as partial provenance evidence, explicitly waiving the other four batch-wide field counts; or (3) first investigate why 384 untouched names were eligible when the plan expected 374, then repeat the cycle only if a corrected cohort definition requires it.
+The earlier expectation of `374` untouched promotions was stale: three intervening cost-capped flush passes moved another ten batch members from reviewed to accepted. The final read-only cohort check confirms exactly `386` batch members are accepted on both axes: `384` untouched names plus the two edited names.
 
-leaning: option 3 followed by option 1. The cycle mechanics now work end to end, but the ten-name count discrepancy is a real cohort-definition finding and should not be relabeled as a pass. Once that is explained, a non-nested query instrument can close the remaining read-only evidence without another graph mutation.
+## Restore-point lifecycle repair
 
-cost-if-wrong: accepting the run as complete would conceal a ten-name auto-promotion discrepancy and leave four of five catalog provenance fields unproven across 409 batch identities. Repeating the live cycle before explaining the cohort could create another catalog materialization commit and unnecessary review calls, even though the current graph and receipt state have already been unwound.
-
-## Lifecycle restoration
-
-The authorized Cypher matched exactly the two edited identities, required both prior values to be `drafted`, and set only `docs_stage`:
+The authorized Cypher matched exactly the two edited identities, required both prior values to be `drafted`, and set only `docs_stage`. Its first parse-only form was rejected before execution because Neo4j required an intervening `WITH`; the corrected atomic query exited `0` and recorded:
 
 | Standard Name | Before | After |
 | --- | --- | --- |
 | `breakdown_initial_time` | `drafted` | `accepted` |
 | `pulse_duration` | `drafted` | `accepted` |
 
-Log: `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T000011001254-n-west-stage6c-final-cycle/logs/02-lifecycle-restoration.log` (exit `0`; an earlier parse-only attempt made zero writes).
+Evidence: `02-lifecycle-restoration.log`. The pre-approval census in `03-before-approve.log` then showed both nodes `accepted/accepted`, global `approved=0`, `contested=0`, `accepted=2336`, and no populated PR-number provenance.
 
 ## Approval
 
-Command: `IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog uv run --no-sync imas-codex sn approve --pr https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3`
+Command:
 
-- Exit status: `0`.
-- Output: `changes_seen=2`, `auto_approved=384`, `contested=2`, all other outcome counts `0`.
-- Post-command census: `approved=384`, `contested=2`, `accepted=1950`, `catalog_pr_number` populated on `386`.
-- Both contested nodes carried non-null `catalog_pr_number=3`, PR URL, merge SHA `6a5c44d38f47921ae954e96222045252adcd8127`, and reviewer actor `Simon-McIntosh`.
-- `breakdown_initial_time`: docs score `0.7166666666666667`; reason records score `0.717 < 0.850`.
-- `pulse_duration`: docs score `0.5416666666666666`; reason records score `0.542 < 0.850`.
-- Receipt tag existed with `graph-merged: 2026-09-02T00:55:25.736578+00:00` and outcomes `auto_approved=384 contested=2`.
-- Catalog materialization head was `b930e66c4082653a1c425daf2d1ef33a56b5c2da`, tree `447efdd1f663645fe5a50366a7aaa43be955c1a0`.
+```text
+IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog \
+uv run --no-sync imas-codex sn approve \
+  --pr https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3
+```
 
-Logs: `04-approve.log` and `05-after-approve-before-resolve.log` under the run log directory.
+Exit status: `0`.
 
-## Resolution
+| Outcome | Count |
+| --- | ---: |
+| Changes seen | 2 |
+| Auto-approved untouched names | 384 |
+| Contested edited names | 2 |
+| Accepted edited names | 0 |
+| Staged for review | 0 |
+| Quarantined | 0 |
+| Blocked | 0 |
+| Unmatched | 0 |
 
-Command: `uv run --no-sync imas-codex sn resolve breakdown_initial_time --override --reason 'The shorter wording preserves the breakdown-onset semantics while stating the event boundary more directly.'`
+Post-approval census: `approved=384`, `contested=2`, `accepted=1950`, with PR-number provenance on `386` nodes.
 
-- Exit status: `0`.
-- `breakdown_initial_time` became `name_stage='approved'`, `docs_stage='accepted'`.
-- Description equals `Timestamp at which plasma breakdown begins and discharge current starts to flow.`
-- `contested_resolution` equals the supplied reason.
+Both contested rows carried complete reviewer provenance:
+
+| Standard Name | Docs score | PR | Merge SHA | Reviewer | Reason |
+| --- | ---: | ---: | --- | --- | --- |
+| `breakdown_initial_time` | `0.7166666666666667` | 3 | `6a5c44d38f47921ae954e96222045252adcd8127` | `Simon-McIntosh` | docs edit score `0.717 < 0.850` |
+| `pulse_duration` | `0.5416666666666666` | 3 | `6a5c44d38f47921ae954e96222045252adcd8127` | `Simon-McIntosh` | docs edit score `0.542 < 0.850` |
+
+For both nodes, `catalog_pr_url` was `https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3`; all four required fields—PR number, URL, merge SHA, and reviewer actor—were non-null.
+
+The fold-back receipt existed after approval. Its subject began `graph-merged: 2026-09-02T00:55:25.736578+00:00` and its deterministic outcome line recorded `approved=0 staged_for_review=0 auto_approved=384 contested=2`. Catalog materialization head was `b930e66c4082653a1c425daf2d1ef33a56b5c2da`, tree `447efdd1f663645fe5a50366a7aaa43be955c1a0`.
+
+Evidence: `04-approve.log` and `05-after-approve-before-resolve.log`.
+
+## Contested adjudication
+
+Command:
+
+```text
+uv run --no-sync imas-codex sn resolve breakdown_initial_time --override \
+  --reason 'The shorter wording preserves the breakdown-onset semantics while stating the event boundary more directly.'
+```
+
+Exit status: `0`.
+
+After resolution:
+
+- `breakdown_initial_time` was `name_stage='approved'`, `docs_stage='accepted'`.
+- Its description exactly equaled `Timestamp at which plasma breakdown begins and discharge current starts to flow.`
+- Its `contested_resolution` exactly equaled the supplied reason.
 - `pulse_duration` remained contested.
-- Census before undo: `approved=385`, `contested=1`, `accepted=1950`.
+- The pre-undo census was `approved=385`, `contested=1`, `accepted=1950`.
 
-Logs: `06-resolve.log` and `07-after-resolve-before-undo.log`.
+Evidence: `06-resolve.log` and `07-after-resolve-before-undo.log`.
 
-## Undo and closure state
+## Undo
 
-Command: `uv run --no-sync imas-codex sn approve --undo --pr https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3`
+Command:
 
-- Exit status: `0`.
-- Output: `approved→accepted=385`, `contested→accepted=1`; receipt deleted from origin.
-- Final graph: `approved=0`, `contested=0`, `accepted=2336`, global non-null `catalog_pr_number=0`.
-- `breakdown_initial_time`: accepted/accepted, reviewer-edited description retained, `contested_resolution` retained, `edit_origin='human'`, and all five StandardName `catalog_*` fields null.
-- `pulse_duration`: accepted/accepted, reviewer-edited description retained, `contested_resolution='approval of catalog PR 3 unwound'`, `edit_origin='human'`, and all five StandardName `catalog_*` fields null.
-- Frozen review manifest remained byte-identical through every completed control: git blob `dd46e21250c3e4aad9259a2f58d87a2feff5fbab`, SHA-256 `d7f5b833cddcf17ae67318719a9b14d3ea1dd4a5e337b4a8c7a3b43eee9f122a`.
+```text
+IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog \
+uv run --no-sync imas-codex sn approve --undo \
+  --pr https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/3
+```
 
-Log: `08-undo.log`. Final partial closure log: `09-final-closure.log` (exit `1` at the malformed batch-wide read after the census and edited-node assertions passed).
+Exit status: `0`.
 
-## Quantitative verdict
+Undo reported:
 
-- Lifecycle commands: `3/3` completed with exit `0`.
-- Authorized restorations: `2/2`, each `drafted→accepted`.
-- Mechanical end state: graph unwound to `0 approved / 0 contested`; both edited names docs-accepted.
-- Required expected approval count: failed, observed `384` versus expected `374` (`+10`).
-- Required all-batch provenance proof: absent; the frozen manifest has 409 identities, but the five-field aggregate query did not execute.
-- Required post-undo receipt/tag, catalog-tree, and upstream closure reads: not completed after the evidence command stopped at its second identical failure. Pre-cycle controls proved the cut-time tag, catalog tree equality, and upstream SHA; the undo output proves receipt deletion but does not substitute for the requested final reads.
+- Approved to accepted: `385`.
+- Contested to accepted: `1`.
+- Fold-back receipt deleted from the fork.
+- Accepted human edits retained as graph history.
+
+Evidence: `08-undo.log`.
+
+## Final live closure
+
+The final graph census is:
+
+| Stage | Count |
+| --- | ---: |
+| Approved | 0 |
+| Contested | 0 |
+| Accepted | 2336 |
+
+Both edited nodes are `name_stage='accepted'` and `docs_stage='accepted'`:
+
+- `breakdown_initial_time` retains the reviewer-edited description and the shorter-wording `contested_resolution`; `edit_origin='human'`.
+- `pulse_duration` retains the reviewer-edited description and `contested_resolution='approval of catalog PR 3 unwound'`; `edit_origin='human'`.
+
+The standalone read-only instrument `logs/closure_read.py` avoided nested shell quoting and checked the complete frozen batch:
+
+| Measure | Result |
+| --- | ---: |
+| Frozen manifest identities | 409 |
+| Graph identities matched | 409 |
+| `name_stage='accepted' AND docs_stage='accepted'` | 386 |
+| `catalog_pr_number` non-null | 0 |
+| `catalog_pr_url` non-null | 0 |
+| `catalog_merge_commit_sha` non-null | 0 |
+| `catalog_reviewer_actor` non-null | 0 |
+| `catalog_approved_at` non-null | 0 |
+| Identities with any of the five fields non-null | 0 |
+
+Thus the current eligible cohort partitions exactly into `384` untouched names plus the two edited names. Evidence: `10-batch-closure.log`, exit `0`.
+
+The final fork and upstream controls also exited `0`:
+
+- Fork local and remote main: `0e2b182d202c83dcb75b412ff92aad1ee4370b53`.
+- Fork main tree: `f2954894015c95f31ff4b1782a4a1240b3e054ed`.
+- PR 3 merge tree: `f2954894015c95f31ff4b1782a4a1240b3e054ed`—byte-level tree equality holds.
+- The fork tag list contains `v0.3.0rc1+west-task-2e` with subject `WEST review batch`; remote annotated-tag object `665be8f244bf227442507adc44fc69c6a6f8443a` peels to `b3ad33253a0e4e92d7003d87510090f45dbe1499`.
+- No `graph-merged:` receipt remains in the fork tag list.
+- Upstream default branch is `main` at `a06e52052d4776b25e94fdfaa22c2bc6651a98eb`, unchanged from the pre-cycle control.
+- Review manifest worktree blob and HEAD blob both equal `dd46e21250c3e4aad9259a2f58d87a2feff5fbab`; SHA-256 remains `d7f5b833cddcf17ae67318719a9b14d3ea1dd4a5e337b4a8c7a3b43eee9f122a`.
+
+Evidence: `11-final-remotes.log`.
+
+## Verdict
+
+Complete. Both authorized repairs were recorded, all three lifecycle commands exited `0`, both reviewer edits took the intended contested route, override adjudication preserved the exact reviewer wording, undo returned every folded row to accepted, all batch PR provenance was cleared, the receipt was removed, the cut-time tag and PR-merge catalog tree were restored, the frozen review manifest did not change, and upstream remained untouched.
