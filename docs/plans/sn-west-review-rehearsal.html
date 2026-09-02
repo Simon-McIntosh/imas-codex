@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="161">
+<meta name="plan-version" content="163">
 <meta name="plan-impl" content="0.99">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-blocks" content="sn-west-catalog-release">
-<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23,b5ed3fae,dc5bdcc3,8f8f5d99">
+<meta name="plan-commits" content="2220dd18,84a4550b,98b80ccb,29cd65ea,6f385c70,13be369b,06527979,6059a234,973028ef,65a43ae3,4d078c6f,5f0799f5,7ef24d29,81b3e71d,bfe3e390,3a2d0d3b,80c66161,38889c23,b5ed3fae,dc5bdcc3,8f8f5d99,e5df9970,ea575887">
 </head>
 <body>
   <main class="plan-doc">
@@ -2657,6 +2657,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="followups" data-id="c-run-r-20260901T235121650370-n-west-catalog-main-inverse" data-who="impl-weststage3" data-when="2026-09-01T23:55:23Z">
     <div class="r-comment-body"><p>fork main reverted the receipt-less materialization; catalog tree equals the PR 3 merge 6a5c44d3 again, only the cut-time RC tag remains, upstream untouched, graph approved 0 / contested 0</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-run-r-20260901T235113590160-n-approve-eligibility-preflight" data-who="impl-approvebase" data-when="2026-09-01T23:59:10Z">
+    <div class="r-comment-body"><p>sn approve preflights every edited target (accepted name, accepted docs, not already approved) before any graph write or catalog push and exits non-zero with zero mutation on an ineligible target; undo restores docs_stage accepted on reverted rows; approval suites pass</p></div>
+</div>
+<div class="r-comment" data-section="followups" data-id="c-20260902T0200-preflight-landed" data-who="reckon-ship" data-when="2026-09-02T02:00:00Z">
+    <div class="r-comment-body">Both 6b repairs landed. Fork catalog main reverted the receipt-less materialization (fork inverse 3edfcc13, report e5df9970): head tree f2954894 equals the PR 3 merge tree, only the cut-time RC tag remains, upstream unchanged at a06e5205, graph approved 0 / contested 0 / accepted 2336. sn approve now fails closed (ea575887, merged e30da1a2): every edited target is eligibility-read (name accepted, docs accepted, no PR provenance, not approved) before the first write, an ineligible target exits non-zero with 0 write queries, 0 apply_edit, 0 auto-promotions, 0 catalog calls, 0 receipt; undo restores docs_stage accepted on both approved and contested reversions; 58/58. One residue from the pre-fix undo: pulse_duration may still sit at docs_stage drafted, which the repaired undo would have restored; the final cycle node restores that one lifecycle field to its restore-point value under a recorded Cypher before running approve, resolve and undo.</div>
 </div>
 </section>
 </main>
