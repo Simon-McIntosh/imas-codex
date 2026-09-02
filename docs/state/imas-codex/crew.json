@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T18:17:42",
+  "updated": "2026-09-02T18:24:00",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1181,9 +1181,11 @@
         "id": "impl-kindrule",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a062e2-7457-7452-8414-b9a7959d6c7c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a062e2-7457-7452-8414-b9a7959d6c7c"
+        },
         "created": "2026-09-02"
       },
       {
@@ -53200,9 +53202,107 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T160956179019-n-kind-stale-refresh",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-kind-stale-refresh",
+        "node_definition": {
+          "done_when": "a focused test seeds a name stored as tensor whose derivation is scalar and asserts the exported entry carries scalar and the reconcile writes scalar with a change record while a stored kind that agrees is untouched; the export and reconcile suites pass with command, exit status and log path recorded; ruff clean; crew/reports/kind-tensor-misclassification.md records a read-only Cypher census of every accepted name whose stored kind disagrees with derive_kind, by kind pair, without modifying the live graph",
+          "estimated_hours": null,
+          "goal": "Make the stored StandardName.kind follow the current derive_kind rule instead of freezing at compose time: two accepted names (flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude from DD gm3 FLT_1D, plasma_electrical_conductivity) are stored as tensor while derive_kind now returns scalar for both, so the export must re-derive kind from the name at publication and the graph reconcile step must refresh a stored kind that disagrees with the derivation, recording each change as a ledgered StandardNameChange",
+          "id": "n-kind-stale-refresh",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T160956179019-n-kind-stale-refresh/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_kind_refresh.py",
+            "crew/reports/kind-tensor-misclassification.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-kindrule",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T16:10:02Z",
+        "completed_at": "2026-09-02T16:23:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 807,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 807,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9b7f830644a32d50d1f547c435fabc3f1e9ae726",
+        "commits": [
+          "2bc25e21b6110ed9e7846d56db8c2332bf9fe19a"
+        ],
+        "changed_lines": {
+          "added": 368,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_kind_refresh.py plus export and reconcile suites",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T160956179019-n-kind-stale-refresh/export-reconcile-tests-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T160956179019-n-kind-stale-refresh/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a062e2-7457-7452-8414-b9a7959d6c7c",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1351
+    "_version": 1353
   }
 }
