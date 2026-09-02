@@ -117,6 +117,93 @@ def _scalar_domain(value: Any) -> str | None:
     return None
 
 
+def reclassify_standard_name_domain(
+    name: str,
+    domain: str,
+    *,
+    reason: str,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Reassign one name's domain property and relationship atomically."""
+    from imas_codex.core.physics_domain import PhysicsDomain
+
+    name = (name or "").strip()
+    reason = (reason or "").strip()
+    if not name:
+        return {"ok": False, "reason": "a standard name is required"}
+    if not reason:
+        return {"ok": False, "reason": "--reason is mandatory for a domain move"}
+    try:
+        target_domain = PhysicsDomain(domain).value
+    except ValueError:
+        valid = ", ".join(item.value for item in PhysicsDomain)
+        return {
+            "ok": False,
+            "reason": f"unknown physics domain {domain!r}; one of: {valid}",
+        }
+
+    with GraphClient() as gc:
+        rows = list(
+            gc.query(
+                "MATCH (name:StandardName {id: $id}) "
+                "RETURN name.physics_domain AS domain, "
+                "name.name_stage AS stage",
+                id=name,
+            )
+        )
+        if not rows:
+            return {"ok": False, "reason": f"standard name {name!r} not found"}
+
+        before = rows[0]
+        result = {
+            "ok": True,
+            "name": name,
+            "stage": before["stage"],
+            "from_domain": before["domain"],
+            "to_domain": target_domain,
+            "dry_run": dry_run,
+        }
+        if dry_run or before["domain"] == target_domain:
+            result["noop"] = before["domain"] == target_domain
+            return result
+
+        change_id = f"sn-change:{uuid.uuid4()}"
+        mutation = list(
+            gc.query(
+                """
+                MATCH (name:StandardName {id: $id})
+                OPTIONAL MATCH (name)-[old_domain:HAS_PHYSICS_DOMAIN]->
+                               (:PhysicsDomain)
+                DELETE old_domain
+                WITH DISTINCT name
+                SET name.physics_domain = $domain,
+                    name.source_domains = [$domain]
+                MERGE (domain:PhysicsDomain {id: $domain})
+                MERGE (name)-[:HAS_PHYSICS_DOMAIN]->(domain)
+                CREATE (change:StandardNameChange {
+                  id: $change_id, from_name: name.id, to_name: name.id,
+                  operation: 'reclassify_domain', reason: $reason,
+                  origin: 'catalog_edit', changed_at: datetime($changed_at),
+                  internal: true
+                })
+                MERGE (name)-[:HAS_INTERNAL_CHANGE]->(change)
+                RETURN name.id AS id
+                """,
+                id=name,
+                domain=target_domain,
+                change_id=change_id,
+                reason=reason,
+                changed_at=datetime.now(UTC).isoformat(),
+            )
+        )
+        if [row.get("id") for row in mutation] != [name]:
+            raise RuntimeError(
+                "standard name changed or disappeared during domain reclassification"
+            )
+        result["change_id"] = change_id
+        return result
+
+
 #: Physics abbreviation expansions applied before name persistence.
 #: Keys are case-sensitive abbreviations as they appear in LLM output;
 #: values are their lowercase ISN-compliant expansions.
