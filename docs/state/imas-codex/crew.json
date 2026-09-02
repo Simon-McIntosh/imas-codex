@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T15:48:04",
+  "updated": "2026-09-02T16:00:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -52766,9 +52766,112 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T134913390202-n-codex-isn-pin-0-8-2",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-codex-isn-pin-0-8-2",
+        "node_definition": {
+          "done_when": "both pin sites read 0.8.2, uv.lock resolves 0.8.2 from PyPI (uv lock output recorded), the shared root environment is deliberately synced and the manifest says so, 'uv run --no-sync python -c' shows imas_standard_names 0.8.2, the export suites pass with command, exit status and log path recorded, one focused commit",
+          "estimated_hours": null,
+          "goal": "Bump imas-standard-names from 0.8.1 to 0.8.2 at both pyproject.toml pin sites with uv.lock regenerated against PyPI and the pinned-schema test's version assertion moved to 0.8.2, so catalog exports use the literal-block writer",
+          "id": "n-codex-isn-pin-0-8-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T134913390202-n-codex-isn-pin-0-8-2/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "pyproject.toml",
+            "uv.lock",
+            "tests/standard_names/test_export_pinned_schema.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-pinbump",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T13:49:22Z",
+        "completed_at": "2026-09-02T14:00:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 687,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 687,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "07ba8ffef403320f825f74bfa9c766e070add583",
+        "commits": [
+          "2207b4fbebf2161084562e340a904b70a484cb54"
+        ],
+        "changed_lines": {
+          "added": 7,
+          "removed": 7,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv lock; uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_export*.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T134913390202-n-codex-isn-pin-0-8-2/logs/pre-stage-naming-check.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T134913390202-n-codex-isn-pin-0-8-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a061f5-7042-7530-9554-ac9f7fd2132b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1944576,
+            "cached_input_tokens_cumulative": 3785728,
+            "input_tokens": 2177513,
+            "input_tokens_cumulative": 4035072,
+            "output_tokens": 3182,
+            "output_tokens_cumulative": 11067,
+            "reasoning_output_tokens": 987,
+            "reasoning_output_tokens_cumulative": 2516
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1338
+    "_version": 1339
   }
 }
