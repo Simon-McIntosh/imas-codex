@@ -106,12 +106,10 @@ _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
 # raises ``Extra inputs are not permitted`` if it appears in the YAML.
 _ISN_UNSUPPORTED_FIELDS = frozenset({"constraints"})
 
-# Graph-only fields that ARE written to the catalog YAML (they appear in
-# ``CANONICAL_KEY_ORDER`` and the ISN catalog loader tolerates them), but which
-# the strict ISN entry models reject under ``extra="forbid"``. They are stamped
-# onto an entry AFTER its build-time ISN validation, so the final-shape gate
-# must strip them before re-validating — otherwise every entry would spuriously
-# fail on these known, intentional fields.
+# Graph-derived fields whose publication depends on the installed ISN entry
+# model. They are stamped onto an entry after build-time validation because the
+# exporter uses them for reports and release gates. A field reaches catalog
+# YAML only when the selected entry model declares it.
 _GRAPH_ONLY_RENDERED_FIELDS = frozenset(
     {"physics_domain", "validity_domain", "roles", "sources"}
 )
@@ -1223,23 +1221,9 @@ def _fetch_deprecation_stubs(
 
 def _entry_model(entry_dict: dict[str, Any]) -> Any:
     """Build the strict ISN model selected by an entry's quantity kind."""
-    from imas_standard_names.models import (
-        StandardNameComplexEntry,
-        StandardNameMetadataEntry,
-        StandardNameScalarEntry,
-        StandardNameTensorEntry,
-        StandardNameVectorEntry,
-    )
+    from imas_standard_names.models import create_standard_name_entry
 
-    kind = entry_dict.get("kind", "scalar")
-    model_cls = {
-        "scalar": StandardNameScalarEntry,
-        "vector": StandardNameVectorEntry,
-        "tensor": StandardNameTensorEntry,
-        "complex": StandardNameComplexEntry,
-        "metadata": StandardNameMetadataEntry,
-    }.get(kind, StandardNameScalarEntry)
-    return model_cls.model_validate(entry_dict)
+    return create_standard_name_entry(entry_dict)
 
 
 def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
@@ -1784,7 +1768,6 @@ def _write_domain_yaml(
 
     # Canonicalise, reorder, and clean each entry
     clean_entries: list[dict[str, Any]] = []
-    invalid: list[str] = []
     for entry_dict in entries:
         canon = canonicalise_entry(entry_dict)
         # Remove None values and ISN-unsupported fields for clean YAML output
@@ -1793,31 +1776,37 @@ def _write_domain_yaml(
             for k, v in canon.items()
             if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
         }
-        roles = clean.pop("roles", [])
-        ordered = reorder_entry_dict(clean)
-        ordered["roles"] = roles
-        # Final-shape validation gate: the dict about to be written must still
-        # satisfy the ISN model. A failure here is a defect in the augmentation
-        # pipeline (dangling-link pruning, computed-ref derivation,
-        # canonicalise), not bad input — fail the export rather than
-        # emit it. Strip the graph-only rendered fields first: they are stamped
-        # on after build-time validation and the strict model rejects them,
-        # though the catalog loader accepts them in the emitted YAML.
-        probe = {
-            k: v for k, v in ordered.items() if k not in _GRAPH_ONLY_RENDERED_FIELDS
+        strict_shape = {
+            key: value
+            for key, value in clean.items()
+            if key not in _GRAPH_ONLY_RENDERED_FIELDS
         }
-        if _validate_entry(probe) is None:
-            invalid.append(ordered.get("name") or ordered.get("id") or "?")
-        clean_entries.append(ordered)
-
-    if invalid:
-        raise RuntimeError(
-            f"{len(invalid)} entry(ies) in domain '{domain}' failed ISN "
-            f"validation in their final written shape (post-augmentation) — "
-            f"the export pipeline corrupted a previously-valid entry: {invalid}"
-        )
+        model = _entry_model(strict_shape)
+        declared_fields = type(model).model_fields
+        publishable = {
+            key: value
+            for key, value in clean.items()
+            if key not in _GRAPH_ONLY_RENDERED_FIELDS or key in declared_fields
+        }
+        clean_entries.append(reorder_entry_dict(publishable))
 
     content = yaml.safe_dump(clean_entries, sort_keys=False, default_flow_style=False)
+
+    # Re-load the exact serialized representation and validate it through the
+    # installed ISN factory. This is intentionally after YAML serialization:
+    # a coercion or late augmentation mismatch must fail here, locally, rather
+    # than in the catalog repository's validation job.
+    serialized_entries = yaml.safe_load(content)
+    for serialized_entry in serialized_entries:
+        try:
+            _entry_model(serialized_entry)
+        except Exception as exc:
+            identity = serialized_entry.get("name", "?")
+            raise RuntimeError(
+                f"catalog entry {identity!r} in domain {domain!r} failed "
+                "installed ISN validation after final YAML serialization"
+            ) from exc
+
     filepath.write_text(header + content, encoding="utf-8")
 
     return filepath
