@@ -15,6 +15,25 @@ from pathlib import Path
 
 import yaml
 
+_MANIFEST_SOURCE_SCHEMA = {
+    "type": "object",
+    "required": [
+        "source_path",
+        "source_status",
+        "standard_name_id",
+        "terminal_stage",
+        "non_nameable_reason",
+    ],
+    "additionalProperties": False,
+    "properties": {
+        "source_path": {"type": "string", "minLength": 1},
+        "source_status": {"type": ["string", "null"]},
+        "standard_name_id": {"type": ["string", "null"]},
+        "terminal_stage": {"type": ["string", "null"]},
+        "non_nameable_reason": {"type": "string"},
+    },
+}
+
 
 class SourcesManifestError(ValueError):
     """A focus file is missing, unreadable, or not schema-compliant."""
@@ -23,7 +42,18 @@ class SourcesManifestError(ValueError):
 def _load_schema(filename: str = "sn_sources.schema.json") -> dict:
     ref = resources.files("imas_codex.standard_names.config").joinpath(filename)
     with ref.open("r", encoding="utf-8") as fh:
-        return json.load(fh)
+        schema = json.load(fh)
+    if filename == "sn_names.schema.json":
+        schema["properties"]["manifest_sources"] = {
+            "description": (
+                "Complete release accounting for every source in the manifest "
+                "that minted this frozen review batch."
+            ),
+            "type": "array",
+            "uniqueItems": True,
+            "items": _MANIFEST_SOURCE_SCHEMA,
+        }
+    return schema
 
 
 def _validate(doc: dict, schema_filename: str, path: str | Path) -> None:
