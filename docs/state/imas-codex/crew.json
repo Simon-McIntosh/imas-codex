@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T18:07:29",
+  "updated": "2026-09-02T18:17:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -53033,9 +53033,176 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T153642489962-n-west-withheld-rescore-2",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-west-withheld-rescore-2",
+        "node_definition": {
+          "done_when": "crew/reports/west-withheld-rescore-2.md records every command with exit status, SNRun ids and exact spend, a per-name table with before and after name_stage, docs_stage, validation_status, the count now fully accepted out of the 28 original withheld, and a GraphClient census proving approved 0 and contested 0; no direct acceptance or graph-text Cypher",
+          "estimated_hours": null,
+          "goal": "Re-run the WEST withheld-name recovery on the fixed code: sn rescore on the 10 reviewed names that scored 0.97 to 1.00 on 2026-09-02 (now acceptable over accepted descendants), a scoped docs drain for parallel_flux_surface_averaged_current_density_due_to_wave_driven_current_drive and spectral_wavelength_of_optical_element, and the 5 governed hint edits classified as clear-cut in crew/reports/west-withheld-recovery.md, all under --cost-limit 20, recording per-name before and after lifecycle triplets",
+          "id": "n-west-withheld-rescore-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T153642489962-n-west-withheld-rescore-2/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "crew/reports/west-withheld-rescore-2.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-westrescore",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T15:36:52Z",
+        "completed_at": "2026-09-02T16:15:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2315,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2315,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "2eb03dd98de017267690ab5a5e826b3a0ace47c9",
+        "commits": [
+          "72cfed85c9c7bca77ebe11fc423b1b24bc7819dc"
+        ],
+        "changed_lines": {
+          "added": 151,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "sn rescore --stage-only x10; sn run --batch scoped drains; GraphClient census",
+          "exit_status": 1,
+          "log_path": null,
+          "log_digest": "sha256:81696c320547e781b57baad1277c2d019c5100aef7fafb9735e8c51632cf6f1c"
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T153642489962-n-west-withheld-rescore-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06260-9605-7290-8e96-bde9697c39f9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 10771968,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 11098476,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 29302,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 8701
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1385,
+              "log_age_seconds": 724,
+              "log_fresh": true,
+              "manifest_commits": [
+                "0c16d4df322ef2ca5cd59c77a34710d2fc5348e8"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T151340962194-n-rescore-accept-with-descendants/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T151340962194-n-rescore-accept-with-descendants --gate <verdict> --commit 0c16d4df322ef2ca5cd59c77a34710d2fc5348e8",
+              "node": "n-rescore-accept-with-descendants",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260902T151340962194-n-rescore-accept-with-descendants",
+              "session": "ship-s10-20260901",
+              "terminal_age_seconds": 762,
+              "terminal_at": "2026-09-02T15:24:07Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260901/n-rescore-accept-with-descendants"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1360,
+              "log_age_seconds": 748,
+              "log_fresh": true,
+              "manifest_commits": [
+                "097c326f38d525aa43873364637cb8bd940a531f"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T151405436305-n-drift-refresh-requeues-docs/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260902T151405436305-n-drift-refresh-requeues-docs --gate <verdict> --commit 097c326f38d525aa43873364637cb8bd940a531f",
+              "node": "n-drift-refresh-requeues-docs",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260902T151405436305-n-drift-refresh-requeues-docs",
+              "session": "ship-s10-20260901",
+              "terminal_age_seconds": 770,
+              "terminal_at": "2026-09-02T15:24:00Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260901/n-drift-refresh-requeues-docs"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1350
+    "_version": 1351
   }
 }
