@@ -7728,9 +7728,11 @@ def sn_reclassify(standard_name: str, domain: str, reason: str, dry_run: bool) -
       imas-codex sn reclassify gyrocenter_frequency --domain transport \\
           --reason "guiding-center orbit dynamics; computational_workflow is a tooling bucket"
     """
-    from imas_codex.standard_names.edit import reclassify_domain
+    from imas_codex.standard_names.graph_ops import reclassify_standard_name_domain
 
-    result = reclassify_domain(standard_name, domain, reason=reason, dry_run=dry_run)
+    result = reclassify_standard_name_domain(
+        standard_name, domain, reason=reason, dry_run=dry_run
+    )
     if not result.get("ok"):
         raise click.UsageError(result.get("reason", "reclassify refused"))
 
