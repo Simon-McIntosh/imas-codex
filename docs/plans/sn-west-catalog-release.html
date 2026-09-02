@@ -27,8 +27,9 @@
 <meta name="plan-capability-tool-autonomy" content="guided">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.15">
+<meta name="plan-version" content="11">
+<meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23">
 </head>
 <body>
 <main class="plan-doc">
@@ -96,6 +97,12 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T065509694984-n-export-pinned-schema-parity" data-who="impl-exportschema" data-when="2026-09-02T06:58:48Z">
     <div class="r-comment-body"><p>node omitted tests/standard_names/test_export_exclusion_ledger.py from its write scope although its roles assertion contradicts the goal; redispatched with the wider scope</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T065939523907-n-export-pinned-schema-parity-2" data-who="impl-exportschema" data-when="2026-09-02T07:22:36Z">
+    <div class="r-comment-body"><p>exporter serializes only fields the installed imas-standard-names 0.8.0 entry model declares and re-validates every emitted entry through create_standard_name_entry before writing; roles stays internal for the collision gate and the ExportReport; 133 exporter tests pass; dry-run exits 0 with no extra_forbidden at the same frozen batch size 368 (295 published after the pre-existing RC-mode exclusions), with the pre-existing Gate A, dangling-link and divergence findings unchanged and owned by the release plan</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-20260902T0924-schema-parity" data-who="reckon-ship" data-when="2026-09-02T09:24:00Z">
+    <div class="r-comment-body">Exporter schema parity landed at e56b3c23 (merged da817af6): catalog YAML now carries only fields the installed imas-standard-names 0.8.0 entry model declares, every emitted entry is re-validated through create_standard_name_entry before the file is written, and the generated roles list stays internal to the identity-token collision gate and the ExportReport. 133 exporter tests pass. Dry-run of the WEST batch exits 0 with no extra_forbidden at the same frozen size (368 names, 295 published). The RC-mode advisory findings are unchanged from the PR 6 cut and are pre-existing: Gate A graph test failures, 331 dangling doc links, 175 divergence entries, 28 unmatched manifest sources, 2 grammar-parse exclusions; they are dispositioned before the human review is called complete but do not block cutting the candidate. Next: close PR 6 with a pointer and cut the validated candidate as a new RC and PR.</div>
 </div>
 </section>
 </main>

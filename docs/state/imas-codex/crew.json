@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T08:59:32",
+  "updated": "2026-09-02T09:23:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -824,9 +824,11 @@
         "id": "impl-exportschema",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a060ea-afc0-7f90-8d69-c2903fd0dd4d",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a060ea-afc0-7f90-8d69-c2903fd0dd4d"
+        },
         "created": "2026-09-02"
       },
       {
@@ -50234,9 +50236,112 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T065939523907-n-export-pinned-schema-parity-2",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-export-pinned-schema-parity-2",
+        "node_definition": {
+          "done_when": "test_generated_roles_mark_quantity_parent_and_leaf is rewritten to assert roles at the report or internal level rather than in emitted YAML while keeping its collision-rule coverage; a focused test exports a fixture cohort under the installed 0.8.0 and asserts every emitted YAML entry round-trips through create_standard_name_entry without extra_forbidden and has no roles key; the export test suites pass with command, exit status and log path recorded; a recorded 'sn release --batch west_production_dd_paths --dry-run' from this worktree reports the same batch size and zero validation findings; the live graph is not modified",
+          "estimated_hours": null,
+          "goal": "Make the catalog exporter emit only entries the pinned imas-standard-names 0.8.0 entry model accepts: the machine-generated roles field stays internal for the collision rule and the exclusion ledger report but is not serialized into catalog YAML unless the installed model declares it, with every emitted entry re-validated after final serialization through the installed create_standard_name_entry so a schema mismatch fails the export locally instead of in catalog CI",
+          "id": "n-export-pinned-schema-parity-2",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065939523907-n-export-pinned-schema-parity-2/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_pinned_schema.py",
+            "tests/standard_names/test_export_exclusion_ledger.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-exportschema",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T06:59:47Z",
+        "completed_at": "2026-09-02T07:22:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1369,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1369,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a73c62005a49ed6b7d9e0cc7a63f69de3452d2cd",
+        "commits": [
+          "e56b3c23e3a3242ed7ae3c13d23e722bfce1e72e"
+        ],
+        "changed_lines": {
+          "added": 85,
+          "removed": 50,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_export*.py; IMAS_CODEX_SN_ISNC=... imas-codex sn release --batch west_production_dd_paths --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065939523907-n-export-pinned-schema-parity-2/logs/after-export-full.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T065939523907-n-export-pinned-schema-parity-2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a060ea-afc0-7f90-8d69-c2903fd0dd4d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3294464,
+            "cached_input_tokens_cumulative": 3294464,
+            "input_tokens": 3470442,
+            "input_tokens_cumulative": 3470442,
+            "output_tokens": 9291,
+            "output_tokens_cumulative": 9291,
+            "reasoning_output_tokens": 2846,
+            "reasoning_output_tokens_cumulative": 2846
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1282
+    "_version": 1284
   }
 }
