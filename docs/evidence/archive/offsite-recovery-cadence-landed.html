@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="offsite-recovery-cadence-landed">
+  <meta name="plan-title" content="Offsite recovery cadence — cumulative evidence">
+  <meta name="plan-evidence-for" content="offsite-recovery-cadence">
+  <meta name="plan-verifies" content="offsite-recovery-cadence#s4">
+  <title>Offsite recovery cadence landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Offsite recovery cadence — cumulative evidence</h1>
+  <p>This record consolidates what the <code>offsite-recovery-cadence</code> plan proved on
+  2026-09-01 and 2026-09-02. It opened on a measured exposure of 56.238 days between the live
+  graph and the only full offsite copy, and it closes with a weekly copy that has been pushed,
+  count-verified, pruned to a bounded retention, and restored into a scratch instance with an
+  exact census match. Every result is reconciled against the committed run ledger at
+  <code>docs/state/imas-codex/crew.json</code> and the receipts and reports the runs left on
+  disk. Dense count-to-commit mappings are tables; causal findings are prose.</p>
+
+  <section id="s4">
+    <h2>§4 — Deliverables: a scheduled, verified, bounded, restore-proven offsite copy</h2>
+    <p>The design decisions were the lead's and were locked before any node ran: a weekly push
+    that no-ops when the store is unchanged; tiered retention of four weekly and three monthly
+    copies with release tags never pruned; and a copy that counts only when its manifest census
+    equals the live graph, with one trial restore now and quarterly after. The reuse map showed
+    almost everything already existed: <code>graph push</code>, <code>graph prune</code>,
+    <code>graph_archive_stamp</code>, the manifest scope counts and the local
+    <code>BackupCurrency</code> shape. What was built is composition over those seams plus the
+    two things they lacked, a currency read against the registry and a scheduler.</p>
+    <table>
+      <thead><tr><th>Result</th><th>Measure</th><th>Commit</th></tr></thead>
+      <tbody>
+        <tr><td>Offsite currency in <code>graph status</code></td><td>read from the GitHub Packages listing; live 56.338 days stale at landing, 0 s after the first push</td><td><code>03433bfd</code></td></tr>
+        <tr><td>Tiered <code>graph prune</code></td><td>dry-run 25 keep / 22 delete over 47 versions; release-tagged never selected (3 tests)</td><td><code>8c850276</code></td></tr>
+        <tr><td>Graph-only launch configuration</td><td>export restart surfaces its config error; graph-only start reads no embedding section (2 regressions)</td><td><code>af2f8c3c</code></td></tr>
+        <tr><td><code>graph push --cycle</code> and <code>--schedule</code></td><td>one verified cycle plus scheduling folded into the existing push command at the lead's direction; the separate command removed</td><td><code>7e09dc98</code>, <code>ecce4695</code></td></tr>
+        <tr><td>Scheduler on the login node</td><td>host-pinned systemd user oneshot plus weekly persistent timer; oras directory resolved at install; failure receipts</td><td><code>2066a50a</code>, <code>c18221be</code>, <code>be90eb62</code></td></tr>
+        <tr><td>First real cycle</td><td>wall 991.46 s, archive 2,461,580,565 bytes, counts_match true (1,614,780 nodes, 4,259,356 relationships, 70 labels), tag <code>dev-198ec82-20260902T085827Z-r1</code></td><td><code>3c5e9e25</code></td></tr>
+        <tr><td>One-off prune</td><td>48 versions became 25: 4 weekly, 3 monthly, 17 release, latest; 23/23 deleted as dry-run predicted</td><td><code>8a496efc</code></td></tr>
+        <tr><td>Trial restore from the registry copy</td><td>fetch 97.9 s, load 41.4 s, census equal to the receipt on all 70 label counts, scratch removed reclaiming about 9.0 GB; drill 574 s</td><td><code>3e59a749</code></td></tr>
+        <tr><td>Instance bookkeeping repairs</td><td>new instances listen on 0.0.0.0 like production; load bookkeeping is per instance</td><td><code>65dee98f</code>, <code>dcd48601</code></td></tr>
+      </tbody>
+    </table>
+    <p>Evidence: receipt
+    <code>~/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json</code>;
+    reports <code>crew/reports/offsite-first-cycle.md</code>,
+    <code>offsite-prune-apply.md</code>, <code>offsite-trial-restore.md</code>; runs are ledgered
+    under session <code>ship-s10-20260901</code>.</p>
+  </section>
+
+  <section id="negative-compute-node-network">
+    <h2>Negative result: the registry is unreachable from the compute node</h2>
+    <p>The first scheduled cycle ran as a SLURM job on titan, resolved <code>api.github.com</code>
+    and could not open HTTPS; no proxy exists. So the locked decision's "SLURM-scheduled job"
+    could not be the upload path. The redesign runs the weekly timer on the login node through
+    a systemd user unit, the same pattern the embedding service already uses, while the dump
+    still happens through the existing remote Neo4j path. The self-resubmitted SLURM successor
+    was cancelled. A second attempt then failed because the generated unit's PATH omitted the
+    directory holding <code>oras</code>; the installer now resolves the uploader at install
+    time and refuses without it, and a failed upload leaves a receipt.</p>
+  </section>
+
+  <section id="negative-instance-bookkeeping">
+    <h2>Negative result: a restored scratch instance was unreachable and relabelled the live one</h2>
+    <p>The trial restore loaded correctly but could not be queried from the login node because
+    <code>graph init</code> wrote loopback listeners for new instances while production binds
+    <code>0.0.0.0</code>; the census had to run on the node through the repository's remote
+    executor. Afterwards <code>graph status</code> on the codex instance reported the trial
+    archive as its load source because load bookkeeping was global. Both are repaired: new and
+    restored instances render production listeners, and load metadata is stored per instance.</p>
+  </section>
+
+  <section id="what-remains">
+    <h2>What remains</h2>
+    <p>Nothing in this plan. The weekly timer next elapses on 2026-09-07 at 00:00 CEST; the
+    quarterly trial restore is the operator's calendar item, using the same fetch, init, load
+    and census path the drill recorded. The stale <code>GHCR_TOKEN</code> in the project
+    <code>.env</code> was regenerated by the lead on 2026-09-02.</p>
+  </section>
+</main>
+</body>
+</html>

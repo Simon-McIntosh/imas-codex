@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T12:54:51",
+  "updated": "2026-09-02T13:03:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -51795,9 +51795,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260902T105457742109-n-graph-manifest-per-instance",
+        "plan": "offsite-recovery-cadence",
+        "section": "\u00a73",
+        "node": "n-graph-manifest-per-instance",
+        "node_definition": {
+          "done_when": "a test loads a manifest record for instance A and asserts status for instance B does not report it while status for A does; the live 'imas-codex graph status' on codex no longer names the offsite-trial archive as its load source (recorded output); the graph CLI status and load suites pass with command, exit status and log path recorded; ruff clean; no live Neo4j restart",
+          "estimated_hours": null,
+          "goal": "Scope the graph load bookkeeping that graph status reports as 'Loaded from' to the instance it describes, so loading an archive into a scratch instance never relabels the codex instance (after the trial restore, status on codex reads 'Loaded from offsite-trial-...tar.gz')",
+          "id": "n-graph-manifest-per-instance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T105457742109-n-graph-manifest-per-instance/manifest.md",
+          "plan": "offsite-recovery-cadence",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/cli/graph/data.py",
+            "imas_codex/cli/graph/server.py",
+            "imas_codex/graph/neo4j_ops.py",
+            "tests/cli/test_graph_manifest_instance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-graphinit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T10:55:02Z",
+        "completed_at": "2026-09-02T11:03:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 511,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 511,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d80c99e3b27c86f1acc4fad0d3fd5b708e565fa0",
+        "commits": [
+          "dcd486018b20707bae19dc9e9079b3d83b4a0622"
+        ],
+        "changed_lines": {
+          "added": 145,
+          "removed": 5,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/cli/test_graph_manifest_instance.py plus graph status and load suites; imas-codex graph status",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T105457742109-n-graph-manifest-per-instance/graph-status-load.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T105457742109-n-graph-manifest-per-instance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a061b8-a19c-7e50-a110-31323185ccd5",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 1315
+    "_version": 1316
   }
 }

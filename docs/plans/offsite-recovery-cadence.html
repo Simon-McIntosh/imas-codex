@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="offsite-recovery-cadence">
   <meta name="plan-title" content="Offsite Recovery Cadence">
-  <meta name="plan-summary" content="Release cadence is acting as the backup schedule, leaving the only full offsite copy 56 days behind the live graph">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="A weekly login-node push keeps a count-verified offsite copy current, retention is tiered and bounded, and the copy restores with an exact census match">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-02">
-<meta name="plan-version" content="27">
-<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a,be90eb62,c7b0fcba,c18221be,3c5e9e25,8a496efc,3e59a749">
-<meta name="plan-artifacts" content="/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json,ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1,/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T203116263091-n-offsite-retention/live-dry-run.log">
-<meta name="plan-impl" content="0.93">
+<meta name="plan-version" content="30">
+<meta name="plan-commits" content="03433bfd,8c850276,af2f8c3c,7e09dc98,ecce4695,a724ef57,2066a50a,be90eb62,c7b0fcba,c18221be,3c5e9e25,8a496efc,3e59a749,65dee98f,dcd48601">
+<meta name="plan-artifacts" content="docs/evidence/archive/offsite-recovery-cadence-landed.html,/home/ITER/mcintos/.local/share/imas-codex/offsite-push/receipts/dev-198ec82-20260902T085827Z.json,ghcr.io/simon-mcintosh/imas-codex-graph:dev-198ec82-20260902T085827Z-r1,crew/reports/offsite-first-cycle.md,crew/reports/offsite-prune-apply.md,crew/reports/offsite-trial-restore.md">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -134,24 +134,18 @@
         an existing mechanism and needs a number rather than new code.</li>
     </ul>
 
-    <h2 id="s4">&#167;4 &mdash; Deliverables</h2>
-    <ul>
-      <li>A full-graph offsite push that runs on its own schedule rather than on the release
-        schedule, so the recovery point tracks data change instead of shipping cadence.</li>
-      <li>A retention policy expressed as a number of full copies kept, applied through the
-        existing <code>--keep</code> mechanism, with the registry storage cost of that choice
-        stated rather than assumed.</li>
-      <li>An offsite currency figure surfaced where the local one already is, so
-        <code>graph status</code> answers both &ldquo;how far behind is my local restore
-        point&rdquo; and &ldquo;how far behind is the copy that survives losing this
-        filesystem&rdquo;.</li>
-      <li>A recovery-path verification whose depth is the decision below &mdash; at minimum a
-        manifest-count comparison against the live graph, since the counts are already
-        recorded and the check costs nothing.</li>
-      <li>A recorded measurement of what one scheduled push actually costs in wall time and
-        registry storage, taken from a real push rather than projected, so the cadence
-        decision can be revisited against a number.</li>
-    </ul>
+    <h2 id="s4"><span class="badge badge-shipped">&#10003; landed 2026-09-02</span> &#167;4 &mdash; Deliverables</h2>
+    <p class="landed-summary">
+      <code>graph push --schedule</code> installs a weekly systemd user timer on the login node
+      (compute nodes cannot reach the registry) whose cycle no-ops when the store is unchanged,
+      exports, refuses unless the manifest census equals the live graph, and uploads;
+      <code>graph status</code> shows offsite currency (56.338 days at start, 0 s after the
+      first push); <code>graph prune</code> applies the tiered policy (48 versions became 25).
+      First real cycle: 991 s wall, 2.46 GB, counts matched, tag
+      <code>dev-198ec82-20260902T085827Z-r1</code>. Trial restore from that copy: fetch 98 s,
+      load 41 s, exact census on all 70 label counts, drill 574 s. Full record:
+      <a href="/imas-codex/evidence/archive/offsite-recovery-cadence-landed#s4">&#167;4 landed</a>.
+    </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -187,10 +181,11 @@
     <pre class="r-fu-prompt">/reckon-ship offsite-recovery-cadence</pre>
     <p class="r-fu-outcome">Decided 2026-09-01 (weekly no-op-when-unchanged push; tiered 4 weekly + 3 monthly + releases; counts every push plus one trial restore now then quarterly) and four nodes landed: offsite currency in graph status (03433bfd, live 56.338 days stale), tiered prune selector with a live dry-run of 25 keep / 22 delete (8c850276), graph-only launcher config repair (af2f8c3c), and the graph offsite-push command with --schedule (7e09dc98, live dry-run: push needed). The three live operations remain and are the lead's to trigger; see f-orc-002.</p>
     </article>
-<article class="r-fu" data-id="f-orc-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship offsite-recovery-cadence" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-orc-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship offsite-recovery-cadence" data-resolved-at="2026-09-02T11:05:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Run the first real offsite cycle with --schedule, apply the one-off prune, and take the trial restore</h4>
     <div class="r-fu-body"><p>authority-required. Three outward or destructive live operations remain, each built and dry-run but not executed: (1) <code>imas-codex graph offsite-push --schedule</code>, which uploads a 2.4 GB full archive to the private GHCR package, stops Neo4j for the dump, and submits a weekly self-resubmitting SLURM job; the harness classifier refused to let the coordinator dispatch it twice on 2026-09-01. (2) <code>imas-codex graph prune --registry ghcr.io/simon-mcintosh</code> without <code>--dry-run</code>, which deletes the 22 versions the tiered dry-run marked (10 untagged, 2 test-prefixed, 10 thinned), best run after (1) so the fresh weekly copy exists first. (3) The one-off trial restore of the pushed archive into a scratch graph, compared by counts, which needs a second Neo4j instance and 15 GB of scratch. Run them in that order; each writes a receipt (offsite-push under <code>~/.local/share/imas-codex/offsite-push/receipts</code>) whose wall time and bytes close the plan's last deliverable. Environment note: the <code>GHCR_TOKEN</code> in the project <code>.env</code> returns 401; unset it (or rotate it) so <code>resolve_token</code> falls back to the gh credential, as the retention dry-run did.</p></div>
     <pre class="r-fu-prompt">/reckon-ship offsite-recovery-cadence</pre>
+    <p class="r-fu-outcome">All three live operations ran 2026-09-02 under the lead's direction after the GHCR_TOKEN was regenerated. First cycle (3c5e9e25): wall 991.46 s, 2,461,580,565 bytes, counts_match true, tag dev-198ec82-20260902T085827Z-r1, offsite current at 0 s, timer next elapse 2026-09-07 00:00 CEST; two infrastructure findings on the way (compute node cannot reach GHCR, unit PATH lacked oras) moved the scheduler to a login-node systemd user timer. One-off prune (8a496efc): 48 to 25 versions, 23/23 deleted as predicted, all release tags and the weekly copy retained. Trial restore (3e59a749): fetch 97.9 s, load 41.4 s, census equal on all 70 label counts, scratch removed, drill 574 s. Two instance bookkeeping defects it exposed are fixed (65dee98f, dcd48601). done — no followup; the quarterly restore is an operator calendar item recorded in the evidence.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -254,6 +249,9 @@
 <div class="r-comment" data-section="s4" data-id="c-20260902T1244-trial-restore" data-who="reckon-ship" data-when="2026-09-02T12:44:00Z">
     <div class="r-comment-body">Trial restore PASSED (report 3e59a749, merged 08d6ef92): the registry copy dev-198ec82-20260902T085827Z-r1 was fetched (97.9 s, 2,461,580,657 bytes, sha256 ecc8dc29), loaded into a scratch instance offsite-trial (41.4 s), and its census matched the receipt exactly: 1,614,780 nodes, 4,259,356 relationships, 70/70 labels with zero differences, label-count sha 1e1c11a2. The scratch instance was removed (about 9.0 GB reclaimed) and codex is active and serving. Whole drill 574 s of timed commands. The offsite copy is a demonstrated recovery path, not just a registry entry. Two defects found by the drill and folded as nodes: graph init writes listen_address 127.0.0.1 for new instances (server.py:222, data.py:1046) so ordinary discovery cannot reach them and the census had to run on the node through the remote executor; and the global graph manifest now reads 'Loaded from offsite-trial...' for the codex instance because load bookkeeping is not per instance.</div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-20260902T1305-shipped" data-who="reckon-ship" data-when="2026-09-02T13:05:00Z">
+    <div class="r-comment-body">Plan shipped 2026-09-02. DRAIN LEDGER: f-orc-001 folded across n-offsite-currency, n-offsite-retention, n-graph-launcher-config, n-offsite-push-job, n-graph-push-schedule-flag; f-orc-002 folded across n-offsite-first-cycle (infra failure), n-graph-push-schedule-login-node, n-offsite-legacy-test-repoint, n-offsite-first-cycle-login (PATH failure), n-graph-push-service-path, n-offsite-first-cycle-login-2, n-offsite-prune-apply, n-offsite-trial-restore, n-graph-init-listeners, n-graph-manifest-per-instance; rows 2, foldable-remaining 0. Cumulative evidence: docs/evidence/archive/offsite-recovery-cadence-landed.html.</div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260901T204546056598-n-graph-launcher-config" data-who="impl-graphlauncher" data-when="2026-09-01T20:51:55Z">
     <div class="r-comment-body"><p>graph export no longer swallows the missing compute-config error on restart and graph start for a graph-only launch reads graph-location service config instead of the embedding section; 7 focused tests pass, no live Neo4j operation performed</p></div>
 </div>
@@ -262,6 +260,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260902T104439684708-n-graph-init-listeners" data-who="impl-graphinit" data-when="2026-09-02T10:54:39Z">
     <div class="r-comment-body"><p>new and restored graph instances now render the same 0.0.0.0 Bolt and HTTP listeners as the production codex instance; loopback defaults removed from both call sites; init, load and start suites green</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260902T105457742109-n-graph-manifest-per-instance" data-who="impl-graphinit" data-when="2026-09-02T11:03:33Z">
+    <div class="r-comment-body"><p>graph load bookkeeping is scoped to the instance it describes; codex status no longer names the offsite-trial archive as its load source; status and load suites green</p></div>
 </div>
 </section>
 </main>
