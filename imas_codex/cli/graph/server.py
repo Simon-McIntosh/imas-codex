@@ -25,6 +25,18 @@ from imas_codex.graph.neo4j_ops import (
 )
 
 NEO4J_IMAGE = neo4j_image()
+COMPUTE_LISTEN_ADDRESS = "0.0.0.0"
+
+
+def _compute_neo4j_conf(*, bolt_port: int, http_port: int) -> str:
+    """Render the Neo4j config used by compute-node graph services."""
+    from imas_codex.graph.dirs import DEFAULT_NEO4J_CONF
+
+    return DEFAULT_NEO4J_CONF.format(
+        listen_address=COMPUTE_LISTEN_ADDRESS,
+        bolt_port=bolt_port,
+        http_port=http_port,
+    )
 
 
 def _deploy_compute_neo4j() -> dict:
@@ -215,11 +227,8 @@ def graph_start(
     # if the directory was created manually.
     conf_file = data_path / "conf" / "neo4j.conf"
     if not conf_file.exists():
-        from imas_codex.graph.dirs import DEFAULT_NEO4J_CONF
-
         conf_file.write_text(
-            DEFAULT_NEO4J_CONF.format(
-                listen_address="127.0.0.1",
+            _compute_neo4j_conf(
                 bolt_port=profile.bolt_port,
                 http_port=profile.http_port,
             )
