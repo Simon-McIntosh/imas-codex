@@ -350,6 +350,23 @@ nothing; every later PR is a pure addition over previously approved entries. App
 identical and disappear from the diff. Never restore the legacy dump. The merge first parent is the additive
 baseline; reviewer-edit detection separately compares merged content with the cut-time RC tag.
 
+### Readable review prose belongs to the package writer
+
+A physicist reads the published YAML, so folded descriptions, one blank line between entries, literal Unicode and
+column wrapping are release requirements — and every one of them is produced by
+`imas_standard_names.yaml_store.dump_catalog_yaml`, which `_write_domain_yaml` hands the whole entry list. The
+exporter owns which fields are emitted, their order, the domain header comment, and re-validating the serialized
+bytes through the installed entry model. It must never format prose itself, and the `reformatted=0` gate below is
+what holds that line.
+
+So when the review surface reads badly, the defect is in the installed package and the repair is a package release
+plus a pin bump at both `pyproject.toml` occurrences, never a formatter in `export.py`. That took three pins to
+learn: the first writer separated entries correctly but still emitted quoted, escaped scalars, and readable folded
+prose arrived only with a later release. Equations, fences and the blank lines inside a documentation block are
+deliberately left untouched, so an over-long line is not by itself a defect — check the invariants the writer
+actually owns (no `\uXXXX` escapes, no backslash continuations, byte-identity with a re-dump) rather than a column
+count.
+
 ### Numbered operator runbook
 
 1. **Choose or define the batch manifest.** Reuse a committed token under
@@ -385,7 +402,44 @@ baseline; reviewer-edit detection separately compares merged content with the cu
    must name the intended series before `--bump` is omitted. **Stop:** any mismatch or uncertainty about fork
    rehearsal versus upstream review.
 
-3. **Preflight the additive cut and author the PR text.** The submitting agent authors a short title and a
+3. **Move the standard-names pin before the kind reconcile fires.** Structural `kind` is derived from the
+   canonical identity by `derive_kind`, and its answer depends on the base declarations inside the installed
+   `imas-standard-names`. `reconcile_standard_name_kinds` runs in the `sn run` startup maintenance sweep (reached
+   through `reconcile_grammar_segments`) and rewrites every stored kind that disagrees with the derivation as a
+   ledgered `StandardNameChange`. The pin therefore decides what the graph is reconciled *to*, and a sweep under a
+   pin whose bases are wrong overwrites correct values graph-wide: measured on 2026-09-02, a sweep touched 181 live
+   names and flipped 45 correct vectors (`momentum`, `torque`, `torque_density`) to scalar because those three
+   bases were still registered scalar in the pinned release. The corrected release had to be pinned first, and the
+   repair cost a second unscoped drain. Bump both `pyproject.toml` occurrences with `uv.lock` resolved to match,
+   then census the live set through the same predicate the reconcile uses.
+
+   ```bash
+   grep -n 'imas-standard-names==' pyproject.toml
+   uv run --no-sync python -c '
+   from imas_standard_names import __version__ as isn
+   from imas_codex.graph.client import GraphClient
+   from imas_codex.standard_names.kind_derivation import derive_kind
+   from imas_codex.standard_names.ledger import LIVE_NAME
+
+   with GraphClient() as gc:
+       rows = list(gc.query(f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, sn.kind AS stored"))
+   controls = {base: derive_kind(base) for base in ("momentum", "torque", "torque_density", "electron_temperature")}
+   disagree = [row for row in rows if row["stored"] != derive_kind(str(row["id"]))]
+   print({"isn": isn, "live": len(rows), "with_kind": sum(1 for row in rows if row["stored"]),
+          "disagreements": len(disagree), "controls": controls})
+   '
+   ```
+
+   Run it before and after the first unscoped `sn run` of the batch. The startup lines `Grammar synced to ISN
+   <version>` and `reconcile_standard_name_kinds: refreshed N stored kind(s)` must account for the difference.
+   **Gate:** the installed `isn` equals both pinned occurrences; `live` equals `with_kind`, so a zero is not a
+   missing-property artifact; each vector-base control derives `vector` and the scalar control derives `scalar`;
+   and `disagreements` is `0` once the drain has run. **Stop:** a pin mismatch, a control deriving the wrong kind,
+   a `live`/`with_kind` gap, or any remaining disagreement. Cut no candidate on a graph whose kinds disagree with
+   their identities, and never reach for a scoped drain or `--skip-global-maintenance` to get past this: those
+   bypass the whole sweep, so the disagreement survives and is published.
+
+4. **Preflight the additive cut and author the PR text.** The submitting agent authors a short title and a
    two-to-five-sentence body naming the facility, manifest, published count, deliberate exclusions, review
    instruction, catalog `REVIEWING.md`, and preview shape. Never enumerate entries or narrate unresolved defects.
 
@@ -402,7 +456,7 @@ baseline; reviewer-edit detection separately compares merged content with the cu
    zero unexplained paths. **Stop:** any unresolved source, validation, semantic, byte-identity, prose, or accounting
    finding. Never use `--skip-gate` to cross a failed gate.
 
-4. **Cut the candidate.** `--target auto` sends an RC batch to a fork PR; add `--final` for the upstream review.
+5. **Cut the candidate.** `--target auto` sends an RC batch to a fork PR; add `--final` for the upstream review.
    In both cases the branch pushes to the fork. `--no-pr` is only for a deliberately tagged in-work build.
 
    ```bash
@@ -416,7 +470,49 @@ baseline; reviewer-edit detection separately compares merged content with the cu
    one branch and one tag; upstream `main` remains at its recorded SHA. **Stop:** wrong target/ref, upstream-main
    change, identity mismatch, or published prose differing from `$BODY`.
 
-5. **Hand off review without weakening machine ownership.** Reviewers may edit only the standard name and its
+6. **Gate the cut before calling it a review candidate.** Two per-entry properties are invisible in the release
+   summary and both break the reviewer's surface silently: an entry whose `physics_domain` is not a `PhysicsDomain`
+   member is rejected by validation and withheld, and an entry whose `kind` disagrees with `derive_kind` publishes a
+   structural claim the identity contradicts. Read them out of the tag the cut just pushed — local in `$ISNC`
+   because the release ran there, so fetch `refs/tags/$RC` first only when reading from another checkout —
+   together with the readability invariants the writer owns, so the candidate is judged on its published bytes.
+
+   ```bash
+   uv run --no-sync python -c '
+   import itertools, os, re, subprocess, yaml
+   from imas_standard_names.grammar import PhysicsDomain
+   from imas_standard_names.yaml_store import dump_catalog_yaml
+   from imas_codex.standard_names.kind_derivation import derive_kind
+
+   isnc, rc = os.environ["ISNC"], os.environ["RC"]
+   show = lambda *a: subprocess.run(["git", "-C", isnc, *a], capture_output=True, text=True, check=True).stdout
+   files = [f for f in show("ls-tree", "-r", "--name-only", rc).split() if f.startswith("standard_names/")]
+   domains = {d.value for d in PhysicsDomain}
+   fields = ("entries", "domain_invalid", "kind_disagreement", "escapes", "continuations", "reformatted")
+   counts = dict.fromkeys(fields, 0)
+   for f in files:
+       text = show("show", f"{rc}:{f}")
+       counts["escapes"] += len(re.findall(r"\\u[0-9A-Fa-f]{4}", text))
+       counts["continuations"] += sum(1 for line in text.splitlines() if line.endswith("\\"))
+       body = "".join(itertools.dropwhile(lambda line: line.startswith("#"), text.splitlines(keepends=True)))
+       entries = yaml.safe_load(body) or []
+       counts["reformatted"] += dump_catalog_yaml(entries) != body
+       for entry in entries:
+           counts["entries"] += 1
+           counts["domain_invalid"] += entry.get("physics_domain") not in domains
+           counts["kind_disagreement"] += entry.get("kind") != derive_kind(entry["name"])
+   print({"files": len(files), **counts})
+   '
+   ```
+
+   **Gate:** `entries` equals the published count the release reported, `domain_invalid=0`, `kind_disagreement=0`,
+   `escapes=0`, `continuations=0`, and `reformatted=0`. **Stop:** any non-zero. A domain outside the enum is a
+   classification defect fixed with `sn reclassify`, never by widening the emitted value; a kind disagreement means
+   the pin-before-reconcile gate has not been satisfied on the live graph, so go back rather than publish it; and a
+   non-zero `reformatted` means prose is being formatted between the writer and the file, which is the one thing
+   the exporter must never do.
+
+7. **Hand off review without weakening machine ownership.** Reviewers may edit only the standard name and its
    description/documentation. Unit, kind, status, source binding kind/ref/version, identity roles, structure,
    ordering, and formatting are machine-owned. To hold an entry, request changes and keep the PR unmerged; do not
    delete it or alter machine fields. After merge, a failed reviewer edit is held as `contested`.
@@ -435,7 +531,7 @@ baseline; reviewer-edit detection separately compares merged content with the cu
    preview, or hold failure. Rebuild with `gh workflow run catalog.yml --repo "$PR_REPO" -f
    pull-request-number="$PR_NUMBER"` or `gh run rerun <run-id>`; require `success`. Never close/reopen the PR.
 
-6. **Merge and run the fail-closed approval preflight.**
+8. **Merge and run the fail-closed approval preflight.**
 
    ```bash
    gh pr view "$PR" --json state,mergeCommit --jq '.state + " " + .mergeCommit.oid'
@@ -449,7 +545,7 @@ baseline; reviewer-edit detection separately compares merged content with the cu
    unmatched identity, or prior provenance/approval before any write; fix the cause and repeat, never bypass or
    hand-edit graph state.
 
-7. **Fold the merged review into the graph.**
+9. **Fold the merged review into the graph.**
 
    ```bash
    uv run --no-sync imas-codex sn approve --pr "$PR"
@@ -464,33 +560,33 @@ baseline; reviewer-edit detection separately compares merged content with the cu
    exits nonzero with `already carries the fold-back contract tag`. **Stop:** any count/provenance/receipt mismatch,
    catalog push without receipt, or non-refusing repeat.
 
-8. **Adjudicate contested proposals explicitly.**
+10. **Adjudicate contested proposals explicitly.**
 
-   ```bash
-   uv run --no-sync imas-codex sn status --contested
-   uv run --no-sync imas-codex sn resolve <name> --override --reason "<substantive expert justification>"
-   ```
+    ```bash
+    uv run --no-sync imas-codex sn status --contested
+    uv run --no-sync imas-codex sn resolve <name> --override --reason "<substantive expert justification>"
+    ```
 
-   **Gate:** a held entry remains listed `contested` without mutation; override prints `proposal applied →
-   approved`, materializes the exact reviewed proposal, sets `docs_stage='accepted'`, stores the exact reason in
-   `contested_resolution`, and preserves provenance. **Stop:** non-contested target, empty/procedural reason,
-   wrong materialized bytes, or provenance change.
+    **Gate:** a held entry remains listed `contested` without mutation; override prints `proposal applied →
+    approved`, materializes the exact reviewed proposal, sets `docs_stage='accepted'`, stores the exact reason in
+    `contested_resolution`, and preserves provenance. **Stop:** non-contested target, empty/procedural reason,
+    wrong materialized bytes, or provenance change.
 
-9. **Prove approved and contested rows are frozen.** Capture ID-ordered `properties(sn)` JSON before and after
-   ordinary unscoped work.
+11. **Prove approved and contested rows are frozen.** Capture ID-ordered `properties(sn)` JSON before and after
+    ordinary unscoped work.
 
-   ```bash
-   export SNAPSHOT=<frozen-before.json>
-   uv run --no-sync python -c 'import json; from imas_codex.graph.client import GraphClient; gc=GraphClient(); q=list(gc.query("MATCH (sn:StandardName) WHERE sn.name_stage IN [\x27approved\x27,\x27contested\x27] RETURN sn.id AS id, properties(sn) AS properties ORDER BY id")); gc.close(); print(json.dumps(q, sort_keys=True, default=str))' > "$SNAPSHOT"
-   sha256sum "$SNAPSHOT"
-   uv run --no-sync imas-codex sn run --flush --cost-limit <conservative-cap>
-   ```
+    ```bash
+    export SNAPSHOT=<frozen-before.json>
+    uv run --no-sync python -c 'import json; from imas_codex.graph.client import GraphClient; gc=GraphClient(); q=list(gc.query("MATCH (sn:StandardName) WHERE sn.name_stage IN [\x27approved\x27,\x27contested\x27] RETURN sn.id AS id, properties(sn) AS properties ORDER BY id")); gc.close(); print(json.dumps(q, sort_keys=True, default=str))' > "$SNAPSHOT"
+    sha256sum "$SNAPSHOT"
+    uv run --no-sync imas-codex sn run --flush --cost-limit <conservative-cap>
+    ```
 
-   Repeat the snapshot command to a different file and hash it. **Gate:** row counts and SHA-256 match while the
-   pipeline processes at least one non-frozen item as a positive control. **Stop:** frozen delta, frozen claim/write,
-   provider/parameter failure, or zero positive-control work; equality without a firing control is absent evidence.
+    Repeat the snapshot command to a different file and hash it. **Gate:** row counts and SHA-256 match while the
+    pipeline processes at least one non-frozen item as a positive control. **Stop:** frozen delta, frozen claim/write,
+    provider/parameter failure, or zero positive-control work; equality without a firing control is absent evidence.
 
-10. **Undo only a rehearsal.** Before approval record the graph census, merged-PR tree, artifact hash,
+12. **Undo only a rehearsal.** Before approval record the graph census, merged-PR tree, artifact hash,
     upstream-main SHA, and exact cut-time annotated tag object. A real accepted release stops here and is never
     unwound.
 
