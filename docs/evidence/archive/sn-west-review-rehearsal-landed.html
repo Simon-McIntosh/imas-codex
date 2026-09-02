@@ -351,6 +351,54 @@
     <code>n-sn-identity-classes</code>.</small></p>
   </section>
 
+  <section id="fold-back-rehearsal">
+    <h2>The fold-back cycle runs end to end, after seven defects it found in itself</h2>
+    <p>On 2026-09-01 and 2026-09-02 the review, approval, adjudication, freeze and undo
+    stages were exercised live against fork PR 3 (RC <code>v0.3.0rc1+west-task-2e</code>) with a
+    worker standing in for the reviewer under the lead's authorization, behind a fresh
+    2,458,729,143-byte restore point whose census was byte-stable before export and after
+    restart. Two edits were made through the GitHub API: a compliant tightening of
+    <code>breakdown_initial_time</code> and a deliberately false terminal event on
+    <code>pulse_duration</code>; both passed the structural guard, the PR merged on the fork, and
+    upstream stayed at <code>a06e5205</code> throughout.</p>
+    <p>Every live stage that followed found a defect the unit suites had not, and every defect was
+    repaired before the stage was repeated. The rehearsal therefore ends with a passing cycle
+    <em>and</em> a list of what would have broken a real physicist release:</p>
+    <table>
+      <thead><tr><th>Stage</th><th>Defect found live</th><th>Repair</th></tr></thead>
+      <tbody>
+        <tr><td>Approve</td><td>Edit detection diffed against the merge first parent, which under the blank-main additive chain holds no batch files, so 0 reviewer edits were seen</td><td>diff against the cut-time RC tag, first parent kept as the additive baseline (<code>6059a234</code>)</td></tr>
+        <tr><td>Approve</td><td>Contested names carried no PR provenance; the CLI rewrote the frozen review manifest after merge</td><td>contest stamps the four provenance fields atomically; the artifact write is removed, the receipt tag is the sole record (<code>65a43ae3</code>)</td></tr>
+        <tr><td>Resolve</td><td><code>sn resolve --override</code> approved a contested name without applying the wording it accepted</td><td>the stored steered edit is materialized with the approved transition (<code>5f0799f5</code>)</td></tr>
+        <tr><td>Freeze</td><td>An ordinary flush run changed <code>review_mean_score</code> and <code>review_disagreement</code> on an approved name whose docs were still drafted</td><td>approved and contested rows excluded from every pool claim and aggregate write, approval settles <code>docs_stage</code> (<code>81b3e71d</code>); its unbound parameter fixed at <code>3a2d0d3b</code></td></tr>
+        <tr><td>Freeze</td><td><code>sn run --dry-run</code> seeded 1,614 sources and ran paid pools</td><td>dry runs return from a read-only preview before any write (<code>80c66161</code>)</td></tr>
+        <tr><td>Undo</td><td>A name approved before provenance stamping was skipped by the provenance-only selection</td><td>frozen-batch membership fallback (<code>dc5bdcc3</code>)</td></tr>
+        <tr><td>Approve</td><td>Approval promoted 384 names and pushed the catalog before discovering its edited targets were ineligible, leaving catalog and graph out of sync with no receipt</td><td>fail-closed eligibility preflight before the first write, undo restores <code>docs_stage</code> (<code>ea575887</code>); fork main reverted (<code>3edfcc13</code>)</td></tr>
+      </tbody>
+    </table>
+    <p>The freeze-check passed on its third run: one unscoped <code>sn run --flush --cost-limit 5</code>
+    (exact spend 5.0999) touched 51 non-frozen names and left all 376 approved and contested rows
+    byte-identical across 19 projected fields. The final cycle then ran on the repaired code:
+    approve gave 384 auto-approved plus 2 contested with all four provenance fields on both
+    contested nodes and a <code>graph-merged:</code> receipt; resolve materialized the reviewer's
+    exact description with its reason; undo reverted 385 approved plus 1 contested, deleted the
+    receipt, kept the RC tag, and left approved 0, contested 0, accepted 2,336, all five
+    <code>catalog_*</code> fields null on all 409 batch rows, the fork main tree equal to the PR 3
+    merge tree, and the review manifest byte-identical to HEAD. The 384 rather than the 374 of the
+    first live approve is three intervening flush passes moving batch names to accepted, confirmed
+    by an eligible-batch count of 386.</p>
+    <p>Cost of the live stages: three freeze runs 10.54 USD plus 1.22 USD from the non-dry
+    dry-run, against a 500 USD ceiling. Two cap readings were 1.088x and 1.020x, the first
+    post-July overshoots on record.</p>
+    <p>Evidence: <code>crew/reports/west-stage3-restore-point.md</code>,
+    <code>west-stage3-review-merge.md</code>, <code>west-stage4-approve.md</code>,
+    <code>west-stage4b-resolve.md</code>, <code>west-stage5-freeze-check.md</code> (three
+    reports), <code>west-stage6-undo.md</code>, <code>west-stage6b-repaired-cycle.md</code>,
+    <code>west-catalog-main-inverse.md</code>, <code>west-stage6c-final-cycle.md</code>, and
+    <code>approve-manifest-mutation.md</code>; runs are ledgered under session
+    <code>ship-s10-20260901</code>.</p>
+  </section>
+
   <section id="document-audit">
     <h2>Document audit</h2>
     <p>The final authored HTML was checked with Reckon's document auditor. The retained command
@@ -362,11 +410,12 @@
 
   <section id="remaining-authority">
     <h2>What remains</h2>
-    <p>The campaign has proved the export, identity, transport, and review mechanics and has a
-    complete source account. It has not supplied the missing accepted proposals for the six source
-    paths, completed the human review, folded reviewer edits back through governed validation, or
-    authorized an upstream final release. Those are the next decisions; this evidence record does
-    not collapse them into a passing technical rehearsal.</p>
+    <p>The campaign has proved the export, identity, transport, review, approval, adjudication,
+    freeze and undo mechanics end to end and has a complete source account. It has not supplied the
+    missing accepted proposals for the six source paths, completed the human review of the real
+    packet, or authorized an upstream final release. Those belong to
+    <code>sn-west-catalog-release</code>; the graph and the fork are unwound and waiting for them.
+    Inside this plan only the release recipe rewrite remains.</p>
   </section>
 </main>
 </body>
