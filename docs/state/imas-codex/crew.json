@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-02T13:03:38",
+  "updated": "2026-09-02T13:51:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1487,6 +1487,15 @@
           "gpt-5.6-sol": "01a03a1f-0495-7c90-a212-d5a92f9b1581"
         },
         "created": "2026-08-25"
+      },
+      {
+        "id": "impl-pinbump",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-02"
       },
       {
         "id": "impl-pinversion",
@@ -51891,6 +51900,6 @@
       }
     ],
     "holds": [],
-    "_version": 1316
+    "_version": 1318
   }
 }
