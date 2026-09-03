@@ -337,12 +337,30 @@ unscoped run rewrites the segment columns of 706 tombstoned identities, each wit
 ledger entry, as a side effect of asking for one review. That write is correct and it is large and reviewable:
 schedule it as its own operation behind its own restore point, never discover it inside a rotation.
 
-Until it has been scheduled, an `sn run` dispatched for a single name must be scoped
-(`--focus <name> --only review`) and must prove it did not fire the sweep. Take the terminal-stage drift census
-immediately before and immediately after the run; the gate is `drifting: 706` unchanged across the pair. Gate on
-the drift count alone, not on the terminal population beside it: that population was 2239 when the sweep was
-ruled in-scope for every stage and it grows whenever an identity is superseded or exhausted, so a moved
-`terminal` figure is ordinary and a moved `drifting` figure is the sweep having fired.
+Until it has been scheduled, an `sn run` dispatched for a single name is
+
+```bash
+uv run --no-sync imas-codex sn run --name <standard-name> --only review --skip-global-maintenance
+```
+
+`--skip-global-maintenance` is the fence. It bypasses the global startup, background, and post-drain
+maintenance writes for a run that already carries an explicit scope, so the sweep is not merely unfired — it is
+unreachable, and no after-the-fact proof is needed to establish that. Require it on every scoped single-name
+run until the sweep is scheduled.
+
+`--name` is the flag that scopes by standard name, and it is the only one that does. `--focus` reads
+name-scoped and is not: it selects **data-dictionary paths**, so a standard-name id handed to it is prefixed
+`dd:` and refused at source seeding with `ValueError: cannot capture exact DD snapshot for source(s):
+dd:<standard-name>` (`graph_ops.py`, the exact-snapshot capture). Measured 2026-09-03: the route failed in 9
+seconds, which is cheap, but the diagnosis was not — the same class of mistake as `sn review --ids`, which
+scopes to *IDS* names rather than standard-name ids and matched nothing for 380 seconds. `--focus` stays
+correct for the DD-path work it is built for; it is wrong for a name.
+
+Keep the terminal-stage drift census as corroboration, not as the gate. Take it immediately before and
+immediately after the run and expect `drifting: 706` unchanged across the pair. Read the drift count alone, not
+the terminal population beside it: that population was 2239 when the sweep was ruled in-scope for every stage
+and it grows whenever an identity is superseded or exhausted, so a moved `terminal` figure is ordinary and a
+moved `drifting` figure is the sweep having fired.
 
 ```bash
 uv run --no-sync python -c '
@@ -362,8 +380,9 @@ drift = [
 print({"terminal": len(rows), "drifting": len(drift)})'
 ```
 
-A moved figure means the scoped run wrote through the sweep: stop and report rather than continuing, because the
-gate has already been crossed and the remaining question is what else the run rewrote. To realign one identity
+A moved figure means the scoped run wrote through the sweep despite the fence: stop and report rather than
+continuing, because the sweep has already run and the remaining question is what else it rewrote — and the
+maintenance skip failing to hold is itself the finding. To realign one identity
 without touching the other 705, use the name-scoped repair `imas-codex sn realign-segments NAME [--dry-run]` —
 that route and the whole-graph sweep share one ledger operation label, so a deliberate single repair stays
 queryable beside the scheduled sweep, and neither is ever a hand-written segment update.
