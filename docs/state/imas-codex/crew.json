@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T14:25:52",
+  "updated": "2026-09-03T15:00:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -426,6 +426,15 @@
       },
       {
         "id": "impl-blockedrename",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-bodylink",
         "harness": "claude",
         "role": "implement",
         "session_id": null,
@@ -58136,6 +58145,94 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T125522297618-n-ledger-link-appears-once",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-ledger-link-appears-once",
+        "node_definition": {
+          "done_when": "a test proves a body already containing the ledger path is returned unchanged, a second proves a body lacking it gains exactly one markdown link whose target resolves to the ledger blob, and uv run --no-sync pytest tests/standard_names -q reports one failure matching the single pre-existing claim case with zero added",
+          "estimated_hours": 1.0,
+          "goal": "Stop the review body carrying the exclusion ledger twice: the appender adds a raw pinned-commit URL paragraph unconditionally, so an authored body that already links the ledger inline ends up with the address in prose and again as a forty-character URL, and the appended form should be a markdown link rather than a bare URL when it is needed at all",
+          "id": "n-ledger-link-appears-once",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/ledger-link-appears-once.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_review_body_ledger_link.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-bodylink",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T12:55:28Z",
+        "completed_at": "2026-09-03T13:00:30.792Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 296,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 302,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "8e1864ef4cf9c68ca8718860ad425e8c4f1dc74c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/ledger-link-appears-once.json",
+        "scope_changed": false,
+        "session_id": "9ddeee9f-b173-4ce5-8220-46b927bb3ec3",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "stopped mid-flight; the node's goal was too narrow to be worth landing",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -58196,6 +58293,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1438
+    "_version": 1440
   }
 }
