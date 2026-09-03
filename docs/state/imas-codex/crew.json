@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T08:15:49",
+  "updated": "2026-09-03T08:50:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -518,6 +518,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "impl-catalogdocs",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-catalogpin",
         "harness": "clive",
         "role": "implement",
@@ -605,6 +614,15 @@
         "role": "implement",
         "session_id": "01a03594-b5df-7141-8b20-a704e199dfae",
         "created": "2026-08-24"
+      },
+      {
+        "id": "impl-codexsidecar",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-cohortstage",
@@ -1234,6 +1252,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-08-27"
+      },
+      {
+        "id": "impl-isnsidecar",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-isnvocab",
@@ -55471,6 +55498,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1395
+    "_version": 1398
   }
 }
