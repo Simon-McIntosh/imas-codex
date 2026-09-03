@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T15:00:59",
+  "updated": "2026-09-03T15:17:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -58233,6 +58233,117 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T130131257324-n-authored-body-is-published-unchanged",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-authored-body-is-published-unchanged",
+        "node_definition": {
+          "done_when": "a test proves an authored body reaches the pull request byte-identical apart from a single appended preview line, a second proves the ledger paragraph is still appended when the body was synthesized rather than authored, and uv run --no-sync pytest tests/standard_names -q reports one failure matching the single pre-existing claim case with zero added",
+          "estimated_hours": 1.5,
+          "goal": "Honour the promise the release command already makes about an explicitly authored review body, which its own help text states is published unchanged: nothing may append machine prose to it, so the exclusion-ledger paragraph must not be added to an authored body at all, while the preview address stays appended because the author cannot know a pull-request number before the pull request exists",
+          "id": "n-authored-body-is-published-unchanged",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/authored-body-is-published-unchanged.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_review_body_authored.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-bodylink",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T13:01:38Z",
+        "completed_at": "2026-09-03T13:12:31.483Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 645,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 653,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "99df894726c11b9bf1ccfc3c60e0f280bafcdd09",
+        "commits": [
+          "cb9c0e0364da2a0cd43ab9ecfd0c582c95b8574b"
+        ],
+        "changed_lines": {
+          "added": 171,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_review_body_authored.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/authored-body-is-published-unchanged.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/authored-body-is-published-unchanged.json",
+        "scope_changed": false,
+        "session_id": "42c2d58c-661b-4996-936f-a48f8e0bc0d8",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 79557,
+            "cache_creation_input_tokens_cumulative": 79557,
+            "cache_read_input_tokens": 2494230,
+            "cache_read_input_tokens_cumulative": 2494230,
+            "inference_geo": "not_available",
+            "input_tokens": 60,
+            "input_tokens_cumulative": 60,
+            "output_tokens": 12017,
+            "output_tokens_cumulative": 12017,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.9373639999999999,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.9373639999999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -58293,6 +58404,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1440
+    "_version": 1441
   }
 }
