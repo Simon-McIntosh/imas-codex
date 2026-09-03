@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:21:04",
+  "updated": "2026-09-03T21:26:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -550,9 +550,11 @@
         "id": "impl-cascadesurfaces",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "a8654233-19cc-4696-89d2-c722ee11b646",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "a8654233-19cc-4696-89d2-c722ee11b646"
+        },
         "created": "2026-09-03"
       },
       {
@@ -61532,6 +61534,126 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T191703687351-n-wcr-cascade-surfaces",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-cascade-surfaces",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/llm tests/standard_names/test_rename_cascade.py -q -p no:cacheprovider reports zero failures added against the base revision, and the added tests assert that neither surface describes deferred descendant rows as completed steps, with the report quoting the exact before and after wording emitted at imas_codex/llm/sn_tools.py and imas_codex/llm/server.py so the two surfaces can be compared against the CLI wording line for line",
+          "estimated_hours": 0.75,
+          "goal": "Make the LLM and MCP cascade surfaces say the same true thing the CLI surface now says",
+          "id": "n-wcr-cascade-surfaces",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T191703687351-n-wcr-cascade-surfaces/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/llm/sn_tools.py",
+            "imas_codex/llm/server.py",
+            "tests/llm"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-cascadesurfaces",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:17:10Z",
+        "completed_at": "2026-09-03T19:25:23.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 487,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 493,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "28f7ba2a376182fa9d228144d4e04a3f028051f2",
+        "commits": [
+          "95421a4e9a2b2e3d2955778785f53c11da7f15b1"
+        ],
+        "changed_lines": {
+          "added": 213,
+          "removed": 9,
+          "files": 3
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/llm tests/standard_names/test_rename_cascade.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/tmp/wcr_cascade_gate_after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T191703687351-n-wcr-cascade-surfaces/manifest.md",
+        "scope_changed": false,
+        "session_id": "a8654233-19cc-4696-89d2-c722ee11b646",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.78,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-07T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 91234,
+            "cache_creation_input_tokens_cumulative": 91234,
+            "cache_read_input_tokens": 2063068,
+            "cache_read_input_tokens_cumulative": 2063068,
+            "inference_geo": "not_available",
+            "input_tokens": 50,
+            "input_tokens_cumulative": 50,
+            "output_tokens": 25144,
+            "output_tokens_cumulative": 25144,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.572723999999999,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.572723999999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 490.057,
+          "generated_tokens": 25144,
+          "generation_seconds": 289.548,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 10.2,
+          "machine_seconds": 200.509,
+          "peak_input_tokens": 101936,
+          "tokens_per_second": 86.84,
+          "wall_tokens_per_second": 51.31
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/llm",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -61592,6 +61714,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1504
+    "_version": 1506
   }
 }
