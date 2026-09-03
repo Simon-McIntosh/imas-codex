@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:12:35",
+  "updated": "2026-09-03T21:15:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -539,9 +539,11 @@
         "id": "impl-cascadepersist",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "c3166750-74e7-429c-b78c-88841e57abcf",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "c3166750-74e7-429c-b78c-88841e57abcf"
+        },
         "created": "2026-09-03"
       },
       {
@@ -61150,6 +61152,127 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T190401117729-n-wcr-cascade-truthful",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-cascade-truthful",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/test_rename_cascade.py tests/standard_names/test_provenance_lifecycle.py -q -p no:cacheprovider passes with zero failures added against the base revision, and the added tests assert both that a subtree rename whose root does not reach accepted reports its descendants as deferred awaiting the root rather than as planned work done, and that a strictly linear non-branching three-level chain plans without emitting the unreachable-in-cascade message",
+          "estimated_hours": 1.0,
+          "goal": "Make what the rename cascade surface reports match what it actually persists",
+          "id": "n-wcr-cascade-truthful",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190401117729-n-wcr-cascade-truthful/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/standard_names/cascade.py",
+            "imas_codex/standard_names/edit.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_rename_cascade.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-cascadepersist",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:04:06Z",
+        "completed_at": "2026-09-03T19:13:58.853Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 586,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 592,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "e5020348b38c67eaff6907cd65975a3a57a17233",
+        "commits": [
+          "9e4773f7e30cf6b2c2e38efb68c9be9b3a0d832b"
+        ],
+        "changed_lines": {
+          "added": 274,
+          "removed": 9,
+          "files": 4
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_rename_cascade.py tests/standard_names/test_provenance_lifecycle.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190401117729-n-wcr-cascade-truthful/gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190401117729-n-wcr-cascade-truthful/manifest.md",
+        "scope_changed": false,
+        "session_id": "c3166750-74e7-429c-b78c-88841e57abcf",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.75,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-07T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 131000,
+            "cache_creation_input_tokens_cumulative": 131000,
+            "cache_read_input_tokens": 4456610,
+            "cache_read_input_tokens_cumulative": 4456610,
+            "inference_geo": "not_available",
+            "input_tokens": 86,
+            "input_tokens_cumulative": 86,
+            "output_tokens": 34640,
+            "output_tokens_cumulative": 34640,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.404735,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.404735
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 589.582,
+          "generated_tokens": 34640,
+          "generation_seconds": 451.652,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 14.2,
+          "machine_seconds": 137.93,
+          "peak_input_tokens": 141702,
+          "tokens_per_second": 76.7,
+          "wall_tokens_per_second": 58.75
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_rename_cascade.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -61210,6 +61333,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1496
+    "_version": 1498
   }
 }
