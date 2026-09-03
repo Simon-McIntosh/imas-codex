@@ -11,11 +11,15 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from tests.standard_names.test_tombstone_supersede import (
     _Graph,
     _node,
     _run,
+    _Session,
     _state,
+    _Transaction,
 )
 
 _OLD = "invalid_duplicate"
@@ -23,12 +27,66 @@ _TARGET = "electron_density"
 _BACKING = "core_profiles/profiles_1d/electrons/density"
 
 
-def _tombstone_state(**kwargs: Any) -> Any:
+def _tombstone_state(
+    *, target_predecessor_stage: str = "accepted", **kwargs: Any
+) -> Any:
     state = _state(**kwargs)
     state.nodes[_TARGET]["name_stage"] = "superseded"
-    state.nodes[_TARGET]["superseded_from_stage"] = "accepted"
+    state.nodes[_TARGET]["superseded_from_stage"] = target_predecessor_stage
     state.nodes[_TARGET]["superseded_by"] = None
     return state
+
+
+class _RevivingTransaction(_Transaction):
+    """Mirrors the production ``ATOMIC_FOLD_MUTATE_NAMES`` write exactly,
+    including the ``target_revived_stage`` parameter the shared stateful
+    mock in :mod:`test_tombstone_supersede` predates and does not apply."""
+
+    def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        if "ATOMIC_FOLD_MUTATE_NAMES" in cypher:
+            self.write_markers.append("names")
+            old = self.state.nodes[params["old_id"]]
+            target = self.state.nodes[params["into_id"]]
+            if (
+                self._element_id("name", params["old_id"]) != params["old_element_id"]
+                or self._element_id("name", params["into_id"])
+                != params["target_element_id"]
+            ):
+                return []
+            old["superseded_from_stage"] = params["predecessor_stage"]
+            old["name_stage"] = "superseded"
+            old.pop("claim_token", None)
+            old.pop("claimed_at", None)
+            old["source_paths"] = []
+            if old.get("edit_status") == "open":
+                old["edit_status"] = "applied"
+            target["source_paths"] = list(params["target_paths"])
+            if params.get("target_revived_stage") is not None:
+                target["name_stage"] = params["target_revived_stage"]
+            lineage = (params["into_id"], params["old_id"])
+            if lineage not in self.state.refined_from:
+                self.state.refined_from.append(lineage)
+            return [
+                {
+                    "old_stage": "superseded",
+                    "predecessor_stage": params["predecessor_stage"],
+                }
+            ]
+        return super().run(cypher, **params)
+
+
+class _RevivingSession(_Session):
+    def begin_transaction(self) -> _RevivingTransaction:
+        transaction = _RevivingTransaction(self.graph)
+        self.graph.transactions.append(transaction)
+        return transaction
+
+
+class _RevivingGraph(_Graph):
+    """A fold graph whose mutation mock matches the revival-aware query."""
+
+    def session(self) -> _RevivingSession:
+        return _RevivingSession(self)
 
 
 def _has_parent(child: str, parent: str) -> dict[str, Any]:
@@ -46,7 +104,7 @@ def _has_parent(child: str, parent: str) -> dict[str, Any]:
 
 
 def test_free_tombstone_target_is_occupied_by_the_fold() -> None:
-    graph = _Graph(_tombstone_state())
+    graph = _RevivingGraph(_tombstone_state())
     preview = _run(graph, dry_run=True)
     assert preview["ok"] is True
     assert graph.commits == 0
@@ -97,7 +155,7 @@ def test_tombstone_target_whose_only_successor_is_the_folded_name_is_admitted() 
     the chain collapsing on itself, not a third-party identity being seized,
     so the fold is admitted despite the target being tombstoned.
     """
-    graph = _Graph(_tombstone_state())
+    graph = _RevivingGraph(_tombstone_state())
     graph.state.refined_from.append((_OLD, _TARGET))
     result = _run(graph)
     assert result["ok"] is True
@@ -116,7 +174,7 @@ def test_tombstone_target_whose_two_hop_chain_closes_onto_its_root_is_admitted()
     folded into it, so the fold is admitted despite the walk needing two hops
     rather than one.
     """
-    graph = _Graph(_tombstone_state())
+    graph = _RevivingGraph(_tombstone_state())
     graph.state.nodes["electron_number_density"] = _node(
         "electron_number_density", stage="superseded"
     )
@@ -215,3 +273,59 @@ def test_tombstone_target_with_a_parent_or_a_child_is_refused() -> None:
     assert result["ok"] is False
     assert "still has child 'electron_density_at_boundary'" in result["reason"]
     assert childed.commits == 0
+
+
+@pytest.mark.parametrize(
+    "predecessor_stage,revived_stage",
+    [
+        ("accepted", "reviewed"),
+        ("reviewed", "reviewed"),
+        ("drafted", "drafted"),
+        ("exhausted", "exhausted"),
+    ],
+)
+def test_fold_revives_a_tombstoned_target_at_its_predecessor_stage(
+    predecessor_stage: str, revived_stage: str
+) -> None:
+    """The target's own pre-tombstone stage is restored, capped short of
+    acceptance: revival re-enters the review pipeline, it never grants
+    acceptance for free. It never stays 'superseded' either — a fold that
+    carries a source onto a still-tombstoned target would leave the
+    data-dictionary path with no live standard name at all."""
+    graph = _RevivingGraph(_tombstone_state(target_predecessor_stage=predecessor_stage))
+    applied = _run(graph)
+    assert applied["ok"] is True
+    assert graph.commits == 1
+    assert graph.state.nodes[_TARGET]["name_stage"] == revived_stage
+    assert graph.state.nodes[_TARGET]["name_stage"] != "superseded"
+    assert graph.state.nodes[_TARGET]["name_stage"] != "accepted"
+
+
+def test_fold_revival_defaults_to_drafted_without_a_recorded_predecessor_stage() -> (
+    None
+):
+    state = _tombstone_state()
+    del state.nodes[_TARGET]["superseded_from_stage"]
+    graph = _RevivingGraph(state)
+    applied = _run(graph)
+    assert applied["ok"] is True
+    assert graph.state.nodes[_TARGET]["name_stage"] == "drafted"
+
+
+def test_fold_onto_a_tombstone_leaves_every_carried_source_on_a_live_name() -> None:
+    """Every source (and its backing projection) the fold carries onto the
+    revived target resolves to a name that is no longer tombstoned — the
+    provenance the fold exists to preserve is reachable again, not stranded
+    on a dead spelling."""
+    graph = _RevivingGraph(_tombstone_state())
+    applied = _run(graph)
+    assert applied["ok"] is True
+    assert applied["sources_carried"] == 1
+
+    revived_stage = graph.state.nodes[_TARGET]["name_stage"]
+    assert revived_stage not in ("superseded", "accepted")
+
+    source = graph.state.sources["dd:" + _BACKING]
+    assert source["properties"]["produced_sn_id"] == _TARGET
+    assert source["bindings"] == [_TARGET]
+    assert graph.state.backings[_BACKING]["projections"] == [_TARGET]

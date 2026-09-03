@@ -1237,10 +1237,12 @@ SET old.superseded_from_stage = $predecessor_stage,
       WHEN old.edit_status = 'open' THEN 'applied'
       ELSE old.edit_status
     END,
-    target.source_paths = $target_paths
+    target.source_paths = $target_paths,
+    target.name_stage = coalesce($target_revived_stage, target.name_stage)
 MERGE (target)-[:REFINED_FROM]->(old)
 RETURN old.name_stage AS old_stage,
-       old.superseded_from_stage AS predecessor_stage
+       old.superseded_from_stage AS predecessor_stage,
+       target.name_stage AS target_stage
 """
 
 _FOLD_POSTFLIGHT_QUERY = _FOLD_SNAPSHOT_QUERY.replace(
@@ -1683,6 +1685,32 @@ def _fold_tombstone_target_reason(
     return None, closing_straight_chain
 
 
+#: A recorded pre-tombstone stage that revival caps before re-entering the
+#: pipeline: acceptance is a gate the review pool clears, never a side
+#: effect of re-occupying a dead spelling, so a target that was 'accepted'
+#: right before it was superseded is revived one hop short of that, at
+#: 'reviewed' — eligible for refine_name pickup, exactly the pipeline entry
+#: an ordinary below-threshold review outcome would leave it at.
+_FOLD_REVIVAL_STAGE_CAP = {"accepted": "reviewed"}
+
+
+def _fold_revival_stage(target_properties: dict[str, Any]) -> str:
+    """The name_stage a tombstoned fold target is revived to.
+
+    A fold onto a free tombstone re-occupies a dead identity rather than
+    leaving the carried source's data-dictionary path with no live standard
+    name at all. ``superseded_from_stage`` already records the stage the
+    target held immediately before it was superseded, so revival restores
+    exactly that — the state that was lost — capped through
+    :data:`_FOLD_REVIVAL_STAGE_CAP` so revival always re-enters the review
+    pipeline rather than granting acceptance outright. A target tombstoned
+    before this field existed has no recorded prior stage; it revives to
+    'drafted', the ordinary unreviewed entry point.
+    """
+    stage = target_properties.get("superseded_from_stage") or "drafted"
+    return _FOLD_REVIVAL_STAGE_CAP.get(stage, stage)
+
+
 def _fold_guard_reason(
     transaction: Any, snapshot: dict[str, Any], old: str, into: str
 ) -> str | None:
@@ -1957,11 +1985,16 @@ def _fold_expected_state(
     run_id: str,
     changed_at: str,
     include_domain_mutation: bool,
+    target_revived_stage: str | None = None,
 ) -> dict[str, Any]:
     expected = _fold_verification_state(snapshot)
-    # The fold never restages the target, so every reference to it keeps the
-    # stage the snapshot read — a tombstoned target stays tombstoned.
-    target_stage = snapshot["target_properties"].get("name_stage")
+    # A tombstoned target is revived to target_revived_stage (computed by
+    # the caller only when the snapshot read it as 'superseded'); any other
+    # target keeps the stage the snapshot read — the fold never touches an
+    # already-live target's lifecycle.
+    target_stage = target_revived_stage or snapshot["target_properties"].get(
+        "name_stage"
+    )
     old_source_ids = {source["id"] for source in old_sources}
     old_backing_ids = {backing["element_id"] for backing in old_backings}
     if include_domain_mutation:
@@ -1978,6 +2011,8 @@ def _fold_expected_state(
         if old_properties.get("edit_status") == "open":
             old_properties["edit_status"] = "applied"
         expected["names"]["target"]["source_paths"] = target_paths
+        if target_revived_stage is not None:
+            expected["names"]["target"]["name_stage"] = target_revived_stage
         target_reference = {
             "target_element_id": snapshot["target_element_id"],
             "target_labels": snapshot["target_labels"],
@@ -2084,6 +2119,7 @@ def _fold_receipt(
     change_id: str,
     run_id: str,
     changed_at: str,
+    target_revived_stage: str | None = None,
 ) -> tuple[str, dict[str, Any]]:
     source_ids = sorted(source["id"] for source in old_sources)
     backing_ids = sorted(backing["id"] for backing in old_backings)
@@ -2115,6 +2151,7 @@ def _fold_receipt(
             run_id=run_id,
             changed_at=changed_at,
             include_domain_mutation=True,
+            target_revived_stage=target_revived_stage,
         ),
     }
     return json.dumps(receipt, sort_keys=True, separators=(",", ":")), receipt
@@ -2273,6 +2310,11 @@ def supersede_into(
                 old_sources = _fold_source_rows(snapshot, old)
                 old_backings = _fold_old_backings(snapshot, old_sources, old)
                 predecessor_stage = snapshot["old_properties"]["name_stage"]
+                target_revived_stage = (
+                    _fold_revival_stage(snapshot["target_properties"])
+                    if snapshot["target_properties"].get("name_stage") == "superseded"
+                    else None
+                )
                 target_paths = _fold_target_paths(
                     snapshot, old_sources, old_backings, into
                 )
@@ -2290,6 +2332,7 @@ def supersede_into(
                     change_id=change_id,
                     run_id=run_id,
                     changed_at=changed_at,
+                    target_revived_stage=target_revived_stage,
                 )
                 would_strand = sum(
                     1
@@ -2432,6 +2475,7 @@ def supersede_into(
                         target_element_id=snapshot["target_element_id"],
                         predecessor_stage=predecessor_stage,
                         target_paths=target_paths,
+                        target_revived_stage=target_revived_stage,
                     )
                 )
                 if len(name_rows) != 1:
