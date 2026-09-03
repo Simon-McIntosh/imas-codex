@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T07:35:22",
+  "updated": "2026-09-03T07:54:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1288,6 +1288,15 @@
           "gpt-5.6-sol": "01a062af-a57f-7f73-b912-c49d29cf0fde"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "impl-ledgertest",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-lexicalgates",
@@ -54975,6 +54984,115 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T052430842170-n-descriptionless-drafted-repair",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-descriptionless-drafted-repair",
+        "node_definition": {
+          "done_when": "a test proves the reconcile returns a drafted null-description name and its bound sources to a compose-eligible state while a drafted name that has a description is left untouched, a second test proves the guard refuses or repairs a persist that would write a drafted name with a null description, and a live census through GraphClient reports how many of the eight moved off drafted after the reconcile runs against the 8 it started from",
+          "estimated_hours": 2.0,
+          "goal": "Rescue the eight drafted names that carry a null description and are therefore invisible to every pool, by adding a startup reconcile that returns such a name to a state the pipeline can act on (re-opening its bound composed sources so the compose pool rewrites the missing prose) and guarding the state at its source so a compose write cannot leave a drafted name with no description",
+          "id": "n-descriptionless-drafted-repair",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/descriptionless-drafted-repair.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_reconcile_descriptionless.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-descrepair",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T05:24:38Z",
+        "completed_at": "2026-09-03T05:38:19.364Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 815,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 821,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "2fd6ee234002f1de4ea63dd93d2fbf6812d2eef7",
+        "commits": [
+          "9e28df44b75c8c16002016733be1c1ae38bb2ada"
+        ],
+        "changed_lines": {
+          "added": 411,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_reconcile_descriptionless.py -m graph",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/descriptionless-drafted-repair.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/descriptionless-drafted-repair.json",
+        "scope_changed": false,
+        "session_id": "3a7b7280-cbc6-404f-bbf5-6c29dc02314f",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 138099,
+            "cache_creation_input_tokens_cumulative": 138099,
+            "cache_read_input_tokens": 5577677,
+            "cache_read_input_tokens_cumulative": 5577677,
+            "inference_geo": "not_available",
+            "input_tokens": 104,
+            "input_tokens_cumulative": 104,
+            "output_tokens": 42177,
+            "output_tokens_cumulative": 42177,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.2247735,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.2247735
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -55021,6 +55139,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1388
+    "_version": 1390
   }
 }
