@@ -140,17 +140,115 @@
     no domain route had ever run over non-live stages.</p>
   </section>
 
-  <section id="what-remains">
-    <h2>What remains</h2>
-    <p>The physicist review of pull request 11 is the human gate and nothing downstream of it
-    can start early. After the review returns: the reviewed disposition folds back through
-    <code>sn approve</code>, the upstream catalog pull request and its stable tag follow, and
-    the undo rehearsal proves the fold is reversible. The 59 withheld names follow as a later
-    additive batch under their recorded reason groups. The release recipe in
-    <code>imas_codex/standard_names/AGENTS.md</code> now gates pin-before-reconcile with a
-    runnable census and gates the candidate on the published bytes, so a session that has not
-    lived through this one can cut the next candidate without rediscovering any of it.</p>
+  <section id="rate-base-correction">
+    <h2>The recut's blocker was a physics error in the plan, not a missing rename</h2>
+    <p>The plan asked for four names to be steered onto a base carrying per-volume
+    per-solid-angle structure. Checked against the data dictionary, the four are three
+    different shapes, and only one of them is that shape at all. The corpus census of
+    accepted bases by unit is what settles each case: m^-3.s^-1 has
+    <code>source_rate</code> on 13 accepted names against <code>emissivity</code> 2 and
+    <code>density</code> 1; m^-3.s^-1.sr^-1 has <strong>zero</strong> accepted names; and
+    m^-2.s^-1.sr^-1 has <code>photon_radiance</code> 3, <code>brightness</code> 2 and
+    <code>factor</code> 1.</p>
+    <table>
+      <thead><tr><th>Name</th><th>What its DD path measures</th><th>Disposition</th></tr></thead>
+      <tbody>
+        <tr><td><code>spectral_rate</code></td>
+            <td>Calibrated spectral radiance — m^-2.s^-1.sr^-1 per unit wavelength, along a
+            line of sight</td>
+            <td>rename to <code>spectral_photon_radiance</code>; parses today</td></tr>
+        <tr><td><code>spectral_bremsstrahlung_rate</code></td>
+            <td>the same radiance shape</td>
+            <td>rename to <code>spectral_bremsstrahlung_photon_radiance</code>; parses today</td></tr>
+        <tr><td><code>rate_due_to_fusion</code></td>
+            <td>m^-3.s^-1, no solid angle at all</td>
+            <td>rename to <code>source_rate_due_to_fusion</code>; parses today</td></tr>
+        <tr><td><code>hard_xray_rate</code></td>
+            <td>m^-3.s^-1.sr^-1 — the only genuine volumetric per-solid-angle case</td>
+            <td>no legal spelling exists; upstream vocabulary gap</td></tr>
+      </tbody>
+    </table>
+    <p>So <code>source_rate</code> was the wrong direction for two of the four: their unit is
+    a radiance per unit wavelength, and asserting a volumetric production rate would claim
+    something the path does not measure. Because their end state is known and parses, they are
+    <code>--rename</code> redesigns rather than <code>--hint</code> steers — a cheaper and more
+    determinate route than the one the plan specified.</p>
+    <p><strong>The fourth name has no legal spelling, and the refusals are exact.</strong>
+    <code>hard_xray_source_rate_per_solid_angle</code>,
+    <code>hard_xray_source_rate_per_steradian</code>,
+    <code>hard_xray_angular_source_rate</code> and <code>hard_xray_photon_emissivity</code>
+    each raise <code>UnknownBaseTokenError</code> against the 211-token closed vocabulary at
+    the pinned 0.8.8 grammar, and <code>volumetric_hard_xray_source_rate</code> raises
+    <code>NonCanonicalNameError</code>. Nothing in 176 physical-base or 114 qualifier tokens
+    means per unit solid angle: the vocabulary carries spectral, bremsstrahlung, volumetric,
+    viewing and direction, and no <code>per_solid_angle</code>, <code>steradian</code> or
+    <code>angular</code>. The only legal spellings drop the steradian, leaving the unit string
+    as the sole place the physics survives. On the lead's ruling the vocabulary gains the
+    qualifier instead — the <code>mass_flow_rate</code> precedent — which fixes every future
+    per-solid-angle quantity at the same time and withholds this one name from the current
+    candidate.</p>
+    <p>Two operational facts came out of the same measurement. A <strong>120-second tool
+    ceiling</strong>, not the 45-minute budget, killed the one real inline review, so any node
+    running a governed review must allow well beyond that. And the killed review stranded one
+    claim token, which was released through the governed route with a graph-wide count
+    confirming <strong>zero</strong> others — the ceiling has not been quietly accumulating
+    claims.</p>
   </section>
+
+  <section id="single-github-transport">
+    <h2>One transport for GitHub, one route for a physics domain, one honest cascade surface</h2>
+    <p>Three release-path residues the review surface had left behind are closed, each gated
+    on a measure rather than a reading.</p>
+    <p><strong>Every pull-request call now speaks REST through a single seam.</strong> Nine
+    gh-CLI call sites went over two commits: creation, body read-back, closed-head lookup and
+    body update in the release module (<code>75a5d2ca</code>, <code>grep '"gh",'</code> 4 to 0,
+    113 focused tests green with 11 added), then <code>resolve_merged_pr</code>,
+    <code>fetch_pr_evidence</code>, the CI check read, the changelog contributor lookup and the
+    graph-quality dispatch (<code>9da911db</code>, 2/2/0 to 0/0/0, 110 tests green with 11
+    added). The transport was consolidated into <code>imas_codex/graph/ghcr.py</code>, which is
+    now the only urllib request builder for GitHub anywhere in the repository. The motivating
+    exposure was concrete: the GitHub CLI resolves pull-request metadata through GraphQL, which
+    fails outright on a repository still carrying Projects-classic fields — the defect that had
+    already forced the body-update path off the CLI. A third call site the followup never named,
+    <code>_closed_pr_heads</code>, was swept in with the rest. <code>gh</code> is no longer
+    needed for any of these reads, though a credential must still resolve;
+    <code>gh auth token</code> remains the last fallback, so an operator authenticated through
+    the CLI is unaffected.</p>
+    <p><strong>One route writes a physics domain.</strong> <code>reclassify_domain</code> in
+    <code>edit.py</code> had no caller anywhere and wrote the property without the
+    <code>HAS_PHYSICS_DOMAIN</code> edge or a transactional guard — a footgun for whoever found
+    it before the atomic version. Deleted at <code>d36d8b6c</code>, 78 lines, leaving the
+    ledger operation string and the generated docstrings untouched.</p>
+    <p><strong>The cascade surface stopped reporting deferred work as done</strong>
+    (<code>9e4773f7</code>, 99 passed with 12 added). A subtree rename plans its descendants
+    with <code>dry_run=True</code> and persists none of them until the root reaches accepted,
+    while the report printed them under a bare "planned renames" heading — so an exhausted root
+    left the operator believing the work had happened. Fixed at the report, never at the gate:
+    no acceptance gate was loosened and no write path was added.</p>
+    <p>The second half of that node found the <code>unreachable in cascade — no parent in
+    plan</code> message had been blaming topology for a deliberate decision. On a strictly
+    linear chain the middle node leaves the plan on purpose — a locus edge is a semantic
+    boundary — and the builder then classified its child as an unresolvable fault, which
+    refused the <em>whole</em> edit because conflicts are all-or-nothing. Reproduced on
+    <code>temperature</code> ← <code>temperature_of_plasma</code> ←
+    <code>ion_temperature_of_plasma</code>. The walk now records why each descendant left, at
+    11 exit sites, and carries that closure downward. One consequence to know: a subtree below
+    a boundary or a safety refusal now lands in <code>skipped</code> rather than
+    <code>conflicts</code>, so an edit previously refused end-to-end will proceed and rename
+    the reachable part.</p>
+    <p>The suite was measured at the merged head carrying the first two of these:
+    6943 collected, 6932 passed, 8 skipped, 3 failed, <strong>added failures 0</strong>, with
+    the three failing ids exactly the pre-existing set on the export and publish gating
+    surface.</p>
+    <p><strong>One merge was deliberately held.</strong> The REST-consolidation node reported
+    collateral outside its own write fence, and it reproduced exactly: two test files patch
+    <code>promote.subprocess.run</code>, which those paths no longer call, so the mocks are
+    inert and the tests reach the real network — failing on an HTTP 404. Merging the wiring
+    alone would have added two failures to main, the mistake this plan has already recorded
+    once. The reconciliation was dispatched on top of the commit so the two land together,
+    green where either alone leaves two.</p>
+  </section>
+
 
   <section id="provenance-integrity">
     <h2>The provenance leak: found, measured, plugged, and made visible</h2>
@@ -198,25 +296,29 @@
     either half alone leaves the suite with two failures.</p>
   </section>
 
-  <section id="what-remains-2">
+  <section id="what-remains">
     <h2>What remains, and what blocks it</h2>
-    <p>The release chain is closed: standard-names reached <code>v0.8.8</code> through eight
-    releases, each one closing a defect the review surface exposed, and both consumers pin
-    it with the environment verified. The standard-name suite is green at zero failures.</p>
-    <p><strong>The recut is blocked, and by exactly one thing.</strong> Four of the five
-    base-dimension names that sit in the open candidate are currently unpublishable: their
-    originals are <code>superseded</code> and no successor has reached accepted on both axes,
-    so a recut today would drop names the candidate already carries. Those four need a base
-    that expresses a per-volume per-solid-angle emission rate; bare <code>rate</code> scores
-    0.694 to 0.825 against 0.944 and 0.956 for the <code>flux</code>-to-<code>rate</code>
-    cases whose unit really is a bare count rate. The direction to try is
-    <code>source_rate</code>, which 19 accepted names use for a cubic-metre-per-second rate
-    against 1 using bare <code>rate</code>; if the grammar cannot carry the solid angle, it
-    is an ISN vocabulary gap of the same shape as <code>mass_flow_rate</code>.</p>
-    <p>Behind that: the 1190 unclaimed extracted sources are slow rather than expensive —
-    under a dollar of model spend but hours of wall clock, so they want a long background
-    drain rather than budget. The physicist review of the recut candidate remains the human
-    gate the whole sprint is aimed at, and the upstream catalog leg follows it.</p>
+    <p><strong>The physicist review is the human gate the whole sprint is aimed at</strong>,
+    and nothing downstream of it can start early. After the review returns: the reviewed
+    disposition folds back through <code>sn approve</code>, the upstream catalog pull request
+    and its stable tag follow, and the undo rehearsal proves the fold is reversible. The
+    withheld names follow as a later additive batch under their recorded reason groups.</p>
+    <p>The release chain is closed: standard-names reached <code>v0.8.8</code> across eight
+    releases, each closing a defect the review surface exposed, with both consumers pinned and
+    the environment verified. The release recipe in
+    <code>imas_codex/standard_names/AGENTS.md</code> gates pin-before-reconcile with a runnable
+    census and gates the candidate on the published bytes, so a session that has not lived
+    through this one can cut the next candidate without rediscovering any of it.</p>
+    <p><strong>The recut carries three of the four blocked names.</strong> Two are radiance
+    quantities the plan had mis-typed and one needs only the established
+    <code>source_rate</code> base; all three parse under the pinned grammar. The fourth,
+    <code>hard_xray_rate</code>, waits on a solid-angle qualifier entering the ISN closed
+    vocabulary, which runs fork pull request, upstream pull request, a tag the lead publishes to
+    PyPI, then a pin bump at both sites. It is withheld from this candidate and enters the
+    next.</p>
+    <p>Behind that: the 1190 unclaimed extracted sources are slow rather than expensive — under
+    a dollar of model spend but hours of wall clock, so they want a long background drain rather
+    than budget.</p>
   </section>
 </main>
 </body>
