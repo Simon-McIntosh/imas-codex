@@ -335,6 +335,63 @@ def _temporal_change_operators() -> frozenset[str]:
 
 
 @lru_cache(maxsize=1)
+def _isn_operator_advisory_aliases() -> dict[str, str]:
+    """Return retired operator spellings mapped to their registered token.
+
+    ``grammar.advisory_aliases`` is grouped by grammar segment, and an alias is
+    operator-relevant when its ``canonical`` target is a registered operator.
+    Filtering on the target rather than on the segment name means an alias ISN
+    files under any segment heading is still recognised, while skipping aliases
+    that are themselves registered preserves distinct operator concepts.
+
+    Retiring an operator to an alias strips the semantics a live name depends
+    on: the retired spelling carries no ``semantic_effects``, so an audit that
+    reads the name literally sees a quantity with no operator at all.  Reading
+    this mapping is how such a name keeps the semantics the grammar still
+    publishes for it.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+
+        grammar = get_grammar_context()["grammar"]
+        operators = grammar["vocabularies"]["operators"]
+        aliases: dict[str, str] = {}
+        for segment_aliases in grammar["advisory_aliases"].values():
+            if not isinstance(segment_aliases, Mapping):
+                continue
+            for alias, details in segment_aliases.items():
+                if alias in operators or not isinstance(details, Mapping):
+                    continue
+                canonical = details.get("canonical")
+                if isinstance(canonical, str) and canonical in operators:
+                    aliases[str(alias)] = canonical
+        return aliases
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("Could not load ISN operator advisory aliases: %s", exc)
+        return {}
+
+
+def resolve_retired_operator_spellings(name: str) -> str:
+    """Rewrite retired operator spellings in *name* to their registered token.
+
+    Substitution is whole-token: an alias matches only between underscore
+    boundaries, so a word that merely contains it as a substring is untouched.
+    Longer aliases are tried first so a multi-token alias is not consumed
+    piecemeal by one of its own tokens.  A spelling the grammar publishes no
+    alias for is returned unchanged, which is what keeps an unknown prefix
+    refused rather than silently admitted.
+    """
+    aliases = _isn_operator_advisory_aliases()
+    if not name or not aliases:
+        return name
+    for alias in sorted(aliases, key=len, reverse=True):
+        name = re.sub(
+            rf"(?:(?<=^)|(?<=_)){re.escape(alias)}(?=_|$)", aliases[alias], name
+        )
+    return name
+
+
+@lru_cache(maxsize=1)
 def _registered_operator_tokens() -> frozenset[str]:
     """Return the complete public ISN operator-token vocabulary."""
     from imas_standard_names import get_grammar_context
@@ -378,10 +435,16 @@ def _ir_physical_quantity_signature(ir: Any) -> tuple[Any, ...] | None:
 
 @lru_cache(maxsize=1024)
 def _parse_audit_ir(name: str) -> Any:
-    """Parse one canonical name once for all structure-aware audits."""
+    """Parse one canonical name once for all structure-aware audits.
+
+    Retired operator spellings are resolved to their registered token first, so
+    every structure-aware audit judges the semantics the grammar still
+    publishes for the name instead of failing to parse it and falling back to a
+    reading in which the operator is absent.
+    """
     from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
-    return parse_canonical_name(name).ir
+    return parse_canonical_name(resolve_retired_operator_spellings(name)).ir
 
 
 @cache
