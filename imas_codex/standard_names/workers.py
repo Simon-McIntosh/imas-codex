@@ -405,7 +405,15 @@ def _ir_denotes_time_change(ir: Any) -> bool:
 
 
 def _name_claims_time_change(sn_name: str) -> bool:
-    """Interpret temporal semantics structurally, with a legacy-safe fallback."""
+    """Interpret temporal semantics structurally, with a legacy-safe fallback.
+
+    A retired operator spelling is rewritten to its registered token first, so
+    a name using the retired prefix still reads as claiming the temporal
+    semantics the grammar continues to publish for it under that token.
+    """
+    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
+
+    sn_name = resolve_retired_operator_spellings(sn_name)
     try:
         from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
