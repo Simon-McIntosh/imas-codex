@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:32:01",
+  "updated": "2026-09-03T12:33:34",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -56933,6 +56933,117 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T101806471865-n-release-surface-round-trips",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-release-surface-round-trips",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/test_catalog_layout_hierarchy.py tests/standard_names/test_export_pinned_schema.py tests/standard_names/test_export_yaml_format.py -q exits 0 with the round-trip and idempotence properties asserted on the current writer rather than relaxed away, and the full tests/standard_names run reports at most eleven failures against the sixteen at the base revision with zero added",
+          "estimated_hours": 2.0,
+          "goal": "Restore the five release-surface round-trip guarantees the reduction and the new writer left failing, which matter because they are exactly the properties the review candidate depends on: byte stability and idempotence of a re-emitted catalog whose fixtures claim a physics domain that is no longer an enum member, the list-root check now that the sidecar is a mapping, the pinned-entry cohort round trip, and the review-friendly yaml round trip under literal blocks",
+          "id": "n-release-surface-round-trips",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/release-surface-round-trips.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "tests/standard_names/test_catalog_layout_hierarchy.py",
+            "tests/standard_names/test_export_pinned_schema.py",
+            "tests/standard_names/test_export_yaml_format.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-releaseroundtrip",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:18:12Z",
+        "completed_at": "2026-09-03T10:32:25.343Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 843,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 853,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "ecf2a3a7234a435c32049d05569d039dfd707505",
+        "commits": [
+          "c650691b90b610f5a8e83bda7e42ce5df7d5e650"
+        ],
+        "changed_lines": {
+          "added": 54,
+          "removed": 51,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_catalog_layout_hierarchy.py tests/standard_names/test_export_pinned_schema.py tests/standard_names/test_export_yaml_format.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/release-surface-round-trips.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/release-surface-round-trips.json",
+        "scope_changed": false,
+        "session_id": "25027fb1-65fc-469a-9f4d-70f298b6c98e",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 138952,
+            "cache_creation_input_tokens_cumulative": 138952,
+            "cache_read_input_tokens": 7268664,
+            "cache_read_input_tokens_cumulative": 7268664,
+            "inference_geo": "not_available",
+            "input_tokens": 116,
+            "input_tokens_cumulative": 116,
+            "output_tokens": 34143,
+            "output_tokens_cumulative": 34143,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.3512027999999994,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.3512027999999994
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_catalog_layout_hierarchy.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -56993,6 +57104,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1424
+    "_version": 1425
   }
 }
