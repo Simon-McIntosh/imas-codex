@@ -592,6 +592,37 @@ class AttachmentPairingGuardResult:
     rejected: tuple[AttachmentVerdict, ...]
 
 
+def _attachment_consistency(
+    dd_path: str,
+    sn_name: str,
+    *,
+    existing_sources: tuple[str, ...] = (),
+    dd_unit: str | None = None,
+    sn_unit: str | None = None,
+) -> tuple[bool, str]:
+    """Ask the compose guard about a pairing, judging the registered spelling.
+
+    The guard reads the name's operator semantics to decide whether the DD
+    path's tense agrees with it.  A name spelled with an operator the grammar
+    has retired to an advisory alias publishes no semantics under that
+    spelling, so the guard would read it as carrying no temporal change and
+    detach the very time-derivative path that justifies it.  Resolving the
+    spelling first keeps the guard's question the same while the name is judged
+    on the semantics the grammar still publishes for it.  The verdicts callers
+    record stay keyed on the stored identity.
+    """
+    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
+    from imas_codex.standard_names.workers import _is_attachment_consistent
+
+    return _is_attachment_consistent(
+        dd_path,
+        resolve_retired_operator_spellings(sn_name),
+        existing_sources=existing_sources,
+        dd_unit=dd_unit,
+        sn_unit=sn_unit,
+    )
+
+
 def guard_source_pairings(
     gc: Any, sn_id: str, source_ids: list[str]
 ) -> AttachmentPairingGuardResult:
@@ -603,8 +634,6 @@ def guard_source_pairings(
     DD candidates are evaluated in deterministic path order with the same
     compose semantics as :func:`audit_attachments`.
     """
-    from imas_codex.standard_names.workers import _is_attachment_consistent
-
     requested = sorted(set(source_ids))
     if not sn_id or not requested:
         return AttachmentPairingGuardResult((), ())
@@ -639,7 +668,7 @@ def guard_source_pairings(
             accepted.append(source_id)
             continue
         dd_path = row["dd_path"]
-        ok, reason = _is_attachment_consistent(
+        ok, reason = _attachment_consistency(
             dd_path,
             sn_id,
             existing_sources=tuple(existing_paths),
@@ -788,8 +817,6 @@ def audit_attachments(
             which is what it needs — it is a per-name rule. Used by the
             write-time gate; omit for the corpus-wide pass.
     """
-    from imas_codex.standard_names.workers import _is_attachment_consistent
-
     own = gc is None
     if own:
         from imas_codex.graph.client import GraphClient
@@ -833,7 +860,7 @@ def audit_attachments(
         accepted_paths: list[str] = []
         group_rejected: list[AttachmentVerdict] = []
         for r in group:
-            ok, reason = _is_attachment_consistent(
+            ok, reason = _attachment_consistency(
                 r["dd_path"],
                 sn_id,
                 existing_sources=tuple(accepted_paths),
