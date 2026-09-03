@@ -6575,7 +6575,9 @@ def sn_detach(dd_path: str, standard_name: str, reason: str, dry_run: bool) -> N
     "into_name",
     required=True,
     help=(
-        "Existing ACCEPTED standard name to fold OLD_NAME into. OLD_NAME is "
+        "Existing standard name to fold OLD_NAME into: either an accepted "
+        "name, or a tombstoned name that is a free identity (no successor, "
+        "no sources, no parent or child) and can be re-pointed. OLD_NAME is "
         "tombstoned (name_stage='superseded') and a REFINED_FROM lineage is "
         "threaded to --into so the export emits a deprecated stub pointing at it."
     ),
@@ -6591,7 +6593,9 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
     For the two repairs that --rename cannot express (the target id already
     exists) and that the source-keyed supersede cannot reach: folding a name
     into an existing canonical name, or re-pointing a name onto a restored
-    tombstoned id. The target (--into) must be name_stage='accepted'.
+    tombstoned id. The target (--into) must be a free identity: either
+    name_stage='accepted', or a tombstoned name that carries no successor and
+    no lineage forward (no sources, parent, or child left reading it).
 
     \b
     Example:
