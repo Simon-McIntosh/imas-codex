@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T09:52:46",
+  "updated": "2026-09-03T10:33:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -985,6 +985,15 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-fixtureshift",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-fixturetorch",
         "harness": "codex",
         "role": "implement",
@@ -1706,6 +1715,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-pertimerecompose",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-phisource",
@@ -55897,6 +55915,214 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T075312274489-n-fixtures-follow-the-sidecar",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-fixtures-follow-the-sidecar",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names -q -p no:cacheprovider reports nineteen failures matching the nineteen that reproduce at the base revision under the same installed standard-names, with zero added",
+          "estimated_hours": 1.0,
+          "goal": "Follow three test files to the reduced surface: two staging-manifest fixtures hard-code the superseded edge model version and should read the constant instead, and two exclusion-ledger assertions read the sources binding straight off a written domain file where it no longer lives and should read it from the sidecar per-name block, which is the assertion the move relocates rather than deletes (the case that deliberately passes an unknown version to prove the gate refuses stays as it is)",
+          "id": "n-fixtures-follow-the-sidecar",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fixtures-follow-the-sidecar.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "tests/standard_names/test_publish_transport_only.py",
+            "tests/standard_names/test_catalog_layout_hierarchy.py",
+            "tests/standard_names/test_export_exclusion_ledger.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-fixtureshift",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T07:53:18Z",
+        "completed_at": "2026-09-03T08:05:30.808Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 726,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 732,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "3c7dd1312175c72aa1f3fe44003a073d8e3ff135",
+        "commits": [
+          "53e9b431d330e661e32eb9ef5a619fd3c4f43423"
+        ],
+        "changed_lines": {
+          "added": 23,
+          "removed": 12,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q -p no:cacheprovider",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fixtures-follow-the-sidecar.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fixtures-follow-the-sidecar.json",
+        "scope_changed": false,
+        "session_id": "bf78407c-74cb-462d-a5b5-e438b863a321",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.93,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T10:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 87555,
+            "cache_creation_input_tokens_cumulative": 87555,
+            "cache_read_input_tokens": 2346825,
+            "cache_read_input_tokens_cumulative": 2346825,
+            "inference_geo": "not_available",
+            "input_tokens": 64,
+            "input_tokens_cumulative": 64,
+            "output_tokens": 17841,
+            "output_tokens_cumulative": 17841,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.4953075000000005,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.4953075000000005
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T075405691367-n-recompose-per-time-names",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-recompose-per-time-names",
+        "node_definition": {
+          "done_when": "a GraphClient census query counting live names whose spelling divides a quantity by time prints 1 before the work and 0 after, a second query counting the retired tendency spelling prints 4 before and 0 after, and the report carries each name's before and after identity beside the exact sn edit invocation used, the run spend, and the reaped parent id",
+          "estimated_hours": 2.0,
+          "goal": "Re-compose the eight names that spell a per-time quantity awkwardly, now that the installed grammar carries the mass flow rate base, refuses a ratio whose denominator is time, and resolves the retired tendency spelling to time_derivative, using the governed sn edit route with a mandatory reason rather than any hand edit or direct acceptance, and reap the placeholder parent that exists only as an artifact of the ratio construction once its sole child is gone",
+          "id": "n-recompose-per-time-names",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/recompose-per-time-names.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/recompose-per-time-names.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-pertimerecompose",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T07:54:10Z",
+        "completed_at": "2026-09-03T08:32:58.079Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2320,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2328,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3c7dd1312175c72aa1f3fe44003a073d8e3ff135",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/recompose-per-time-names.json",
+        "scope_changed": false,
+        "session_id": "237ad4f8-26ce-47a1-8267-17d7077d1fc8",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.97,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T08:40:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 100246,
+            "cache_creation_input_tokens_cumulative": 100246,
+            "cache_read_input_tokens": 2653002,
+            "cache_read_input_tokens_cumulative": 2653002,
+            "inference_geo": "not_available",
+            "input_tokens": 60,
+            "input_tokens_cumulative": 60,
+            "output_tokens": 23584,
+            "output_tokens_cumulative": 23584,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.0020625000000005,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.0020625000000005
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an sn edit run changes graph state rather than repository files",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -55943,6 +56169,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1404
+    "_version": 1408
   }
 }
