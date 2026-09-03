@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:02:21",
+  "updated": "2026-09-03T12:17:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -211,6 +211,15 @@
       {
         "id": "impl-aliasresolve",
         "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-aliasworkers",
+        "harness": "claude",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -1982,6 +1991,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "impl-releaseroundtrip",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-relgap",
         "harness": "codex",
         "role": "implement",
@@ -2552,6 +2570,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-vocabfixtures",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-voltadj",
@@ -56619,6 +56646,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1416
+    "_version": 1419
   }
 }
