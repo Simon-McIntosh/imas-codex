@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:17:18",
+  "updated": "2026-09-03T12:23:56",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -597,6 +597,15 @@
           "gpt-5.6-sol": "01a042cb-3ada-7cf1-8087-92574d67efbe"
         },
         "created": "2026-08-27"
+      },
+      {
+        "id": "impl-clihelp",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-closecensus",
@@ -56586,6 +56595,225 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T100931336153-n-workers-resolve-retired-spellings",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-workers-resolve-retired-spellings",
+        "node_definition": {
+          "done_when": "the five failing cases in tests/standard_names/test_attachment_guard.py that call the attachment consistency check directly now pass, proving a name spelled with the retired temporal prefix accepts a data-dictionary time-derivative path and still refuses a plain temperature path, and uv run --no-sync pytest tests/standard_names -q reports eleven failures against the sixteen at the base revision with zero added",
+          "estimated_hours": 1.5,
+          "goal": "Carry the retired-spelling resolution into the tense rule's own readers in workers.py, so the two compose-time write gates and the attachment consistency check resolve a retired operator through the grammar's advisory alias before judging, which is the half the audit-side fix could not reach from its own fence",
+          "id": "n-workers-resolve-retired-spellings",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/workers-resolve-retired-spellings.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/workers.py",
+            "tests/standard_names/test_attachment_guard.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-aliasworkers",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:09:38Z",
+        "completed_at": "2026-09-03T10:22:05.692Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 742,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 747,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ecf2a3a7234a435c32049d05569d039dfd707505",
+        "commits": [
+          "4c7a4b4f58ce4147b468726a396ca2221e7e6af9"
+        ],
+        "changed_lines": {
+          "added": 9,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_attachment_guard.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/workers-resolve-retired-spellings.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/workers-resolve-retired-spellings.json",
+        "scope_changed": false,
+        "session_id": "d0e78b3a-7d1b-4540-8e18-011867d6f4f8",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 87515,
+            "cache_creation_input_tokens_cumulative": 87515,
+            "cache_read_input_tokens": 2781345,
+            "cache_read_input_tokens_cumulative": 2781345,
+            "inference_geo": "not_available",
+            "input_tokens": 66,
+            "input_tokens_cumulative": 66,
+            "output_tokens": 14342,
+            "output_tokens_cumulative": 14342,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.049881,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.049881
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T101921758433-n-fold-help-states-the-precondition",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-fold-help-states-the-precondition",
+        "node_definition": {
+          "done_when": "a grep over the committed cli module finds the free-identity precondition stated in both the option help and the command docstring with no remaining claim that the target must be accepted, and uv run --no-sync imas-codex sn supersede --help exits 0 showing the corrected text",
+          "estimated_hours": 0.5,
+          "goal": "Correct the fold command's option help and docstring, which still tell an operator the target must be an accepted standard name while the same docstring advertises re-pointing a name onto a restored tombstoned id, now that a successor-less tombstone carrying no lineage forward is admitted as the free identity it is",
+          "id": "n-fold-help-states-the-precondition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-help-states-the-precondition.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/cli/sn.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-clihelp",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:19:27Z",
+        "completed_at": "2026-09-03T10:20:45.354Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 72,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 78,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "fafbd45a366b4bbf89e166891a03fd862971c345",
+        "commits": [
+          "c3edb3b6dbd7a0562f679ff0519477f573e411e9"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 2,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep over the committed cli module plus the fold command help",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-help-states-the-precondition.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-help-states-the-precondition.json",
+        "scope_changed": false,
+        "session_id": "9c12f7f9-46b2-4708-98b6-621d76c6ee2e",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 54876,
+            "cache_creation_input_tokens_cumulative": 54876,
+            "cache_read_input_tokens": 1189864,
+            "cache_read_input_tokens_cumulative": 1189864,
+            "inference_geo": "not_available",
+            "input_tokens": 34,
+            "input_tokens_cumulative": 34,
+            "output_tokens": 4838,
+            "output_tokens_cumulative": 4838,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.5059248,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.5059248
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -56646,6 +56874,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1419
+    "_version": 1422
   }
 }
