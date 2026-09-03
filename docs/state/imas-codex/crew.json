@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T08:10:53",
+  "updated": "2026-09-03T08:15:49",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1237,9 +1237,11 @@
       },
       {
         "id": "impl-isnvocab",
-        "harness": "codex",
+        "harness": "claude-opus",
         "role": "implement",
         "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-08-19"
       },
       {
@@ -55313,6 +55315,116 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T061223612992-n-codex-isn-pin-0-8-5",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-codex-isn-pin-0-8-5",
+        "node_definition": {
+          "done_when": "grep -c 'imas-standard-names==0.8.5' pyproject.toml prints 2 while uv lock exits 0 with uv.lock recording imas-standard-names 0.8.5",
+          "estimated_hours": 0.3,
+          "goal": "Bump the imas-standard-names dependency pin from 0.8.4 to 0.8.5 in both places it appears in pyproject.toml, refreshing uv.lock with uv lock so the exporter resolves the literal-block catalog writer",
+          "id": "n-codex-isn-pin-0-8-5",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-5.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "pyproject.toml",
+            "uv.lock"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-isnpin",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "backend": "clive",
+          "effort": "medium",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T06:12:30Z",
+        "completed_at": "2026-09-03T06:14:47.648Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 131,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 137,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "d0f7eea6323e8cef58b6dac1703bad96fb09eb60",
+        "commits": [
+          "2b9ca74cbc6e16620864680a32048dc944fa5413"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c 'imas-standard-names==0.8.5' pyproject.toml",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-5.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-5.json",
+        "scope_changed": false,
+        "session_id": "d90aa95f-e77d-4105-9105-952f80b8d309",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 947905,
+            "input_tokens_cumulative": 947905,
+            "output_tokens": 6129,
+            "output_tokens_cumulative": 6129,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.89275,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 4.89275
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -55359,6 +55471,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1393
+    "_version": 1395
   }
 }
