@@ -411,61 +411,98 @@ class TestReadPrChanges:
 
 
 # ---------------------------------------------------------------------------
-# PR-URL resolution (gh CLI mocked)
+# PR-URL resolution (GitHub REST transport mocked)
 # ---------------------------------------------------------------------------
 
 
+def _rest_pull(**overrides):
+    """A REST pull-request payload with the fields the resolver reads."""
+    payload = {
+        "number": 7,
+        "html_url": "https://github.com/o/r/pull/7",
+        "state": "closed",
+        "merged": True,
+        "merge_commit_sha": "cafe1234",
+        "user": {"login": "reviewer"},
+        "head": {"ref": "review/v0.2.0rc65"},
+        "base": {"ref": "main"},
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _patch_rest(status=200, payload=None, recorder=None):
+    """Bind the shared transport to a canned response, recording every path."""
+
+    def fake_call(method, path, *, payload=None, token=None):
+        if recorder is not None:
+            recorder.append((method, path))
+        return fake_call.status, fake_call.body
+
+    fake_call.status = status
+    fake_call.body = payload
+    return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
+
+
 class TestResolveMergedPr:
-    def _gh_result(self, payload, rc=0, err=""):
-        import json as _json
-        from types import SimpleNamespace
-
-        return SimpleNamespace(returncode=rc, stdout=_json.dumps(payload), stderr=err)
-
     def test_resolves_merged_pr(self):
         from imas_codex.standard_names.promote import resolve_merged_pr
 
-        payload = {
-            "number": 7,
-            "url": "https://github.com/o/r/pull/7",
-            "state": "MERGED",
-            "mergeCommit": {"oid": "cafe1234"},
-            "headRefName": "review/v0.2.0rc65",
-            "baseRefName": "main",
-        }
-        with patch(
-            "imas_codex.standard_names.promote.subprocess.run",
-            return_value=self._gh_result(payload),
-        ):
+        seen: list[tuple[str, str]] = []
+        with _patch_rest(payload=_rest_pull(), recorder=seen):
             r = resolve_merged_pr("https://github.com/o/r/pull/7")
         assert r.number == 7
         assert r.merge_commit == "cafe1234"
         assert r.head_ref == "review/v0.2.0rc65"
+        assert r.reviewer_actor == "reviewer"
+        assert seen == [("GET", "/repos/o/r/pulls/7")]
+
+    def test_merged_state_is_read_off_the_merge_record_not_the_state_field(self):
+        """REST reports a merged pull request as ``closed``."""
+        from imas_codex.standard_names.promote import resolve_merged_pr
+
+        payload = _rest_pull(merged=False, merged_at="2026-09-01T00:00:00Z")
+        with _patch_rest(payload=payload):
+            assert resolve_merged_pr("https://github.com/o/r/pull/7").number == 7
 
     def test_unmerged_pr_rejected(self):
         from imas_codex.standard_names.promote import resolve_merged_pr
 
-        payload = {"number": 7, "state": "OPEN", "mergeCommit": None}
+        payload = _rest_pull(
+            state="open", merged=False, merged_at=None, merge_commit_sha=None
+        )
         with (
-            patch(
-                "imas_codex.standard_names.promote.subprocess.run",
-                return_value=self._gh_result(payload),
-            ),
+            _patch_rest(payload=payload),
             pytest.raises(ValueError, match="not merged"),
         ):
             resolve_merged_pr("https://github.com/o/r/pull/7")
 
-    def test_gh_failure_surfaces(self):
+    def test_rejected_read_surfaces_what_github_said(self):
         from imas_codex.standard_names.promote import resolve_merged_pr
 
         with (
-            patch(
-                "imas_codex.standard_names.promote.subprocess.run",
-                return_value=self._gh_result({}, rc=1, err="no auth"),
-            ),
-            pytest.raises(ValueError, match="gh pr view failed"),
+            _patch_rest(status=401, payload={"message": "Bad credentials"}),
+            pytest.raises(ValueError, match="Bad credentials"),
         ):
             resolve_merged_pr("https://github.com/o/r/pull/7")
+
+    def test_url_that_is_not_a_pull_request_is_refused(self):
+        from imas_codex.standard_names.promote import resolve_merged_pr
+
+        with pytest.raises(ValueError, match="pull-request URL"):
+            resolve_merged_pr("https://github.com/o/r/issues/7")
+
+    def test_no_pull_request_call_shells_out(self):
+        from imas_codex.standard_names.promote import resolve_merged_pr
+
+        def fail(*args, **kwargs):
+            raise AssertionError(f"pull-request work shelled out to {args[0]!r}")
+
+        with (
+            _patch_rest(payload=_rest_pull()),
+            patch("imas_codex.standard_names.promote.subprocess.run", fail),
+        ):
+            assert resolve_merged_pr("https://github.com/o/r/pull/7").number == 7
 
 
 # ---------------------------------------------------------------------------
@@ -498,23 +535,13 @@ class TestBatchLabelledVersionRoundTrip:
     def test_resolve_merged_pr_carries_a_labelled_head_ref(self):
         from imas_codex.standard_names.promote import resolve_merged_pr
 
-        payload = {
-            "number": 9,
-            "url": "https://github.com/o/r/pull/9",
-            "state": "MERGED",
-            "mergeCommit": {"oid": "beef5678"},
-            "headRefName": "review/v0.2.0rc65+west-task-2e",
-            "baseRefName": "main",
-        }
-        import json as _json
-        from types import SimpleNamespace
-
-        with patch(
-            "imas_codex.standard_names.promote.subprocess.run",
-            return_value=SimpleNamespace(
-                returncode=0, stdout=_json.dumps(payload), stderr=""
-            ),
-        ):
+        payload = _rest_pull(
+            number=9,
+            html_url="https://github.com/o/r/pull/9",
+            merge_commit_sha="beef5678",
+            head={"ref": "review/v0.2.0rc65+west-task-2e"},
+        )
+        with _patch_rest(payload=payload):
             r = resolve_merged_pr("https://github.com/o/r/pull/9")
         assert r.head_ref == "review/v0.2.0rc65+west-task-2e"
 
@@ -553,3 +580,60 @@ class TestBatchLabelledVersionRoundTrip:
         assert doc["rc_version"] == "v0.2.0rc65+west-task-2e"
         assert doc["batch_label"] == "west-task-2e"
         assert doc["rc_version"].split("+", 1)[1] == doc["batch_label"]
+
+
+class TestFetchPrEvidenceOverRest:
+    """Approval evidence is assembled from four REST reads, never from ``gh``.
+
+    The CLI returned description, conversation and commits in one call; REST
+    splits them across the pull, issue-comment, review and commit endpoints,
+    so the assembler is what keeps the evidence record's shape stable for the
+    summary synthesizer downstream.
+    """
+
+    def _transport(self, responses):
+        def fake_call(method, path, *, payload=None, token=None):
+            for fragment, status, body in responses:
+                if fragment in path:
+                    return status, body
+            return 404, {"message": f"unrouted {path}"}
+
+        return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
+
+    def test_assembles_body_conversation_and_commits(self):
+        from imas_codex.standard_names.promote import fetch_pr_evidence
+
+        responses = [
+            ("/issues/7/comments", 200, [{"user": {"login": "rev"}, "body": "ok"}]),
+            (
+                "/pulls/7/reviews",
+                200,
+                [{"user": {"login": "rev"}, "body": "approve", "state": "APPROVED"}],
+            ),
+            (
+                "/pulls/7/commits",
+                200,
+                [{"sha": "c1", "commit": {"message": "publish batch\n\nwhy"}}],
+            ),
+            ("/pulls/7", 200, {"body": "PR description"}),
+        ]
+        with self._transport(responses):
+            evidence = fetch_pr_evidence("https://github.com/o/r/pull/7")
+
+        assert evidence["body"] == "PR description"
+        assert evidence["comments"][0]["author"]["login"] == "rev"
+        assert evidence["reviews"][0]["state"] == "APPROVED"
+        assert evidence["commits"][0]["oid"] == "c1"
+        assert evidence["commits"][0]["messageHeadline"] == "publish batch"
+        assert evidence["commits"][0]["messageBody"] == "why"
+
+    def test_a_rejected_read_returns_empty_and_never_raises(self):
+        from imas_codex.standard_names.promote import fetch_pr_evidence
+
+        with self._transport([("/pulls/7", 401, {"message": "Bad credentials"})]):
+            assert fetch_pr_evidence("https://github.com/o/r/pull/7") == {}
+
+    def test_a_url_that_is_not_a_pull_request_returns_empty(self):
+        from imas_codex.standard_names.promote import fetch_pr_evidence
+
+        assert fetch_pr_evidence("not-a-url") == {}

@@ -10,7 +10,6 @@ State machine:
 
 from __future__ import annotations
 
-import json
 import logging
 import re
 import shlex
@@ -19,6 +18,12 @@ from dataclasses import dataclass, field
 from functools import partial, wraps
 from pathlib import Path
 from typing import Any
+
+from imas_codex.graph.ghcr import (
+    GitHubRestError,
+    github_api_call as _github_api,
+    github_error_detail as _rest_error_detail,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,84 +45,6 @@ class ReviewPreviewLinkInvariantError(RuntimeError):
 
 class ExclusionLedgerLinkError(RuntimeError):
     """The exclusion ledger exists but no committed revision can be linked."""
-
-
-GITHUB_API = "https://api.github.com"
-
-_REST_TIMEOUT_SECONDS = 30
-
-
-class GitHubRestError(RuntimeError):
-    """A GitHub REST call did not return a success status."""
-
-
-def _resolve_github_token() -> str:
-    """Resolve the token every pull-request call authenticates with."""
-    import os
-
-    for variable in ("GITHUB_TOKEN", "GH_TOKEN"):
-        token = os.environ.get(variable)
-        if token:
-            return token
-    from imas_codex.graph.ghcr import resolve_token
-
-    try:
-        return resolve_token(None)
-    except Exception as exc:  # click.ClickException when nothing is configured
-        raise GitHubRestError(
-            "no GitHub token is available for the pull-request API: set "
-            "GITHUB_TOKEN or authenticate the local GitHub credential store"
-        ) from exc
-
-
-def _github_api(
-    method: str,
-    path: str,
-    *,
-    payload: dict[str, Any] | None = None,
-    token: str | None = None,
-) -> tuple[int, Any]:
-    """Call one GitHub REST endpoint and return ``(status, decoded body)``.
-
-    A non-success status is returned rather than raised so each caller can
-    name the pull request it failed on; only a transport-level failure escapes.
-    """
-    import urllib.error
-    import urllib.request
-
-    data = None if payload is None else json.dumps(payload).encode()
-    request = urllib.request.Request(f"{GITHUB_API}{path}", data=data, method=method)
-    request.add_header("Authorization", f"Bearer {token or _resolve_github_token()}")
-    request.add_header("Accept", "application/vnd.github+json")
-    request.add_header("X-GitHub-Api-Version", "2022-11-28")
-    if data is not None:
-        request.add_header("Content-Type", "application/json")
-    try:
-        with urllib.request.urlopen(request, timeout=_REST_TIMEOUT_SECONDS) as response:
-            body = response.read().decode()
-            return response.status, json.loads(body) if body else None
-    except urllib.error.HTTPError as exc:
-        raw = exc.read().decode() if exc.fp else ""
-        try:
-            return exc.code, json.loads(raw) if raw else None
-        except json.JSONDecodeError:
-            return exc.code, {"message": raw}
-
-
-def _rest_error_detail(status: int, body: Any) -> str:
-    """Render what GitHub said about a rejected call, status included."""
-    text = ""
-    if isinstance(body, dict):
-        text = str(body.get("message") or "")
-        reasons = [
-            str(row.get("message") or row) if isinstance(row, dict) else str(row)
-            for row in body.get("errors") or []
-        ]
-        if reasons:
-            text = f"{text}: {'; '.join(reasons)}" if text else "; ".join(reasons)
-    elif body:
-        text = str(body)
-    return f"HTTP {status} {text}".strip()
 
 
 class _GitHubClient:

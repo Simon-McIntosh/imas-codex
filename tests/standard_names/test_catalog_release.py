@@ -525,3 +525,71 @@ class TestClosedPullRequestHeadLookup:
             ("fork/catalog", "fork"),
             ("upstream/catalog", "fork"),
         ]
+
+
+class TestOnePullRequestTransport:
+    """The catalog's pull-request client and the registry share one transport.
+
+    Two urllib request builders existed side by side, one here and one in the
+    registry module. A second builder is a second place for a header, a
+    timeout or a token-resolution rule to drift, so the seam is now a single
+    function both import.
+    """
+
+    def test_catalog_client_calls_the_shared_transport(self):
+        from imas_codex.graph import ghcr
+        from imas_codex.standard_names import catalog_release
+
+        assert catalog_release._github_api is ghcr.github_api_call
+        assert catalog_release.GitHubRestError is ghcr.GitHubRestError
+
+    def test_the_shared_transport_is_the_only_urllib_request_builder(self):
+        import inspect
+
+        from imas_codex.graph import ghcr
+        from imas_codex.standard_names import catalog_release
+
+        for module in (ghcr, catalog_release):
+            source = inspect.getsource(module)
+            builders = source.count("urllib.request.Request(")
+            expected = 1 if module is ghcr else 0
+            assert builders == expected, (
+                f"{module.__name__} builds {builders} GitHub requests directly"
+            )
+
+    def test_a_json_body_travels_as_a_json_document(self, monkeypatch):
+        sent: dict = {}
+
+        class _Response:
+            status = 201
+            headers: dict = {}
+
+            def read(self):
+                return b'{"number": 5}'
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def fake_urlopen(request, timeout=None):
+            sent["url"] = request.full_url
+            sent["method"] = request.get_method()
+            sent["data"] = request.data
+            sent["content_type"] = request.get_header("Content-type")
+            return _Response()
+
+        monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+
+        from imas_codex.graph.ghcr import github_api_call
+
+        status, body = github_api_call(
+            "POST", "/repos/o/r/pulls", payload={"title": "t"}, token="tok"
+        )
+
+        assert (status, body) == (201, {"number": 5})
+        assert sent["method"] == "POST"
+        assert sent["url"] == "https://api.github.com/repos/o/r/pulls"
+        assert json.loads(sent["data"]) == {"title": "t"}
+        assert sent["content_type"] == "application/json"
