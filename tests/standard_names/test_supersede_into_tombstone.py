@@ -89,6 +89,37 @@ def test_tombstone_target_holding_a_successor_is_refused() -> None:
     assert lineage.commits == 0
 
 
+def test_tombstone_target_whose_only_successor_is_the_folded_name_is_admitted() -> None:
+    """A straight-line refinement chain (target -> old) closes back onto target.
+
+    ``old`` already carries a REFINED_FROM edge onto ``target``, so ``target``'s
+    only live descendant is the very name now being folded into it. That is
+    the chain collapsing on itself, not a third-party identity being seized,
+    so the fold is admitted despite the target being tombstoned.
+    """
+    graph = _Graph(_tombstone_state())
+    graph.state.refined_from.append((_OLD, _TARGET))
+    result = _run(graph)
+    assert result["ok"] is True
+    assert graph.commits == 1
+    assert graph.state.nodes[_OLD]["name_stage"] == "superseded"
+
+
+def test_tombstone_target_with_a_different_successor_stays_refused_even_when_old_is_also_one() -> (
+    None
+):
+    graph = _Graph(_tombstone_state())
+    graph.state.nodes["electron_number_density"] = _node(
+        "electron_number_density", stage="accepted"
+    )
+    graph.state.refined_from.append((_OLD, _TARGET))
+    graph.state.refined_from.append(("electron_number_density", _TARGET))
+    result = _run(graph)
+    assert result["ok"] is False
+    assert "successor lineage: electron_number_density" in result["reason"]
+    assert graph.commits == 0
+
+
 def test_live_target_that_is_not_accepted_is_still_refused() -> None:
     for stage in ("pending", "drafted", "reviewed", "approved", "refining"):
         graph = _Graph(_state())

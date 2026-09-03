@@ -1564,14 +1564,32 @@ def _fold_target_paths(
     return sorted(path for path in paths if path)
 
 
-def _fold_tombstone_target_reason(snapshot: dict[str, Any], into: str) -> str | None:
+def _fold_target_successor_names(
+    relationships: list[dict[str, Any]], target_element_id: str
+) -> set[str]:
+    """Names with a direct REFINED_FROM edge onto ``target_element_id``."""
+    return {
+        relationship.get("start_id")
+        for relationship in relationships
+        if relationship.get("type") == "REFINED_FROM"
+        and relationship.get("end_element_id") == target_element_id
+    }
+
+
+def _fold_tombstone_target_reason(
+    snapshot: dict[str, Any], old: str, into: str
+) -> str | None:
     """Refuse a tombstoned fold target that is not a free identity.
 
     A tombstoned identity can be re-occupied only when nothing reads it: no
-    recorded successor and no successor lineage edge, no sources bound to or
-    projected onto it, and neither a parent nor a child. Any one of those makes
-    the spelling load-bearing, so the fold refuses and the caller folds into
-    whatever holds the live meaning instead.
+    recorded successor and no successor lineage edge other than the name now
+    being folded into it, no sources bound to or projected onto it, and
+    neither a parent nor a child. A target whose only live descendant is the
+    name being folded is a straight-line refinement chain closing on itself,
+    not a third-party identity being taken, so that case alone is admitted.
+    Any other live descendant makes the spelling load-bearing, so the fold
+    refuses and the caller folds into whatever holds the live meaning
+    instead.
     """
     target_properties = snapshot["target_properties"]
     successor = target_properties.get("superseded_by")
@@ -1582,14 +1600,8 @@ def _fold_tombstone_target_reason(snapshot: dict[str, Any], into: str) -> str | 
         )
     target_element_id = snapshot["target_element_id"]
     relationships = snapshot.get("relationships") or []
-    successor_lineage = sorted(
-        {
-            relationship.get("start_id")
-            for relationship in relationships
-            if relationship.get("type") == "REFINED_FROM"
-            and relationship.get("end_element_id") == target_element_id
-        }
-    )
+    target_successors = _fold_target_successor_names(relationships, target_element_id)
+    successor_lineage = sorted(target_successors - {old})
     if successor_lineage:
         return f"target {into!r} is superseded and has successor lineage: " + ", ".join(
             str(name) for name in successor_lineage
@@ -1623,10 +1635,15 @@ def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | N
     if old_stage != "superseded" and old_stage not in _FOLD_PREDECESSOR_STAGES:
         return f"name {old!r} has unsupported predecessor stage {old_stage!r}"
     target_stage = target_properties.get("name_stage")
+    closing_straight_chain = False
     if target_stage == "superseded":
-        tombstone_reason = _fold_tombstone_target_reason(snapshot, into)
+        tombstone_reason = _fold_tombstone_target_reason(snapshot, old, into)
         if tombstone_reason:
             return tombstone_reason
+        target_successors = _fold_target_successor_names(
+            snapshot.get("relationships") or [], snapshot["target_element_id"]
+        )
+        closing_straight_chain = target_successors == {old}
     elif target_stage != "accepted":
         return f"target {into!r} is name_stage={target_stage!r}, not 'accepted'"
     elif target_properties.get("validation_status") != "valid":
@@ -1634,7 +1651,7 @@ def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | N
             f"target {into!r} is validation_status="
             f"{target_properties.get('validation_status')!r}, not 'valid'"
         )
-    if snapshot.get("cycle"):
+    if snapshot.get("cycle") and not closing_straight_chain:
         return (
             f"{old!r} already descends from {into!r} (REFINED_FROM cycle) — cannot fold"
         )
