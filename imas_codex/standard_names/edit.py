@@ -1564,18 +1564,72 @@ def _fold_target_paths(
     return sorted(path for path in paths if path)
 
 
+def _fold_tombstone_target_reason(snapshot: dict[str, Any], into: str) -> str | None:
+    """Refuse a tombstoned fold target that is not a free identity.
+
+    A tombstoned identity can be re-occupied only when nothing reads it: no
+    recorded successor and no successor lineage edge, no sources bound to or
+    projected onto it, and neither a parent nor a child. Any one of those makes
+    the spelling load-bearing, so the fold refuses and the caller folds into
+    whatever holds the live meaning instead.
+    """
+    target_properties = snapshot["target_properties"]
+    successor = target_properties.get("superseded_by")
+    if successor:
+        return (
+            f"target {into!r} is superseded and records successor {successor!r} — "
+            "fold into the successor instead"
+        )
+    target_element_id = snapshot["target_element_id"]
+    relationships = snapshot.get("relationships") or []
+    successor_lineage = sorted(
+        {
+            relationship.get("start_id")
+            for relationship in relationships
+            if relationship.get("type") == "REFINED_FROM"
+            and relationship.get("end_element_id") == target_element_id
+        }
+    )
+    if successor_lineage:
+        return f"target {into!r} is superseded and has successor lineage: " + ", ".join(
+            str(name) for name in successor_lineage
+        )
+    target_sources = _fold_source_rows(snapshot, into)
+    if target_sources:
+        return (
+            f"target {into!r} is superseded and still carries "
+            f"{len(target_sources)} source(s)"
+        )
+    for relationship in relationships:
+        if relationship.get("type") != "HAS_PARENT":
+            continue
+        if relationship.get("start_element_id") == target_element_id:
+            return (
+                f"target {into!r} is superseded and still has parent "
+                f"{relationship.get('end_id')!r}"
+            )
+        if relationship.get("end_element_id") == target_element_id:
+            return (
+                f"target {into!r} is superseded and still has child "
+                f"{relationship.get('start_id')!r}"
+            )
+    return None
+
+
 def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | None:
     old_properties = snapshot["old_properties"]
     target_properties = snapshot["target_properties"]
     old_stage = old_properties.get("name_stage")
     if old_stage != "superseded" and old_stage not in _FOLD_PREDECESSOR_STAGES:
         return f"name {old!r} has unsupported predecessor stage {old_stage!r}"
-    if target_properties.get("name_stage") != "accepted":
-        return (
-            f"target {into!r} is name_stage={target_properties.get('name_stage')!r}, "
-            "not 'accepted'"
-        )
-    if target_properties.get("validation_status") != "valid":
+    target_stage = target_properties.get("name_stage")
+    if target_stage == "superseded":
+        tombstone_reason = _fold_tombstone_target_reason(snapshot, into)
+        if tombstone_reason:
+            return tombstone_reason
+    elif target_stage != "accepted":
+        return f"target {into!r} is name_stage={target_stage!r}, not 'accepted'"
+    elif target_properties.get("validation_status") != "valid":
         return (
             f"target {into!r} is validation_status="
             f"{target_properties.get('validation_status')!r}, not 'valid'"
@@ -1833,6 +1887,9 @@ def _fold_expected_state(
     include_domain_mutation: bool,
 ) -> dict[str, Any]:
     expected = _fold_verification_state(snapshot)
+    # The fold never restages the target, so every reference to it keeps the
+    # stage the snapshot read — a tombstoned target stays tombstoned.
+    target_stage = snapshot["target_properties"].get("name_stage")
     old_source_ids = {source["id"] for source in old_sources}
     old_backing_ids = {backing["element_id"] for backing in old_backings}
     if include_domain_mutation:
@@ -1854,7 +1911,7 @@ def _fold_expected_state(
             "target_labels": snapshot["target_labels"],
             "target_properties": expected["names"]["target"],
             "target_id": into,
-            "target_stage": "accepted",
+            "target_stage": target_stage,
         }
         for source in expected["sources"]:
             if (source.get("scalar_target") or {}).get("target_id") == into:
@@ -1863,7 +1920,7 @@ def _fold_expected_state(
                     "labels": snapshot["target_labels"],
                     "properties": expected["names"]["target"],
                     "target_id": into,
-                    "target_stage": "accepted",
+                    "target_stage": target_stage,
                 }
             for binding in source["bindings"]:
                 if binding.get("target_id") == into:
@@ -1876,7 +1933,7 @@ def _fold_expected_state(
                 "labels": snapshot["target_labels"],
                 "properties": expected["names"]["target"],
                 "target_id": into,
-                "target_stage": "accepted",
+                "target_stage": target_stage,
             }
             source["bindings"] = [
                 binding
