@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T01:52:48",
+  "updated": "2026-09-04T01:54:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -63042,6 +63042,128 @@
           "role": "documentation",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T215329580772-n-wcr-cascade-keyword-tests",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-cascade-keyword-tests",
+        "node_definition": {
+          "done_when": "grep -rc cascade_planned tests/ returns 0, and uv run --no-sync pytest tests/standard_names/test_edit_cli.py tests/standard_names/test_edit_engine.py tests/standard_names/test_edit_scope.py tests/standard_names/test_edit_inline_review.py tests/standard_names/test_sn_approve.py tests/standard_names/test_rename_cascade.py tests/llm -q -p no:cacheprovider exits 0 with 0 failures where the base revision leaves 11",
+          "estimated_hours": 0.4,
+          "goal": "Move the five remaining test files onto the renamed deferred-cascade keyword",
+          "id": "n-wcr-cascade-keyword-tests",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215329580772-n-wcr-cascade-keyword-tests/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "tests/standard_names/test_edit_cli.py",
+            "tests/standard_names/test_edit_engine.py",
+            "tests/standard_names/test_edit_scope.py",
+            "tests/standard_names/test_edit_inline_review.py",
+            "tests/standard_names/test_sn_approve.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-cascadekw",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T21:53:38Z",
+        "completed_at": "2026-09-03T22:02:09.508Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 505,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 511,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "7dffaeb82ec628df2f8e6aa03b9ff9a68ac53e85",
+        "commits": [
+          "a152dac684f95a36d727847d404c243ae7f2bc83"
+        ],
+        "changed_lines": {
+          "added": 15,
+          "removed": 13,
+          "files": 5
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest <the five renamed files plus test_rename_cascade and tests/llm> -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215329580772-n-wcr-cascade-keyword-tests/after-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215329580772-n-wcr-cascade-keyword-tests/manifest.md",
+        "scope_changed": false,
+        "session_id": "9d6c0042-2caf-48cd-a8e9-0cb75ff16815",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.96,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-04T01:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 69477,
+            "cache_creation_input_tokens_cumulative": 69477,
+            "cache_read_input_tokens": 1343093,
+            "cache_read_input_tokens_cumulative": 1343093,
+            "inference_geo": "not_available",
+            "input_tokens": 42,
+            "input_tokens_cumulative": 42,
+            "output_tokens": 11918,
+            "output_tokens_cumulative": 11918,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6644764999999997,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.6644764999999997
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 507.969,
+          "generated_tokens": 11918,
+          "generation_seconds": 151.418,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 8.0,
+          "machine_seconds": 356.551,
+          "peak_input_tokens": 80179,
+          "tokens_per_second": 78.71,
+          "wall_tokens_per_second": 23.46
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_edit_cli.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -63144,6 +63266,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1540
+    "_version": 1541
   }
 }
