@@ -16,7 +16,7 @@ import re
 import shlex
 import subprocess
 from dataclasses import dataclass, field
-from functools import wraps
+from functools import partial, wraps
 from pathlib import Path
 from typing import Any
 
@@ -42,8 +42,100 @@ class ExclusionLedgerLinkError(RuntimeError):
     """The exclusion ledger exists but no committed revision can be linked."""
 
 
+GITHUB_API = "https://api.github.com"
+
+_REST_TIMEOUT_SECONDS = 30
+
+
+class GitHubRestError(RuntimeError):
+    """A GitHub REST call did not return a success status."""
+
+
+def _resolve_github_token() -> str:
+    """Resolve the token every pull-request call authenticates with."""
+    import os
+
+    for variable in ("GITHUB_TOKEN", "GH_TOKEN"):
+        token = os.environ.get(variable)
+        if token:
+            return token
+    from imas_codex.graph.ghcr import resolve_token
+
+    try:
+        return resolve_token(None)
+    except Exception as exc:  # click.ClickException when nothing is configured
+        raise GitHubRestError(
+            "no GitHub token is available for the pull-request API: set "
+            "GITHUB_TOKEN or authenticate the local GitHub credential store"
+        ) from exc
+
+
+def _github_api(
+    method: str,
+    path: str,
+    *,
+    payload: dict[str, Any] | None = None,
+    token: str | None = None,
+) -> tuple[int, Any]:
+    """Call one GitHub REST endpoint and return ``(status, decoded body)``.
+
+    A non-success status is returned rather than raised so each caller can
+    name the pull request it failed on; only a transport-level failure escapes.
+    """
+    import urllib.error
+    import urllib.request
+
+    data = None if payload is None else json.dumps(payload).encode()
+    request = urllib.request.Request(f"{GITHUB_API}{path}", data=data, method=method)
+    request.add_header("Authorization", f"Bearer {token or _resolve_github_token()}")
+    request.add_header("Accept", "application/vnd.github+json")
+    request.add_header("X-GitHub-Api-Version", "2022-11-28")
+    if data is not None:
+        request.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(request, timeout=_REST_TIMEOUT_SECONDS) as response:
+            body = response.read().decode()
+            return response.status, json.loads(body) if body else None
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode() if exc.fp else ""
+        try:
+            return exc.code, json.loads(raw) if raw else None
+        except json.JSONDecodeError:
+            return exc.code, {"message": raw}
+
+
+def _rest_error_detail(status: int, body: Any) -> str:
+    """Render what GitHub said about a rejected call, status included."""
+    text = ""
+    if isinstance(body, dict):
+        text = str(body.get("message") or "")
+        reasons = [
+            str(row.get("message") or row) if isinstance(row, dict) else str(row)
+            for row in body.get("errors") or []
+        ]
+        if reasons:
+            text = f"{text}: {'; '.join(reasons)}" if text else "; ".join(reasons)
+    elif body:
+        text = str(body)
+    return f"HTTP {status} {text}".strip()
+
+
 class _GitHubClient:
-    """Small GitHub CLI boundary for creating and verifying review PRs."""
+    """The single pull-request boundary; every call goes over GitHub REST.
+
+    REST is the transport for all of them because the CLI resolves
+    pull-request metadata through GraphQL, which fails outright on a
+    repository whose response still carries Projects-classic fields. Bodies
+    travel as JSON documents, so no length or quoting limit applies.
+    """
+
+    def __init__(self, token: str | None = None) -> None:
+        self._token = token
+
+    def _call(
+        self, method: str, path: str, *, payload: dict[str, Any] | None = None
+    ) -> tuple[int, Any]:
+        return _github_api(method, path, payload=payload, token=self._token)
 
     def create_pull_request(
         self,
@@ -55,69 +147,74 @@ class _GitHubClient:
         repo: str,
         head_owner: str,
     ) -> tuple[int | None, str | None]:
-        return _gh_pr_create(
-            branch=branch,
-            base=base,
-            title=title,
-            body=body,
-            repo=repo,
-            head_owner=head_owner,
+        """Open a pull request and return ``(number, url)``."""
+        status, payload = self._call(
+            "POST",
+            f"/repos/{repo}/pulls",
+            payload={
+                "title": title,
+                "body": body,
+                "base": base,
+                "head": f"{head_owner}:{branch}",
+            },
         )
+        if status not in {200, 201} or not isinstance(payload, dict):
+            raise GitHubRestError(
+                f"could not open a pull request on {repo} for {head_owner}:{branch}: "
+                f"{_rest_error_detail(status, payload)}"
+            )
+        number = payload.get("number")
+        return (int(number) if number is not None else None), payload.get("html_url")
 
     def update_pull_request_body(self, *, repo: str, number: int, body: str) -> None:
-        """Patch the body through the REST pull-request endpoint.
-
-        The body is sent as a JSON document on stdin so no length or quoting
-        limit of the command line applies. REST is the transport because the
-        CLI's own edit verb resolves pull-request metadata through GraphQL,
-        which fails outright on a repository whose response still carries
-        Projects-classic fields.
-        """
-        result = subprocess.run(
-            [
-                "gh",
-                "api",
-                "--method",
-                "PATCH",
-                f"repos/{repo}/pulls/{number}",
-                "--input",
-                "-",
-            ],
-            input=json.dumps({"body": body}),
-            capture_output=True,
-            text=True,
-            timeout=30,
+        """Patch the body through the REST pull-request endpoint."""
+        status, payload = self._call(
+            "PATCH", f"/repos/{repo}/pulls/{number}", payload={"body": body}
         )
-        if result.returncode != 0:
+        if status != 200:
             raise ReviewPreviewLinkInvariantError(
                 f"could not write the preview address to {repo}#{number}: "
-                f"{result.stderr.strip()}"
+                f"{_rest_error_detail(status, payload)}"
             )
 
     def read_pull_request_body(self, *, repo: str, number: int) -> str:
-        result = subprocess.run(
-            [
-                "gh",
-                "pr",
-                "view",
-                str(number),
-                "--repo",
-                repo,
-                "--json",
-                "body",
-                "--jq",
-                ".body",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        if result.returncode != 0:
+        """Return the body GitHub currently stores for one pull request."""
+        status, payload = self._call("GET", f"/repos/{repo}/pulls/{number}")
+        if status != 200 or not isinstance(payload, dict):
             raise ReviewPreviewLinkInvariantError(
                 f"could not read back the body of {repo}#{number}: "
-                f"{result.stderr.strip()}"
+                f"{_rest_error_detail(status, payload)}"
             )
-        return result.stdout
+        return payload.get("body") or ""
+
+    def closed_pull_request_heads(
+        self, *, repo: str, branch: str, head_owner: str | None = None
+    ) -> set[str]:
+        """Return the head commits of closed pull requests opened from *branch*.
+
+        A merged pull request is closed as far as REST is concerned, so both
+        dispositions arrive through the one state filter. The head owner
+        narrows the query when it is known; the branch name is re-checked on
+        every row either way, because the filter is a server-side convenience
+        rather than an identity.
+        """
+        query = "state=closed&per_page=100&sort=updated&direction=desc"
+        if head_owner:
+            from urllib.parse import quote
+
+            query = f"{query}&head={quote(f'{head_owner}:{branch}', safe='')}"
+        status, payload = self._call("GET", f"/repos/{repo}/pulls?{query}")
+        if status != 200 or not isinstance(payload, list):
+            raise GitHubRestError(
+                f"could not list closed pull requests for {branch} in {repo}: "
+                f"{_rest_error_detail(status, payload)}"
+            )
+        heads: set[str] = set()
+        for row in payload:
+            head = row.get("head") or {}
+            if head.get("ref") == branch and head.get("sha"):
+                heads.add(head["sha"])
+        return heads
 
 
 def _review_preview_url(repo: str, pr_number: int) -> str:
@@ -282,15 +379,17 @@ def _run_git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess
     )
 
 
-def _closed_pr_heads(isnc_path: Path, branch: str) -> set[str]:
+def _closed_pr_heads(
+    isnc_path: Path, branch: str, *, github_client: Any | None = None
+) -> set[str]:
     """Return closed or merged PR heads recorded for *branch*.
 
     Both catalog remotes are queried because rehearsal PRs live on the fork
     while final review PRs live upstream. A failed lookup contributes no proof:
     branch reclamation then falls back to ancestry and otherwise refuses.
     """
-    import json
-
+    client = github_client or _GitHubClient()
+    fork = _github_slug(isnc_path, _RC_REMOTE)
     repos = {
         f"{owner}/{repo}"
         for remote in (_RC_REMOTE, _FINAL_REMOTE)
@@ -300,27 +399,14 @@ def _closed_pr_heads(isnc_path: Path, branch: str) -> set[str]:
     heads: set[str] = set()
     for repo in sorted(repos):
         try:
-            result = subprocess.run(
-                [
-                    "gh",
-                    "pr",
-                    "list",
-                    "--repo",
-                    repo,
-                    "--state",
-                    "closed",
-                    "--head",
-                    branch,
-                    "--limit",
-                    "100",
-                    "--json",
-                    "headRefName,headRefOid,state",
-                ],
-                capture_output=True,
-                text=True,
-                timeout=30,
+            heads.update(
+                client.closed_pull_request_heads(
+                    repo=repo,
+                    branch=branch,
+                    head_owner=fork[0] if fork is not None else None,
+                )
             )
-        except (OSError, subprocess.TimeoutExpired) as exc:
+        except (OSError, GitHubRestError) as exc:
             logger.warning(
                 "Could not inspect closed pull requests for %s in %s: %s",
                 branch,
@@ -328,26 +414,6 @@ def _closed_pr_heads(isnc_path: Path, branch: str) -> set[str]:
                 exc,
             )
             continue
-        if result.returncode != 0:
-            logger.warning(
-                "Could not inspect closed pull requests for %s in %s: %s",
-                branch,
-                repo,
-                result.stderr.strip(),
-            )
-            continue
-        try:
-            rows = json.loads(result.stdout)
-        except json.JSONDecodeError:
-            logger.warning("gh returned invalid PR data for %s in %s", branch, repo)
-            continue
-        heads.update(
-            row["headRefOid"]
-            for row in rows
-            if row.get("headRefName") == branch
-            and row.get("state") in {"CLOSED", "MERGED"}
-            and row.get("headRefOid")
-        )
     return heads
 
 
@@ -357,6 +423,7 @@ def _prepare_release_branch(
     *,
     base_ref: str = "main",
     pr_head_reader: Any | None = None,
+    github_client: Any | None = None,
 ) -> tuple[str | None, str | None]:
     """Create *branch* or safely move a stale local copy onto *base_ref*.
 
@@ -378,7 +445,7 @@ def _prepare_release_branch(
         ).returncode
         == 0
     )
-    reader = pr_head_reader or _closed_pr_heads
+    reader = pr_head_reader or partial(_closed_pr_heads, github_client=github_client)
     pr_heads = set() if contained else set(reader(isnc_path, branch))
     if not contained and old_head not in pr_heads:
         repo = shlex.quote(str(isnc_path))
@@ -888,6 +955,7 @@ def run_release(
     exporter: Any | None = None,
     publisher: Any | None = None,
     pr_creator: Any | None = None,
+    github_client: Any | None = None,
     upstream_repo: str | None = None,
     fork_owner: str | None = None,
     pr_head_reader: Any | None = None,
@@ -943,7 +1011,10 @@ def run_release(
     report.remote = effective_remote
     exporter = exporter or _default_exporter
     publisher = publisher or _default_publisher
-    pr_creator = pr_creator or _gh_pr_create
+    if github_client is None and pr_creator is None:
+        github_client = _GitHubClient()
+    if pr_creator is None:
+        pr_creator = github_client.create_pull_request
 
     # ── Pre-flight checks ──────────────────────────────────
     logger.info("Pre-flight checks on %s", isnc_path)
@@ -1032,6 +1103,7 @@ def run_release(
                 isnc_path,
                 report.branch,
                 pr_head_reader=pr_head_reader,
+                github_client=github_client,
             )
             if branch_error:
                 report.errors.append(branch_error)
@@ -1113,7 +1185,7 @@ def run_release(
                 head_owner=fork_owner,
             )
         except Exception as exc:
-            report.errors.append(f"gh pr create failed: {exc}")
+            report.errors.append(f"could not open the pull request: {exc}")
         return report
 
     # If publish created no commit (no changes), still tag and push
@@ -1311,8 +1383,9 @@ def backfill_review_artifact(
 ) -> None:
     """Write PR provenance into a frozen artifact as it becomes known.
 
-    The PR number/URL land after ``gh pr create``; the merge commit lands when
-    ``sn approve`` folds the merged PR back. Only the provided fields are written.
+    The PR number/URL land when the pull request is opened; the merge commit
+    lands when ``sn approve`` folds the merged PR back. Only the provided
+    fields are written.
     """
     import yaml
 
@@ -1324,44 +1397,6 @@ def backfill_review_artifact(
     if merge_commit is not None:
         doc["merge_commit"] = merge_commit
     path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
-
-
-def _gh_pr_create(
-    *, branch: str, base: str, title: str, body: str, repo: str, head_owner: str
-) -> tuple[int | None, str | None]:
-    """Open a PR via the gh CLI; return (pr_number, pr_url).
-
-    Injected as ``pr_creator`` in tests so no live GitHub call is made.
-    """
-    result = subprocess.run(
-        [
-            "gh",
-            "pr",
-            "create",
-            "--repo",
-            repo,
-            "--base",
-            base,
-            "--head",
-            f"{head_owner}:{branch}",
-            "--title",
-            title,
-            "--body",
-            body,
-        ],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"gh pr create failed: {result.stderr.strip()}")
-    url = result.stdout.strip().splitlines()[-1] if result.stdout.strip() else None
-    number = None
-    if url and "/pull/" in url:
-        try:
-            number = int(url.rsplit("/", 1)[-1])
-        except ValueError:
-            number = None
-    return number, url
 
 
 def _assert_approved_entries_unchanged(
@@ -1425,8 +1460,9 @@ def run_review_release(
     sn-sources file is minted live to the SN set (:func:`mint_sn_list`), an
     sn-names file is used directly (schema dispatch). The resolved set is frozen
     under ``manifests/reviews/<rc>.sn_names.yaml`` (RC-tagged, the traceable key)
-    and the PR number/URL back-filled after ``gh pr create`` when ``open_pr``
-    is true. The RC tag is always created and pushed to the fork at cut time.
+    and the PR number/URL back-filled once the pull request is opened when
+    ``open_pr`` is true. The RC tag is always created and pushed to the fork at
+    cut time.
 
     The RC version carries the batch identity as semver build metadata
     (``v0.2.0rc66+<label>``, derived from the manifest — see
@@ -1631,6 +1667,7 @@ def run_review_release(
         isnc_path,
         report.branch,
         pr_head_reader=pr_head_reader,
+        github_client=github_client,
     )
     if branch_error:
         report.errors.append(branch_error)
@@ -1705,7 +1742,7 @@ def run_review_release(
     # The PR repo and fork owner are derived from the ISNC checkout's own
     # remotes — never hardcoded — so the tool follows whatever catalog repo
     # the checkout actually tracks. pr_target='fork' raises the PR within the
-    # fork itself (origin) — the full gh review/merge flow with no upstream
+    # fork itself (origin) — the full GitHub review/merge flow with no upstream
     # noise (rehearsals); 'upstream' (default) targets the real catalog.
     if upstream_repo is None:
         if pr_target == "fork":
@@ -1787,7 +1824,7 @@ def run_review_release(
             head_owner=fork_owner,
         )
     except Exception as exc:
-        report.errors.append(f"gh pr create failed: {exc}")
+        report.errors.append(f"could not open the pull request: {exc}")
         return report
     report.pr_number = pr_number
     report.pr_url = pr_url
