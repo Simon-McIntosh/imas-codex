@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:52:33",
+  "updated": "2026-09-03T13:05:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -57372,6 +57372,117 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T105108728031-n-fold-completes-a-straight-line-chain",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-fold-completes-a-straight-line-chain",
+        "node_definition": {
+          "done_when": "a test proves a fold succeeds where the target's only live descendant is the folded name itself, a second test proves it is still refused where the target has a live descendant that is a different name, and uv run --no-sync pytest tests/standard_names -q reports one failure matching the single pre-existing claim stage-transition case with zero added",
+          "estimated_hours": 1.5,
+          "goal": "Widen the tombstone guard by exactly one case: admit a superseded target whose every live descendant is the name being folded into it, since that is a straight-line refinement chain being closed rather than a third-party identity being taken, while a target carrying a live descendant other than the folded name stays refused",
+          "id": "n-fold-completes-a-straight-line-chain",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-completes-a-straight-line-chain.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/edit.py",
+            "tests/standard_names/test_supersede_into_tombstone.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-supersederoute",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:51:14Z",
+        "completed_at": "2026-09-03T11:04:17.200Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 772,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 783,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "efe0c45cf5d197ef396f33830b119b5d3b715174",
+        "commits": [
+          "a4b21a4e6d190063f9ab8169723ef35b73ea162a"
+        ],
+        "changed_lines": {
+          "added": 63,
+          "removed": 15,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_supersede_into_tombstone.py tests/standard_names/test_tombstone_supersede.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-completes-a-straight-line-chain.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-completes-a-straight-line-chain.json",
+        "scope_changed": false,
+        "session_id": "3bfc7826-97bf-4462-b6d2-d2c6664111a0",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 9624,
+            "cache_creation_input_tokens_cumulative": 9624,
+            "cache_read_input_tokens": 1475155,
+            "cache_read_input_tokens_cumulative": 1475155,
+            "inference_geo": "not_available",
+            "input_tokens": 26,
+            "input_tokens_cumulative": 26,
+            "output_tokens": 4773,
+            "output_tokens_cumulative": 4773,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6047327999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.6047327999999998
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -57432,6 +57543,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1429
+    "_version": 1430
   }
 }
