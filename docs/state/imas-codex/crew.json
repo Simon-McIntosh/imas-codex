@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:38:26",
+  "updated": "2026-09-03T12:50:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -423,6 +423,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-24"
+      },
+      {
+        "id": "impl-blockedrename",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-boundband",
@@ -57153,6 +57162,105 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T103915184654-n-complete-the-blocked-rename",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-complete-the-blocked-rename",
+        "node_definition": {
+          "done_when": "a GraphClient census counting live names carrying the retired temporal prefix prints 1 before the work and 0 after, with the report giving the before and after identity, whether a producing source reattached and from which data-dictionary path, the recorded quorum score, the exact invocations used, the spend",
+          "estimated_hours": 1.5,
+          "goal": "Finish the one refused per-time rename by moving the live quarantined name spelled with the retired temporal prefix onto the tombstoned identity its own grandparent holds, using only the governed fold or rename routes with a mandatory reason, never a hand edit, never a direct acceptance",
+          "id": "n-complete-the-blocked-rename",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/complete-the-blocked-rename.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/complete-the-blocked-rename.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-blockedrename",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:39:21Z",
+        "completed_at": "2026-09-03T10:49:31.798Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 605,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 610,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a57bc5bd97660cd2451160b8569e39cfc3f89824",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/complete-the-blocked-rename.json",
+        "scope_changed": false,
+        "session_id": "852ccfee-f997-4f0a-9377-eecd20752212",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 138508,
+            "cache_creation_input_tokens_cumulative": 138508,
+            "cache_read_input_tokens": 5979885,
+            "cache_read_input_tokens_cumulative": 5979885,
+            "inference_geo": "not_available",
+            "input_tokens": 102,
+            "input_tokens_cumulative": 102,
+            "output_tokens": 40414,
+            "output_tokens_cumulative": 40414,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.154353,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.154353
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an investigation of a refused route; no code in this node's scope changed",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -57213,6 +57321,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1426
+    "_version": 1428
   }
 }
