@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T17:13:27",
+  "updated": "2026-09-03T17:17:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -284,6 +284,15 @@
         "role": "implement",
         "session_id": "01a0247a-b8a1-79c1-bcd5-ce93a4cc0f8a",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-attribwiring",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-auditfix",
@@ -59710,6 +59719,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1464
+    "_version": 1465
   }
 }
