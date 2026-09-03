@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T11:18:03",
+  "updated": "2026-09-03T12:01:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -56361,6 +56361,204 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T090315581892-n-audits-resolve-retired-spellings",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-audits-resolve-retired-spellings",
+        "node_definition": {
+          "done_when": "a test proves the temporal-change operator set resolves the retired spelling so a name using it passes the unit audit at watts under an energy base, a second test proves the attachment tense rule accepts a data-dictionary time-derivative path against a name spelled with the retired prefix, a third test proves an unknown prefix is still refused, and uv run --no-sync pytest tests/standard_names -q adds no failure against the eighteen that reproduce at the base revision",
+          "estimated_hours": 2.5,
+          "goal": "Make every audit that reads an operator's semantics resolve a retired spelling through the advisory alias the grammar publishes before judging, because retiring an operator to an alias silently strips the semantics a live name depended on: a name spelled with the retired temporal prefix now reads as carrying no temporal change, so the unit audit quarantines it for holding watts under an energy base and the attachment tense rule detaches the very data-dictionary time-derivative path that justified it",
+          "id": "n-audits-resolve-retired-spellings",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/audits-resolve-retired-spellings.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "imas_codex/standard_names/audits.py",
+            "imas_codex/standard_names/attachment_audit.py",
+            "tests/standard_names/test_audits_resolve_aliases.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-aliasresolve",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T09:03:21Z",
+        "completed_at": "2026-09-03T09:17:44.935Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 857,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 863,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "752cc1302bded5c60b279d9fecb1fa1a2a817d95",
+        "commits": [
+          "036dfe72ee5d5032c4151ec72c1c1b46507a8984"
+        ],
+        "changed_lines": {
+          "added": 219,
+          "removed": 8,
+          "files": 3
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_audits_resolve_aliases.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/audits-resolve-retired-spellings.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/audits-resolve-retired-spellings.json",
+        "scope_changed": false,
+        "session_id": "70abc54e-4b41-49f4-820d-290f25f7de5c",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 116956,
+            "cache_creation_input_tokens_cumulative": 116956,
+            "cache_read_input_tokens": 3212001,
+            "cache_read_input_tokens_cumulative": 3212001,
+            "inference_geo": "not_available",
+            "input_tokens": 68,
+            "input_tokens_cumulative": 68,
+            "output_tokens": 25576,
+            "output_tokens_cumulative": 25576,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.4153005,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.4153005
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T091852408715-n-sourceless-names-are-surfaced-and-healed",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-sourceless-names-are-surfaced-and-healed",
+        "node_definition": {
+          "done_when": "a census through the repository GraphClient counting live pipeline names with no producing source prints 8 before the reconcile and fewer after, with a test proving a name whose detachment reason has lapsed is reattached to its original source while a name whose reason still holds is reported and left alone, and uv run --no-sync pytest tests/standard_names -q adding no failure against the eighteen that reproduce at the base revision",
+          "estimated_hours": 2.0,
+          "goal": "Stop a live accepted name being left with no provenance at all: add a startup reconcile that finds a live pipeline-origin name with no producing source and reattaches the source detached from it when the detachment reason no longer holds under the current grammar, leaving a name whose reason still holds surfaced as a blocker rather than silently accepted, because the detach path returns the freed source to extracted and nothing ever re-pairs the two when the rejection was itself the transient",
+          "id": "n-sourceless-names-are-surfaced-and-healed",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sourceless-names-are-surfaced-and-healed.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_sourceless_name_recovery.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-orphanreattach",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T09:18:58Z",
+        "completed_at": "2026-09-03T09:22:05.800Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 187,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "4310fb286921187511a84d7d78ce6c2b3d1ab219",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sourceless-names-are-surfaced-and-healed.json",
+        "scope_changed": false,
+        "session_id": "3527f4bf-cd32-4f99-8019-ad190b4eb0b5",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 100.0,
+          "rate_limit_type": "spend-limit",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": "exhausted",
+          "surpassed_threshold": true,
+          "tokens": null,
+          "cost_usd": null,
+          "refusal": true,
+          "detail": "backend refused the turn: the account's spend-limit is reached"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "the account spend limit rejected the run at 19 turns; base and head are the same commit and the tree is clean, so nothing was produced",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": true,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -56407,6 +56605,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1413
+    "_version": 1415
   }
 }
