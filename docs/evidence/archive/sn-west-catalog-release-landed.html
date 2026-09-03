@@ -151,6 +151,73 @@
     runnable census and gates the candidate on the published bytes, so a session that has not
     lived through this one can cut the next candidate without rediscovering any of it.</p>
   </section>
+
+  <section id="provenance-integrity">
+    <h2>The provenance leak: found, measured, plugged, and made visible</h2>
+    <p>The lead asked for the source-stripping to be fixed at root. The first answer was
+    incomplete and the second came from the lead reading physics rather than reasoning. An
+    orphan triage reported two sourceless names as sound detachments needing their pairings
+    retired; the lead challenged both and the data dictionary settled both against the
+    report. <code>summary/global_quantities/power_steady/value</code> is documented as
+    <em>"the total coupled power minus the time derivative of the stored energy"</em>, which
+    is exactly the name that was refused it; and
+    <code>equilibrium/time_slice/constraints/n_e_line</code> is keyworded
+    <em>interferometry</em>, which is exactly the locus the guard said it did not share.</p>
+    <p>Both rules were judging a path's <em>spelling</em> rather than what the dictionary says
+    the path measures. The tense rule read a temporal operator anywhere in a name as making
+    the whole quantity a rate, ignoring that it sat inside one operand of a binary
+    difference. The locus rule looked for a literal device token in the path string.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Detachments on record</td><td>508, spanning 2026-07-27 to 2026-09-03</td></tr>
+        <tr><td>Concentration</td><td>407 in July, 80 in August, 21 in September</td></tr>
+        <tr><td>Distinct names touched</td><td>155 — of which 111 still hold other sources</td></tr>
+        <tr><td>Left with no source at all</td><td>44, of which 42 were already superseded or exhausted</td></tr>
+        <tr><td>Live and publishable orphans</td><td>2</td></tr>
+        <tr><td>Audited false-positive rate</td><td>4 of 29 sampled; six rules covering 461 detachments (91%) sampled clean</td></tr>
+        <tr><td>Where the false positives sit</td><td>tense mismatch 3 of its 5 total; unit dimensionality 1 of 4 sampled</td></tr>
+        <tr><td>New detachments after the fixes</td><td><strong>0</strong> across a full flush and a compose drain, against roughly 2 per drain before</td></tr>
+        <tr><td>Names composed from the freed backlog</td><td>151, for 0.06 USD</td></tr>
+        <tr><td>Unclaimed extracted sources</td><td>1471 → 1190</td></tr>
+        <tr><td>Live sourceless names</td><td>8 → 3</td></tr>
+      </tbody>
+    </table>
+    <p>A generalisation the sprint had to correct in itself: from two hand-checked false
+    positives it inferred that the guard was unsound. The audit refuted that. Both bad cases
+    came from the same rule family, which is the smallest population of the eight, and a
+    three-in-five rate on a five-item rule does not project onto 507. The guard is sound
+    where it does most of its work; one small rule was not.</p>
+    <p>The gap that made the leak invisible was separate and worse. All 508 detachment
+    records carried <strong>no run attribution</strong> while the documentation-refine
+    operation carried it on all 2142 — so the one operation that strips a name's provenance
+    was the only one that could not be traced to the drain that performed it, and no record
+    carried a creation timestamp at all. Whether the tail was closing or regenerating was
+    unanswerable until 508 records were dated by hand. Attribution now runs end to end:
+    sink, both call sites, and the tests that assert them, merged as one change because
+    either half alone leaves the suite with two failures.</p>
+  </section>
+
+  <section id="what-remains-2">
+    <h2>What remains, and what blocks it</h2>
+    <p>The release chain is closed: standard-names reached <code>v0.8.8</code> through eight
+    releases, each one closing a defect the review surface exposed, and both consumers pin
+    it with the environment verified. The standard-name suite is green at zero failures.</p>
+    <p><strong>The recut is blocked, and by exactly one thing.</strong> Four of the five
+    base-dimension names that sit in the open candidate are currently unpublishable: their
+    originals are <code>superseded</code> and no successor has reached accepted on both axes,
+    so a recut today would drop names the candidate already carries. Those four need a base
+    that expresses a per-volume per-solid-angle emission rate; bare <code>rate</code> scores
+    0.694 to 0.825 against 0.944 and 0.956 for the <code>flux</code>-to-<code>rate</code>
+    cases whose unit really is a bare count rate. The direction to try is
+    <code>source_rate</code>, which 19 accepted names use for a cubic-metre-per-second rate
+    against 1 using bare <code>rate</code>; if the grammar cannot carry the solid angle, it
+    is an ISN vocabulary gap of the same shape as <code>mass_flow_rate</code>.</p>
+    <p>Behind that: the 1190 unclaimed extracted sources are slow rather than expensive —
+    under a dollar of model spend but hours of wall clock, so they want a long background
+    drain rather than budget. The physicist review of the recut candidate remains the human
+    gate the whole sprint is aimed at, and the upstream catalog leg follows it.</p>
+  </section>
 </main>
 </body>
 </html>
