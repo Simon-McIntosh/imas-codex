@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T09:30:22",
+  "updated": "2026-09-03T09:42:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -55676,6 +55676,116 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T073454717001-n-codex-isn-pin-0-8-6",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-codex-isn-pin-0-8-6",
+        "node_definition": {
+          "done_when": "grep -c 'imas-standard-names==0.8.6' pyproject.toml prints 2 while uv lock exits 0 with uv.lock recording imas-standard-names 0.8.6",
+          "estimated_hours": 0.3,
+          "goal": "Bump the imas-standard-names dependency pin from 0.8.5 to 0.8.6 in both places it appears in pyproject.toml, refreshing uv.lock with uv lock so the exporter resolves the per-time vocabulary and the reduced entry model",
+          "id": "n-codex-isn-pin-0-8-6",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-6.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "pyproject.toml",
+            "uv.lock"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-isnpin",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "backend": "clive",
+          "effort": "medium",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T07:35:00Z",
+        "completed_at": "2026-09-03T07:40:50.044Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 339,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 350,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "658394db16cbcd95ff4656f772d1c5dc6530f667",
+        "commits": [
+          "9c5f1c8b9c00128cca00440c4922a5ebf6bdffcf"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c 'imas-standard-names==0.8.6' pyproject.toml",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-6.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/codex-isn-pin-0-8-6.json",
+        "scope_changed": false,
+        "session_id": "0ef709f6-e239-4d6f-8c67-f14a9d4bc845",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1040826,
+            "input_tokens_cumulative": 1040826,
+            "output_tokens": 5841,
+            "output_tokens_cumulative": 5841,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.350154999999999,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 5.350154999999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -55722,6 +55832,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1402
+    "_version": 1403
   }
 }
