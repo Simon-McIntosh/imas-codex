@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T16:04:28",
+  "updated": "2026-09-03T16:43:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1520,6 +1520,15 @@
         "created": "2026-08-25"
       },
       {
+        "id": "impl-locusrule",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-machretarget",
         "harness": "codex",
         "role": "implement",
@@ -2920,6 +2929,15 @@
           "gpt-5.6-sol": "01a05cf8-bdfe-7480-98d2-585873b68162"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "inv-guardaudit",
+        "harness": "claude",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "inv-importguard",
@@ -58959,6 +58977,419 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T140449161691-n-attachment-guard-false-positive-rate",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-attachment-guard-false-positive-rate",
+        "node_definition": {
+          "done_when": "a GraphClient census query prints the detachment count per rule summing to 507, the report carries at least four judged samples per rule each quoting the data-dictionary definition text and a sound-or-unsound verdict, and prints a false-positive count against sample size per rule as a fraction",
+          "estimated_hours": 2.5,
+          "goal": "Measure how often the attachment consistency guard rejects a correct pairing, sampling its recorded detachments across every rule it applies and judging each against the data dictionary's own definition of the path rather than the path spelling, since two of two cases examined by hand were sound pairings the guard refused on lexical grounds",
+          "id": "n-attachment-guard-false-positive-rate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/attachment-guard-false-positive-rate.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "entry-gate",
+          "spec_level": "open",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/attachment-guard-false-positive-rate.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-guardaudit",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T14:05:00Z",
+        "completed_at": "2026-09-03T14:11:02.123Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 354,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 362,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "e3a540282b128f2abdbb817766b832985619f12a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "GraphClient census per rule summing to 507, with 29 detachments judged against the data dictionary's own definitions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/attachment-guard-false-positive-rate.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/attachment-guard-false-positive-rate.json",
+        "scope_changed": false,
+        "session_id": "d18d1f72-6e3c-4ea6-bd92-4f7e400cd1bf",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.95,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T15:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 102889,
+            "cache_creation_input_tokens_cumulative": 102889,
+            "cache_read_input_tokens": 3354736,
+            "cache_read_input_tokens_cumulative": 3354736,
+            "inference_geo": "not_available",
+            "input_tokens": 72,
+            "input_tokens_cumulative": 72,
+            "output_tokens": 27369,
+            "output_tokens_cumulative": 27369,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.3563372000000002,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.3563372000000002
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an investigation node; its deliverable is the report",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": true,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T135736246890-n-orphans-regain-their-sources",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-orphans-regain-their-sources",
+        "node_definition": {
+          "done_when": "a GraphClient census counting live accepted pipeline names with no producing source prints 5 before the work and fewer after, with the report naming for each name the data-dictionary path chosen, that path's own definition text, the guard's verdict on the pairing, and for any name left unbound the candidate paths considered with the reason each was refused",
+          "estimated_hours": 2.0,
+          "goal": "Restore a traceable data-dictionary source to each of the five accepted names that carry none, searching the data dictionary for the path whose own definition matches the name's physics (for the fast-ion charge-state power inside a flux surface, the waves coherent-wave ion state cumulative fast power inside is an exact definitional match) and binding it through the governed attachment route so the guard judges each pairing rather than a hand-written edge",
+          "id": "n-orphans-regain-their-sources",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/orphans-regain-their-sources.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/orphans-regain-their-sources.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-reattach",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T13:57:42Z",
+        "completed_at": "2026-09-03T14:09:29.975Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 699,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 707,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a216fcaaf1f83aeb5172ef214ff8cc59a53c1dad",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_attachment_audit.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/orphans-regain-their-sources.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/orphans-regain-their-sources.json",
+        "scope_changed": false,
+        "session_id": "cde285fd-220d-4f6e-9749-e6960ef9d878",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.94,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T15:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 206178,
+            "cache_creation_input_tokens_cumulative": 206178,
+            "cache_read_input_tokens": 8494993,
+            "cache_read_input_tokens_cumulative": 8494993,
+            "inference_geo": "not_available",
+            "input_tokens": 114,
+            "input_tokens_cumulative": 114,
+            "output_tokens": 42064,
+            "output_tokens_cumulative": 42064,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.9445786000000003,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.9445786000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "a governed graph attachment changes no repository file",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T135644742597-n-tense-rule-respects-operator-scope",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-tense-rule-respects-operator-scope",
+        "node_definition": {
+          "done_when": "a test proves a difference whose second operand carries a temporal operator accepts a base-quantity power path of matching unit, a second test proves a name whose outermost operator is temporal still requires a rate-shaped path, and uv run --no-sync pytest tests/standard_names -q exits 0",
+          "estimated_hours": 1.5,
+          "goal": "Make the attachment tense rule respect operator scope, because a temporal operator nested inside one operand of a binary construction currently makes the whole name read as a rate: a difference of a heating power and a stored-energy time derivative is dimensionally a power and the data dictionary defines its source path as exactly that difference, yet the pairing was refused and the source detached",
+          "id": "n-tense-rule-respects-operator-scope",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/tense-rule-respects-operator-scope.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/audits.py",
+            "imas_codex/standard_names/workers.py",
+            "tests/standard_names/test_tense_operator_scope.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-tensescope",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T13:56:50Z",
+        "completed_at": "2026-09-03T14:07:36.494Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 637,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 646,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a216fcaaf1f83aeb5172ef214ff8cc59a53c1dad",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/tense-rule-respects-operator-scope.json",
+        "scope_changed": false,
+        "session_id": "0748e694-049a-467d-b60a-6c57f04ea2d1",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.92,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T15:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 118295,
+            "cache_creation_input_tokens_cumulative": 118295,
+            "cache_read_input_tokens": 6390300,
+            "cache_read_input_tokens_cumulative": 6390300,
+            "inference_geo": "not_available",
+            "input_tokens": 122,
+            "input_tokens_cumulative": 122,
+            "output_tokens": 33624,
+            "output_tokens_cumulative": 33624,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.0877240000000006,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.0877240000000006
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "died with the work uncommitted; the diff is preserved under crew/reports",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T140555962689-n-locus-rule-reads-what-the-path-measures",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-locus-rule-reads-what-the-path-measures",
+        "node_definition": {
+          "done_when": "a test proves a name with an interferometer-beam locus accepts the equilibrium n_e_line constraint path whose documentation names interferometry, a second test proves a genuinely foreign device path is still refused, and uv run --no-sync pytest tests/standard_names -q exits 0",
+          "estimated_hours": 2.0,
+          "goal": "Make the locus device rule judge what a data-dictionary path measures rather than which substrings its segments contain, because an interferometer chord used as an equilibrium constraint is spelled n_e_line and shares no literal device token with an interferometer_beam locus, so a semantically exact pairing was refused and its source detached while the path's own documentation names interferometry outright",
+          "id": "n-locus-rule-reads-what-the-path-measures",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/locus-rule-reads-what-the-path-measures.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/attachment_audit.py",
+            "tests/standard_names/test_locus_rule_semantics.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-locusrule",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T14:06:04Z",
+        "completed_at": "2026-09-03T14:11:50.331Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 338,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 346,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "e3a540282b128f2abdbb817766b832985619f12a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/locus-rule-reads-what-the-path-measures.json",
+        "scope_changed": false,
+        "session_id": "2de8ce5e-e97f-4499-b171-2019fafcb9e2",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.95,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T15:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 97788,
+            "cache_creation_input_tokens_cumulative": 97788,
+            "cache_read_input_tokens": 4457593,
+            "cache_read_input_tokens_cumulative": 4457593,
+            "inference_geo": "not_available",
+            "input_tokens": 90,
+            "input_tokens_cumulative": 90,
+            "output_tokens": 16185,
+            "output_tokens_cumulative": 16185,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.4447006000000004,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.4447006000000004
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "died with the work uncommitted; the diff is preserved under crew/reports",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -59019,6 +59450,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1452
+    "_version": 1458
   }
 }
