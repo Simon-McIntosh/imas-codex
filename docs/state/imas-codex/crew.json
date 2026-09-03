@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T15:55:16",
+  "updated": "2026-09-03T16:04:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1958,6 +1958,15 @@
         "created": "2026-09-01"
       },
       {
+        "id": "impl-reattach",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-receiptrestore",
         "harness": "codex",
         "role": "implement",
@@ -2559,6 +2568,15 @@
         "role": "implement",
         "session_id": "01a0253d-b978-7f82-ae7e-e5da13869ab8",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-tensescope",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-testextra",
@@ -58841,6 +58859,106 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T134237653424-n-base-matches-the-dimension",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-base-matches-the-dimension",
+        "node_definition": {
+          "done_when": "a GraphClient census counting live accepted names whose base implies a dimension the stored unit contradicts prints 9 before the work and fewer after, with the report giving each name's before and after identity, the base it moved to, the recorded quorum score and the spend, and naming any name left unchanged with the physics reason it was left",
+          "estimated_hours": 2.0,
+          "goal": "Re-compose the nine accepted names whose physical base disagrees with the dimension they carry, using the governed edit route with a mandatory reason and never a hand edit, so a count rate stops being spelled as a flux with no area, a volumetric reaction rate stops being spelled as an emissivity, and a spectral radiance carrying a per-volume unit stops claiming a radiance base",
+          "id": "n-base-matches-the-dimension",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/base-matches-the-dimension.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/base-matches-the-dimension.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-basedim",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T13:42:43Z",
+        "completed_at": "2026-09-03T14:03:14.942Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1225,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1231,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d6a27275477f656b2abbda40b1e0d5a7f023394e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/base-matches-the-dimension.json",
+        "scope_changed": false,
+        "session_id": "d9f0e5af-50c3-4f63-abdd-eb0f896c6cc5",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 19494,
+            "cache_creation_input_tokens_cumulative": 19494,
+            "cache_read_input_tokens": 1638293,
+            "cache_read_input_tokens_cumulative": 1638293,
+            "inference_geo": "not_available",
+            "input_tokens": 20,
+            "input_tokens_cumulative": 20,
+            "output_tokens": 10243,
+            "output_tokens_cumulative": 10243,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.116864399999999,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.116864399999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "a governed graph edit changes no repository file",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -58901,6 +59019,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1449
+    "_version": 1452
   }
 }
