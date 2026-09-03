@@ -1397,7 +1397,7 @@ class TestDeepChainPlanConstruction:
 class TestDeferredCascadeIsReportedAsDeferred:
     """``sn edit`` prints the cascade before anything is written.
 
-    ``EditPlan.cascade_planned`` is applied only by the acceptance hook, so a
+    ``EditPlan.cascade_deferred`` is applied only by the acceptance hook, so a
     root that is withheld or exhausted leaves every row in it unperformed.
     The surface has to say that rather than present the rows as done work.
     """
@@ -1413,7 +1413,7 @@ class TestDeferredCascadeIsReportedAsDeferred:
             scope="subtree",
             entry="review_name",
             successor="source_rate_due_to_fusion",
-            cascade_planned=[
+            cascade_deferred=[
                 {
                     "from": "deuterium_deuterium_emissivity_due_to_fusion",
                     "to": "deuterium_deuterium_source_rate_due_to_fusion",

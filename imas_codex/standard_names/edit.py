@@ -143,7 +143,7 @@ class EditPlan:
         The new drafted StandardName id (rename mode only — a new node
         identity). ``None`` for docs/hint modes (same-id, in-place) or when
         blocked/dry-run.
-    cascade_planned:
+    cascade_deferred:
         ``[{"from": ..., "to": ...}]`` descendant renames the root rename
         implies (subtree / family scope only). This is a *deferred* plan, not
         an outcome: nothing here is written when the edit is applied. The
@@ -174,7 +174,7 @@ class EditPlan:
     scope: str
     entry: str
     successor: str | None
-    cascade_planned: list[dict[str, str]] = field(default_factory=list)
+    cascade_deferred: list[dict[str, str]] = field(default_factory=list)
     blocked: str | None = None
     actions: list[str] = field(default_factory=list)
     applied: bool = False
@@ -429,7 +429,7 @@ def _blocked(
         scope=scope,
         entry=_ENTRY_BY_MODE[mode],
         successor=None,
-        cascade_planned=[],
+        cascade_deferred=[],
         blocked=message,
         actions=actions,
         applied=False,
@@ -2598,7 +2598,7 @@ def _apply_rename(
     # 5. Plan the descendant cascade now (dry-run) — conflicts refuse the
     #    whole edit, all-or-nothing. Even a childless root plans cleanly
     #    (no descendants to resolve).
-    cascade_planned: list[dict[str, str]] = []
+    cascade_deferred: list[dict[str, str]] = []
     if scope in (EditScope.family.value, EditScope.subtree.value):
         plan_result = rename_cascade(
             gc,
@@ -2617,7 +2617,7 @@ def _apply_rename(
                 "cascade plan conflict: " + "; ".join(plan_result.conflicts),
                 extra_actions=actions,
             )
-        cascade_planned = [
+        cascade_deferred = [
             r for r in plan_result.renamed if r["from"] != refine_root_old
         ]
 
@@ -2626,9 +2626,9 @@ def _apply_rename(
     if dry_run:
         actions.append(
             f"[dry-run] would rename {refine_root_old!r} → {refine_root_new!r}"
-            f" ({len(cascade_planned)} descendant(s) would then await "
+            f" ({len(cascade_deferred)} descendant(s) would then await "
             f"{refine_root_new!r} reaching accepted)"
-            if cascade_planned
+            if cascade_deferred
             else f"[dry-run] would rename {refine_root_old!r} → {refine_root_new!r}"
         )
         return EditPlan(
@@ -2638,7 +2638,7 @@ def _apply_rename(
             scope=scope,
             entry="review_name",
             successor=None,
-            cascade_planned=cascade_planned,
+            cascade_deferred=cascade_deferred,
             blocked=None,
             actions=actions,
             applied=False,
@@ -2696,9 +2696,9 @@ def _apply_rename(
         f"renamed {refine_root_old!r} → {successor!r}, entering name review "
         f"(edit_status=open, run_id={run_id})"
     )
-    if cascade_planned:
+    if cascade_deferred:
         actions.append(
-            f"{len(cascade_planned)} descendant(s) unchanged and deferred — "
+            f"{len(cascade_deferred)} descendant(s) unchanged and deferred — "
             f"they are renamed only once {successor!r} reaches accepted; if it "
             "is withheld or exhausted they keep their current ids"
         )
@@ -2709,7 +2709,7 @@ def _apply_rename(
         scope=scope,
         entry="review_name",
         successor=successor,
-        cascade_planned=cascade_planned,
+        cascade_deferred=cascade_deferred,
         blocked=None,
         actions=actions,
         applied=True,
@@ -2809,7 +2809,7 @@ def _apply_docs(
             scope=scope,
             entry="review_docs",
             successor=None,
-            cascade_planned=[],
+            cascade_deferred=[],
             blocked=None,
             actions=actions,
             applied=False,
@@ -2873,7 +2873,7 @@ def _apply_docs(
         scope=scope,
         entry="review_docs",
         successor=None,
-        cascade_planned=[],
+        cascade_deferred=[],
         blocked=None,
         actions=actions,
         applied=True,
@@ -2960,7 +2960,7 @@ def _apply_hint(
             scope=scope,
             entry="generate",
             successor=None,
-            cascade_planned=[],
+            cascade_deferred=[],
             blocked=None,
             actions=actions,
             applied=False,
@@ -3019,7 +3019,7 @@ def _apply_hint(
         scope=scope,
         entry="generate",
         successor=None,
-        cascade_planned=[],
+        cascade_deferred=[],
         blocked=None,
         actions=actions,
         applied=True,
@@ -3040,7 +3040,7 @@ def _inline_review_ids(plan: EditPlan) -> list[str]:
     """
     if plan.mode == "rename" and plan.successor:
         ids = [plan.successor]
-        ids += [c["to"] for c in plan.cascade_planned if c.get("to")]
+        ids += [c["to"] for c in plan.cascade_deferred if c.get("to")]
         return ids
     return [plan.target]
 

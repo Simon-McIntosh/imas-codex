@@ -889,10 +889,10 @@ def _edit_standard_name(
 
     Returns:
         Dict rendering of the resulting ``EditPlan`` (target, mode, axis,
-        scope, entry, successor, cascade_planned, blocked, actions,
+        scope, entry, successor, cascade_deferred, blocked, actions,
         applied) plus a ``"summary"`` key with a short human-readable
         recap and, whenever the cascade is non-empty, a
-        ``"cascade_status"`` key. ``cascade_planned`` lists the descendant
+        ``"cascade_status"`` key. ``cascade_deferred`` lists the descendant
         renames the root rename *implies* and this call writes none of
         them: the descendants keep their current ids until the successor
         reaches ``accepted``, when the acceptance hook re-walks the live
@@ -934,7 +934,7 @@ def _edit_standard_name(
         return {"error": f"apply_edit failed: {_neo4j_error_message(e)}"}
 
     result = dataclasses.asdict(plan)
-    # ``cascade_planned`` is a deferred plan, never an outcome: this call
+    # ``cascade_deferred`` is a deferred plan, never an outcome: this call
     # writes none of those renames. The acceptance hook re-walks the live
     # subtree once the successor reaches accepted and applies the cascade
     # then, so a root that is withheld or exhausted leaves every row
@@ -942,11 +942,11 @@ def _edit_standard_name(
     # stated there as well as beside the rows.
     awaited = plan.successor or "the renamed root"
     deferral = (
-        f"{len(plan.cascade_planned)} descendant(s) unchanged and deferred — "
+        f"{len(plan.cascade_deferred)} descendant(s) unchanged and deferred — "
         f"renamed only once {awaited} reaches accepted, and left at their "
         "current ids if it is withheld or exhausted"
     )
-    if plan.cascade_planned:
+    if plan.cascade_deferred:
         result["cascade_status"] = f"not yet applied; {deferral}"
     if plan.blocked:
         summary = f"BLOCKED: {plan.blocked}"
@@ -954,7 +954,7 @@ def _edit_standard_name(
         summary = (
             f"[dry-run] {plan.mode} edit on {plan.target!r} would enter {plan.entry}"
         )
-        if plan.cascade_planned:
+        if plan.cascade_deferred:
             summary += f"; {deferral}"
     else:
         successor_note = f" -> successor {plan.successor!r}" if plan.successor else ""
@@ -962,7 +962,7 @@ def _edit_standard_name(
             f"{plan.mode} edit attached to {plan.target!r}{successor_note}, "
             f"entering {plan.entry} (edit_status=open)"
         )
-        if plan.cascade_planned:
+        if plan.cascade_deferred:
             summary += f"; {deferral}"
     result["summary"] = summary
     return result

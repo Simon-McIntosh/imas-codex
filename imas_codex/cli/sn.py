@@ -6150,7 +6150,7 @@ def _render_edit_plan(plan: Any, *, followup_hint: bool = True) -> None:
         for a in plan.actions:
             console.print(f"  - {a}")
 
-    if plan.cascade_planned:
+    if plan.cascade_deferred:
         # Deferred, never done here: the descendants keep their current ids
         # until the successor reaches accepted. Say so beside the table so the
         # rows cannot be read as renames that already happened.
@@ -6160,11 +6160,11 @@ def _render_edit_plan(plan: Any, *, followup_hint: bool = True) -> None:
         table = Table(show_header=True)
         table.add_column("Current")
         table.add_column("Becomes on acceptance")
-        for r in plan.cascade_planned[:50]:
+        for r in plan.cascade_deferred[:50]:
             table.add_row(r["from"], r["to"])
         console.print(table)
-        if len(plan.cascade_planned) > 50:
-            console.print(f"  ... and {len(plan.cascade_planned) - 50} more")
+        if len(plan.cascade_deferred) > 50:
+            console.print(f"  ... and {len(plan.cascade_deferred) - 50} more")
         awaited = plan.successor or "the renamed root"
         console.print(
             f"  [yellow]awaiting[/yellow] {awaited} reaching "

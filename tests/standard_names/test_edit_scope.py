@@ -145,7 +145,7 @@ class TestFamilyMapping:
         assert plan.blocked is None
         assert plan.applied is True
         assert plan.successor == "radial_outline_of_control_surface"
-        assert plan.cascade_planned == []
+        assert plan.cascade_deferred == []
         assert fake.nodes["radial_coordinate"]["name_stage"] == "accepted"
         assert all(child in fake.nodes for child in unrelated)
         assert all(
@@ -171,7 +171,7 @@ class TestFamilyMapping:
         assert "parent" in plan.blocked
         assert plan.applied is False
         assert plan.successor is None
-        assert plan.cascade_planned == []
+        assert plan.cascade_deferred == []
         assert "density" not in fake.nodes
         assert fake.nodes["temperature"]["name_stage"] == "accepted"
 
@@ -191,7 +191,7 @@ class TestFamilyMapping:
         assert plan.applied is False
         assert plan.blocked is not None
         assert plan.run_id is None
-        assert plan.cascade_planned == []
+        assert plan.cascade_deferred == []
         # No graph mutation at all.
         assert "density" not in fake.nodes
         assert fake.nodes["temperature"]["name_stage"] == "accepted"
@@ -245,7 +245,7 @@ class TestSubtreeCascadePlanning:
         assert plan.applied is True
         assert plan.scope == "subtree"  # default for a parent target
         assert plan.successor == "density"
-        planned_pairs = {(r["from"], r["to"]) for r in plan.cascade_planned}
+        planned_pairs = {(r["from"], r["to"]) for r in plan.cascade_deferred}
         assert ("electron_temperature", "electron_density") in planned_pairs
         assert ("ion_temperature", "ion_density") in planned_pairs
 

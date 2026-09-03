@@ -57,7 +57,7 @@ def _rename_plan(**overrides) -> EditPlan:
         "scope": "only_self",
         "entry": "review_name",
         "successor": "ion_temperature",
-        "cascade_planned": [],
+        "cascade_deferred": [],
         "blocked": None,
         "actions": ["renamed 'electron_temperature' → 'ion_temperature'"],
         "applied": True,
@@ -142,7 +142,7 @@ class TestInlineReviewScoping:
         """A family/subtree rename reports the successor + cascade descendants."""
         plan = _rename_plan(
             scope="family",
-            cascade_planned=[
+            cascade_deferred=[
                 {"from": "electron_temperature_a", "to": "ion_temperature_a"}
             ],
         )
@@ -647,7 +647,7 @@ def test_inline_review_lands_successor_accepted(_gc, _clean_inline_nodes, mock_l
         scope="only_self",
         entry="review_name",
         successor=sn_id,
-        cascade_planned=[],
+        cascade_deferred=[],
         blocked=None,
         actions=[],
         applied=True,
@@ -686,7 +686,7 @@ def test_inline_review_below_threshold_stays_unaccepted(
         scope="only_self",
         entry="review_name",
         successor=sn_id,
-        cascade_planned=[],
+        cascade_deferred=[],
         blocked=None,
         actions=[],
         applied=True,

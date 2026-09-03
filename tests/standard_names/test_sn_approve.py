@@ -61,7 +61,7 @@ def _edit_plan(
         scope="only_self",
         entry=entry,
         successor=successor,
-        cascade_planned=[],
+        cascade_deferred=[],
         blocked=blocked,
         actions=[],
         applied=applied and blocked is None,
