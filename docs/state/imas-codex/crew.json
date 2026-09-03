@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T15:17:59",
+  "updated": "2026-09-03T15:40:19",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -351,6 +351,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-basedim",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-basetoken",
@@ -908,6 +917,15 @@
         "role": "implement",
         "session_id": "01a025dd-f0f3-7782-ba42-422ca33e2015",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-edgestamp",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-editguardscope",
@@ -2464,6 +2482,15 @@
         "created": "2026-09-01"
       },
       {
+        "id": "impl-suitegreen",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-supersede6",
         "harness": "codex",
         "role": "implement",
@@ -2906,6 +2933,15 @@
           "gpt-5.6-sol": "01a05e41-c0a4-7453-b84d-5cfc92ce3429"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "inv-orphantriage",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "inv-pertime",
@@ -58344,6 +58380,250 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T122811545240-n-west-recut-reduced-surface-b",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-recut-reduced-surface-b",
+        "node_definition": {
+          "done_when": "gh pr checks on the new pull request exits 0 with validate and build passing, a count of entry keys across every added catalog file returns exactly the four editable field names, a grep for a run of two consecutive blank lines in the added prose returns zero, the published count exceeds the 351 of the prior candidate by the published structural parents, and the prior pull request state reads CLOSED",
+          "estimated_hours": 2.5,
+          "goal": "Recut the WEST review candidate on the catalog fork from imas_codex/standard_names/manifests/west_production_dd_paths.yaml so the reviewer reads four editable fields per entry with the derived fields in the manifest sidecar, wrapped literal-block prose with single blank lines, no per-file header comments, accepted structural parents published alongside the leaves, and a five-sentence body stating the exclusion accounting with a resolvable link to the committed exclusion ledger, closing the superseded candidate with a comment naming the replacement",
+          "id": "n-west-recut-reduced-surface-b",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "imas_codex/standard_names/manifests/reviews",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-recut12",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T12:28:17Z",
+        "completed_at": "2026-09-03T12:53:59.561Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1532,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1542,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "8e1864ef4cf9c68ca8718860ad425e8c4f1dc74c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.json",
+        "scope_changed": false,
+        "session_id": "e34a0656-7e89-4025-aa23-fd07d7c7a55b",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 33640,
+            "cache_creation_input_tokens_cumulative": 33640,
+            "cache_read_input_tokens": 2390424,
+            "cache_read_input_tokens_cumulative": 2390424,
+            "inference_geo": "not_available",
+            "input_tokens": 32,
+            "input_tokens_cumulative": 32,
+            "output_tokens": 14421,
+            "output_tokens_cumulative": 14421,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.0216386000000006,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.0216386000000006
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "blocked on a package defect outside its write scope",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T131836408968-n-standard-names-suite-is-green",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-standard-names-suite-is-green",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names -q exits 0 with zero failures, the atomic-claim assertion proves no stage is written rather than that a column name is absent, and the pinned-schema fixture reads the version from the project dependency rather than repeating a literal",
+          "estimated_hours": 1.5,
+          "goal": "Make the standard-name suite green by correcting its last two stale assertions, one asserting that the column name never appears in the claim query as a proxy for no stage being written (which the frozen-stage guard legitimately breaks by reading that column in a filter) and one naming a superseded standard-names version rather than the one the repository depends on",
+          "id": "n-standard-names-suite-is-green",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/standard-names-suite-is-green.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/standard_names/test_claim_atomic.py",
+            "tests/standard_names/test_export_pinned_schema.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-suitegreen",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T13:18:42Z",
+        "completed_at": "2026-09-03T13:27:07.500Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 498,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 505,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5e18a31516341ad03974cc79a30933d44e01a1be",
+        "commits": [
+          "ee46d577a14ead6536ce2375f8ae5bb9ad3383bc"
+        ],
+        "changed_lines": {
+          "added": 30,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/standard-names-suite-is-green.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/standard-names-suite-is-green.json",
+        "scope_changed": false,
+        "session_id": "7ab6e73c-905a-4e81-be9b-3d898a020ace",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 76817,
+            "cache_creation_input_tokens_cumulative": 76817,
+            "cache_read_input_tokens": 2912622,
+            "cache_read_input_tokens_cumulative": 2912622,
+            "inference_geo": "not_available",
+            "input_tokens": 66,
+            "input_tokens_cumulative": 66,
+            "output_tokens": 11546,
+            "output_tokens_cumulative": 11546,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.0053843999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.0053843999999998
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: fork PR 12's own validate CI check fails: the installed imas-standard-names package's yaml_store loader requires the `kind` discriminator inline on every entry; but the reduced four-field surface moves `kind` to the catalog.yml sidecar by design; and nothing yet teaches the loader to read it from there. The fix is either an authority-required ISN release or an export.py change outside this node's write scope (imas_codex/standard_names/manifests/reviews only); so PR 11 was left open rather than closed against a non-passing successor.",
+              "elapsed_seconds": 3023,
+              "log_age_seconds": 1480,
+              "log_fresh": false,
+              "manifest_commits": [
+                "e16c683c"
+              ],
+              "manifest_derived": false,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.json",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.json; resolve the blocker before resuming the run",
+              "node": "n-west-recut-reduced-surface-b",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260903T122811545240-n-west-recut-reduced-surface-b",
+              "session": "ship-s10-20260901",
+              "terminal_age_seconds": 1485,
+              "terminal_at": "2026-09-03T12:53:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260901/n-west-recut-reduced-surface-b"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -58404,6 +58684,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1441
+    "_version": 1447
   }
 }
