@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T13:15:06",
+  "updated": "2026-09-03T13:32:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1965,6 +1965,15 @@
         "role": "implement",
         "session_id": "01a023e9-431b-77e1-a420-9c2d8010cd1d",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-recut12",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-reembedgap",
@@ -57583,6 +57592,117 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T111515794355-n-fold-walks-the-whole-chain",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-fold-walks-the-whole-chain",
+        "node_definition": {
+          "done_when": "a test proves a two-hop chain closes onto its root where the only live descendant is the folded name, a second proves a two-hop chain is refused when an intermediate carries a second live descendant, a third proves the one-hop case still behaves as before, and uv run --no-sync pytest tests/standard_names -q reports one failure matching the single pre-existing claim case with zero added",
+          "estimated_hours": 1.5,
+          "goal": "Make the tombstone fold guard walk the transitive refinement chain rather than one direct edge, so a chain of any depth whose every live descendant is the name being folded may be closed onto its root identity, while a chain carrying a live descendant that is a different name stays refused and every intermediate must itself be superseded with no other lineage",
+          "id": "n-fold-walks-the-whole-chain",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-walks-the-whole-chain.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/edit.py",
+            "tests/standard_names/test_supersede_into_tombstone.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-supersederoute",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T11:15:23Z",
+        "completed_at": "2026-09-03T11:25:50.523Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 621,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 627,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "37fca75234504b3d8ca3cb42a7d8390843d54861",
+        "commits": [
+          "34638598b968d4b070645b599a311fc64cff157d"
+        ],
+        "changed_lines": {
+          "added": 133,
+          "removed": 30,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q plus the real-case fold dry-run, both run by the orchestrator in the worker's worktree",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/f1591135-be21-4640-9d84-b21a1ca94dda/scratchpad/foldchain.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-walks-the-whole-chain.json",
+        "scope_changed": false,
+        "session_id": "78b8c1ea-dae2-4d62-a377-0bef270eb4e6",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 125330,
+            "cache_creation_input_tokens_cumulative": 125330,
+            "cache_read_input_tokens": 5157975,
+            "cache_read_input_tokens_cumulative": 5157975,
+            "inference_geo": "not_available",
+            "input_tokens": 88,
+            "input_tokens_cumulative": 88,
+            "output_tokens": 41548,
+            "output_tokens_cumulative": 41548,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.9485710000000003,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.9485710000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -57643,6 +57763,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1431
+    "_version": 1433
   }
 }

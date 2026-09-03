@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="80">
+<meta name="plan-version" content="81">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -268,6 +268,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T110541230664-n-complete-the-blocked-rename-b" data-who="impl-blockedrename" data-when="2026-09-03T11:12:49.509Z">
     <div class="r-comment-body"><p>all three fold routes are refused and the report proves why with live CLI output: the guard walks direct edges while the chain is two hops, the immediate parent is correctly refused by the tense rule as a base quantity, and clearing the intermediate first is refused as ambiguous; the grandparent is the only physically valid target</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T111515794355-n-fold-walks-the-whole-chain" data-who="impl-supersederoute" data-when="2026-09-03T11:25:50.523Z">
+    <div class="r-comment-body"><p>the fold guard walks the transitive refinement chain, so the two-hop case closes onto its root and carries its source across; verified by the orchestrator because the worker died after committing without writing a manifest</p></div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
