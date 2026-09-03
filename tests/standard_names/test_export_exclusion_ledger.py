@@ -182,7 +182,12 @@ def test_export_emits_generic_source_bindings_and_preserves_accounting(
     emitted = yaml.safe_load(
         (tmp_path / "standard_names" / "equilibrium.yml").read_text(encoding="utf-8")
     )[0]
-    assert emitted["sources"] == [
+    # The source bindings are machine-derived, so they are declared once per
+    # name in the manifest sidecar rather than in the reviewable entry.
+    sidecar = yaml.safe_load((tmp_path / "catalog.yml").read_text(encoding="utf-8"))
+    name_block = sidecar["names"]["emitted_name"]
+    sources = name_block["sources"]
+    assert sources == [
         {
             "kind": "imas-dd",
             "ref": "equilibrium/time_slice/profiles_1d/psi",
@@ -194,21 +199,23 @@ def test_export_emits_generic_source_bindings_and_preserves_accounting(
             "version": "62253",
         },
     ]
-    assert all(
-        set(binding) == {"kind", "ref", "version"} for binding in emitted["sources"]
-    )
-    assert emitted["sources"][1]["kind"] != "imas-dd"
+    assert all(set(binding) == {"kind", "ref", "version"} for binding in sources)
+    assert sources[1]["kind"] != "imas-dd"
     assert not {
         "dd_path",
         "dd_version",
         "signal_id",
         "semantic_facet",
-    }.intersection(key for binding in emitted["sources"] for key in binding)
+    }.intersection(key for binding in sources for key in binding)
 
-    strict_projection = {key: value for key, value in emitted.items() if key != "roles"}
+    # The entry validates as the resolved shape a consumer sees: the written
+    # entry overlaid with the sidecar block that sits beside it.
+    strict_projection = {
+        key: value for key, value in {**emitted, **name_block}.items() if key != "roles"
+    }
     strict_entry = _entry_model(strict_projection)
     assert strict_entry.name == "emitted_name"
-    assert strict_entry.model_dump(mode="json")["sources"] == emitted["sources"]
+    assert strict_entry.model_dump(mode="json")["sources"] == sources
 
     rows = {row.reason: row for row in report.exclusion_records}
     assert report.exported_count == 1
@@ -289,7 +296,8 @@ def test_export_publishes_derived_producer_parent(tmp_path: Path) -> None:
     assert report.validation_failures == 0
     assert report.exclusion_records == []
     assert [entry["name"] for entry in emitted] == ["electron_temperature"]
-    assert emitted[0]["sources"] == [
+    sidecar = yaml.safe_load((tmp_path / "catalog.yml").read_text(encoding="utf-8"))
+    assert sidecar["names"]["electron_temperature"]["sources"] == [
         {
             "kind": "derived",
             "ref": "derived:electron_temperature",

@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
+from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
 from imas_codex.standard_names.publish import (
     PublishReport,
     _validate_staging_dir,
@@ -55,7 +56,7 @@ def staging_dir(tmp_path: Path) -> Path:
         "published_count": 1,
         "excluded_below_score_count": 0,
         "excluded_unreviewed_count": 0,
-        "edge_model_version": "v1",
+        "edge_model_version": CATALOG_EDGE_MODEL_VERSION,
         "domains_included": ["equilibrium"],
     }
     (staging / "catalog.yml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
