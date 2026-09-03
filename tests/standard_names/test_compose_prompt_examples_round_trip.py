@@ -59,8 +59,27 @@ _VOCAB_GAP_ALLOWLIST: dict[str, str] = {}
 
 
 def _round_trips(name: str) -> bool:
+    """True if *name* round-trips literally, or via its retired-spelling alias.
+
+    A retired operator spelling (e.g. ``tendency_of_*``) no longer parses
+    under its own text once the grammar demotes it to an advisory alias, but
+    it still names a real, resolvable quantity — the same substitution the
+    production audits apply before reading a name's semantics. A genuinely
+    unrepresentable name has no alias to resolve through and still fails.
+    """
     try:
-        return compose(parse(name, strict=True).ir) == name
+        if compose(parse(name, strict=True).ir) == name:
+            return True
+    except Exception:
+        pass
+
+    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
+
+    resolved = resolve_retired_operator_spellings(name)
+    if resolved == name:
+        return False
+    try:
+        return compose(parse(resolved, strict=True).ir) == resolved
     except Exception:
         return False
 
