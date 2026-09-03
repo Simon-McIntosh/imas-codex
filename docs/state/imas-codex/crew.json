@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T16:43:08",
+  "updated": "2026-09-03T16:43:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1206,6 +1206,15 @@
           "gpt-5.6-sol": "01a05d22-1a2f-7062-bb99-0932f895f798"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-guardfixes",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-guardscope",
@@ -59450,6 +59459,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1458
+    "_version": 1459
   }
 }
