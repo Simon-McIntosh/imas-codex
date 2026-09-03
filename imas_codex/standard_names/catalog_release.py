@@ -1741,11 +1741,12 @@ def run_review_release(
         static_pr_notes,
     )
 
-    if pr_title is not None and pr_body is not None:
+    authored_body = pr_title is not None and pr_body is not None
+    if authored_body:
         title, body = pr_title, pr_body
     elif notes_builder is None and llm_notes:
         notes_builder = build_pr_notes
-    if pr_title is not None and pr_body is not None:
+    if authored_body:
         pass
     elif notes_builder is not None:
         changes = collect_catalog_changes(isnc_path, base_ref="main")
@@ -1766,11 +1767,16 @@ def run_review_release(
             minted_from=str(focus_file),
             dd_gaps=report.dd_gap_summary,
         )
-    try:
-        body = body_with_exclusion_ledger_link(body, focus_file)
-    except ExclusionLedgerLinkError as exc:
-        report.errors.append(f"{type(exc).__name__}: {exc}")
-        return report
+    if not authored_body:
+        # An authored body is published unchanged (see --pr-body-file help
+        # text): the author has no way to know the exclusion ledger's
+        # committed address in advance, so appending it here would silently
+        # rewrite prose the author explicitly supplied.
+        try:
+            body = body_with_exclusion_ledger_link(body, focus_file)
+        except ExclusionLedgerLinkError as exc:
+            report.errors.append(f"{type(exc).__name__}: {exc}")
+            return report
     try:
         pr_number, pr_url = pr_creator(
             branch=report.branch,
