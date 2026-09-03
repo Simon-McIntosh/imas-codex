@@ -527,7 +527,7 @@ def test_rebuild_dry_run_binds_nothing():
     assert summary["parent_sources_reconciled"] == 0
     assert not m_bind.called
     assert not m_bind_history.called
-    reconcile_attachments.assert_called_once_with(gc=gc, dry_run=True)
+    reconcile_attachments.assert_called_once_with(gc=gc, dry_run=True, run_id=None)
     reconcile_semantic_sources.assert_called_once_with(gc)
     assert summary["dry_run"] is True
     assert summary["unresolved"] == 0
@@ -785,7 +785,11 @@ def test_rebuild_reports_exact_consistency_rows_and_refuses_completion() -> None
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map={})
 
-    reconcile_attachments.assert_called_once_with(gc=gc, dry_run=False)
+    reconcile_attachments.assert_called_once()
+    reconcile_call_kwargs = reconcile_attachments.call_args.kwargs
+    assert reconcile_call_kwargs["gc"] is gc
+    assert reconcile_call_kwargs["dry_run"] is False
+    assert reconcile_call_kwargs["run_id"].startswith("provenance-rebuild:")
     retire.assert_not_called()
     consistency = summary["consistency"]
     assert consistency["attachment_postcheck"]["skipped_protected"] == 1
