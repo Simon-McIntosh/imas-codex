@@ -13395,8 +13395,15 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     return {"edges_created": len(attach), "pairs_dropped": len(dropped)}
 
 
+#: Ledger operation label recorded when a name's stored grammar segment
+#: columns are rewritten to agree with the parse of its own canonical id.
+#: Shared by the whole-graph sweep and the name-scoped repair so both writes
+#: are queryable as one operation.
+_SEGMENT_REALIGN_OPERATION = "realign_grammar_segments"
+
+
 def reconcile_grammar_segments() -> dict[str, int]:
-    """Realign each live name's grammar segment columns with its canonical id.
+    """Realign every name's grammar segment columns with its canonical id.
 
     The bare-name segments (``position``, ``component``, ``subject``, …) are a
     deterministic function of the canonical name id via the ISN parser. A name
@@ -13406,10 +13413,17 @@ def reconcile_grammar_segments() -> dict[str, int]:
     case. Such a name no longer recomposes to itself, and a re-composition from
     its DD leaf would mint a divergent ``_at_pedestal`` near-duplicate.
 
-    This idempotent sweep re-parses every live name through the authoritative
-    ISN parser and realigns any drifted segment column to the parse. Names the
+    This idempotent sweep re-parses every name through the authoritative ISN
+    parser and realigns any drifted segment column to the parse. Names the
     ISN grammar cannot parse are skipped (their segments are owned by the
     quarantine path, never wiped here). Safe to run every rotation.
+
+    Every lifecycle stage is in range. A superseded or exhausted identity
+    carries the same drifted columns as a live one, and its history is what a
+    published catalog resolves a retired name through, so the sweep repairs it
+    rather than leaving it behind; the ``StandardNameChange`` written beside
+    each realignment is what keeps a rewrite of a tombstoned identity
+    reviewable.
 
     Kind is another deterministic projection of the canonical name. The same
     maintenance step refreshes a stale stored kind and records every change in
@@ -13418,16 +13432,12 @@ def reconcile_grammar_segments() -> dict[str, int]:
     Returns ``{"names_realigned": n}``; the stable result shape remains scoped
     to grammar segments while kind refresh reports through its own log entry.
     """
-    from imas_codex.standard_names.ledger import LIVE_NAME
-
     cols = _GRAMMAR_SEGMENT_COLUMNS
     select = ", ".join(f"sn.{c} AS {c}" for c in cols)
     set_clause = ", ".join(f"sn.{c} = b.{c}" for c in cols)
     batch: list[dict[str, Any]] = []
     with GraphClient() as gc:
-        rows = gc.query(
-            f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
-        )
+        rows = gc.query(f"MATCH (sn:StandardName) RETURN sn.id AS id, {select}")
         for r in rows:
             parsed = _parse_grammar(r["id"])
             # A successful ISN parse always yields a physical_base; an all-None
@@ -13440,7 +13450,15 @@ def reconcile_grammar_segments() -> dict[str, int]:
         if batch:
             gc.query(
                 f"UNWIND $batch AS b MATCH (sn:StandardName {{id: b.id}}) "
-                f"SET {set_clause}",
+                f"SET {set_clause} "
+                f"CREATE (change:StandardNameChange {{"
+                f"  id: 'sn-change:' + randomUUID(),"
+                f"  from_name: sn.id, to_name: sn.id,"
+                f"  operation: '{_SEGMENT_REALIGN_OPERATION}',"
+                f"  reason: 'stored grammar segments disagreed with the "
+                f"canonical-name parse', origin: 'graph_reconcile',"
+                f"  changed_at: datetime(), internal: true}}) "
+                f"MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)",
                 batch=batch,
             )
     if batch:
@@ -13451,6 +13469,126 @@ def reconcile_grammar_segments() -> dict[str, int]:
         )
     reconcile_standard_name_kinds()
     return {"names_realigned": len(batch)}
+
+
+def realign_grammar_segments_for_name(
+    name: str,
+    *,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Realign one name's grammar segment columns with its canonical id.
+
+    The name-scoped counterpart of :func:`reconcile_grammar_segments`: the
+    same parse authority and the same write, narrowed to a single id and
+    offering a dry run so the drift can be read before it is repaired. The
+    sweep only runs as a rotation-wide maintenance step, which leaves a single
+    known-drifted name unreachable between rotations; this is that route.
+
+    Every lifecycle stage is in range. A superseded or exhausted identity
+    carries the same drifted columns as a live one and is repaired rather than
+    refused, and the ``StandardNameChange`` written beside the repair is what
+    keeps a rewrite of a tombstoned identity reviewable.
+
+    Args:
+        name: Canonical StandardName id to re-parse and realign.
+        dry_run: Report the drift without writing to the graph.
+
+    Returns:
+        ``{"ok": True, "name", "stage", "dry_run", "drift", "noop"}`` where
+        ``drift`` maps each disagreeing segment column to its ``stored`` and
+        ``parsed`` values, or ``{"ok": False, "reason": ...}`` for a refusal.
+    """
+    cols = _GRAMMAR_SEGMENT_COLUMNS
+    name = (name or "").strip()
+    if not name:
+        return {"ok": False, "reason": "a standard name is required"}
+
+    select = ", ".join(f"sn.{c} AS {c}" for c in cols)
+    with GraphClient() as gc:
+        rows = list(
+            gc.query(
+                "MATCH (sn:StandardName {id: $id}) "
+                f"RETURN sn.name_stage AS stage, {select}",
+                id=name,
+            )
+        )
+        if not rows:
+            return {"ok": False, "reason": f"standard name {name!r} not found"}
+
+        stored = rows[0]
+        parsed = _parse_grammar(name)
+        # A successful ISN parse always yields a physical_base; an all-None
+        # parse means the grammar rejected the name, whose segments belong to
+        # the quarantine path and are never wiped from here.
+        if not parsed.get("physical_base"):
+            return {
+                "ok": False,
+                "reason": (
+                    f"the ISN grammar cannot parse {name!r}; its segments are "
+                    "owned by the quarantine path, not by this repair"
+                ),
+            }
+
+        drift = {
+            column: {"stored": stored.get(column), "parsed": parsed.get(column)}
+            for column in cols
+            if parsed.get(column) != stored.get(column)
+        }
+        result: dict[str, Any] = {
+            "ok": True,
+            "name": name,
+            "stage": stored.get("stage"),
+            "dry_run": dry_run,
+            "drift": drift,
+            "noop": not drift,
+            # First segment column, reported on every outcome so an aligned
+            # name still shows the value the parse agreed on.
+            "physical_base": parsed.get("physical_base"),
+        }
+        if dry_run or not drift:
+            return result
+
+        change_id = f"sn-change:{uuid.uuid4()}"
+        set_clause = ", ".join(f"sn.{c} = seg.{c}" for c in cols)
+        mutation = list(
+            gc.query(
+                f"""
+                UNWIND [$segments] AS seg
+                MATCH (sn:StandardName {{id: $id}})
+                SET {set_clause},
+                    sn.updated_at = datetime()
+                CREATE (change:StandardNameChange {{
+                  id: $change_id, from_name: sn.id, to_name: sn.id,
+                  operation: $operation, reason: $reason,
+                  origin: 'catalog_edit', changed_at: datetime($changed_at),
+                  internal: true
+                }})
+                MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+                RETURN sn.id AS id
+                """,
+                id=name,
+                segments={column: parsed.get(column) for column in cols},
+                change_id=change_id,
+                operation=_SEGMENT_REALIGN_OPERATION,
+                reason=_segment_drift_reason(drift),
+                changed_at=datetime.now(UTC).isoformat(),
+            )
+        )
+        if [row.get("id") for row in mutation] != [name]:
+            raise RuntimeError(
+                "standard name changed or disappeared during segment realignment"
+            )
+        result["change_id"] = change_id
+        return result
+
+
+def _segment_drift_reason(drift: dict[str, dict[str, Any]]) -> str:
+    """Render a segment drift map as the ledger reason for its repair."""
+    moves = ", ".join(
+        f"{column}: {values['stored']!r} -> {values['parsed']!r}"
+        for column, values in sorted(drift.items())
+    )
+    return f"stored segments disagreed with the canonical-name parse ({moves})"
 
 
 def reconcile_standard_name_kinds(gc: Any | None = None) -> dict[str, int]:

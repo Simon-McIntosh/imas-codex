@@ -7714,6 +7714,53 @@ def sn_restage_accepted(
         raise SystemExit(3)
 
 
+@sn.command("realign-segments")
+@click.argument("standard_name")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Report the drift between stored segments and the parse without writing.",
+)
+def sn_realign_segments(standard_name: str, dry_run: bool) -> None:
+    """Realign STANDARD_NAME's grammar segment columns with its own id.
+
+    The segment columns (``physical_base``, ``subject``, ``position``, …) are
+    a deterministic projection of the canonical id through the ISN parser. A
+    name written by an out-of-grammar path can store segments that disagree
+    with its id, so it no longer recomposes to itself. The rotation-wide
+    maintenance sweep repairs the whole graph; this repairs one name on
+    demand, at any lifecycle stage — a superseded or exhausted identity is
+    realigned rather than refused, and each write records a
+    ``StandardNameChange`` so the repair stays reviewable.
+
+    \b
+    Example:
+      imas-codex sn realign-segments neutron_rate_due_to_beam_beam_fusion --dry-run
+    """
+    from imas_codex.standard_names.graph_ops import (
+        realign_grammar_segments_for_name,
+    )
+
+    result = realign_grammar_segments_for_name(standard_name, dry_run=dry_run)
+    if not result.get("ok"):
+        raise click.UsageError(result.get("reason", "segment realignment refused"))
+
+    stage = result.get("stage") or "unstaged"
+    if result.get("noop"):
+        base = result.get("physical_base") or "null"
+        click.echo(
+            f"{result['name']} ({stage}): segments already match the parse "
+            f"(physical_base={base})"
+        )
+        return
+    verb = "would realign" if dry_run else "realigned"
+    click.echo(f"{verb} {result['name']} ({stage}):")
+    for column, values in sorted(result["drift"].items()):
+        stored = values["stored"] if values["stored"] is not None else "null"
+        parsed = values["parsed"] if values["parsed"] is not None else "null"
+        click.echo(f"  {column}: {stored} \u2192 {parsed}")
+
+
 @sn.command("reclassify")
 @click.argument("standard_name")
 @click.option(
