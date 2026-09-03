@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T17:09:34",
+  "updated": "2026-09-03T17:13:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2003,6 +2003,15 @@
           "gpt-5.6-sol": "01a05dfb-7ae3-76f2-a683-657a94ccc3c7"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-reckonbudget",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-reclassify",
@@ -59530,6 +59539,117 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T145510417958-n-a-detachment-names-its-run",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-a-detachment-names-its-run",
+        "node_definition": {
+          "done_when": "a test proves a detachment written during a run records that run's identifier, a GraphClient census prints how many detachment records carry no run attribution, and uv run --no-sync pytest tests/standard_names -q exits 0",
+          "estimated_hours": 1.5,
+          "goal": "Make every recorded detachment name the run that performed it, because all five hundred and eight carry no run attribution while the documentation-refine operation carries it on all two thousand one hundred and forty-two, so the one operation that removes a name's provenance is the only one that cannot be traced back to the drain that removed it",
+          "id": "n-a-detachment-names-its-run",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/a-detachment-names-its-run.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/attachment_audit.py",
+            "tests/standard_names/test_detachment_attribution.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-detachattrib",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T14:55:16Z",
+        "completed_at": "2026-09-03T15:11:39.105Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 975,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 983,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b56ef8e5cfee4a6572b25a90f2fb28ac554ca6ae",
+        "commits": [
+          "ca21e9debd8b42db3578f90a602cd8b87f7161d9"
+        ],
+        "changed_lines": {
+          "added": 150,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/a-detachment-names-its-run.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/a-detachment-names-its-run.json",
+        "scope_changed": false,
+        "session_id": "612b1831-f290-4677-a002-dbbe498a6b9f",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.76,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 111541,
+            "cache_creation_input_tokens_cumulative": 111541,
+            "cache_read_input_tokens": 5413842,
+            "cache_read_input_tokens_cumulative": 5413842,
+            "inference_geo": "not_available",
+            "input_tokens": 96,
+            "input_tokens_cumulative": 96,
+            "output_tokens": 17923,
+            "output_tokens_cumulative": 17923,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.7083544,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.7083544
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -59590,6 +59710,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1462
+    "_version": 1464
   }
 }
