@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T17:47:08",
+  "updated": "2026-09-03T18:01:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1995,6 +1995,15 @@
       },
       {
         "id": "impl-reattach",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-rebuildtests",
         "harness": "claude",
         "role": "implement",
         "session_id": null,
@@ -59897,6 +59906,128 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T154804124310-n-rebuild-tests-follow-the-run-parameter",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-rebuild-tests-follow-the-run-parameter",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names -q exits 0 with the two named rebuild tests passing against the threaded call, and the manifest is written before any background wait rather than after",
+          "estimated_hours": 1.0,
+          "goal": "Bring the two provenance-rebuild tests into line with the run identifier the attachment reconcile now takes, because commit e1e823fb threads that identifier through the rebuild path and those two tests assert the older call shape, so a green suite on the main branch gains two failures the moment the wiring merges",
+          "id": "n-rebuild-tests-follow-the-run-parameter",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/rebuild-tests-follow-the-run-parameter.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "tests/standard_names/test_provenance_rebuild.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-rebuildtests",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T15:48:10Z",
+        "completed_at": "2026-09-03T15:55:49.826Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 450,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 459,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "c815f5170ec276290b1e8fb6bf60050f8bc71ec5",
+        "commits": [
+          "5d974e339cb12232c0aa2f05ef8005366f10e0a3"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 2,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q, run by the orchestrator over the merged pair",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/f1591135-be21-4640-9d84-b21a1ca94dda/scratchpad/combined.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/rebuild-tests-follow-the-run-parameter.json",
+        "scope_changed": false,
+        "session_id": "ea8b4c74-f2dc-4c8a-9f0a-923518a991ce",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.8,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 85059,
+            "cache_creation_input_tokens_cumulative": 85059,
+            "cache_read_input_tokens": 2848890,
+            "cache_read_input_tokens_cumulative": 2848890,
+            "inference_geo": "not_available",
+            "input_tokens": 64,
+            "input_tokens_cumulative": 64,
+            "output_tokens": 23195,
+            "output_tokens_cumulative": 23195,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.142092,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.142092
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 456.635,
+          "generated_tokens": 23195,
+          "generation_seconds": 292.091,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 10.9,
+          "machine_seconds": 164.544,
+          "peak_input_tokens": 109482,
+          "tokens_per_second": 79.41,
+          "wall_tokens_per_second": 50.8
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -59957,6 +60088,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1468
+    "_version": 1470
   }
 }
