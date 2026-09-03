@@ -12960,6 +12960,7 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
             """
         )
         reconcile_descriptionless_composed_names(gc=client)
+        reconcile_sourceless_pipeline_names(gc=client)
     finally:
         if own:
             client.close()
@@ -13056,6 +13057,232 @@ def reconcile_descriptionless_composed_names(
     return {
         "names_reopened": names_reopened,
         "sources_reopened": sources_reopened,
+    }
+
+
+def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]:
+    """Reattach the detached source of a live pipeline name when the reason lapsed.
+
+    A consistency detach (:func:`reconcile_attachment_consistency`) strips a
+    source whose pairing the compose guard then rejected, returns the freed
+    source to ``'extracted'`` and records the event as a
+    ``'detach_inconsistent_attachment'`` ``StandardNameChange``. The name itself
+    is left live but with no producing source — a provenance orphan. If the
+    rejection was transient — the guard judged the pairing under an older
+    grammar (e.g. a retired operator spelling whose semantics the audit now
+    resolves, or a stale DD unit) — nothing ever re-pairs the two, because the
+    freed source sits at ``'extracted'`` where no pool revisits an already live
+    name.
+
+    This reconcile closes that gap. For every live pipeline-origin name with no
+    producing source it reads the recorded detachment(s), re-asks the guard
+    under the CURRENT grammar, and:
+
+    * reattaches the source when the guard now accepts it — the provenance edge,
+      the DD-side projection, the source's produced state and the name's
+      ``source_paths`` entry are restored, and the re-pair is itself recorded as
+      a ``StandardNameChange``;
+    * leaves the source alone and surfaces the name as a blocker when the
+      reason still holds — a catalog-authoritative name must not silently keep
+      a provenance the data no longer justifies;
+    * reports a name whose detachment path is no longer on record as
+      unrecoverable rather than guessing a replacement source.
+
+    Only sources in the exact rewound state the detach produced are candidates:
+    a ``'dd'`` source at ``'extracted'`` carrying no claim, no ``produced_sn_id``
+    and no edge to a different live name. A source that has since composed or
+    attached elsewhere is current authority for that target and is never
+    reclaimed. Status mirrors the compose path (``'composed'``, ``produced_sn_id``
+    set); the liveness reconcile that follows startup rewrites it to
+    ``'attached'`` as a side effect.
+
+    Idempotent: a name that gains a source drops out of the selector, so a
+    second pass matches nothing.
+
+    Returns dict: {sourceless, reattached, names_reattached, blockers,
+    unrecoverable}.
+    """
+    from imas_codex.standard_names.attachment_audit import _attachment_consistency
+    from imas_codex.standard_names.provenance_lifecycle import (
+        record_standard_name_change,
+    )
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    terminal = _TERMINAL_NAME_STAGES
+    try:
+        names = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.origin = 'pipeline'
+              AND NOT coalesce(sn.name_stage, '') IN $terminal
+              AND NOT (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+            OPTIONAL MATCH (sn)-[:HAS_INTERNAL_CHANGE]->(ch:StandardNameChange)
+            WHERE ch.operation = 'detach_inconsistent_attachment'
+            WITH sn, collect(DISTINCT ch.from_name) AS detached_paths
+            RETURN sn.id AS sn_id, sn.name_stage AS stage,
+                   [p IN detached_paths WHERE p IS NOT NULL] AS detached_paths
+            ORDER BY sn.id
+            """,
+            terminal=terminal,
+        )
+        sourceless = len(names)
+        reattached = 0
+        names_reattached = 0
+        blockers: list[str] = []
+        unrecoverable: list[str] = []
+        for row in names:
+            sn_id = row.get("sn_id")
+            if not sn_id:
+                continue
+            paths = row.get("detached_paths") or []
+            if not paths:
+                unrecoverable.append(sn_id)
+                continue
+            name_gained_source = False
+            for dd_path in sorted({p for p in paths if p}):
+                source_id = f"dd:{dd_path}"
+                probe = client.query(
+                    """
+                    MATCH (sn:StandardName {id: $sn_id})
+                    OPTIONAL MATCH (sns:StandardNameSource {id: $source_id})
+                    OPTIONAL MATCH (dd:IMASNode {id: $dd_path})
+                    OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
+                    RETURN sn.unit AS sn_unit,
+                           sns.id AS source_id,
+                           sns.status AS status,
+                           sns.claim_token AS claim_token,
+                           sns.claimed_at AS claimed_at,
+                           sns.produced_sn_id AS produced_sn_id,
+                           coalesce(du.id, dd.unit) AS dd_unit,
+                           EXISTS {
+                             MATCH (sns)-[:PRODUCED_NAME]->(other:StandardName)
+                             WHERE NOT coalesce(other.name_stage, '') IN $terminal
+                           } AS bound_to_other_live
+                    """,
+                    sn_id=sn_id,
+                    source_id=source_id,
+                    dd_path=dd_path,
+                    terminal=terminal,
+                )
+                p = probe[0] if probe else {}
+                ok, reason = _attachment_consistency(
+                    dd_path,
+                    sn_id,
+                    dd_unit=p.get("dd_unit"),
+                    sn_unit=p.get("sn_unit"),
+                )
+                if not ok:
+                    # The recorded reason still holds under the current
+                    # grammar — do not reattach; the name stays a blocker.
+                    continue
+                # The reason has lapsed. Reattach only if the source is still
+                # in the exact rewound state the detach produced — gone,
+                # claimed, composed elsewhere, or authority for another live
+                # target means the pair is no longer recoverable here.
+                if (
+                    p.get("source_id") is None
+                    or p.get("status") != "extracted"
+                    or p.get("claim_token") is not None
+                    or p.get("claimed_at") is not None
+                    or p.get("produced_sn_id") is not None
+                    or p.get("bound_to_other_live")
+                ):
+                    continue
+                written = client.query(
+                    """
+                    MATCH (sns:StandardNameSource {id: $source_id})
+                    MATCH (sn:StandardName {id: $sn_id})
+                    WHERE sns.status = 'extracted'
+                      AND sns.claim_token IS NULL
+                      AND sns.claimed_at IS NULL
+                      AND sns.produced_sn_id IS NULL
+                      AND NOT EXISTS {
+                        MATCH (sns)-[:PRODUCED_NAME]->(other:StandardName)
+                        WHERE NOT coalesce(other.name_stage, '') IN $terminal
+                      }
+                      AND NOT (sns)-[:PRODUCED_NAME]->(sn)
+                    OPTIONAL MATCH (dd:IMASNode {id: $dd_path})
+                    MERGE (sns)-[:PRODUCED_NAME]->(sn)
+                    FOREACH (_ IN CASE WHEN dd IS NULL THEN [] ELSE [1] END |
+                      MERGE (dd)-[:HAS_STANDARD_NAME]->(sn))
+                    SET sns.status = 'composed',
+                        sns.produced_sn_id = sn.id,
+                        sns.composed_at = datetime(),
+                        sns.claimed_at = null,
+                        sns.claim_token = null,
+                        sn.source_paths = CASE
+                          WHEN $uri IN coalesce(sn.source_paths, [])
+                          THEN sn.source_paths
+                          ELSE coalesce(sn.source_paths, []) + $uri END
+                    RETURN count(sn) AS n
+                    """,
+                    sn_id=sn_id,
+                    source_id=source_id,
+                    dd_path=dd_path,
+                    uri=source_id,
+                    terminal=terminal,
+                )
+                count = int(written[0]["n"]) if written else 0
+                if count:
+                    reattached += 1
+                    name_gained_source = True
+                    try:
+                        record_standard_name_change(
+                            client,
+                            dd_path,
+                            sn_id,
+                            operation="reattach_lapsed_detachment",
+                            reason=(
+                                "guard now accepts the pairing under the "
+                                "current grammar"
+                            ),
+                            origin="sourceless_reconcile",
+                        )
+                    except Exception:  # pragma: no cover - audit crumb must not block the heal
+                        logger.debug(
+                            "Failed to record reattachment of %s", dd_path, exc_info=True
+                        )
+            if not name_gained_source:
+                # A recorded detachment exists but no source was restored:
+                # the reason holds, or the pair is no longer recoverable.
+                blockers.append(sn_id)
+            else:
+                names_reattached += 1
+    finally:
+        if own:
+            client.close()
+
+    if reattached:
+        logger.info(
+            "reconcile_sourceless_pipeline_names: reattached %d detached "
+            "source(s) to %d live pipeline name(s) whose detachment reason no "
+            "longer holds",
+            reattached,
+            names_reattached,
+        )
+    if blockers:
+        logger.warning(
+            "reconcile_sourceless_pipeline_names: %d live pipeline name(s) "
+            "stay sourceless because their recorded detachment reason still "
+            "holds under the current grammar: %s",
+            len(blockers),
+            "; ".join(blockers)[:1200],
+        )
+    if unrecoverable:
+        logger.warning(
+            "reconcile_sourceless_pipeline_names: %d live pipeline name(s) "
+            "have no recorded detached source to re-pair and are surfaced "
+            "for review: %s",
+            len(unrecoverable),
+            "; ".join(unrecoverable)[:1200],
+        )
+    return {
+        "sourceless": sourceless,
+        "reattached": reattached,
+        "names_reattached": names_reattached,
+        "blockers": len(blockers),
+        "unrecoverable": len(unrecoverable),
     }
 
 
