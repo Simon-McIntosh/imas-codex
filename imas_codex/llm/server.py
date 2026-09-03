@@ -3507,10 +3507,10 @@ class AgentsServer:
 
                     Returns:
                         Dict rendering of the EditPlan (target, mode, axis,
-                        scope, entry, successor, cascade_planned, blocked,
+                        scope, entry, successor, cascade_deferred, blocked,
                         actions, applied) plus a "summary" string, and a
                         "cascade_status" string whenever the cascade is
-                        non-empty. cascade_planned is a DEFERRED plan, not
+                        non-empty. cascade_deferred is a DEFERRED plan, not
                         an outcome: this call writes none of those renames.
                         The descendants keep their current ids until the
                         successor reaches accepted, when the acceptance

@@ -1,6 +1,6 @@
 """The agent-facing edit surfaces must report the cascade as deferred.
 
-``EditPlan.cascade_planned`` is a plan the acceptance hook applies later:
+``EditPlan.cascade_deferred`` is a plan the acceptance hook applies later:
 ``_edit_standard_name`` writes none of those descendant renames, and a root
 that is withheld or exhausted leaves every row unperformed. These tests pin
 the wording of both agent-facing surfaces — the tool result an agent reads
@@ -36,7 +36,7 @@ def _plan(**overrides: Any) -> Any:
         "scope": "subtree",
         "entry": "review_name",
         "successor": "source_rate_due_to_fusion",
-        "cascade_planned": list(CASCADE),
+        "cascade_deferred": list(CASCADE),
         "applied": True,
         "run_id": "sn-edit-20260903T000000Z",
     }
@@ -96,7 +96,7 @@ class TestAppliedResultReportsTheDeferral:
         assert "reaches accepted" in result["cascade_status"]
         # The rows themselves are still returned — the agent needs to see
         # the consequence of the edit it is proposing.
-        assert result["cascade_planned"] == CASCADE
+        assert result["cascade_deferred"] == CASCADE
 
     def test_summary_never_presents_the_rows_as_completed_steps(self) -> None:
         result = _call(_plan())
@@ -126,7 +126,7 @@ class TestNoCascadeStaysQuiet:
     """A self-scope edit implies no descendants, so it claims no deferral."""
 
     def test_empty_cascade_omits_the_status_key(self) -> None:
-        result = _call(_plan(scope="only_self", cascade_planned=[]))
+        result = _call(_plan(scope="only_self", cascade_deferred=[]))
 
         assert "cascade_status" not in result
         assert "deferred" not in result["summary"]
