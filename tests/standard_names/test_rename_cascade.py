@@ -1267,3 +1267,200 @@ def test_non_cascading_kinds(op_kind: str) -> None:
     """Both 'projection' and 'coordinate' are non-cascading by rule."""
     edge = {"operator": "x", "operator_kind": op_kind, "axis": "radial"}
     assert _cascade_target_name(edge, "new_parent") is None
+
+
+# ---------------------------------------------------------------------------
+# The plan the surface shows must match what the cascade actually persists
+# ---------------------------------------------------------------------------
+
+
+class TestDeepChainPlanConstruction:
+    """A chain resolves through its whole depth, and a stopped ancestor
+    reports its subtree as stopped rather than as a topology fault."""
+
+    def test_linear_three_level_chain_plans_without_unreachable(self) -> None:
+        """``temperature`` ← ``ion_temperature`` ← ``core_ion_temperature``.
+
+        Nothing branches and every edge carries a provable qualifier, so all
+        three levels belong in the plan and none of them is unreachable.
+        """
+        gc = _MockGraph()
+        for name in ("temperature", "ion_temperature", "core_ion_temperature"):
+            gc.add_node(name)
+        gc.add_edge(
+            "ion_temperature",
+            "temperature",
+            operator="ion",
+            operator_kind="qualifier",
+        )
+        gc.add_edge(
+            "core_ion_temperature",
+            "ion_temperature",
+            operator="core",
+            operator_kind="qualifier",
+        )
+
+        new_root = "temperature_of_plasma_boundary"
+        result = rename_cascade(gc, "temperature", new_root, dry_run=True)
+
+        assert result.conflicts == []
+        assert not any(
+            "unreachable in cascade" in conflict for conflict in result.conflicts
+        )
+        plan = {r["from"]: r["to"] for r in result.renamed}
+        assert plan == {
+            "temperature": new_root,
+            "ion_temperature": f"ion_{new_root}",
+            "core_ion_temperature": f"core_ion_{new_root}",
+        }
+
+    def test_subtree_below_a_boundary_is_stopped_not_unreachable(self) -> None:
+        """A locus edge halts propagation; its own child is not a fault.
+
+        The chain is strictly linear, so the grandchild is perfectly
+        reachable — the cascade simply stops above it. Reporting it as
+        ``unreachable`` made it a conflict, which refuses the whole edit.
+        """
+        gc = _MockGraph()
+        for name in (
+            "temperature",
+            "temperature_of_plasma",
+            "ion_temperature_of_plasma",
+        ):
+            gc.add_node(name)
+        gc.add_edge(
+            "temperature_of_plasma",
+            "temperature",
+            operator="of",
+            operator_kind="locus",
+        )
+        gc.add_edge(
+            "ion_temperature_of_plasma",
+            "temperature_of_plasma",
+            operator="ion",
+            operator_kind="qualifier",
+        )
+
+        result = rename_cascade(gc, "temperature", "electron_temperature", dry_run=True)
+
+        assert result.conflicts == []
+        stopped = {row["name"]: row["reason"] for row in result.skipped}
+        assert set(stopped) == {
+            "temperature_of_plasma",
+            "ion_temperature_of_plasma",
+        }
+        assert "semantic boundary" in stopped["temperature_of_plasma"]
+        assert (
+            "propagation stopped at ancestor 'temperature_of_plasma'"
+            in stopped["ion_temperature_of_plasma"]
+        )
+        assert [r["from"] for r in result.renamed] == ["temperature"]
+
+    def test_stopped_subtree_still_reports_the_ancestor_conflict(self) -> None:
+        """A middle node whose proof fails keeps blocking the edit.
+
+        Its descendant moves out of ``conflicts`` — one cause, one conflict —
+        but the cause itself is untouched.
+        """
+        gc = _MockGraph()
+        for name in ("temperature", "ion_temperature", "core_ion_temperature"):
+            gc.add_node(name)
+        gc.add_edge(
+            "ion_temperature",
+            "temperature",
+            operator="electron",  # disagrees with the ISN derivation
+            operator_kind="qualifier",
+        )
+        gc.add_edge(
+            "core_ion_temperature",
+            "ion_temperature",
+            operator="core",
+            operator_kind="qualifier",
+        )
+
+        result = rename_cascade(
+            gc, "temperature", "temperature_of_plasma_boundary", dry_run=True
+        )
+
+        assert len(result.conflicts) == 1
+        assert "semantic proof absent for 'ion_temperature'" in result.conflicts[0]
+        assert not any(
+            "unreachable in cascade" in conflict for conflict in result.conflicts
+        )
+        stopped = {row["name"]: row["reason"] for row in result.skipped}
+        assert (
+            "propagation stopped at ancestor 'ion_temperature'"
+            in stopped["core_ion_temperature"]
+        )
+
+
+class TestDeferredCascadeIsReportedAsDeferred:
+    """``sn edit`` prints the cascade before anything is written.
+
+    ``EditPlan.cascade_planned`` is applied only by the acceptance hook, so a
+    root that is withheld or exhausted leaves every row in it unperformed.
+    The surface has to say that rather than present the rows as done work.
+    """
+
+    @staticmethod
+    def _rename_plan() -> Any:
+        from imas_codex.standard_names.edit import EditPlan
+
+        return EditPlan(
+            target="emissivity_due_to_fusion",
+            mode="rename",
+            axis="name",
+            scope="subtree",
+            entry="review_name",
+            successor="source_rate_due_to_fusion",
+            cascade_planned=[
+                {
+                    "from": "deuterium_deuterium_emissivity_due_to_fusion",
+                    "to": "deuterium_deuterium_source_rate_due_to_fusion",
+                },
+                {
+                    "from": "deuterium_tritium_emissivity_due_to_fusion",
+                    "to": "deuterium_tritium_source_rate_due_to_fusion",
+                },
+            ],
+            applied=True,
+            run_id="sn-edit-20260903T000000Z",
+        )
+
+    def _render(self) -> str:
+        from rich.console import Console
+
+        from imas_codex.cli import sn as sn_cli
+
+        recorder = Console(record=True, width=200)
+        original = sn_cli.console
+        sn_cli.console = recorder
+        try:
+            sn_cli._render_edit_plan(self._rename_plan(), followup_hint=False)
+        finally:
+            sn_cli.console = original
+        return recorder.export_text()
+
+    def test_render_names_the_deferral_and_what_it_waits_on(self) -> None:
+        output = self._render()
+
+        assert "deferred" in output
+        assert "not yet applied" in output
+        assert "awaiting source_rate_due_to_fusion reaching" in output
+        assert "accepted" in output
+        # The rows are still shown — the operator needs to see the consequence.
+        assert "deuterium_tritium_emissivity_due_to_fusion" in output
+        assert "deuterium_tritium_source_rate_due_to_fusion" in output
+
+    def test_render_never_calls_the_deferred_rows_planned_work_done(self) -> None:
+        output = self._render()
+
+        assert "Cascade (planned renames)" not in output
+        assert "renamed 2 descendant" not in output
+
+    def test_applied_plan_actions_state_the_descendants_are_unchanged(self) -> None:
+        from imas_codex.standard_names import edit as edit_module
+
+        doc = edit_module.EditPlan.__doc__ or ""
+        assert "deferred" in doc
+        assert "reaches ``accepted``" in doc

@@ -144,8 +144,15 @@ class EditPlan:
         identity). ``None`` for docs/hint modes (same-id, in-place) or when
         blocked/dry-run.
     cascade_planned:
-        ``[{"from": ..., "to": ...}]`` staged descendant renames (subtree /
-        family scope only). Populated even in ``dry_run``.
+        ``[{"from": ..., "to": ...}]`` descendant renames the root rename
+        implies (subtree / family scope only). This is a *deferred* plan, not
+        an outcome: nothing here is written when the edit is applied. The
+        descendants keep their current ids until the successor reaches
+        ``accepted``, at which point the acceptance hook re-walks the live
+        subtree and applies the cascade in one transaction. A root that never
+        reaches ``accepted`` leaves every entry here unperformed. Populated
+        identically in ``dry_run``, which is why it must never be surfaced as
+        completed work.
     blocked:
         Human-readable refusal reason, or ``None`` if the edit is valid.
     actions:
@@ -2619,7 +2626,8 @@ def _apply_rename(
     if dry_run:
         actions.append(
             f"[dry-run] would rename {refine_root_old!r} → {refine_root_new!r}"
-            f" ({len(cascade_planned)} descendant(s) staged)"
+            f" ({len(cascade_planned)} descendant(s) would then await "
+            f"{refine_root_new!r} reaching accepted)"
             if cascade_planned
             else f"[dry-run] would rename {refine_root_old!r} → {refine_root_new!r}"
         )
@@ -2688,6 +2696,12 @@ def _apply_rename(
         f"renamed {refine_root_old!r} → {successor!r}, entering name review "
         f"(edit_status=open, run_id={run_id})"
     )
+    if cascade_planned:
+        actions.append(
+            f"{len(cascade_planned)} descendant(s) unchanged and deferred — "
+            f"they are renamed only once {successor!r} reaches accepted; if it "
+            "is withheld or exhausted they keep their current ids"
+        )
     return EditPlan(
         target=target,
         mode="rename",
