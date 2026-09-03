@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T17:17:37",
+  "updated": "2026-09-03T17:47:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3708,9 +3708,11 @@
         "id": "test-westgate",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "02f88523-1dfa-4f41-b873-73bda345de76",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "02f88523-1dfa-4f41-b873-73bda345de76"
+        },
         "created": "2026-09-02"
       },
       {
@@ -59659,6 +59661,242 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T151737849884-n-callers-pass-the-run-to-the-detachment",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-callers-pass-the-run-to-the-detachment",
+        "node_definition": {
+          "done_when": "a test proves a detachment written through the pool loop's own reconcile call records the active run identifier, a second proves the same through the provenance rebuild path, and uv run --no-sync pytest tests/standard_names -q exits 0",
+          "estimated_hours": 1.5,
+          "goal": "Thread the active run identifier from each caller of the attachment consistency reconcile into the call, because the record now accepts a run identifier and neither the pool loop nor the provenance rebuild passes one, so a detachment written in production still cannot be traced to the drain that performed it and the capability sits in the module unreached",
+          "id": "n-callers-pass-the-run-to-the-detachment",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/callers-pass-the-run-to-the-detachment.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/loop.py",
+            "imas_codex/standard_names/provenance_rebuild.py",
+            "tests/standard_names/test_detachment_attribution_wiring.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-attribwiring",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T15:17:43Z",
+        "completed_at": "2026-09-03T15:23:29.460Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 339,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 346,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "153e3f9dbf9f4f702024650546f41a800a8dc3ef",
+        "commits": [
+          "e1e823fbc12ff2ceadebe66bbf055e548694abbc"
+        ],
+        "changed_lines": {
+          "added": 285,
+          "removed": 3,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/callers-pass-the-run-to-the-detachment.json",
+        "scope_changed": false,
+        "session_id": "77f2e188-7613-4a4c-bd92-29252f19c40c",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.77,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 89404,
+            "cache_creation_input_tokens_cumulative": 89404,
+            "cache_read_input_tokens": 5046578,
+            "cache_read_input_tokens_cumulative": 5046578,
+            "inference_geo": "not_available",
+            "input_tokens": 112,
+            "input_tokens_cumulative": 112,
+            "output_tokens": 17410,
+            "output_tokens_cumulative": 17410,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.5412555999999997,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.5412555999999997
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 343.077,
+          "generated_tokens": 17410,
+          "generation_seconds": 198.277,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 11.4,
+          "machine_seconds": 144.8,
+          "peak_input_tokens": 113827,
+          "tokens_per_second": 87.81,
+          "wall_tokens_per_second": 50.75
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T150951659670-n-drain-closes-the-detachment-tail",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-drain-closes-the-detachment-tail",
+        "node_definition": {
+          "done_when": "a GraphClient census run before and after the drain prints both readings for the detachment count starting at 508, the live sourceless-name count starting at 3, and the unclaimed extracted source count starting at 1471, the report states how many new detachments the drain itself created against those 508, and records the run spend against the 40 dollar ceiling",
+          "estimated_hours": 2.0,
+          "goal": "Run one unscoped drain from this worktree with UV_PROJECT_ENVIRONMENT pointed at /home/ITER/mcintos/Code/imas-codex/.venv, PYTHONPATH set to the worktree, invoking uv run --no-sync imas-codex sn run --flush --cost-limit 40, so the compose pool names the paths the attachment guard freed now that its two spelling-based rules read the data-dictionary definition instead",
+          "id": "n-drain-closes-the-detachment-tail",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/drain-closes-the-detachment-tail.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/drain-closes-the-detachment-tail.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-westgate",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T15:09:56Z",
+        "completed_at": "2026-09-03T15:46:07.004Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2164,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2171,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "b56ef8e5cfee4a6572b25a90f2fb28ac554ca6ae",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync imas-codex sn run --flush --cost-limit 40 with a GraphClient census before and after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/drain-closes-the-detachment-tail.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/drain-closes-the-detachment-tail.json",
+        "scope_changed": false,
+        "session_id": "02f88523-1dfa-4f41-b873-73bda345de76",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.79,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 135365,
+            "cache_creation_input_tokens_cumulative": 135365,
+            "cache_read_input_tokens": 1169532,
+            "cache_read_input_tokens_cumulative": 1169532,
+            "inference_geo": "not_available",
+            "input_tokens": 18,
+            "input_tokens_cumulative": 18,
+            "output_tokens": 9781,
+            "output_tokens_cumulative": 9781,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.8732124000000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.8732124000000001
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 125.345,
+          "generated_tokens": 9781,
+          "generation_seconds": 111.114,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 15.5,
+          "machine_seconds": 14.231,
+          "peak_input_tokens": 154596,
+          "tokens_per_second": 88.03,
+          "wall_tokens_per_second": 78.03
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "a pipeline invocation changes graph state rather than repository files",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -59719,6 +59957,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1465
+    "_version": 1468
   }
 }
