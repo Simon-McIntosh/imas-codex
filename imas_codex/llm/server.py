@@ -3477,7 +3477,7 @@ class AgentsServer:
 
                     Recommend calling with ``dry_run=True`` first to preview
                     the plan (and, for family/subtree scope, the full
-                    cascade) before attaching it for real.
+                    deferred cascade) before attaching it for real.
 
                     Args:
                         standard_name: Target StandardName id to correct.
@@ -3508,7 +3508,16 @@ class AgentsServer:
                     Returns:
                         Dict rendering of the EditPlan (target, mode, axis,
                         scope, entry, successor, cascade_planned, blocked,
-                        actions, applied) plus a "summary" string. A
+                        actions, applied) plus a "summary" string, and a
+                        "cascade_status" string whenever the cascade is
+                        non-empty. cascade_planned is a DEFERRED plan, not
+                        an outcome: this call writes none of those renames.
+                        The descendants keep their current ids until the
+                        successor reaches accepted, when the acceptance
+                        hook re-walks the live subtree and applies the
+                        cascade in one transaction — a root that is
+                        withheld or exhausted leaves every row unperformed,
+                        so never report them as renames that happened. A
                         malformed call returns {"error": "..."} instead of
                         raising.
                     """
