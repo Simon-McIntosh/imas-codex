@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="64">
+<meta name="plan-version" content="65">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -277,6 +277,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T044148295944-n-catalog-surface-sidecar" data-who="inv-catalogsurface" data-when="2026-09-03T04:50:12.846Z">
     <div class="r-comment-body"><p>the entry can shrink to the four editable fields with six derived fields moving to the sidecar, which can also carry the 84 internal name edges the review site would render; the arguments field the goal omitted is what the site turns into the parent edge</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T073545355187-n-exporter-writes-the-sidecar" data-who="impl-codexsidecar" data-when="2026-09-03T07:52:18.518Z">
+    <div class="r-comment-body"><p>each exported entry now carries only name, description, documentation and unit while the sidecar carries a per-name block of the six derived fields, with the fold-back reader taking them off the sidecar and still failing when kind or physics domain disagrees with the graph</p></div>
 </div>
 </section>
 </main>
