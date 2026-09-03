@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
 import subprocess
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import patch
+
+import pytest
 
 from imas_codex.standard_names.promote import (
     ApprovalChange,
@@ -16,14 +16,40 @@ from imas_codex.standard_names.promote import (
 )
 
 
+class RealTransportAttempted(BaseException):
+    """A test reached the network instead of its mock.
+
+    Derived from BaseException rather than Exception on purpose: the readers
+    under test degrade a failed GitHub call to an empty result through a broad
+    ``except Exception``, so an ordinary error would be swallowed and an
+    escaped mock would read as a behaviour change. This one propagates.
+    """
+
+
+@pytest.fixture(autouse=True)
+def no_real_transport(monkeypatch):
+    """Any HTTP request escaping a mock fails the test instead of leaving.
+
+    An unauthenticated GitHub read answers 404, which the resolver reports as
+    an ordinary rejection — so a mock that stopped intercepting would look
+    like a behaviour change rather than a test that reached the network.
+    """
+
+    def refuse(request, *args, **kwargs):
+        raise RealTransportAttempted(
+            f"test opened a real connection to {getattr(request, 'full_url', request)}"
+        )
+
+    monkeypatch.setattr("urllib.request.urlopen", refuse)
+
+
 def _git(repo: Path, *args: str) -> str:
-    return subprocess.run(
+    return subprocess.check_output(
         ["git", *args],
         cwd=repo,
-        capture_output=True,
         text=True,
-        check=True,
-    ).stdout.strip()
+        stderr=subprocess.DEVNULL,
+    ).strip()
 
 
 def _write_entries(path: Path, *, edited_description: str | None = None) -> None:
@@ -56,7 +82,6 @@ def test_additive_pr_detects_edit_against_cut_time_catalog(tmp_path: Path) -> No
     _write_entries(catalog_path)
     _git(repo, "add", "standard_names/equilibrium.yml")
     _git(repo, "commit", "-q", "-m", "submit catalog entries")
-    cut_commit = _git(repo, "rev-parse", "HEAD")
     cut_tag = head_ref.removeprefix("review/")
     _git(repo, "tag", "-a", cut_tag, "-m", "catalog review candidate")
 
@@ -64,7 +89,6 @@ def test_additive_pr_detects_edit_against_cut_time_catalog(tmp_path: Path) -> No
     _write_entries(catalog_path, edited_description=revised)
     _git(repo, "add", "standard_names/equilibrium.yml")
     _git(repo, "commit", "-q", "-m", "revise duration description")
-    edit_commit = _git(repo, "rev-parse", "HEAD")
 
     _git(repo, "checkout", "-q", "main")
     _git(repo, "merge", "-q", "--no-ff", head_ref, "-m", "merge reviewed catalog")
@@ -74,23 +98,21 @@ def test_additive_pr_detects_edit_against_cut_time_catalog(tmp_path: Path) -> No
     assert read_pr_changes(repo, additive_base) == []
 
     pr_url = "https://github.com/example/catalog/pull/3"
+    # REST reports a merged pull request as closed with a merge record beside
+    # it, so the merged disposition is carried by ``merged``, not by ``state``.
     payload = {
         "number": 3,
-        "url": pr_url,
-        "state": "MERGED",
-        "mergeCommit": {"oid": merge_commit},
-        "author": {"login": "reviewer"},
-        "headRefName": head_ref,
-        "baseRefName": "main",
-        "commits": [{"oid": cut_commit}, {"oid": edit_commit}],
+        "html_url": pr_url,
+        "state": "closed",
+        "merged": True,
+        "merge_commit_sha": merge_commit,
+        "user": {"login": "reviewer"},
+        "head": {"ref": head_ref},
+        "base": {"ref": "main"},
     }
     with patch(
-        "imas_codex.standard_names.promote.subprocess.run",
-        return_value=SimpleNamespace(
-            returncode=0,
-            stdout=json.dumps(payload),
-            stderr="",
-        ),
+        "imas_codex.graph.ghcr.github_api_call",
+        return_value=(200, payload),
     ):
         resolved = resolve_merged_pr(pr_url)
 
@@ -121,3 +143,22 @@ def test_additive_pr_detects_edit_against_cut_time_catalog(tmp_path: Path) -> No
     assert [
         (outcome.sn_id, outcome.axis, outcome.decision) for outcome in report.outcomes
     ] == [("pulse_duration", "docs", "planned")]
+
+
+def test_guard_stops_a_resolve_whose_mock_misses_the_transport_seam() -> None:
+    """A mock aimed away from the REST seam is caught, not quietly tolerated.
+
+    The resolver would otherwise reach GitHub unauthenticated and report the
+    404 as an ordinary rejection, so this exercises the autouse guard rather
+    than asserting it exists: the mock below intercepts a helper that sits
+    *behind* the transport, leaving the transport itself live.
+    """
+    with (
+        patch(
+            "imas_codex.standard_names.promote._pull_request_state",
+            return_value="MERGED",
+        ),
+        patch("imas_codex.graph.ghcr.resolve_api_token", return_value="token"),
+        pytest.raises(RealTransportAttempted),
+    ):
+        resolve_merged_pr("https://github.com/example/catalog/pull/3")
