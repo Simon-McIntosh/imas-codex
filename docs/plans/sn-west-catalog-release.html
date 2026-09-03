@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="106">
+<meta name="plan-version" content="107">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -415,6 +415,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T134040639599-n-one-repo-owns-the-layout-stamp" data-who="impl-edgestamp" data-when="2026-09-03T13:53:21.162Z">
     <div class="r-comment-body"><p>the exporter reads the catalog layout stamp from the standard-names package instead of declaring it locally, so one repository owns the value and the next layout change has one place to update</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-20260903T180800" data-who="reckon-ship" data-when="2026-09-03T18:08:00Z">
+    <div class="r-comment-body"><p>Currency audit before this wave, four facts each checked against the live surface rather than the record. (1) PR 12's <code>validate</code> failure is a stale pin on its own branch, not a code defect: the branch <code>review/v0.4.0rc1+west-task-2e</code> pins <code>imas-standard-names[quality,docs]==0.8.7</code> while catalog main pins 0.8.8, and 0.8.8 is the loader that reads the kind discriminator off the sidecar; the failing run 33757569755 raises <code>union_tag_not_found</code> on <code>kind</code> at <code>yaml_store.load</code>. A recut on current main therefore resolves it and no catalog code change is owed. PR 11 remains green and is still the working candidate. (2) The volumetric-rate blocker holds: every one of the six identities carrying <code>m^-3.s^-1.sr^-1</code> is superseded, drafted, exhausted or reviewed, and none is accepted, so a recut today would drop names PR 12 already carries. (3) <code>reclassify_domain</code> survives at <code>imas_codex/standard_names/edit.py:681</code> with no caller anywhere; the only other occurrences are the operation string in <code>graph_ops.py:185</code> and the generated model docstrings, so deleting the function leaves the ledger vocabulary intact. (4) The gh-CLI pull-request calls remain at <code>catalog_release.py</code> lines 78, 100, 305 and 1338.</p></div>
 </div>
 </section>
 </main>
