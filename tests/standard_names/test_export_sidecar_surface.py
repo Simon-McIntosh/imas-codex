@@ -225,22 +225,56 @@ class TestPublishGateMovesWithTheShape:
 
     @staticmethod
     def _staging(tmp_path: Path, edge_model_version: str) -> Path:
+        """A staging tree whose only defect is the stamp under test.
+
+        The gate runs behind the installed loader's manifest validation, so a
+        partial hand-built sidecar is refused before the gate is reached and
+        the stamp is never read. Writing through the exporter keeps every
+        required field present and leaves the stamp the only thing that varies.
+        """
         staging = tmp_path / "staging"
         (staging / "standard_names").mkdir(parents=True)
         (staging / "standard_names" / "transport.yml").write_text(
-            yaml.safe_dump([{"name": "particle_flux"}]), encoding="utf-8"
-        )
-        (staging / "catalog.yml").write_text(
             yaml.safe_dump(
-                {
-                    "catalog_name": "imas-standard-names-catalog",
-                    "export_scope": "domain",
-                    "domains_included": ["transport"],
-                    "edge_model_version": edge_model_version,
-                }
+                [
+                    {
+                        "name": "particle_flux",
+                        "description": "Particle flux.",
+                        "documentation": "Particle flux through a surface.",
+                        "unit": "m^-2.s^-1",
+                    }
+                ]
             ),
             encoding="utf-8",
         )
+        _write_manifest(
+            staging,
+            cocos_convention=17,
+            candidate_count=1,
+            published_count=1,
+            excluded_below_score_count=0,
+            excluded_unreviewed_count=0,
+            min_score_applied=0.65,
+            min_description_score_applied=None,
+            include_unreviewed=False,
+            source_commit_sha=None,
+            export_scope="domain",
+            domains_included=["transport"],
+            names={
+                "particle_flux": {
+                    "kind": "scalar",
+                    "status": "active",
+                    "physics_domain": "transport",
+                    "links": [],
+                    "sources": [],
+                }
+            },
+        )
+        manifest_path = staging / "catalog.yml"
+        manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+        manifest["edge_model_version"] = edge_model_version
+        manifest_path.write_text(yaml.safe_dump(manifest), encoding="utf-8")
+
         isnc = tmp_path / "isnc"
         (isnc / ".git").mkdir(parents=True)
         return staging
@@ -257,7 +291,10 @@ class TestPublishGateMovesWithTheShape:
 
         report = run_publish(staging, tmp_path / "isnc", dry_run=True)
 
-        assert not any("edge_model_version" in error for error in report.errors)
+        # The whole run has to be clean, not merely free of a stamp complaint:
+        # any earlier refusal returns before the gate is read, which would let
+        # this pass without the gate ever having accepted anything.
+        assert report.errors == []
 
     def test_the_exporter_stamps_what_the_gate_requires(self, tmp_path: Path) -> None:
         _, manifest = _export(tmp_path)

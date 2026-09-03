@@ -27,7 +27,69 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+from imas_codex.standard_names.export import _write_manifest
+
+
+def _stage_manifest(
+    staging: Path,
+    name: str,
+    domain: str,
+    *,
+    export_scope: str,
+    domains_included: list[str],
+    edge_model_version: str | None = None,
+) -> None:
+    """Write the manifest the exporter emits, overriding the field under test.
+
+    Publish's own gates run behind the installed loader's manifest validation,
+    which refuses a sidecar missing any required field. A hand-built partial
+    manifest therefore never reaches the gate it was written to exercise, so
+    the fixture goes through the writer and overrides only what it asserts on.
+    """
+    _write_manifest(
+        staging,
+        cocos_convention=17,
+        candidate_count=1,
+        published_count=1,
+        excluded_below_score_count=0,
+        excluded_unreviewed_count=0,
+        min_score_applied=0.65,
+        min_description_score_applied=None,
+        include_unreviewed=False,
+        source_commit_sha=None,
+        export_scope=export_scope,
+        domains_included=domains_included,
+        names={
+            name: {
+                "kind": "scalar",
+                "status": "active",
+                "physics_domain": domain,
+                "links": [],
+                "sources": [],
+            }
+        },
+    )
+    if edge_model_version is None:
+        return
+
+    # The writer always stamps the current shape; a stale stamp has to be
+    # substituted afterwards to reach the compatibility gate.
+    manifest_path = staging / "catalog.yml"
+    data = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    data["edge_model_version"] = edge_model_version
+    manifest_path.write_text(yaml.safe_dump(data), encoding="utf-8")
+
+
+def _stage_entry(name: str) -> dict[str, str]:
+    """One reduced-surface entry: identity, prose and the unit that frames it."""
+    prose = name.replace("_", " ").capitalize()
+    return {
+        "name": name,
+        "description": f"{prose}.",
+        "documentation": f"{prose} of the thermal plasma.",
+        "unit": "m^-2.s^-1",
+    }
+
 
 # ============================================================================
 # Test 3: Ordering — unary prefix
@@ -420,16 +482,18 @@ class TestPartialExportPublishSafety:
         sn_dir.mkdir()
 
         # Write one domain file
-        (sn_dir / "transport.yml").write_text(yaml.safe_dump([{"name": "flux"}]))
+        (sn_dir / "transport.yml").write_text(
+            yaml.safe_dump([_stage_entry("particle_flux")])
+        )
 
         # Manifest claims full scope but only one domain
-        manifest = {
-            "catalog_name": "imas-standard-names-catalog",
-            "export_scope": "full",
-            "domains_included": ["transport", "magnetics"],
-            "edge_model_version": CATALOG_EDGE_MODEL_VERSION,
-        }
-        (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
+        _stage_manifest(
+            staging,
+            "particle_flux",
+            "transport",
+            export_scope="full",
+            domains_included=["transport", "magnetics"],
+        )
 
         # Create a fake ISNC git repo
         isnc = tmp_path / "isnc"
@@ -449,15 +513,17 @@ class TestPartialExportPublishSafety:
         sn_dir = staging / "standard_names"
         sn_dir.mkdir()
 
-        (sn_dir / "transport.yml").write_text(yaml.safe_dump([{"name": "flux"}]))
+        (sn_dir / "transport.yml").write_text(
+            yaml.safe_dump([_stage_entry("particle_flux")])
+        )
 
-        manifest = {
-            "catalog_name": "imas-standard-names-catalog",
-            "export_scope": "domain",
-            "domains_included": ["transport"],
-            "edge_model_version": CATALOG_EDGE_MODEL_VERSION,
-        }
-        (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
+        _stage_manifest(
+            staging,
+            "particle_flux",
+            "transport",
+            export_scope="domain",
+            domains_included=["transport"],
+        )
 
         # Set up ISNC with existing domain files
         isnc = tmp_path / "isnc"
@@ -541,15 +607,18 @@ class TestEdgeModelVersionGuard:
         staging.mkdir()
         sn_dir = staging / "standard_names"
         sn_dir.mkdir()
-        (sn_dir / "kinetics.yml").write_text(yaml.safe_dump([{"name": "temperature"}]))
+        (sn_dir / "core_plasma_physics.yml").write_text(
+            yaml.safe_dump([_stage_entry("electron_temperature")])
+        )
 
-        manifest = {
-            "catalog_name": "imas-standard-names-catalog",
-            "export_scope": "full",
-            "domains_included": ["kinetics"],
-            "edge_model_version": "v0",
-        }
-        (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
+        _stage_manifest(
+            staging,
+            "electron_temperature",
+            "core_plasma_physics",
+            export_scope="full",
+            domains_included=["core_plasma_physics"],
+            edge_model_version="v0",
+        )
 
         isnc = tmp_path / "isnc"
         isnc.mkdir()
