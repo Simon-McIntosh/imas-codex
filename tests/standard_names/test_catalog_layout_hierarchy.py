@@ -27,6 +27,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
+from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+
 # ============================================================================
 # Test 3: Ordering — unary prefix
 # ============================================================================
@@ -446,7 +448,7 @@ class TestPartialExportPublishSafety:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "full",
             "domains_included": ["transport", "magnetics"],
-            "edge_model_version": "v1",
+            "edge_model_version": CATALOG_EDGE_MODEL_VERSION,
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
@@ -474,7 +476,7 @@ class TestPartialExportPublishSafety:
             "catalog_name": "imas-standard-names-catalog",
             "export_scope": "domain",
             "domains_included": ["transport"],
-            "edge_model_version": "v1",
+            "edge_model_version": CATALOG_EDGE_MODEL_VERSION,
         }
         (staging / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
