@@ -7264,7 +7264,12 @@ def _finalize_generated_name_stage(
 
     In one transaction:
     - initialise missing/pending name lifecycle to ``drafted`` without
-      demoting an existing reviewed, accepted, exhausted, or superseded name
+      demoting an existing reviewed, accepted, exhausted, or superseded name.
+      A node carrying no description is parked at ``pending`` instead: name
+      review requires prose, so drafting a prose-less name mints work nothing
+      can claim — and the source is about to read ``composed``, which the
+      compose pool excludes, so the pair would strand permanently.
+      :func:`reconcile_reviewable_name_stage` re-opens such a pair.
     - fill missing docs/generation defaults without overwriting later state
     - Source: ``claim_token = null``, ``claimed_at = null``,
       ``status = 'composed'``, ``composed_at = datetime()``,
@@ -7291,9 +7296,13 @@ def _finalize_generated_name_stage(
                       AND sns.status = 'extracted'
                     MATCH (sn:StandardName {id: b.sn_id})
                     SET sn.name_stage = CASE
-                            WHEN sn.name_stage IS NULL
-                                 OR sn.name_stage = 'pending'
-                            THEN 'drafted' ELSE sn.name_stage END,
+                            WHEN (sn.name_stage IS NULL
+                                  OR sn.name_stage = 'pending')
+                                 AND sn.description IS NOT NULL
+                                 AND trim(sn.description) <> ''
+                            THEN 'drafted'
+                            WHEN sn.name_stage IS NULL THEN 'pending'
+                            ELSE sn.name_stage END,
                         sn.chain_length = coalesce(sn.chain_length, 0),
                         sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
                         sn.docs_chain_length = coalesce(sn.docs_chain_length, 0),
@@ -12923,6 +12932,13 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
     either. Its repair vehicle is ``sn edit --rename``, which mints a fresh,
     separately validated successor rather than advancing a stage.
 
+    A null description withholds the advance for exactly the same reason: the
+    review predicate demands prose, so promoting a prose-less name would move
+    it from stranded-at-``'pending'`` to stranded-at-``'drafted'`` and buy
+    nothing. Such a name needs the opposite repair, and
+    :func:`reconcile_descriptionless_composed_names` runs from here to apply
+    it, reporting its own counts to the log.
+
     Returns dict: {names_advanced}.
     """
     own = gc is None
@@ -12935,12 +12951,15 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
               AND coalesce(sn.origin, '') <> 'derived'
               AND coalesce(sn.validation_status, '') = 'valid'
               AND coalesce(src.source_type, '') <> 'derived'
+              AND sn.description IS NOT NULL
+              AND trim(sn.description) <> ''
             WITH DISTINCT sn
             SET sn.name_stage = 'drafted',
                 sn.origin     = 'pipeline'
             RETURN count(sn) AS advanced
             """
         )
+        reconcile_descriptionless_composed_names(gc=client)
     finally:
         if own:
             client.close()
@@ -12953,6 +12972,91 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
             advanced,
         )
     return {"names_advanced": advanced}
+
+
+def reconcile_descriptionless_composed_names(
+    gc: Any | None = None,
+) -> dict[str, int]:
+    """Re-open a composed name that carries no description at all.
+
+    :data:`REVIEW_NAME_ELIGIBILITY_WHERE` demands a non-null description, so a
+    name whose description is null is never claimed for name review — and
+    compose cannot refill the prose either, because the source that produced it
+    already reads ``composed`` or ``attached`` while the compose pool claims
+    only ``extracted``. The pair is terminally stuck while still presenting as
+    live work, which is how an unscoped drain comes to exit reporting no
+    eligible work graph-wide.
+
+    The repair returns both sides to a state the pipeline can act on: the name
+    drops to ``'pending'``, and each bound non-derived source returns to
+    ``'extracted'`` with a fresh attempt budget, its produced edge released and
+    its identity dropped from the name's ``source_paths`` cache. Releasing the
+    edge rather than keeping it is what makes the repair survive to the next
+    run — a re-opened source still pointing at a live target would be realigned
+    straight back to ``'attached'`` by
+    :func:`reconcile_source_status_liveness`, re-stranding the pair. If compose
+    then lands on the same spelling the node is reused, the prose is written and
+    the finalize advances it; if it lands elsewhere the ``'pending'`` node keeps
+    no false claim on the review pool.
+
+    Idempotent: once the sources are freed no ``composed``/``attached``
+    non-derived source points at the name, so a second pass matches nothing.
+    Sources under an active claim are left alone — the compose worker holding
+    them owns the write.
+
+    Returns dict: {names_reopened, sources_reopened}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (src:StandardNameSource)-[produced:PRODUCED_NAME]->
+                  (sn:StandardName)
+            WHERE coalesce(sn.name_stage, '') IN ['', 'pending', 'drafted']
+              AND (sn.description IS NULL OR trim(sn.description) = '')
+              AND coalesce(sn.origin, '') <> 'derived'
+              AND coalesce(src.source_type, '') <> 'derived'
+              AND src.status IN ['composed', 'attached']
+              AND src.claim_token IS NULL
+            WITH sn, collect(DISTINCT src) AS sources,
+                 collect(DISTINCT produced) AS produced_edges
+            SET sn.name_stage = 'pending',
+                sn.source_paths = [
+                  path IN coalesce(sn.source_paths, [])
+                  WHERE NOT path IN [source IN sources | source.id]
+                ]
+            FOREACH (edge IN produced_edges | DELETE edge)
+            FOREACH (source IN sources |
+              SET source.status         = 'extracted',
+                  source.attempt_count  = 0,
+                  source.claimed_at     = null,
+                  source.claim_token    = null,
+                  source.produced_sn_id = null,
+                  source.composed_at    = null
+            )
+            RETURN count(DISTINCT sn) AS names,
+                   sum(size(sources)) AS sources_freed
+            """
+        )
+    finally:
+        if own:
+            client.close()
+
+    names_reopened = int(rows[0].get("names") or 0) if rows else 0
+    sources_reopened = int(rows[0].get("sources_freed") or 0) if rows else 0
+    if names_reopened:
+        logger.info(
+            "reconcile_descriptionless_composed_names: re-opened %d name(s) "
+            "carrying no description — %d source(s) returned to 'extracted' "
+            "so compose rewrites the missing prose",
+            names_reopened,
+            sources_reopened,
+        )
+    return {
+        "names_reopened": names_reopened,
+        "sources_reopened": sources_reopened,
+    }
 
 
 def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
