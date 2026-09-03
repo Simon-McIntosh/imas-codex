@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="75">
+<meta name="plan-version" content="76">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -254,6 +254,9 @@
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T101719321360-n-fold-coverage-follows-the-new-alias" data-who="impl-vocabfixtures" data-when="2026-09-03T10:30:46.285Z">
     <div class="r-comment-body"><p>the fold-coverage and compose-example expectations follow the grammar that retires the duplicate temporal spelling, and the node found the composer's own rule file still recommending that spelling as preferred</p></div>
 </div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T103207341584-n-composer-stops-teaching-the-retired-spelling" data-who="impl-composerule" data-when="2026-09-03T10:34:49.715Z">
+    <div class="r-comment-body"><p>the composer&#x27;s rule prose and good examples no longer recommend the retired temporal spelling, so the next composition cannot mint the identity this session renamed away</p></div>
+</div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
 </div>
@@ -309,7 +312,7 @@
     <div class="r-comment-body"><p>three test files follow the reduced surface: the manifest fixtures read the edge model version constant and the exclusion-ledger assertions read the sources binding from the sidecar, taking the suite from 27 failures to 18, a strict subset with none added</p></div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T101806471865-n-release-surface-round-trips" data-who="impl-releaseroundtrip" data-when="2026-09-03T10:32:25.343Z">
-    <div class="r-comment-body"><p>the five release-surface round-trip guarantees hold on the current writer: byte stability and idempotence of a re-emitted catalog, the sidecar&#x27;s list-root check, the pinned-entry cohort and the review-friendly yaml round trip (22 passed)</p></div>
+    <div class="r-comment-body"><p>the five release-surface round-trip guarantees hold on the current writer: byte stability and idempotence of a re-emitted catalog, the sidecar's list-root check, the pinned-entry cohort and the review-friendly yaml round trip (22 passed)</p></div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:33:34",
+  "updated": "2026-09-03T12:38:26",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -57044,6 +57044,115 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T103207341584-n-composer-stops-teaching-the-retired-spelling",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-composer-stops-teaching-the-retired-spelling",
+        "node_definition": {
+          "done_when": "a grep over the committed rule file finds no occurrence of the retired prefix in either the rule prose or the good examples while the surviving prefix appears in both, and uv run --no-sync pytest tests/standard_names/test_compose_prompt_examples_round_trip.py -q exits 0",
+          "estimated_hours": 0.5,
+          "goal": "Stop the composer recommending the spelling the grammar retired: its rule prose names the retired temporal prefix as preferred and its good-example list carries a name built from it, so the next composition would mint exactly the identity we spent this session renaming away",
+          "id": "n-composer-stops-teaching-the-retired-spelling",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/composer-stops-teaching-the-retired-spelling.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/llm/config/sn_composition_rules.yaml"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-composerule",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:32:14Z",
+        "completed_at": "2026-09-03T10:34:49.715Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 147,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 155,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "3d28f72c8c243dac0cb4522a2bf2ec20a51ecfae",
+        "commits": [
+          "4cd90877828872ffce84062eb590ba29106cee4e"
+        ],
+        "changed_lines": {
+          "added": 3,
+          "removed": 3,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_compose_prompt_examples_round_trip.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/composer-stops-teaching-the-retired-spelling.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/composer-stops-teaching-the-retired-spelling.json",
+        "scope_changed": false,
+        "session_id": "baf7cd05-9674-4786-9e9b-9862a168e4aa",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 60591,
+            "cache_creation_input_tokens_cumulative": 60591,
+            "cache_read_input_tokens": 1549012,
+            "cache_read_input_tokens_cumulative": 1549012,
+            "inference_geo": "not_available",
+            "input_tokens": 42,
+            "input_tokens_cumulative": 42,
+            "output_tokens": 6894,
+            "output_tokens_cumulative": 6894,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.6211904,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.6211904
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_compose_prompt_examples_round_trip.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -57104,6 +57213,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1425
+    "_version": 1426
   }
 }
