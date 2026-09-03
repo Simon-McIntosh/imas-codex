@@ -404,6 +404,44 @@ def _ir_denotes_time_change(ir: Any) -> bool:
     )
 
 
+def _ir_claims_time_change_in_scope(ir: Any) -> bool:
+    """True when a temporal operator governs *ir*'s own tense, scope-aware.
+
+    A binary operator (``difference_of``, ``ratio_of``, ...) combines two
+    independently-scoped operand expressions into one result whose tense is
+    set by the binary operator itself, not by either operand: a difference of
+    a power and a stored-energy time derivative is dimensionally a power (the
+    derivative already carries the rate; the outer subtraction does not apply
+    a second one). So a temporal operator buried inside ONE operand of a
+    binary construction must not make the whole name read as a rate. A
+    temporal operator anywhere in a non-binary (unary) chain still does,
+    since a unary wrapper (``magnitude_of``, ``gradient_of``, ...) does not
+    introduce an independent operand scope of its own.
+    """
+    from imas_standard_names import get_operator_semantics
+
+    def denotes_time_change(token: Any) -> bool:
+        return isinstance(token, str) and (
+            "temporal_change" in get_operator_semantics(token)
+        )
+
+    for operator in getattr(ir, "operators", ()) or ():
+        if denotes_time_change(getattr(operator, "op", None)):
+            return True
+        if getattr(operator, "kind", None) == "binary":
+            continue
+        if any(
+            _ir_claims_time_change_in_scope(argument)
+            for argument in getattr(operator, "args", ()) or ()
+        ):
+            return True
+
+    return any(
+        denotes_time_change(getattr(qualifier, "token", None))
+        for qualifier in getattr(ir, "qualifiers", ()) or ()
+    )
+
+
 def _name_claims_time_change(sn_name: str) -> bool:
     """Interpret temporal semantics structurally, with a legacy-safe fallback.
 
@@ -430,6 +468,31 @@ def _name_claims_time_change(sn_name: str) -> bool:
             for start in range(len(parts))
             for end in range(start + 1, len(parts) + 1)
         )
+
+
+def _time_change_claim_is_binary_scoped(sn_name: str) -> bool:
+    """True when *sn_name*'s ONLY temporal claim sits inside one operand of a
+    binary construction (``difference_of``, ``ratio_of``, ...), not in the
+    name's own outer operator scope.
+
+    Distinguishes ``time_derivative_of_stored_energy`` (outer scope is
+    temporal — still a rate) from
+    ``difference_of_heating_power_and_time_derivative_of_stored_energy``
+    (outer scope is the binary ``difference`` — the temporal operator only
+    governs its own operand). Returns ``False`` — never scoped, keep the
+    conservative reading — when strict parsing fails, matching the legacy
+    fallback in :func:`_name_claims_time_change`.
+    """
+    from imas_codex.standard_names.audits import resolve_retired_operator_spellings
+
+    resolved = resolve_retired_operator_spellings(sn_name)
+    try:
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+
+        ir = parse_canonical_name(resolved).ir
+    except (TypeError, ValueError):
+        return False
+    return _ir_denotes_time_change(ir) and not _ir_claims_time_change_in_scope(ir)
 
 
 def _shape_parameter_surface(dd_path: str | None) -> str:
@@ -2706,6 +2769,24 @@ def _geometry_representation_conflicts(source_id: str, locus: str | None) -> boo
     return (solid_path and optical_locus) or (optical_path and solid_locus)
 
 
+def _dd_standard_name_units_dimensionally_agree(
+    sn_unit: str, dd_unit: str, source_id: str
+) -> bool:
+    """True when *sn_unit* and *dd_unit* canonicalise to the same dimension.
+
+    Thin wrapper over the same registry the dimensionality rule below
+    consults, for callers that need a unit-agreement verdict before that
+    rule's own placement in the function.
+    """
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none, units_agree
+
+    return (
+        canonical_or_none(dd_unit) is not None
+        and canonical_or_none(sn_unit) is not None
+        and units_agree(sn_unit, dd_unit, source_id)
+    )
+
+
 def _is_attachment_consistent(
     source_id: str,
     sn_name: str,
@@ -2749,10 +2830,25 @@ def _is_attachment_consistent(
         _TIME_DERIVATIVE_SEGMENT_RE.fullmatch(seg) for seg in source_id.split("/")
     )
     if sn_claims_derivative and not path_is_change:
-        return False, (
-            f"tense mismatch: SN '{sn_name}' is a change/rate but path "
-            f"'{source_id}' is a base quantity"
+        # A temporal operator buried inside one operand of a binary
+        # construction (a ``difference``/``ratio``/``product`` of the outer
+        # scope) does not make the WHOLE name a rate — the derivative already
+        # carries the rate, and the outer combination does not apply a second
+        # one. Only excuse the mismatch once the caller's own unit context
+        # proves the combination is dimensionally what the base-quantity path
+        # is: with no unit context, or with disagreeing units, this stays the
+        # conservative rejection.
+        excused = (
+            dd_unit
+            and sn_unit
+            and _time_change_claim_is_binary_scoped(sn_name)
+            and _dd_standard_name_units_dimensionally_agree(sn_unit, dd_unit, source_id)
         )
+        if not excused:
+            return False, (
+                f"tense mismatch: SN '{sn_name}' is a change/rate but path "
+                f"'{source_id}' is a base quantity"
+            )
     if path_is_change and not sn_is_rate:
         return False, (
             f"tense mismatch: path '{source_id}' is a change/rate but SN "
