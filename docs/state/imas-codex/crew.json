@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T18:01:16",
+  "updated": "2026-09-03T18:23:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -60028,6 +60028,123 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T154716383057-n-compose-names-the-freed-paths",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-compose-names-the-freed-paths",
+        "node_definition": {
+          "done_when": "a GraphClient census before and after prints the unclaimed extracted source count starting at 1471 and the detachment count starting at 508, the report states how many names the compose pool created and how many new detachments the run itself produced, and the manifest is written before any wait rather than after",
+          "estimated_hours": 2.0,
+          "goal": "Name the data-dictionary paths the attachment guard freed by running the compose pool over them, invoking uv run --no-sync imas-codex sn run --only compose --cost-limit 40 in the foreground from this worktree with UV_PROJECT_ENVIRONMENT pointed at the main checkout venv and PYTHONPATH set to the worktree, because the earlier flush invocation structurally excludes the generate pool and so left every freed path unnamed",
+          "id": "n-compose-names-the-freed-paths",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/compose-names-the-freed-paths.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/compose-names-the-freed-paths.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-westgate",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T15:47:21Z",
+        "completed_at": "2026-09-03T16:22:11.557Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2078,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2090,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "c815f5170ec276290b1e8fb6bf60050f8bc71ec5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync imas-codex sn run --only compose --cost-limit 40 with a GraphClient census before and after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/compose-names-the-freed-paths.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/compose-names-the-freed-paths.json",
+        "scope_changed": false,
+        "session_id": "02f88523-1dfa-4f41-b873-73bda345de76",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.8,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T18:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 34994,
+            "cache_read_input_tokens": 9140632,
+            "cache_read_input_tokens_cumulative": 10310164,
+            "inference_geo": "not_available",
+            "input_tokens": 66,
+            "input_tokens_cumulative": 84,
+            "output_tokens": 485,
+            "output_tokens_cumulative": 10266,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 8.959433600000004,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 9.832646000000004
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 255.701,
+          "generated_tokens": 28908,
+          "generation_seconds": 144.291,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 27.2,
+          "machine_seconds": 111.41,
+          "peak_input_tokens": 272183,
+          "tokens_per_second": 200.35,
+          "wall_tokens_per_second": 113.05
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "a pipeline invocation changes graph state rather than repository files",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -60088,6 +60205,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1470
+    "_version": 1471
   }
 }
