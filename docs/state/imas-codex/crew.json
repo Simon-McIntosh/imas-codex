@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T20:57:34",
+  "updated": "2026-09-03T21:12:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1197,6 +1197,15 @@
         "created": "2026-09-01"
       },
       {
+        "id": "impl-ghrestclient",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-goldenrefresh",
         "harness": "codex",
         "role": "implement",
@@ -1412,6 +1421,15 @@
       },
       {
         "id": "impl-isnsidecar",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-isnsolidangle",
         "harness": "claude-opus",
         "role": "implement",
         "session_id": null,
@@ -2497,6 +2515,17 @@
         "role": "implement",
         "session_id": "01a023fc-7a5e-7f72-8e4b-18d59ffe172f",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-staleclaim",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "b4895e66-13ea-43d6-95b6-37f5703f8be5",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "b4895e66-13ea-43d6-95b6-37f5703f8be5"
+        },
+        "created": "2026-09-03"
       },
       {
         "id": "impl-staleguard",
@@ -3725,6 +3754,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-08-27"
+      },
+      {
+        "id": "test-wcrsuite",
+        "harness": "claude",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "test-west-rc-gates",
@@ -60999,6 +61037,119 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T190313848666-n-wcr-stale-claim",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-stale-claim",
+        "node_definition": {
+          "done_when": "the report at the write path shows a Cypher read of hard_xray_rate before and after, the before carrying claim_token 517573b0-14de-4969-a26b-abc22e00e480 and the after carrying none, with the governed command used and a count of any other identity holding a claim_token whose owning run is no longer live",
+          "estimated_hours": 0.25,
+          "goal": "Clear the stale claim token stranded on hard_xray_rate so the next rotation can claim it",
+          "id": "n-wcr-stale-claim",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190313848666-n-wcr-stale-claim/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-stale-claim.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-staleclaim",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:03:19Z",
+        "completed_at": "2026-09-03T19:06:42.783Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 197,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 203,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "e5020348b38c67eaff6907cd65975a3a57a17233",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "cypher read of hard_xray_rate claim_token, and a graph-wide count of set claim_tokens",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-stale-claim.gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190313848666-n-wcr-stale-claim/manifest.md",
+        "scope_changed": false,
+        "session_id": "b4895e66-13ea-43d6-95b6-37f5703f8be5",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 98150,
+            "cache_creation_input_tokens_cumulative": 98150,
+            "cache_read_input_tokens": 2928750,
+            "cache_read_input_tokens_cumulative": 2928750,
+            "inference_geo": "not_available",
+            "input_tokens": 64,
+            "input_tokens_cumulative": 64,
+            "output_tokens": 12000,
+            "output_tokens_cumulative": 12000,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.0984779999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.0984779999999998
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 200.758,
+          "generated_tokens": 12000,
+          "generation_seconds": 177.479,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 11.7,
+          "machine_seconds": 23.279,
+          "peak_input_tokens": 117381,
+          "tokens_per_second": 67.61,
+          "wall_tokens_per_second": 59.77
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "governed graph transition only; the report is the deliverable and sits outside the git tree by the write fence",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -61059,6 +61210,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1490
+    "_version": 1496
   }
 }
