@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T07:23:23",
+  "updated": "2026-09-03T07:35:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -54865,6 +54865,116 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T052343048749-n-publish-structural-parents",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-publish-structural-parents",
+        "node_definition": {
+          "done_when": "a test proves an accepted derived-parent candidate with only derived producers is returned eligible while an unaccepted one is still withheld, the determinism assertion now requires the emitted file to begin with a list item rather than a comment, uv run --no-sync pytest tests/standard_names -q reports six failures matching the six that reproduce at the base revision with zero added",
+          "estimated_hours": 1.5,
+          "goal": "Publish accepted structural parents instead of withholding them: remove the export-policy rule near line 636 of imas_codex/standard_names/export.py that excludes a name for having no Data Dictionary source binding when its only producers are derived, so a fully accepted derived parent reaches the catalog with derived provenance, and repair the one assertion in tests/standard_names/test_export_determinism.py that still requires the per-file header comment this repository no longer emits",
+          "id": "n-publish-structural-parents",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/publish-structural-parents.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_eligibility.py",
+            "tests/standard_names/test_export_determinism.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-parentpublish",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T05:23:49Z",
+        "completed_at": "2026-09-03T05:33:35.917Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 581,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 586,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "2fd6ee234002f1de4ea63dd93d2fbf6812d2eef7",
+        "commits": [
+          "5bff803cae91151bb3986ebfeeb10ddfd7c7470a"
+        ],
+        "changed_lines": {
+          "added": 69,
+          "removed": 37,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_export_eligibility.py tests/standard_names/test_export_determinism.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/publish-structural-parents.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/publish-structural-parents.json",
+        "scope_changed": false,
+        "session_id": "4a7c63d8-a00e-4f71-961c-56ddab2359d8",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 90407,
+            "cache_creation_input_tokens_cumulative": 90407,
+            "cache_read_input_tokens": 2968979,
+            "cache_read_input_tokens_cumulative": 2968979,
+            "inference_geo": "not_available",
+            "input_tokens": 72,
+            "input_tokens_cumulative": 72,
+            "output_tokens": 16877,
+            "output_tokens_cumulative": 16877,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.8108445,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.8108445
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -54911,6 +55021,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1387
+    "_version": 1388
   }
 }
