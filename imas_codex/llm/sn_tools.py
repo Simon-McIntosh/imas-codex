@@ -884,16 +884,23 @@ def _edit_standard_name(
             (hint mode only — rename/docs modes imply their own axis).
         scope: Blast radius: ``"self" | "family" | "subtree"``. Mapped to
             the internal ``EditScope`` enum (``self`` -> ``only_self``).
-        dry_run: Preview the plan (and cascade, if any) without writing to
-            the graph.
+        dry_run: Preview the plan (and the deferred cascade, if any)
+            without writing to the graph.
 
     Returns:
         Dict rendering of the resulting ``EditPlan`` (target, mode, axis,
         scope, entry, successor, cascade_planned, blocked, actions,
         applied) plus a ``"summary"`` key with a short human-readable
-        recap. A malformed call (wrong argument combination, missing
-        reason, invalid axis/scope) returns ``{"error": "..."}`` instead
-        of raising.
+        recap and, whenever the cascade is non-empty, a
+        ``"cascade_status"`` key. ``cascade_planned`` lists the descendant
+        renames the root rename *implies* and this call writes none of
+        them: the descendants keep their current ids until the successor
+        reaches ``accepted``, when the acceptance hook re-walks the live
+        subtree and applies the cascade in one transaction. A root that is
+        withheld or exhausted leaves every row unperformed, so those rows
+        must never be reported as renames that happened. A malformed call
+        (wrong argument combination, missing reason, invalid axis/scope)
+        returns ``{"error": "..."}`` instead of raising.
     """
     scope_value: str | None = None
     if scope is not None:
@@ -927,18 +934,35 @@ def _edit_standard_name(
         return {"error": f"apply_edit failed: {_neo4j_error_message(e)}"}
 
     result = dataclasses.asdict(plan)
+    # ``cascade_planned`` is a deferred plan, never an outcome: this call
+    # writes none of those renames. The acceptance hook re-walks the live
+    # subtree once the successor reaches accepted and applies the cascade
+    # then, so a root that is withheld or exhausted leaves every row
+    # unperformed. An agent reads ``summary`` first, so the deferral is
+    # stated there as well as beside the rows.
+    awaited = plan.successor or "the renamed root"
+    deferral = (
+        f"{len(plan.cascade_planned)} descendant(s) unchanged and deferred — "
+        f"renamed only once {awaited} reaches accepted, and left at their "
+        "current ids if it is withheld or exhausted"
+    )
+    if plan.cascade_planned:
+        result["cascade_status"] = f"not yet applied; {deferral}"
     if plan.blocked:
         summary = f"BLOCKED: {plan.blocked}"
     elif not plan.applied:
         summary = (
-            f"[dry-run] {plan.mode} edit on {plan.target!r} would enter "
-            f"{plan.entry} ({len(plan.cascade_planned)} cascade step(s))"
+            f"[dry-run] {plan.mode} edit on {plan.target!r} would enter {plan.entry}"
         )
+        if plan.cascade_planned:
+            summary += f"; {deferral}"
     else:
         successor_note = f" -> successor {plan.successor!r}" if plan.successor else ""
         summary = (
             f"{plan.mode} edit attached to {plan.target!r}{successor_note}, "
             f"entering {plan.entry} (edit_status=open)"
         )
+        if plan.cascade_planned:
+            summary += f"; {deferral}"
     result["summary"] = summary
     return result
