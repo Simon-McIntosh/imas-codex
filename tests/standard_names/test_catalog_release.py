@@ -20,7 +20,9 @@ import pytest
 import yaml
 
 from imas_codex.standard_names.catalog_release import (
+    GitHubRestError,
     ReviewPreviewLinkInvariantError,
+    _closed_pr_heads,
     _format_tag,
     _get_semver_tags,
     _GitHubClient,
@@ -279,58 +281,247 @@ class TestComputeNextVersion:
         assert "+" not in tag and "+" not in version
 
 
-class TestPullRequestBodyTransport:
-    """The body update goes over REST, not the GraphQL-backed CLI edit verb."""
+class TestPullRequestTransport:
+    """Every pull-request call is a GitHub REST call, never a CLI invocation.
 
-    def _patch_run(self, monkeypatch, returncode=0, stderr=""):
+    REST is the transport because the CLI resolves pull-request metadata
+    through GraphQL, which fails outright on a repository whose response
+    still carries Projects-classic fields.
+    """
+
+    def _patch_api(self, monkeypatch, status=200, payload=None):
         calls: list[dict] = []
 
-        def fake_run(cmd, **kwargs):
-            calls.append({"cmd": cmd, "input": kwargs.get("input")})
-            return subprocess.CompletedProcess(cmd, returncode, "", stderr)
+        def fake_api(method, path, *, payload=None, token=None):
+            calls.append({"method": method, "path": path, "payload": payload})
+            return status, fake_api.response
 
+        fake_api.response = payload
         monkeypatch.setattr(
-            "imas_codex.standard_names.catalog_release.subprocess.run", fake_run
+            "imas_codex.standard_names.catalog_release._github_api", fake_api
         )
         return calls
 
-    def test_update_patches_the_pull_request_endpoint_with_the_body(self, monkeypatch):
-        calls = self._patch_run(monkeypatch)
+    def _forbid_subprocess(self, monkeypatch):
+        def fail(*args, **kwargs):
+            raise AssertionError(f"pull-request work shelled out to {args[0]!r}")
 
-        _GitHubClient().update_pull_request_body(
+        monkeypatch.setattr(
+            "imas_codex.standard_names.catalog_release.subprocess.run", fail
+        )
+
+    def test_update_patches_the_pull_request_endpoint_with_the_body(self, monkeypatch):
+        self._forbid_subprocess(monkeypatch)
+        calls = self._patch_api(monkeypatch, payload={"number": 11})
+
+        _GitHubClient(token="t").update_pull_request_body(
             repo="owner/catalog", number=11, body="new body\n\nPreview: https://x/"
         )
 
-        assert len(calls) == 1
-        assert calls[0]["cmd"] == [
-            "gh",
-            "api",
-            "--method",
-            "PATCH",
-            "repos/owner/catalog/pulls/11",
-            "--input",
-            "-",
+        assert calls == [
+            {
+                "method": "PATCH",
+                "path": "/repos/owner/catalog/pulls/11",
+                "payload": {"body": "new body\n\nPreview: https://x/"},
+            }
         ]
-        assert json.loads(calls[0]["input"]) == {
-            "body": "new body\n\nPreview: https://x/"
-        }
-
-    def test_update_never_shells_out_to_the_cli_edit_verb(self, monkeypatch):
-        calls = self._patch_run(monkeypatch)
-
-        _GitHubClient().update_pull_request_body(
-            repo="owner/catalog", number=11, body="body"
-        )
-
-        assert calls[0]["cmd"][:3] != ["gh", "pr", "edit"]
 
     def test_update_names_the_pull_request_when_the_patch_fails(self, monkeypatch):
-        self._patch_run(monkeypatch, returncode=1, stderr="Not Found\n")
+        self._patch_api(monkeypatch, status=404, payload={"message": "Not Found"})
 
         with pytest.raises(ReviewPreviewLinkInvariantError) as excinfo:
-            _GitHubClient().update_pull_request_body(
+            _GitHubClient(token="t").update_pull_request_body(
                 repo="owner/catalog", number=11, body="body"
             )
 
         assert "owner/catalog#11" in str(excinfo.value)
         assert "Not Found" in str(excinfo.value)
+        assert "404" in str(excinfo.value)
+
+    def test_read_returns_the_stored_body_from_the_pull_request_endpoint(
+        self, monkeypatch
+    ):
+        self._forbid_subprocess(monkeypatch)
+        calls = self._patch_api(monkeypatch, payload={"body": "stored body"})
+
+        body = _GitHubClient(token="t").read_pull_request_body(
+            repo="owner/catalog", number=11
+        )
+
+        assert body == "stored body"
+        assert calls == [
+            {"method": "GET", "path": "/repos/owner/catalog/pulls/11", "payload": None}
+        ]
+
+    def test_read_treats_a_null_body_as_empty_rather_than_none(self, monkeypatch):
+        self._patch_api(monkeypatch, payload={"body": None})
+
+        assert (
+            _GitHubClient(token="t").read_pull_request_body(
+                repo="owner/catalog", number=11
+            )
+            == ""
+        )
+
+    def test_read_names_the_pull_request_when_the_fetch_fails(self, monkeypatch):
+        self._patch_api(monkeypatch, status=403, payload={"message": "Forbidden"})
+
+        with pytest.raises(ReviewPreviewLinkInvariantError) as excinfo:
+            _GitHubClient(token="t").read_pull_request_body(
+                repo="owner/catalog", number=11
+            )
+
+        assert "owner/catalog#11" in str(excinfo.value)
+        assert "Forbidden" in str(excinfo.value)
+
+    def test_create_posts_the_pull_request_and_returns_number_and_url(
+        self, monkeypatch
+    ):
+        self._forbid_subprocess(monkeypatch)
+        calls = self._patch_api(
+            monkeypatch,
+            status=201,
+            payload={
+                "number": 12,
+                "html_url": "https://github.com/owner/catalog/pull/12",
+            },
+        )
+
+        number, url = _GitHubClient(token="t").create_pull_request(
+            branch="review/v0.3.0rc2",
+            base="main",
+            title="candidate",
+            body="body",
+            repo="owner/catalog",
+            head_owner="fork",
+        )
+
+        assert (number, url) == (12, "https://github.com/owner/catalog/pull/12")
+        assert calls == [
+            {
+                "method": "POST",
+                "path": "/repos/owner/catalog/pulls",
+                "payload": {
+                    "title": "candidate",
+                    "body": "body",
+                    "base": "main",
+                    "head": "fork:review/v0.3.0rc2",
+                },
+            }
+        ]
+
+    def test_create_reports_what_github_refused(self, monkeypatch):
+        self._patch_api(
+            monkeypatch,
+            status=422,
+            payload={
+                "message": "Validation Failed",
+                "errors": [{"message": "No commits between main and the branch"}],
+            },
+        )
+
+        with pytest.raises(GitHubRestError) as excinfo:
+            _GitHubClient(token="t").create_pull_request(
+                branch="review/v0.3.0rc2",
+                base="main",
+                title="candidate",
+                body="body",
+                repo="owner/catalog",
+                head_owner="fork",
+            )
+
+        assert "owner/catalog" in str(excinfo.value)
+        assert "fork:review/v0.3.0rc2" in str(excinfo.value)
+        assert "No commits between main and the branch" in str(excinfo.value)
+
+    def test_closed_heads_keeps_only_rows_whose_head_is_the_branch(self, monkeypatch):
+        self._forbid_subprocess(monkeypatch)
+        calls = self._patch_api(
+            monkeypatch,
+            payload=[
+                {"head": {"ref": "review/rc2", "sha": "a" * 40}},
+                {"head": {"ref": "review/rc3", "sha": "b" * 40}},
+                {"head": {"ref": "review/rc2", "sha": None}},
+            ],
+        )
+
+        heads = _GitHubClient(token="t").closed_pull_request_heads(
+            repo="owner/catalog", branch="review/rc2", head_owner="fork"
+        )
+
+        assert heads == {"a" * 40}
+        assert calls[0]["method"] == "GET"
+        assert calls[0]["path"].startswith("/repos/owner/catalog/pulls?")
+        assert "state=closed" in calls[0]["path"]
+        assert "head=fork%3Areview%2Frc2" in calls[0]["path"]
+
+    def test_closed_heads_omits_the_head_filter_when_no_owner_is_known(
+        self, monkeypatch
+    ):
+        calls = self._patch_api(monkeypatch, payload=[])
+
+        assert (
+            _GitHubClient(token="t").closed_pull_request_heads(
+                repo="owner/catalog", branch="review/rc2"
+            )
+            == set()
+        )
+        assert "head=" not in calls[0]["path"]
+
+    def test_closed_heads_raises_so_the_caller_can_refuse_to_reclaim(self, monkeypatch):
+        self._patch_api(monkeypatch, status=401, payload={"message": "Bad credentials"})
+
+        with pytest.raises(GitHubRestError) as excinfo:
+            _GitHubClient(token="t").closed_pull_request_heads(
+                repo="owner/catalog", branch="review/rc2"
+            )
+
+        assert "owner/catalog" in str(excinfo.value)
+        assert "Bad credentials" in str(excinfo.value)
+
+
+class TestClosedPullRequestHeadLookup:
+    """A failed lookup contributes no proof; it never fabricates a head."""
+
+    def test_an_unreachable_api_yields_no_heads_instead_of_raising(self, monkeypatch):
+        class Refusing:
+            def closed_pull_request_heads(self, *, repo, branch, head_owner=None):
+                raise GitHubRestError("HTTP 500 Server Error")
+
+        monkeypatch.setattr(
+            "imas_codex.standard_names.catalog_release._github_slug",
+            lambda _path, remote: ("fork", "catalog"),
+        )
+
+        assert (
+            _closed_pr_heads(
+                Path("/nonexistent"), "review/rc2", github_client=Refusing()
+            )
+            == set()
+        )
+
+    def test_both_catalog_remotes_are_queried_with_the_fork_as_head_owner(
+        self, monkeypatch
+    ):
+        seen: list[tuple[str, str | None]] = []
+
+        class Recording:
+            def closed_pull_request_heads(self, *, repo, branch, head_owner=None):
+                seen.append((repo, head_owner))
+                return {"c" * 40} if repo == "upstream/catalog" else set()
+
+        slugs = {"origin": ("fork", "catalog"), "upstream": ("upstream", "catalog")}
+        monkeypatch.setattr(
+            "imas_codex.standard_names.catalog_release._github_slug",
+            lambda _path, remote: slugs[remote],
+        )
+
+        heads = _closed_pr_heads(
+            Path("/nonexistent"), "review/rc2", github_client=Recording()
+        )
+
+        assert heads == {"c" * 40}
+        assert sorted(seen) == [
+            ("fork/catalog", "fork"),
+            ("upstream/catalog", "fork"),
+        ]
