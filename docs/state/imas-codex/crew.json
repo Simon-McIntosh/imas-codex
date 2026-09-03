@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T13:32:10",
+  "updated": "2026-09-03T13:36:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -57703,6 +57703,107 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T111622551195-n-west-recut-reduced-surface",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-recut-reduced-surface",
+        "node_definition": {
+          "done_when": "gh pr checks on the new pull request exits 0 with validate and build passing, a count of entry keys across every added catalog file returns exactly the four editable field names, a grep for a run of two consecutive blank lines in the added prose returns zero, the published count exceeds the 351 of the prior candidate by the published structural parents, and the prior pull request state reads CLOSED",
+          "estimated_hours": 2.5,
+          "goal": "Recut the WEST review candidate on the catalog fork from imas_codex/standard_names/manifests/west_production_dd_paths.yaml so the reviewer reads four editable fields per entry with the derived fields in the manifest sidecar, wrapped literal-block prose with single blank lines, no per-file header comments, accepted structural parents published alongside the leaves, and a five-sentence body stating the exclusion accounting with a resolvable link to the committed exclusion ledger, closing the superseded candidate with a comment naming the replacement",
+          "id": "n-west-recut-reduced-surface",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "imas_codex/standard_names/manifests/reviews",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-recut12",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T11:16:29Z",
+        "completed_at": "2026-09-03T11:35:02.738Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1108,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1113,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "37fca75234504b3d8ca3cb42a7d8390843d54861",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/west-recut-reduced-surface.json",
+        "scope_changed": false,
+        "session_id": "f0969f63-c47f-4628-a21b-04a678713ad5",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 155151,
+            "cache_creation_input_tokens_cumulative": 155151,
+            "cache_read_input_tokens": 9566790,
+            "cache_read_input_tokens_cumulative": 9566790,
+            "inference_geo": "not_available",
+            "input_tokens": 142,
+            "input_tokens_cumulative": 142,
+            "output_tokens": 31292,
+            "output_tokens_cumulative": 31292,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.8471660000000005,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.8471660000000005
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "blocked before any change was in scope; the export re-validation refuses every entry whose sign-convention sentence the writer wrapped",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -57763,6 +57864,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1433
+    "_version": 1434
   }
 }
