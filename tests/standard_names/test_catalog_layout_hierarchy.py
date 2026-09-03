@@ -317,10 +317,6 @@ class TestRoundTripByteStability:
     """Export entries, parse, re-emit → byte-identical."""
 
     def test_byte_stable_round_trip(self, tmp_path: Path) -> None:
-        from imas_codex.standard_names.canonical import (
-            canonicalise_entry,
-            reorder_entry_dict,
-        )
         from imas_codex.standard_names.export import _write_domain_yaml
 
         entries = [
@@ -331,49 +327,33 @@ class TestRoundTripByteStability:
                 "description": "Temperature profile",
                 "documentation": "A temperature measurement.",
                 "unit": "eV",
-                "physics_domain": "kinetics",
+                "physics_domain": "core_plasma_physics",
                 "links": [],
             },
         ]
 
-        # Write domain file
-        _write_domain_yaml(tmp_path, "kinetics", entries)
+        # Write domain file; the sidecar carries the machine-derived fields
+        # the reviewable entry no longer does.
+        metadata: dict[str, dict] = {}
+        _write_domain_yaml(tmp_path, "kinetics", entries, name_metadata=metadata)
 
         filepath = tmp_path / "standard_names" / "kinetics.yml"
         assert filepath.exists()
-
-        # Parse back
         text = filepath.read_text(encoding="utf-8")
-        # Skip header comments
-        yaml_text = "\n".join(
-            line for line in text.splitlines() if not line.startswith("#")
-        )
-        parsed = yaml.safe_load(yaml_text)
+
+        # Parse back and overlay the sidecar, the same resolved shape a
+        # consumer folds back into the writer, then re-emit through the same
+        # writer used the first time.
+        parsed = yaml.safe_load(text)
         assert isinstance(parsed, list)
+        resolved = [{**entry, **metadata[entry["name"]]} for entry in parsed]
 
-        # Re-emit through canonical pipeline (matching export logic)
-        from imas_codex.standard_names.export import _ISN_UNSUPPORTED_FIELDS
-
-        re_emitted = []
-        for entry in parsed:
-            canon = canonicalise_entry(entry)
-            clean = {
-                k: v
-                for k, v in canon.items()
-                if v is not None and k not in _ISN_UNSUPPORTED_FIELDS
-            }
-            roles = clean.pop("roles", [])
-            ordered = reorder_entry_dict(clean)
-            ordered["roles"] = roles
-            re_emitted.append(ordered)
-
-        re_emitted_yaml = yaml.safe_dump(
-            re_emitted, sort_keys=False, default_flow_style=False
+        second_metadata: dict[str, dict] = {}
+        second_path = _write_domain_yaml(
+            tmp_path / "second", "kinetics", resolved, name_metadata=second_metadata
         )
 
-        # Extract YAML body from original (after header comments)
-        original_yaml = yaml_text.strip() + "\n"
-        assert re_emitted_yaml == original_yaml
+        assert second_path.read_text(encoding="utf-8") == text
 
 
 # ============================================================================
@@ -399,7 +379,7 @@ class TestRoundTripIdempotence:
                 "description": "Electron temperature",
                 "documentation": "Te from Thomson scattering.",
                 "unit": "eV",
-                "physics_domain": "kinetics",
+                "physics_domain": "core_plasma_physics",
                 "links": ["name:ion_temperature"],
                 "constraints": ["T_e > 0"],
                 "validity_domain": "core plasma",
@@ -407,18 +387,17 @@ class TestRoundTripIdempotence:
         ]
 
         # First write
-        _write_domain_yaml(tmp_path, "kinetics", entries)
+        metadata: dict[str, dict] = {}
+        _write_domain_yaml(tmp_path, "kinetics", entries, name_metadata=metadata)
         fp = tmp_path / "standard_names" / "kinetics.yml"
         first_bytes = fp.read_bytes()
 
-        # Parse back and re-write
-        text = fp.read_text(encoding="utf-8")
-        yaml_text = "\n".join(
-            line for line in text.splitlines() if not line.startswith("#")
-        )
-        parsed = yaml.safe_load(yaml_text)
+        # Parse back, overlay the sidecar the entry no longer carries, and
+        # re-write.
+        parsed = yaml.safe_load(fp.read_text(encoding="utf-8"))
+        resolved = [{**entry, **metadata[entry["name"]]} for entry in parsed]
 
-        _write_domain_yaml(tmp_path, "kinetics", parsed)
+        _write_domain_yaml(tmp_path, "kinetics", resolved, name_metadata=metadata)
         second_bytes = fp.read_bytes()
 
         assert first_bytes == second_bytes
@@ -525,6 +504,11 @@ class TestCheckCatalogListRoot:
             },
         ]
         (sn_dir / "kinetics.yml").write_text(yaml.safe_dump(entries))
+
+        # The reviewable entry no longer carries physics_domain; the manifest
+        # sidecar's per-name mapping supplies it before model validation.
+        manifest = {"names": {"temperature": {"physics_domain": "core_plasma_physics"}}}
+        (catalog_dir / "catalog.yml").write_text(yaml.safe_dump(manifest))
 
         from imas_codex.standard_names.catalog_import import check_catalog
 

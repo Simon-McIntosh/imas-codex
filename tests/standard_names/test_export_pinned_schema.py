@@ -36,7 +36,7 @@ def test_graph_entry_carries_physics_domain_into_initial_validation() -> None:
 def test_fixture_cohort_round_trips_through_pinned_entry_factory(
     tmp_path: Path,
 ) -> None:
-    assert importlib.metadata.version("imas-standard-names") == "0.8.2"
+    assert importlib.metadata.version("imas-standard-names") == "0.8.6"
     cohort = [
         {
             "name": "electron_temperature",
@@ -62,11 +62,13 @@ def test_fixture_cohort_round_trips_through_pinned_entry_factory(
         },
     ]
 
-    output = _write_domain_yaml(tmp_path, "equilibrium", cohort)
+    metadata: dict[str, dict] = {}
+    output = _write_domain_yaml(tmp_path, "equilibrium", cohort, name_metadata=metadata)
     emitted = yaml.safe_load(output.read_text(encoding="utf-8"))
 
     assert len(emitted) == len(cohort)
     assert all("roles" not in entry for entry in emitted)
     for entry in emitted:
-        validated = create_standard_name_entry(entry)
+        resolved = {**entry, **metadata[entry["name"]]}
+        validated = create_standard_name_entry(resolved)
         assert validated.name == entry["name"]
