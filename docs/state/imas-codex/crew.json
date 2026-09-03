@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T16:43:14",
+  "updated": "2026-09-03T16:54:45",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -802,6 +802,15 @@
       {
         "id": "impl-descrepair",
         "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-detachattrib",
+        "harness": "claude",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -59399,6 +59408,119 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T144315394688-n-guard-rules-read-the-definition",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-guard-rules-read-the-definition",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names -q exits 0 with the two new test files passing, and a grep of the touched modules shows the added helper spells standard_name in full",
+          "estimated_hours": 2.0,
+          "goal": "Land the two preserved guard-rule patches under crew/reports (tense-rule-respects-operator-scope-partial.patch with its test file, and locus-rule-reads-what-the-path-measures-partial.patch with its test file), assessing each rather than applying blindly, and clear the repository naming rule the first one trips by spelling out standard_name in the helper it adds instead of abbreviating it",
+          "id": "n-guard-rules-read-the-definition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/guard-rules-read-the-definition.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/workers.py",
+            "imas_codex/standard_names/attachment_audit.py",
+            "tests/standard_names/test_tense_operator_scope.py",
+            "tests/standard_names/test_locus_rule_semantics.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-guardfixes",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T14:43:22Z",
+        "completed_at": "2026-09-03T14:53:50.348Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 621,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 628,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "5cdd1ff6a31bd4fbb8ced8169bbfcb950890c0e9",
+        "commits": [
+          "8e2ed486f3d3bd4bd45f10e14d230bf11d2bc58d"
+        ],
+        "changed_lines": {
+          "added": 266,
+          "removed": 7,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/guard-rules-read-the-definition.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/guard-rules-read-the-definition.json",
+        "scope_changed": false,
+        "session_id": "bf76329c-ad87-4980-aed3-6ca756ebdc75",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.98,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T15:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 103324,
+            "cache_creation_input_tokens_cumulative": 103324,
+            "cache_read_input_tokens": 5221196,
+            "cache_read_input_tokens_cumulative": 5221196,
+            "inference_geo": "not_available",
+            "input_tokens": 102,
+            "input_tokens_cumulative": 102,
+            "output_tokens": 15913,
+            "output_tokens_cumulative": 15913,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6168691999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.6168691999999998
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -59459,6 +59581,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1459
+    "_version": 1461
   }
 }
