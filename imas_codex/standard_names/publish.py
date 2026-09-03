@@ -6,8 +6,14 @@ into an ISNC git checkout, creating a commit and optionally pushing.
 
 Publish safety:
 - All IO under ``FileLock`` on the ISNC checkout.
-- Pre-flight: manifest validation, ``edge_model_version`` check,
-  staged-domain consistency, working-tree cleanliness.
+- Refusal order, chosen so every refusal names its own cause: manifest and
+  entry-file shape, then the ``edge_model_version`` compatibility stamp,
+  then the ISN store load, then staged-domain consistency and working-tree
+  cleanliness. The stamp is read *before* the store load because the
+  installed loader answers a tree cut by an older exporter with a
+  field-by-field dump of its manifest model — a dump that points at the
+  entry files, while the only thing an operator can act on is re-exporting
+  the tree with the current exporter.
 - Full-scope: ``rmtree`` + ``copytree``.
 - Domain-subset: per-domain ``copy2``.
 - Post-copy: ``check_catalog`` + ``load_catalog`` rollback on failure.
@@ -71,18 +77,43 @@ class PublishReport:
 # =============================================================================
 
 
+def _check_edge_model_version(manifest: dict[str, Any]) -> str | None:
+    """Return a one-line refusal if the manifest shape stamp is not readable.
+
+    ``None`` means the stamp matches what this publisher writes and reads.
+    The message states the remedy because a stamp mismatch has exactly one:
+    re-export the staging tree with the current exporter.
+    """
+    edge_version = manifest.get("edge_model_version")
+    if edge_version == _REQUIRED_EDGE_MODEL_VERSION:
+        return None
+    return (
+        f"edge_model_version mismatch: manifest has '{edge_version}', "
+        f"required '{_REQUIRED_EDGE_MODEL_VERSION}' — re-export the staging "
+        "tree with this version of the exporter"
+    )
+
+
 def _validate_staging_dir(staging_dir: Path) -> list[str]:
     """Validate that the staging directory is well-formed.
 
-    Runs three layers of checks, all upstream from the ISNC release:
+    Runs four layers of checks, all upstream from the ISNC release, ordered
+    so that the first refusal an operator reads names the cause they can act
+    on:
 
     1. **Shape checks** — manifest exists, ``standard_names/`` populated.
-    2. **Structural checks** — ISN's ``YamlStore.load()`` parses every
+    2. **Compatibility check** — the manifest's ``edge_model_version`` stamp
+       matches the shape this module reads. It is refused on its own, ahead
+       of the store load: the installed loader validates the manifest as
+       part of loading the entries, so a tree cut by an older exporter would
+       otherwise surface as a field-by-field dump attributed to the entry
+       files instead of a single line naming the stale stamp.
+    3. **Structural checks** — ISN's ``YamlStore.load()`` parses every
        entry and runs the catalog-level structural + semantic suite that
        the ``Validate Catalog`` GitHub workflow runs on the published
        repo. Surfacing the issues here means we catch broken names at
        publish time, not at release time.
-    3. **Pipeline-specific checks** — public ISN advisory aliases and
+    4. **Pipeline-specific checks** — public ISN advisory aliases and
        conservatively proven field-at-position relation findings, applied
        across the whole staging set by ``canonical_locus_check``.
 
@@ -95,6 +126,7 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
         return errors
 
     manifest = staging_dir / "catalog.yml"
+    manifest_data: dict[str, Any] | None = None
     if not manifest.is_file():
         errors.append(f"Missing manifest: {manifest}")
     else:
@@ -102,8 +134,10 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
             data = yaml.safe_load(manifest.read_text(encoding="utf-8"))
             if not isinstance(data, dict):
                 errors.append("catalog.yml is not a YAML mapping")
-            elif "catalog_name" not in data:
-                errors.append("catalog.yml missing required field 'catalog_name'")
+            else:
+                manifest_data = data
+                if "catalog_name" not in data:
+                    errors.append("catalog.yml missing required field 'catalog_name'")
         except Exception as exc:
             errors.append(f"catalog.yml parse error: {exc}")
 
@@ -117,7 +151,19 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
         errors.append("standard_names/ contains no .yml files")
         return errors
 
-    # --- Layer 2: ISN structural + semantic catalog checks ---------------
+    # --- Layer 2: manifest compatibility stamp ---------------------------
+    # Read the stamp before anything loads the tree. The loader validates
+    # the manifest sidecar while loading entries, so a manifest from an
+    # older exporter fails there first, as a list of missing fields — which
+    # describes a symptom of the stale shape rather than the shape itself.
+    # Refuse on the stamp alone so the remedy is the whole message.
+    if manifest_data is not None:
+        stamp_error = _check_edge_model_version(manifest_data)
+        if stamp_error:
+            errors.append(stamp_error)
+            return errors
+
+    # --- Layer 3: ISN structural + semantic catalog checks ---------------
     # Hard structural failures (Pydantic / round-trip) block publish; the
     # ``WARNING -`` and ``INFO -`` advisories are emitted to the log but
     # do not block. Hard upstream gates live at compose/validate time
@@ -142,7 +188,7 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
     except Exception as exc:
         errors.append(f"structural check failed: {exc}")
 
-    # --- Layer 3: public alias / structural relation checks ---------------
+    # --- Layer 4: public alias / structural relation checks ---------------
     # Advisory only — the strong gates run at compose and review time
     # (see ``canonical_locus_check`` invoked from ``_validate_via_isn``).
     # Any violation that reaches this point came from a pre-existing
@@ -278,14 +324,9 @@ def run_publish(
             report.errors.append("catalog.yml is not a YAML mapping")
             return report
 
-        # Edge model version check
-        edge_version = manifest.get("edge_model_version")
-        if edge_version != _REQUIRED_EDGE_MODEL_VERSION:
-            report.errors.append(
-                f"edge_model_version mismatch: manifest has "
-                f"'{edge_version}', required '{_REQUIRED_EDGE_MODEL_VERSION}'"
-            )
-            return report
+        # The shape stamp was already read and refused in pre-flight, ahead
+        # of the store load; the manifest re-read here is for the domain
+        # fields the copy scope is derived from.
 
         # Domain consistency check
         export_scope = manifest.get("export_scope", "full")

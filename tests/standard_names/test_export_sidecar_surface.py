@@ -227,10 +227,10 @@ class TestPublishGateMovesWithTheShape:
     def _staging(tmp_path: Path, edge_model_version: str) -> Path:
         """A staging tree whose only defect is the stamp under test.
 
-        The gate runs behind the installed loader's manifest validation, so a
-        partial hand-built sidecar is refused before the gate is reached and
-        the stamp is never read. Writing through the exporter keeps every
-        required field present and leaves the stamp the only thing that varies.
+        Written through the exporter so every field the installed loader
+        requires is present: that leaves the stamp the only thing varying, so
+        the accepting direction reaches the whole run rather than stopping at
+        some other complaint.
         """
         staging = tmp_path / "staging"
         (staging / "standard_names").mkdir(parents=True)
@@ -285,6 +285,55 @@ class TestPublishGateMovesWithTheShape:
         report = run_publish(staging, tmp_path / "isnc", dry_run=True)
 
         assert any("edge_model_version" in error for error in report.errors)
+
+    def test_an_older_exporters_tree_is_refused_by_its_stamp(
+        self, tmp_path: Path
+    ) -> None:
+        """The stale stamp is the message, not the fields the shape moved.
+
+        This is the tree an operator actually brings: cut by an exporter that
+        predates the sidecar, so its manifest carries the first stamp *and*
+        none of the fields the installed loader now requires. Both faults are
+        real, but only one is actionable, and the loader's dump names the
+        entry files rather than the manifest.
+        """
+        staging = tmp_path / "staging"
+        (staging / "standard_names").mkdir(parents=True)
+        (staging / "standard_names" / "transport.yml").write_text(
+            yaml.safe_dump(
+                [
+                    {
+                        "name": "particle_flux",
+                        "description": "Particle flux.",
+                        "documentation": "Particle flux through a surface.",
+                        "unit": "m^-2.s^-1",
+                    }
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (staging / "catalog.yml").write_text(
+            yaml.safe_dump(
+                {
+                    "catalog_name": "imas-standard-names",
+                    "edge_model_version": "v1",
+                    "export_scope": "domain",
+                    "domains_included": ["transport"],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "isnc" / ".git").mkdir(parents=True)
+
+        report = run_publish(staging, tmp_path / "isnc", dry_run=True)
+
+        assert len(report.errors) == 1
+        refusal = report.errors[0]
+        assert "edge_model_version" in refusal
+        assert refusal.count("\n") == 0
+        # The loader's manifest model would report one line per missing field.
+        assert "Field required" not in refusal
+        assert "structural" not in refusal
 
     def test_the_current_shape_stamp_passes_the_gate(self, tmp_path: Path) -> None:
         staging = self._staging(tmp_path, CATALOG_EDGE_MODEL_VERSION)

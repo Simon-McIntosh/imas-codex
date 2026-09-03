@@ -41,10 +41,12 @@ def _stage_manifest(
 ) -> None:
     """Write the manifest the exporter emits, overriding the field under test.
 
-    Publish's own gates run behind the installed loader's manifest validation,
-    which refuses a sidecar missing any required field. A hand-built partial
-    manifest therefore never reaches the gate it was written to exercise, so
-    the fixture goes through the writer and overrides only what it asserts on.
+    The domain and clean-tree gates run behind the installed loader's manifest
+    validation, which refuses a sidecar missing any required field. A
+    hand-built partial manifest therefore never reaches those gates, so the
+    fixture goes through the writer and overrides only what it asserts on.
+    (The shape stamp is the exception — it is read ahead of the load, which
+    ``TestEdgeModelVersionGuard`` covers directly.)
     """
     _write_manifest(
         staging,
@@ -627,6 +629,48 @@ class TestEdgeModelVersionGuard:
         report = run_publish(staging, isnc)
         assert report.errors
         assert any("edge_model_version" in e for e in report.errors)
+
+    def test_the_stamp_is_read_before_the_store_load(self, tmp_path: Path) -> None:
+        """A stale stamp refuses on its own, with the load never reached.
+
+        The load is what would otherwise answer first, and it answers with the
+        loader's manifest model — one line per field the reduced shape moved,
+        attributed to the entry files. Patching it to raise proves the order
+        rather than inferring it from a message that happens to be short.
+        """
+        from imas_codex.standard_names import publish as publish_module
+
+        staging = tmp_path / "staging"
+        staging.mkdir()
+        sn_dir = staging / "standard_names"
+        sn_dir.mkdir()
+        (sn_dir / "core_plasma_physics.yml").write_text(
+            yaml.safe_dump([_stage_entry("electron_temperature")])
+        )
+        _stage_manifest(
+            staging,
+            "electron_temperature",
+            "core_plasma_physics",
+            export_scope="full",
+            domains_included=["core_plasma_physics"],
+            edge_model_version="v0",
+        )
+
+        isnc = tmp_path / "isnc"
+        isnc.mkdir()
+        (isnc / ".git").mkdir()
+
+        class _LoadReached(BaseException):
+            """Not an ``Exception``: the load site catches those and reports."""
+
+        def _load_must_not_run(*args: object, **kwargs: object) -> None:
+            raise _LoadReached("the store load ran ahead of the stamp gate")
+
+        with patch("imas_standard_names.yaml_store.YamlStore", _load_must_not_run):
+            report = publish_module.run_publish(staging, isnc, dry_run=True)
+
+        assert len(report.errors) == 1
+        assert "edge_model_version" in report.errors[0]
 
 
 # ============================================================================
