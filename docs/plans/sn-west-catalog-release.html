@@ -16,7 +16,7 @@
 <meta name="plan-effort" content="M">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-03">
+<meta name="plan-modified" content="2026-09-04">
 <meta name="plan-graph-handle" content="west-rc">
 <meta name="plan-depends-on" content="sn-west-review-rehearsal">
 <meta name="plan-blocks" content="">
@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.92">
-<meta name="plan-version" content="136">
+<meta name="plan-version" content="138">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0,d36d8b6c,75a5d2ca,9e4773f7,9da911db,95421a4e,329b6cda,7b6a558a,18939154,35317df">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -415,6 +415,9 @@
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T200834629370-n-wcr-sweep-scheduling-note" data-who="doc-sweepsched-o" data-when="2026-09-03T20:13:01.979Z">
     <div class="r-comment-body"><p>the release recipe now carries the sweep as a scheduled operation, +40 lines with a reproducible census committed verbatim. It corrected the figure in passing: the terminal population is 2241 now, not 2239, grown by the two radiance renames - so the fence gates on the drifting count staying at 706 and explicitly NOT on the terminal total, which rises on ordinary retirement and would make the fence fail for the wrong reason</p></div>
 </div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T215557969338-n-wcr-recipe-route-fix" data-who="doc-sweepsched-o" data-when="2026-09-03T21:59:16.948Z">
+    <div class="r-comment-body"><p>the release recipe now gives the working scoped route, sn run --name with --skip-global-maintenance, and records why the focus flag fails: it selects data-dictionary paths so a standard-name id is prefixed dd: and refused at source seeding. Flags were verified against the CLI definitions rather than memory, and the two correct --focus mentions elsewhere in the file were deliberately left alone with a note so a later reader does not fix them</p></div>
+</div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
 </div>
@@ -516,6 +519,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T195145317321-n-wcr-publish-refusal-order" data-who="impl-refusalorder" data-when="2026-09-03T20:16:50.700Z">
     <div class="r-comment-body"><p>the operator's refusal for a tree cut by an older exporter went from a 24-line eight-field pydantic dump labelled structural-check-failed to one line naming the stale stamp and the remedy; focused gate 50 passed exit 0, full suite added failures 0. Both new tests were demonstrated biting with the reorder removed, one of them patching the store to raise a BaseException so the load site's broad except cannot swallow it</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T215451330280-n-wcr-third-inert-mock" data-who="impl-thirdmock" data-when="2026-09-03T21:59:09.145Z">
+    <div class="r-comment-body"><p>2 passed exit 0; grep -c subprocess.run on the file returns 0, so no mockable shell-out remains. The stranded patch stood in front of nothing and the resolver would have opened a real socket; it now patches the REST seam, and the autouse guard raising from BaseException was demonstrated biting by a deliberately misdirected mock rather than only asserted</p></div>
 </div>
 </section>
 </main>

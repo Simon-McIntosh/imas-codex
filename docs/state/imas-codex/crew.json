@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T23:52:53",
+  "updated": "2026-09-04T01:52:48",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1791,6 +1791,17 @@
       {
         "id": "impl-neutronsubj",
         "harness": "claude-opus",
+        "role": "implement",
+        "session_id": "cea41150-c9da-414c-b257-fd380790293d",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "cea41150-c9da-414c-b257-fd380790293d"
+        },
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-neutronsubj-s",
+        "harness": "claude",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -62795,6 +62806,242 @@
           "role": "documentation",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T215451330280-n-wcr-third-inert-mock",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-wcr-third-inert-mock",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/test_sn_approve_reviewer_base.py -q -p no:cacheprovider exits 0 with 0 failures, the file no longer patches promote.subprocess.run so grep -c subprocess.run on it returns 0, and it carries the same autouse guard that raises on any real urlopen, demonstrated biting by a deliberately misdirected mock rather than only asserted",
+          "estimated_hours": 0.4,
+          "goal": "Move the last stranded pull-request test mock onto the REST seam so no test opens a socket",
+          "id": "n-wcr-third-inert-mock",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215451330280-n-wcr-third-inert-mock/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "tests/standard_names/test_sn_approve_reviewer_base.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-thirdmock",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T21:55:06Z",
+        "completed_at": "2026-09-03T21:59:09.145Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 236,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 243,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "2d60f7b4ec241735a5d3a73d06a40f352ba93ffd",
+        "commits": [
+          "8412a120e65a4478f54be0defae1fd1f3ef04c60"
+        ],
+        "changed_lines": {
+          "added": 62,
+          "removed": 21,
+          "files": 1
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_approve_reviewer_base.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215451330280-n-wcr-third-inert-mock/pytest.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215451330280-n-wcr-third-inert-mock/manifest.md",
+        "scope_changed": false,
+        "session_id": "7055d843-83af-4a38-bc32-e4206e3ba3a9",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.91,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-04T01:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 68411,
+            "cache_creation_input_tokens_cumulative": 68411,
+            "cache_read_input_tokens": 1250451,
+            "cache_read_input_tokens_cumulative": 1250451,
+            "inference_geo": "not_available",
+            "input_tokens": 38,
+            "input_tokens_cumulative": 38,
+            "output_tokens": 10391,
+            "output_tokens_cumulative": 10391,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.5693004999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.5693004999999998
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 238.66,
+          "generated_tokens": 10391,
+          "generation_seconds": 147.407,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 8.2,
+          "machine_seconds": 91.253,
+          "peak_input_tokens": 81625,
+          "tokens_per_second": 70.49,
+          "wall_tokens_per_second": 43.54
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_sn_approve_reviewer_base.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T215557969338-n-wcr-recipe-route-fix",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-recipe-route-fix",
+        "node_definition": {
+          "done_when": "in imas_codex/standard_names/AGENTS.md the recipe's scoped-run instruction reads 'sn run --name' so grep -c 'sn run --name' returns at least 1, grep -c 'skip-global-maintenance' returns at least 1, the recipe no longer instructs the reader to scope a single standard name through the focus flag, and the passage records why: that flag selects data-dictionary paths, so a standard-name id is prefixed dd: and refused at source seeding with cannot-capture-exact-DD-snapshot. The maintenance skip is presented as the primary fence because it makes the sweep unreachable, with the drift census kept as corroboration rather than as the gate",
+          "estimated_hours": 0.25,
+          "goal": "Correct the scoped-run route in the release recipe to the flag that actually scopes by standard name",
+          "id": "n-wcr-recipe-route-fix",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215557969338-n-wcr-recipe-route-fix/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "doc-sweepsched-o",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T21:56:22Z",
+        "completed_at": "2026-09-03T21:59:16.948Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 166,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 174,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "2d60f7b4ec241735a5d3a73d06a40f352ba93ffd",
+        "commits": [
+          "d86542b567e28b9fda70c2db205998c049cf749e"
+        ],
+        "changed_lines": {
+          "added": 27,
+          "removed": 8,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c 'sn run --name' AGENTS.md (=1); grep -c 'skip-global-maintenance' (=3); grep -n 'focus <name>' (no match)",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-reuse-map.gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215557969338-n-wcr-recipe-route-fix/manifest.md",
+        "scope_changed": false,
+        "session_id": "bc8e1d16-7f93-4f07-989c-3d968536a596",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.91,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-04T01:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 75906,
+            "cache_creation_input_tokens_cumulative": 75906,
+            "cache_read_input_tokens": 1230880,
+            "cache_read_input_tokens_cumulative": 1230880,
+            "inference_geo": "not_available",
+            "input_tokens": 36,
+            "input_tokens_cumulative": 36,
+            "output_tokens": 9914,
+            "output_tokens_cumulative": 9914,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.62253,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.62253
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 169.599,
+          "generated_tokens": 9914,
+          "generation_seconds": 144.015,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 8.7,
+          "machine_seconds": 25.584,
+          "peak_input_tokens": 86608,
+          "tokens_per_second": 68.84,
+          "wall_tokens_per_second": 58.46
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -62873,16 +63120,30 @@
         "backend": "claude",
         "purpose": "dispatch",
         "opened_at": "2026-09-03T20:02:18Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-03T23:52:19Z",
+        "held_seconds": 13801,
         "utilisation_pct": 100.0,
         "resets_at": null,
         "effective_ceiling_pct": 95.0,
         "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
+        "closed_by_purpose": "dispatch",
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-claude-opus-20260903235151",
+        "backend": "claude-opus",
+        "purpose": "resume",
+        "opened_at": "2026-09-03T23:51:51Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": null,
         "resumption_fired": false
       }
     ],
-    "_version": 1531
+    "_version": 1540
   }
 }
