@@ -176,4 +176,4 @@ class TestDomainHeaderHasNoSha:
         text = (tmp_path / "standard_names" / "core_plasma_physics.yml").read_text()
         assert "Catalog sha" not in text
         assert "deadbeefcafe" not in text
-        assert "# Domain: core_plasma_physics" in text
+        assert text.startswith("- "), text[:120]
