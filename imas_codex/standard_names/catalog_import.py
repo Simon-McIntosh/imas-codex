@@ -33,6 +33,17 @@ logger = logging.getLogger(__name__)
 #: validation; it is never compared against the graph.
 COMPUTED_FIELDS: frozenset[str] = frozenset({"arguments", "error_variants"})
 
+#: Name of the manifest sidecar written beside the published domain files.
+MANIFEST_FILENAME = "catalog.yml"
+
+#: Machine-derived per-name fields the published entry no longer carries. They
+#: are read off the sidecar's ``names`` block and overlaid onto the entry
+#: before model validation, so the comparison below still sees every field it
+#: compares against the graph rather than silently passing on an absent one.
+SIDECAR_NAME_FIELDS: frozenset[str] = frozenset(
+    {"kind", "status", "physics_domain", "links", "arguments", "sources"}
+)
+
 
 def guard_catalog_write_payloads(
     entries: list[dict[str, Any]],
@@ -124,6 +135,40 @@ def _derive_domain_from_path(yaml_path: Path) -> str | None:
             return None
         return domain
     return None
+
+
+def _load_sidecar_metadata(catalog_dir: Path) -> dict[str, dict[str, Any]]:
+    """Return the manifest sidecar's per-name metadata block, keyed by name.
+
+    The published layout puts ``catalog.yml`` beside the ``standard_names``
+    directory, so a caller may hand either level. An absent or unreadable
+    sidecar yields an empty mapping and the comparison then reports the
+    machine-derived fields as absent rather than as agreeing.
+    """
+    import yaml
+
+    for candidate in (
+        catalog_dir / MANIFEST_FILENAME,
+        catalog_dir.parent / MANIFEST_FILENAME,
+    ):
+        if not candidate.is_file():
+            continue
+        try:
+            manifest = yaml.safe_load(candidate.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.warning("Cannot parse catalog sidecar %s: %s", candidate, exc)
+            return {}
+        if not isinstance(manifest, dict):
+            continue
+        names = manifest.get("names") or {}
+        if not isinstance(names, dict):
+            return {}
+        return {
+            str(identity): dict(block)
+            for identity, block in names.items()
+            if isinstance(block, dict)
+        }
+    return {}
 
 
 # ---------------------------------------------------------------------------
@@ -223,9 +268,11 @@ _CHECK_FIELDS = (
 
 # Fields that are graph-only extensions (not in the ISN catalog model)
 # but may appear in YAML files. Strip before model validation.
+# ``physics_domain`` is deliberately absent: the ISN entry model declares it and
+# requires it, so stripping it made every entry fail validation and the whole
+# comparison silently report nothing.
 _GRAPH_ONLY_FIELDS = {
     "dd_paths",
-    "physics_domain",
     "cocos_transformation_type",
     "cocos",
 }
@@ -261,6 +308,7 @@ def check_catalog(
     from imas_codex.graph.client import GraphClient
 
     ta = TypeAdapter(StandardNameEntry)
+    sidecar = _load_sidecar_metadata(catalog_dir)
     catalog_sha = _resolve_catalog_sha(catalog_dir)
     result = CheckResult(catalog_commit_sha=catalog_sha)
 
@@ -268,7 +316,7 @@ def check_catalog(
     yaml_files = sorted(
         p
         for p in catalog_dir.rglob("*")
-        if p.suffix in (".yml", ".yaml") and p.is_file()
+        if p.suffix in (".yml", ".yaml") and p.is_file() and p.name != MANIFEST_FILENAME
     )
 
     catalog_entries: dict[str, dict[str, Any]] = {}
@@ -308,17 +356,30 @@ def check_catalog(
                             cf,
                         )
 
+                # The entry carries only the reviewable fields; the sidecar
+                # supplies the machine-derived ones the model still declares
+                # and the comparison below still checks.
+                identity = entry_data.get("name")
+                resolved = {
+                    **entry_data,
+                    **{
+                        k: v
+                        for k, v in sidecar.get(str(identity), {}).items()
+                        if k in SIDECAR_NAME_FIELDS
+                    },
+                }
+
                 # Strip computed + graph-only fields before ISN model validation
                 model_data = {
                     k: v
-                    for k, v in entry_data.items()
+                    for k, v in resolved.items()
                     if k not in _GRAPH_ONLY_FIELDS
                     and k not in COMPUTED_FIELDS
                     and k not in _ISN_REMOVED_FIELDS
                 }
                 entry = ta.validate_python(model_data)
 
-                raw_pd = entry_data.get("physics_domain")
+                raw_pd = resolved.get("physics_domain")
                 if isinstance(raw_pd, list):
                     pd_value: list[str] | str = raw_pd
                 elif isinstance(raw_pd, str) and raw_pd:
@@ -328,7 +389,10 @@ def check_catalog(
                 graph_dict = _entry_to_graph_dict(entry, physics_domain=pd_value)
                 catalog_entries[graph_dict["id"]] = graph_dict
 
-        except Exception:
+        except Exception as exc:
+            # A file that cannot be read or validated must not pass as agreeing
+            # with the graph, so say so rather than dropping it in silence.
+            logger.warning("Cannot compare catalog file %s: %s", yaml_path, exc)
             continue
 
     if not catalog_entries:

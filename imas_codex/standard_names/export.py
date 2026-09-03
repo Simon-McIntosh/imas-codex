@@ -112,6 +112,30 @@ _ISN_UNSUPPORTED_FIELDS = frozenset({"constraints"})
 # YAML only when the selected entry model declares it.
 _GRAPH_ONLY_RENDERED_FIELDS = frozenset({"validity_domain", "roles", "sources"})
 
+# The reviewable catalog entry carries only what a physicist is invited to
+# judge: the identity, its prose and the physical unit that frames the prose.
+# Everything else about a published name is machine-derived and moves to the
+# per-name block of the manifest sidecar, so an edit to a domain file can only
+# express a review opinion and never contradicts the graph.
+_ENTRY_REVIEW_FIELDS: tuple[str, ...] = ("name", "description", "documentation", "unit")
+
+#: Machine-derived per-name fields that live in the sidecar rather than the
+#: entry. ``sources`` carries its own per-binding ``version`` sub-key.
+_SIDECAR_NAME_FIELDS: tuple[str, ...] = (
+    "kind",
+    "status",
+    "physics_domain",
+    "links",
+    "arguments",
+    "sources",
+)
+
+#: Shape stamp for the manifest's relationship and per-name metadata blocks.
+#: The first published shape declared machine-derived fields on each entry;
+#: this shape declares them once per name in the sidecar. ``publish`` refuses a
+#: manifest whose stamp it does not recognise, so the two move together.
+CATALOG_EDGE_MODEL_VERSION = "v2"
+
 # These identity-specific holds take precedence over generic lifecycle gates.
 # Each reason names the unresolved authority condition so the exclusion ledger
 # stays reviewable and a hold is removed only when that condition is resolved.
@@ -1858,8 +1882,15 @@ def _write_domain_yaml(
     staging_dir: Path,
     domain: str,
     entries: list[dict[str, Any]],
+    *,
+    name_metadata: dict[str, dict[str, Any]] | None = None,
 ) -> Path:
-    """Write a per-domain YAML file containing all entries as a list.
+    """Write a per-domain YAML file carrying only the reviewable entry fields.
+
+    The machine-derived fields each entry no longer carries are collected into
+    *name_metadata*, keyed by name, for the caller to place in the manifest
+    sidecar. One export writes many domain files and one manifest, so the
+    caller accumulates across domains rather than merging returned mappings.
 
     The file carries entries only. Provenance and counts live in the manifest
     (catalog.yml), which is written once per export: a per-file preamble
@@ -1885,6 +1916,9 @@ def _write_domain_yaml(
 
     # Canonicalise, reorder, and clean each entry
     clean_entries: list[dict[str, Any]] = []
+    metadata_by_name: dict[str, dict[str, Any]] = (
+        name_metadata if name_metadata is not None else {}
+    )
     for entry_dict in entries:
         catalog_entry = {
             **entry_dict,
@@ -1909,7 +1943,14 @@ def _write_domain_yaml(
             for key, value in clean.items()
             if key not in _GRAPH_ONLY_RENDERED_FIELDS or key in declared_fields
         }
-        clean_entries.append(reorder_entry_dict(publishable))
+        ordered = reorder_entry_dict(publishable)
+        identity = ordered["name"]
+        metadata_by_name[identity] = {
+            key: ordered[key] for key in _SIDECAR_NAME_FIELDS if key in ordered
+        }
+        clean_entries.append(
+            {key: ordered[key] for key in _ENTRY_REVIEW_FIELDS if key in ordered}
+        )
 
     content = dump_catalog_yaml(clean_entries)
 
@@ -1917,12 +1958,19 @@ def _write_domain_yaml(
     # installed ISN factory. This is intentionally after YAML serialization:
     # a coercion or late augmentation mismatch must fail here, locally, rather
     # than in the catalog repository's validation job.
+    # The reduced entry carries no union discriminator on its own, so the
+    # resolved shape a consumer sees — entry bytes overlaid with the sidecar
+    # block that will be written beside them — is what must validate.
     serialized_entries = yaml.safe_load(content)
     for serialized_entry in serialized_entries:
+        identity = serialized_entry.get("name", "?")
+        resolved = {
+            **serialized_entry,
+            **metadata_by_name.get(identity, {}),
+        }
         try:
-            _entry_model(serialized_entry)
+            _entry_model(resolved)
         except Exception as exc:
-            identity = serialized_entry.get("name", "?")
             raise RuntimeError(
                 f"catalog entry {identity!r} in domain {domain!r} failed "
                 "installed ISN validation after final YAML serialization"
@@ -1966,6 +2014,7 @@ def _write_manifest(
     domains_included: list[str] | None = None,
     review_batch: list[str] | None = None,
     require_provenance: bool = False,
+    names: dict[str, dict[str, Any]] | None = None,
 ) -> Path:
     """Write the catalog.yml manifest to the staging directory root.
 
@@ -2004,7 +2053,14 @@ def _write_manifest(
         "domains_included": sorted(domains_included or []),
         "catalog_commit_sha": source_commit_sha,
         "exported_at": stamp,
-        "edge_model_version": "v1",
+        "edge_model_version": CATALOG_EDGE_MODEL_VERSION,
+        # One block per published name holding every machine-derived field the
+        # entry no longer carries. The loader overlays it before entry-model
+        # validation, so the sidecar and the entry together are the entry.
+        "names": {
+            identity: dict(metadata)
+            for identity, metadata in sorted((names or {}).items())
+        },
     }
     # A review-batch export carries the batch id-set so the SPA can render a
     # PR-scoped fixed view. Omitted on normal builds so their output is
@@ -2608,8 +2664,9 @@ def run_export(
         # ── 5c. Write ordered domain files ──────────────────────
         codex_sha = _get_codex_commit_sha()
 
+        name_metadata: dict[str, dict[str, Any]] = {}
         for d, entries in sorted(domain_entries.items()):
-            _write_domain_yaml(staging_path, d, entries)
+            _write_domain_yaml(staging_path, d, entries, name_metadata=name_metadata)
 
     # Dedup: a candidate with multiple physics_domain values is enumerated
     # by the candidate loop once per domain, but ``domain_entries[primary]``
@@ -2736,6 +2793,7 @@ def run_export(
         domains_included=all_domains,
         review_batch=sorted(review_batch) if review_batch is not None else None,
         require_provenance=True,
+        names=name_metadata,
     )
 
     # ── 7. Write export report ──────────────────────────────────

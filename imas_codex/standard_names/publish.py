@@ -25,10 +25,14 @@ from typing import Any
 import yaml
 from filelock import FileLock
 
+from imas_codex.standard_names.export import CATALOG_EDGE_MODEL_VERSION
+
 logger = logging.getLogger(__name__)
 
-#: Required edge model version — publish refuses incompatible manifests.
-_REQUIRED_EDGE_MODEL_VERSION = "v1"
+#: Required manifest shape stamp — publish refuses a manifest whose per-name
+#: and relationship blocks it cannot read. Sourced from the exporter so the
+#: writer and this gate can never drift apart.
+_REQUIRED_EDGE_MODEL_VERSION = CATALOG_EDGE_MODEL_VERSION
 
 
 # =============================================================================
