@@ -38,6 +38,10 @@ class ReviewPreviewLinkInvariantError(RuntimeError):
     """The created review PR does not expose its exact Pages preview address."""
 
 
+class ExclusionLedgerLinkError(RuntimeError):
+    """The exclusion ledger exists but no committed revision can be linked."""
+
+
 class _GitHubClient:
     """Small GitHub CLI boundary for creating and verifying review PRs."""
 
@@ -147,6 +151,78 @@ def _write_and_verify_review_preview_link(
             f"{preview_url}"
         )
     return preview_url
+
+
+_EXCLUSION_LEDGER_SUFFIX = ".exclusions.json"
+
+
+def exclusion_ledger_path(focus_file: str | Path) -> Path | None:
+    """The node-category exclusion ledger committed beside a source manifest.
+
+    Returns None when the manifest has no ledger, which is the normal case for
+    a focus file naming standard names directly: nothing was excluded by DD
+    node category, so there is nothing for a reviewer to open.
+    """
+    focus = Path(focus_file)
+    ledger = focus.with_name(f"{focus.stem}{_EXCLUSION_LEDGER_SUFFIX}")
+    return ledger if ledger.is_file() else None
+
+
+def exclusion_ledger_blob_url(ledger: str | Path) -> str:
+    """Return a blob address for the ledger's own committed revision.
+
+    The revision is the last commit that touched the ledger rather than the
+    checkout HEAD, so the address neither churns on unrelated commits nor
+    resolves to bytes other than the ones the release excluded. A ledger that
+    exists only in the working tree has no address a reviewer could open, so
+    it raises instead of publishing a link that 404s.
+    """
+    ledger = Path(ledger).resolve()
+    toplevel = _run_git("rev-parse", "--show-toplevel", cwd=ledger.parent)
+    if toplevel.returncode != 0:
+        raise ExclusionLedgerLinkError(
+            f"{ledger} is not inside a git checkout, so its committed revision "
+            "cannot be resolved"
+        )
+    root = Path(toplevel.stdout.strip())
+    relative = ledger.relative_to(root).as_posix()
+    revision = _run_git("log", "-1", "--format=%H", "--", relative, cwd=root)
+    sha = revision.stdout.strip()
+    if revision.returncode != 0 or not sha:
+        raise ExclusionLedgerLinkError(
+            f"{relative} has no commit in {root}: commit the exclusion ledger "
+            "before cutting the review candidate"
+        )
+    blob = _run_git("cat-file", "-e", f"{sha}:{relative}", cwd=root)
+    if blob.returncode != 0:
+        raise ExclusionLedgerLinkError(
+            f"{relative} is absent from {sha}, so a blob address for it would "
+            "not resolve"
+        )
+    slug = _github_slug(root, "origin")
+    if slug is None:
+        raise ExclusionLedgerLinkError(
+            f"{root} has no github 'origin' remote, so the exclusion ledger has "
+            "no reviewable address"
+        )
+    return f"https://github.com/{slug[0]}/{slug[1]}/blob/{sha}/{relative}"
+
+
+def body_with_exclusion_ledger_link(body: str, focus_file: str | Path) -> str:
+    """Append the reviewer's route from an excluded path to its category.
+
+    The ledger records every source path the DD node category withheld from
+    the batch together with the category that withheld it; the body carries
+    its address so the exclusion accounting is checkable rather than asserted.
+    """
+    ledger = exclusion_ledger_path(focus_file)
+    if ledger is None:
+        return body
+    url = exclusion_ledger_blob_url(ledger)
+    return (
+        f"{body.rstrip()}\n\nExcluded source paths, each with the data "
+        f"dictionary node category that excluded it: {url}\n"
+    )
 
 
 # =============================================================================
@@ -1690,6 +1766,11 @@ def run_review_release(
             minted_from=str(focus_file),
             dd_gaps=report.dd_gap_summary,
         )
+    try:
+        body = body_with_exclusion_ledger_link(body, focus_file)
+    except ExclusionLedgerLinkError as exc:
+        report.errors.append(f"{type(exc).__name__}: {exc}")
+        return report
     try:
         pr_number, pr_url = pr_creator(
             branch=report.branch,

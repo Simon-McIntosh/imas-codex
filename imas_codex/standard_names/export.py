@@ -1853,12 +1853,7 @@ def assemble_review_catalog(
     for path in standard_names.glob("*.yml"):
         path.unlink()
     for domain, records in sorted(by_domain.items()):
-        header = (
-            f"# Domain: {domain}\n"
-            f"# Entries: {len(records)}\n"
-            "# Ordering: approved baseline followed by fresh review entries\n"
-        ).encode()
-        content = bytearray(header)
+        content = bytearray()
         for record in records:
             content.extend(record.item_bytes)
             if not record.item_bytes.endswith(b"\n"):
@@ -1902,9 +1897,11 @@ def _write_domain_yaml(
 ) -> Path:
     """Write a per-domain YAML file containing all entries as a list.
 
-    The source commit sha lives only in the manifest (catalog.yml): stamping
-    the codex HEAD sha into each per-domain header churned every one of the
-    ~18 domain files on any unrelated codex commit.
+    The file carries entries only. Provenance and counts live in the manifest
+    (catalog.yml), which is written once per export: a per-file preamble
+    restating the domain, the entry count and the ordering rule goes stale the
+    moment an entry moves between domains or the ordering changes, and it
+    churns every one of the ~18 domain files on unrelated edits.
 
     Each entry is re-validated against the ISN model in its FINAL, written
     shape — after canonicalisation, unsupported-field stripping, and link
@@ -1921,16 +1918,6 @@ def _write_domain_yaml(
     sn_dir = staging_dir / "standard_names"
     sn_dir.mkdir(parents=True, exist_ok=True)
     filepath = sn_dir / f"{domain}.yml"
-
-    # Build header comment (no per-file sha — see docstring)
-    header_lines = [
-        f"# Domain: {domain}",
-        f"# Entries: {len(entries)}",
-        "# Ordering: structural traversal",
-        "#   (HAS_PARENT-incoming + HAS_ERROR-outgoing, Kahn topo sort,",
-        "#    alphabetic tie-break)",
-    ]
-    header = "\n".join(header_lines) + "\n"
 
     # Canonicalise, reorder, and clean each entry
     clean_entries: list[dict[str, Any]] = []
@@ -1977,7 +1964,7 @@ def _write_domain_yaml(
                 "installed ISN validation after final YAML serialization"
             ) from exc
 
-    filepath.write_text(header + content, encoding="utf-8")
+    filepath.write_text(content, encoding="utf-8")
 
     return filepath
 
