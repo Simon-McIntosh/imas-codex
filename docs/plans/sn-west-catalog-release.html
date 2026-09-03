@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -232,6 +232,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T075405691367-n-recompose-per-time-names" data-who="impl-pertimerecompose" data-when="2026-09-03T08:32:58.079Z">
     <div class="r-comment-body"><p>four of the eight re-composed through the governed route with quorum scores 0.956 to 0.972 for 0.75 USD, taking ratio-over-time from 1 to 0 and the retired spelling from 4 to 1; the last one is refused because a superseded orphan already holds the id it must occupy and neither edit nor supersede admits a tombstoned target</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T083407436934-n-supersede-onto-a-tombstone" data-who="impl-supersederoute" data-when="2026-09-03T08:34:23.201Z">
+    <div class="r-comment-body"><p>denied at dispatch by a per-account spend limit (warning at utilisation 0.99, then rejected, reset 10:40 Paris); nothing partial to recover, so the node is redispatched intact now the window has reset</p></div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
