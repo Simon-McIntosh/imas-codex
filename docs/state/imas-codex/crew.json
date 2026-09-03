@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T09:03:04",
+  "updated": "2026-09-03T09:26:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -55461,6 +55461,212 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T043035843046-n-comment-driven-edit-design",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-comment-driven-edit-design",
+        "node_definition": {
+          "done_when": "the report carries a live retrieval against the open review pull request showing the count of line-bound review comments the GitHub read returns alongside the exact call used, a mapping table covering all four comment forms with the misbinding failure mode of each, the sn edit flags quoted verbatim from its own help output, a count of the new code surfaces a first implementation needs with the module holding each",
+          "estimated_hours": 1.5,
+          "goal": "Determine whether a reviewer pass expressed as pull-request comments can be turned into governed sn edit invocations over one name or a whole batch, reading the existing sn edit surface (hint, rename, docs, axis, scope, reason, stage-only) together with the review pull-request machinery in catalog_release.py, reporting the exact mapping from a comment to an invocation, where a comment cannot be bound to a name safely, what the smallest implementation would touch",
+          "id": "n-comment-driven-edit-design",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/comment-driven-edit-design.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "release-contract",
+          "spec_level": "open",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/comment-driven-edit-design.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "impl-commentroute",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T04:30:42Z",
+        "completed_at": "2026-09-03T04:37:38.456Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 407,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 416,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c6ee845675b0abe4a5245f6d8b0377d5e4bca1d6",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live retrieval of review comments across every pull request the catalog repository has had",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/comment-driven-edit-design.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/comment-driven-edit-design.json",
+        "scope_changed": false,
+        "session_id": "4f1a6044-c811-4b6b-80d3-bcc33e42bbdc",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 107377,
+            "cache_creation_input_tokens_cumulative": 107377,
+            "cache_read_input_tokens": 2209222,
+            "cache_read_input_tokens_cumulative": 2209222,
+            "inference_geo": "not_available",
+            "input_tokens": 52,
+            "input_tokens_cumulative": 52,
+            "output_tokens": 27179,
+            "output_tokens_cumulative": 27179,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.8581159999999994,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.8581159999999994
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an investigation node; its deliverable is the report",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T044148295944-n-catalog-surface-sidecar",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-catalog-surface-sidecar",
+        "node_definition": {
+          "done_when": "the report records a git show of the committed sidecar at the candidate ref with its field list, an entry field count from the same ref against the four the proposal keeps, a grep -n citation per consumer of every field proposed for the move, a uv run --no-sync python GraphClient query exiting 0 whose output gives the per-type edge count over the published names, a stated verdict whose per-repository change list is itemised with a count",
+          "estimated_hours": 2.0,
+          "goal": "Determine whether the reviewable catalog entry can shrink to name, description, documentation, unit with every derived field (kind, status, physics domain, data-dictionary sources, version, name links) moving to the machine sidecar that already travels beside the entries, alongside whether that sidecar can carry the graph relationship edges a review site would need to display how one standard name relates to another",
+          "id": "n-catalog-surface-sidecar",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-surface-sidecar.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "release-contract",
+          "spec_level": "open",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-surface-sidecar.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-catalogsurface",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T04:41:55Z",
+        "completed_at": "2026-09-03T04:50:12.846Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 491,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 497,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "c6ee845675b0abe4a5245f6d8b0377d5e4bca1d6",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "committed sidecar field list plus a live per-type edge count over the published names",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-surface-sidecar.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/catalog-surface-sidecar.json",
+        "scope_changed": false,
+        "session_id": "c0dfc646-3196-4176-b940-190fce5462fd",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 127448,
+            "cache_creation_input_tokens_cumulative": 127448,
+            "cache_read_input_tokens": 4180942,
+            "cache_read_input_tokens_cumulative": 4180942,
+            "inference_geo": "not_available",
+            "input_tokens": 88,
+            "input_tokens_cumulative": 88,
+            "output_tokens": 33601,
+            "output_tokens_cumulative": 33601,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.205416,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.205416
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an investigation node; its deliverable is the report",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -55507,6 +55713,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1399
+    "_version": 1401
   }
 }
