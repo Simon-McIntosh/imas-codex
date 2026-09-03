@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T13:43:35",
+  "updated": "2026-09-03T14:06:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -57913,6 +57913,117 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T114344912853-n-fold-revives-its-target",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-fold-revives-its-target",
+        "node_definition": {
+          "done_when": "a test proves a fold onto a tombstone leaves the target at the predecessor's prior stage rather than superseded and never at accepted, a second test proves each carried source resolves to a live name afterwards, and uv run --no-sync pytest tests/standard_names -q reports one failure matching the single pre-existing claim case with zero added",
+          "estimated_hours": 1.5,
+          "goal": "Make a fold onto a tombstoned target revive that target into the review pipeline at the stage its predecessor came from, because the fold currently carries the sources across and leaves the target superseded, so a data-dictionary path ends up with no live standard name at all and is invisible to every pool, and revival must route through review rather than granting acceptance",
+          "id": "n-fold-revives-its-target",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-revives-its-target.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/edit.py",
+            "tests/standard_names/test_supersede_into_tombstone.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-supersederoute",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T11:43:51Z",
+        "completed_at": "2026-09-03T12:03:54.440Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1194,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1203,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d3dfff7fde076401e1b23a187df1c04fc130d3ab",
+        "commits": [
+          "86a797dccc5ed945eee0138d1aced970755c45e7"
+        ],
+        "changed_lines": {
+          "added": 168,
+          "removed": 10,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_supersede_into_tombstone.py tests/standard_names/test_tombstone_supersede.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-revives-its-target.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-revives-its-target.json",
+        "scope_changed": false,
+        "session_id": "549a78f1-0da7-412f-a556-d9509ccca2de",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 8461,
+            "cache_creation_input_tokens_cumulative": 8461,
+            "cache_read_input_tokens": 2113483,
+            "cache_read_input_tokens_cumulative": 2113483,
+            "inference_geo": "not_available",
+            "input_tokens": 18,
+            "input_tokens_cumulative": 18,
+            "output_tokens": 4935,
+            "output_tokens_cumulative": 4935,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.6937952,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.6937952
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -57973,6 +58084,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1436
+    "_version": 1437
   }
 }
