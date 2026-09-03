@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T23:50:31",
+  "updated": "2026-09-03T23:52:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -555,6 +555,15 @@
       },
       {
         "id": "impl-cascadefield",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-cascadekw",
         "harness": "claude-opus",
         "role": "implement",
         "session_id": null,
@@ -1780,6 +1789,15 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-neutronsubj",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-normalizer",
         "harness": "codex",
         "role": "implement",
@@ -2799,6 +2817,15 @@
           "gpt-5.6-sol": "01a05eaa-7144-71e3-bce3-715d7bd45a8a"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-thirdmock",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-torflux",
@@ -62531,6 +62558,243 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T200612156705-n-wcr-cascade-field-rename",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-cascade-field-rename",
+        "node_definition": {
+          "done_when": "grep -rc 'cascade_planned' imas_codex/ returns 0, uv run --no-sync pytest tests/standard_names/test_rename_cascade.py tests/llm tests/standard_names/test_edit_cli.py -q -p no:cacheprovider exits 0 with 0 failures, and the report states the count of call sites moved beside the count of files touched",
+          "estimated_hours": 0.75,
+          "goal": "Rename the deferred-cascade field so its own name says the rows are a plan rather than an outcome",
+          "id": "n-wcr-cascade-field-rename",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T200612156705-n-wcr-cascade-field-rename/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/standard_names/edit.py",
+            "imas_codex/standard_names/cascade.py",
+            "imas_codex/cli/sn.py",
+            "imas_codex/llm/sn_tools.py",
+            "imas_codex/llm/server.py",
+            "tests/standard_names/test_rename_cascade.py",
+            "tests/llm"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-cascadefield",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T20:06:19Z",
+        "completed_at": "2026-09-03T20:11:12.639Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 287,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 293,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "ece1ed6c0791a3bb5bc544208c6cab77dabddd64",
+        "commits": [
+          "7dffaeb82ec628df2f8e6aa03b9ff9a68ac53e85"
+        ],
+        "changed_lines": {
+          "added": 35,
+          "removed": 35,
+          "files": 6
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T200612156705-n-wcr-cascade-field-rename/manifest.md",
+        "scope_changed": false,
+        "session_id": "fd4ecf43-46ea-4178-979d-6e9c52067b98",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 73822,
+            "cache_creation_input_tokens_cumulative": 73822,
+            "cache_read_input_tokens": 1647554,
+            "cache_read_input_tokens_cumulative": 1647554,
+            "inference_geo": "not_available",
+            "input_tokens": 46,
+            "input_tokens_cumulative": 46,
+            "output_tokens": 14951,
+            "output_tokens_cumulative": 14951,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.936002,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.936002
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 289.86,
+          "generated_tokens": 14951,
+          "generation_seconds": 207.027,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 8.7,
+          "machine_seconds": 82.833,
+          "peak_input_tokens": 87036,
+          "tokens_per_second": 72.22,
+          "wall_tokens_per_second": 51.58
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_rename_cascade.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T200834629370-n-wcr-sweep-scheduling-note",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-sweep-scheduling-note",
+        "node_definition": {
+          "done_when": "grep -c 'realign-segments' imas_codex/standard_names/AGENTS.md returns at least 1, the added passage states the figure 706 alongside the 2239 terminal-stage total and names the before-and-after census a scoped run must show to prove it did not fire the sweep, and grep -Ein 'phase[-_ ]?[0-9]|co-authored-by|generated with' over the added lines returns 0",
+          "estimated_hours": 0.25,
+          "goal": "Record in the release recipe that the ungated segment sweep is a scheduled operation rather than a rotation side effect",
+          "id": "n-wcr-sweep-scheduling-note",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T200834629370-n-wcr-sweep-scheduling-note/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "doc-sweepsched-o",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T20:08:41Z",
+        "completed_at": "2026-09-03T20:13:01.979Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 255,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 260,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "ece1ed6c0791a3bb5bc544208c6cab77dabddd64",
+        "commits": [
+          "cdec92e6557bd4b99114571ae972b38004e17580"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c 'realign-segments' imas_codex/standard_names/AGENTS.md (=1); added lines carry 706 and 2239; naming checks over added lines return 0",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-reuse-map.gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T200834629370-n-wcr-sweep-scheduling-note/manifest.md",
+        "scope_changed": false,
+        "session_id": "5ade601f-61be-493d-9933-e9969cebce6b",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 78854,
+            "cache_creation_input_tokens_cumulative": 78854,
+            "cache_read_input_tokens": 1750462,
+            "cache_read_input_tokens_cumulative": 1750462,
+            "inference_geo": "not_available",
+            "input_tokens": 48,
+            "input_tokens_cumulative": 48,
+            "output_tokens": 15374,
+            "output_tokens_cumulative": 15374,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.048361,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.048361
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 257.541,
+          "generated_tokens": 15374,
+          "generation_seconds": 207.916,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 9.2,
+          "machine_seconds": 49.625,
+          "peak_input_tokens": 92068,
+          "tokens_per_second": 73.94,
+          "wall_tokens_per_second": 59.7
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -62619,6 +62883,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1526
+    "_version": 1531
   }
 }
