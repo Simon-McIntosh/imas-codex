@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T13:05:16",
+  "updated": "2026-09-03T13:15:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -57483,6 +57483,106 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T110541230664-n-complete-the-blocked-rename-b",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-complete-the-blocked-rename-b",
+        "node_definition": {
+          "done_when": "a GraphClient census counting live names carrying the retired temporal prefix prints 1 before the work and 0 after, with the report giving the before and after identity, whether a producing source reattached and from which data-dictionary path, the recorded quorum score, the exact invocations used, the spend",
+          "estimated_hours": 1.5,
+          "goal": "Finish the one refused per-time rename by moving the live quarantined name spelled with the retired temporal prefix onto the tombstoned identity its own grandparent holds, using only the governed fold or rename routes with a mandatory reason, never a hand edit, never a direct acceptance, now that the fold admits a chain returning to the identity it started from",
+          "id": "n-complete-the-blocked-rename-b",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/complete-the-blocked-rename.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/complete-the-blocked-rename.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-blockedrename",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T11:05:48Z",
+        "completed_at": "2026-09-03T11:12:49.509Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 413,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 421,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5c007886ed266a0134d3f546a3af55ff65ce57f2",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/complete-the-blocked-rename.json",
+        "scope_changed": false,
+        "session_id": "b52f444f-104b-41a6-a992-c5c6627c6bc2",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 124200,
+            "cache_creation_input_tokens_cumulative": 124200,
+            "cache_read_input_tokens": 3825952,
+            "cache_read_input_tokens_cumulative": 3825952,
+            "inference_geo": "not_available",
+            "input_tokens": 74,
+            "input_tokens_cumulative": 74,
+            "output_tokens": 27514,
+            "output_tokens_cumulative": 27514,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.5372784000000002,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.5372784000000002
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an investigation of three refused routes; no code in this node's scope changed",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -57543,6 +57643,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1430
+    "_version": 1431
   }
 }
