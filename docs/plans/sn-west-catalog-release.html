@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="91">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -284,6 +284,9 @@
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T131836408968-n-standard-names-suite-is-green" data-who="impl-suitegreen" data-when="2026-09-03T13:27:07.500Z">
     <div class="r-comment-body"><p>the standard-name suite is green: the atomic-claim assertion now proves no stage is written rather than that a column name is absent, and the pinned-schema fixture reads the version from the project dependency</p></div>
 </div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T134144400046-n-provenance-orphan-triage" data-who="inv-orphantriage" data-when="2026-09-03T13:47:11.827Z">
+    <div class="r-comment-body"><p>all seven sourceless names are attributed to a mechanism from their own records: two keep a detachment whose reason still holds and need the pairing retired rather than restored, five lost their source with no detachment record at all and need rebuilding because three were dropped by a pre-fix rename that backfilled only the name lineage and two have affirmatively silent histories</p></div>
+</div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
 </div>
@@ -352,6 +355,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T122811545240-n-west-recut-reduced-surface-b" data-who="impl-recut12" data-when="2026-09-03T12:53:59.561Z">
     <div class="r-comment-body"><p>the recut produced fork PR 12 with the reduced surface and the readable prose, and correctly left PR 11 open rather than closing a working candidate against a red successor; its validate check fails because the loader does not read the kind discriminator from the sidecar the reduction moved it to</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T134040639599-n-one-repo-owns-the-layout-stamp" data-who="impl-edgestamp" data-when="2026-09-03T13:53:21.162Z">
+    <div class="r-comment-body"><p>the exporter reads the catalog layout stamp from the standard-names package instead of declaring it locally, so one repository owns the value and the next layout change has one place to update</p></div>
 </div>
 </section>
 </main>

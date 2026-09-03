@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T15:40:19",
+  "updated": "2026-09-03T15:55:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -58624,6 +58624,223 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T134144400046-n-provenance-orphan-triage",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-provenance-orphan-triage",
+        "node_definition": {
+          "done_when": "a GraphClient census query prints 7 live pipeline names with no producing source, the report tabulates all seven with stage, unit, the change operations recorded against each and the restore-or-retire route each needs, and names for every one of the five without a detachment record the operation that removed its source quoted from that record",
+          "estimated_hours": 2.0,
+          "goal": "Report the mechanism that removed the source from each live standard name that now carries none, reading each name's recorded change history rather than inferring, so the seven remaining after the reattachment reconcile are separated into the two whose detachment reason still holds under the current grammar and the five that carry no detachment record at all",
+          "id": "n-provenance-orphan-triage",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/provenance-orphan-triage.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "entry-gate",
+          "spec_level": "open",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/provenance-orphan-triage.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-orphantriage",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T13:41:50Z",
+        "completed_at": "2026-09-03T13:47:11.827Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 315,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 321,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "d6a27275477f656b2abbda40b1e0d5a7f023394e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "GraphClient census of live pipeline names with no producing source, plus each name's recorded change history",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/provenance-orphan-triage.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/provenance-orphan-triage.json",
+        "scope_changed": false,
+        "session_id": "b59fb822-4698-4ba7-a53c-d1e3fe2cf6f8",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 126376,
+            "cache_creation_input_tokens_cumulative": 126376,
+            "cache_read_input_tokens": 4097499,
+            "cache_read_input_tokens_cumulative": 4097499,
+            "inference_geo": "not_available",
+            "input_tokens": 74,
+            "input_tokens_cumulative": 74,
+            "output_tokens": 25500,
+            "output_tokens_cumulative": 25500,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.5801518000000003,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.5801518000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an investigation node; its deliverable is the report",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": true,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T134040639599-n-one-repo-owns-the-layout-stamp",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-one-repo-owns-the-layout-stamp",
+        "node_definition": {
+          "done_when": "a grep shows no literal layout-version string remaining in either module, a test proves the exporter stamps whatever the installed package declares and the publish gate accepts that value while rejecting a different one, and uv run --no-sync pytest tests/standard_names -q exits 0",
+          "estimated_hours": 0.75,
+          "goal": "Have the exporter and the publish gate read the catalog layout stamp from the standard-names package rather than declaring the version string locally, because the constant is currently spelled in two repositories and the next layout change has two places to forget",
+          "id": "n-one-repo-owns-the-layout-stamp",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/one-repo-owns-the-layout-stamp.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "imas_codex/standard_names/publish.py",
+            "tests/standard_names/test_export_layout_stamp.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-edgestamp",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T13:40:47Z",
+        "completed_at": "2026-09-03T13:53:21.162Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 747,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 754,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d6a27275477f656b2abbda40b1e0d5a7f023394e",
+        "commits": [
+          "2a4ae6676759881033da82106c96c3d84ab258a6"
+        ],
+        "changed_lines": {
+          "added": 104,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/one-repo-owns-the-layout-stamp.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/one-repo-owns-the-layout-stamp.json",
+        "scope_changed": false,
+        "session_id": "cc8b1154-0f33-4024-ba9c-8e69d3735f64",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 6781,
+            "cache_creation_input_tokens_cumulative": 6781,
+            "cache_read_input_tokens": 829400,
+            "cache_read_input_tokens_cumulative": 829400,
+            "inference_geo": "not_available",
+            "input_tokens": 16,
+            "input_tokens_cumulative": 16,
+            "output_tokens": 2625,
+            "output_tokens_cumulative": 2625,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.3321012000000005,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.3321012000000005
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -58684,6 +58901,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1447
+    "_version": 1449
   }
 }
