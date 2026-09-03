@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T00:29:23",
+  "updated": "2026-09-03T07:23:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -136,6 +136,15 @@
           "gpt-5.6-sol": "01a060cb-ae77-7370-9726-93cd22d1bdd9"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "doc-reviewcomments",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "doc-westevidence",
@@ -518,6 +527,15 @@
         "created": "2026-09-01"
       },
       {
+        "id": "impl-catalogwriter",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-catapply",
         "harness": "codex",
         "role": "implement",
@@ -594,6 +612,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-commentroute",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-corpusbuild",
@@ -690,6 +717,15 @@
           "gpt-5.6-sol": "01a037fe-32e0-7a13-b94a-fdf6ddd496c1"
         },
         "created": "2026-08-25"
+      },
+      {
+        "id": "impl-descrepair",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-detachmigrate",
@@ -890,6 +926,15 @@
           "gpt-5.6-sol": "01a060ea-afc0-7f90-8d69-c2903fd0dd4d"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "impl-exportsurface",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-exportwriter",
@@ -1561,6 +1606,15 @@
         "role": "implement",
         "session_id": "01a02db8-8657-7fb3-9ead-df6744f54674",
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-parentpublish",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-parentseed",
@@ -2562,6 +2616,15 @@
           "gpt-5.6-sol": "01a02466-fa5a-77c1-952a-0322cf5ec694"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "inv-catalogsurface",
+        "harness": "claude-opus",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "inv-crsreuse",
@@ -54594,6 +54657,214 @@
           "role": "documentation",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T042815127667-n-export-header-and-ledger",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-export-header-and-ledger",
+        "node_definition": {
+          "done_when": "a test asserts no emitted catalog file begins with a comment line, a second test asserts the composed review body contains a resolvable blob link to the exclusion ledger path, with uv run --no-sync pytest tests/standard_names -q showing no added failures against its baseline",
+          "estimated_hours": 1.5,
+          "goal": "Drop the stale per-file header comments the catalog writers emit (the domain name, the entry count, the ordering claim, all three of which rot as soon as an entry moves) while making the review pull-request body carry a link to the committed exclusion ledger so a reviewer can open the excluded paths with the node category that excluded each one",
+          "id": "n-export-header-and-ledger",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/export-header-and-ledger.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_export_catalog_files.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-exportsurface",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T04:28:20Z",
+        "completed_at": "2026-09-03T04:42:28.127Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 842,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 848,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c6ee845675b0abe4a5245f6d8b0377d5e4bca1d6",
+        "commits": [
+          "6329a83e0f1fd0b964bc95562410fdd46f1345ac"
+        ],
+        "changed_lines": {
+          "added": 298,
+          "removed": 20,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_export_catalog_files.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/export-header-and-ledger.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/export-header-and-ledger.json",
+        "scope_changed": false,
+        "session_id": "cfa66d3f-1954-47fe-a1de-eb155a15a22f",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 128734,
+            "cache_creation_input_tokens_cumulative": 128734,
+            "cache_read_input_tokens": 5420821,
+            "cache_read_input_tokens_cumulative": 5420821,
+            "inference_geo": "not_available",
+            "input_tokens": 104,
+            "input_tokens_cumulative": 104,
+            "output_tokens": 28052,
+            "output_tokens_cumulative": 28052,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.699570499999999,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.699570499999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T042912013096-n-sn-flush-recover-cohort",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-sn-flush-recover-cohort",
+        "node_definition": {
+          "done_when": "a census query through the repository GraphClient counting how many of the eight named targets sit at accepted on both axes returns 0 before the work against a run that raises it, printed as a before count of 0 alongside an after count with the eight per-name rows, the quarantine issue text wherever a name stays blocked, the exact run spend against the 25 dollar ceiling",
+          "estimated_hours": 1.5,
+          "goal": "Recover the eight names the lost worker left mid-pipeline by running one unscoped drain from this worktree with UV_PROJECT_ENVIRONMENT pointed at /home/ITER/mcintos/Code/imas-codex/.venv, PYTHONPATH set to the worktree, invoking uv run --no-sync imas-codex sn run --flush --cost-limit 25, rescoring first through uv run --no-sync imas-codex sn rescore for any of them parked at exhausted or reviewed rather than hand-accepting anything",
+          "id": "n-sn-flush-recover-cohort",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sn-flush-recover-cohort.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sn-flush-recover-cohort.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-westgate",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T04:29:17Z",
+        "completed_at": "2026-09-03T04:40:46.126Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 683,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 689,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "c6ee845675b0abe4a5245f6d8b0377d5e4bca1d6",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sn-flush-recover-cohort.json",
+        "scope_changed": false,
+        "session_id": "569d680b-d9d2-43ff-bdd2-93bdb4169c08",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 32988,
+            "cache_creation_input_tokens_cumulative": 32988,
+            "cache_read_input_tokens": 7224047,
+            "cache_read_input_tokens_cumulative": 7224047,
+            "inference_geo": "not_available",
+            "input_tokens": 112,
+            "input_tokens_cumulative": 112,
+            "output_tokens": 16655,
+            "output_tokens_cumulative": 16655,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 7.963771,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 7.963771
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an operational drain changes graph state rather than repository files, and this one changed none",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": true,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -54640,6 +54911,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1378
+    "_version": 1387
   }
 }

@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="56">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -218,6 +218,9 @@
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260902T213253838006-n-codex-isn-pin-0-8-4" data-who="impl-isnpin" data-when="2026-09-02T21:38:47.635Z">
     <div class="r-comment-body"><p>the codex tooling pins imas-standard-names 0.8.4 at both sites, so the exporter writes folded, wrapped catalog prose</p></div>
 </div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T042912013096-n-sn-flush-recover-cohort" data-who="test-westgate" data-when="2026-09-03T04:40:46.126Z">
+    <div class="r-comment-body"><p>the prescribed drain cannot reach its measure and the report says why: eight drafted names carry a null description, which REVIEW_NAME_ELIGIBILITY_WHERE excludes and compose cannot refill because their sources already read composed, so an unscoped flush exits 0 at zero spend with no eligible work graph-wide</p></div>
+</div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
 </div>
@@ -247,6 +250,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T221644442790-n-runbook-readable-release" data-who="doc-releaseread" data-when="2026-09-02T22:27:46.003Z">
     <div class="r-comment-body"><p>the release recipe now gates pin-before-reconcile with a runnable census (0 kind disagreements over 2474 live names, momentum/torque/torque_density controls vector) and a candidate gate over the published bytes (18 files, 351 entries, 0 invalid domains, 0 kind disagreements)</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T042815127667-n-export-header-and-ledger" data-who="impl-exportsurface" data-when="2026-09-03T04:42:28.127Z">
+    <div class="r-comment-body"><p>catalog files no longer open with stale domain, count and ordering comments, and the review body links the committed exclusion ledger so a reviewer can open the excluded paths</p></div>
 </div>
 </section>
 </main>
