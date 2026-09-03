@@ -1789,7 +1789,7 @@ class TestRenameCascadeProtections:
         assert plan.blocked is None
         assert any(
             r["to"] == "ion_temperature_of_plasma_boundary"
-            for r in plan.cascade_planned
+            for r in plan.cascade_deferred
         )
 
     def test_accepted_descendant_blocks_by_default(self) -> None:
@@ -1820,7 +1820,7 @@ class TestRenameCascadeProtections:
         assert plan.blocked is None
         assert any(
             r["to"] == "ion_temperature_of_plasma_boundary"
-            for r in plan.cascade_planned
+            for r in plan.cascade_deferred
         )
 
     def test_default_flags_recorded_false_on_successor(self) -> None:

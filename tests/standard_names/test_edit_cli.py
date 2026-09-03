@@ -33,7 +33,7 @@ def _plan(**overrides) -> EditPlan:
         "scope": "only_self",
         "entry": "generate",
         "successor": None,
-        "cascade_planned": [],
+        "cascade_deferred": [],
         "blocked": None,
         "actions": ["hint attached to 'electron_temperature' (axis=name)"],
         "applied": True,
@@ -271,7 +271,9 @@ def test_cascade_table_rendered_for_family_scope():
         scope="family",
         entry="review_name",
         successor="ion_temperature",
-        cascade_planned=[{"from": "electron_temperature_a", "to": "ion_temperature_a"}],
+        cascade_deferred=[
+            {"from": "electron_temperature_a", "to": "ion_temperature_a"}
+        ],
     )
     runner = CliRunner()
     with patch("imas_codex.standard_names.edit.apply_edit", return_value=plan):
