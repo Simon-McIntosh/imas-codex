@@ -195,7 +195,8 @@ RETURN src.id            AS source_node_id,
          ELSE null
        END AS sn_unit,
        sn_relationship_units,
-       other_live_names
+       other_live_names,
+       dd.documentation  AS dd_documentation
 """
 
 #: Scope clause narrowing the read to one name. Used by the write-time gate on
@@ -220,7 +221,8 @@ RETURN source_id,
        coalesce(nu.id, sn.unit) AS sn_unit,
        EXISTS { (source)-[:PRODUCED_NAME]->(sn) } AS already_bound,
        existing_dd_paths,
-       sn.name_stage AS name_stage
+       sn.name_stage AS name_stage,
+       dd.documentation AS dd_documentation
 """
 
 #: Detach one attachment: the provenance edge, the DD-side projection, and the
@@ -592,6 +594,50 @@ class AttachmentPairingGuardResult:
     rejected: tuple[AttachmentVerdict, ...]
 
 
+def _locus_documentation_confirms_device(
+    sn_name: str, dd_documentation: str | None
+) -> str | None:
+    """Return the hardware locus token *dd_documentation* independently names, or None.
+
+    ``workers._is_attachment_consistent`` judges the locus/device rule purely on
+    path SPELLING: it rejects a hardware locus (``_of_interferometer_beam``) when
+    none of its content tokens literally appear among the DD path's own
+    segments. A path can measure exactly what the locus names while spelling it
+    under a different DD structure — an equilibrium constraint path carries no
+    ``interferometer`` token in its segments even though the path's own
+    documentation names interferometry outright. This reads that documentation
+    text as independent evidence: a shared word STEM (not a literal substring,
+    since ``interferometer`` and ``interferometry`` diverge past the ninth
+    letter) between a hardware locus token and a documentation word confirms the
+    device the spelling-only rule could not see.
+    """
+    if not dd_documentation:
+        return None
+    from imas_codex.standard_names.workers import (
+        _HARDWARE_LOCUS_WORDS,
+        _content_tokens,
+        _name_locus_token,
+    )
+
+    locus = _name_locus_token(sn_name)
+    if not locus:
+        return None
+    locus_tokens = _content_tokens(locus) & _HARDWARE_LOCUS_WORDS
+    if not locus_tokens:
+        return None
+    doc_tokens = _content_tokens(dd_documentation)
+    for locus_token in sorted(locus_tokens):
+        for doc_token in doc_tokens:
+            shared = 0
+            for a, b in zip(locus_token, doc_token, strict=False):
+                if a != b:
+                    break
+                shared += 1
+            if shared >= 7 and shared >= min(len(locus_token), len(doc_token)) - 2:
+                return locus_token
+    return None
+
+
 def _attachment_consistency(
     dd_path: str,
     sn_name: str,
@@ -599,6 +645,7 @@ def _attachment_consistency(
     existing_sources: tuple[str, ...] = (),
     dd_unit: str | None = None,
     sn_unit: str | None = None,
+    dd_documentation: str | None = None,
 ) -> tuple[bool, str]:
     """Ask the compose guard about a pairing, judging the registered spelling.
 
@@ -610,17 +657,36 @@ def _attachment_consistency(
     spelling first keeps the guard's question the same while the name is judged
     on the semantics the grammar still publishes for it.  The verdicts callers
     record stay keyed on the stored identity.
+
+    A locus/device rejection is re-examined against the DD path's own
+    ``dd_documentation`` text: the compose-time guard sees only the path's
+    segments, but this retroactive pass has the documentation available, and a
+    device the documentation names outright resolves the mismatch the segments
+    alone could not settle. Every other rejection reason passes through
+    unchanged — this is a narrowing of one specific rule, not a general override.
     """
     from imas_codex.standard_names.audits import resolve_retired_operator_spellings
     from imas_codex.standard_names.workers import _is_attachment_consistent
 
-    return _is_attachment_consistent(
+    resolved_name = resolve_retired_operator_spellings(sn_name)
+    ok, reason = _is_attachment_consistent(
         dd_path,
-        resolve_retired_operator_spellings(sn_name),
+        resolved_name,
         existing_sources=existing_sources,
         dd_unit=dd_unit,
         sn_unit=sn_unit,
     )
+    if not ok and reason.startswith("locus/source device mismatch"):
+        confirmed = _locus_documentation_confirms_device(
+            resolved_name, dd_documentation
+        )
+        if confirmed:
+            return True, (
+                f"locus/source device mismatch overridden: path documentation "
+                f"for {dd_path!r} names the '{confirmed}' device the path "
+                f"segments do not spell"
+            )
+    return ok, reason
 
 
 def guard_source_pairings(
@@ -674,6 +740,7 @@ def guard_source_pairings(
             existing_sources=tuple(existing_paths),
             dd_unit=row.get("dd_unit"),
             sn_unit=row.get("sn_unit"),
+            dd_documentation=row.get("dd_documentation"),
         )
         if ok:
             accepted.append(source_id)
@@ -866,6 +933,7 @@ def audit_attachments(
                 existing_sources=tuple(accepted_paths),
                 dd_unit=r["dd_unit"],
                 sn_unit=r["sn_unit"],
+                dd_documentation=r.get("dd_documentation"),
             )
             if ok:
                 accepted_paths.append(r["dd_path"])
