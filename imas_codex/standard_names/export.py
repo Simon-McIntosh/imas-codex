@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from imas_standard_names.models import CATALOG_EDGE_MODEL_VERSION
 
 from imas_codex.standard_names.canonical import (
     canonicalise_entry,
@@ -129,12 +130,6 @@ _SIDECAR_NAME_FIELDS: tuple[str, ...] = (
     "arguments",
     "sources",
 )
-
-#: Shape stamp for the manifest's relationship and per-name metadata blocks.
-#: The first published shape declared machine-derived fields on each entry;
-#: this shape declares them once per name in the sidecar. ``publish`` refuses a
-#: manifest whose stamp it does not recognise, so the two move together.
-CATALOG_EDGE_MODEL_VERSION = "v2"
 
 # These identity-specific holds take precedence over generic lifecycle gates.
 # Each reason names the unresolved authority condition so the exclusion ledger
