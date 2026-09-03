@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:50:59",
+  "updated": "2026-09-03T12:52:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -57261,6 +57261,117 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T100248973237-n-sourceless-names-are-surfaced-and-healed-b",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-sourceless-names-are-surfaced-and-healed-b",
+        "node_definition": {
+          "done_when": "a census through the repository GraphClient counting live pipeline names with no producing source prints 8 before the reconcile and fewer after, with a test proving a name whose detachment reason has lapsed is reattached to its original source while a name whose reason still holds is reported and left alone, and uv run --no-sync pytest tests/standard_names -q adding no failure against the sixteen that reproduce at the base revision",
+          "estimated_hours": 2.0,
+          "goal": "Stop a live accepted name being left with no provenance at all: add a startup reconcile that finds a live pipeline-origin name with no producing source and reattaches the source detached from it when the detachment reason no longer holds under the current grammar, leaving a name whose reason still holds surfaced as a blocker rather than silently accepted, because the detach path returns the freed source to extracted and nothing ever re-pairs the two when the rejection was itself the transient",
+          "id": "n-sourceless-names-are-surfaced-and-healed-b",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sourceless-names-are-surfaced-and-healed.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_sourceless_name_recovery.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-orphanreattach",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "backend": "clive",
+          "effort": "medium",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:02:55Z",
+        "completed_at": "2026-09-03T10:50:44.410Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2862,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2869,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "43a24b51ce5d9db757c19b8abfde291e9568963a",
+        "commits": [
+          "3a14683e00909a32243ba1354a8d7dbd0f13ba94"
+        ],
+        "changed_lines": {
+          "added": 483,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sourceless_name_recovery.py -m graph",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sourceless-names-are-surfaced-and-healed.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sourceless-names-are-surfaced-and-healed.json",
+        "scope_changed": false,
+        "session_id": "b6f32574-001c-462f-bb5f-f0c0a78916b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 14005819,
+            "input_tokens_cumulative": 14005819,
+            "output_tokens": 77443,
+            "output_tokens_cumulative": 77443,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 71.96517000000006,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 71.96517000000006
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": true,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -57321,6 +57432,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1428
+    "_version": 1429
   }
 }
