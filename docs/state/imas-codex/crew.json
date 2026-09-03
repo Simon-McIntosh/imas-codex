@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T07:54:21",
+  "updated": "2026-09-03T08:10:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2733,6 +2733,15 @@
           "gpt-5.6-sol": "01a05e41-c0a4-7453-b84d-5cfc92ce3429"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "inv-pertime",
+        "harness": "claude-opus",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "inv-physicsgates",
@@ -55093,6 +55102,217 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T053546102355-n-retire-parent-withhold-test",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-retire-parent-withhold-test",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names -q reports six failures matching the six that reproduce at the base revision in the main checkout with zero added, and the file's remaining assertions still cover at least one withhold reason that is still live",
+          "estimated_hours": 0.5,
+          "goal": "Retire or invert the exclusion-ledger test that asserts a source-free structural parent is withheld, since an accepted derived parent now publishes with derived provenance, keeping whatever coverage the file legitimately owns for the reasons that still withhold a name",
+          "id": "n-retire-parent-withhold-test",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/retire-parent-withhold-test.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/standard_names/test_export_exclusion_ledger.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-ledgertest",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T05:35:53Z",
+        "completed_at": "2026-09-03T05:55:44.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1186,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1191,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "a3c0ce5865d2f08de50b23c94cb8f9dd3981f75a",
+        "commits": [
+          "0ad5ccb4abc542f0e40e2b81395c438739ecad12"
+        ],
+        "changed_lines": {
+          "added": 38,
+          "removed": 10,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names -q -p no:cacheprovider",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/retire-parent-withhold-test.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/retire-parent-withhold-test.json",
+        "scope_changed": false,
+        "session_id": "34b622ea-83e5-4918-970a-ccc078b6031c",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 95721,
+            "cache_creation_input_tokens_cumulative": 95721,
+            "cache_read_input_tokens": 2982914,
+            "cache_read_input_tokens_cumulative": 2982914,
+            "inference_geo": "not_available",
+            "input_tokens": 68,
+            "input_tokens_cumulative": 68,
+            "output_tokens": 14750,
+            "output_tokens_cumulative": 14750,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.8177570000000003,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.8177570000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T055448211388-n-per-time-naming-blast-radius",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-per-time-naming-blast-radius",
+        "node_definition": {
+          "done_when": "the report gives a live count through the repository GraphClient of names whose unit carries a negative first power of seconds grouped by the construction their spelling uses, names every awkward construction found with its member count and one example each, states which ISN physical_base or operator tokens are missing against the 175 bases and 51 operators the installed grammar actually exposes (quoted), and sizes the regeneration as a count of names to re-compose with the accepted-name cascade each would disturb",
+          "estimated_hours": 2.0,
+          "goal": "Assess the blast radius of per-time quantities named as ratios rather than rates, taking ratio_of_coolant_mass_to_time as the exemplar (unit kg per second, bound to three data-dictionary mass_flow paths, refined out of the grammatical predecessor coolant_flow_of_plant_component_port, while its own documentation opens by calling it a coolant mass flow rate), determining which live names express a per-time quantity through an awkward construction, which ISN vocabulary tokens are missing to say it properly, and which names would have to be regenerated",
+          "id": "n-per-time-naming-blast-radius",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/per-time-naming-blast-radius.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "release-contract",
+          "spec_level": "open",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/per-time-naming-blast-radius.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-pertime",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T05:54:54Z",
+        "completed_at": "2026-09-03T06:03:03.775Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 481,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 489,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "5ed217db1ebc99e681a98c18514d720aaa53d46b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live census through GraphClient grouping the 537 per-second names by spelling construction",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/per-time-naming-blast-radius.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/per-time-naming-blast-radius.json",
+        "scope_changed": false,
+        "session_id": "56eded3a-9627-46a3-a8d8-a36d51c1f76e",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 118121,
+            "cache_creation_input_tokens_cumulative": 118121,
+            "cache_read_input_tokens": 2890448,
+            "cache_read_input_tokens_cumulative": 2890448,
+            "inference_geo": "not_available",
+            "input_tokens": 66,
+            "input_tokens_cumulative": 66,
+            "output_tokens": 30512,
+            "output_tokens_cumulative": 30512,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.3895640000000014,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.3895640000000014
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "an investigation node; its deliverable is the report",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -55139,6 +55359,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1390
+    "_version": 1393
   }
 }

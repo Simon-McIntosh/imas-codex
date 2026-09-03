@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="60">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -259,6 +259,12 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T052343048749-n-publish-structural-parents" data-who="impl-parentpublish" data-when="2026-09-03T05:33:35.917Z">
     <div class="r-comment-body"><p>accepted structural parents now reach the catalog with derived provenance instead of being withheld for lacking a data-dictionary source, and the determinism assertion no longer requires the removed file header</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T053546102355-n-retire-parent-withhold-test" data-who="impl-ledgertest" data-when="2026-09-03T05:55:44.245Z">
+    <div class="r-comment-body"><p>the assertion that a source-free structural parent stays withheld is retired now that accepted parents publish, taking the suite from seven failures to the six that pre-date this wave</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260903T055448211388-n-per-time-naming-blast-radius" data-who="inv-pertime" data-when="2026-09-03T06:03:03.775Z">
+    <div class="r-comment-body"><p>eight live names spell a per-time quantity awkwardly out of 537 carrying a per-second unit, disturbing zero accepted descendants; the grammar needs one base (mass_flow_rate) and one guard against dividing by time, while tendency and time_derivative are byte-identical duplicates split 4 to 3</p></div>
 </div>
 </section>
 </main>
