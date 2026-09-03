@@ -328,6 +328,46 @@ uv run --no-sync imas-codex sn resolve --help
 If help and this recipe disagree, stop and update the recipe before operating. Keep `BATCH`, `ISNC`, `PR`,
 `PR_NUMBER`, `PR_REPO`, `RC`, `BODY`, `PREVIEW`, and `RESTORE` bound to one release identity.
 
+### The segment sweep is a scheduled operation, not a rotation side effect
+
+`reconcile_grammar_segments` runs as a startup maintenance step of every unscoped `sn run`, and it covers every
+lifecycle stage: a superseded or exhausted identity carries the same drifted segment columns as a live one, and a
+published catalog resolves a retired name through that history. 706 of the 2239 terminal-stage names drift, so an
+unscoped run rewrites the segment columns of 706 tombstoned identities, each with its own `StandardNameChange`
+ledger entry, as a side effect of asking for one review. That write is correct and it is large and reviewable:
+schedule it as its own operation behind its own restore point, never discover it inside a rotation.
+
+Until it has been scheduled, an `sn run` dispatched for a single name must be scoped
+(`--focus <name> --only review`) and must prove it did not fire the sweep. Take the terminal-stage drift census
+immediately before and immediately after the run; the gate is `drifting: 706` unchanged across the pair. Gate on
+the drift count alone, not on the terminal population beside it: that population was 2239 when the sweep was
+ruled in-scope for every stage and it grows whenever an identity is superseded or exhausted, so a moved
+`terminal` figure is ordinary and a moved `drifting` figure is the sweep having fired.
+
+```bash
+uv run --no-sync python -c '
+from imas_codex.graph.client import GraphClient
+from imas_codex.standard_names.graph_ops import _GRAMMAR_SEGMENT_COLUMNS as cols, _parse_grammar
+select = ", ".join(f"sn.{c} AS {c}" for c in cols)
+with GraphClient() as gc:
+    rows = gc.query(
+        f"MATCH (sn:StandardName) WHERE sn.name_stage IN $terminal RETURN sn.id AS id, {select}",
+        terminal=["superseded", "exhausted", "contested"],
+    )
+drift = [
+    r for r in rows
+    if (p := _parse_grammar(r["id"])).get("physical_base")
+    and any(p.get(c) != r.get(c) for c in cols)
+]
+print({"terminal": len(rows), "drifting": len(drift)})'
+```
+
+A moved figure means the scoped run wrote through the sweep: stop and report rather than continuing, because the
+gate has already been crossed and the remaining question is what else the run rewrote. To realign one identity
+without touching the other 705, use the name-scoped repair `imas-codex sn realign-segments NAME [--dry-run]` —
+that route and the whole-graph sweep share one ledger operation label, so a deliberate single repair stays
+queryable beside the scheduled sweep, and neither is ever a hand-written segment update.
+
 ### Detached-worktree setup
 
 A detached imas-codex worktree cannot discover the separate catalog checkout through the sibling fallback.
