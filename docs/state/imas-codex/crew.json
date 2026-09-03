@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:26:38",
+  "updated": "2026-09-03T21:47:50",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1052,9 +1052,11 @@
         "id": "impl-exportgate",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "29bccd38-0f33-4cc5-a5a2-7c16022f7b27",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "29bccd38-0f33-4cc5-a5a2-7c16022f7b27"
+        },
         "created": "2026-09-03"
       },
       {
@@ -1293,9 +1295,11 @@
         "id": "impl-guardscope",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "5ed2e387-876f-4316-b623-dbf049ca11d9",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "5ed2e387-876f-4316-b623-dbf049ca11d9"
+        },
         "created": "2026-09-03"
       },
       {
@@ -61654,6 +61658,475 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T192107981045-n-wcr-promote-test-mocks",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-wcr-promote-test-mocks",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/test_sn_approve_tag.py tests/standard_names/test_promote_reviewer_actor.py -q -p no:cacheprovider exits 0 with 0 failures where the base revision leaves 2, and the report shows that neither file constructs a urllib request during the run, evidenced by a patch or guard that makes any real transport attempt fail loudly rather than emit an HTTP 404 warning",
+          "estimated_hours": 0.5,
+          "goal": "Move the two stranded pull-request test mocks onto the REST seam so no test reaches the network",
+          "id": "n-wcr-promote-test-mocks",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192107981045-n-wcr-promote-test-mocks/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "tests/standard_names/test_sn_approve_tag.py",
+            "tests/standard_names/test_promote_reviewer_actor.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-ghrestclient",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:21:25Z",
+        "completed_at": "2026-09-03T19:29:00.339Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 444,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 455,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "9da911dbfb54717d53e91aa356313803813a814e",
+        "commits": [
+          "329b6cda8849e604cc119cf296d7e60ad8b8b01b"
+        ],
+        "changed_lines": {
+          "added": 109,
+          "removed": 27,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_approve_tag.py tests/standard_names/test_promote_reviewer_actor.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/tmp/wcr-mocks-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192107981045-n-wcr-promote-test-mocks/manifest.md",
+        "scope_changed": false,
+        "session_id": "a12a7bfa-3f17-4f47-9652-9caac40b4fd1",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.78,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-07T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 153239,
+            "cache_creation_input_tokens_cumulative": 284541,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 1887074,
+            "inference_geo": "not_available",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 28,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 13693,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.0,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.131411999999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 449.31,
+          "generated_tokens": 13693,
+          "generation_seconds": 173.516,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 16.5,
+          "machine_seconds": 275.794,
+          "peak_input_tokens": 164554,
+          "tokens_per_second": 78.91,
+          "wall_tokens_per_second": 30.48
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_sn_approve_tag.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T191610541046-n-wcr-segment-repair-route",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-segment-repair-route",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider reports zero failures added against the base revision, and the added tests assert that the new route takes a single name and a dry-run, that it realigns a drifted physical_base column, and that it acts on a superseded or exhausted target rather than refusing it, with the report recording a live dry-run against neutron_rate_due_to_beam_beam_fusion showing its stored physical_base and the value the parser derives",
+          "estimated_hours": 1.0,
+          "goal": "Expose the grammar-segment realignment as a name-scoped command that acts at any lifecycle stage",
+          "id": "n-wcr-segment-repair-route",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T191610541046-n-wcr-segment-repair-route/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_grammar_segment_repair.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-guardscope",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:16:17Z",
+        "completed_at": "2026-09-03T19:37:01.776Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1238,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1244,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "28f7ba2a376182fa9d228144d4e04a3f028051f2",
+        "commits": [
+          "7b6a558a2f927af28e6e33cad8de1f68ae4e3e13"
+        ],
+        "changed_lines": {
+          "added": 466,
+          "removed": 9,
+          "files": 3
+        },
+        "tests_added": 13,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider",
+          "exit_status": 1,
+          "log_path": "/tmp/wcr-seg-after-full.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T191610541046-n-wcr-segment-repair-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "5ed2e387-876f-4316-b623-dbf049ca11d9",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.99,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-03T23:50:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 126407,
+            "cache_creation_input_tokens_cumulative": 126407,
+            "cache_read_input_tokens": 5857994,
+            "cache_read_input_tokens_cumulative": 5857994,
+            "inference_geo": "not_available",
+            "input_tokens": 118,
+            "input_tokens_cumulative": 118,
+            "output_tokens": 38361,
+            "output_tokens_cumulative": 38361,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.152682,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.152682
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1241.338,
+          "generated_tokens": 38361,
+          "generation_seconds": 488.322,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.7,
+          "machine_seconds": 753.016,
+          "peak_input_tokens": 137109,
+          "tokens_per_second": 78.56,
+          "wall_tokens_per_second": 30.9
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260903T190741162856-n-wcr-radiance-renames",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-radiance-renames",
+        "node_definition": {
+          "done_when": "the report at the write path records for each of the three renames (spectral_rate to spectral_photon_radiance, spectral_bremsstrahlung_rate to spectral_bremsstrahlung_photon_radiance, rate_due_to_fusion to source_rate_due_to_fusion) the exact governed sn edit --rename invocation and the quorum score it returned, and closes with a Cypher count of how many of those three successor identities carry name_stage accepted and docs_stage accepted, stated as a number out of 3",
+          "estimated_hours": 1.0,
+          "goal": "Move the three reachable rate names onto the targets that parse under the pinned grammar",
+          "id": "n-wcr-radiance-renames",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190741162856-n-wcr-radiance-renames/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-radiance-renames.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-volumetricbase",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:07:48Z",
+        "completed_at": "2026-09-03T19:43:33.834Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2131,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2145,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e5020348b38c67eaff6907cd65975a3a57a17233",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T190741162856-n-wcr-radiance-renames/manifest.md",
+        "scope_changed": false,
+        "session_id": "8dd5cb01-cb38-4751-b035-8ac0b9c8fcd4",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 30048,
+            "cache_creation_input_tokens_cumulative": 132290,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 1934232,
+            "inference_geo": "not_available",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 32,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 16101,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.0,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.6927009999999996
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2141.355,
+          "generated_tokens": 16101,
+          "generation_seconds": 216.79,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 14.3,
+          "machine_seconds": 1924.565,
+          "peak_input_tokens": 142992,
+          "tokens_per_second": 74.27,
+          "wall_tokens_per_second": 7.52
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "governed graph transitions only; the report is the deliverable and sits outside the git tree by the write fence",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T192231555566-n-wcr-export-gate-failures",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-wcr-export-gate-failures",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/test_catalog_layout_hierarchy.py tests/standard_names/test_export_sidecar_surface.py -q -p no:cacheprovider exits 0 with 0 failures, a full uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider run reports a failure count of 0 against the 3 recorded at base 524ca624, and the report states for each of the three whether the assertion was stale against the reduced entry surface or the source was genuinely wrong, with the evidence that settles it",
+          "estimated_hours": 1.0,
+          "goal": "Clear the three failing gate assertions on the catalog export surface the recut crosses",
+          "id": "n-wcr-export-gate-failures",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192231555566-n-wcr-export-gate-failures/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "open",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "imas_codex/standard_names/publish.py",
+            "imas_codex/standard_names/catalog_import.py",
+            "tests/standard_names/test_catalog_layout_hierarchy.py",
+            "tests/standard_names/test_export_sidecar_surface.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "impl-exportgate",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:22:53Z",
+        "completed_at": "2026-09-03T19:46:44.164Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1420,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1431,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "29ed8d9cadb59df3df16c6b4f7b02a2a3187cbbd",
+        "commits": [
+          "18939154ba08d5c2d9500555f40feba4168e17f8"
+        ],
+        "changed_lines": {
+          "added": 141,
+          "removed": 35,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/tmp/wcr-egf/sn-suite-after2.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T192231555566-n-wcr-export-gate-failures/manifest.md",
+        "scope_changed": false,
+        "session_id": "29bccd38-0f33-4cc5-a5a2-7c16022f7b27",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 122708,
+            "cache_creation_input_tokens_cumulative": 122708,
+            "cache_read_input_tokens": 6633532,
+            "cache_read_input_tokens_cumulative": 6633532,
+            "inference_geo": "not_available",
+            "input_tokens": 136,
+            "input_tokens_cumulative": 136,
+            "output_tokens": 38829,
+            "output_tokens_cumulative": 38829,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.5152509999999975,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.5152509999999975
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1425.433,
+          "generated_tokens": 38829,
+          "generation_seconds": 567.97,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.3,
+          "machine_seconds": 857.463,
+          "peak_input_tokens": 133410,
+          "tokens_per_second": 68.36,
+          "wall_tokens_per_second": 27.24
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_catalog_layout_hierarchy.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -61714,6 +62187,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1506
+    "_version": 1512
   }
 }
