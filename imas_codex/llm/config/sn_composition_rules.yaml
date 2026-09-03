@@ -412,14 +412,14 @@ composition_rules:
     rule: |
       When the source quantity is a time derivative (path typically contains
       `d_dt`, `ddt`, or the DD unit includes `.s^-1` as a differentiator rather
-      than a rate-of-reaction), name it with `tendency_of_<quantity>` (preferred)
-      or `change_in_<quantity>` or `time_derivative_of_<quantity>`. `rate_of_change_of_`
+      than a rate-of-reaction), name it with `time_derivative_of_<quantity>`
+      (preferred) or `change_in_<quantity>`. `rate_of_change_of_`
       is not an ISN operator — use `time_derivative_of_`. Never use
       `instant_change_of_...` — "instant" / "instantaneous" are not
       standard-name tokens. The description must match: if you describe a "rate
       of change" or "time derivative", the name must carry a rate marker.
     examples_good:
-      - "tendency_of_electron_temperature"
+      - "time_derivative_of_electron_temperature"
       - "time_derivative_of_plasma_current"
     examples_bad:
       - "instant_change_of_electron_temperature"
