@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T20:00:32",
+  "updated": "2026-09-03T20:10:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -536,6 +536,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "impl-cascadepersist",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-catalog",
         "harness": "codex",
         "role": "implement",
@@ -894,6 +903,15 @@
           "gpt-5.6-sol": "01a06238-72c2-7073-a478-ae0c0da41175"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "impl-domainroute",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-drain",
@@ -1955,6 +1973,15 @@
         "session_model": "gpt-5.6-sol"
       },
       {
+        "id": "impl-prrest",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-quarcensus",
         "harness": "codex",
         "role": "implement",
@@ -2766,6 +2793,15 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-volumetricbase",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-watchdogflake",
         "harness": "codex",
         "role": "implement",
@@ -3139,9 +3175,11 @@
         "id": "inv-wcrreuse",
         "harness": "claude-opus",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "80089e46-63f6-418a-b042-ca856f3b33d5",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"read-only\"}": "80089e46-63f6-418a-b042-ca856f3b33d5"
+        },
         "created": "2026-09-03"
       },
       {
@@ -60493,6 +60531,119 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T180117745368-n-wcr-reuse-map",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-reuse-map",
+        "node_definition": {
+          "done_when": "the report at the write path carries exactly five headings named GOVERNED-HINT-EDIT, RENAME-CASCADE-PERSIST, PHYSICAL-BASE-PROPERTY-REPAIR, DOMAIN-WRITE-ROUTES, GITHUB-PR-REST; under each, every named symbol carries a file:line anchor and a one-line verdict of fit, unfit-because, or absent; grep -c '^## ' on the report returns 5",
+          "estimated_hours": 0.5,
+          "goal": "Produce a reuse map of the machinery that already exists for the five capabilities this wave needs",
+          "id": "n-wcr-reuse-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T180117745368-n-wcr-reuse-map/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "entry-gate",
+          "spec_level": "open",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-reuse-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-wcrreuse",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-03T18:01:24Z",
+        "completed_at": "2026-09-03T18:07:06.728Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 335,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 342,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "1986178ad3d59855eb0211a0267dc155b0b683bf",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c '^## ' /home/ITER/mcintos/.config/reckon/crew/reports/wcr-reuse-map.md",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-reuse-map.gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T180117745368-n-wcr-reuse-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "80089e46-63f6-418a-b042-ca856f3b33d5",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.01,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 117343,
+            "cache_creation_input_tokens_cumulative": 117343,
+            "cache_read_input_tokens": 3562632,
+            "cache_read_input_tokens_cumulative": 3562632,
+            "inference_geo": "not_available",
+            "input_tokens": 80,
+            "input_tokens_cumulative": 80,
+            "output_tokens": 24940,
+            "output_tokens_cumulative": 24940,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.578646,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.578646
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 339.282,
+          "generated_tokens": 24940,
+          "generation_seconds": 332.997,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 12.8,
+          "machine_seconds": 6.285,
+          "peak_input_tokens": 128045,
+          "tokens_per_second": 74.9,
+          "wall_tokens_per_second": 73.51
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "investigate role; its only write path is a report outside the repository",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -60543,16 +60694,16 @@
         "backend": "claude-opus",
         "purpose": "dispatch",
         "opened_at": "2026-09-03T10:02:21Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-03T18:01:21Z",
+        "held_seconds": 28740,
         "utilisation_pct": 100.0,
         "resets_at": null,
         "effective_ceiling_pct": 95.0,
         "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 1477
+    "_version": 1484
   }
 }
