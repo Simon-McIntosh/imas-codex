@@ -1725,7 +1725,9 @@ async def run_sn_pools(
         attach_result = (
             AttachmentAuditResult()
             if skip_global_maintenance
-            else await asyncio.to_thread(reconcile_attachment_consistency)
+            else await asyncio.to_thread(
+                reconcile_attachment_consistency, run_id=run_id
+            )
         )
         if attach_result.detached or attach_result.rejected:
             logger.info(

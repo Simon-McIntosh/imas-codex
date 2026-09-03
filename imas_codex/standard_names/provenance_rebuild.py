@@ -28,6 +28,7 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -498,6 +499,7 @@ def _reconcile_recovery_consistency(
     *,
     dry_run: bool,
     adjudication_manifest: dict[str, list[dict[str, Any]]] | None,
+    run_id: str | None = None,
 ) -> dict[str, Any]:
     """Run canonical post-replay consistency checks in dependency order.
 
@@ -522,7 +524,9 @@ def _reconcile_recovery_consistency(
                 f"recovery adjudication manifest {key!r} must be a list of rows"
             )
 
-    attachment_result = reconcile_attachment_consistency(gc=gc, dry_run=dry_run)
+    attachment_result = reconcile_attachment_consistency(
+        gc=gc, dry_run=dry_run, run_id=run_id
+    )
     attachment_postcheck = attachment_result if dry_run else audit_attachments(gc=gc)
     attachment_rows = _attachment_violation_rows(attachment_postcheck)
     semantic_rows = find_semantic_source_invariant_violations(gc)
@@ -566,6 +570,7 @@ def rebuild_provenance(
     retire_unresolved: bool = False,
     include_accepted_retirement: bool = False,
     adjudication_manifest: dict[str, list[dict[str, Any]]] | None = None,
+    run_id: str | None = None,
 ) -> dict[str, Any]:
     """Rebuild provenance for every orphaned live name to fresh-parity.
 
@@ -585,8 +590,12 @@ def rebuild_provenance(
     ``semantic_source_violations``; values must be full rows copied from the
     corresponding consistency result. A dry run reports ``would_complete`` but
     never claims applied completion. Content (name/description/docs/stage) is
-    never touched.
+    never touched. *run_id* identifies this invocation on every
+    ``detach_inconsistent_attachment`` change the attachment reconcile writes;
+    when omitted and the run is not a dry run, one is generated so a written
+    detachment is always traceable.
     """
+    run_id = run_id or (None if dry_run else f"provenance-rebuild:{uuid.uuid4()}")
     owns = gc is None
     gc = gc or GraphClient()
     try:
@@ -713,6 +722,7 @@ def rebuild_provenance(
             gc,
             dry_run=dry_run,
             adjudication_manifest=adjudication_manifest,
+            run_id=run_id,
         )
         summary["consistency"] = consistency
         summary["would_complete"] = bool(
