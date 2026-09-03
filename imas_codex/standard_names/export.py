@@ -606,42 +606,6 @@ def _classify_export_population(
             )
             continue
 
-        source_paths = candidate.get("source_paths") or []
-        has_dd_source_binding = candidate.get("_has_dd_source_binding")
-        if has_dd_source_binding is None:
-            has_dd_source_binding = any(
-                not str(source_path).startswith("derived:")
-                for source_path in source_paths
-            )
-        has_derived_producer = candidate.get("_has_derived_producer")
-        if has_derived_producer is None:
-            has_derived_producer = any(
-                str(source_path).startswith("derived:") for source_path in source_paths
-            )
-        has_non_derived_producer = candidate.get("_has_non_derived_producer")
-        if has_non_derived_producer is None:
-            has_non_derived_producer = any(
-                not str(source_path).startswith("derived:")
-                for source_path in source_paths
-            )
-        if (
-            not has_dd_source_binding
-            and has_derived_producer
-            and not has_non_derived_producer
-        ):
-            excluded.append(
-                ExclusionRecord(
-                    standard_name_id=candidate_id,
-                    stage="export_policy",
-                    reason="structural_parent",
-                    detail=(
-                        "hierarchy scaffold has no Data Dictionary source binding "
-                        "and only derived producers"
-                    ),
-                )
-            )
-            continue
-
         # Some low-level callers provide a projection already returned by the
         # historical eligibility query rather than a full graph node. The live
         # upstream query always includes name_stage; retain compatibility with
