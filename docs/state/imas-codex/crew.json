@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:01:55",
+  "updated": "2026-09-03T12:02:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -56603,8 +56603,22 @@
         "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
         "closed_by_purpose": null,
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-claude-opus-20260903100221",
+        "backend": "claude-opus",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-03T10:02:21Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 95.0,
+        "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 1415
+    "_version": 1416
   }
 }
