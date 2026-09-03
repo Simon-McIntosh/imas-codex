@@ -245,28 +245,57 @@ def test_export_refuses_when_ledger_does_not_close(tmp_path: Path) -> None:
     assert not (tmp_path / "catalog.yml").exists()
 
 
-def test_export_withholds_source_free_structural_parent(tmp_path: Path) -> None:
+def test_export_publishes_derived_producer_parent(tmp_path: Path) -> None:
+    """A hierarchy parent publishes on its review lifecycle, not its topology.
+
+    Such a parent carries no Data Dictionary binding because its producers are
+    the derived children folded into it; withholding it for that alone left the
+    children published under a parent the catalog never saw.
+    """
     population = [
         _candidate(
-            "radial_coordinate",
+            "electron_temperature",
             origin=None,
-            source_paths=["derived:radial_coordinate"],
+            source_paths=["derived:electron_temperature"],
             _has_dd_source_binding=False,
             _has_derived_producer=True,
             _has_non_derived_producer=False,
-            unit="m",
+            _is_parent=True,
+            unit="eV",
         )
     ]
 
-    report = _run_fixture_export(tmp_path, population, validate_entries=True)
-    rows = {row["reason"]: row for row in report.to_dict()["exclusion_ledger"]}
+    report = _run_fixture_export(
+        tmp_path,
+        population,
+        validate_entries=True,
+        include_sources=True,
+        source_bindings=[
+            {
+                "kind": "derived",
+                "ref": "derived:electron_temperature",
+                "version": "1",
+            }
+        ],
+        write_domain_yaml=True,
+    )
+    emitted = yaml.safe_load(
+        (tmp_path / "standard_names" / "general.yml").read_text(encoding="utf-8")
+    )
 
     assert report.all_gates_passed
     assert report.total_candidates == 1
-    assert report.exported_count == 0
+    assert report.exported_names == ["electron_temperature"]
     assert report.validation_failures == 0
-    assert rows["structural_parent"]["identities"] == ["radial_coordinate"]
-    assert report.exported_count + sum(row["count"] for row in rows.values()) == 1
+    assert report.exclusion_records == []
+    assert [entry["name"] for entry in emitted] == ["electron_temperature"]
+    assert emitted[0]["sources"] == [
+        {
+            "kind": "derived",
+            "ref": "derived:electron_temperature",
+            "version": "1",
+        }
+    ]
 
 
 def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
@@ -289,7 +318,6 @@ def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
     assert report.total_candidates == 1
     assert report.exported_count == 0
     assert rows["invalid_catalog_entry"]["identities"] == ["radial_coordinate"]
-    assert "structural_parent" not in rows
     assert report.exported_count + sum(row["count"] for row in rows.values()) == 1
 
 
