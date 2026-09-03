@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="84">
+<meta name="plan-version" content="85">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -276,7 +276,10 @@
     <div class="r-comment-body"><p>the fold executed and met its stated measure of zero live retired spellings, but the measure was wrong: it left the target a tombstone, so the data-dictionary path it carried the source onto now has no live standard name at all, which is a worse provenance state than the quarantined name it replaced</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T114344912853-n-fold-revives-its-target" data-who="impl-supersederoute" data-when="2026-09-03T12:03:54.440Z">
-    <div class="r-comment-body"><p>a fold onto a tombstone revives the target into review at its predecessor&#x27;s prior stage instead of leaving it dead, so a carried source keeps a live name and is never accepted by hand (53 passed, suite at the one pre-existing failure)</p></div>
+    <div class="r-comment-body"><p>a fold onto a tombstone revives the target into review at its predecessor's prior stage instead of leaving it dead, so a carried source keeps a live name and is never accepted by hand (53 passed, suite at the one pre-existing failure)</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T122120613661-n-codex-isn-pin-0-8-7" data-who="impl-isnpin" data-when="2026-09-03T12:25:01.156Z">
+    <div class="r-comment-body"><p>the codex tooling pins 0.8.7, so the exporter validates against a checker that reads a wrapped sign-convention sentence</p></div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>
