@@ -8,7 +8,8 @@ accepted names, so a successful fold-back never implies those docs are ready
 for full export.
 
 These tests pin that contract against a LOCAL bare repo — a real merge commit,
-``gh`` and the notes model mocked, no live GitHub and no live LLM:
+the GitHub REST transport and the notes model mocked, no live GitHub and no
+live LLM:
 
 * the deterministic contract block comes first and is what the idempotency
   guard parses;
@@ -47,6 +48,34 @@ from imas_codex.standard_names.promote import (
 )
 
 APPROVAL = "imas_codex.standard_names.promote"
+
+
+class RealTransportAttempted(BaseException):
+    """A test reached the network instead of its mock.
+
+    Derived from BaseException rather than Exception on purpose: the readers
+    under test degrade a failed GitHub call to an empty result through a broad
+    ``except Exception``, so an ordinary error would be swallowed and an
+    escaped mock would read as a behaviour change. This one propagates.
+    """
+
+
+@pytest.fixture(autouse=True)
+def no_real_transport(monkeypatch):
+    """Any HTTP request escaping a mock fails the test instead of leaving.
+
+    An unauthenticated GitHub read answers 404, which the evidence gatherer
+    reports as an ordinary degraded read — so a mock that stopped intercepting
+    would look like a behaviour change rather than a test that reached the
+    network.
+    """
+
+    def refuse(request, *args, **kwargs):
+        raise RealTransportAttempted(
+            f"test opened a real connection to {getattr(request, 'full_url', request)}"
+        )
+
+    monkeypatch.setattr("urllib.request.urlopen", refuse)
 
 
 def _git(args: list[str], cwd: Path) -> str:
@@ -441,35 +470,53 @@ class TestReviewDelta:
 
 
 # ---------------------------------------------------------------------------
-# gh evidence gathering (subprocess mocked)
+# Evidence gathering (GitHub REST transport mocked)
 # ---------------------------------------------------------------------------
 
 
 class TestFetchPrEvidence:
-    def _gh(self, payload, rc=0, err=""):
-        import json as _json
-        from types import SimpleNamespace
+    def _transport(self, responses):
+        """Route each REST read by the endpoint fragment it asks for.
 
-        return SimpleNamespace(returncode=rc, stdout=_json.dumps(payload), stderr=err)
+        The description, the conversation and the commits arrive from four
+        separate endpoints, so a single canned response cannot stand in for
+        the call; an unrouted path answers 404 so a missing route shows up as
+        a missing section rather than as silence.
+        """
+
+        def fake_call(method, path, *, payload=None, token=None):
+            for fragment, status, body in responses:
+                if fragment in path:
+                    return status, body
+            return 404, {"message": f"unrouted {path}"}
+
+        return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
 
     def test_parses_body_comments_reviews_commits(self):
-        payload = {
-            "body": "PR description",
-            "comments": [{"author": {"login": "rev"}, "body": "looks good"}],
-            "reviews": [
-                {"author": {"login": "rev"}, "body": "approve", "state": "APPROVED"}
-            ],
-            "commits": [{"oid": "c1", "messageHeadline": "publish batch"}],
-        }
-        with patch(f"{APPROVAL}.subprocess.run", return_value=self._gh(payload)):
+        responses = [
+            ("/issues/7/comments", 200, [{"user": {"login": "rev"}, "body": "ok"}]),
+            (
+                "/pulls/7/reviews",
+                200,
+                [{"user": {"login": "rev"}, "body": "approve", "state": "APPROVED"}],
+            ),
+            (
+                "/pulls/7/commits",
+                200,
+                [{"sha": "c1", "commit": {"message": "publish batch"}}],
+            ),
+            ("/pulls/7", 200, {"body": "PR description"}),
+        ]
+        with self._transport(responses):
             evidence = fetch_pr_evidence("https://github.com/o/r/pull/7")
         assert evidence["body"] == "PR description"
+        assert evidence["comments"][0]["author"]["login"] == "rev"
+        assert evidence["reviews"][0]["state"] == "APPROVED"
         assert evidence["commits"][0]["oid"] == "c1"
+        assert evidence["commits"][0]["messageHeadline"] == "publish batch"
 
-    def test_gh_failure_returns_empty_never_raises(self):
-        with patch(
-            f"{APPROVAL}.subprocess.run", return_value=self._gh({}, rc=1, err="no auth")
-        ):
+    def test_rejected_read_returns_empty_never_raises(self):
+        with self._transport([("/pulls/7", 401, {"message": "Bad credentials"})]):
             assert fetch_pr_evidence("https://github.com/o/r/pull/7") == {}
 
 

@@ -17,6 +17,7 @@ import shutil
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import click
 
@@ -389,51 +390,39 @@ def fetch_tag_messages(
 def dispatch_graph_quality(git_info: dict, version_tag: str, registry: str) -> None:
     """Fire a repository_dispatch event to trigger graph quality CI.
 
-    Uses the GitHub CLI (gh) to dispatch a graph-pushed event.
-    Silently skips if gh is not available or the dispatch fails.
+    Goes over the REST transport every other GitHub call in this repository
+    uses. Silently skips when no token is configured or the dispatch fails.
     """
-    if not shutil.which("gh"):
-        return
-
     owner = git_info.get("remote_owner", "iterorganization")
     repo = "imas-codex"
 
-    body = json.dumps(
-        {
-            "event_type": "graph-pushed",
-            "client_payload": {
-                "tag": version_tag,
-                "registry": registry,
-                "commit": git_info.get("commit", ""),
-            },
-        }
-    )
-
     try:
-        result = subprocess.run(
-            [
-                "gh",
-                "api",
-                f"repos/{owner}/{repo}/dispatches",
-                "--method",
-                "POST",
-                "--input",
-                "-",
-            ],
-            input=body,
-            capture_output=True,
-            text=True,
-            timeout=15,
+        status, body = github_api_call(
+            "POST",
+            f"/repos/{owner}/{repo}/dispatches",
+            payload={
+                "event_type": "graph-pushed",
+                "client_payload": {
+                    "tag": version_tag,
+                    "registry": registry,
+                    "commit": git_info.get("commit", ""),
+                },
+            },
         )
-        if result.returncode == 0:
-            click.echo("✓ Dispatched graph-quality CI")
-        else:
-            click.echo(
-                f"Warning: graph-quality dispatch failed: {result.stderr.strip()}",
-                err=True,
-            )
-    except (subprocess.TimeoutExpired, Exception) as e:
+    except GitHubRestError:
+        return
+    except Exception as e:
         click.echo(f"Warning: graph-quality dispatch skipped: {e}", err=True)
+        return
+
+    if status in {202, 204, 200}:
+        click.echo("✓ Dispatched graph-quality CI")
+    else:
+        click.echo(
+            f"Warning: graph-quality dispatch failed: "
+            f"{github_error_detail(status, body)}",
+            err=True,
+        )
 
 
 # ============================================================================
@@ -441,71 +430,138 @@ def dispatch_graph_quality(git_info: dict, version_tag: str, registry: str) -> N
 # ============================================================================
 
 
-def github_api_request(
-    path: str,
-    token: str,
-    method: str = "GET",
-) -> tuple[int, dict | list | None]:
-    """Make a GitHub REST API request. Returns (status_code, json_body)."""
+class GitHubRestError(RuntimeError):
+    """A GitHub REST call did not return a success status."""
+
+
+_REST_TIMEOUT_SECONDS = 30
+
+
+def resolve_api_token(token: str | None = None) -> str:
+    """Resolve the token every GitHub REST call authenticates with.
+
+    The API-scoped variables come first because a workflow or a shell that
+    exports one has named the identity the call should carry; the registry
+    token and the local credential store are the fallbacks.
+    """
+    if token:
+        return token
+    for variable in ("GITHUB_TOKEN", "GH_TOKEN"):
+        value = os.environ.get(variable)
+        if value:
+            return value
+    try:
+        return resolve_token(None)
+    except Exception as exc:  # click.ClickException when nothing is configured
+        raise GitHubRestError(
+            "no GitHub token is available for the REST API: set GITHUB_TOKEN "
+            "or authenticate the local GitHub credential store"
+        ) from exc
+
+
+def _github_request(
+    method: str,
+    url: str,
+    *,
+    payload: dict | list | None = None,
+    token: str | None = None,
+) -> tuple[int, Any, dict[str, str]]:
+    """Issue one GitHub REST call and return ``(status, body, headers)``.
+
+    This is the only place in the codebase that builds an HTTP request against
+    the GitHub API. A non-success status is returned rather than raised so each
+    caller can name the resource it failed on; only a transport-level failure
+    escapes.
+    """
     import urllib.error
     import urllib.request
 
-    url = f"{GITHUB_API}{path}"
-    req = urllib.request.Request(url, method=method)
-    req.add_header("Authorization", f"Bearer {token}")
-    req.add_header("Accept", "application/vnd.github+json")
-    req.add_header("X-GitHub-Api-Version", "2022-11-28")
-
+    data = None if payload is None else json.dumps(payload).encode()
+    request = urllib.request.Request(url, data=data, method=method)
+    request.add_header("Authorization", f"Bearer {resolve_api_token(token)}")
+    request.add_header("Accept", "application/vnd.github+json")
+    request.add_header("X-GitHub-Api-Version", "2022-11-28")
+    if data is not None:
+        request.add_header("Content-Type", "application/json")
     try:
-        with urllib.request.urlopen(req) as resp:
-            body = resp.read().decode()
-            return resp.status, json.loads(body) if body else None
-    except urllib.error.HTTPError as e:
-        body = e.read().decode() if e.fp else ""
+        with urllib.request.urlopen(request, timeout=_REST_TIMEOUT_SECONDS) as response:
+            body = response.read().decode()
+            return (
+                response.status,
+                json.loads(body) if body else None,
+                dict(response.headers),
+            )
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode() if exc.fp else ""
         try:
-            return e.code, json.loads(body) if body else None
+            return exc.code, json.loads(raw) if raw else None, {}
         except json.JSONDecodeError:
-            return e.code, {"message": body}
+            return exc.code, {"message": raw}, {}
+
+
+def github_api_call(
+    method: str,
+    path: str,
+    *,
+    payload: dict | list | None = None,
+    token: str | None = None,
+) -> tuple[int, Any]:
+    """Call one GitHub REST endpoint and return ``(status, decoded body)``."""
+    status, body, _ = _github_request(
+        method, f"{GITHUB_API}{path}", payload=payload, token=token
+    )
+    return status, body
+
+
+def github_error_detail(status: int, body: Any) -> str:
+    """Render what GitHub said about a rejected call, status included."""
+    text = ""
+    if isinstance(body, dict):
+        text = str(body.get("message") or "")
+        reasons = [
+            str(row.get("message") or row) if isinstance(row, dict) else str(row)
+            for row in body.get("errors") or []
+        ]
+        if reasons:
+            text = f"{text}: {'; '.join(reasons)}" if text else "; ".join(reasons)
+    elif body:
+        text = str(body)
+    return f"HTTP {status} {text}".strip()
+
+
+def github_api_request(
+    path: str,
+    token: str | None = None,
+    method: str = "GET",
+    *,
+    payload: dict | list | None = None,
+) -> tuple[int, dict | list | None]:
+    """Make a GitHub REST API request. Returns (status_code, json_body)."""
+    return github_api_call(method, path, payload=payload, token=token)
 
 
 def github_api_paginated(
     path: str,
-    token: str,
+    token: str | None = None,
 ) -> tuple[int, list]:
     """Fetch all pages from a paginated GitHub API endpoint."""
-    import urllib.error
-    import urllib.request
-
     all_items: list = []
-    url = f"{GITHUB_API}{path}?per_page=100"
+    separator = "&" if "?" in path else "?"
+    url = f"{GITHUB_API}{path}{separator}per_page=100"
 
     while url:
-        req = urllib.request.Request(url)
-        req.add_header("Authorization", f"Bearer {token}")
-        req.add_header("Accept", "application/vnd.github+json")
-        req.add_header("X-GitHub-Api-Version", "2022-11-28")
+        status, body, headers = _github_request("GET", url, token=token)
+        if status >= 400:
+            err = body if body is not None else {}
+            return status, err if isinstance(err, list) else [err]
+        if not isinstance(body, list):
+            return status, all_items
+        all_items.extend(body)
 
-        try:
-            with urllib.request.urlopen(req) as resp:
-                body = json.loads(resp.read().decode())
-                if isinstance(body, list):
-                    all_items.extend(body)
-                else:
-                    return resp.status, all_items
-
-                # Parse Link header for next page
-                link_header = resp.headers.get("Link", "")
-                url = None
-                for part in link_header.split(","):
-                    if 'rel="next"' in part:
-                        url = part.split("<")[1].split(">")[0]
-        except urllib.error.HTTPError as e:
-            body_str = e.read().decode() if e.fp else ""
-            try:
-                err = json.loads(body_str)
-            except json.JSONDecodeError:
-                err = {"message": body_str}
-            return e.code, err if isinstance(err, list) else [err]
+        url = None
+        for part in headers.get("Link", "").split(","):
+            if 'rel="next"' in part:
+                url = part.split("<")[1].split(">")[0]
 
     return 200, all_items
 

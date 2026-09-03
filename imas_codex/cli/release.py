@@ -457,40 +457,43 @@ def _check_final_targets_upstream(remote: str) -> None:
     click.echo("  ✓ Final release targets upstream (iterorganization)")
 
 
-def _check_ci_passed(remote: str, dry_run: bool) -> None:
-    """Verify that CI checks have passed for the HEAD commit.
-
-    Uses the GitHub CLI (gh) to query commit status. Gracefully degrades
-    if gh is not available. For --dry-run, downgrades failures to warnings.
-    """
-    import json as _json
-
-    if not shutil.which("gh"):
-        click.echo("  ⚠ gh CLI not found — skipping CI status check", err=True)
-        return
-
+def _remote_slug(remote: str) -> tuple[str, str] | None:
+    """Return ``(owner, repo)`` for a git remote, or None when unresolvable."""
     owner = _get_remote_owner(remote)
     if owner is None:
-        click.echo(
-            "  ⚠ Could not determine remote owner — skipping CI check",
-            err=True,
-        )
-        return
-
+        return None
     result = subprocess.run(
         ["git", "remote", "get-url", remote],
         capture_output=True,
         text=True,
     )
     if result.returncode != 0:
-        click.echo("  ⚠ Could not read remote URL — skipping CI check", err=True)
-        return
-
+        return None
     url = result.stdout.strip()
     if url.startswith("git@"):
         repo = url.split(":")[-1].replace(".git", "").split("/")[-1]
     else:
         repo = url.replace(".git", "").split("/")[-1]
+    return (owner, repo) if repo else None
+
+
+def _check_ci_passed(remote: str, dry_run: bool) -> None:
+    """Verify that CI checks have passed for the HEAD commit.
+
+    Queries commit check-runs over the GitHub REST API. Gracefully degrades
+    when no token is configured or the query fails. For --dry-run, downgrades
+    failures to warnings.
+    """
+    from imas_codex.graph.ghcr import GitHubRestError, github_api_call
+
+    slug = _remote_slug(remote)
+    if slug is None:
+        click.echo(
+            "  ⚠ Could not determine remote owner — skipping CI check",
+            err=True,
+        )
+        return
+    owner, repo = slug
 
     sha_result = subprocess.run(
         ["git", "rev-parse", "HEAD"], capture_output=True, text=True
@@ -500,19 +503,20 @@ def _check_ci_passed(remote: str, dry_run: bool) -> None:
         return
     sha = sha_result.stdout.strip()
 
-    api_result = subprocess.run(
-        ["gh", "api", f"repos/{owner}/{repo}/commits/{sha}/check-runs"],
-        capture_output=True,
-        text=True,
-    )
-    if api_result.returncode != 0:
+    try:
+        status, data = github_api_call(
+            "GET", f"/repos/{owner}/{repo}/commits/{sha}/check-runs"
+        )
+    except GitHubRestError:
+        click.echo(
+            "  ⚠ No GitHub token configured — skipping CI status check", err=True
+        )
+        return
+    except Exception:
         click.echo("  ⚠ Could not query CI status — skipping CI check", err=True)
         return
-
-    try:
-        data = _json.loads(api_result.stdout)
-    except _json.JSONDecodeError:
-        click.echo("  ⚠ Could not parse CI response — skipping CI check", err=True)
+    if status != 200 or not isinstance(data, dict):
+        click.echo("  ⚠ Could not query CI status — skipping CI check", err=True)
         return
 
     check_runs = data.get("check_runs", [])
@@ -575,6 +579,32 @@ _TYPE_HEADINGS: dict[str, str] = {
 }
 
 
+def _merged_pull_requests(remote: str = "origin", limit: int = 50) -> list[dict]:
+    """The most recently updated merged pull requests against ``main``.
+
+    Read over the GitHub REST API; an unresolvable remote, a missing token or
+    a rejected call yields an empty list, because contributor attribution
+    enriches the changelog rather than gating it.
+    """
+    from imas_codex.graph.ghcr import github_api_call
+
+    slug = _remote_slug(remote)
+    if slug is None:
+        return []
+    owner, repo = slug
+    try:
+        status, rows = github_api_call(
+            "GET",
+            f"/repos/{owner}/{repo}/pulls?state=closed&base=main"
+            f"&per_page={limit}&sort=updated&direction=desc",
+        )
+    except Exception:
+        return []
+    if status != 200 or not isinstance(rows, list):
+        return []
+    return [row for row in rows if isinstance(row, dict) and row.get("merged_at")]
+
+
 def _generate_changelog(
     from_tag: str,
     to_ref: str = "HEAD",
@@ -617,39 +647,14 @@ def _generate_changelog(
     # Try to get merged PRs for contributor info
     contributors: set[str] = set()
     pr_map: dict[str, str] = {}  # title → #number
-    try:
-        import json as _json
-
-        pr_result = subprocess.run(
-            [
-                "gh",
-                "pr",
-                "list",
-                "--state",
-                "merged",
-                "--base",
-                "main",
-                "--limit",
-                "50",
-                "--json",
-                "number,title,author",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if pr_result.returncode == 0:
-            prs = _json.loads(pr_result.stdout)
-            for pr in prs:
-                login = pr.get("author", {}).get("login", "")
-                if login:
-                    contributors.add(f"@{login}")
-                title = pr.get("title", "")
-                number = pr.get("number", "")
-                if title and number:
-                    pr_map[title.lower()] = f"#{number}"
-    except (subprocess.TimeoutExpired, Exception):
-        pass
+    for pr in _merged_pull_requests():
+        login = (pr.get("user") or {}).get("login", "")
+        if login:
+            contributors.add(f"@{login}")
+        title = pr.get("title", "")
+        number = pr.get("number", "")
+        if title and number:
+            pr_map[title.lower()] = f"#{number}"
 
     # Build markdown
     parts: list[str] = []

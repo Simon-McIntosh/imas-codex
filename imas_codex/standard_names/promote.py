@@ -1271,7 +1271,7 @@ def run_approval(
 
 @dataclass(frozen=True)
 class ResolvedPr:
-    """Merged-PR metadata resolved from a PR URL via the gh CLI."""
+    """Merged-PR metadata resolved from a PR URL over the GitHub REST API."""
 
     number: int
     url: str
@@ -1280,6 +1280,52 @@ class ResolvedPr:
     head_ref: str
     base_ref: str
     review_base_ref: str = ""
+
+
+_PR_URL_RE = re.compile(
+    r"^https?://[^/]*github\.com/(?P<repo>[^/]+/[^/]+)/pull/(?P<number>\d+)"
+)
+
+
+def parse_pull_request_url(pr_url: str) -> tuple[str, int]:
+    """Split a pull-request URL into its ``owner/repo`` slug and number."""
+    match = _PR_URL_RE.match((pr_url or "").strip())
+    if match is None:
+        raise ValueError(
+            f"{pr_url!r} is not a GitHub pull-request URL of the form "
+            "https://github.com/<owner>/<repo>/pull/<number>"
+        )
+    return match.group("repo"), int(match.group("number"))
+
+
+def _pull_request_call(repo: str, path: str) -> tuple[int, Any]:
+    """One REST read against a pull request, through the shared transport."""
+    from imas_codex.graph.ghcr import github_api_call
+
+    return github_api_call("GET", f"/repos/{repo}{path}")
+
+
+def _pull_request_state(payload: dict[str, Any]) -> str:
+    """The disposition of a pull request, merged distinguished from closed.
+
+    REST reports a merged pull request as ``closed`` with a merge record
+    beside it, so the merged case has to be read off that record rather than
+    off the state field alone.
+    """
+    if payload.get("merged") or payload.get("merged_at"):
+        return "MERGED"
+    return str(payload.get("state") or "").upper()
+
+
+def _commit_record(row: dict[str, Any]) -> dict[str, str]:
+    """Flatten one REST commit row into headline and body."""
+    message = ((row.get("commit") or {}).get("message") or "").strip()
+    headline, _, body = message.partition("\n")
+    return {
+        "oid": row.get("sha") or "",
+        "messageHeadline": headline.strip(),
+        "messageBody": body.strip(),
+    }
 
 
 def resolve_merged_pr(pr_url: str) -> ResolvedPr:
@@ -1291,50 +1337,44 @@ def resolve_merged_pr(pr_url: str) -> ResolvedPr:
     itself. Reviewer edits are compared with that cut-time content, while the
     merge first parent remains the additive approved-catalog baseline.
 
-    Raises ValueError when gh fails, the PR is not merged, or no merge commit
-    is recorded.
+    Raises ValueError when the read fails, the PR is not merged, or no merge
+    commit is recorded.
     """
-    import json
+    repo, number = parse_pull_request_url(pr_url)
+    status, data = _pull_request_call(repo, f"/pulls/{number}")
+    if status != 200 or not isinstance(data, dict):
+        from imas_codex.graph.ghcr import github_error_detail
 
-    result = subprocess.run(
-        [
-            "gh",
-            "pr",
-            "view",
-            pr_url,
-            "--json",
-            "number,url,state,mergeCommit,author,headRefName,baseRefName,commits",
-        ],
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
-    if result.returncode != 0:
-        raise ValueError(f"gh pr view failed: {result.stderr.strip()}")
-    data = json.loads(result.stdout)
-    if data.get("state") != "MERGED":
         raise ValueError(
-            f"PR is not merged (state={data.get('state')}) — sn approve runs only "
+            f"could not read pull request {repo}#{number}: "
+            f"{github_error_detail(status, data)}"
+        )
+    state = _pull_request_state(data)
+    if state != "MERGED":
+        raise ValueError(
+            f"PR is not merged (state={state}) — sn approve runs only "
             "from an accepted (merged) PR"
         )
-    oid = (data.get("mergeCommit") or {}).get("oid")
+    oid = data.get("merge_commit_sha")
     if not oid:
         raise ValueError("merged PR records no merge commit")
-    reviewer_actor = (data.get("author") or {}).get("login") or ""
-    head_ref = data.get("headRefName") or ""
+    reviewer_actor = (data.get("user") or {}).get("login") or ""
+    head_ref = (data.get("head") or {}).get("ref") or ""
     cut_tag = approval_tag_name(head_ref) if head_ref.startswith("review/") else None
-    commits = data.get("commits") or []
-    first_pr_commit = (commits[0] or {}).get("oid") if commits else None
-    review_base_ref = cut_tag or first_pr_commit
+    review_base_ref = cut_tag
+    if not review_base_ref:
+        commit_status, commits = _pull_request_call(repo, f"/pulls/{number}/commits")
+        rows = commits if commit_status == 200 and isinstance(commits, list) else []
+        review_base_ref = (rows[0] or {}).get("sha") if rows else None
     if not review_base_ref:
         raise ValueError("merged PR records no cut-time catalog revision")
     resolved = ResolvedPr(
-        number=int(data["number"]),
-        url=data.get("url") or pr_url,
+        number=int(data.get("number") or number),
+        url=data.get("html_url") or pr_url,
         merge_commit=oid,
         reviewer_actor=reviewer_actor,
         head_ref=head_ref,
-        base_ref=data.get("baseRefName") or "main",
+        base_ref=(data.get("base") or {}).get("ref") or "main",
         review_base_ref=review_base_ref,
     )
     approval_key = (resolved.number, resolved.url, resolved.merge_commit)
@@ -1697,40 +1737,56 @@ def resolve_tag_remote(
 
 
 def fetch_pr_evidence(pr_url: str) -> dict[str, Any]:
-    """Gather the approval summary's evidence from the PR itself, via ``gh``.
+    """Gather the approval summary's evidence from the PR itself, over REST.
 
-    One call returns the PR description, the full conversation (comments +
-    reviews), and the commit list (whose first entry locates the review-delta
-    base). Never raises — a gh failure returns ``{}`` so the summary degrades
-    to the deterministic block alone.
+    Four reads return the PR description, the full conversation (issue
+    comments + reviews), and the commit list (whose first entry locates the
+    review-delta base). Never raises — a failed read returns ``{}`` so the
+    summary degrades to the deterministic block alone.
     """
-    import json
-
     try:
-        result = subprocess.run(
-            [
-                "gh",
-                "pr",
-                "view",
-                pr_url,
-                "--json",
-                "body,comments,reviews,commits",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
+        repo, number = parse_pull_request_url(pr_url)
+        status, pull = _pull_request_call(repo, f"/pulls/{number}")
+        if status != 200 or not isinstance(pull, dict):
+            logger.warning(
+                "pull-request evidence read failed for %s: HTTP %s", pr_url, status
+            )
+            return {}
+        comment_status, comments = _pull_request_call(
+            repo, f"/issues/{number}/comments?per_page=100"
         )
-    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
-        logger.warning("gh pr view (evidence) failed: %s", exc)
+        review_status, reviews = _pull_request_call(
+            repo, f"/pulls/{number}/reviews?per_page=100"
+        )
+        commit_status, commits = _pull_request_call(
+            repo, f"/pulls/{number}/commits?per_page=100"
+        )
+    except Exception as exc:  # transport failure, or a URL that is not a PR
+        logger.warning("pull-request evidence read failed: %s", exc)
         return {}
-    if result.returncode != 0:
-        logger.warning("gh pr view (evidence) failed: %s", result.stderr.strip())
-        return {}
-    try:
-        data = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return {}
-    return data if isinstance(data, dict) else {}
+
+    def _rows(code: int, payload: Any) -> list[dict[str, Any]]:
+        return payload if code == 200 and isinstance(payload, list) else []
+
+    return {
+        "body": pull.get("body") or "",
+        "comments": [
+            {
+                "author": {"login": (row.get("user") or {}).get("login", "")},
+                "body": row.get("body") or "",
+            }
+            for row in _rows(comment_status, comments)
+        ],
+        "reviews": [
+            {
+                "author": {"login": (row.get("user") or {}).get("login", "")},
+                "body": row.get("body") or "",
+                "state": row.get("state") or "",
+            }
+            for row in _rows(review_status, reviews)
+        ],
+        "commits": [_commit_record(row) for row in _rows(commit_status, commits)],
+    }
 
 
 def review_delta_diff(

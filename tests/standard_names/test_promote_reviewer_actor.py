@@ -3,11 +3,40 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import pytest
+
 from imas_codex.standard_names.promote import (
     ApprovalChange,
     resolve_merged_pr,
     run_approval,
 )
+
+
+class RealTransportAttempted(BaseException):
+    """A test reached the network instead of its mock.
+
+    Derived from BaseException rather than Exception on purpose: the readers
+    under test degrade a failed GitHub call to an empty result through a broad
+    ``except Exception``, so an ordinary error would be swallowed and an
+    escaped mock would read as a behaviour change. This one propagates.
+    """
+
+
+@pytest.fixture(autouse=True)
+def no_real_transport(monkeypatch):
+    """Any HTTP request escaping a mock fails the test instead of leaving.
+
+    An unauthenticated GitHub read answers 404, which the resolver reports as
+    an ordinary rejection — so a mock that stopped intercepting would look
+    like a behaviour change rather than a test that reached the network.
+    """
+
+    def refuse(request, *args, **kwargs):
+        raise RealTransportAttempted(
+            f"test opened a real connection to {getattr(request, 'full_url', request)}"
+        )
+
+    monkeypatch.setattr("urllib.request.urlopen", refuse)
 
 
 class RecordingGraph:
@@ -24,15 +53,21 @@ class RecordingGraph:
 
 
 def test_accepted_catalog_edit_persists_actor_from_pull_request_evidence():
-    payload = (
-        '{"number":12,"url":"https://github.com/o/r/pull/12",'
-        '"state":"MERGED","mergeCommit":{"oid":"abc123"},'
-        '"author":{"login":"physics-reviewer"},'
-        '"headRefName":"review/catalog","baseRefName":"main"}'
-    )
+    # REST reports a merged pull request as closed with a merge record beside
+    # it, so the merged disposition is carried by ``merged``, not by ``state``.
+    payload = {
+        "number": 12,
+        "html_url": "https://github.com/o/r/pull/12",
+        "state": "closed",
+        "merged": True,
+        "merge_commit_sha": "abc123",
+        "user": {"login": "physics-reviewer"},
+        "head": {"ref": "review/catalog"},
+        "base": {"ref": "main"},
+    }
     with patch(
-        "imas_codex.standard_names.promote.subprocess.run",
-        return_value=SimpleNamespace(returncode=0, stdout=payload, stderr=""),
+        "imas_codex.graph.ghcr.github_api_call",
+        return_value=(200, payload),
     ):
         evidence = resolve_merged_pr("https://github.com/o/r/pull/12")
 
