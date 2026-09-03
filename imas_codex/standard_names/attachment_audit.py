@@ -110,6 +110,7 @@ __all__ = [
     "AttachmentAuditResult",
     "NameLevelDefect",
     "audit_attachments",
+    "count_unattributed_detachments",
     "guard_source_pairings",
     "recover_terminal_attachment",
     "recover_terminal_attachments",
@@ -987,6 +988,7 @@ def reconcile_attachment_consistency(
     include_accepted: bool = False,
     dry_run: bool = False,
     sn_id: str | None = None,
+    run_id: str | None = None,
 ) -> AttachmentAuditResult:
     """Detach every inconsistent attachment and reroute its source to compose.
 
@@ -997,6 +999,10 @@ def reconcile_attachment_consistency(
             losing a source is a decision, not hygiene.
         dry_run: Report the verdicts without writing.
         sn_id: Restrict the pass to one name (see :func:`audit_attachments`).
+        run_id: The invocation this pass runs under, recorded on every
+            ``detach_inconsistent_attachment`` change so the removal can be
+            traced back to the run that performed it. ``None`` when the caller
+            has no run scope (e.g. an ad hoc corpus-wide pass).
 
     Returns the :class:`AttachmentAuditResult`, whose ``by_rule()`` breaks the
     rejections down by which guard rule fired.
@@ -1101,7 +1107,7 @@ def reconcile_attachment_consistency(
             {v.source_node_id for v in actionable if v.reroute}
         )
 
-        _record_detachments(client, actionable)
+        _record_detachments(client, actionable, run_id=run_id)
         result.names_orphaned = _find_orphaned_names(
             client, sorted({v.sn_id for v in actionable})
         )
@@ -2492,7 +2498,9 @@ def gate_migrated_attachments(
         return AttachmentAuditResult()
 
 
-def _record_detachments(gc: Any, verdicts: list[AttachmentVerdict]) -> None:
+def _record_detachments(
+    gc: Any, verdicts: list[AttachmentVerdict], *, run_id: str | None = None
+) -> None:
     """Write one ``StandardNameChange`` per detachment so history survives."""
     from imas_codex.standard_names.provenance_lifecycle import (
         record_standard_name_change,
@@ -2507,9 +2515,43 @@ def _record_detachments(gc: Any, verdicts: list[AttachmentVerdict]) -> None:
                 operation="detach_inconsistent_attachment",
                 reason=v.reason,
                 origin="attachment_consistency_reconcile",
+                run_id=run_id,
             )
         except Exception:  # pragma: no cover - audit crumb must not block the fix
             logger.debug("Failed to record detachment of %s", v.dd_path, exc_info=True)
+
+
+def count_unattributed_detachments(gc: Any | None = None) -> int:
+    """Census: how many ``detach_inconsistent_attachment`` changes carry no run.
+
+    A change recorded before ``run_id`` threading landed, or recorded by a
+    caller with no run scope, has ``run_id IS NULL``. This is a read-only
+    diagnostic — it does not backfill anything — used to measure how much of
+    the historical detachment record is still untraceable to the run that
+    performed it.
+    """
+    own = gc is None
+    if own:
+        from imas_codex.graph.client import GraphClient
+
+        client: Any = GraphClient()
+    else:
+        client = gc
+    try:
+        rows = list(
+            client.query(
+                """
+                MATCH (c:StandardNameChange)
+                WHERE c.operation = 'detach_inconsistent_attachment'
+                  AND c.run_id IS NULL
+                RETURN count(c) AS n
+                """
+            )
+        )
+    finally:
+        if own:
+            client.close()
+    return int(rows[0]["n"]) if rows else 0
 
 
 def _find_orphaned_names(gc: Any, sn_ids: list[str]) -> list[str]:
