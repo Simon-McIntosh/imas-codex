@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T21:47:50",
+  "updated": "2026-09-03T23:50:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -141,6 +141,24 @@
         "id": "doc-reviewcomments",
         "harness": "claude-opus",
         "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "doc-sweepsched-o",
+        "harness": "claude-opus",
+        "role": "documentation",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "doc-sweepschedule",
+        "harness": "claude",
+        "role": "documentation",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -534,6 +552,15 @@
           "gpt-5.6-sol": "01a062ae-ebe6-7382-bde5-fa35745fcb92"
         },
         "created": "2026-09-02"
+      },
+      {
+        "id": "impl-cascadefield",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "impl-cascadepersist",
@@ -1180,6 +1207,17 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-fusionverdict",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": "d8c254f0-a46c-4441-9fe6-8e81e0189d23",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "d8c254f0-a46c-4441-9fe6-8e81e0189d23"
+        },
+        "created": "2026-09-03"
+      },
+      {
         "id": "impl-gatehonesty",
         "harness": "codex",
         "role": "implement",
@@ -1459,6 +1497,15 @@
       {
         "id": "impl-isnsolidangle",
         "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-isnupstream",
+        "harness": "claude",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -2181,6 +2228,17 @@
           "gpt-5.6-sol": "01a05def-5609-7990-b23e-d45a344b0f12"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-refusalorder",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": "6a12a1a6-4bdc-46c9-a23f-484d39d8e061",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "6a12a1a6-4bdc-46c9-a23f-484d39d8e061"
+        },
+        "created": "2026-09-03"
       },
       {
         "id": "impl-releasecheckout",
@@ -62127,6 +62185,352 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T195031388632-n-wcr-brems-review",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-brems-review",
+        "node_definition": {
+          "done_when": "the report records the scoped sn run --focus spectral_bremsstrahlung_photon_radiance --only review invocation with the quorum score it returned and the resulting name_stage plus docs_stage, states a Cypher count of how many of spectral_photon_radiance and spectral_bremsstrahlung_photon_radiance carry name_stage accepted alongside docs_stage accepted as a number out of 2, and proves the ungated segment sweep did not fire by showing the count of terminal-stage names drifting from their own id parse before the run beside the count after, both of which must read 706",
+          "estimated_hours": 1.0,
+          "goal": "Take spectral_bremsstrahlung_photon_radiance through the one review rotation its applied rename still needs",
+          "id": "n-wcr-brems-review",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T195031388632-n-wcr-brems-review/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-brems-review.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-volumetricbase",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:50:46Z",
+        "completed_at": "2026-09-03T20:12:08.476Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1265,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1282,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ece1ed6c0791a3bb5bc544208c6cab77dabddd64",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "cypher count of the two successors accepted on both axes, plus the terminal-stage drift census before and after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-brems-review.gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T195031388632-n-wcr-brems-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "8dd5cb01-cb38-4751-b035-8ac0b9c8fcd4",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 37542,
+            "cache_creation_input_tokens_cumulative": 169832,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 1375460,
+            "inference_geo": "not_available",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 18,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 12430,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.004189000000000664,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.6968900000000002
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 667.986,
+          "generated_tokens": 12430,
+          "generation_seconds": 171.273,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 18.1,
+          "machine_seconds": 496.713,
+          "peak_input_tokens": 180534,
+          "tokens_per_second": 72.57,
+          "wall_tokens_per_second": 18.61
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "one governed graph transition; the report is the deliverable and sits outside the git tree by the write fence",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T200432418626-n-wcr-fusion-rate-verdict",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-fusion-rate-verdict",
+        "node_definition": {
+          "done_when": "the report at the write path carries exactly three headings spelled AXIS-NAME, AXIS-DOCS and AXIS-REASON-TEXT so that grep -c '^## AXIS-' on it returns 3; under those headings every reviewer comment stored against the source_rate_due_to_fusion review appears verbatim beside its reviewer id and its score; and the report's final line begins with the token VERDICT: followed by a plain statement of whether the source_rate base itself was rejected, resting on the quoted lines rather than on inference. This node issues no edit",
+          "estimated_hours": 0.5,
+          "goal": "Establish from its own reviewer records what the 0.30 verdict on source_rate_due_to_fusion is actually about",
+          "id": "n-wcr-fusion-rate-verdict",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T200432418626-n-wcr-fusion-rate-verdict/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "open",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-fusion-rate-verdict.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "impl-fusionverdict",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T20:04:37Z",
+        "completed_at": "2026-09-03T20:11:21.121Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 396,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 404,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "ece1ed6c0791a3bb5bc544208c6cab77dabddd64",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "grep -c '^## AXIS-' report (=3); tail -1 grep -c '^VERDICT: ' (=1); verbatim re-read of all 9 review rows, MISSING_VERBATIM=0",
+          "exit_status": 0,
+          "log_path": "/tmp/verify.out",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T200432418626-n-wcr-fusion-rate-verdict/manifest.md",
+        "scope_changed": false,
+        "session_id": "d8c254f0-a46c-4441-9fe6-8e81e0189d23",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 98907,
+            "cache_creation_input_tokens_cumulative": 98907,
+            "cache_read_input_tokens": 2523871,
+            "cache_read_input_tokens_cumulative": 2523871,
+            "inference_geo": "not_available",
+            "input_tokens": 62,
+            "input_tokens_cumulative": 62,
+            "output_tokens": 22026,
+            "output_tokens_cumulative": 22026,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.8019655000000006,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.8019655000000006
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 400.461,
+          "generated_tokens": 22026,
+          "generation_seconds": 291.515,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 11.2,
+          "machine_seconds": 108.946,
+          "peak_input_tokens": 112121,
+          "tokens_per_second": 75.56,
+          "wall_tokens_per_second": 55.0
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only investigation; its sole write path is a report outside the repository",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260903T195145317321-n-wcr-publish-refusal-order",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-wcr-publish-refusal-order",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider exits 0 with 0 failures, the added tests assert that a staging tree whose manifest carries a stale edge_model_version is refused with the one-line stamp message rather than a multi-error structural dump, and the module docstring states the new refusal order so the declared contract matches the code",
+          "estimated_hours": 0.75,
+          "goal": "Let publish give its own legible manifest refusal before the store load buries it in a field dump",
+          "id": "n-wcr-publish-refusal-order",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T195145317321-n-wcr-publish-refusal-order/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/standard_names/publish.py",
+            "tests/standard_names/test_export_sidecar_surface.py",
+            "tests/standard_names/test_catalog_layout_hierarchy.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-refusalorder",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T19:51:51Z",
+        "completed_at": "2026-09-03T20:16:50.700Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1494,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1499,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "ece1ed6c0791a3bb5bc544208c6cab77dabddd64",
+        "commits": [
+          "23a8afdbc6158175bf1b192e9c6380da9f6afb12"
+        ],
+        "changed_lines": {
+          "added": 159,
+          "removed": 25,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/{test_export_sidecar_surface,test_catalog_layout_hierarchy,test_export_layout_stamp,test_publish_transport_only}.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T195145317321-n-wcr-publish-refusal-order/focused-publish-gates.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T195145317321-n-wcr-publish-refusal-order/manifest.md",
+        "scope_changed": false,
+        "session_id": "6a12a1a6-4bdc-46c9-a23f-484d39d8e061",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 115248,
+            "cache_creation_input_tokens_cumulative": 115248,
+            "cache_read_input_tokens": 4437154,
+            "cache_read_input_tokens_cumulative": 4437154,
+            "inference_geo": "not_available",
+            "input_tokens": 92,
+            "input_tokens_cumulative": 92,
+            "output_tokens": 32574,
+            "output_tokens_cumulative": 32574,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.185867,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.185867
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 866.297,
+          "generated_tokens": 32574,
+          "generation_seconds": 429.628,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 12.8,
+          "machine_seconds": 436.669,
+          "peak_input_tokens": 128462,
+          "tokens_per_second": 75.82,
+          "wall_tokens_per_second": 37.6
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -62185,8 +62589,36 @@
         "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-claude-opus-20260903200058",
+        "backend": "claude-opus",
+        "purpose": "resume",
+        "opened_at": "2026-09-03T20:00:58Z",
+        "closed_at": "2026-09-03T20:02:21Z",
+        "held_seconds": 83,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-claude-20260903200218",
+        "backend": "claude",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-03T20:02:18Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 95.0,
+        "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 1512
+    "_version": 1526
   }
 }
