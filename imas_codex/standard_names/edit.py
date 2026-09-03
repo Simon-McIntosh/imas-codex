@@ -1576,20 +1576,77 @@ def _fold_target_successor_names(
     }
 
 
+_FOLD_CHAIN_MAX_DEPTH = 64
+
+
+def _fold_chain_walk(
+    transaction: Any, snapshot: dict[str, Any], old: str, into: str
+) -> tuple[bool, str | None]:
+    """Walk ``into``'s REFINED_FROM descendants for a straight chain to ``old``.
+
+    A chain of any depth whose every live descendant is ``old`` closes onto
+    ``into`` as its own root identity — each hop is confirmed superseded
+    before the walk descends through it, so an intermediate that is still
+    live stops the walk exactly as a direct live successor would. A branch
+    that leads to a different name anywhere along the way keeps the target
+    spelling load-bearing, so the walk refuses instead of descending into it.
+
+    Returns ``(True, None)`` when the chain closes on ``old``. Returns
+    ``(False, reason)`` when a live successor — direct or found while
+    descending — is not ``old``. Returns ``(False, None)`` when ``into`` has
+    no successor lineage at all, leaving the caller's other free-identity
+    checks (sources, parent, child) to decide.
+    """
+    element_id = snapshot["target_element_id"]
+    relationships = snapshot.get("relationships") or []
+    visited = {into}
+    for _ in range(_FOLD_CHAIN_MAX_DEPTH):
+        successors = _fold_target_successor_names(relationships, element_id)
+        if successors == {old}:
+            return True, None
+        live = sorted(successors - {old})
+        if len(successors) != 1 or not live:
+            if live:
+                return False, (
+                    f"target {into!r} is superseded and has successor lineage: "
+                    + ", ".join(live)
+                )
+            return False, None
+        (candidate,) = live
+        if candidate in visited:
+            return False, None
+        candidate_snapshot = _fold_snapshot(transaction, candidate, into)
+        if candidate_snapshot is None or (
+            candidate_snapshot["old_properties"].get("name_stage") != "superseded"
+        ):
+            return False, (
+                f"target {into!r} is superseded and has successor lineage: {candidate}"
+            )
+        visited.add(candidate)
+        element_id = candidate_snapshot["old_element_id"]
+        relationships = candidate_snapshot.get("relationships") or []
+    return False, f"target {into!r} successor lineage exceeds walk depth"
+
+
 def _fold_tombstone_target_reason(
-    snapshot: dict[str, Any], old: str, into: str
-) -> str | None:
+    transaction: Any, snapshot: dict[str, Any], old: str, into: str
+) -> tuple[str | None, bool]:
     """Refuse a tombstoned fold target that is not a free identity.
 
     A tombstoned identity can be re-occupied only when nothing reads it: no
-    recorded successor and no successor lineage edge other than the name now
-    being folded into it, no sources bound to or projected onto it, and
-    neither a parent nor a child. A target whose only live descendant is the
+    recorded successor and no successor lineage other than a chain of any
+    depth that closes back onto the name now being folded into it, no
+    sources bound to or projected onto it, and neither a parent nor a child.
+    A target whose only live descendant, at the end of that chain, is the
     name being folded is a straight-line refinement chain closing on itself,
-    not a third-party identity being taken, so that case alone is admitted.
-    Any other live descendant makes the spelling load-bearing, so the fold
-    refuses and the caller folds into whatever holds the live meaning
-    instead.
+    not a third-party identity being taken, so that case alone is admitted —
+    provided every intermediate on the way is itself superseded, with no
+    other lineage of its own. Any other live descendant, or a chain that
+    passes through a still-live intermediate, makes the spelling
+    load-bearing, so the fold refuses and the caller folds into whatever
+    holds the live meaning instead.
+
+    Returns ``(reason, closing_straight_chain)``.
     """
     target_properties = snapshot["target_properties"]
     successor = target_properties.get("superseded_by")
@@ -1597,38 +1654,38 @@ def _fold_tombstone_target_reason(
         return (
             f"target {into!r} is superseded and records successor {successor!r} — "
             "fold into the successor instead"
-        )
-    target_element_id = snapshot["target_element_id"]
-    relationships = snapshot.get("relationships") or []
-    target_successors = _fold_target_successor_names(relationships, target_element_id)
-    successor_lineage = sorted(target_successors - {old})
-    if successor_lineage:
-        return f"target {into!r} is superseded and has successor lineage: " + ", ".join(
-            str(name) for name in successor_lineage
-        )
+        ), False
+    closing_straight_chain, chain_reason = _fold_chain_walk(
+        transaction, snapshot, old, into
+    )
+    if chain_reason:
+        return chain_reason, False
     target_sources = _fold_source_rows(snapshot, into)
     if target_sources:
         return (
             f"target {into!r} is superseded and still carries "
             f"{len(target_sources)} source(s)"
-        )
-    for relationship in relationships:
+        ), closing_straight_chain
+    target_element_id = snapshot["target_element_id"]
+    for relationship in snapshot.get("relationships") or []:
         if relationship.get("type") != "HAS_PARENT":
             continue
         if relationship.get("start_element_id") == target_element_id:
             return (
                 f"target {into!r} is superseded and still has parent "
                 f"{relationship.get('end_id')!r}"
-            )
+            ), closing_straight_chain
         if relationship.get("end_element_id") == target_element_id:
             return (
                 f"target {into!r} is superseded and still has child "
                 f"{relationship.get('start_id')!r}"
-            )
-    return None
+            ), closing_straight_chain
+    return None, closing_straight_chain
 
 
-def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | None:
+def _fold_guard_reason(
+    transaction: Any, snapshot: dict[str, Any], old: str, into: str
+) -> str | None:
     old_properties = snapshot["old_properties"]
     target_properties = snapshot["target_properties"]
     old_stage = old_properties.get("name_stage")
@@ -1637,13 +1694,11 @@ def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | N
     target_stage = target_properties.get("name_stage")
     closing_straight_chain = False
     if target_stage == "superseded":
-        tombstone_reason = _fold_tombstone_target_reason(snapshot, old, into)
+        tombstone_reason, closing_straight_chain = _fold_tombstone_target_reason(
+            transaction, snapshot, old, into
+        )
         if tombstone_reason:
             return tombstone_reason
-        target_successors = _fold_target_successor_names(
-            snapshot.get("relationships") or [], snapshot["target_element_id"]
-        )
-        closing_straight_chain = target_successors == {old}
     elif target_stage != "accepted":
         return f"target {into!r} is name_stage={target_stage!r}, not 'accepted'"
     elif target_properties.get("validation_status") != "valid":
@@ -2204,7 +2259,7 @@ def supersede_into(
                     return _fold_refusal(
                         f"name {old!r} or target {into!r} was not found"
                     )
-                guard_reason = _fold_guard_reason(snapshot, old, into)
+                guard_reason = _fold_guard_reason(transaction, snapshot, old, into)
                 if guard_reason:
                     transaction.rollback()
                     return _fold_refusal(guard_reason)

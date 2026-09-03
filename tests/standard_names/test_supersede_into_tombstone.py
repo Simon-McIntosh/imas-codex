@@ -105,6 +105,54 @@ def test_tombstone_target_whose_only_successor_is_the_folded_name_is_admitted() 
     assert graph.state.nodes[_OLD]["name_stage"] == "superseded"
 
 
+def test_tombstone_target_whose_two_hop_chain_closes_onto_its_root_is_admitted() -> (
+    None
+):
+    """target -> intermediate -> old, intermediate itself tombstoned, closes.
+
+    ``target``'s only direct successor is ``electron_number_density``, which
+    is itself superseded and whose only successor is ``old``. Every live
+    descendant of ``target``, at the end of the chain, is the name now being
+    folded into it, so the fold is admitted despite the walk needing two hops
+    rather than one.
+    """
+    graph = _Graph(_tombstone_state())
+    graph.state.nodes["electron_number_density"] = _node(
+        "electron_number_density", stage="superseded"
+    )
+    graph.state.refined_from.append(("electron_number_density", _TARGET))
+    graph.state.refined_from.append((_OLD, "electron_number_density"))
+    result = _run(graph)
+    assert result["ok"] is True
+    assert graph.commits == 1
+    assert graph.state.nodes[_OLD]["name_stage"] == "superseded"
+
+
+def test_tombstone_target_whose_two_hop_chain_branches_stays_refused() -> None:
+    """A live descendant off the chain keeps the spelling load-bearing.
+
+    ``electron_number_density`` sits between ``target`` and ``old`` and is
+    itself superseded, but it also carries a second, still-live successor
+    (``ion_density_alias``) of its own. That branch is a live descendant of
+    ``target`` that is not the name being folded, so the fold refuses even
+    though the direct path to ``old`` is otherwise a clean chain.
+    """
+    graph = _Graph(_tombstone_state())
+    graph.state.nodes["electron_number_density"] = _node(
+        "electron_number_density", stage="superseded"
+    )
+    graph.state.nodes["ion_density_alias"] = _node(
+        "ion_density_alias", stage="accepted"
+    )
+    graph.state.refined_from.append(("electron_number_density", _TARGET))
+    graph.state.refined_from.append((_OLD, "electron_number_density"))
+    graph.state.refined_from.append(("ion_density_alias", "electron_number_density"))
+    result = _run(graph)
+    assert result["ok"] is False
+    assert "successor lineage: ion_density_alias" in result["reason"]
+    assert graph.commits == 0
+
+
 def test_tombstone_target_with_a_different_successor_stays_refused_even_when_old_is_also_one() -> (
     None
 ):
