@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T19:35:41",
+  "updated": "2026-09-03T20:00:32",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3134,6 +3134,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-01"
+      },
+      {
+        "id": "inv-wcrreuse",
+        "harness": "claude-opus",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
       },
       {
         "id": "inv-west",
@@ -60544,6 +60553,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1476
+    "_version": 1477
   }
 }
