@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-03T12:23:56",
+  "updated": "2026-09-03T12:32:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -661,6 +661,15 @@
       {
         "id": "impl-commentroute",
         "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-composerule",
+        "harness": "claude",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -56814,6 +56823,116 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T101719321360-n-fold-coverage-follows-the-new-alias",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-fold-coverage-follows-the-new-alias",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/test_gap_rule_verdicts.py tests/standard_names/test_compose_prompt_examples_round_trip.py -q exits 0, and the full tests/standard_names run reports eleven failures against the sixteen at the base revision with zero added",
+          "estimated_hours": 1.5,
+          "goal": "Bring the fold-coverage and compose-example round-trip expectations into line with the grammar that now retires the duplicate temporal spelling to an advisory alias, since three fold-coverage cases assert which public aliases exist and which folds stay actionable while two compose-example cases round-trip operator projection forms, and all five encode the vocabulary as it stood before the retirement",
+          "id": "n-fold-coverage-follows-the-new-alias",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-coverage-follows-the-new-alias.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/standard_names/test_gap_rule_verdicts.py",
+            "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-vocabfixtures",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T10:17:26Z",
+        "completed_at": "2026-09-03T10:30:46.285Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 793,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 800,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ecf2a3a7234a435c32049d05569d039dfd707505",
+        "commits": [
+          "e9fa200ad5de41a27f09d5487da255e3418fb393"
+        ],
+        "changed_lines": {
+          "added": 55,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_gap_rule_verdicts.py tests/standard_names/test_compose_prompt_examples_round_trip.py -q",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-coverage-follows-the-new-alias.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/fold-coverage-follows-the-new-alias.json",
+        "scope_changed": false,
+        "session_id": "94e1b8ec-1a6e-4df2-a856-044265361e4f",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 128537,
+            "cache_creation_input_tokens_cumulative": 128537,
+            "cache_read_input_tokens": 4322699,
+            "cache_read_input_tokens_cumulative": 4322699,
+            "inference_geo": "not_available",
+            "input_tokens": 72,
+            "input_tokens_cumulative": 72,
+            "output_tokens": 27438,
+            "output_tokens_cumulative": 27438,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6532117999999993,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.6532117999999993
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_gap_rule_verdicts.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -56874,6 +56993,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1422
+    "_version": 1424
   }
 }
