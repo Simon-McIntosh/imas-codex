@@ -613,6 +613,9 @@ def _walk_and_resolve_cascade(
     # Plan per-descendant renames.
     rename_plan: dict[str, str] = {root_id: root_new_name}
     skipped: list[dict[str, str]] = []
+    # Every descendant that leaves the plan, and why. A child below one of
+    # these did not fail to resolve — propagation stopped above it.
+    unplanned: dict[str, str] = {}
     conflicts: list[str] = [
         f"heterogeneous semantic cohort below {parent_id!r}: "
         f"operator_kinds={sorted(kinds)!r}"
@@ -635,6 +638,7 @@ def _walk_and_resolve_cascade(
                 skipped.append(
                     {"name": child_id, "reason": "no HAS_PARENT edge in subtree"}
                 )
+                unplanned[child_id] = skipped[-1]["reason"]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -662,6 +666,7 @@ def _walk_and_resolve_cascade(
                         "reason": f"operator_kind={op_kind} is a semantic boundary",
                     }
                 )
+                unplanned[child_id] = skipped[-1]["reason"]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -680,6 +685,7 @@ def _walk_and_resolve_cascade(
                     f"semantic proof absent for {child_id!r} -> {target_id!r}: "
                     f"{proof_reason}"
                 )
+                unplanned[child_id] = conflicts[-1]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -709,6 +715,7 @@ def _walk_and_resolve_cascade(
                         f"binary edge for {child_id!r}: cannot locate the "
                         f"role={other_role!r} partner argument"
                     )
+                    unplanned[child_id] = conflicts[-1]
                     pending.discard(child_id)
                     progress = True
                     continue
@@ -724,6 +731,7 @@ def _walk_and_resolve_cascade(
                         f"locus edge for {child_id!r}: cannot recover locus "
                         "(relation, token) from child id parse"
                     )
+                    unplanned[child_id] = conflicts[-1]
                     pending.discard(child_id)
                     progress = True
                     continue
@@ -743,6 +751,7 @@ def _walk_and_resolve_cascade(
                     f"cannot compute cascade for {child_id!r} "
                     f"(operator_kind={op_kind!r}; edge props insufficient)"
                 )
+                unplanned[child_id] = conflicts[-1]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -755,6 +764,7 @@ def _walk_and_resolve_cascade(
                     f"semantic proof does not survive {child_id!r} -> "
                     f"{new_child!r}: {successor_proof_reason}"
                 )
+                unplanned[child_id] = conflicts[-1]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -766,6 +776,7 @@ def _walk_and_resolve_cascade(
                     f"ISN round-trip failed for cascade "
                     f"{child_id!r} → {new_child!r}: {rt_reason}"
                 )
+                unplanned[child_id] = conflicts[-1]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -777,6 +788,7 @@ def _walk_and_resolve_cascade(
                     f"{child_id!r} has origin='catalog_edit'; "
                     "pass override_edits=True to rename anyway"
                 )
+                unplanned[child_id] = conflicts[-1]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -785,6 +797,7 @@ def _walk_and_resolve_cascade(
                     f"{child_id!r} has name_stage='accepted'; "
                     "pass include_accepted=True to rename anyway"
                 )
+                unplanned[child_id] = conflicts[-1]
                 pending.discard(child_id)
                 progress = True
                 continue
@@ -796,9 +809,39 @@ def _walk_and_resolve_cascade(
         if not pending:
             break
         if not progress:
-            # Pending children can't be resolved (probably orphaned by
-            # a broken topology).  Report and stop.
-            for orphan in sorted(pending):
+            # Two different situations end a pass with work left over, and
+            # only one of them is a fault. A child whose parent left the
+            # plan — a semantic boundary, a safety refusal, a failed proof —
+            # is reachable and correctly resolved: propagation stopped above
+            # it, so it belongs in ``skipped`` beneath the ancestor that
+            # stopped, not in ``conflicts``. Walk that closure downward
+            # first; whatever is still pending afterwards has no parent in
+            # the subtree walk at all, which is the topology fault.
+            remaining = set(pending)
+            while True:
+                stopped: list[tuple[str, str]] = []
+                for child_id in sorted(remaining):
+                    blocker = next(
+                        (
+                            str(er.get("target_id"))
+                            for er in edges_by_child.get(child_id, [])
+                            if er.get("target_id") in unplanned
+                        ),
+                        None,
+                    )
+                    if blocker is not None:
+                        stopped.append((child_id, blocker))
+                if not stopped:
+                    break
+                for child_id, blocker in stopped:
+                    reason = (
+                        f"propagation stopped at ancestor {blocker!r}: "
+                        f"{unplanned[blocker]}"
+                    )
+                    skipped.append({"name": child_id, "reason": reason})
+                    unplanned[child_id] = reason
+                    remaining.discard(child_id)
+            for orphan in sorted(remaining):
                 conflicts.append(
                     f"{orphan!r} unreachable in cascade — no parent in plan"
                 )
