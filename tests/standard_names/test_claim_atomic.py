@@ -111,7 +111,15 @@ class TestAtomicClaimSetsTokenAndStage:
         assert seed_kwargs.get("to_stage") == "refining"
 
     def test_no_stage_transition_when_to_stage_none(self):
-        """When to_stage is None, the SET clause omits stage writes."""
+        """When to_stage is None, no stage property is written: neither
+        stage SET clause is present and no ``to_stage`` parameter is bound.
+
+        ``sn.name_stage`` still appears in the seed query's frozen-stage
+        eligibility filter (``coalesce(sn.name_stage, '') IN
+        $frozen_name_stages``) regardless of *to_stage* — that read is not
+        a write, so this test proves the absence of a write rather than
+        the absence of the column name.
+        """
         from imas_codex.standard_names.graph_ops import _claim_sn_atomic
 
         gc, tx = _mock_gc_tx()
@@ -141,8 +149,10 @@ class TestAtomicClaimSetsTokenAndStage:
             )
 
         seed_cypher = tx.run.call_args_list[0].args[0]
-        assert "name_stage" not in seed_cypher
-        assert "docs_stage" not in seed_cypher
+        assert "sn.name_stage = $to_stage" not in seed_cypher
+        assert "sn.docs_stage = $to_stage" not in seed_cypher
+        seed_kwargs = tx.run.call_args_list[0].kwargs
+        assert "to_stage" not in seed_kwargs
 
 
 # ---------------------------------------------------------------------------
