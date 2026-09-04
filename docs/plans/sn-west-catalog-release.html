@@ -63,6 +63,34 @@
     </tbody>
   </table>
 </section>
+
+<section>
+  <h2 id="release-run-residues">Three residues the second candidate cut left behind</h2>
+  <p>Cutting <code>v0.4.0rc4+west-task-2e</code> and opening pull request 15 succeeded, and the
+  same run reported three defects in the release path it had just exercised. All three are this
+  plan's own scope and none of them blocked the cut, which is precisely why they are written
+  down: a defect a successful run reports is the kind that is never rediscovered until it
+  matters.</p>
+  <p><strong>The export report's verdict does not gate what gets published.</strong>
+  <code>run_review_release</code> can assemble and publish staging content without first
+  propagating an unsuccessful <code>ExportReport</code>. So a failed export does not stop the
+  step that consumes its output, and the content that reaches a reviewer may be stale rather
+  than absent. This is the fail-open shape the sprint has met repeatedly — a check that runs,
+  produces a verdict, and has no wire to anything that would act on it. Closing it means
+  measuring first what has been passing only because the report was ignored.</p>
+  <p><strong>The post-copy divergence scan walks the catalog checkout's virtual
+  environment.</strong> The run reported 387 divergences sourced from environment YAML files
+  while the release itself completed, so every one was noise and a reader cannot tell a real
+  divergence from an artifact of the traversal. Naming the subtrees to scan is the fix, and it
+  is the same remedy as the repository-wide grep rule: name the target rather than exclude what
+  you do not want.</p>
+  <p><strong>The deterministic pull-request body omits the reviewing guide.</strong> When the
+  structured release-notes call returns no title the run falls back to a static body, which
+  links the exclusions artifact and the catalog preview but not the runbook's
+  <code>REVIEWING.md</code>. A reviewer reaching the fallback body therefore never sees the
+  document that states which fields they may edit — which is exactly the surface
+  <code>catalog-review-surface</code> exists to keep honest.</p>
+</section>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="west-protection" data-choice="no-special-protection" data-by="Simon McIntosh" data-when="2026-08-10T08:11:07+00:00">
