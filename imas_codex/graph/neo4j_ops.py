@@ -15,6 +15,7 @@ import json
 import os
 import shutil
 import subprocess
+import tarfile
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -34,6 +35,7 @@ RECOVERY_DIR = Path.home() / ".local" / "share" / "imas-codex" / "recovery"
 DATA_DIR = Path.home() / ".local" / "share" / "imas-codex" / "neo4j"
 NEO4J_LOCK_FILE = Path.home() / ".config" / "imas-codex" / "neo4j-operation.lock"
 INSTANCE_MANIFESTS_KEY = "instances"
+FULL_GRAPH_ARCHIVE_PACKAGE = "imas-codex-graph"
 
 
 def get_graph_instance_manifest(instance_name: str | None) -> dict | None:
@@ -493,6 +495,7 @@ class BackupCurrency:
     live_path: Path | None
     live_modified_at: datetime | None
     age_seconds: float | None
+    backup_size_bytes: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -505,6 +508,69 @@ class OffsiteCurrency:
     live_path: Path | None
     live_modified_at: datetime | None
     age_seconds: float | None
+    offsite_size_bytes: int | None = None
+
+
+def _is_full_recovery_archive(path: Path) -> bool:
+    """Return whether a gzip tar contains a non-empty graph dump member."""
+    try:
+        with tarfile.open(path, "r:gz") as archive:
+            for member in archive:
+                if (
+                    member.isfile()
+                    and member.size > 0
+                    and Path(member.name).name == "graph.dump"
+                ):
+                    return True
+    except (OSError, tarfile.TarError):
+        return False
+    return False
+
+
+def _newest_recovery_archive(
+    backup_dir: Path,
+) -> tuple[Path | None, int | None, datetime | None]:
+    candidates: list[tuple[float, Path, int]] = []
+    if backup_dir.exists():
+        for path in backup_dir.rglob("*"):
+            if not path.is_file() or not _is_full_recovery_archive(path):
+                continue
+            try:
+                stat = path.stat()
+            except OSError:
+                continue
+            candidates.append((stat.st_mtime, path, stat.st_size))
+
+    if not candidates:
+        return None, None, None
+
+    modified_timestamp, path, size_bytes = max(
+        candidates, key=lambda candidate: candidate[0]
+    )
+    return (
+        path,
+        size_bytes,
+        datetime.fromtimestamp(modified_timestamp, tz=UTC),
+    )
+
+
+def _offsite_archive_identity(version: dict) -> str | None:
+    tags = version.get("metadata", {}).get("container", {}).get("tags", [])
+    named_tags = [tag for tag in tags if tag != "latest"]
+    identity = (
+        named_tags[0] if named_tags else (tags[0] if tags else version.get("name"))
+    )
+    return str(identity) if identity else None
+
+
+def _offsite_archive_size(version: dict) -> int | None:
+    container = version.get("metadata", {}).get("container", {})
+    raw_size = version.get("size_in_bytes", container.get("size_in_bytes"))
+    try:
+        size_bytes = int(raw_size)
+    except (TypeError, ValueError):
+        return None
+    return size_bytes if size_bytes > 0 else None
 
 
 def _newest_live_file() -> tuple[Path | None, datetime | None]:
@@ -526,25 +592,13 @@ def _newest_live_file() -> tuple[Path | None, datetime | None]:
 
 
 def get_backup_currency() -> BackupCurrency:
-    """Measure how far the newest graph backup is behind the live data directory."""
+    """Measure how far the newest full recovery archive trails live graph data."""
     from imas_codex.graph.profiles import BACKUPS_DIR
 
-    backup_files = (
-        [
-            path
-            for path in BACKUPS_DIR.rglob("*")
-            if path.is_file() and path.stat().st_size > 0
-        ]
-        if BACKUPS_DIR.exists()
-        else []
+    backup_path, backup_size_bytes, backup_modified_at = _newest_recovery_archive(
+        BACKUPS_DIR
     )
-    backup_path = max(backup_files, key=lambda path: path.stat().st_mtime, default=None)
     live_path, live_modified_at = _newest_live_file()
-    backup_modified_at = (
-        datetime.fromtimestamp(backup_path.stat().st_mtime, tz=UTC)
-        if backup_path is not None
-        else None
-    )
 
     if backup_modified_at is None:
         return BackupCurrency(
@@ -554,6 +608,7 @@ def get_backup_currency() -> BackupCurrency:
             live_path=live_path,
             live_modified_at=live_modified_at,
             age_seconds=None,
+            backup_size_bytes=None,
         )
 
     age_seconds = (
@@ -568,6 +623,7 @@ def get_backup_currency() -> BackupCurrency:
         live_path=live_path,
         live_modified_at=live_modified_at,
         age_seconds=age_seconds,
+        backup_size_bytes=backup_size_bytes,
     )
 
 
@@ -575,20 +631,23 @@ def get_offsite_currency(
     registry: str,
     token: str | None = None,
 ) -> OffsiteCurrency:
-    """Measure full-scope GHCR copy lag against the newest live database file."""
+    """Measure exact full-graph package lag against the newest live database file."""
     from imas_codex.graph.ghcr import list_package_versions
 
     versions = list_package_versions(
         registry,
         token,
-        pkg_name="imas-codex-graph",
+        pkg_name=FULL_GRAPH_ARCHIVE_PACKAGE,
     )
     live_path, live_modified_at = _newest_live_file()
 
-    timestamped: list[tuple[datetime, dict]] = []
+    timestamped: list[tuple[datetime, dict, str, int | None]] = []
     for version in versions:
         created_at = version.get("created_at")
         if not isinstance(created_at, str):
+            continue
+        identity = _offsite_archive_identity(version)
+        if identity is None:
             continue
         try:
             timestamp = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
@@ -596,7 +655,14 @@ def get_offsite_currency(
             continue
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=UTC)
-        timestamped.append((timestamp.astimezone(UTC), version))
+        timestamped.append(
+            (
+                timestamp.astimezone(UTC),
+                version,
+                identity,
+                _offsite_archive_size(version),
+            )
+        )
 
     if not timestamped:
         return OffsiteCurrency(
@@ -608,18 +674,13 @@ def get_offsite_currency(
             age_seconds=None,
         )
 
-    offsite_modified_at, newest = max(timestamped, key=lambda item: item[0])
-    tags = newest.get("metadata", {}).get("container", {}).get("tags", [])
-    named_tags = [tag for tag in tags if tag != "latest"]
-    identity = (
-        named_tags[0] if named_tags else (tags[0] if tags else newest.get("name"))
+    offsite_modified_at, _, identity, offsite_size_bytes = max(
+        timestamped, key=lambda item: item[0]
     )
     offsite_ref = (
-        f"{registry}/imas-codex-graph:{identity}"
-        if identity and not str(identity).startswith("sha256:")
-        else f"{registry}/imas-codex-graph@{identity}"
-        if identity
-        else None
+        f"{registry}/{FULL_GRAPH_ARCHIVE_PACKAGE}:{identity}"
+        if not identity.startswith("sha256:")
+        else f"{registry}/{FULL_GRAPH_ARCHIVE_PACKAGE}@{identity}"
     )
     age_seconds = (
         max(0.0, (live_modified_at - offsite_modified_at).total_seconds())
@@ -633,6 +694,7 @@ def get_offsite_currency(
         live_path=live_path,
         live_modified_at=live_modified_at,
         age_seconds=age_seconds,
+        offsite_size_bytes=offsite_size_bytes,
     )
 
 

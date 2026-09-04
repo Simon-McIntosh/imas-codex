@@ -1,8 +1,10 @@
-"""Backup currency measurements from filesystem modification times."""
+"""Currency status and lag semantics after recovery artifacts are identified."""
 
 from __future__ import annotations
 
+import io
 import os
+import tarfile
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -12,6 +14,18 @@ from imas_codex.graph import neo4j_ops
 def _file_with_mtime(path: Path, timestamp: float, content: bytes = b"data") -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(content)
+    os.utime(path, (timestamp, timestamp))
+    return path
+
+
+def _recovery_archive_with_mtime(
+    path: Path, timestamp: float, content: bytes = b"graph data"
+) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    member = tarfile.TarInfo(f"{path.stem}/graph.dump")
+    member.size = len(content)
+    with tarfile.open(path, "w:gz") as archive:
+        archive.addfile(member, io.BytesIO(content))
     os.utime(path, (timestamp, timestamp))
     return path
 
@@ -41,8 +55,8 @@ def test_reports_no_backup_separately_from_staleness(tmp_path, monkeypatch):
 def test_reports_newest_backup_age_against_newest_live_file(tmp_path, monkeypatch):
     backups_dir = tmp_path / "backups"
     data_dir = tmp_path / "neo4j"
-    _file_with_mtime(backups_dir / "older.dump", 100.0)
-    newest_backup = _file_with_mtime(backups_dir / "newer.dump", 200.0)
+    _recovery_archive_with_mtime(backups_dir / "older.tar.gz", 100.0)
+    newest_backup = _recovery_archive_with_mtime(backups_dir / "newer.tar.gz", 200.0)
     _file_with_mtime(data_dir / "data" / "older", 250.0)
     newest_live = _file_with_mtime(data_dir / "data" / "nested" / "newer", 325.0)
     _configure_paths(monkeypatch, backups_dir, data_dir)
@@ -58,7 +72,7 @@ def test_reports_newest_backup_age_against_newest_live_file(tmp_path, monkeypatc
 def test_reports_zero_lag_when_backup_is_newer_than_live_data(tmp_path, monkeypatch):
     backups_dir = tmp_path / "backups"
     data_dir = tmp_path / "neo4j"
-    newest_backup = _file_with_mtime(backups_dir / "newer.dump", 400.0)
+    newest_backup = _recovery_archive_with_mtime(backups_dir / "newer.tar.gz", 400.0)
     newest_live = _file_with_mtime(data_dir / "data" / "store", 325.0)
     _configure_paths(monkeypatch, backups_dir, data_dir)
 
