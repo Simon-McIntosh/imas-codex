@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T01:08:33",
+  "updated": "2026-09-05T01:28:32",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1557,9 +1557,11 @@
         "id": "impl-guardfixtures",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06eac-21f6-7550-bbfd-17f3451b1875",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06eac-21f6-7550-bbfd-17f3451b1875"
+        },
         "created": "2026-09-04"
       },
       {
@@ -4035,9 +4037,11 @@
         "id": "test-holdoutunit",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06eac-21f5-7912-9488-fc1a05c840c7",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06eac-21f5-7912-9488-fc1a05c840c7"
+        },
         "created": "2026-09-04"
       },
       {
@@ -4162,6 +4166,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a037ea-ac01-7933-a15d-2b9d06ea4bd0"
         }
+      },
+      {
+        "id": "test-resolutionbypass",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "test-roundtrip",
@@ -76386,6 +76399,271 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T230600682123-n-sli-eligibility-fixtures-carry-a-category",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-eligibility-fixtures-carry-a-category",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4384,
+                "cached_input_tokens": 552905,
+                "input_tokens": 557291,
+                "output_tokens": 3931,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 561222,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "A merged-head measurement found 27 added failures in tests/standard_names against a five-failure base, and NINETEEN of them are yours: the fail-closed node_category guard added in qualify_dd rejects a candidate whose metadata.node_category is absent or outside SN_SOURCE_CATEGORIES, and the older fixtures never supplied one. tests/standard_names/test_enrichment.py defaults node_category to None and contributes 13 failures; the _row helper in tests/standard_names/test_qualify_sources.py omits it entirely and contributes 6. Their rows are filtered to zero BEFORE the behaviour each test intends to exercise, so the tracebacks show empty output where enriched rows were expected, or IndexError when an assertion indexes the empty result. THE GUARD IS CORRECT AND IS NOT TO BE WEAKENED. Do not relax it, do not make the category optional, and do not add a test-only bypass: a source with no category is genuinely ineligible, which is the whole point of the change. Repair the FIXTURES so each row carries the node_category its scenario actually implies, and give a realistic value rather than a blanket eligible one - a test whose subject is a rejected row must still be rejected, and for the RIGHT reason. Watch that last point specifically: test_skip_records_written now records node_category_ineligible where it expects duplicate_ids, so its fixture must be eligible on category in order to reach the duplicate-id rejection it is actually about. Do the same reading for test_ineligible_rows_removed, test_mixed_unit_rejected, test_string_type_rejected and test_process_path_rejected, each of which asserts a specific rejection reason that the category filter is now pre-empting. THE MEASURE: run the whole tests/standard_names/ suite and report failure count and every failure id before and after. Your nineteen must reach zero. The other eight added failures belong to two concurrent peers and to a live-graph question, so leave them failing and name them as not yours. The five pre-existing failures in test_docs_review_eligibility.py and test_edit_prompt_injection.py are also not yours. Run every check with env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and never drop --no-sync: that environment is shared with the main checkout and every peer. Capture each run to a file once with its exact command, exit status and log path, then read the file. THE WHOLE tests/standard_names/ SUITE IS YOUR GATE, not a subset, because that is the population the regression was measured in.",
+          "estimated_hours": null,
+          "goal": "Restore the nineteen fixture failures the source-eligibility guard exposed",
+          "id": "n-sli-eligibility-fixtures-carry-a-category",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230600682123-n-sli-eligibility-fixtures-carry-a-category/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/standard_names/test_enrichment.py",
+            "tests/standard_names/test_qualify_sources.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-guardfixtures",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T23:06:08Z",
+        "completed_at": "2026-09-04T23:24:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1076,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1076,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "edc24f187dd5221f9eace42e07f11cf36e4c160a",
+        "commits": [
+          "c426d083038eacf19dbbb061fd61b6061d79ce6f",
+          "a23929bad55fff5bd0c7bc6b7e53e4b00bf8ee5e"
+        ],
+        "changed_lines": {
+          "added": 3,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230600682123-n-sli-eligibility-fixtures-carry-a-category/after-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230600682123-n-sli-eligibility-fixtures-carry-a-category/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06eac-21f6-7550-bbfd-17f3451b1875",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8296192,
+            "cached_input_tokens_cumulative": 8296192,
+            "input_tokens": 8469562,
+            "input_tokens_cumulative": 8469562,
+            "output_tokens": 22308,
+            "output_tokens_cumulative": 22308,
+            "reasoning_output_tokens": 6526,
+            "reasoning_output_tokens_cumulative": 6526
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 28834,
+          "peak_input_tokens": 16765754
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sli-eligibility-fixtures-carry-a-category",
+          "session_id": "01a06eac-21f6-7550-bbfd-17f3451b1875",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T23:24:04Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T230600682031-n-sli-which-unit-authority-is-right",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-which-unit-authority-is-right",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4384,
+                "cached_input_tokens": 552905,
+                "input_tokens": 557291,
+                "output_tokens": 3931,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 561222,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "One added failure at the merged head has no supported commit attribution and must not be repaired until it is understood. tests/standard_names/test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings fails because the tracked holdout records declared_unit m^-3 while the live graph reports declared_unit 1, for DD path equilibrium/time_slice/constraints/n_e/reconstructed under catalog name electron_density, with both COCOS fields null on each side. The measuring node established that no source diff between b95b1360 and d89f837b touches that holdout row or its authority query, so the live graph authority changed rather than the code. ANSWER THREE QUESTIONS WITH EVIDENCE AND CHANGE NOTHING. FIRST, what does the data dictionary itself say: read the unit for that exact path at the DD version the graph is built from, and state the version explicitly rather than assuming one, because unit strings differ between DD versions and probing the wrong one has produced a confident wrong answer on this project before. Report the unit the DD declares and, if it differs, the unit an earlier DD version declared. SECOND, did tonight's work change it: commit 23d1465f re-derived DD path nodes for the constraint-fit and convergence cohort through extract_paths_for_version and _batch_create_path_nodes, and that cohort includes the /reconstructed paths, so establish whether that re-derivation wrote this node's unit and whether the value it wrote matches the DD. THIRD, which side is right - the tracked holdout at m^-3 or the live graph at 1 - and say plainly which, on the DD's authority rather than on which is older. A reconstructed constraint value would ordinarily carry the constraint's own unit, so a dimensionless 1 deserves scepticism; but the DD is the authority and a normalized field would legitimately be dimensionless, so report what it says rather than what is expected. State a verdict: the holdout is stale and should be refreshed, or the graph carries a wrong unit and that is a regression to repair, and name the mechanism either way. Write your findings to the report path, touch no source file, and repair nothing. Run every check with env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and never drop --no-sync: that environment is shared with the main checkout and every peer. Capture each run to a file once with its exact command, exit status and log path, then read the file. THE WHOLE tests/standard_names/ SUITE IS YOUR GATE, not a subset, because that is the population the regression was measured in.",
+          "estimated_hours": null,
+          "goal": "Establish which unit authority is correct for the reconstructed electron-density constraint path",
+          "id": "n-sli-which-unit-authority-is-right",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230600682031-n-sli-which-unit-authority-is-right/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sli-holdout-unit-authority.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-holdoutunit",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T23:06:08Z",
+        "completed_at": "2026-09-04T23:24:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1089,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1089,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "edc24f187dd5221f9eace42e07f11cf36e4c160a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "extract_paths_for_version('4.1.1', {'equilibrium'}) compared against live IMASNode.unit, its units alias and its HAS_UNIT target",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-holdout-unit-authority.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230600682031-n-sli-which-unit-authority-is-right/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06eac-21f5-7912-9488-fc1a05c840c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7800960,
+            "cached_input_tokens_cumulative": 7800960,
+            "input_tokens": 8019180,
+            "input_tokens_cumulative": 8019180,
+            "output_tokens": 31690,
+            "output_tokens_cumulative": 31690,
+            "reasoning_output_tokens": 11543,
+            "reasoning_output_tokens_cumulative": 11543
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 43233,
+          "peak_input_tokens": 15820140
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "investigation node in a report-only scope: its deliverable is the verdict and it changed no source, holdout row, resolution record or graph value by design",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sli-which-unit-authority-is-right",
+          "session_id": "01a06eac-21f5-7912-9488-fc1a05c840c7",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T23:24:17Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -76530,6 +76808,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1676
+    "_version": 1681
   }
 }
