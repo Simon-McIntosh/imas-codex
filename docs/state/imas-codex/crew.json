@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T00:58:21",
+  "updated": "2026-09-05T01:08:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1481,6 +1481,15 @@
         "created": "2026-08-24"
       },
       {
+        "id": "impl-grammarassertions",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-graphbackup",
         "harness": "codex",
         "role": "implement",
@@ -1543,6 +1552,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-03"
+      },
+      {
+        "id": "impl-guardfixtures",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-guardscope",
@@ -4012,6 +4030,15 @@
           "gpt-5.6-sol": "01a05e50-8c14-7b30-94cb-d9d42dd551e3"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "test-holdoutunit",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "test-identities",
@@ -76087,6 +76114,278 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T223502625859-n-sgr-the-merged-head-holds",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a76",
+        "node": "n-sgr-the-merged-head-holds",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1909,
+                "cached_input_tokens": 494527,
+                "input_tokens": 496438,
+                "output_tokens": 4328,
+                "reasoning_output_tokens": 709,
+                "total_tokens": 500766,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "Two grammar commits are now merged in /home/ITER/mcintos/Code/imas-standard-names and visible to this checkout through an editable install: the tail-gated operator rule and six added closed-vocabulary tokens. Each was measured ALONE in its own worktree and neither has been measured with the other. That is the gap this node closes, because a pair of changes can each be green and their combination not be. THE MEASURE: run the full imas-codex test suite at the current main head, capture it once, and report the exact command, exit status, log path, failure count and every failure id. The known base is FIVE failures, all predating tonight's grammar work - four in tests/standard_names/test_docs_review_eligibility.py on schema-derived winning methods, the shared export-gate traversal, the atomic pending-count predicate and stranded promotion, and one in tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden. Report added failures against those five. ALSO REPARSE THE ONE NAME A PEER COULD NOT: power_flux_density_maximum_at_inner_divertor_target could be pinned at renderer-IR level but not strict-reparsed, because power_flux_density is absent from the closed base vocabulary and the vocabulary node deliberately did not add it. Attempt the strict reparse now that both commits are merged and report the outcome either way; a continued failure is the expected result and confirms that token is still owed. YOU ARE A MEASUREMENT NODE. Change no source file and repair nothing: if you find added failures, report them with ids and tracebacks so a repair node can be shaped, because a verification node that fixes what it measures destroys the measurement. Write your report to the named path. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and NEVER drop --no-sync: that environment is shared with the main checkout and every peer, and syncing it from a worktree repoints its editable install at your worktree and breaks all of them. Capture each run to a file once with its exact command, exit status and log path, then read the file rather than piping it. Report failure count and failure ids before and after, and judge yourself on ADDED failures against your own measured base.",
+          "estimated_hours": null,
+          "goal": "Measure the whole consumer suite at the merged head where both grammar changes are live together",
+          "id": "n-sgr-the-merged-head-holds",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502625859-n-sgr-the-merged-head-holds/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sgr-merged-head.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-mergedhead",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T22:35:09Z",
+        "completed_at": "2026-09-04T23:02:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1641,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1641,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "d89f837bdb9ac6bb906728e3354471f3138ba148",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502625859-n-sgr-the-merged-head-holds/standard-names-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "negative-result",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502625859-n-sgr-the-merged-head-holds/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e8f-c29f-7ba2-bb23-1d3780a87ac4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8275840,
+            "cached_input_tokens_cumulative": 8275840,
+            "input_tokens": 8387423,
+            "input_tokens_cumulative": 8387423,
+            "output_tokens": 44952,
+            "output_tokens_cumulative": 44952,
+            "reasoning_output_tokens": 11577,
+            "reasoning_output_tokens_cumulative": 11577
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 56529,
+          "peak_input_tokens": 16663263
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "measurement node in a report-only scope: its deliverable is the attribution report, and it repaired nothing by design",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-the-merged-head-holds",
+          "session_id": "01a06e8f-c29f-7ba2-bb23-1d3780a87ac4",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T23:02:30Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T223543679455-n-crs-currency-distinguishes-a-recovery-archive",
+        "plan": "catalog-review-surface",
+        "section": "\u00a74b",
+        "node": "n-crs-currency-distinguishes-a-recovery-archive",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 759,
+                "cached_input_tokens": 502249,
+                "input_tokens": 503010,
+                "output_tokens": 1503,
+                "reasoning_output_tokens": 88,
+                "total_tokens": 504513,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "Measured tonight: the newest verified full archive is 2,458,442,456 bytes and 271,912.874 seconds - 3.15 days - older than the newest live checkpoint, while a 4,748-byte offsite TRIAL DUMP is NEWER BY MTIME and is not a recovery artifact at all. So a currency answer derived from the newest file reports the graph protected while the only restorable copy is three days stale. DELIVER: get_backup_currency at imas_codex/graph/neo4j_ops.py:528 and get_offsite_currency at :574 must distinguish a full recovery archive from anything that is not one, and report the age of the former. Choose the discriminator on evidence and state which you chose: a size floor alone is fragile, so prefer a structural property such as the archive opening as a gzip tar whose entries include a graph dump member, and state why a 4,748-byte trial dump cannot satisfy the property you picked. The reported figure must NAME the artifact it measured, with its path, size and mtime, so a reader can check the answer rather than trust it. THE GATE IS A FIRING CONTROL, because a currency check that cannot be wrong is the defect: build a fixture directory holding a stale full archive beside a newer non-recovery dump, assert the reported currency names the STALE archive and reports it stale, and show that same test FAILS when the selection falls back to newest-file-by-mtime. Report the tests/graph suite before and after with 0 added failures. Read no real backup and write none; use fixtures only. A peer holds imas_codex/cli/graph/registry.py, so do not edit it even though _read_offsite_currency there consumes your result. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync and never drop --no-sync: that environment is shared with the main checkout and every peer. Capture each run to a file once with its exact command, exit status and log path, then read the file; report failure count and ids before and after and judge yourself on added failures.",
+          "estimated_hours": null,
+          "goal": "Make backup currency report the age of a recovery artifact rather than of the newest file",
+          "id": "n-crs-currency-distinguishes-a-recovery-archive",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223543679455-n-crs-currency-distinguishes-a-recovery-archive/manifest.md",
+          "plan": "catalog-review-surface",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74b",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/graph/neo4j_ops.py",
+            "tests/graph/test_backup_currency.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-backupcurrency",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T22:35:52Z",
+        "completed_at": "2026-09-04T23:04:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1727,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1727,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "d89f837bdb9ac6bb906728e3354471f3138ba148",
+        "commits": [
+          "551a9ec98c8f475d838a75e183da8db5f3651a42",
+          "3988815d2c8a33c626042d3a3b44d8d3bac8256c",
+          "a40058fe2892fc4fa48455889d5ea96ef7fdc63d"
+        ],
+        "changed_lines": {
+          "added": 225,
+          "removed": 33,
+          "files": 3
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/graph/",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223543679455-n-crs-currency-distinguishes-a-recovery-archive/resume-tests-graph.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223543679455-n-crs-currency-distinguishes-a-recovery-archive/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a06e90-6789-7923-87e0-3ca870066beb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6433152,
+            "cached_input_tokens_cumulative": 6433152,
+            "input_tokens": 6506258,
+            "input_tokens_cumulative": 6506258,
+            "output_tokens": 14480,
+            "output_tokens_cumulative": 14480,
+            "reasoning_output_tokens": 3153,
+            "reasoning_output_tokens_cumulative": 3153
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 17633,
+          "peak_input_tokens": 12939410
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "scope_acceptances": [
+          {
+            "path": "tests/core/test_backup_currency.py",
+            "reason": "coordinator-authorized mid-flight: its two local-backup fixtures modelled a backup as an arbitrary non-gzip byte file, the assumption this change establishes is wrong"
+          }
+        ],
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-crs-currency-distinguishes-a-recovery-archive",
+          "session_id": "01a06e90-6789-7923-87e0-3ca870066beb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T23:04:39Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -76231,6 +76530,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1671
+    "_version": 1676
   }
 }
