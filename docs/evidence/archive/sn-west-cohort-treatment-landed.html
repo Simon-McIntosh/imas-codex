@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"       content="imas-codex">
+  <meta name="reckon-type"        content="evidence">
+  <meta name="plan-slug"          content="sn-west-cohort-treatment-landed">
+  <meta name="plan-title"         content="WEST Cohort Treatment: What Landed">
+  <meta name="plan-summary"       content="Each scoping and cohort repair, with the census that proves the cut matches the manifest it claims.">
+  <meta name="plan-status"        content="active">
+  <meta name="plan-owner"         content="Simon McIntosh">
+  <meta name="plan-tags"          content="standard-names,west,catalog-release">
+  <meta name="plan-evidence-for"  content="sn-west-cohort-treatment">
+  <title>WEST Cohort Treatment: What Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="batch-scope">A cut that matches the manifest it claims</h2>
+    <p>The halted candidate published 411 names from a 355-path manifest. The cause was one
+    line: <code>run_review_release</code> computed its names as
+    <code>dict.fromkeys([*mint.names, *terminal_ids])</code>, and
+    <code>mint_sn_list</code> deliberately adds each name's parent, siblings and children on
+    top of its authoritative <code>PRODUCED_NAME</code> join. Committed at
+    <code>2d9d674a</code>.</p>
+    <table>
+      <thead><tr><th>Dry-run census</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td>roster</td><td>431</td><td>228</td></tr>
+        <tr><td>published</td><td>378</td><td>197</td></tr>
+        <tr><td><strong>published without a manifest path</strong></td><td><strong>181</strong></td><td><strong>0</strong></td></tr>
+        <tr><td>retained structural parents</td><td>21</td><td>6</td></tr>
+        <tr><td>retained <em>unbound</em> structural parents</td><td>—</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The two structural-parent figures are what prove the ruling was honoured in
+    both directions.</strong> Six accepted derived identities remain, and each remains because
+    it is <em>itself</em> a terminal identity selected by a manifest path — not because parents
+    are waved through. The unbound count is zero. So the cut carries the parents an included
+    name needs to be well-formed and nothing else, rather than reintroducing the
+    published-child-with-no-published-parent condition that withholding them would cause.</p>
+    <p>The exporter and the approved-baseline assembly are untouched, so an already-published
+    name is still preserved byte-for-byte and the new rule constrains only the new batch. A
+    second seam closed fail-closed: a source with several direct bindings and no authoritative
+    matching scalar now returns a release-report error <em>before</em> freeze and export,
+    instead of silently taking the lexicographically first id.</p>
+    <p><strong>Two recorded figures were wrong and the live census corrected them.</strong>
+    The graph read 378 published with 181 unbound before the change, not the 384 and 182 the
+    plan recorded; and the resulting roster is 228, not the roughly 260 predicted. Both were
+    reported rather than reconciled.</p>
+    <p><strong>A consequence nobody predicted, recorded rather than acted on.</strong>
+    <code>mint_sn_list</code> is now called from nowhere in <code>imas_codex</code>. It is
+    still defined and still exercised by two test modules, so it looks maintained — but the
+    release path was its only production caller. The reuse map verdicted it reusable "for the
+    broader review-cohort callers that intend it", and there are no such callers in the
+    current tree. Whether that route is retired or awaits a caller yet to be written is a
+    judgement, not a repair.</p>
+
+  </main>
+</body>
+</html>

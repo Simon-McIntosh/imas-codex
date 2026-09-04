@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T00:09:06",
+  "updated": "2026-09-05T00:20:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -497,9 +497,11 @@
         "id": "impl-batchscope",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06e66-a01f-79f0-a5ae-a2fb034b0425",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e66-a01f-79f0-a5ae-a2fb034b0425"
+        },
         "created": "2026-09-04"
       },
       {
@@ -75490,6 +75492,142 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T215001801858-n-swct-a-cut-publishes-only-its-own-manifest",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a71",
+        "node": "n-swct-a-cut-publishes-only-its-own-manifest",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 550,
+                "cached_input_tokens": 384076,
+                "input_tokens": 384628,
+                "output_tokens": 1336,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 385964,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "The locked decision batch-cut-scope governs: a batch-scoped cut publishes only names bound to a path in the batch manifest, PLUS the accepted structural parents those names require to be well-formed. Withholding structural parents was explicitly rejected because it reintroduces a published child whose parent is absent. THE CAUSE IS ALREADY LOCATED, so do not re-derive it. run_review_release at imas_codex/standard_names/catalog_release.py:1446-1479 computes names as the UNION of mint_sn_list().names with the terminal manifest identities, and mint_sn_list at imas_codex/standard_names/minting.py:98-120 DELIBERATELY adds each name's parent, siblings and children on top of the authoritative PRODUCED_NAME join at :72-97. That union is where an identity with no path in the manifest enters the cut. The remedy the reuse map derives: build the release names list solely from the non-null terminal standard_name_id values that fetch_manifest_source_release_rows returns, and stop unioning the minted family into the release batch. PRESERVE mint_sn_list UNCHANGED, because its family closure is correct for the broader review-cohort callers that intend it, and its existing tests at tests/standard_names/test_minting.py must stay green. FAIL CLOSED WHERE IT CURRENTLY GUESSES: fetch_manifest_source_release_rows at graph_ops.py:11888-11896 falls back to the lexicographically first direct id when a source has several direct ids and no authoritative matching produced_sn_id, so a release must refuse or reconcile that ambiguity rather than silently pick one, and unmatched or non-nameable rows must still reach the exclusion ledger. LEAVE _fetch_candidates and assemble_review_catalog ALONE: the map verdicts them reusable as-is, and assemble_review_catalog preserving the already-approved baseline byte-for-byte is deliberate, so the rule you are adding constrains the NEW review batch and must not remove a name already in the approved baseline. THE MEASURE IS THE DRY-RUN CENSUS reported before and after from imas-codex sn release --batch west_production_dd_paths --dry-run: it reads roster 431, published 384 and published_without_manifest_path 182 today, and published_without_manifest_path must read 0 after, with the retained structural parents counted separately so a reader sees they were kept deliberately. Report the resulting roster and published figures rather than matching a prediction; an earlier analysis expected roughly 260 and a disagreement is a finding to state. Name the source path of five representative names your change now excludes and which manifest each failed to match. Pin it by extending tests/standard_names/test_review_release.py with a source bound to one name plus an unbound parent, sibling and child, asserting the report names, the frozen artifact names and the exporter review_batch all contain ONLY the bound terminal identity, and add an ambiguous-multi-binding refusal case. Do NOT cut a real candidate, push a branch or tag, or open or modify a pull request. A reuse map for this wave is at /home/ITER/mcintos/.config/reckon/crew/reports/sgr-reuse-map.md with 18 candidate mechanisms each carrying one fitness verdict. Read it and build on what it marks reusable; if you author machinery of your own, state which named candidate failed and why. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and NEVER drop --no-sync: that environment is shared with the main checkout and every peer worker, and syncing it from a worktree repoints its editable install at your worktree and breaks all of them. Capture each suite run to a file once with the exact command, exit status and log path, then read the file rather than piping it. Report failure count and failure ids BEFORE your change and AFTER it, and judge yourself on ADDED failures against your own measured base rather than on absolute green, because this checkout carries peer work in flight.",
+          "estimated_hours": null,
+          "goal": "Make a batch-scoped catalog cut publish only names bound to a path in its own batch manifest",
+          "id": "n-swct-a-cut-publishes-only-its-own-manifest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801858-n-swct-a-cut-publishes-only-its-own-manifest/manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_review_release.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-batchscope",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T21:50:13Z",
+        "completed_at": "2026-09-04T22:18:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1693,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1693,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "abd5be253452db300936d229a96eaaa02a9c36d8",
+        "commits": [
+          "2d9d674a2fba12ee7f78747b8537e7bf59e277ba"
+        ],
+        "changed_lines": {
+          "added": 162,
+          "removed": 16,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog uv run --no-sync imas-codex sn release --batch west_production_dd_paths --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801858-n-swct-a-cut-publishes-only-its-own-manifest/after-dry-run-census.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801858-n-swct-a-cut-publishes-only-its-own-manifest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e66-a01f-79f0-a5ae-a2fb034b0425",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16525184,
+            "cached_input_tokens_cumulative": 16525184,
+            "input_tokens": 16755907,
+            "input_tokens_cumulative": 16755907,
+            "output_tokens": 37881,
+            "output_tokens_cumulative": 37881,
+            "reasoning_output_tokens": 14217,
+            "reasoning_output_tokens_cumulative": 14217
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 52098,
+          "peak_input_tokens": 33281091
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-swct-a-cut-publishes-only-its-own-manifest",
+          "session_id": "01a06e66-a01f-79f0-a5ae-a2fb034b0425",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T22:18:26Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -75634,6 +75772,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1659
+    "_version": 1661
   }
 }
