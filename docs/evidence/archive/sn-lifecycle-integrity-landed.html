@@ -234,6 +234,46 @@
     without it buys one clean measurement before the next import undoes it. The guard now
     exists and is proven, so that plan's stated precondition is satisfied.</p>
 
+    <h2 id="fit-artifact">The bypass, not the missing rule</h2>
+    <p>The section framed this as a classifier that applies <code>fit_artifact</code>
+    inconsistently. The live tree said something else: <code>extract_dd_candidates</code> was
+    <em>already</em> category-authoritative through <code>n.node_category IN
+    $sn_categories</code> — but its <code>explicit_paths</code> branch routes around that
+    query into <code>qualify_dd</code>, which carried no eligibility guard at all. A single
+    authority that one branch bypasses is not a single authority. Committed at
+    <code>23d1465f</code>.</p>
+    <table>
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td><code>tests/core</code> before / after</td><td>0 failures / 0 failures, 0 added</td></tr>
+        <tr><td>explicit-path guard removed</td><td>exit 1, exactly 1 expected failure</td></tr>
+        <tr><td>classifier repair reverted</td><td>exit 1, exactly 3 expected failures</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The plan's figure of 54 was a stale snapshot.</strong> 52 constraint leaves were
+    already at <code>fit_artifact</code> from an earlier pass, beside 12 error companions and 2
+    reconstructed containers at <code>structural</code>. Re-derivation changed
+    <strong>exactly 4</strong> categories — the 2 reconstructed containers and both
+    <code>convergence/iterations_n</code> nodes — while the 52 stood and the error companions
+    correctly stayed <code>error</code>. The repair was a quarter the size the plan implied,
+    and the count was never the figure that mattered.</p>
+    <p>It was re-derived rather than patched: <code>extract_paths_for_version</code> for DD
+    4.1.1 plus <code>_batch_create_path_nodes</code> over the exact cohort, with no direct
+    category-update statement issued. The behavioural consequences are the real measure, and
+    both fire from the one authority — <code>camera_x_rays/detector_humidity</code> is
+    <strong>eligible</strong>, while 20 active constraint <code>/weight</code> nodes and both
+    iteration counters are <strong>excluded</strong>.</p>
+    <p>The two names minted from misclassified sources were <em>retired as records</em>: 2
+    sources retired, 2 names superseded off <code>accepted</code>, 2 retirement ledger rows,
+    nothing deleted. A name minted from a bad source is evidence of what the pipeline did, and
+    the retirement is the correction rather than an erasure.</p>
+    <p><strong>The obstacle was a stale test contract, and it was not hidden.</strong>
+    <code>test_int0d_physics_remains_quantity</code> asserted a solver iteration count stays
+    <code>quantity</code>, which the locked ruling on iteration counts contradicts. Eleven of
+    its twelve cases are genuine physics integers and are untouched; exactly one mis-filed
+    example moved. The test is stronger for it, because it no longer claims solver bookkeeping
+    is physics.</p>
+
   </main>
 </body>
 </html>
