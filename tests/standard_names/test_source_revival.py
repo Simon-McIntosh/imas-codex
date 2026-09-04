@@ -833,6 +833,7 @@ def _startup_patches(revive_mock: MagicMock, retry_mock: MagicMock) -> list:
         patch(f"{_GO}.reconcile_source_status_liveness", return_value={}),
         patch(f"{_GO}.retire_unreachable_hint_edits", return_value=0),
         patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
+        patch(f"{_GO}.reconcile_catalog_status", return_value={}),
         patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
         patch(
             f"{_GO}.reconcile_standard_name_unit_edges",
