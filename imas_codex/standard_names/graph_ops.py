@@ -12818,6 +12818,55 @@ def reconcile_standard_name_unit_edges(gc: Any | None = None) -> dict[str, int]:
     }
 
 
+def reconcile_constraint_fit_artifacts(gc: Any | None = None) -> dict[str, int]:
+    """Reclassify constraint fit bookkeeping that still looks nameable.
+
+    Constraint ``weight`` leaves and reconstructed-value branches describe how
+    an equilibrium fit was performed, not independent physical quantities.  DD
+    graphs built before that distinction was available retain ``quantity`` on
+    those leaves, admitting them to standard-name extraction.  Select only
+    leaf nodes below a ``constraints`` subtree whose terminal segment is
+    ``weight`` or whose path contains a reconstructed-value segment.
+
+    Idempotent: the selector matches only ``quantity`` nodes, so every repaired
+    node drops out after its category becomes ``fit_artifact``.
+
+    Returns dict: {nodes_reclassified}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (node:IMASNode {node_category: 'quantity'})
+            WHERE node.is_leaf = true
+              AND node.id CONTAINS '/constraints/'
+              AND (
+                last(split(node.id, '/')) = 'weight'
+                OR any(
+                  segment IN split(node.id, '/')
+                  WHERE segment = 'reconstructed'
+                     OR segment ENDS WITH '_reconstructed'
+                )
+              )
+            SET node.node_category = 'fit_artifact'
+            RETURN count(node) AS reclassified
+            """
+        )
+    finally:
+        if own:
+            client.close()
+
+    reclassified = int(rows[0].get("reclassified", 0)) if rows else 0
+    if reclassified:
+        logger.info(
+            "reconcile_constraint_fit_artifacts: reclassified %d constraint "
+            "fit-artifact leaf node(s)",
+            reclassified,
+        )
+    return {"nodes_reclassified": reclassified}
+
+
 # Terminal / dead name stages — refined-away or given-up names whose edges have
 # already been migrated off them; their denormalised scalar is left as-is.
 _TERMINAL_NAME_STAGES = ["superseded", "exhausted", "contested"]
@@ -12961,6 +13010,7 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
         )
         reconcile_descriptionless_composed_names(gc=client)
         reconcile_sourceless_pipeline_names(gc=client)
+        reconcile_constraint_fit_artifacts(gc=client)
     finally:
         if own:
             client.close()
