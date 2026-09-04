@@ -126,13 +126,72 @@ def test_a_terminal_stage_is_repaired_rather_than_refused(
     assert graph.writes[0][1]["segments"]["physical_base"] == "density"
 
 
-def test_the_whole_graph_sweep_is_not_gated_to_live_names() -> None:
-    """The sweep reads every StandardName, so history is repaired with it."""
+def test_the_whole_graph_sweep_is_gated_to_live_names() -> None:
+    """The sweep quarantines tombstones: only a live name is read for repair."""
     import inspect
 
     source = inspect.getsource(graph_ops.reconcile_grammar_segments)
-    assert "MATCH (sn:StandardName) RETURN sn.id AS id" in source
-    assert "LIVE_NAME" not in source
+    assert "LIVE_NAME" in source
+    assert "MATCH (sn:StandardName) WHERE" in source
+
+
+class _StagedGraph:
+    """Graph double holding one id whose stage the caller controls.
+
+    Both routes read and write against the same in-memory row, so a test can
+    show that the sweep's bulk query never selects a terminal-stage id while
+    the name-scoped route reaches it directly.
+    """
+
+    def __init__(self, *, stage: str, row: dict[str, Any]) -> None:
+        self.stage = stage
+        self.row = dict(row)
+        self.sweep_writes: list[dict[str, Any]] = []
+        self.scoped_writes: list[dict[str, Any]] = []
+
+    def __enter__(self) -> _StagedGraph:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        if "UNWIND $batch AS b" in cypher:
+            self.sweep_writes.extend(params["batch"])
+            return []
+        if "RETURN sn.name_stage AS stage" in cypher:
+            return [{"stage": self.stage, **self.row}]
+        if "UNWIND [$segments]" in cypher:
+            self.scoped_writes.append(params)
+            return [{"id": params["id"]}]
+        # The whole-graph sweep's bulk read: a real LIVE_NAME predicate
+        # excludes a superseded/exhausted row server-side.
+        if self.stage in ("superseded", "exhausted"):
+            return []
+        return [{"id": DRIFTED_NAME, **self.row}]
+
+
+def test_the_sweep_leaves_a_superseded_identity_untouched_while_the_scoped_route_repairs_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Quarantine: the sweep skips a tombstone; the name-scoped route reaches it."""
+    graph = _StagedGraph(stage="superseded", row=_stored(physical_base="rate"))
+    monkeypatch.setattr(graph_ops, "GraphClient", lambda: graph)
+    monkeypatch.setattr(
+        graph_ops, "reconcile_standard_name_kinds", lambda: {"kinds_realigned": 0}
+    )
+
+    sweep_result = graph_ops.reconcile_grammar_segments()
+
+    assert sweep_result == {"names_realigned": 0}
+    assert graph.sweep_writes == []
+
+    scoped_result = realign_grammar_segments_for_name(DRIFTED_NAME)
+
+    assert scoped_result["ok"] is True
+    assert scoped_result["stage"] == "superseded"
+    assert len(graph.scoped_writes) == 1
+    assert graph.scoped_writes[0]["segments"]["physical_base"] == "density"
 
 
 def test_an_aligned_name_is_a_reported_noop(
