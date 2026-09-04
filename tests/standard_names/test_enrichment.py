@@ -169,7 +169,7 @@ class TestEnrichPaths:
 
     def test_filters_out_temporal_coordinate_paths(self):
         """Depth-3+ 'time' leaves with coordinate category are rejected by
-        the DD qualifier as temporal coordinates (S7)."""
+        the DD qualifier as temporal coordinates."""
         rows = [
             _make_row(
                 path="core_profiles/profiles_1d/time",
