@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T05:56:59",
+  "updated": "2026-09-04T06:29:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3007,9 +3007,11 @@
         "id": "impl-westrecut",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "dea4663c-311d-459a-b3dc-d4868167114a"
+        },
         "created": "2026-09-02"
       },
       {
@@ -63483,6 +63485,114 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260903T215612074191-n-wcr-fusion-subject-reissue",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-fusion-subject-reissue",
+        "node_definition": {
+          "done_when": "the report records the governed rescore invocation followed by the sn edit --rename invocation with the exact spelling chosen, the quorum score returned, the resulting name_stage beside docs_stage, and the measured name-versus-description semantic similarity of the new spelling shown against the 0.55 critical threshold; it closes with a Cypher count of identities in this lineage carrying name_stage accepted alongside docs_stage accepted stated as a number out of 1, and every sn run invocation carries --name with --skip-global-maintenance so the tombstone sweep is unreachable",
+          "estimated_hours": 1.0,
+          "goal": "Give the volumetric fusion rate a spelling carrying the subject its own description names",
+          "id": "n-wcr-fusion-subject-reissue",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-fusion-subject-reissue.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-neutronsubj",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T21:56:50Z",
+        "completed_at": "2026-09-04T04:28:23.364Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 23482,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 23493,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "2d60f7b4ec241735a5d3a73d06a40f352ba93ffd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md",
+        "scope_changed": false,
+        "session_id": "cea41150-c9da-414c-b257-fd380790293d",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 88267,
+            "cache_creation_input_tokens_cumulative": 88267,
+            "cache_read_input_tokens": 396120,
+            "cache_read_input_tokens_cumulative": 396120,
+            "inference_geo": "not_available",
+            "input_tokens": 10,
+            "input_tokens_cumulative": 10,
+            "output_tokens": 6663,
+            "output_tokens_cumulative": 6663,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.247355,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.247355
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 123.022,
+          "generated_tokens": 6663,
+          "generation_seconds": 94.402,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 10.1,
+          "machine_seconds": 28.62,
+          "peak_input_tokens": 101481,
+          "tokens_per_second": 70.58,
+          "wall_tokens_per_second": 54.16
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "stood down before issuing any command that writes; the report is its only artifact",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -63583,8 +63693,36 @@
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-claude-opus-20260904041555",
+        "backend": "claude-opus",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T04:15:55Z",
+        "closed_at": "2026-09-04T04:21:40Z",
+        "held_seconds": 345,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-claude-opus-20260904042536",
+        "backend": "claude-opus",
+        "purpose": "resume",
+        "opened_at": "2026-09-04T04:25:36Z",
+        "closed_at": "2026-09-04T04:26:17Z",
+        "held_seconds": 41,
+        "utilisation_pct": 100.0,
+        "resets_at": null,
+        "effective_ceiling_pct": 100.0,
+        "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
+        "closed_by_purpose": "resume",
+        "resumption_fired": false
       }
     ],
-    "_version": 1546
+    "_version": 1552
   }
 }
