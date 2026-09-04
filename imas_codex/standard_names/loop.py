@@ -194,6 +194,20 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
     }
 
 
+def _pool_error_stop_reason(
+    stop_reason: str,
+    health_map: dict[str, Any] | None,
+) -> tuple[str, int]:
+    """Refuse a nominally successful stop after a pool counted an error."""
+    error_count = sum(
+        int(getattr(health, "error_count", 0) or 0)
+        for health in (health_map or {}).values()
+    )
+    if error_count and stop_reason in {"completed", "no_eligible_work"}:
+        return "failed", error_count
+    return stop_reason, error_count
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Pool-based orchestrator — concurrent weighted pools over one shared budget,
 # in place of a sequential rotation over physics domains.
@@ -2393,6 +2407,24 @@ async def run_sn_pools(
             summary.stop_reason = "interrupted"
         else:
             summary.stop_reason = "completed"
+
+        clean_stop_reason = summary.stop_reason
+        summary.stop_reason, pool_error_count = _pool_error_stop_reason(
+            clean_stop_reason,
+            health_map,
+        )
+        if summary.stop_reason != clean_stop_reason:
+            error_details = ", ".join(
+                f"{pool_name}={int(getattr(health, 'error_count', 0) or 0)}"
+                for pool_name, health in sorted((health_map or {}).items())
+                if int(getattr(health, "error_count", 0) or 0)
+            )
+            logger.error(
+                "run_sn_pools: refusing successful completion after %d counted "
+                "pool error(s): %s",
+                pool_error_count,
+                error_details,
+            )
 
         if summary.stop_reason in {"completed", "no_eligible_work"} and (
             scope_run_id or drain_scope_id
