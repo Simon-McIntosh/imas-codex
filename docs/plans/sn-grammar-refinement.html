@@ -23,7 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -191,6 +192,14 @@
 
     
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260904T195154675750-n-sgr-shadow-diff-the-rename-list" data-who="test-shadowdiff" data-when="2026-09-04T20:22:51Z">
+    <div class="r-comment-body"><p>350 identities would change under the two rules, ALL 350 proposals free of collision, zero exists-live, zero exists-retired and zero many-to-one merges, so the migration needs no revival route. 331 of the changed names are already publishable. The decisive finding is against the rule as specified: split by locus tail, 148 prefix and 6 postfix changes carry an of/at/due_to tail and read better, while 145 prefix and 38 prefix-plus-postfix changes have NO tail and read worse, turning accumulated_ammonia_count into ammonia_count_accumulated. That evidence narrowed the rule to tail-gated and cut the surface to 165. It also caught the composite exemption leaking into a protected ratio's second operand</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260904T205813963445" data-who="" data-when="">
+    <div class="r-comment-body"><p><strong>The demonstrator landed and the migration premise is proven, not assumed.</strong> Merged in the grammar repository at <code>12b5573</code> (from <code>ff1738fd</code> renderer plus parser, and <code>0170736e</code> expectations). Suite: base 1145 passed with zero failures, the renderer commit exposed <strong>exactly 29 failures across seven files</strong>, final 1148 passed with zero failures.</p><p>The 29 are the deliverable rather than an obstacle: every one was an existing assertion pinning the retired index-before-operand spelling, so their count is the evidence the rule reached the surface instead of passing vacuously. <strong>All 29 updates are spelling-only.</strong> The worker re-parsed all 29 renderer-derived spellings and reports <code>ir_unchanged = true</code> for every row, with fused transformations, base, qualifier and locus segments, units, dimension flags and operand trees all unchanged, and no assertion relaxed or deleted to reach green. The three cases worth reading: <code>derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface</code> becomes <code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>; the nested form resolves the same way; and the protected composite <code>flux_surface_averaged_ratio_of_square_of_..._to_square_of_major_radius</code> is <strong>unchanged byte for byte</strong>, which is the recursive exemption holding and the earlier leak into <code>major_radius_square</code> closed with a test pinning it.</p><p><strong>The shadow diff that preceded it</strong> rendered all live names under both rules with no writes at all: 350 identities would change, <strong>all 350 proposals collision-free</strong> with zero landing on a live or retired identity and zero many-to-one merges, and 331 already publishable. Split by locus tail it produced the evidence that narrowed the rule: 148 prefix and 6 postfix changes carry a tail and read better, while 145 prefix and 38 mixed changes have no tail and read worse, turning <code>accumulated_ammonia_count</code> into <code>ammonia_count_accumulated</code>. Tail-gating cut the surface to 165.</p><p><strong>Next step, measured rather than assumed.</strong> The installed package is still <code>0.8.9</code> and rejects the new form with <code>UnknownBaseTokenError</code>, so nothing in the consumer sees the change yet. The mechanical next action is the editable install of the grammar checkout into the consumer, then re-render the 11 indexed-operator names through parse, re-render and supersede with provenance, then the 154 tail-gated names. Four hops separate a renderer change from the published site and three are manual by design: the consumer pin, the re-render, and the export; only the site build is automatic. The published sidecar also carries no per-name segment decomposition today, only <code>arguments</code>, <code>kind</code>, <code>links</code>, <code>physics_domain</code>, <code>sources</code> and <code>status</code>, so the component-axis work has to add that field for the site to group families without re-parsing client-side.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
