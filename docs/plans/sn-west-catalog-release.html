@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.92">
-<meta name="plan-version" content="143">
+<meta name="plan-version" content="144">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0,d36d8b6c,75a5d2ca,9e4773f7,9da911db,95421a4e,329b6cda,7b6a558a,18939154,35317df">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -432,6 +432,9 @@
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260904T035600" data-who="reckon-ship" data-when="2026-09-04T03:56:00Z">
     <div class="r-comment-body"><p><strong>Release authorization, given by the lead 2026-09-04.</strong> Merging upstream pull request 30 into <code>iterorganization/IMAS-Standard-Names:main</code> and pushing the <code>v0.8.9</code> tag are <strong>authorized</strong>. The tag triggers the release workflow, which publishes <code>imas-standard-names</code> to PyPI through trusted publishing, and that publication is authorized with it. This is the same chain the plan already ran for 0.8.1 through 0.8.8, and the lead's ruling on <code>hard-xray-solid-angle</code> costed it explicitly.</p><p>Preconditions confirmed before the authorization was recorded: PR 30 is <code>OPEN</code>, <code>MERGEABLE</code>, <code>mergeStateStatus CLEAN</code>, with docs/build, test/build 3.12, test/build 3.13 and coverage all <code>SUCCESS</code> and docs/deploy skipped. Upstream's newest tag is <code>v0.8.8</code> and PyPI serves 0.8.8, so <code>v0.8.9</code> is unused. Upstream main is untouched by this session.</p><p>Scope of the authorization, stated so a worker can act inside it: merge PR 30, push the <code>v0.8.9</code> tag to <code>iterorganization</code>, let the release workflow run, then verify. It does <strong>not</strong> extend to force-pushing, to rewriting upstream history, to deleting or moving an existing tag, or to any release beyond 0.8.9. A previous node refused this work correctly because its fence carried no such authorization; that refusal was a well-formed stop, not a failure.</p></div>
+</div>
+<div class="r-comment" data-section="entry-gate" data-id="c-run-r-20260903T235527562127-n-wcr-fusion-subject-retry" data-who="impl-neutronsubj-s" data-when="2026-09-04T03:55:23.648Z">
+    <div class="r-comment-body"><p>neutron_emissivity_due_to_fusion is accepted on BOTH axes at review_mean_score 0.878, taking the recut gate to 3 of 3. It released the stale claim first, ran the docs rotation in the foreground as advised, and its manifest reached status complete before the process ended. It chose the emissivity base over the plan&#x27;s recorded source_rate because this description&#x27;s own accepted family uses it</p></div>
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260902T094001846179-n-release-restores-catalog-main" data-who="impl-releasecheckout" data-when="2026-09-02T09:52:19Z">
     <div class="r-comment-body"><p>sn release --batch refuses on a dirty catalog checkout before any branch switch and always returns the checkout to a clean main after pushing the review branch and tag; three HEAD-based assertions repointed to report.commit_sha and the remote refs; review-release suite green</p></div>

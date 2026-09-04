@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T05:45:05",
+  "updated": "2026-09-04T05:56:45",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -63332,6 +63332,157 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T235527562127-n-wcr-fusion-subject-retry",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-fusion-subject-retry",
+        "node_definition": {
+          "done_when": "the report records the governed rescore invocation followed by the sn edit --rename invocation with the exact spelling chosen, the quorum score returned, the resulting name_stage beside docs_stage, and the measured name-versus-description semantic similarity of the new spelling shown against the 0.55 critical threshold; it closes with a Cypher count of identities in this lineage carrying name_stage accepted alongside docs_stage accepted stated as a number out of 1, and every sn run invocation carries --name together with --skip-global-maintenance so the tombstone sweep is unreachable",
+          "estimated_hours": 1.0,
+          "goal": "Give the volumetric fusion rate a spelling carrying the subject its own description names",
+          "id": "n-wcr-fusion-subject-retry",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T235527562127-n-wcr-fusion-subject-retry/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-fusion-subject-retry.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-neutronsubj-s",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T23:55:34Z",
+        "completed_at": "2026-09-04T03:55:23.648Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 14383,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 14389,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "7cc290a6f6400a54f99de49c500e0e49de9b1e46",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "cypher: the three candidate identities with name_stage and docs_stage both accepted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-brems-review.gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T235527562127-n-wcr-fusion-subject-retry/manifest.md",
+        "scope_changed": false,
+        "session_id": "cfced8b1-5130-4c58-a6c8-3e430274142f",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.91,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-04T04:50:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 255823,
+            "cache_creation_input_tokens_cumulative": 255823,
+            "cache_read_input_tokens": 2297384,
+            "cache_read_input_tokens_cumulative": 2297384,
+            "inference_geo": "not_available",
+            "input_tokens": 34,
+            "input_tokens_cumulative": 34,
+            "output_tokens": 13119,
+            "output_tokens_cumulative": 13119,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6140267999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.6140267999999998
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4421,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: work in progress \u2014 this is the pre-work placeholder manifest",
+              "elapsed_seconds": 7121,
+              "log_age_seconds": 6725,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none yet; changed_paths: none yet"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-fusion-subject-reissue",
+              "phase": "blocked",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260903T215612074191-n-wcr-fusion-subject-reissue",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 7096,
+              "terminal_at": "2026-09-03T21:57:15Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-fusion-subject-reissue"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 614.723,
+          "generated_tokens": 13119,
+          "generation_seconds": 177.056,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 16.6,
+          "machine_seconds": 437.667,
+          "peak_input_tokens": 165828,
+          "tokens_per_second": 74.1,
+          "wall_tokens_per_second": 21.34
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "governed graph transitions only; the deliverable is the accepted identity, verified in the graph by the orchestrator",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -63434,6 +63585,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1544
+    "_version": 1545
   }
 }
