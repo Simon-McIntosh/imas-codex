@@ -2,10 +2,22 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 from imas_codex.standard_names.attachment_audit import guard_source_pairings
 from imas_codex.standard_names.workers import _is_attachment_consistent
+
+
+@pytest.fixture(autouse=True)
+def _no_approved_names():
+    """Make the approval-backed protection lookup explicit for this suite."""
+    with patch(
+        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        return_value=set(),
+    ):
+        yield
 
 
 @pytest.mark.parametrize(

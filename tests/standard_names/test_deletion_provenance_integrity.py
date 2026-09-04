@@ -4,6 +4,18 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _no_approved_names():
+    """Make the approval-backed protection lookup explicit for this suite."""
+    with patch(
+        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        return_value=set(),
+    ):
+        yield
+
 
 def _queries(gc: MagicMock) -> list[str]:
     return [call.args[0] for call in gc.query.call_args_list]

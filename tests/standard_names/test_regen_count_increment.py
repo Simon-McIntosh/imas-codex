@@ -14,6 +14,16 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _no_approved_names():
+    """Make the approval-backed protection lookup explicit for this suite."""
+    with patch(
+        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        return_value=set(),
+    ):
+        yield
+
+
 class TestRegenCountIncrement:
     """Verify regen_count is properly tracked through the persist path."""
 
