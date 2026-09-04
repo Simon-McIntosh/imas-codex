@@ -1099,6 +1099,7 @@ def graph_fetch(
 
 
 @click.command()
+@click.argument("target")
 @click.option("-v", "--version", "version", default="latest")
 @click.option("--registry", envvar="IMAS_DATA_REGISTRY", default=None)
 @click.option("--token", envvar="GHCR_TOKEN")
@@ -1122,6 +1123,7 @@ def graph_fetch(
     help="Pull IMAS-only variant (DD nodes only)",
 )
 def graph_pull(
+    target: str,
     version: str,
     registry: str | None,
     token: str | None,
@@ -1132,6 +1134,9 @@ def graph_pull(
     dd_only: bool,
 ) -> None:
     """Pull graph from GHCR and load it (convenience for fetch + load).
+
+    TARGET must name the graph selected by the active symlink. The command
+    refuses before fetching or replacing data when that graph is not active.
 
     This is equivalent to running 'graph fetch' followed by 'graph load'.
     Use 'graph fetch' if you only want to download without loading.
@@ -1146,6 +1151,7 @@ def graph_pull(
 
     Use --facility/-f (repeatable) to pull a per-facility graph.
     """
+    from imas_codex.cli.graph.data import _require_matching_graph_target
     from imas_codex.cli.graph_progress import (
         GraphProgress,
         remote_operation_streaming,
@@ -1154,6 +1160,7 @@ def graph_pull(
     from imas_codex.graph.profiles import resolve_neo4j
 
     profile = resolve_neo4j()
+    _require_matching_graph_target(target, profile, operation="pull")
     git_info = get_git_info()
     target_registry = get_registry(git_info, registry)
     pkg_name = get_package_name(
@@ -1284,7 +1291,7 @@ def graph_pull(
             gp.start_phase(f"Loading on {profile.host}")
             load_script = build_remote_load_script(
                 remote_archive,
-                profile.name,
+                target,
                 password,
                 scheduler=_resolve_scheduler(profile),
             )
@@ -1374,7 +1381,7 @@ def graph_pull(
             from imas_codex.cli.graph.data import graph_load
 
             runner = CliRunner()
-            load_args = [str(archives[0]), "--force"]
+            load_args = [str(archives[0]), target, "--force"]
             result = runner.invoke(graph_load, load_args)
             if result.exit_code != 0:
                 gp.fail_phase(result.output.strip())
