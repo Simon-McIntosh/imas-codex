@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-lifecycle-integrity">
+  <meta name="plan-title" content="Lifecycle Integrity: Plug the Leaks Before the Repairs">
+  <meta name="plan-summary" content="Two lifecycle axes have drifted apart and one is written as a constant. Close every write path that reopens the damage, then repair.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="critical">
+  <meta name="plan-sprint" content="S10">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="sn-origin-provenance-backfill,sn-west-cohort-treatment">
+  <title>Lifecycle Integrity: Plug the Leaks Before the Repairs | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-04">
+<meta name="plan-version" content="1">
+</head>
+<body>
+<main class="plan-doc">
+
+<section class="plan-hero">
+  <p class="eyebrow">Leaks first · repairs second · blocks the backfill</p>
+  <h1>Lifecycle Integrity: Plug the Leaks Before the Repairs</h1>
+  <p class="lead">A standard name carries five lifecycle axes. Three are healthy. Two are damaged,
+  and at least one is damaged by a write path that is still open — so repairing the data first would
+  be undone by the next export. This plan closes every open write path, proves each closure with a
+  test that fails without it, and only then hands the repair work to the plans that own it.</p>
+</section>
+
+<h2 id="s1">§1 — The five axes, measured</h2>
+<p>Every count here is from the live graph over 4852 <code>StandardName</code> nodes.</p>
+
+<table>
+  <thead><tr><th>Axis</th><th>Declared vocabulary</th><th>In use</th><th>Null</th></tr></thead>
+  <tbody>
+    <tr><td><code>name_stage</code></td>
+        <td>pending, drafted, reviewed, accepted, approved, refining, exhausted, superseded, contested</td>
+        <td>accepted 2356, superseded 1963, exhausted 278, drafted 136, reviewed 107, pending 12</td>
+        <td><strong>0</strong></td></tr>
+    <tr><td><code>docs_stage</code></td><td>same shape</td>
+        <td>accepted 2993, pending 1787, reviewed 31, drafted 26, exhausted 10, superseded 2</td>
+        <td>3</td></tr>
+    <tr><td><code>validation_status</code></td><td>pending, valid, quarantined</td>
+        <td>valid 4522, quarantined 327</td><td>3</td></tr>
+    <tr><td><code>status</code></td><td>draft, active, deprecated, superseded</td>
+        <td>draft 1996, superseded 323</td><td><strong>2533 (52%)</strong></td></tr>
+    <tr><td><code>origin</code></td><td>pipeline, catalog_edit, derived</td>
+        <td>catalog_edit 2096, pipeline 1288, derived 246</td><td><strong>1222 (25%)</strong></td></tr>
+  </tbody>
+</table>
+
+<p>The pipeline lifecycle itself is sound and worth stating plainly, because it is the part that
+works: a name moves <code>pending → drafted → reviewed → accepted</code> under the review pools, and
+<code>sn approve</code> advances it to <code>approved</code> once the catalog pull request merges
+(<code>promote.py:885</code>). Terminal states are <code>superseded</code> when a name is refined
+away and <code>exhausted</code> when it hits the rotation cap. No identity has reached
+<code>approved</code> yet, which is correct — no catalog pull request has ever merged.</p>
+
+<h2 id="s2">§2 — Leak one: the exported status is a constant</h2>
+<p><code>export.py:1242</code> writes <code>"status": "active"</code> as a literal. The halted
+candidate's <code>catalog.yml</code> sidecar therefore carries <strong>386 entries all reading
+<code>status: active</code></strong>, while the graph holds <em>zero</em> <code>active</code>, 1996
+<code>draft</code> and 2533 null.</p>
+
+<p>This is the leak that makes the ordering argument concrete. The origin-provenance backfill plan
+exists to recover <code>status</code> on the identities an import cleared. If that backfill lands
+while the exporter still emits a constant, the recovered value never reaches the catalog and the next
+reader sees <code>active</code> exactly as before. <strong>The repair would be invisible, and we
+would circle.</strong></p>
+
+<p>It also answers a question the release has been carrying implicitly: a reviewer was expected to
+see draft names remaining draft until approval, and instead every name ships as
+<code>active</code> whatever its real state.</p>
+
+<p><strong>Treatment.</strong> Derive the exported status from the graph rather than asserting it.
+Decide what a name at <code>name_stage=accepted</code> but not yet <code>approved</code> should
+publish as — that is the open decision below. Then gate the export: refuse to cut a candidate that
+would publish a name whose graph status is null, so the 52% hole becomes a refusal with a list
+instead of a silent overwrite.</p>
+
+<h2 id="s3">§3 — Leak two: two lifecycle axes encoding the same thing</h2>
+<p><code>status</code> (draft / active / deprecated / superseded) and <code>name_stage</code>
+(… accepted / approved / superseded) both encode lifecycle, and they have drifted apart.
+<code>name_stage</code> is maintained by the review pools and by <code>sn approve</code>;
+<code>status</code> is written once at creation and then overwritten at export. One is real, one is
+decorative, and no reader can tell which they are looking at.</p>
+
+<p><strong>Treatment.</strong> Decide which axis is authoritative for the published catalog, then make
+the other derived or remove it. A single authority is the only durable fix: while two fields can
+disagree, every future repair has to choose one and the choice will not be consistent across
+callers. This is a schema-level decision and it belongs to the lead.</p>
+
+<h2 id="s4">§4 — Leak three: the import may still clear the editorial axis</h2>
+<p>The origin-provenance backfill plan records the damage: a catalog round-trip cleared
+<code>origin</code> and <code>status</code> on <strong>1,091 identities</strong>, and left five
+generated names carrying catalog markers. Its <code>import-write-authority</code> decision is
+already locked, and it states the rule exactly — an import is entitled to record that it happened
+through <code>imported_at</code> and <code>catalog_commit_sha</code>, and is entitled to nothing on
+the editorial axis.</p>
+
+<p><strong>That decision is locked but the guard is not proven to exist.</strong> This plan's job is
+narrow and specific: establish whether a test exists that fails when an import writes
+<code>origin</code> or <code>status</code>, and if not, write one. The locked decision's own
+rationale makes the point — recovery without the guard buys one clean measurement before the next
+import undoes it. <strong>The guard must land before the backfill runs, not after</strong>, which is
+why this plan blocks that one.</p>
+
+<p>"Can never happen again" has a testable meaning here and nothing weaker will do: a test that
+performs an import against an identity carrying a known <code>origin</code> and <code>status</code>,
+and asserts both survive unchanged. If that test does not fail when the guard is removed, the guard
+is not real.</p>
+
+<h2 id="s5">§5 — Footguns to remove</h2>
+<p>Each of these is a mechanism that produces a defect silently, so each is a leak in the same sense
+as the three above. They are listed with what makes them silent, because that is the property to
+remove.</p>
+
+<table>
+  <thead><tr><th>Footgun</th><th>Evidence</th><th>Why it is silent</th></tr></thead>
+  <tbody>
+    <tr><td>failure path records no reason</td><td>59 of 283 failed sources carry no error text</td>
+        <td>a reader cannot tell a transient failure from a permanent one, so the source is never triaged</td></tr>
+    <tr><td>compose attempt cap</td><td>216 sources parked at <code>attempt_count = 5</code></td>
+        <td>the cap reads as a failure, so 216 nameable quantities look like physics problems</td></tr>
+    <tr><td>fit-artifact misclassification</td><td>54 leaf nodes labelled <code>quantity</code> that are <code>/weight</code> or <code>/reconstructed</code> pairs</td>
+        <td>the category exists and is applied inconsistently, so eligibility silently admits solver bookkeeping</td></tr>
+    <tr><td><code>superseded_by</code> scalar rot</td><td>1945 superseded names with a null scalar; 513 with no successor on edge or scalar</td>
+        <td>the scalar looks authoritative and is unwritten, so a reader following it silently sees nothing</td></tr>
+    <tr><td>synthetic review verdict</td><td>the embedding gate writes a constant 0.30 with a null resolution method and no reviewer</td>
+        <td>the row is shaped exactly like a reviewer critique, so it was read as one at plan level</td></tr>
+  </tbody>
+</table>
+
+<p>The last one has already cost a wrong diagnosis in this sprint. A dedicated node was needed to
+establish that <code>SEMANTIC_SIM_SYNTHETIC_SCORE</code> is a constant written when cosine similarity
+falls below threshold, that the gate then skips the reviewer call entirely, and that no model ever
+rejected the name. Making the synthetic origin unmistakable — a distinct resolution method, or a tier
+the aggregate readers refuse to treat as a verdict — is the fix.</p>
+
+<h2 id="s6">§6 — Ordering: why the leaks come first</h2>
+<p>The lead's instruction is the governing constraint on this plan and it is not a preference. Every
+item in §2 through §5 is a write path or a classifier that <em>produces</em> the defect a repair plan
+would remove. Running the repairs first means each of them is re-created by the next export, the next
+import, or the next compose rotation, and the measured improvement decays without anyone seeing it
+happen.</p>
+
+<p>So the sequence is: close the write path, prove the closure with a test that fails without it,
+<em>then</em> release the repair. Concretely this plan blocks
+<code>sn-origin-provenance-backfill</code> — which must not run until §4's guard exists and §2's
+exporter reads the graph — and <code>sn-west-cohort-treatment</code>, whose classification repair in
+its Group C is the same fix as §5's third row and should be done once, here, rather than twice.</p>
+
+<p>The one measurement that will show whether this worked is not a count of repaired rows. It is that
+a repeat of the same census, taken after a later export and a later import, returns the same numbers.
+A repair that survives one round trip is a repair; one that does not was a reading.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="published-status-authority" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which axis is authoritative for the status a catalog entry publishes?</p>
+    <p class="r-dec-ctx">The exporter writes a literal active . The graph holds draft on 1996 names, null on 2533, and never active . Meanwhile name_stage is maintained and reaches approved through sn approve . Two fields encode lifecycle and only one is kept current.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="derive-status-from-name-stage">Derive the published status from name_stage ; make status a computed projection with no independent write path.</button>
+      <button class="r-opt" data-value="status-authoritative-backfilled">Keep status authoritative, backfill the 2533 nulls, and have the exporter read it.</button>
+      <button class="r-opt" data-value="drop-status-entirely">Remove status from the schema and publish name_stage directly.</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="accepted-not-approved-publishes-as" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What status should a name publish while it is accepted but not yet approved?</p>
+    <p class="r-dec-ctx">A review candidate contains names at name_stage=accepted that the
+    physicist has not yet approved. They are real proposals, not yet catalog authority. The catalog
+    site and any downstream consumer need to be able to tell the difference.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="draft-until-approved">Publish draft until sn approve advances the name, then active .</button>
+      <button class="r-opt" data-value="active-throughout">Publish active throughout, treating presence in the catalog as the authority signal.</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sli-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-04" data-recommends-skill="/reckon-ship sn-lifecycle-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close every open write path, prove each closure, then release the repairs</h4>
+    <div class="r-fu-body"><p>Work §2 through §5 before any repair plan runs, because each is a write path or classifier that produces the defect a repair would remove. §2 is the clearest case: the exporter writes <code>status: active</code> as a literal, so backfilling status while it stands means the recovered value never reaches the catalog. §4 is the one that must be testable rather than argued — an import guard is only real if a test fails when it is removed. §5 lists five footguns whose common property is silence, and the classification repair there is the same fix as Group C of the cohort-treatment plan, so do it once here. The measure that this worked is not repaired rows: it is that a repeat census after a later export and a later import returns the same numbers.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-lifecycle-integrity</pre>
+    </article>
+</section>
+
+</main>
+</body>
+</html>
