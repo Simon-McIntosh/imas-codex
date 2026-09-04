@@ -1035,6 +1035,7 @@ url = "https://download.pytorch.org/whl/cu121"
 explicit = true
 
 [tool.uv.sources]
+imas-standard-names = { path = "/home/ITER/mcintos/Code/imas-standard-names", editable = true }
 torch = [
   { index = "pytorch-cpu", extra = "cpu" },
   { index = "pytorch-cpu", extra = "test" },
