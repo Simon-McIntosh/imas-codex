@@ -1,4 +1,4 @@
-"""Recovery-archive selection for graph backup currency."""
+"""Structural recovery-artifact selection and reported artifact identity."""
 
 from __future__ import annotations
 
