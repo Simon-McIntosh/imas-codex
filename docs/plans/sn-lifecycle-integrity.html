@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -167,7 +167,7 @@ A repair that survives one round trip is a repair; one that does not was a readi
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="published-status-authority" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="published-status-authority" data-choice="graph-status-is-the-export-gate" data-by="Simon McIntosh" data-when="2026-09-04T05:47:54+00:00">
     <p class="r-dec-q">Which axis is authoritative for the status a catalog entry publishes?</p>
     <p class="r-dec-ctx">The exporter writes a literal active . The graph holds draft on 1996 names, null on 2533, and never active . Meanwhile name_stage is maintained and reaches approved through sn approve . Two fields encode lifecycle and only one is kept current.</p>
     <p class="r-dec-opts">
@@ -175,9 +175,9 @@ A repair that survives one round trip is a repair; one that does not was a readi
       <button class="r-opt" data-value="status-authoritative-backfilled">Keep status authoritative, backfill the 2533 nulls, and have the exporter read it.</button>
       <button class="r-opt" data-value="drop-status-entirely">Remove status from the schema and publish name_stage directly.</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04. The lifecycle has a single source of truth in the graph and the catalog export reads from it; the exporter never asserts a value of its own. This also corrects the framing that status and name_stage are redundant — they are different concerns and both are legitimate. name_stage is the PIPELINE lifecycle: how a name was produced, reviewed and accepted, maintained by the review pools. status is the CATALOG lifecycle: draft, active, deprecated, superseded, and it is the gate on what the export may publish. The reason history currently leaks into export paths is precisely that the exporter writes a literal active and never consults status, so the gate never fires. Persisting deprecated and superseded on status is the missing mechanism that keeps a historical record in the graph out of a published catalog.</p>
     </div>
-<div class="r-dec" data-key="accepted-not-approved-publishes-as" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="accepted-not-approved-publishes-as" data-choice="draft-until-upstream-pr-approval" data-by="Simon McIntosh" data-when="2026-09-04T05:47:54+00:00">
     <p class="r-dec-q">What status should a name publish while it is accepted but not yet approved?</p>
     <p class="r-dec-ctx">A review candidate contains names at name_stage=accepted that the
     physicist has not yet approved. They are real proposals, not yet catalog authority. The catalog
@@ -186,7 +186,7 @@ A repair that survives one round trip is a repair; one that does not was a readi
       <button class="r-opt" data-value="draft-until-approved">Publish draft until sn approve advances the name, then active .</button>
       <button class="r-opt" data-value="active-throughout">Publish active throughout, treating presence in the catalog as the authority signal.</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04. A name publishes as draft and stays draft until the human gate passes. There is exactly ONE mechanism that moves draft to active: approval of the upstream pull request. No pipeline stage, no score threshold and no export flag may advance it, because the point of the gate is that a human decided. A review candidate therefore ships entirely as draft, which is what a reviewer should see, and the transition to active is the recorded consequence of their approval rather than something the pipeline can reach on its own.</p>
     </div>
 </section>
 
@@ -199,6 +199,11 @@ A repair that survives one round trip is a repair; one that does not was a readi
     </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20260904T055500" data-who="reckon-ship" data-when="2026-09-04T05:55:00Z">
+    <div class="r-comment-body"><p><strong>This section's framing was wrong and the lead's ruling replaces it.</strong> It argued that <code>status</code> and <code>name_stage</code> redundantly encode lifecycle and that one should be derived or removed. They are not redundant: they are two different lifecycles, and both are needed.</p><p><code>name_stage</code> is the <strong>pipeline</strong> lifecycle — <code>pending → drafted → reviewed → accepted</code>, terminal at <code>superseded</code> or <code>exhausted</code> — and it records how a name was produced and reviewed. <code>status</code> is the <strong>catalog</strong> lifecycle — <code>draft → active</code>, with <code>deprecated</code> and <code>superseded</code> as the retired states — and it is <strong>the gate on what the export may publish</strong>.</p><p>That is the mechanism this system has been missing, and it explains a defect nobody had named: a historical record persisted in the graph reaches the export paths because the exporter writes a literal <code>active</code> and never consults <code>status</code>, so the gate that would have stopped it never fires. Persisting <code>deprecated</code> and <code>superseded</code> on <code>status</code> is what keeps history in the graph and out of the catalog.</p><p>The single source of truth is the graph, and the export reads it. Exactly one mechanism moves a name from <code>draft</code> to <code>active</code>: approval of the upstream pull request. No pipeline stage, score threshold or export flag may advance it — the gate exists because a human decided, so a candidate ships entirely as <code>draft</code> and the transition is the recorded consequence of that approval.</p><p>So §3's treatment is replaced. Nothing is removed. What is owed is: make the export read <code>status</code> from the graph and gate on it, give <code>sn approve</code> the <code>draft → active</code> write alongside the <code>name_stage → approved</code> write it already performs at <code>promote.py:885</code>, and ensure no other caller can write <code>active</code>.</p></div>
+</div>
+</section>
 </main>
 </body>
 </html>

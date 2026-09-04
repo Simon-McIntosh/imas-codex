@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T06:55:53",
+  "updated": "2026-09-04T07:44:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -38,6 +38,15 @@
         "role": "implement",
         "session_id": "c4283d0f-4079-4b90-bea6-4d584a1301bd",
         "created": "2026-08-22"
+      },
+      {
+        "id": "cx-pinbump",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "cx-prhalt",
@@ -63732,6 +63741,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1553
+    "_version": 1554
   }
 }
