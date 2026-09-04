@@ -16,6 +16,14 @@ All graph node types, relationships, and properties are defined in LinkML schema
 - `imas_codex/schemas/task_groups.yaml` - Worker task grouping
 - `imas_codex/schemas/common.yaml` - Shared enums and mixins
 
+The generic MCP `add_to_graph` tool refuses every concrete class owned by the
+`standard_name` and `grammar_graph` schemas. Those nodes are governed state and
+must be written through the dedicated Standard Name pipeline. The boundary is
+derived through `GraphSchema.get_class_schema_id()` from each LinkML class's
+`from_schema` value, so adding another class to either schema automatically
+places it behind the same refusal. LinkML `SchemaView` access stays encapsulated
+inside `imas_codex/graph/schema.py`.
+
 **Build pipeline:**
 - Models auto-generated during `uv sync` via hatch build hook
 - Regenerate manually: `uv run build-models --force`
