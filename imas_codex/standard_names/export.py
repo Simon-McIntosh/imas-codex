@@ -98,6 +98,7 @@ GATE_C = "score_thresholds"
 GATE_D = "divergence_detection"
 GATE_EXCLUSION_ACCOUNTING = "exclusion_accounting"
 GATE_IDENTITY_TOKEN_COLLISION = "identity_token_collision"
+GATE_CATALOG_STATUS = "catalog_status"
 
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
@@ -447,6 +448,7 @@ def _fetch_candidates(
     OPTIONAL MATCH (sn)-[:HAS_COCOS]->(c:COCOS)
     RETURN sn {
         .*,
+        status: sn.status,
         unit: coalesce(u.id, sn.unit),
         cocos: c.id
     } AS record
@@ -548,6 +550,7 @@ def _fetch_export_population(
     OPTIONAL MATCH (sn)-[:HAS_COCOS]->(c:COCOS)
     RETURN sn {{
         .*,
+        status: sn.status,
         unit: coalesce(u.id, sn.unit),
         cocos: c.id,
         _has_dd_source_binding: has_dd_source_binding,
@@ -1235,11 +1238,10 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
         # publication projection must never freeze the compose-time value.
         "kind": derive_kind(node["id"]),
         "unit": node.get("unit") or "",
-        # Every candidate reaching this function has passed the accepted /
-        # docs-accepted / valid export gate, so it is published as 'active'.
-        # 'draft' and 'deprecated' therefore never appear in the released
-        # status vocabulary.
-        "status": "active",
+        # The graph owns catalog lifecycle. Public graph projections always
+        # carry this key explicitly; the fallback retains compatibility with
+        # older low-level callers whose already-filtered projections predate it.
+        "status": node["status"] if "status" in node else "active",
         "physics_domain": primary_physics_domain,
         "links": list(node.get("links") or []),
     }
@@ -2289,6 +2291,36 @@ def run_export(
         batch=review_batch,
         require_docs_review=not names_only,
     )
+    missing_status_ids = sorted(
+        candidate["id"]
+        for candidate in population
+        if "status" in candidate and candidate["status"] is None
+    )
+    status_gate = GateResult(
+        gate=GATE_CATALOG_STATUS,
+        passed=not missing_status_ids,
+        issues=[
+            {
+                "type": "null_catalog_status",
+                "name": candidate_id,
+                "detail": "graph catalog status is null",
+            }
+            for candidate_id in missing_status_ids
+        ],
+    )
+    report.gate_results.append(status_gate)
+    if missing_status_ids:
+        report.total_candidates = len(population)
+        report.all_gates_passed = False
+        report.gate_failures = 1
+        logger.error(
+            "Export blocked: %d candidate identity(ies) have null graph status: %s",
+            len(missing_status_ids),
+            missing_status_ids,
+        )
+        staging_path.mkdir(parents=True, exist_ok=True)
+        _write_export_report(staging_path, report)
+        return report
     candidates, eligibility_exclusions = _classify_export_population(
         population,
         domain=domain,
