@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T08:11:18",
+  "updated": "2026-09-04T08:14:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -41,6 +41,33 @@
       },
       {
         "id": "cx-catalogpin",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "cx-exportstatus",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "cx-fitclass",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "cx-importguard",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -63805,6 +63832,114 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T045554384846-n-wcr-halt-fork-pr",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-wcr-halt-fork-pr",
+        "node_definition": {
+          "done_when": "gh pr view 13 on Simon-McIntosh/imas-standard-names-catalog reports state CLOSED, a comment on it states that a successor candidate will follow carrying the untreated WEST cohort so the closure reason is legible to a reviewer, pull requests 11 and 12 are left OPEN and untouched, and a grep of the comment text for co-authored-by, generated with, claude and copilot returns 0",
+          "estimated_hours": 0.25,
+          "goal": "Close the premature review candidate on the fork so no physicist picks it up",
+          "id": "n-wcr-halt-fork-pr",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "exact",
+          "time_budget": "20m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-halt-fork-pr.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "cx-prhalt",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T04:56:07Z",
+        "completed_at": "2026-09-04T04:59:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 179,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 179,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "66076b7bcaf1d30b96f8a7d4a89150c340e04959",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "gh pr view 13 state; gh pr list states for 11 and 12; forbidden-term grep of the posted comment",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-halt-fork-pr.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06ac6-2d1c-7a02-b099-2c9033db6950",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1913472,
+            "cached_input_tokens_cumulative": 1913472,
+            "input_tokens": 2026556,
+            "input_tokens_cumulative": 2026556,
+            "output_tokens": 6501,
+            "output_tokens_cumulative": 6501,
+            "reasoning_output_tokens": 1974,
+            "reasoning_output_tokens_cumulative": 1974
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 8475,
+          "peak_input_tokens": 3940028
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "operational node on an external repository; its deliverable is the closed pull request and the report",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -63935,6 +64070,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1557
+    "_version": 1561
   }
 }
