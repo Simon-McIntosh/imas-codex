@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 </head>
 <body>
 <main class="plan-doc">
@@ -187,6 +187,14 @@ A repair that survives one round trip is a repair; one that does not was a readi
       <button class="r-opt" data-value="active-throughout">Publish active throughout, treating presence in the catalog as the authority signal.</button>
       </p>
     <p class="r-dec-rat">Lead ruling 2026-09-04. A name publishes as draft and stays draft until the human gate passes. There is exactly ONE mechanism that moves draft to active: approval of the upstream pull request. No pipeline stage, no score threshold and no export flag may advance it, because the point of the gate is that a human decided. A review candidate therefore ships entirely as draft, which is what a reviewer should see, and the transition to active is the recorded consequence of their approval rather than something the pipeline can reach on its own.</p>
+    </div>
+<div class="r-dec" data-key="origin-axis-disposition" data-choice="retire-origin-entirely" data-by="Simon McIntosh" data-when="2026-09-04T06:06:57+00:00">
+    <p class="r-dec-q">origin-axis-disposition</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04: unmaintained infrastructure is retired, because a signal nothing maintains is costly to resolve and misleads every reader who trusts it. origin qualifies on the evidence. Only ONE writer of StandardName.origin exists in the codebase, graph_ops.py:4002, and it writes &#x27;derived&#x27;; nothing writes &#x27;catalog_edit&#x27; or &#x27;pipeline&#x27; at all, so those 3384 markers are residue from a path that no longer exists. That is why the set is both stale and large, and why 182 genuinely hand-edited names sit unmarked while roughly 2031 unmarked-in-fact names sit protected. The surviving value, &#x27;derived&#x27;, duplicates the StandardNameSource source_type binding and disagrees with it 341 times (18 marked without a derived source, 323 with one and unmarked), so the relationship the composer creates is both truer and already present. Retirement therefore has three parts: repoint the six workers.py and parents.py readers at the source binding, resolve the protection gate under its own decision, and drop the field. No regeneration is implied and no LLM cost is incurred, because filter_protected only strips fields from writes the pipeline is already making and pool eligibility keys on name_stage and docs_stage, never on origin.</p>
+    </div>
+<div class="r-dec" data-key="maintained-status-set" data-choice="four-axes-each-with-one-writer" data-by="Simon McIntosh" data-when="2026-09-04T06:06:57+00:00">
+    <p class="r-dec-q">maintained-status-set</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04: the status set must be consistent and maintainable. The retained set is four axes, each with exactly one writer and a stated meaning, and any axis that cannot name its writer is retired rather than carried. name_stage is the pipeline lifecycle (pending, drafted, reviewed, accepted, then approved), written by the review pools and by sn approve; it is currently healthy at zero nulls. docs_stage is the same shape for the documentation axis, written by the docs pools, healthy at three nulls. validation_status is valid or quarantined, written by the quarantine route, healthy at three nulls. status is the CATALOG lifecycle and the export gate: draft on creation, active only through approval of the upstream pull request, deprecated or superseded when a published name is retired. status is the axis that is currently broken at 52% null and must be brought under a single maintained writer through an idempotent sn run reconcile step. origin is retired under its own decision. The invariant that makes this maintainable is that every axis names its writer, so a future reader can ask who set a value and get an answer.</p>
     </div>
 </section>
 
