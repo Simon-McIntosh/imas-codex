@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T15:02:13",
+  "updated": "2026-09-04T15:15:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -378,6 +378,15 @@
         "role": "implement",
         "session_id": "01a02485-ee50-72c3-9f2f-a3e723ebe135",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-attachexample",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-attachmanifest",
@@ -71918,6 +71927,168 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T125615620018-n-wct-dead-end-identity-revival",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a72",
+        "node": "n-wct-dead-end-identity-revival",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 633,
+                "cached_input_tokens": 637558,
+                "input_tokens": 638193,
+                "output_tokens": 1267,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 639460,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "A compose proposal that collides with a retired identity having NO live successor is resolved by a governed revival rather than refused, and the four measured cases become bindable. The probe established that the attempt cap was only the parked state: after a clean reset all six capped sources re-consumed five attempts and composed nothing, and four failed because the composer proposed the CORRECT spelling while the target identity already exists in a non-bindable stage. Those four are energy_confinement_time at superseded, current_of_poloidal_field_coil at exhausted and quarantined, vertical_outline_of_plasma_boundary at superseded, and neutral_pressure at exhausted and quarantined. Following the chain does not help and must not be the fix: energy_confinement_time's only successor thermal_energy_confinement_time is itself exhausted, vertical_outline_of_plasma_boundary's successor vertical_outline_of_plasma_filament is itself superseded, and the other two have no successor of any kind. The structural size is 1592 of 2243 retired identities carrying no live successor, so this is a mechanism rather than four repairs. Implement the rule that a retired identity with no live successor, whose spelling a live data-dictionary source independently proposes, is revived to a reviewable stage and bound, with the revival recorded as its own auditable event carrying the prior stage and the source that triggered it. A retired identity that DOES have a live successor keeps its current refusal, because there the successor is the answer. Never revive by clearing the axis silently. Prove it two ways: a test that fails when the revival is removed, and a live scoped compose over the four named sources with --skip-global-maintenance showing produced-name edges where there were none. Gate: 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_supersede_successor.py tests/standard_names/test_refine_name_chain.py tests/standard_names/test_source_revival.py -q -p no:cacheprovider' at exit 0 plus your own new test file, with before and after failure ids recorded, and write the manifest with a non-terminal status before any long run.",
+          "estimated_hours": 1.5,
+          "goal": "Let a live source bind the correct spelling when a retired identity holds it with no live successor",
+          "id": "n-wct-dead-end-identity-revival",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-dead-end-revival.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_dead_end_identity_revival.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-deadend",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T12:56:23Z",
+        "completed_at": "2026-09-04T13:14:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1092,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1092,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "7b7adcf9e89a0af23186dabb12b93292b2ee77af",
+        "commits": [
+          "b008cdf6014aab7b2a0c53bba4e106b728463cda"
+        ],
+        "changed_lines": {
+          "added": 250,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_supersede_successor_scalar.py tests/standard_names/test_refine_name_chain.py tests/standard_names/test_source_revival.py tests/standard_names/test_dead_end_identity_revival.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "99 passed exit 0 on the corrected gate; 6 of 6 focused failures at base; the supplied gate path test_supersede_successor.py does not exist and was corrected to test_supersede_successor_scalar.py"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-dead-end-revival.md",
+        "scope_changed": false,
+        "session_id": "01a06c7d-e058-7841-9915-ba7016495815",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 21326,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 24026,
+              "external_wait": null,
+              "log_age_seconds": 23905,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 23928,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-dead-end-identity-revival",
+          "session_id": "01a06c7d-e058-7841-9915-ba7016495815",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T13:14:35Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_supersede_successor.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -72062,6 +72233,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1613
+    "_version": 1615
   }
 }
