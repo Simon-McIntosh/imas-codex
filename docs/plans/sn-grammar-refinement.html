@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-grammar-refinement">
+  <meta name="plan-title" content="Grammar Refinement: Fix the Rendering Before the Names Are Approved">
+  <meta name="plan-summary" content="Operators render away from their operand and a vector component is not a distinguished family dimension. Fix both while generation is free.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="16.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S10">
+  <meta name="plan-tags" content="standard-names,isn-grammar,catalog-presentation">
+  <meta name="plan-depends-on" content="sn-lifecycle-integrity">
+  <title>Grammar Refinement | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-04">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The window, and why it closes</h2>
+    <p>Composition runs on a local, free seat, so a rename costs nothing but wall clock
+    today. The moment a name is approved through an upstream pull request its spelling
+    becomes catalog authority, and every later correction is a published-catalog migration
+    with downstream consumers attached. <strong>2,689 live names exist and 253 carry the
+    defects below, of which 225 are already publishable</strong> — one approval from frozen.
+    That asymmetry is the entire argument for doing this now rather than after the WEST
+    candidate merges.</p>
+    <p>The meaning of every affected name is unchanged. These are rendering and grouping
+    defects, so <strong>descriptions and documentation stay exactly as they are</strong> and
+    the migration is a rename with provenance, not a re-derivation.</p>
+
+    <h2 id="s2">§2 — Defect one: the operator renders away from its operand</h2>
+    <p>Operators are not a segment. They are a wrapping layer of 35 <code>unary_prefix</code>,
+    13 <code>unary_postfix</code> and 3 binary forms, and they render at the outer edge of the
+    name. The canonical segment order puts <code>object</code>, <code>geometry</code>,
+    <code>position</code> and <code>region</code> <em>after</em> the base, so a postfix operator
+    ends up separated from the base it transforms by the whole locus tail, landing against the
+    wrong noun.</p>
+    <table>
+      <thead><tr><th>Renders today</th><th>Reads as</th></tr></thead>
+      <tbody>
+        <tr><td><code>voltage_of_ion_cyclotron_heating_antenna_amplitude</code></td><td>the antenna has an amplitude</td></tr>
+        <tr><td><code>wave_current_of_antenna_strap_amplitude</code></td><td>the strap has an amplitude</td></tr>
+        <tr><td><code>root_mean_square_of_wave_current_of_antenna_strap</code></td><td>correct, but the operator is three nouns from its base</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Measured surface:</strong> 87 postfix-operator names (74 publishable), of which
+    13 have an <code>_of_</code> tail between base and operator; 149 prefix-operator names
+    (138 publishable).</p>
+
+    <h2 id="s3">§3 — Defect two: an indexed operator renders its index before its operand</h2>
+    <p><code>derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface</code>
+    states the coordinate before the thing being differentiated.
+    <code>derivative_with_respect_to</code> is <code>unary_prefix</code> with
+    <code>indexed: true</code> and <code>index_params: [coord]</code>, and the template emits
+    the index immediately after the operator token. Nesting compounds it:
+    <code>time_derivative_of_derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface</code>.</p>
+    <p><strong>Measured surface: 13 names</strong> — 9 <code>derivative_with_respect_to_*</code>
+    and 4 <code>time_derivative_of_*</code>. The smallest defect with the clearest fix, which
+    is why it is the demonstrator.</p>
+
+    <h2 id="s4">§4 — Defect three: a vector component is not a distinguished family dimension</h2>
+    <p>Family grouping exists: 1,598 of 2,689 live names carry <code>HAS_PARENT</code>, and the
+    parent is the bare base. But the children of a base mix component variants with qualifier
+    variants indiscriminately — <code>magnetic_field</code> has 13 children in which
+    <code>poloidal_magnetic_field</code> sits beside <code>vacuum_magnetic_field</code> and
+    <code>plasma_magnetic_field</code>. Nothing marks one as a member of a component set, so a
+    <em>missing</em> component is invisible to every reader and to the catalog site.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 214" width="100%" role="img"
+           aria-label="Today a base parent has one undifferentiated child list mixing component and qualifier variants; the proposal splits the children onto two axes so a component set is addressable and a gap is visible.">
+        <g font-family="system-ui, sans-serif" font-size="13" fill="#1a1a1a">
+          <text x="8" y="16" font-weight="600">today — one undifferentiated child list</text>
+          <rect x="8" y="28" width="150" height="34" fill="#fff" stroke="#1a1a1a"/>
+          <text x="83" y="49" text-anchor="middle" font-weight="600">magnetic_field</text>
+          <line x1="158" y1="45" x2="196" y2="45" stroke="#1a1a1a"/>
+          <polygon points="196,45 188,41 188,49" fill="#1a1a1a"/>
+          <rect x="196" y="24" width="230" height="42" fill="#fff" stroke="#999"/>
+          <text x="311" y="41" text-anchor="middle" fill="#444">poloidal · vacuum · plasma ·</text>
+          <text x="311" y="57" text-anchor="middle" fill="#444">non_axisymmetric · … (13)</text>
+          <text x="440" y="49" fill="#8a5a00">a missing radial component is invisible</text>
+
+          <text x="8" y="104" font-weight="600">proposed — two axes under the same base</text>
+          <rect x="8" y="116" width="150" height="34" fill="#fff" stroke="#1a1a1a"/>
+          <text x="83" y="137" text-anchor="middle" font-weight="600">magnetic_field</text>
+          <line x1="158" y1="126" x2="196" y2="126" stroke="#0b6e4f" stroke-width="2"/>
+          <polygon points="196,126 188,122 188,130" fill="#0b6e4f"/>
+          <line x1="158" y1="146" x2="196" y2="176" stroke="#1a1a1a"/>
+          <polygon points="196,176 188,170 191,178" fill="#1a1a1a"/>
+          <rect x="196" y="108" width="252" height="36" fill="#fff" stroke="#0b6e4f" stroke-width="2"/>
+          <text x="322" y="124" text-anchor="middle" font-weight="600" fill="#0b6e4f">component axis</text>
+          <text x="322" y="139" text-anchor="middle" fill="#444">radial · vertical · toroidal · poloidal</text>
+          <rect x="196" y="158" width="252" height="36" fill="#fff" stroke="#999"/>
+          <text x="322" y="174" text-anchor="middle" font-weight="600" fill="#444">qualifier variants</text>
+          <text x="322" y="189" text-anchor="middle" fill="#444">vacuum · plasma · non_axisymmetric</text>
+          <text x="462" y="130" fill="#0b6e4f">a gap on this axis is a hole</text>
+          <text x="462" y="180" fill="#444">these are peers, not a set</text>
+        </g>
+      </svg>
+      <figcaption>The base parent already exists; what is missing is the distinction between a
+      component set and a set of qualified peers. Only the first has a completeness property,
+      and only the first should drive close grouping in the published catalog.</figcaption>
+    </figure>
+
+    <p><strong>Measured surface.</strong> Of 505 component-prefixed stems, 345 carry only one
+    component. Partitioned by the base's declared <code>kind</code>: <strong>176 are true
+    vector components</strong> where a sibling is expected; 80 have a direction word that is
+    not a <code>component</code> segment at all; 87 sit on a scalar base where the direction is
+    intrinsic (<code>poloidal_magnetic_flux</code>, <code>poloidal_diffusivity</code>); 2 need
+    the structured parser. A missing sibling among the 176 may still be a data-dictionary
+    coverage fact rather than a naming defect, so completion is per-name evidence, not a sweep.</p>
+
+    <h2 id="s5">§5 — Order of work</h2>
+    <p>Smallest and most certain first, because each stage proves the migration machinery for
+    the next. Nothing is renamed until a no-write comparison has produced the exact rename list.</p>
+    <ol>
+      <li><strong>Shadow diff.</strong> Render all 431 roster names through current and proposed
+      templates with the graph held fixed and no writes at all. Output is the exact rename list
+      and its size. Free.</li>
+      <li><strong>Demonstrator — indexed operator template.</strong> 13 names. Proves grammar
+      change, prompt change, regeneration and rename provenance end to end.</li>
+      <li><strong>Arity rule, postfix.</strong> 87 names.</li>
+      <li><strong>Arity rule, prefix.</strong> 149 names, only once postfix validates.</li>
+      <li><strong>Component axis in the schema</strong>, then carried into
+      <code>catalog.yml</code> so the published sidecar exposes the family grouping the site
+      needs.</li>
+      <li><strong>Sibling completion</strong> across the 176, informed by the axis rather than
+      by a name-prefix heuristic.</li>
+    </ol>
+    <p>Renaming and family completion touch the same names, so they are deliberately sequenced
+    rather than combined: doing both at once would make the diff unreadable and leave no way to
+    attribute a regression to either.</p>
+
+    <h2 id="s6">§6 — Development posture</h2>
+    <p>The grammar is edited in the upstream package, so it is installed editable from the
+    sibling checkout for the duration and pinned only once settled. One hazard is specific to
+    this workstation: every dispatched worker shares the main checkout's environment, so an
+    editable grammar becomes visible to the whole fleet at once. That is the point — it is what
+    makes turnaround fast — but it means a broken grammar breaks every concurrent worker, so
+    each grammar change is gated by the suite in the main checkout before any worker wave opens.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="operator-renders-by-arity" data-choice="single-base-operand-renders-adjacent" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
+    <p class="r-dec-q">operator-renders-by-arity</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04. An operator whose operand is a single base renders immediately after that base; an operator wrapping a composite keeps the outer position; the locus or object tail always comes last. One rule covers both reported cases, and it makes the discriminator ARITY rather than operator kind - which matters because a measured counter-case exists: flux_surface_averaged_ratio_of_square_of_A_to_square_of_B genuinely averages the ratio, so rendering that operator inward would assert something false. Under the rule voltage_of_ion_cyclotron_heating_antenna_amplitude becomes voltage_amplitude_of_ion_cyclotron_heating_antenna, and root_mean_square_of_wave_current_of_antenna_strap becomes wave_current_root_mean_square_of_antenna_strap, while the averaged ratio is unchanged. Surface: 87 postfix names of which 13 are acute, and 149 prefix names. Postfix lands first and prefix only once postfix validates, because a prefix operator more often wraps a composite.</p>
+    </div>
+<div class="r-dec" data-key="indexed-operator-template" data-choice="operand-before-index" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
+    <p class="r-dec-q">indexed-operator-template</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04, and the confirmed DEMONSTRATOR for the programme. An indexed operator renders operator, then operand, then index: derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate rather than derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface. derivative_with_respect_to is unary_prefix with indexed true and index_params coord, and the template emits the index immediately after the operator token, before the thing being differentiated. Surface is 13 names, 9 derivative_with_respect_to and 4 time_derivative_of, and the fix resolves the nested case too. It goes first because it is the smallest defect with the least ambiguity, so it proves grammar change, prompt change, regeneration and rename provenance end to end on a surface small enough to audit by hand.</p>
+    </div>
+<div class="r-dec" data-key="component-is-a-family-axis" data-choice="distinguished-dimension-carried-to-the-catalog" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
+    <p class="r-dec-q">component-is-a-family-axis</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04. A vector component becomes a distinguished dimension of the name family in the graph schema, and that distinction must travel into catalog.yml so the published sidecar exposes close family grouping for presentation. Family grouping already exists - 1598 of 2689 live names carry HAS_PARENT onto the bare base - but a base&#x27;s children mix component variants with qualifier variants indiscriminately: magnetic_field has 13 children in which poloidal_magnetic_field sits beside vacuum_magnetic_field and plasma_magnetic_field. Only a component set has a completeness property, so without the distinction a missing component is invisible to every reader and to the catalog site. Completion scope is the 176 stems whose base carries kind vector or tensor, partitioned out of 345 lone-component stems: 80 have a direction word that is not a component segment, 87 sit on a scalar base where the direction is intrinsic such as poloidal_magnetic_flux and poloidal_diffusivity, and 2 need the structured parser. A missing sibling among the 176 may still be a data-dictionary coverage fact rather than a naming defect, so completion is judged per name.</p>
+    </div>
+<div class="r-dec" data-key="rename-before-completion" data-choice="sequence-never-combine" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
+    <p class="r-dec-q">rename-before-completion</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04. Renaming and family completion touch the same names and are sequenced rather than combined, because doing both at once makes the diff unreadable and leaves no way to attribute a regression to either. Nothing is renamed until a no-write shadow comparison has rendered all 431 roster names through current and proposed templates with the graph held fixed, producing the exact rename list and its size; that comparison is free. Order: shadow diff, the indexed-operator demonstrator, arity postfix, arity prefix, the component axis in the schema and its carriage into catalog.yml, then sibling completion across the 176. Descriptions and documentation are unchanged throughout - these are rendering and grouping defects, so every migration is a rename with provenance rather than a re-derivation.</p>
+    </div>
+<div class="r-dec" data-key="editable-grammar-during-development" data-choice="editable-then-repin" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
+    <p class="r-dec-q">editable-grammar-during-development</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04: install the standard-names grammar editable from the sibling checkout for the duration and pin only once the grammar has settled, cutting the release-and-pin turnaround out of every iteration. One hazard is specific to this workstation and must be respected rather than discovered: every dispatched worker shares the main checkout&#x27;s environment through the .venv symlink, so an editable grammar becomes visible to the whole fleet the moment it changes. That is what makes turnaround fast, and it also means a broken grammar breaks every concurrent worker, so each grammar change is gated by the suite in the main checkout before any worker wave opens. The pin is restored to a released version before the WEST candidate is approved.</p>
+    </div>
+</section>
+
+    
+
+    
+
+  </main>
+</body>
+</html>
