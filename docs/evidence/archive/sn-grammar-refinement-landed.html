@@ -161,6 +161,36 @@
     unit vector. That is a Data Dictionary unit defect and it does not change the
     geometry-carrier verdict.</p>
 
+    <h2 id="merged-head">The merged head, measured twice</h2>
+    <p>Each change in this programme was green in its own worktree. None had been measured
+    with the others. That gap is not hypothetical — it cost 27 added failures.</p>
+    <table>
+      <thead><tr><th>Head</th><th><code>tests/standard_names</code></th><th>Added</th><th>Reading</th></tr></thead>
+      <tbody>
+        <tr><td>baseline</td><td>5 failed, 6991 passed</td><td>—</td><td>the five that predate this work</td></tr>
+        <tr><td>merged, before repair</td><td>32 failed, 6970 passed</td><td><strong>27</strong></td><td>each contributing change was green alone</td></tr>
+        <tr><td>repaired</td><td>6 failed, 6997 passed</td><td><strong>0</strong></td><td>no seventh failure</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The 27 were attributed by evidence, and they did not fall where this plan would
+    have guessed.</strong> Six came from the tail rule, one from registering the Stokes
+    indices, <em>nineteen</em> from a consumer eligibility guard whose fixtures had never
+    supplied a <code>node_category</code>, and one from a live-graph unit disagreement with no
+    supported commit attribution at all. The nineteen were a coordinator gating error: that
+    node was gated on <code>tests/core</code> and its focused surfaces, which its change passed
+    cleanly, while the change itself was to <em>source eligibility</em> — reached by the
+    standard-names extraction path. A gate has to be derived from what a change can reach, not
+    from where its code lives.</p>
+    <p><strong>The closure is on evidence, not arithmetic.</strong> The two repairs reported 19
+    and 7 removals from a 32-failure head, and 32 − 26 = 6 is exactly what the final run found.
+    That subtraction was still not the evidence: a sum of two isolated deltas is a prediction,
+    and only measuring the combined state establishes it. Both repairs kept their subject
+    intact — the eligibility guard was never weakened, and every moved assertion still checks
+    what it was written to check.</p>
+    <p>The sixth remaining failure is held open on purpose. Refreshing that holdout to the raw
+    Data Dictionary value would fix in place a number that a resolution-authority repair might
+    reverse, so it stays red with a stated reason rather than green with a hidden decision.</p>
+
   </main>
 </body>
 </html>

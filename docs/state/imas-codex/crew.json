@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T01:34:29",
+  "updated": "2026-09-05T01:49:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -76805,6 +76805,135 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T233633838135-n-sgr-the-repaired-head-holds",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a76",
+        "node": "n-sgr-the-repaired-head-holds",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1559,
+                "cached_input_tokens": 613036,
+                "input_tokens": 614597,
+                "output_tokens": 378,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 614975,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "Two repair commits are now merged: a23929ba restored 19 eligibility-fixture failures and 324a1f1a restored 7 grammar-assertion failures. EACH WAS MEASURED IN ITS OWN WORKTREE AND NEITHER WAS MEASURED WITH THE OTHER, which is the same gap that let 27 added failures reach the previous merged head, so the arithmetic is not the evidence and this measurement is. Run the whole tests/standard_names/ suite at the current main head, capture it once, and report the exact command, exit status, log path, failure count and every failure id. THE EXPECTED RESULT IS SIX FAILURES and each is accounted for in advance: the five that predate tonight, being four in tests/standard_names/test_docs_review_eligibility.py on schema-derived winning methods, the shared export-gate traversal, the atomic pending-count predicate and stranded promotion, plus tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden; and tests/standard_names/test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings, left failing on purpose while a peer measures whether the graph should honour its own DD resolution rather than the raw declaration. ANY SEVENTH FAILURE IS THE FINDING and must be reported with its id and traceback rather than repaired. Also run tests/core/, whose measured base is 924 passed with zero failures, and report added failures against that base. YOU ARE A MEASUREMENT NODE: change no source file and repair nothing, because a verification node that fixes what it measures destroys the measurement. Install no optional dependency; torch and sentence-transformers are absent by design, and the resulting six-file coverage gap is already recorded. Run every check with env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync and never drop --no-sync: that environment is shared with the main checkout and a peer worker.",
+          "estimated_hours": null,
+          "goal": "Measure the consumer suite at the head where both repairs are merged together",
+          "id": "n-sgr-the-repaired-head-holds",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T233633838135-n-sgr-the-repaired-head-holds/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sgr-repaired-head.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-mergedhead",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T23:36:40Z",
+        "completed_at": "2026-09-04T23:48:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 680,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 680,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "c058283ae7d4948bf5ad8f33cbf92a8e09fb8fa0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T233633838135-n-sgr-the-repaired-head-holds/standard-names-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T233633838135-n-sgr-the-repaired-head-holds/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e8f-c29f-7ba2-bb23-1d3780a87ac4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 1894656,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2092238,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15272,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 4113
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 19385,
+          "peak_input_tokens": 3986894
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "measurement node in a report-only scope: its deliverable is the combined-head measurement and it repaired nothing by design",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-the-repaired-head-holds",
+          "session_id": "01a06e8f-c29f-7ba2-bb23-1d3780a87ac4",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T23:48:00Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run tests",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -76949,6 +77078,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1683
+    "_version": 1684
   }
 }
