@@ -173,7 +173,7 @@ We run **Neo4j 2026.01.x** with `db.query.default_language: CYPHER_5`. The only 
 
 ### Neo4j Management
 
-`imas-codex graph <cmd>` (`--help` for the full list): server `start`/`stop`/`status`/`shell`/`profiles`; instances `init`/`switch`/`list`; archives `export`/`load ARCHIVE TARGET`/`fetch`; GHCR `pull`/`push --dev`/`tags`/`prune --dev-only`; maintenance `clear TARGET`/`secure`; facilities `facility`. `export`, `fetch`, `pull`, `push`, `tags`, and `prune` accept `-F/--facility`; `load` and `clear` instead require the explicit `TARGET` selected by the active symlink. `graph status` reports the newest non-empty backup, newest live database file, and their measured lag. Also use `imas-codex tunnel start <host>`/`status` and `config private push` / `config secrets push <host>`.
+`imas-codex graph <cmd>` (`--help` for the full list): server `start`/`stop`/`status`/`shell`/`profiles`; instances `init`/`switch`/`list`; archives `export`/`load ARCHIVE TARGET`/`fetch`; GHCR `pull TARGET`/`push --dev`/`tags`/`prune --dev-only`; maintenance `clear TARGET`/`secure`; facilities `facility`. `export`, `fetch`, `pull TARGET`, `push`, `tags`, and `prune` accept `-F/--facility`; destructive `load`, `pull`, and `clear` require the explicit `TARGET` selected by the active symlink. `graph status` reports the newest non-empty backup, newest live database file, and their measured lag. Also use `imas-codex tunnel start <host>`/`status` and `config private push` / `config secrets push <host>`.
 
 Never use `DETACH DELETE` on production data without user confirmation. For re-embedding: update nodes in place, don't delete and recreate.
 

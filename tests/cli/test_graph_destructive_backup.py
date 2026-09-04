@@ -76,7 +76,7 @@ def test_pull_aborts_before_registry_fetch_when_dump_fails(tmp_path, monkeypatch
 
     result = CliRunner().invoke(
         registry.graph_pull,
-        ["--version", "test", "--force"],
+        ["test", "--version", "test", "--force"],
     )
 
     assert result.exit_code != 0
