@@ -103,8 +103,7 @@ _GOVERNED_STANDARD_NAME_SCHEMA_IDS = frozenset(
 
 def _refuse_governed_standard_name_write(schema: Any, node_type: str) -> None:
     """Keep generic MCP writes outside the governed Standard Name schemas."""
-    class_definition = schema._view.get_class(node_type)
-    schema_id = str(class_definition.from_schema or "")
+    schema_id = schema.get_class_schema_id(node_type)
     if schema_id in _GOVERNED_STANDARD_NAME_SCHEMA_IDS:
         msg = (
             f"add_to_graph refuses governed Standard Name node type {node_type}; "

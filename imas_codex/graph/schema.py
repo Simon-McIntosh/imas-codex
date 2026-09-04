@@ -311,6 +311,28 @@ class GraphSchema:
                 return slot.name
         return None
 
+    def get_class_schema_id(self, class_name: str) -> str:
+        """Get the LinkML schema id that owns a class.
+
+        Args:
+            class_name: Name of the class (node label).
+
+        Returns:
+            Owning schema id.
+
+        Raises:
+            ValueError: If the class or its owning schema is not declared.
+        """
+        class_definition = self._view.get_class(class_name)
+        if class_definition is None:
+            msg = f"Unknown schema class: {class_name}"
+            raise ValueError(msg)
+        schema_id = class_definition.from_schema
+        if not schema_id:
+            msg = f"Schema class has no declared owner: {class_name}"
+            raise ValueError(msg)
+        return str(schema_id)
+
     def get_model(self, class_name: str) -> type:
         """Get the Pydantic model class for a node label.
 

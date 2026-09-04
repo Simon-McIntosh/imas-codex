@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -29,19 +28,14 @@ class _ValidatedItem:
         return item
 
 
-class _SchemaView:
-    def __init__(self, source_by_label: dict[str, str]) -> None:
-        self._source_by_label = source_by_label
-
-    def get_class(self, label: str) -> SimpleNamespace:
-        return SimpleNamespace(from_schema=self._source_by_label[label])
-
-
 class _GraphSchema:
     def __init__(self, source_by_label: dict[str, str]) -> None:
         self.node_labels = list(source_by_label)
-        self._view = _SchemaView(source_by_label)
+        self._source_by_label = source_by_label
         self.validated_labels: list[str] = []
+
+    def get_class_schema_id(self, label: str) -> str:
+        return self._source_by_label[label]
 
     def get_private_slots(self, label: str) -> list[str]:
         return []
@@ -74,6 +68,23 @@ def _install_graph_fakes(
     monkeypatch.setattr(server_module, "GraphClient", graph_client)
     monkeypatch.setattr(server_module, "to_cypher_props", lambda item: item)
     return schema, graph_client
+
+
+@pytest.mark.parametrize(
+    ("node_type", "expected_schema_id"),
+    (
+        ("StandardName", "https://imas.iter.org/schemas/standard_name"),
+        ("GrammarSegment", "https://imas.iter.org/schemas/grammar_graph"),
+        ("SourceFile", "https://imas.iter.org/schemas/facility"),
+    ),
+)
+def test_graph_schema_reports_class_owner(
+    node_type: str,
+    expected_schema_id: str,
+) -> None:
+    from imas_codex.graph.schema import GraphSchema
+
+    assert GraphSchema().get_class_schema_id(node_type) == expected_schema_id
 
 
 @pytest.mark.parametrize("node_type", STANDARD_NAME_NODE_TYPES)
