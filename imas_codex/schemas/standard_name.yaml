@@ -493,6 +493,11 @@ enums:
         description: >-
           Both cycles failed to produce a score for this item and retry
           also failed. Item is quarantined.
+      semantic_similarity_gate:
+        description: >-
+          A deterministic embedding-similarity check rejected the name before
+          any reviewer cycle ran. This method records diagnostic evidence only
+          and is a non-winning terminal state.
       single_review:
         description: >-
           Only one review cycle produced a valid score (either len(models)==1,
