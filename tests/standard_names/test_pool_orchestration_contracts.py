@@ -58,6 +58,7 @@ def _stub_parent_lifecycle_startup():
         patch(f"{_go}.reconcile_vocab_gaps", return_value={}),
         patch(f"{_go}.reconcile_source_status_liveness", return_value={}),
         patch(f"{_go}.retire_unreachable_hint_edits", return_value=0),
+        patch(f"{_go}.reconcile_catalog_status", return_value={}),
         patch(f"{_go}.rederive_structural_edges", return_value={}),
         patch(f"{_go}.seed_parent_sources", return_value=0),
         patch(f"{_go}.normalize_derived_parent_lifecycle", return_value=0),
@@ -1216,6 +1217,7 @@ class TestRunSnPoolsFinalizePopulatesCounters:
                 ),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_catalog_status=MagicMock(return_value={}),
                 reconcile_standard_name_cocos_links=MagicMock(return_value={}),
                 reconcile_standard_name_unit_edges=MagicMock(
                     return_value={

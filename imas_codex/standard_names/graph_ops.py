@@ -12949,6 +12949,73 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
     return {"names_reconciled": len(updates)}
 
 
+def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
+    """Maintain the catalog lifecycle without assuming publication authority.
+
+    ``status`` is distinct from the pipeline's ``name_stage``: it gates what a
+    catalog may publish. New and historical names without a catalog status are
+    drafts, while pipeline-terminal identities need terminal catalog statuses
+    so they remain available as graph history without returning to an export.
+
+    Approval is the sole writer of ``'active'``. Accordingly, this reconcile
+    only changes null or draft values: superseded pipeline identities become
+    ``'superseded'``, exhausted identities become ``'deprecated'``, and any
+    remaining null becomes ``'draft'``. Existing active and terminal statuses
+    never match a write predicate. Terminal transitions run first so the draft
+    count reports only non-terminal nulls and each changed name is counted once.
+
+    Returns dict: {drafted, superseded, deprecated, total_changed}.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        superseded_rows = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.name_stage = 'superseded'
+              AND (sn.status IS NULL OR sn.status = 'draft')
+            SET sn.status = 'superseded'
+            RETURN count(sn) AS changed
+            """
+        )
+        deprecated_rows = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.name_stage = 'exhausted'
+              AND (sn.status IS NULL OR sn.status = 'draft')
+            SET sn.status = 'deprecated'
+            RETURN count(sn) AS changed
+            """
+        )
+        drafted_rows = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.status IS NULL
+            SET sn.status = 'draft'
+            RETURN count(sn) AS changed
+            """
+        )
+    finally:
+        if own:
+            client.close()
+
+    result = {
+        "drafted": drafted_rows[0]["changed"] if drafted_rows else 0,
+        "superseded": superseded_rows[0]["changed"] if superseded_rows else 0,
+        "deprecated": deprecated_rows[0]["changed"] if deprecated_rows else 0,
+    }
+    result["total_changed"] = sum(result.values())
+    if result["total_changed"]:
+        logger.info(
+            "reconcile_catalog_status: set %d name(s) to draft, %d to "
+            "superseded, and %d to deprecated",
+            result["drafted"],
+            result["superseded"],
+            result["deprecated"],
+        )
+    return result
+
+
 def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
     """Advance source-backed pipeline names stranded below the review entry stage.
 
