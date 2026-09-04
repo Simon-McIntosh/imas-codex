@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T13:40:59",
+  "updated": "2026-09-04T13:50:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -66738,6 +66738,189 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T112947131979-n-sli-refine-the-true-positives",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-refine-the-true-positives",
+        "node_definition": {
+          "done_when": "beta and ion_power each come out of a pipeline refine rotation with a proposed successor recorded, or with a recorded reason no proposal was produced. These are the two names measured as genuinely under-specified: beta describes toroidal beta and is bound to core_profiles/global_quantities/beta_tor, and ion_power describes volume-integrated NET power COUPLED to all ion species summed over species, charge states and channels, while the vocabulary already carries the aggregation segment and the qualifier tokens absorbed, deposited and conducted that its name omits. Do NOT hand-author either successor; the pipeline proposes and review steers, so the deliverable is the rotation's own output. One precondition must be cleared first and it is a stale record rather than a policy change: both names carry review_quorum_shortfall with the reason text 'review carried no resolution method', and the refine claim at graph_ops.py REFINE_NAME_ELIGIBILITY_WHERE requires that shortfall to be null, so neither name is claimable today. That reason is now FALSE \u2014 the embedding gate's rows were given the typed resolution_method semantic_similarity_gate and all 36 carry it \u2014 so clear the shortfall for exactly these two identities on the ground that it names a condition that no longer holds, touching no other row and recording the before and after count. Then run 'imas-codex sn run --names \"beta ion_power\" --only refine_name --cost-limit 5' in the FOREGROUND, and record for each name the proposed successor, its review score, and the predecessor's disposition. Report the actual spend beside the 5 dollar ceiling. Write the manifest with a non-terminal status BEFORE starting the rotation, because a rotation of this kind has taken over 560 seconds per name and a run that ends with it unwritten is indistinguishable from a crash. Do not rename rotational_transform, fast_neutral_density or hot_neutral_temperature: those three are measured false positives whose names match the data dictionary.",
+          "estimated_hours": 1.0,
+          "goal": "Put the two genuinely under-specified names through the pipeline refine rotation",
+          "id": "n-sli-refine-the-true-positives",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-refine-true-positives-manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sli-refine-true-positives.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-truepositive",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T11:29:57Z",
+        "completed_at": "2026-09-04T11:49:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1158,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1158,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "ae924bbd7379881035e43264c168a639ab8576cd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn run --name \"beta ion_power\" --only refine_name --cost-limit 5",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-refine-true-positives.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-refine-true-positives-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c2e-be11-7600-becd-eca90b89d567",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6718592,
+            "cached_input_tokens_cumulative": 6718592,
+            "input_tokens": 6802184,
+            "input_tokens_cumulative": 6802184,
+            "output_tokens": 16385,
+            "output_tokens_cumulative": 16385,
+            "reasoning_output_tokens": 5307,
+            "reasoning_output_tokens_cumulative": 5307
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 16138,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 18838,
+              "external_wait": null,
+              "log_age_seconds": 18718,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 18741,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2293,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4693,
+              "external_wait": null,
+              "log_age_seconds": 3987,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T101127100747-n-sli-graph-fault-census --gate <verdict> --commit []; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census.md\" --commit \"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md\"]",
+              "node": "n-sli-graph-fault-census",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": null,
+              "project": "imas-codex",
+              "run_id": "r-20260904T101127100747-n-sli-graph-fault-census",
+              "session": "ship-sli-20260904",
+              "terminal_age_seconds": 4014,
+              "terminal_at": "2026-09-04T10:22:57Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-sli-graph-fault-census"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 21692,
+          "peak_input_tokens": 13520776
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "pipeline node; its writes are governed graph transitions through the sn CLI and its report sits outside the git tree by design of the write fence",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -66868,6 +67051,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1602
+    "_version": 1603
   }
 }
