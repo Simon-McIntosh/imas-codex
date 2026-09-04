@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T02:03:01",
+  "updated": "2026-09-04T05:45:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1803,9 +1803,11 @@
         "id": "impl-neutronsubj-s",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "cfced8b1-5130-4c58-a6c8-3e430274142f",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "cfced8b1-5130-4c58-a6c8-3e430274142f"
+        },
         "created": "2026-09-03"
       },
       {
@@ -63432,6 +63434,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1543
+    "_version": 1544
   }
 }
