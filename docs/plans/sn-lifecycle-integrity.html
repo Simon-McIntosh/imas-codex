@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-impl" content="0.55">
 </head>
 <body>
@@ -233,6 +233,9 @@ A repair that survives one round trip is a repair; one that does not was a readi
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260904T081337560336-n-sli-status-axis-reconcile" data-who="impl-statusaxis" data-when="2026-09-04T08:29:24Z">
     <div class="r-comment-body"><p>the status axis is wired into sn run startup maintenance and is idempotent: 3113 live rows on the first pass, 0 on the second, and 7 sparse-mock failures measured in a scratch copy before implementing and then repaired. The exhausted-to-deprecated half of the mapping was MY specification error, corrected by lead ruling after this run landed: an exhausted name is quarantined for repair, not deprecated, so 278 live rows and the mapping both need the follow-up node</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260904T085149010348-n-sli-exhausted-is-quarantined" data-who="impl-statusmarker" data-when="2026-09-04T09:03:38Z">
+    <div class="r-comment-body"><p>an exhausted name is quarantined for repair at status draft and never deprecated; both exhaustion write paths set validation_status in the same Cypher write that parks the stage, so the transition is the writer and the reconcile is its net. Live: 278 rows moved off deprecated on the first pass, 0 on the second, post census deprecated 0, null 0, superseded 1963, exhausted 278 of 278 paired</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260904T060000" data-who="reckon-ship" data-when="2026-09-04T06:00:00Z">
     <div class="r-comment-body"><p><strong>The retirement gate is measurably absent, and the measurement shows why it cannot simply be switched on.</strong> Of the 1941 names retired by <code>name_stage</code>, only <strong>323</strong> carry a retired <code>status</code>. 580 still read <code>draft</code> and <strong>1338 carry no status at all</strong>. So a name refined away weeks ago is, to the catalog lifecycle, indistinguishable from one awaiting its first review.</p><p>On the publishable side the same hole appears from the other direction: of 2356 names at <code>accepted</code> or <code>approved</code>, <strong>970 have a null status</strong>. Running the count that a status gate would run today returns <strong>zero names gated out</strong> — not because nothing needs retiring, but because the field the gate reads was never maintained.</p><p>That zero settles the sequencing. Adding the gate first gates on a field that is half null and catches nothing. Backfilling the field first writes values the exporter overwrites with its literal. <strong>Both leaks must close before either repair means anything</strong>: the export must read <code>status</code> from the graph, and <code>sn approve</code> must become the only writer of <code>active</code>. Only then is filling the 1338 nulls worth doing, and only then does the retirement gate have something true to read.</p></div>
