@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T09:54:47",
+  "updated": "2026-09-04T10:32:26",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -86,7 +86,8 @@
         "session_id": "01a06b0d-310b-73d3-9f96-0480a815195d",
         "session_model": "gpt-5.6-sol",
         "sessions": {
-          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b0d-310b-73d3-9f96-0480a815195d"
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b0d-310b-73d3-9f96-0480a815195d",
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b6b-c767-7703-9d8e-503688aaeacb"
         },
         "created": "2026-09-04"
       },
@@ -1382,9 +1383,11 @@
         "id": "impl-graphboundary",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b6d-5aa7-76e0-a1c1-e1553ca0e642",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b6d-5aa7-76e0-a1c1-e1553ca0e642"
+        },
         "created": "2026-09-04"
       },
       {
@@ -2759,6 +2762,15 @@
         "role": "implement",
         "session_id": "01a00bd9-04e9-71b1-b0eb-c4e7f232e794",
         "created": "2026-08-16"
+      },
+      {
+        "id": "impl-statusaxis",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-structapply",
@@ -64807,6 +64819,238 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T075832275260-n-sli-graph-write-boundary",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-graph-write-boundary",
+        "node_definition": {
+          "done_when": "A new test file tests/core/test_graph_write_boundary.py takes the scoped gate 'uv run --no-sync pytest tests/core/test_graph_write_boundary.py tests/core/test_cli.py -q -p no:cacheprovider' to exit 0, asserting that add_to_graph returns a refusal naming the label with no graph write attempted for each of StandardName, StandardNameSource, StandardNameChange, StandardNameReview, GrammarSegment, GrammarToken, GrammarTemplate, ISNGrammarVersion, VocabGap, while SourceFile and FacilityPath still validate and write as they do today. Every refusal assertion must fail by name when the deny is reverted, measured and recorded. The refused set must be derived from a property the graph schema already carries so a future standard-name label is covered without editing a list; if the schema carries no such property, the manifest must state what was measured to establish that before falling back to an explicit frozenset. Record the before and after exit status with failure ids in the manifest.",
+          "estimated_hours": 0.8,
+          "goal": "Refuse every standard-name node label at the add_to_graph MCP write boundary",
+          "id": "n-sli-graph-write-boundary",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-write-boundary.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/llm/server.py",
+            "tests/core/test_graph_write_boundary.py",
+            "imas_codex/graph/AGENTS.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-graphboundary",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T07:58:43Z",
+        "completed_at": "2026-09-04T08:23:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1486,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1486,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "68158cc970ae6f2971baa4f2e86947384534c218",
+        "commits": [
+          "adbb684717b437dfaae1881eb0ee5d93889f60d1",
+          "5369731c40009cf547c089ea34cbb506e2b12ce9"
+        ],
+        "changed_lines": {
+          "added": 209,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 15,
+        "gate": "passed",
+        "gate_check": {
+          "command": "PYTHONPATH=\"$PWD\" uv run --no-sync pytest tests/core/test_graph_write_boundary.py tests/core/test_cli.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-write-boundary-accessor-final-verified.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-write-boundary.md",
+        "scope_changed": true,
+        "session_id": "01a06b6d-5aa7-76e0-a1c1-e1553ca0e642",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6076288,
+            "cached_input_tokens_cumulative": 6076288,
+            "input_tokens": 6278607,
+            "input_tokens_cumulative": 6278607,
+            "output_tokens": 14395,
+            "output_tokens_cumulative": 14395,
+            "reasoning_output_tokens": 4532,
+            "reasoning_output_tokens_cumulative": 4532
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 18927,
+          "peak_input_tokens": 12354895
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "scope_acceptances": [
+          {
+            "path": "imas_codex/graph/schema.py",
+            "reason": "coordinator granted this single path on resume so the refusal stops reaching through GraphSchema._view; LinkML SchemaView knowledge stays encapsulated where every other access already lives"
+          }
+        ],
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/core/test_graph_write_boundary.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260904T075643349133-n-sli-approve-promotes-active",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a73",
+        "node": "n-sli-approve-promotes-active",
+        "node_definition": {
+          "done_when": "The scoped gate 'uv run --no-sync pytest tests/standard_names/test_sn_approve.py tests/standard_names/test_sn_status_integrity.py tests/standard_names/test_cli_approve.py tests/standard_names/test_export_status_authority.py tests/standard_names/test_promote_origin_guard.py -q -p no:cacheprovider' exits 0 carrying new assertions that fail when the status write is deleted: an approval fold over a name at status=draft with name_stage=accepted leaves that name at status=active, a contested or quarantined name in the same fold stays at status=draft, an --undo of a folded approval returns the promoted name to status=draft. Record the before and after exit status with failure ids in the manifest.",
+          "estimated_hours": 1.0,
+          "goal": "Give the approval fold sole ownership of the draft-to-active status transition on StandardName",
+          "id": "n-sli-approve-promotes-active",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-approve-promotes-active.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/promote.py",
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_sn_approve.py",
+            "tests/standard_names/test_sn_status_integrity.py",
+            "tests/standard_names/test_cli_approve.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-importguard",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T07:56:59Z",
+        "completed_at": "2026-09-04T08:18:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1314,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1314,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "68158cc970ae6f2971baa4f2e86947384534c218",
+        "commits": [
+          "3b1f1d15c1119656e2bcb6217bacc6dbeea53995",
+          "32f8b01481cd017821c902b6c1e5fcb3161c6956"
+        ],
+        "changed_lines": {
+          "added": 296,
+          "removed": 19,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_sn_approve.py tests/standard_names/test_sn_status_integrity.py tests/standard_names/test_cli_approve.py tests/standard_names/test_export_status_authority.py tests/standard_names/test_promote_origin_guard.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-approve-promotes-active-revision-after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-approve-promotes-active.md",
+        "scope_changed": false,
+        "session_id": "01a06b6b-c767-7703-9d8e-503688aaeacb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8082560,
+            "cached_input_tokens_cumulative": 8082560,
+            "input_tokens": 8302635,
+            "input_tokens_cumulative": 8302635,
+            "output_tokens": 16029,
+            "output_tokens_cumulative": 16029,
+            "reasoning_output_tokens": 4526,
+            "reasoning_output_tokens_cumulative": 4526
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 20555,
+          "peak_input_tokens": 16385195
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_sn_approve.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -64937,6 +65181,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1574
+    "_version": 1579
   }
 }
