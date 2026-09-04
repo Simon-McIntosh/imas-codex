@@ -1240,7 +1240,7 @@ dev = [
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "hdbscan", specifier = ">=0.8.41" },
     { name = "imas-python", specifier = ">=2.0.1" },
-    { name = "imas-standard-names", editable = "../../../../imas-standard-names" },
+    { name = "imas-standard-names", editable = "/home/ITER/mcintos/Code/imas-standard-names" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "ipython", specifier = ">=9.2.0" },
     { name = "jellyfish", specifier = ">=1.2.1" },
@@ -1320,7 +1320,7 @@ wheels = [
 
 [[package]]
 name = "imas-standard-names"
-source = { editable = "../../../../imas-standard-names" }
+source = { editable = "/home/ITER/mcintos/Code/imas-standard-names" }
 dependencies = [
     { name = "click" },
     { name = "pint" },

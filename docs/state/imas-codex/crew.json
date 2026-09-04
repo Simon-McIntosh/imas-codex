@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T23:41:11",
+  "updated": "2026-09-04T23:49:00",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -901,6 +901,15 @@
         "created": "2026-09-03"
       },
       {
+        "id": "impl-consumertests",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-corpusbuild",
         "harness": "codex",
         "role": "implement",
@@ -1639,9 +1648,11 @@
         "id": "impl-isneditable",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06e4f-c684-74e0-bedd-c560eecb943b",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e4f-c684-74e0-bedd-c560eecb943b"
+        },
         "created": "2026-09-04"
       },
       {
@@ -3977,6 +3988,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-01"
+      },
+      {
+        "id": "test-mergedhead",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "test-mergeverify",
@@ -74639,6 +74659,141 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T212509093164-n-sgr-consumer-resolves-editable-grammar",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a76",
+        "node": "n-sgr-consumer-resolves-editable-grammar",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5493,
+                "cached_input_tokens": 246476,
+                "input_tokens": 251971,
+                "output_tokens": 175,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 252146,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "imas-codex resolves imas-standard-names from the sibling checkout at /home/ITER/mcintos/Code/imas-standard-names instead of the released 0.8.9 wheel, durably and pyproject-backed so it survives uv sync, and you report which mechanism you chose and why. THE MEASURE HAS TWO HALVES AND BOTH ARE REQUIRED. First, prove the new grammar is visible to the consumer: through the consumer's own environment, parse derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate and show it does NOT raise UnknownBaseTokenError, and show the retired spelling derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface no longer round-trips. Second, MEASURE THE EXPOSURE rather than repair it: capture the imas-codex standard-names suite to a file once before the swap and once after, with the exact command, exit status and log path each time, and report the failure count and the failure ids for both, plus the added-failure delta. Added failures are the EXPECTED result of a grammar the stored spellings predate and they are this node's finding, not its fault; do NOT edit any test, any stored spelling, or any imas-codex source to reduce that count, and do NOT relax the pin to make the suite green. Three constraints. Your write scope is pyproject.toml and uv.lock only. A checkout with no sibling present must still install, so say explicitly whether your mechanism breaks that and how a consumer opts out. And you must NOT commit, merge, sync or otherwise modify anything inside /home/ITER/mcintos/Code/imas-standard-names, because two other workers hold worktrees of it right now.",
+          "estimated_hours": null,
+          "goal": "Make the consumer resolve the standard-names grammar from the sibling checkout and measure what that exposes",
+          "id": "n-sgr-consumer-resolves-editable-grammar",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212509093164-n-sgr-consumer-resolves-editable-grammar/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "pyproject.toml",
+            "uv.lock"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-isneditable",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T21:25:16Z",
+        "completed_at": "2026-09-04T21:44:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1155,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1155,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "d474ba8349b9b0ec01d5f9d4a39928b399bff516",
+        "commits": [
+          "b61430cba5e5be1c077a03267a41b9e96a3280e7"
+        ],
+        "changed_lines": {
+          "added": 43,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/ -q",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212509093164-n-sgr-consumer-resolves-editable-grammar/after-standard-names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212509093164-n-sgr-consumer-resolves-editable-grammar/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e4f-c684-74e0-bedd-c560eecb943b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5920768,
+            "cached_input_tokens_cumulative": 5920768,
+            "input_tokens": 6050971,
+            "input_tokens_cumulative": 6050971,
+            "output_tokens": 24574,
+            "output_tokens_cumulative": 24574,
+            "reasoning_output_tokens": 8684,
+            "reasoning_output_tokens_cumulative": 8684
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 33258,
+          "peak_input_tokens": 11971739
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-consumer-resolves-editable-grammar",
+          "session_id": "01a06e4f-c684-74e0-bedd-c560eecb943b",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T21:44:31Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -74783,6 +74938,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1646
+    "_version": 1650
   }
 }
