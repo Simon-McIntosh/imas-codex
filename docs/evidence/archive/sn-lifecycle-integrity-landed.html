@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"       content="imas-codex">
+  <meta name="reckon-type"        content="evidence">
+  <meta name="plan-slug"          content="sn-lifecycle-integrity-landed">
+  <meta name="plan-title"         content="Lifecycle Integrity: What Landed">
+  <meta name="plan-summary"       content="Each lifecycle leak closed, with the commit that closed it and the measure that proves it.">
+  <meta name="plan-status"        content="active">
+  <meta name="plan-owner"         content="Simon McIntosh">
+  <meta name="plan-tags"          content="standard-names,lifecycle,graph-integrity">
+  <meta name="plan-evidence-for"  content="sn-lifecycle-integrity">
+  <title>Lifecycle Integrity: What Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="axes">The four maintained axes</h2>
+    <p>The plan opened by measuring five axes and asking which were real. The answer that
+    survived measurement is four, and the invariant that makes them maintainable is that
+    each one can name its writer. An axis that cannot is not a weak signal — it is a
+    signal every reader trusts and nothing keeps true.</p>
+
+    <table>
+      <thead>
+        <tr><th>Axis</th><th>Meaning</th><th>Writer</th><th>Health when measured</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>name_stage</code></td>
+          <td>pipeline lifecycle: pending, drafted, reviewed, accepted, approved</td>
+          <td>the review pools, and <code>sn approve</code></td>
+          <td>healthy — zero nulls</td>
+        </tr>
+        <tr>
+          <td><code>docs_stage</code></td>
+          <td>the same shape for the documentation axis</td>
+          <td>the docs pools</td>
+          <td>healthy — three nulls</td>
+        </tr>
+        <tr>
+          <td><code>validation_status</code></td>
+          <td>valid or quarantined — a signal to <strong>repair</strong></td>
+          <td>the quarantine route</td>
+          <td>healthy — three nulls</td>
+        </tr>
+        <tr>
+          <td><code>status</code></td>
+          <td>catalog lifecycle and the export gate: draft, active, deprecated, superseded</td>
+          <td>the approval fold for <code>active</code>; a maintenance reconcile for the rest</td>
+          <td><strong>broken — 52% null, and never once <code>active</code></strong></td>
+        </tr>
+        <tr>
+          <td><code>origin</code></td>
+          <td>retired: one writer existed and wrote one value that duplicates an edge</td>
+          <td>—</td>
+          <td>3384 markers, residue of a removed path</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="status-machine">What publishes a name</h2>
+    <p>The defect underneath every symptom was that <code>status</code> had no writer for its
+    one meaningful transition. Nothing in the code did what an approval is supposed to mean,
+    so the exporter compensated by writing the literal <code>active</code> on every row it
+    cut — which is why history in the graph reached published catalogs. The gate could not
+    fire because the gate was never read.</p>
+
+    <figure>
+      <svg viewBox="0 0 760 250" width="100%" role="img"
+           aria-label="The catalog status axis: draft becomes active only through approval of the upstream pull request; a published name later retires to superseded or deprecated; an exhausted name never publishes and is quarantined for repair.">
+        <g font-family="system-ui, sans-serif" font-size="13" fill="#1a1a1a">
+
+          <rect x="24" y="96" width="128" height="46" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+          <text x="88" y="115" text-anchor="middle" font-size="14" font-weight="600">draft</text>
+          <text x="88" y="132" text-anchor="middle" fill="#444">not yet published</text>
+
+          <line x1="152" y1="119" x2="286" y2="119" stroke="#1a1a1a" stroke-width="1"/>
+          <polygon points="286,119 278,115 278,123" fill="#1a1a1a"/>
+          <text x="219" y="104" text-anchor="middle" fill="#0b6e4f" font-weight="600">approval</text>
+          <text x="219" y="138" text-anchor="middle" fill="#0b6e4f">of the upstream PR</text>
+
+          <rect x="286" y="96" width="128" height="46" fill="#ffffff" stroke="#0b6e4f" stroke-width="2"/>
+          <text x="350" y="115" text-anchor="middle" font-size="14" font-weight="600">active</text>
+          <text x="350" y="132" text-anchor="middle" fill="#444">catalog authority</text>
+
+          <line x1="414" y1="112" x2="548" y2="70" stroke="#1a1a1a" stroke-width="1"/>
+          <polygon points="548,70 539,70 543,78" fill="#1a1a1a"/>
+          <line x1="414" y1="126" x2="548" y2="168" stroke="#1a1a1a" stroke-width="1"/>
+          <polygon points="548,168 539,168 543,160" fill="#1a1a1a"/>
+
+          <rect x="548" y="44" width="188" height="46" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+          <text x="642" y="63" text-anchor="middle" font-size="14" font-weight="600">superseded</text>
+          <text x="642" y="80" text-anchor="middle" fill="#444">a successor is named</text>
+
+          <rect x="548" y="142" width="188" height="46" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+          <text x="642" y="161" text-anchor="middle" font-size="14" font-weight="600">deprecated</text>
+          <text x="642" y="178" text-anchor="middle" fill="#444">withdrawn, no successor</text>
+
+          <line x1="88" y1="142" x2="88" y2="200" stroke="#8a5a00" stroke-width="1" stroke-dasharray="4 3"/>
+          <polygon points="88,200 84,192 92,192" fill="#8a5a00"/>
+          <rect x="24" y="200" width="196" height="42" fill="#ffffff" stroke="#8a5a00" stroke-width="1"/>
+          <text x="122" y="218" text-anchor="middle" font-weight="600" fill="#8a5a00">validation_status = quarantined</text>
+          <text x="122" y="234" text-anchor="middle" fill="#444">exhausted: a signal to repair</text>
+
+        </g>
+      </svg>
+      <figcaption>One mechanism publishes a name, and it is a human decision. The two
+      terminal markers are reachable only from <code>active</code>, because both describe a
+      name a reader once could use. An exhausted name never left <code>draft</code>: it is
+      quarantined for repair rather than deprecated, since <em>deprecated</em> has to answer
+      “superseded by what” and an exhausted name has no answer.</figcaption>
+    </figure>
+
+    <h2 id="export-status">The exported status is no longer a constant</h2>
+    <p><code>export.py</code> wrote <code>"status": "active"</code> as a literal on every
+    entry it cut, so the graph's own value was never consulted and the export gate could not
+    exist. The export now reads the graph, and a null status <strong>refuses the whole
+    cut</strong> rather than defaulting — including under <code>skip_gate</code> and
+    <code>force</code>, because a missing value is exactly the case where guessing publishes
+    the wrong thing.</p>
+    <p>Landed at <code>bee0e296</code>. Measured: the literal mapping greps to zero, a
+    <code>draft</code> status survives into <code>catalog.yml</code>, and a null status in
+    any population row fails the gate before any file is written.</p>
+
+    <h2 id="protection">Protection follows approval, and fails closed</h2>
+    <p><code>filter_protected</code> keyed on <code>origin = 'catalog_edit'</code>, a marker
+    nothing writes. It was wrong in both directions: 182 names with real edit records were
+    excluded from protection while roughly 2031 names with none were protected. It now keys
+    on <code>name_stage = 'approved'</code> — published authority, one writer, set only when
+    a pull request is approved — so protection is a consequence of the human gate rather
+    than a marker someone has to remember.</p>
+    <p>The same change removed the <code>except Exception</code> that turned a failed
+    protection lookup into “no names are protected”. That mattered more than the trigger
+    did: <strong>closing the swallow exposed 38 failures and 5 setup errors across 13
+    files</strong>, none of them regressions. Every one had been green <em>because the guard
+    switched itself off</em>. The worker refused to re-swallow the refusal to make its own
+    gate pass, and proved the combined state by virtual merge against the repair rather than
+    asserting only its own half.</p>
+    <p>Landed at <code>baf6480f</code> and <code>3570246e</code>. Measured: the
+    approval-only query present once, the origin clause gone, thirteen explicit fixtures,
+    the fail-open swallow at zero, and the standard-names suite green at the merged head.</p>
+
+    <h2 id="write-boundary">The generic graph tool cannot touch governed name state</h2>
+    <p>The MCP <code>add_to_graph</code> tool accepted <em>any</em> label in the schema and
+    MERGEd by id, so an agent could create a <code>StandardName</code> at
+    <code>name_stage = 'approved'</code>, <code>status = 'active'</code> in a single call —
+    no review, no pipeline, no protection. The rule that there are zero hand-edited names in
+    the graph had nothing enforcing it at that boundary.</p>
+    <p>The tool is kept, because it is the documented write path for facility discovery in
+    four separate client surfaces, including the shipped pipeline prompts. What changed is
+    that it refuses every concrete class owned by the <code>standard_name</code> and
+    <code>grammar_graph</code> schemas. The refusal is derived from each LinkML class's
+    declared <code>from_schema</code> through a public <code>GraphSchema</code> accessor, so
+    a class added to either schema later is covered with no list to maintain — and a test
+    asserts exactly that for a future label.</p>
+    <p>Landed at <code>adbb6847</code> and <code>5369731c</code>. Measured: 10 independent
+    counterfactual failures with the refusal neutralized, 31 passing with it in place, and
+    <code>SourceFile</code> and <code>FacilityPath</code> writing unchanged.</p>
+
+    <h2 id="approval-publishes">Approval is the only thing that publishes</h2>
+    <p><code>sn approve</code> advanced <code>name_stage</code> and never touched
+    <code>status</code>, so the transition the whole architecture rests on did not exist in
+    code. The approval fold now writes <code>active</code> atomically with the catalog
+    receipt, and <code>--undo</code> reverses both axes together.</p>
+    <p>Its first cut required <code>status = 'draft'</code> exactly. Against the live graph
+    that predicate matched 1372 of the 2284 eligible accepted names and silently refused the
+    other <strong>912, whose status was null</strong> — a real fold would have promoted 60%
+    of a batch and skipped the rest with nothing reported. A null status now reads as
+    not-yet-published; the quarantine exclusion is unchanged, keeping 11 names out.</p>
+    <p>The reporting defect mattered as much as the predicate. At one call site the boolean
+    return was discarded and the name was appended to <code>report.accepted</code> anyway,
+    so a name whose row never moved reported as approved; at the other, a refusal only
+    dropped out of a count. Both surfaces now name the refused ids with a precondition
+    reason, and the CLI exits nonzero before writing a fold-back receipt.</p>
+    <p>Landed at <code>3b1f1d15</code> and <code>32f8b014</code>. Measured: 36 passing on
+    the scoped gate, and two counterfactuals — deleting the status write, and restoring the
+    strict predicate — each failing by name.</p>
+
+    <h2 id="fit-artifacts">Solver bookkeeping is not a physical quantity</h2>
+    <p>54 leaf nodes labelled <code>quantity</code> were <code>/weight</code> and
+    <code>/reconstructed</code> pairs — constraint fit artifacts, admitted as nameable
+    physics because a category that already existed was applied inconsistently. A reconcile
+    step now applies it.</p>
+    <p>Landed at <code>f6abcb6e</code>. Measured on the live graph: 52 reclassified on the
+    first pass (the plan recorded 54 and the census had drifted by execution — the run
+    reported both rather than matching the brief), 0 remaining, and 0 changed on an
+    immediate second pass and a final repeat.</p>
+
+    <h2 id="method">What the sequencing bought</h2>
+    <p>The plan's ordering rule was that leaks come before repairs, because a repair that
+    runs while a write path is open buys one clean measurement before the next run undoes
+    it. Two things in this record only exist because of that order.</p>
+    <p>The export literal is the clearest: backfilling <code>status</code> while
+    <code>export.py</code> asserted <code>active</code> would have produced correct graph
+    rows and identical published output, and the measurement would have said the repair
+    worked. The approval transition is the second: a status reconcile is meaningless while
+    nothing can move a name off <code>draft</code>, because the axis would be maintained and
+    permanently unpublishable.</p>
+    <p>The discipline that produced the strongest evidence here was requiring each
+    counterfactual — deleting the write, neutralizing the refusal, restoring the strict
+    predicate — and recording that it fails <em>by name</em>. Three separate guards in this
+    record would have passed their own tests while providing nothing.</p>
+
+  </main>
+</body>
+</html>
