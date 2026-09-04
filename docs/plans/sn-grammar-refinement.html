@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="0.25">
 </head>
 <body>
@@ -185,6 +185,10 @@
 <div class="r-dec" data-key="composite-exemption-covers-nested-operands" data-choice="recursive" data-by="Simon McIntosh" data-when="2026-09-04T20:11:49+00:00">
     <p class="r-dec-q">composite-exemption-covers-nested-operands</p>
     <p class="r-dec-rat">Lead ruling 2026-09-04. The composite exemption must hold recursively, not just for the outermost operator. Measured leak: flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius rendered as ..._to_major_radius_square, so the exemption protected the outer flux_surface_averaged operator while the rule reached inside the ratio and reordered its second operand. Two names are affected. An operator anywhere within a composite operand tree keeps its position, because a reader cannot tell which operand a moved operator belonged to once the tree is flattened into a surface string.</p>
+    </div>
+<div class="r-dec" data-key="the-name-is-the-decomposition" data-choice="site-parses-no-sidecar-field" data-by="Simon McIntosh" data-when="2026-09-04T21:02:18+00:00">
+    <p class="r-dec-q">the-name-is-the-decomposition</p>
+    <p class="r-dec-rat">Lead correction 2026-09-04, superseding the sidecar half of component-is-a-family-axis. The published catalog needs NO segment-decomposition field: the site depends on the standard-names package and decomposes each name itself, and the grammar round-trips by design, so the spelling already carries the structure. Confirmed against the catalog repository, whose pyproject pins imas-standard-names[quality,docs] and therefore already holds the parser. This coordinator had proposed emitting per-name segments so the site would not re-parse, and that proposal was wrong in a way worth recording, because it is the same defect class this programme keeps closing: shipping a derivable fact as a second copy invites drift. It is the superseded_by scalar disagreeing with its edge, the origin marker duplicating a source binding, and the produced_sn_id scalar that rotted. A decomposition in the sidecar would be a second source of truth that can disagree with the name beside it. So the component axis is added to the GRAPH schema, where it serves our own completeness queries and family reasoning, and the catalog side needs only the right package pin - a mechanism that already exists. The one thing the site does require is that the pin be current, since a name rendered under a newer grammar cannot be decomposed by an older parser.</p>
     </div>
 </section>
 
