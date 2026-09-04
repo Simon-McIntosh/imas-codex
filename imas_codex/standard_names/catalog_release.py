@@ -1384,12 +1384,12 @@ def run_review_release(
 
     A single orchestrating step so the frozen sn-names artifact, the pushed RC
     catalog, and the PR stay in lock-step. The focus file drives the batch: an
-    sn-sources file is minted live to the SN set (:func:`mint_sn_list`), an
-    sn-names file is used directly (schema dispatch). The resolved set is frozen
-    under ``manifests/reviews/<rc>.sn_names.yaml`` (RC-tagged, the traceable key)
-    and the PR number/URL back-filled once the pull request is opened when
-    ``open_pr`` is true. The RC tag is always created and pushed to the fork at
-    cut time.
+    sn-sources file resolves each exact manifest path to its terminal name, and
+    an sn-names file is used directly (schema dispatch). The resolved set is
+    frozen under ``manifests/reviews/<rc>.sn_names.yaml`` (RC-tagged, the
+    traceable key) and the PR number/URL back-filled once the pull request is
+    opened when ``open_pr`` is true. The RC tag is always created and pushed to
+    the fork at cut time.
 
     The RC version carries the batch identity as semver build metadata
     (``v0.2.0rc66+<label>``, derived from the manifest — see
@@ -1400,7 +1400,6 @@ def run_review_release(
     ``exporter``/``publisher``/``pr_creator``/``github_client`` are injectable
     so the flow is testable against a local bare repo with no live GitHub call.
     """
-    from imas_codex.standard_names.minting import mint_sn_list
     from imas_codex.standard_names.sources_manifest import load_focus_file
 
     report = ReviewReleaseReport(dry_run=dry_run)
@@ -1452,18 +1451,21 @@ def run_review_release(
 
     manifest_sources: list[dict[str, Any]] | None = None
     if kind == "sn_sources":
-        mint = mint_sn_list(items, gc=gc)
         from imas_codex.standard_names.graph_ops import (
             fetch_manifest_source_release_rows,
         )
 
-        manifest_sources = fetch_manifest_source_release_rows(items, gc=gc)
+        try:
+            manifest_sources = fetch_manifest_source_release_rows(items, gc=gc)
+        except ValueError as exc:
+            report.errors.append(f"manifest source resolution failed: {exc}")
+            return report
         terminal_ids = [
             row["standard_name_id"]
             for row in manifest_sources
             if row.get("standard_name_id")
         ]
-        names = list(dict.fromkeys([*mint.names, *terminal_ids]))
+        names = list(dict.fromkeys(terminal_ids))
         unmatched = [
             row["source_path"]
             for row in manifest_sources
