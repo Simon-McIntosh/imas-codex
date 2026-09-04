@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T14:05:23",
+  "updated": "2026-09-04T14:55:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -619,6 +619,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-capprobe",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-capremove",
         "harness": "codex",
         "role": "implement",
@@ -939,6 +948,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-deadend",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-decodingpin",
@@ -3354,6 +3372,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "inv-geomroute",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "inv-graphreuse",
         "harness": "codex",
         "role": "investigate",
@@ -3479,6 +3506,15 @@
           "gpt-5.6-sol": "01a03e38-408d-7853-801c-8fe86f310d1f"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "inv-skiprule",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "inv-stall",
@@ -71376,6 +71412,338 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T115851501646-n-wcr-cut-the-rc-and-open-the-fork-pr",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-wcr-cut-the-rc-and-open-the-fork-pr",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 191,
+                "cached_input_tokens": 542923,
+                "input_tokens": 543116,
+                "output_tokens": 1173,
+                "reasoning_output_tokens": 125,
+                "total_tokens": 544289,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "A pull request is open on the fork catalog repository Simon-McIntosh/imas-standard-names-catalog carrying a freshly cut WEST review candidate, and its URL is recorded. Run 'imas-codex sn release --batch west_production_dd_paths --dry-run' first and record what it reports, then the same command without --dry-run, both in the FOREGROUND. The release mints the name set, freezes it under standard_names/manifests/reviews/, exports, branches, pushes to the fork, tags the branch head and opens the pull request in one step; an RC batch targets the fork by default so do not pass --target upstream and do not pass --final. Three checks are mandatory before you report success, each with its number. First, every exported entry must read status draft: grep the cut for a status of active and require zero, because the exporter previously wrote that value as a literal and a review candidate must publish as draft until an approved pull request promotes it. Second, record the total name count and, separately and for information only, how many names are bound to no path in west_production_dd_paths.yaml; carrying accompanying accepted names is NOT a defect and must not stop the cut. Third, check the pull request title and body for the strings co-authored-by, generated with, claude and copilot, and if any is present strip it with gh pr edit and say so; authorship is the operator's and the tooling never signs its own work. Record the release version, the branch name, the tag, the frozen artifact path, the entry count and the pull-request URL in the manifest, and write the manifest with a non-terminal status BEFORE starting the non-dry run.",
+          "estimated_hours": 1.0,
+          "goal": "Cut the WEST review candidate and open its pull request on the fork",
+          "id": "n-wcr-cut-the-rc-and-open-the-fork-pr",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-cut-the-rc.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/manifests/reviews"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-rccut",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T11:59:01Z",
+        "completed_at": "2026-09-04T12:30:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1914,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1914,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "cc8a4d3eda4f872e32d636b90e2194a46ea04a29",
+        "commits": [
+          "d18db79ef1a5f536e76d2b598996b0583bf1569d"
+        ],
+        "changed_lines": {
+          "added": 2226,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync imas-codex sn release --batch west_production_dd_paths",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "live release exit 0; branch and annotated tag pushed; fork PR 14 open; published 385 entries all status draft, active 0; PR forbidden-string count 0; PR checks 6 passed 1 skipped"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-cut-the-rc.md",
+        "scope_changed": false,
+        "session_id": "01a06c49-5ce4-70b3-8aa2-f29f64e2831f",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 17883,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 20583,
+              "external_wait": null,
+              "log_age_seconds": 20462,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 20486,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wcr-cut-the-rc-and-open-the-fork-pr",
+          "session_id": "01a06c49-5ce4-70b3-8aa2-f29f64e2831f",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T12:30:55Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T123837849599-n-wct-cap-reset-probe",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a72",
+        "node": "n-wct-cap-reset-probe",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2627,
+                "cached_input_tokens": 613105,
+                "input_tokens": 615734,
+                "output_tokens": 1110,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 616844,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "Six named WEST sources parked at the compose attempt cap are given one clean attempt and the per-source outcome is recorded. The six, all StandardNameSource rows at status failed with attempt_count 5 and last_error 'compose claim-attempt cap reached', are exactly: summary/global_quantities/tau_energy/value, pf_active/coil/current, barometry/gauge/pressure, equilibrium/time_slice/boundary/outline/z, equilibrium/time_slice/boundary/geometric_axis/z, ece/channel/position/z. Note that the boundary outline and geometric axis are GEOMETRIC PROPERTIES of the plasma boundary rather than coordinate axes, and the first three are canonical tokamak quantities, so all six are expected to be nameable. Clear attempt_count and last_error and return status to extracted for exactly those six source_id values, touching no other row, and record the changed-row count which must be 6. Then run 'imas-codex sn run --focus \"summary/global_quantities/tau_energy/value pf_active/coil/current barometry/gauge/pressure equilibrium/time_slice/boundary/outline/z equilibrium/time_slice/boundary/geometric_axis/z ece/channel/position/z\" --only compose --skip-global-maintenance --cost-limit 3' in the FOREGROUND. The --skip-global-maintenance flag is mandatory and is valid because --focus supplies an explicit scope: without it a scoped run performs graph-wide startup and post-drain maintenance writes, which a previous node of this session did by omission. Record for each of the six whether a name was produced and its spelling, or the new error text if it failed again, because a fresh failure reason is the finding this node exists to get. Report actual spend beside the 3 dollar ceiling and write the manifest with a non-terminal status BEFORE starting the run.",
+          "estimated_hours": 0.8,
+          "goal": "Establish whether the current pipeline composes a name for a source parked at the attempt cap",
+          "id": "n-wct-cap-reset-probe",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-cap-reset-probe-manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wct-cap-reset-probe.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-capprobe",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T12:38:56Z",
+        "completed_at": "2026-09-04T12:52:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 788,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 788,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "fdb8945cf4acf91e5736e5fa40ee05b890963c33",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn run --focus \"<six capped WEST paths>\" --only compose --skip-global-maintenance --cost-limit 3",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-cap-reset-probe.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-cap-reset-probe-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c6d-e853-77d0-8bd0-4e6d827d4f09",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5532800,
+            "cached_input_tokens_cumulative": 5532800,
+            "input_tokens": 5689891,
+            "input_tokens_cumulative": 5689891,
+            "output_tokens": 19411,
+            "output_tokens_cumulative": 19411,
+            "reasoning_output_tokens": 6413,
+            "reasoning_output_tokens_cumulative": 6413
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 20277,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 22977,
+              "external_wait": null,
+              "log_age_seconds": 22857,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 22880,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 25824,
+          "peak_input_tokens": 11222691
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "probe node; its writes are governed source-recovery transitions and its deliverable is the per-source report at the declared path",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-cap-reset-probe",
+          "session_id": "01a06c6d-e853-77d0-8bd0-4e6d827d4f09",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T12:52:04Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -71520,6 +71888,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1605
+    "_version": 1611
   }
 }

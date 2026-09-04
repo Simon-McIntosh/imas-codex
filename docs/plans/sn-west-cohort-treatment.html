@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
 <main class="plan-doc">
@@ -281,7 +281,10 @@ scalar to follow lineage at all, and must traverse edges every time.</p>
     <div class="r-comment-body"><p>the widening is mint_sn_list step 2 at minting.py:100-120, a parent/sibling/child closure whose only check is that the related name is not dead; 150 out-of-manifest names plus 42 structural parents plus 1 source-less name equal exactly the 193 surplus over 218 manifest-bound identities. It is a batch-list defect, not an exporter-gate defect, and export.py needs no change. The any-binding reading is already what the base join implements, and test_mint_live_closure at test_minting.py:181-198 currently pins the over-broad behaviour</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260904T101002885906-n-wct-mint-honours-the-manifest" data-who="impl-mintscope" data-when="2026-09-04T10:22:35Z">
-    <div class="r-comment-body"><p>node retired. It first narrowed the batch mint to manifest-bound names, which the lead reversed because a reviewer must see the full family set; it was then repointed at declaring each name&#x27;s admission route in the artifact and body, which the lead also reversed on the grounds that carrying extra accepted names for review is not a fault and the batch is a weak scoping device. The PR 13 halt reason is therefore dissolved for the scoping half; the status literal half was already fixed, so a recut is unblocked</p></div>
+    <div class="r-comment-body"><p>node retired. It first narrowed the batch mint to manifest-bound names, which the lead reversed because a reviewer must see the full family set; it was then repointed at declaring each name's admission route in the artifact and body, which the lead also reversed on the grounds that carrying extra accepted names for review is not a fault and the batch is a weak scoping device. The PR 13 halt reason is therefore dissolved for the scoping half; the status literal half was already fixed, so a recut is unblocked</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260904T123837849599-n-wct-cap-reset-probe" data-who="impl-capprobe" data-when="2026-09-04T12:52:04Z">
+    <div class="r-comment-body"><p>the attempt cap is the parked state, not the cause, and the fan-out it was probing would have been wasted. All six sources were reset cleanly (6 of 6, audited by StandardNameSourceRetry events) and all six re-consumed the five attempts composing nothing, for causes the counter was hiding. FOUR are lifecycle collisions where the composer proposes the CORRECT spelling and the target identity already exists non-bindable: energy_confinement_time superseded, current_of_poloidal_field_coil exhausted and quarantined, vertical_outline_of_plasma_boundary superseded, neutral_pressure exhausted and quarantined. TWO are attachment conflicts where a geometric plasma-boundary property was routed to a generic coordinate identity another path already feeds. One further attempt raised a pool error after grammar rejection while the command still exited 0. Spend was zero, served locally, and --skip-global-maintenance held with the scoped reconcile writing 0 actions</p></div>
 </div>
 </section>
 </main>
