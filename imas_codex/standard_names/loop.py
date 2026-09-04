@@ -1644,10 +1644,10 @@ async def run_sn_pools(
         if catalog_status.get("total_changed", 0):
             logger.info(
                 "run_sn_pools: catalog-status reconcile — %d draft, "
-                "%d superseded, %d deprecated",
+                "%d superseded, %d quarantined",
                 catalog_status.get("drafted", 0),
                 catalog_status.get("superseded", 0),
-                catalog_status.get("deprecated", 0),
+                catalog_status.get("quarantined", 0),
             )
 
         entry_result = await _global_maintenance_call(

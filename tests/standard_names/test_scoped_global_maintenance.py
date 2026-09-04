@@ -97,12 +97,17 @@ def _maintenance_mocks(stack: ExitStack) -> dict[str, MagicMock]:
 
 
 async def _run_loop(
-    *, skip_global_maintenance: bool, terminal_residue: dict | None = None
+    *,
+    skip_global_maintenance: bool,
+    terminal_residue: dict | None = None,
+    catalog_status: dict[str, int] | None = None,
 ):
     """Run the orchestrator with graph and worker boundaries mocked."""
     graph_context, _ = _graph_context()
     with ExitStack() as stack:
         maintenance = _maintenance_mocks(stack)
+        if catalog_status is not None:
+            maintenance["reconcile_catalog_status"].return_value = catalog_status
         create_run = stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
         finalize_run = stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
         terminal_probe = stack.enter_context(
@@ -214,6 +219,30 @@ async def test_ordinary_scoped_run_keeps_global_maintenance() -> None:
     finalize_run.assert_called_once()
     build_specs.assert_called_once()
     run_pools.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_catalog_status_summary_reports_quarantined_count(caplog) -> None:
+    caplog.set_level("INFO", logger=_LOOP)
+
+    await _run_loop(
+        skip_global_maintenance=False,
+        catalog_status={
+            "drafted": 2,
+            "superseded": 3,
+            "quarantined": 5,
+            "deprecated": 0,
+            "total_changed": 10,
+        },
+    )
+
+    summary = next(
+        record.getMessage()
+        for record in caplog.records
+        if "catalog-status reconcile" in record.getMessage()
+    )
+    assert summary.endswith("2 draft, 3 superseded, 5 quarantined")
+    assert "deprecated" not in summary
 
 
 @pytest.mark.asyncio
