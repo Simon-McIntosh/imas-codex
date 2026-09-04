@@ -1,7 +1,7 @@
 """Symmetric ownership guards for standard-name graph writes.
 
 Prevents the codex LLM pipeline from overwriting editorial content
-that was manually curated via a catalog PR (origin=catalog_edit).
+that has passed the catalog approval gate.
 All writers of protected fields call ``filter_protected()`` before
 persisting to the graph.
 
@@ -21,7 +21,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-#: Fields that are catalog-authoritative when origin=catalog_edit.
+#: Fields that are catalog-authoritative after approval.
 #: Pipeline writers must not overwrite these without override=True.
 PROTECTED_FIELDS: frozenset[str] = frozenset(
     {
@@ -136,7 +136,7 @@ def filter_protected(
     override_names: set[str] | None = None,
     protected_names: set[str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    """Strip protected editorial fields from catalog-edited items.
+    """Strip protected editorial fields from approved items.
 
     Parameters
     ----------
@@ -146,19 +146,19 @@ def filter_protected(
         When ``True``, bypass protection — all fields pass through.
     override_names:
         Selective override — set of standard name IDs that should bypass
-        protection even if they have ``origin='catalog_edit'``.  Other
-        names remain protected.  Ignored when ``override=True``.
+        protection even if they have passed approval. Other names remain
+        protected. Ignored when ``override=True``.
     protected_names:
-        Pre-fetched set of standard name IDs whose ``origin`` is
-        ``'catalog_edit'``. If ``None``, queries the graph to determine
-        protection status. Callers in hot loops should pre-fetch.
+        Pre-fetched set of standard name IDs whose ``name_stage`` is
+        ``'approved'``. If ``None``, queries the graph to determine protection
+        status. Callers in hot loops should pre-fetch.
 
     Returns
     -------
     tuple of (filtered_items, skipped_names):
         - ``filtered_items``: new list with protected fields stripped from
-          catalog-edited items. Non-protected fields pass through. Items
-          without ``origin`` or with ``origin='pipeline'`` pass unchanged.
+          approved items. Non-protected fields pass through. Items that have
+          not passed approval remain unchanged.
         - ``skipped_names``: list of item IDs that had fields stripped.
 
     Notes
@@ -201,26 +201,19 @@ def filter_protected(
 
 
 def _fetch_catalog_edit_names(name_ids: list[str]) -> set[str]:
-    """Query graph for curator-owned or PR-approved names."""
+    """Query graph for names that have passed the approval gate."""
     if not name_ids:
         return set()
-    try:
-        from imas_codex.graph.client import GraphClient
+    from imas_codex.graph.client import GraphClient
 
-        with GraphClient() as gc:
-            rows = gc.query(
-                """
-                UNWIND $names AS name
-                MATCH (sn:StandardName {id: name})
-                WHERE sn.origin = 'catalog_edit' OR sn.name_stage = 'approved'
-                RETURN sn.id AS id
-                """,
-                names=name_ids,
-            )
-            return {r["id"] for r in (rows or [])}
-    except Exception:
-        logger.warning(
-            "Failed to query catalog_edit names — treating all as pipeline",
-            exc_info=True,
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $names AS name
+            MATCH (sn:StandardName {id: name})
+            WHERE sn.name_stage = 'approved'
+            RETURN sn.id AS id
+            """,
+            names=name_ids,
         )
-        return set()
+        return {r["id"] for r in (rows or [])}
