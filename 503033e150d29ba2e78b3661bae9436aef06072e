@@ -1,0 +1,13 @@
+The merge subject states the rule but not the change. What baf6480f carried:
+
+- PROTECTED_FIELDS gained the four editorial fields that were unlisted and
+  therefore unprotected: deprecates, superseded_by, validity_domain, constraints.
+- The protected-set query dropped its origin clause and now reads
+  name_stage = 'approved' alone, so protection follows the approval signal
+  rather than a marker nothing writes.
+- The fail-open except/warning around that query was removed, so a failed
+  lookup propagates instead of being treated as 'no names are protected'.
+
+The third item is the load-bearing one: closing the swallow exposed 43 tests
+that had been green only because the guard switched itself off, repaired in
+the merge that follows this one.
