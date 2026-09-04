@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:04:21",
+  "updated": "2026-09-04T11:17:19",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -65368,6 +65368,142 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T090526579133-n-sli-maintenance-summary-names-quarantine",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a73",
+        "node": "n-sli-maintenance-summary-names-quarantine",
+        "node_definition": {
+          "done_when": "The catalog-status summary line in loop.py stops labelling its third field deprecated, because the reconcile no longer writes that value and now reports quarantined instead, so the printed summary names an axis the run never touched. The line reports the counts the reconciler returns, under the names the reconciler returns them. The gate is the focused pytest command over tests/standard_names/test_scoped_global_maintenance.py, test_pool_orchestrator_integration.py and test_pool_orchestration_contracts.py at exit 0, with a test asserting the summary carries the quarantined count and no deprecated label, and that assertion failing when the label is put back. Record the before and after exit status with failure ids in the manifest.",
+          "estimated_hours": 0.3,
+          "goal": "Make the startup maintenance summary name the axis the reconcile actually writes",
+          "id": "n-sli-maintenance-summary-names-quarantine",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-maintenance-summary-quarantine.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/standard_names/loop.py",
+            "tests/standard_names/test_scoped_global_maintenance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-statusaxis",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T09:05:37Z",
+        "completed_at": "2026-09-04T09:16:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 651,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 651,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "2764eb6bdd5f0d15437d9f822599a65fb9215e2e",
+        "commits": [
+          "9c0a6ffaa56bcd4c172effdc16ac8c11a004f910"
+        ],
+        "changed_lines": {
+          "added": 32,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_scoped_global_maintenance.py tests/standard_names/test_pool_orchestrator_integration.py tests/standard_names/test_pool_orchestration_contracts.py",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "61 passed, 0 failed; counterfactual with the deprecated label restored exits 1 on test_catalog_status_summary_reports_quarantined_count"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-maintenance-summary-quarantine.md",
+        "scope_changed": false,
+        "session_id": "01a06baa-9c5e-7322-a549-da7b3ef7fe82",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 7480,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 10180,
+              "external_wait": null,
+              "log_age_seconds": 10059,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 10082,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest command",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -65498,6 +65634,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1582
+    "_version": 1583
   }
 }
