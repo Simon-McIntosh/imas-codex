@@ -12857,7 +12857,7 @@ def reconcile_constraint_fit_artifacts(gc: Any | None = None) -> dict[str, int]:
         if own:
             client.close()
 
-    reclassified = rows[0]["reclassified"] if rows else 0
+    reclassified = int(rows[0].get("reclassified", 0)) if rows else 0
     if reclassified:
         logger.info(
             "reconcile_constraint_fit_artifacts: reclassified %d constraint "
