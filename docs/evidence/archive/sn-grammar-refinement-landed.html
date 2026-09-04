@@ -123,6 +123,44 @@
     1963 superseded, while this census counts live names. Both figures are correct for their
     own scope, and the live one is what sizes the consumer-side migration.</p>
 
+    <h2 id="vocabulary">Six tokens accepted, one gap closed as a rejection</h2>
+    <p>Committed at <code>eefcdf86</code>. The grammar suite reads 1148 passed with zero
+    failures at both the base and the candidate, so <strong>0 added and 0 removed</strong> —
+    which is the correct result for an additive closed-vocabulary change, and the reason the
+    gate was set at zero rather than at a delta. 23 focused tests, six of them token-removal
+    mutation checks proving each accepted token is load-bearing rather than merely present.</p>
+    <table>
+      <thead><tr><th>Gap</th><th>Outcome</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>relative humidity</td><td><code>relative_humidity</code>, physical base</td>
+            <td>generic <code>fraction</code> does not name a water-vapour saturation ratio</td></tr>
+        <tr><td>Stokes component index</td><td><code>s0</code>–<code>s3</code>, components</td>
+            <td>an unindexed <code>stokes_parameter</code> erases which polarization coordinate is stored</td></tr>
+        <tr><td>iron-core &beta;</td><td><code>beta_inclination</code>, geometry qualifier</td>
+            <td>bare <code>beta</code> is normalized plasma pressure and collides in the closed vocabulary</td></tr>
+        <tr><td>strain-gauge measurement direction</td><td><strong>rejected</strong></td>
+            <td>the shipped ordinal pair already binds all six leaves; a non-ordinal carrier would collapse two rosette axes</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Two cases that look alike were decided opposite ways, and the discriminating
+    reason is the durable part.</strong> The iron core keeps its Greek label while the strain
+    gauge keeps its ordinal, because <code>alpha</code> and <code>beta</code> are the durable
+    source identities of the oblique iron-core parameters, whereas <code>direction</code> and
+    <code>direction_second</code> make the ordinal itself the field identity. Each name keeps
+    whichever distinction the Data Dictionary actually carries — not a house style applied
+    uniformly.</p>
+    <p>The sibling constraint was checked before the spelling was chosen, because naming one
+    member of a two-member set is how a second migration gets created:
+    <code>alpha_inclination</code> follows <code>beta_inclination</code> by the same pattern
+    with no rename. And the rejection is pinned shut rather than merely recorded — six
+    shipped-carrier round-trip tests plus one asserting the rejected non-ordinal spelling does
+    not resolve.</p>
+    <p>Found on the way past and routed rather than folded: the six
+    <code>operational_instrumentation/sensor/direction</code> leaves report unit
+    <code>m</code> while both the parent documentation and the accepted carrier semantics say
+    unit vector. That is a Data Dictionary unit defect and it does not change the
+    geometry-carrier verdict.</p>
+
   </main>
 </body>
 </html>

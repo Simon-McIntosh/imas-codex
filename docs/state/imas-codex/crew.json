@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T23:52:41",
+  "updated": "2026-09-04T23:55:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -74931,6 +74931,153 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T212509081993-n-sgr-four-vocabulary-gaps",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a77",
+        "node": "n-sgr-four-vocabulary-gaps",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5493,
+                "cached_input_tokens": 246476,
+                "input_tokens": 251971,
+                "output_tokens": 175,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 252146,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "Section 7 of the live plan names four gaps: a measurement-direction token that is not an ordinal for six strain-gauge identities, a Stokes component index for eight sources, relative_humidity as a physical base for the WEST source camera_x_rays/detector_humidity, and an iron-core beta token for one source. For EACH of the four, deliver one of two outcomes and never a silent third. Either a token added to the correct closed-vocabulary YAML under imas_standard_names/grammar/vocabularies, with three things stated: the data-dictionary documentation text and unit that support it, evidence from the shipped ISN catalog that the quantity is not already nameable with an existing token, and which base family it joins and why it fits. Or a recorded REJECTION that names the accepted alternative spelling beside the rejected one and explains the semantic distinction in plain language. BIAS TOWARD INCLUSION and say so when you are unsure: two valid bases were wrongly dismissed on this programme before, so a token is rejected only on positive evidence that an existing spelling already carries the meaning, never on a feeling that the quantity is marginal. The gate is tests/test_vocabulary_gap_tokens.py, which must pin for every accepted token that a representative full name parses and round-trips through render, and must fail if that token is removed from the vocabulary. Run the grammar suite plus tests/test_grammar_round_trip.py with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv and report the exact command, exit status, log path, failure count and failure ids before and after your change. Added tokens are additive to a closed vocabulary so they must not change how any existing name parses, and a nonzero added-failure count is therefore a defect in your change rather than an exposure. Two constraints: do not touch operators.yml or anything under tests/grammar, because a concurrent worker owns the renderer, and do not run any imas-codex command or query the live graph, because another worker is changing that environment underneath you right now.",
+          "estimated_hours": null,
+          "goal": "Close the four named closed-vocabulary gaps with a stated physics basis for each token",
+          "id": "n-sgr-four-vocabulary-gaps",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212509081993-n-sgr-four-vocabulary-gaps/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a77",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_standard_names/grammar/vocabularies/physical_bases.yml",
+            "imas_standard_names/grammar/vocabularies/qualifiers.yml",
+            "imas_standard_names/grammar/vocabularies/components.yml",
+            "tests/test_vocabulary_gap_tokens.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-isnvocab",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T21:25:16Z",
+        "completed_at": "2026-09-04T21:54:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1749,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1749,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "12b557363ab0f2a6ed55bdaf619d3bc02a7e1e14",
+        "commits": [
+          "eefcdf86911ec4762298bc54d5b42191df00fc0d"
+        ],
+        "changed_lines": {
+          "added": 165,
+          "removed": 4,
+          "files": 6
+        },
+        "tests_added": 23,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/grammar tests/test_grammar_round_trip.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212509081993-n-sgr-four-vocabulary-gaps/after-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "six closed-vocabulary tokens accepted (relative_humidity, beta_inclination, Stokes s0-s3) with the strain-gauge gap recorded as a rejection in favour of the already-shipped ordinal pair; grammar suite 1148 passed with zero failures at both base and candidate, 0 added and 0 removed; 23 focused tests including 6 token-removal mutation checks",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212509081993-n-sgr-four-vocabulary-gaps/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a06e4f-cace-7840-9bbc-73fb3b5fc849",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3429120,
+            "cached_input_tokens_cumulative": 3429120,
+            "input_tokens": 3486354,
+            "input_tokens_cumulative": 3486354,
+            "output_tokens": 21989,
+            "output_tokens_cumulative": 21989,
+            "reasoning_output_tokens": 5800,
+            "reasoning_output_tokens_cumulative": 5800
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 27789,
+          "peak_input_tokens": 6915474
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "scope_acceptances": [
+          {
+            "path": "imas_standard_names/grammar/model_types.py",
+            "reason": "coordinator-authorized mid-flight: the runtime Component and Qualifier enums are generated from the vocabularies, so a token addition without regeneration fails the repo's own codegen drift test"
+          },
+          {
+            "path": "imas_standard_names/grammar/vocabularies/qualifier_categories.yml",
+            "reason": "coordinator-authorized mid-flight: the file's own header states every qualifiers.yml token must appear in exactly one category, added in the same change"
+          }
+        ],
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260904/n-sgr-four-vocabulary-gaps",
+          "session_id": "01a06e4f-cace-7840-9bbc-73fb3b5fc849",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T21:54:25Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -75075,6 +75222,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1651
+    "_version": 1652
   }
 }
