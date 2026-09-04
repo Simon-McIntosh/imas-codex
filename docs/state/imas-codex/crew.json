@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:33:33",
+  "updated": "2026-09-04T11:46:41",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1315,6 +1315,15 @@
         "role": "implement",
         "session_id": "01a02df7-9b56-78b1-ae3e-93c5916ef5c4",
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-gatemarker",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-gatescope",
@@ -65668,6 +65677,160 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T092258308927-n-sli-maintenance-mock-exposure",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a73",
+        "node": "n-sli-maintenance-mock-exposure",
+        "node_definition": {
+          "done_when": "The full standard-names suite returns to zero failures at HEAD. Seven failures exist and all seven belong to this wave, in two causes. Six are sparse startup-maintenance mocks that now reach a real GraphClient because run_sn_pools calls _global_maintenance_call(reconcile_catalog_status) at loop.py:1641, raising the default-tier guard 'GraphClient.__post_init__ called in a default-tier test': they are test_detachment_attribution_wiring.py::test_pool_loop_passes_active_run_id_to_attachment_reconcile, the four in test_only_phase_skip_generate.py, and test_source_revival.py::test_run_sn_pools_runs_both_revival_reconciles. Give each the same explicit local patch its sibling reconciles already have; never mark them graph-tier and never weaken what they assert. The seventh is test_refine_name_chain.py:627, which asserts a field list is absent from the terminal refine Cypher and now trips on validation_status because the exhaust write sets the quarantine in that same statement. That exposure is correct behaviour, so do not simply drop the field from the absent-list: assert positively that the terminal query sets validation_status to quarantined when the target stage is exhausted, and keep every other field the test was protecting. Write your manifest with the work done and the counts you have BEFORE starting the suite, then run it in the foreground, because a run that ends with the suite unwritten is indistinguishable from a crash. Gate: 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider' at exit 0, with the before and after failure ids recorded.",
+          "estimated_hours": 1.0,
+          "goal": "Close the seven suite failures the new maintenance step and the exhaust quarantine exposed",
+          "id": "n-sli-maintenance-mock-exposure",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-maintenance-mock-exposure.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/standard_names/test_detachment_attribution_wiring.py",
+            "tests/standard_names/test_only_phase_skip_generate.py",
+            "tests/standard_names/test_source_revival.py",
+            "tests/standard_names/test_refine_name_chain.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-mockexposure",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T09:23:06Z",
+        "completed_at": "2026-09-04T09:41:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1087,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1087,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5a1f09f4aa63f1a3bcb76d00e197e8433169c696",
+        "commits": [
+          "b27c3f5b7bf88105e4245124b6a3a8f92ce83043"
+        ],
+        "changed_lines": {
+          "added": 7,
+          "removed": 1,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-maintenance-mock-exposure-after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-maintenance-mock-exposure.md",
+        "scope_changed": false,
+        "session_id": "01a06bba-9b8f-7cd0-87a5-b94c38955e35",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6837888,
+            "cached_input_tokens_cumulative": 6837888,
+            "input_tokens": 6972734,
+            "input_tokens_cumulative": 6972734,
+            "output_tokens": 21006,
+            "output_tokens_cumulative": 21006,
+            "reasoning_output_tokens": 5713,
+            "reasoning_output_tokens_cumulative": 5713
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 8529,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 11229,
+              "external_wait": null,
+              "log_age_seconds": 11108,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 11131,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26719,
+          "peak_input_tokens": 13810622
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -65798,6 +65961,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1586
+    "_version": 1588
   }
 }
