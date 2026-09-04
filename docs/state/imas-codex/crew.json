@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T15:15:27",
+  "updated": "2026-09-04T15:19:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -72089,6 +72089,179 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T131027311266-n-wct-same-axis-different-property-example",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a74",
+        "node": "n-wct-same-axis-different-property-example",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 923,
+                "cached_input_tokens": 659406,
+                "input_tokens": 660331,
+                "output_tokens": 1392,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 661723,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "imas_codex/llm/prompts/sn/generate_name_dd.md gains one compact rule with three worked contrasts, beside the existing geometry and attachment examples, and a focused test renders the prompt and asserts all three are present. The investigation established the root cause precisely: no deterministic Python branch turns a leaf named z into any particular name \u2014 compose_worker renders the static system prompt at workers.py:3695 and selects the DD prompt at workers.py:3819-3821, and the MODEL chooses base_token, base_kind, projection_axis and locus. The general fidelity invariant is already stated at generate_name_dd.md:10-15 and :61-73, so do not restate it; what is missing is a concrete example for the exact shape that failed, because the prompt has one for outlines and unit vectors and none for ordinary scalar coordinate leaves beneath different semantic parents. The three contrasts to add verbatim in substance: boundary/geometric_axis/z may produce only vertical_coordinate_of_geometric_axis, while boundary/dr_dz_zero_point/z must use an exact registered identity for the dr/dz = 0 landmark or emit vocab_gap, and must never be attached to the geometric-axis coordinate; ece/channel/position/z may produce only vertical_coordinate_of_measurement_position, while ece/channel/delta_position_suprathermal/z must retain its delta and suprathermal semantics through an exact registered carrier or emit vocab_gap, and must never be attached as the absolute measurement position; and the existing boundary/outline/z to vertical_outline_of_plasma_boundary example is kept as the positive property-specific control. Do NOT touch eligibility and do NOT touch _vector_fields_conflict: the attachment guard refused both groupings correctly, because a geometric axis and a dr_dz zero point are different quantities that merely share a component axis, and the defect was the model grouping them rather than the guard rejecting them. Gate: 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_prompt_rendering.py tests/standard_names/test_compose_prompts.py -q -p no:cacheprovider' if those files exist, otherwise name the prompt-rendering test files that do and use them, plus your own new focused test; record the exact command with before and after failure ids.",
+          "estimated_hours": 0.6,
+          "goal": "Teach the composer that an equal axis leaf never licenses a shared attachment across different parent fields",
+          "id": "n-wct-same-axis-different-property-example",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-same-axis-example.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/llm/prompts/sn/generate_name_dd.md",
+            "tests/standard_names/test_same_axis_attachment_guidance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-attachexample",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T13:10:35Z",
+        "completed_at": "2026-09-04T13:18:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 458,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 458,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "8acb404e0bcd5f56559853869f8b444c3fdd572c",
+        "commits": [
+          "7b012c64d50d68a0acd03c34ed9ab2995164afe5"
+        ],
+        "changed_lines": {
+          "added": 63,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_compose_prompt_examples_round_trip.py tests/standard_names/test_same_axis_attachment_guidance.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "242 passed 1 skipped exit 0 after, against 241 passed 1 skipped at baseline; the three-contrast rendering assertion passes"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-same-axis-example.md",
+        "scope_changed": false,
+        "session_id": "01a06c8a-dfe6-7321-9d25-b96cde584316",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 22177,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 24877,
+              "external_wait": null,
+              "log_age_seconds": 24757,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+                "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 24780,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-same-axis-different-property-example",
+          "session_id": "01a06c8a-dfe6-7321-9d25-b96cde584316",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T13:18:13Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_prompt_rendering.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -72233,6 +72406,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1615
+    "_version": 1616
   }
 }
