@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-west-cohort-treatment">
+  <meta name="plan-title" content="WEST Cohort Treatment and Batch Scoping">
+  <meta name="plan-summary" content="Treat the 37 untreated WEST paths and stop the candidate publishing names from outside its own batch manifest.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S10">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="sn-west-catalog-release">
+  <title>WEST Cohort Treatment and Batch Scoping | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-04">
+<meta name="plan-version" content="1">
+</head>
+<body>
+<main class="plan-doc">
+
+<section class="plan-hero">
+  <p class="eyebrow">Blocks the WEST catalog release · halted candidate</p>
+  <h1>WEST Cohort Treatment and Batch Scoping</h1>
+  <p class="lead">The review candidate was cut and then halted, because it publishes 150 names that
+  are not in its own batch manifest and leaves 37 manifest paths untreated. This plan fixes the
+  scoping, treats the untreated cohort, and hands the release plan a candidate whose contents match
+  what its body claims.</p>
+</section>
+
+<h2 id="s1">§1 — Why the candidate was halted</h2>
+<p>Fork pull request 13 was cut on 2026-09-04 and closed the same hour, before any physicist saw it.
+Its body states that it <em>"publishes 392 accepted standard names … minted from the committed
+<code>west_production_dd_paths</code> batch manifest"</em>, and its own arithmetic is internally
+consistent: 469 spreadsheet paths less 114 excluded by DD node category leaves the 355 eligible
+sources the manifest carries. The frozen artifact
+<code>v0.4.0rc2+west-task-2e.sn_names.yaml</code> then records 411 names against
+<code>manifest_sources: 355</code> — more names than there are source paths.</p>
+
+<p>Resolving all 411 against the graph shows where the surplus comes from.</p>
+
+<table>
+  <thead><tr><th>Provenance of the 411 frozen names</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td>bound to a path in the WEST batch manifest</td><td>218</td></tr>
+    <tr><td><strong>bound to a data-dictionary path outside the manifest</strong></td><td><strong>150</strong></td></tr>
+    <tr><td>derived structural parent (no data-dictionary source, expected)</td><td>42</td></tr>
+    <tr><td>no source of any kind</td><td>1</td></tr>
+  </tbody>
+</table>
+
+<p>The 150 are not near-misses at the manifest boundary. <code>argon_density_at_divertor_target</code>
+comes from <code>summary/local/divertor_target/n_i/argon/value</code>;
+<code>beryllium_density_at_plasma_boundary</code> from
+<code>summary/local/separatrix/n_i/beryllium/value</code>; <code>beta</code> from
+<code>core_profiles/global_quantities/beta_tor</code>. <strong>Beryllium is not a WEST
+species</strong> — WEST is a tungsten machine — so these are generic data-dictionary quantities that
+were never in the Task 2e spreadsheet. The leakage concentrates exactly where a whole-file export
+would put it: <code>summary</code> contributes 94 of the 150, while <code>plasma_profiles</code> (20)
+and <code>edge_profiles</code> (16) appear <em>nowhere</em> in the WEST manifest at all.</p>
+
+<p>Two further defects sit in the same artifact. <strong>184 of the 411 carry a null
+<code>status</code></strong>, so nearly half the candidate has no catalog lifecycle field. And
+<strong>18 of the 411 are not accepted on both axes</strong>, ten of them at
+<code>drafted</code>/<code>pending</code> — the frozen artifact carries names that are not
+publishable.</p>
+
+<p>The consequence is what forced the halt: a physicist opening that pull request would have been
+asked to review 150 names from outside the batch they were told they were reviewing, with no way to
+tell which were which. The scoping defect is therefore the first item here, ahead of the cohort
+work, because every later candidate inherits it.</p>
+
+<h2 id="s2">§2 — Group A: the attempt-cap cohort</h2>
+<p>All twelve WEST sources with status <code>failed</code> carry the identical error
+<code>compose claim-attempt cap reached</code> at <code>attempt_count = 5</code>. This is not twelve
+physics problems; it is one counter. The affected paths are ordinary physical quantities —
+<code>pf_active/coil/current</code> (A), <code>barometry/gauge/pressure</code> (Pa),
+<code>summary/global_quantities/tau_energy/value</code> (s),
+<code>summary/global_quantities/power_steady/value</code> (W),
+<code>camera_ir/channel/camera/frame/apparent_temperature</code> (K), and seven more.</p>
+
+<p>Graph-wide the same signature accounts for <strong>216 of the 283 failed sources</strong>. A
+further <strong>59 failed sources carry no recorded error at all</strong>, which is a second defect:
+a failure path that does not say why it failed.</p>
+
+<p><strong>Suggested treatment.</strong> Reset the claim-attempt counter for sources whose only
+recorded failure is the cap, then re-compose. Verify by the count of <code>failed</code> sources
+before and after, and by how many of the twelve WEST paths gain a name. Separately, find the code
+path that records a failure without an error string and make it record one; a failure that cannot
+say why is not diagnosable by the next reader. Neither task requires physics judgement, and together
+they are the highest-leverage action available on this cohort.</p>
+
+<h2 id="s3">§3 — Group B: the extracted backlog</h2>
+<p>Six WEST sources sit at status <code>extracted</code> — extracted from the data dictionary, never
+composed. They include <code>calorimetry/group/component/power</code> (W),
+<code>calorimetry/group/component/energy_cumulated</code> (J),
+<code>summary/fusion/neutron_rates/total/value</code> (Hz),
+<code>ece/channel/optical_depth</code> and
+<code>hard_x_rays/emissivity_profile_1d/half_width_external</code>. Graph-wide the extracted backlog
+is <strong>1244 sources</strong>.</p>
+
+<p><strong>Suggested treatment.</strong> A scoped compose over the WEST subset first, since it is six
+sources and directly gates the candidate. The graph-wide 1244 is a separate, larger drain that is
+bounded by wall clock rather than budget — the last measured drain composed 151 names for six cents —
+and it should not be attached to the release critical path.</p>
+
+<h2 id="s4">§4 — Group C: the exclusion rule over-reaches</h2>
+<p>Six WEST sources are <code>skipped</code> with node category <code>quantity</code>. At least one
+is wrongly excluded, and it was found by challenging an assumption rather than by any check the
+pipeline runs:</p>
+
+<table>
+  <thead><tr><th>Path</th><th>Unit</th><th>Category</th><th>Documentation</th></tr></thead>
+  <tbody>
+    <tr><td><code>camera_x_rays/detector_humidity</code></td><td>1</td><td>quantity</td>
+        <td>Fraction of humidity (0-1) measured at the detector level</td></tr>
+    <tr><td><code>equilibrium/time_slice/constraints/n_e_line/weight</code></td><td>1</td><td>quantity</td>
+        <td>Weight given to the measurement</td></tr>
+    <tr><td><code>equilibrium/time_slice/convergence/iterations_n</code></td><td>-</td><td>quantity</td>
+        <td>Number of iterations carried out in the convergence loop</td></tr>
+  </tbody>
+</table>
+
+<p>Detector humidity is a leaf node with a unit and a physical definition. It should carry a standard
+name. So should <code>camera_x_rays/detector_temperature</code> (K). The constraint
+<code>weight</code> fields and the convergence iteration count are arguably the "fit or
+representation artifacts" the manifest's own exclusion vocabulary names — but <strong>nobody has made
+that judgement explicitly</strong>, and the rule that dropped them is the same rule that dropped
+humidity.</p>
+
+<p>This is the WEST-visible face of a defect already on record: signal-structure sources wrongly
+excluded by the leaf invariant, where roughly 336 quantities under a <code>/data</code> child were
+being refused.</p>
+
+<p><strong>Suggested treatment.</strong> Audit the skip rule against every skipped source that has a
+unit and node category <code>quantity</code>, graph-wide, not only in the WEST batch. Produce a list
+partitioned into "wrongly excluded, should be named" and "correctly excluded, with the stated
+reason". The second half matters as much as the first: an exclusion nobody can justify in words is
+indistinguishable from a bug.</p>
+
+<h2 id="s5">§5 — Group D: correctly excluded coordinates</h2>
+<p>Six WEST sources are <code>skipped</code> with node category <code>coordinate</code>:
+<code>equilibrium/time_slice/time</code>, <code>core_profiles/profiles_1d/time</code>,
+<code>hard_x_rays/emissivity_profile_1d/time</code>, <code>camera_x_rays/frame/time</code>,
+<code>camera_x_rays/detector_humidity/time</code> and
+<code>camera_x_rays/detector_temperature/time</code>, together with
+<code>summary/disruption/time/value</code>.</p>
+
+<p>These are time axes, not measured quantities, and excluding them is correct. They are recorded
+here so that a later reader counting "37 untreated" does not mistake them for outstanding work, and
+so the distinction between this group and Group C is explicit rather than assumed. No action.</p>
+
+<h2 id="s6">§6 — Group E: named but not release-ready</h2>
+<p>Twelve WEST paths have produced a name that is not yet accepted on both axes. They split three
+ways.</p>
+
+<table>
+  <thead><tr><th>Sub-group</th><th>Names</th><th>Route</th></tr></thead>
+  <tbody>
+    <tr><td>one docs rotation from ready</td>
+        <td><code>safety_factor</code>, <code>atomic_number</code>,
+            <code>toroidal_magnetic_flux_due_to_diamagnetic_drift</code></td>
+        <td>scoped docs review, cheap</td></tr>
+    <tr><td>the hard-x-ray cluster</td>
+        <td><code>hard_xray_rate</code> plus three competing identities on
+            <code>half_width_internal</code></td>
+        <td>physics; one waits on the 0.8.9 pin</td></tr>
+    <tr><td>individually stuck</td>
+        <td><code>total_electron_count</code>, <code>plasma_breakdown_time</code>,
+            <code>hot_neutral_temperature</code>, and two spectrometer names</td>
+        <td>rescore or governed edit, case by case</td></tr>
+  </tbody>
+</table>
+
+<p>The hard-x-ray cluster deserves attention beyond its size: the single path
+<code>hard_x_rays/emissivity_profile_1d/half_width_internal</code> carries <em>three</em> competing
+identities at once — one drafted, one exhausted, one superseded. That is the same failure mode this
+sprint met on the volumetric-rate names, where renames were issued against a criticism the reviewers
+had not made.</p>
+
+<h2 id="s7">§7 — The lifecycle field is missing on nearly half the catalog</h2>
+<p>Of the 2295 names accepted on both axes, <strong>1377 carry <code>status: draft</code> and 918
+carry no status at all</strong>. Graph-wide, 2533 names have a null <code>status</code>. This is the
+field the catalog's own lifecycle depends on, and the null half is consistent with the recorded
+import that cleared origin and status on 1,091 identities.</p>
+
+<p><strong>Suggested treatment.</strong> This plan does not attempt the provenance recovery — that is
+owned by the origin-provenance backfill plan and should stay there. What belongs here is the
+<em>release gate</em>: no candidate should be cut while any name in its frozen artifact carries a
+null status, because the catalog cannot express that name's lifecycle. Adding that as an export
+pre-flight check turns a silent 45% hole into a refusal with a list.</p>
+
+<h2 id="s8">§8 — Wider graph defects observed while measuring</h2>
+<p>These were found while answering the questions above. They are recorded so they are not
+rediscovered, and each names its owner rather than being absorbed here.</p>
+
+<table>
+  <thead><tr><th>Defect</th><th>Count</th><th>Reading</th></tr></thead>
+  <tbody>
+    <tr><td><code>superseded_by</code> scalar null on a superseded name</td><td>1945</td>
+        <td>known scalar rot; lineage lives on the edge and the scalar was never written</td></tr>
+    <tr><td>superseded with no successor on edge or scalar</td><td>513</td>
+        <td>genuine dead ends; supersede pattern only half implemented</td></tr>
+    <tr><td>live names with no source</td><td>12</td>
+        <td>grown from the seven a previous audit attributed; not re-attributed since</td></tr>
+    <tr><td>live names sharing a source with another live name</td><td>4 (2 sources)</td>
+        <td>dual-bound identities</td></tr>
+    <tr><td>detachment ledger rows</td><td>508</td>
+        <td><strong>flat against baseline</strong> — the guard is holding</td></tr>
+    <tr><td>sources <code>attached</code> or <code>composed</code> with no name</td><td>0</td>
+        <td>clean; no new silent detachment is occurring</td></tr>
+    <tr><td>stale claim tokens</td><td>0</td>
+        <td>clean</td></tr>
+  </tbody>
+</table>
+
+<p>The two zero rows are the reassuring ones and are worth stating positively: no source is stranded
+mid-pipeline, and no identity is holding a claim nobody owns. The supersede pattern is the one that
+is genuinely unstable — 1945 null scalars against 513 true dead ends means a reader cannot use the
+scalar to follow lineage at all, and must traverse edges every time.</p>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="batch-scope-authority" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What may a batch-scoped catalog cut publish?</p>
+    <p class="r-dec-ctx">The halted candidate published 411 names from a 355-path manifest: 218 bound
+    to manifest paths, 150 bound to data-dictionary paths outside it, 42 derived structural parents,
+    one with no source. Structural parents are a deliberate inclusion from an earlier change;
+    the 150 are not.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="manifest-paths-plus-their-parents">Only names bound to a manifest path, plus the accepted structural parents those names require.</button>
+      <button class="r-opt" data-value="whole-domain-files">Whole physics-domain files, accepting that a batch cut publishes unrelated names from the same domain.</button>
+      <button class="r-opt" data-value="manifest-paths-only">Only names bound to a manifest path; withhold structural parents too.</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="fit-artifact-exclusion" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Are constraint weights and solver iteration counts nameable quantities?</p>
+    <p class="r-dec-ctx">They carry units and node category quantity , so the pipeline
+    sees them as eligible, but they describe a fit rather than the plasma. The same skip rule that
+    excluded them also excluded detector humidity, which is a genuine physical measurement.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="exclude-fit-artifacts">Exclude fit and representation artifacts by an explicit, stated rule; name everything else with a unit.</button>
+      <button class="r-opt" data-value="name-everything-with-a-unit">Name every leaf quantity carrying a unit, including fit weights and iteration counts.</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-swct-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-04" data-recommends-skill="/reckon-ship sn-west-cohort-treatment" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Fix batch scoping, then treat the 37 untreated WEST paths</h4>
+    <div class="r-fu-body"><p>Start with the scoping defect in §1, because every later candidate inherits it: 150 of 411 published names are bound to no path in the batch manifest. Then Group A (§2), which is the cheapest real progress available — twelve WEST sources and 216 graph-wide share one error, <code>compose claim-attempt cap reached</code>, and need a counter reset rather than any physics judgement. Group B (§3) is six more sources that were extracted and never composed. Group C (§4) needs the skip rule audited, since it excluded detector humidity, which has a unit and a physical definition. Group D (§5) is correctly excluded and needs no action. Group E (§6) is twelve named identities, three of them one docs rotation from ready. The lifecycle gate in §7 should land before any recut, so a candidate cannot be cut carrying names with a null status.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-west-cohort-treatment</pre>
+    </article>
+</section>
+
+</main>
+</body>
+</html>
