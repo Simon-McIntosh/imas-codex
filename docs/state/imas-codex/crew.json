@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T01:28:32",
+  "updated": "2026-09-05T01:34:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1484,9 +1484,11 @@
         "id": "impl-grammarassertions",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06eaf-7a25-7a12-89c2-e7bb45407670",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06eaf-7a25-7a12-89c2-e7bb45407670"
+        },
         "created": "2026-09-04"
       },
       {
@@ -76664,6 +76666,145 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T230941269309-n-sgr-consumer-assertions-read-the-merged-grammar",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a72",
+        "node": "n-sgr-consumer-assertions-read-the-merged-grammar",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 756,
+                "cached_input_tokens": 572231,
+                "input_tokens": 572989,
+                "output_tokens": 2140,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 575129,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "Seven added failures in tests/standard_names belong to the two grammar commits now merged, and each is identified with its cause. SIX FROM THE TAIL RULE, where an operator now renders between the base group and an of, at or due_to tail. test_audit_check_precision.py::test_registered_field_compounds_are_not_bare_fields and ::test_registered_field_locus_is_not_token_repetition both pin magnetic_field_at_pedestal_top_low_field_side_magnitude, which now raises NonCanonicalNameError; its canonical form is magnetic_field_magnitude_at_pedestal_top_low_field_side, and both tests currently fall back to lexical analysis and see a bare or duplicated field token. test_audit_false_positives.py::test_unit_audit_uses_physical_base_and_operator_dimensions pins tendency_of_rotation_frequency_of_neoclassical_tearing_mode, whose residue now raises UnknownBaseTokenError so the structured parse no longer suppresses the lexical frequency-unit rule and s^-2 is rejected. test_derivation.py::test_maximum_of_temperature_at_plasma_boundary pins a prefix-before-operand order across a locus tail and now raises ParseError, so derive_edges returns no HAS_PARENT edge. test_logarithmic_unit_prefix_audit.py::test_decibel_quantity_with_logarithm_prefix_is_quarantined pins logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel, which now raises ParseError. test_operator_compose_round_trip.py::test_projection_and_transformation_follow_public_canonical_order expects perpendicular_normalized_momentum_flux_due_to_e_cross_b_drift while the composer emits perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift. ONE FROM THE VOCABULARY: test_gap_rule_verdicts.py::TestOrdinalSamples::test_the_rule_fires_on_no_registered_token asserts no offenders and now receives s0, s1, s2 and s3, which were deliberately registered as Stokes component indices. UPDATE THE SPELLING, NEVER THE PROPERTY. Every one of these tests is about something other than the spelling it happens to use: a bare-field audit, a token-repetition audit, a unit audit suppressing a lexical rule, parent-edge derivation, a logarithmic-prefix quarantine, canonical projection order, and a gap rule firing on unregistered tokens. Move each to the canonical spelling the merged grammar produces and leave the assertion intact; for the Stokes case choose sample tokens that are genuinely unregistered rather than deleting the assertion. DERIVE EACH CANONICAL FORM FROM THE PARSER rather than by hand, and state for each test what it asserts and why your change preserves that. THE MEASURE: run the whole tests/standard_names/ suite and report failure count and every failure id before and after. Your seven must reach zero. Nineteen further added failures belong to a concurrent peer repairing eligibility fixtures in test_enrichment.py and test_qualify_sources.py, and one is a live-graph unit question under investigation; leave all twenty failing and name them as not yours, along with the five pre-existing failures in test_docs_review_eligibility.py and test_edit_prompt_injection.py. Run every check with env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync and never drop --no-sync: that environment is shared with the main checkout and every peer. Capture each run to a file once with its exact command, exit status and log path, then read the file.",
+          "estimated_hours": null,
+          "goal": "Restore the seven consumer assertions the merged grammar changed",
+          "id": "n-sgr-consumer-assertions-read-the-merged-grammar",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230941269309-n-sgr-consumer-assertions-read-the-merged-grammar/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "tests/standard_names/test_audit_check_precision.py",
+            "tests/standard_names/test_audit_false_positives.py",
+            "tests/standard_names/test_derivation.py",
+            "tests/standard_names/test_logarithmic_unit_prefix_audit.py",
+            "tests/standard_names/test_operator_compose_round_trip.py",
+            "tests/standard_names/test_gap_rule_verdicts.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-grammarassertions",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T23:09:48Z",
+        "completed_at": "2026-09-04T23:32:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1371,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1371,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5c1cc81ac794e5222e35860432c3fd5ba898baa7",
+        "commits": [
+          "324a1f1aa5f1520e59fad4c499ba68f3c0965ef3"
+        ],
+        "changed_lines": {
+          "added": 22,
+          "removed": 24,
+          "files": 6
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230941269309-n-sgr-consumer-assertions-read-the-merged-grammar/after-standard-names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T230941269309-n-sgr-consumer-assertions-read-the-merged-grammar/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06eaf-7a25-7a12-89c2-e7bb45407670",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9766016,
+            "cached_input_tokens_cumulative": 9766016,
+            "input_tokens": 9945807,
+            "input_tokens_cumulative": 9945807,
+            "output_tokens": 31427,
+            "output_tokens_cumulative": 31427,
+            "reasoning_output_tokens": 9046,
+            "reasoning_output_tokens_cumulative": 9046
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 40473,
+          "peak_input_tokens": 19711823
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-consumer-assertions-read-the-merged-grammar",
+          "session_id": "01a06eaf-7a25-7a12-89c2-e7bb45407670",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T23:32:39Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -76808,6 +76949,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1681
+    "_version": 1683
   }
 }
