@@ -209,6 +209,27 @@ Never teach bare `radial_outline` / `vertical_outline` as identities shared by
 different objects. Ordinal siblings of one wall outline may consolidate, but a
 wall outline and a plasma-boundary outline may not.
 
+### Equal axis leaves never license shared attachments
+
+An equal coordinate leaf or projection axis does not make different parent
+properties equivalent. Apply these contrasts before proposing or reusing an
+attachment:
+
+- `boundary/geometric_axis/z` may produce only
+  `vertical_coordinate_of_geometric_axis`, while
+  `boundary/dr_dz_zero_point/z` must use an exact registered identity for the
+  `dr/dz = 0` landmark or emit `vocab_gap`; never attach the landmark to the
+  geometric-axis coordinate.
+- `ece/channel/position/z` may produce only
+  `vertical_coordinate_of_measurement_position`, while
+  `ece/channel/delta_position_suprathermal/z` must retain its `delta` and
+  `suprathermal` semantics through an exact registered carrier or emit
+  `vocab_gap`; never attach the delta as the absolute measurement position.
+- `boundary/outline/z` may produce
+  `vertical_outline_of_plasma_boundary`: this is the positive
+  property-specific control, and it does not license any other `z` leaf to
+  share that attachment.
+
 `dd_paths` for `radial_coordinate_of_line_of_sight` MUST list every
 `.../*_point/r` endpoint — the collapse is realised by attaching every endpoint
 path to the single name. Do not include endpoints belonging to any other
