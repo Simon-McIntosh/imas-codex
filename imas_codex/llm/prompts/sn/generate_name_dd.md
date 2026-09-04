@@ -230,6 +230,25 @@ attachment:
   property-specific control, and it does not license any other `z` leaf to
   share that attachment.
 
+### Distinct carriers keep distinct names — HARD
+
+A generic measurement-position identity is too vague to be a Standard Name.
+`vertical_coordinate_of_measurement_position` currently carries 24 bound
+sources spanning Thomson scattering, interferometers, Langmuir probes, NBI
+beamlets, ion cyclotron antennas, barometry, reflectometers, visible
+spectrometers, and ECE. That count is evidence that carrier semantics were
+erased, not that the sources are equivalent. Each distinct carrier keeps its
+own name qualified by that carrier, using an exact registered identity or a
+`vocab_gap` when the required carrier token is unavailable.
+
+Apply this rule concretely: a Thomson-scattering measurement position and an
+interferometer measurement position require distinct carrier-qualified names;
+an NBI beamlet position and an ion cyclotron antenna position also require
+distinct names. Likewise, a delta or displacement never binds to an absolute
+position identity. In particular, `ece/channel/delta_position_suprathermal/z`
+must not attach to `vertical_coordinate_of_measurement_position`, even when an
+ECE channel position already uses that identity.
+
 `dd_paths` for `radial_coordinate_of_line_of_sight` MUST list every
 `.../*_point/r` endpoint — the collapse is realised by attaching every endpoint
 path to the single name. Do not include endpoints belonging to any other
@@ -299,6 +318,25 @@ Study this table before composing — it eliminates the most common vocab-gap re
 | `derivative_with_respect_to_*` | operators | transformation | Use transformation segment for derivatives |
 | `diffusion_coefficient`, `convection_velocity` | process | physical_base | Transport coefficients are quantities, not processes |
 | `parallel_viscosity`, `heat_viscosity` | process | physical_base | Viscosity is a quantity — process would be `viscous_diffusion` |
+
+### Registered token slot ownership — HARD
+
+Establish which grammar segment owns a token before declaring a vocabulary
+gap. A token registered as a `geometric_base` MUST be emitted as
+`base_token` with `base_kind: "geometry"`; never emit it as a
+`physical_base` or report it missing from `physical_base`.
+
+The worked example is `displacement`. The paths
+`mhd_linear/time_slice/toroidal_mode/plasma/displacement_parallel/imaginary`,
+`mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/real`,
+and
+`mhd_linear/time_slice/toroidal_mode/plasma/displacement_perpendicular/imaginary`
+all failed with the self-diagnosing error `non-actionable vocabulary gap:
+displacement is a registered geometric_base token, not a physical_base - place
+it in the geometric_base slot`. This is NOT a vocabulary gap and needs no
+upstream release: use `displacement` in the `geometric_base` slot, then preserve
+the source-stated parallel/perpendicular and real/imaginary distinctions in
+their owning segments.
 
 ### Process vs Physical_base Decision Rule
 
