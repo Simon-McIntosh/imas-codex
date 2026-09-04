@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:57:06",
+  "updated": "2026-09-04T11:59:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3248,6 +3248,15 @@
           "gpt-5.6-sol": "01a02466-fa5a-77c1-952a-0322cf5ec694"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "inv-batchmint",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "inv-catalogsurface",
@@ -66206,6 +66215,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1591
+    "_version": 1592
   }
 }
