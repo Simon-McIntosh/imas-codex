@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T05:56:45",
+  "updated": "2026-09-04T05:56:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -63575,16 +63575,16 @@
         "backend": "claude-opus",
         "purpose": "resume",
         "opened_at": "2026-09-03T23:51:51Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-04T03:56:59Z",
+        "held_seconds": 14708,
         "utilisation_pct": 100.0,
         "resets_at": null,
         "effective_ceiling_pct": 100.0,
         "reason": "utilisation 100.0% is at or above the 100.0% ceiling for a resume",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 1545
+    "_version": 1546
   }
 }
