@@ -6,10 +6,10 @@ Invoke with:
     uv run pytest tests/graph/test_sn_graph.py -v
     uv run pytest -m graph -v          # all graph tests including these
 
-All metrics are scoped to terminal-state names only:
+Each metric is scoped to the population it judges:
 - name_stage='accepted' for name-axis metrics
 - docs_stage='accepted' for documentation-axis metrics
-- name_stage IN ('accepted', 'exhausted') for quarantine/exclusion checks
+- names not superseded or exhausted for the live-catalog quarantine rate
 
 If the graph contains fewer than 10 accepted StandardName nodes,
 tests are skipped (graph connectivity is handled by the conftest).
@@ -52,12 +52,12 @@ def gc():
 
 
 # ---------------------------------------------------------------------------
-# Queries — all scoped to terminal states
+# Queries — each scoped to its quality population
 # ---------------------------------------------------------------------------
 
 _QUARANTINE_RATE_QUERY = """
 MATCH (sn:StandardName)
-WHERE sn.name_stage IN ['accepted', 'exhausted']
+WHERE sn.name_stage <> 'superseded' AND sn.name_stage <> 'exhausted'
 WITH count(sn) AS total,
      sum(CASE WHEN sn.validation_status = 'quarantined' THEN 1 ELSE 0 END) AS q
 RETURN total, q,
@@ -137,18 +137,17 @@ LIMIT 10
 class TestStandardNameGraph:
     """Quantitative gates for a post-rotation standard name corpus.
 
-    All metrics are scoped to terminal-state names — names still in
-    drafted/reviewed/refining are in-flight and excluded.
+    Each metric selects the lifecycle population whose quality it measures.
     """
 
     def test_quarantine_rate(self, gc):
-        """Quarantine rate among terminal names ≤ 5%."""
+        """Quarantine rate among non-retired names is at most 5%."""
         rows = gc.query(_QUARANTINE_RATE_QUERY)
         row = rows[0]
         rate = row["rate"]
         assert rate <= 0.05, (
             f"Quarantine rate {rate:.1%} exceeds 5% threshold "
-            f"({row['q']}/{row['total']} quarantined among terminal names)"
+            f"({row['q']}/{row['total']} quarantined among non-retired names)"
         )
 
     def test_description_coverage(self, gc):
