@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T01:54:38",
+  "updated": "2026-09-04T02:03:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2749,6 +2749,15 @@
       {
         "id": "impl-supersederoute",
         "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-03"
+      },
+      {
+        "id": "impl-sweepgate",
+        "harness": "claude",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -63164,6 +63173,163 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T235751791634-n-wcr-restore-sweep-gate",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-wcr-restore-sweep-gate",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/test_grammar_segment_repair.py tests/standard_names/test_grammar_segment_reconcile.py -q -p no:cacheprovider exits 0 with 0 failures, the added test asserts that the whole-graph sweep leaves a superseded identity untouched while the name-scoped route still repairs that same identity, and the report states the count of terminal-stage names the sweep can now reach beside the 706 it could reach before the gate was restored",
+          "estimated_hours": 0.5,
+          "goal": "Restore the live-name gate on the whole-graph segment sweep so tombstones are quarantined",
+          "id": "n-wcr-restore-sweep-gate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T235751791634-n-wcr-restore-sweep-gate/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_grammar_segment_repair.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-sweepgate",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T23:57:58Z",
+        "completed_at": "2026-09-04T00:01:52.012Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 227,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 234,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "4d663850734583f43ee046a5543e132880a58118",
+        "commits": [
+          "c2cd22e822b26dea27ddccff45ff1dfb6e9dd5bb"
+        ],
+        "changed_lines": {
+          "added": 77,
+          "removed": 13,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_grammar_segment_repair.py tests/standard_names/test_grammar_segment_reconcile.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/tmp/wcr_test_out.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T235751791634-n-wcr-restore-sweep-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "17740af9-24b7-43bb-9a74-f2594f3cf5c2",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 0.82,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-07T20:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.75,
+          "tokens": {
+            "cache_creation_input_tokens": 88839,
+            "cache_creation_input_tokens_cumulative": 88839,
+            "cache_read_input_tokens": 2405726,
+            "cache_read_input_tokens_cumulative": 2405726,
+            "inference_geo": "not_available",
+            "input_tokens": 54,
+            "input_tokens_cumulative": 54,
+            "output_tokens": 15935,
+            "output_tokens_cumulative": 15935,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.9959592000000003,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 0.9959592000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4566,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: work in progress \u2014 this is the pre-work placeholder manifest",
+              "elapsed_seconds": 7266,
+              "log_age_seconds": 6870,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none yet; changed_paths: none yet"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-fusion-subject-reissue",
+              "phase": "blocked",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260903T215612074191-n-wcr-fusion-subject-reissue",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 7241,
+              "terminal_at": "2026-09-03T21:57:15Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-fusion-subject-reissue"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 230.472,
+          "generated_tokens": 15935,
+          "generation_seconds": 184.173,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 10.8,
+          "machine_seconds": 46.299,
+          "peak_input_tokens": 108070,
+          "tokens_per_second": 86.52,
+          "wall_tokens_per_second": 69.14
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_grammar_segment_repair.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -63266,6 +63432,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1541
+    "_version": 1543
   }
 }
