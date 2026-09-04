@@ -15,12 +15,18 @@ DEFAULT_MIN_SCORE: float = 0.85
 
 # ── Semantic similarity gate ──────────────────────────────────────────
 # Cosine similarity between embed(name_as_words) and embed(description).
-# Names below CRITICAL are auto-failed (synthetic low score → refine).
+# Names below CRITICAL receive a deterministic, non-winning verdict.
 # Names below WARNING get an advisory issue injected into review context.
+
+SEMANTIC_SIM_GATE_MODEL: str = "(semantic_similarity_gate)"
+"""Model identity used for deterministic embedding-similarity verdicts."""
+
+SEMANTIC_SIM_GATE_RESOLUTION_METHOD: str = "semantic_similarity_gate"
+"""Non-winning resolution method for deterministic similarity verdicts."""
 
 SEMANTIC_SIM_CRITICAL: float = 0.55
 """Below this similarity, the name is semantically ambiguous. Review is
-skipped and a synthetic low score (0.30) routes the name to refine."""
+skipped and a deterministic low score is recorded without reviewer authority."""
 
 SEMANTIC_SIM_WARNING: float = 0.65
 """Below this similarity, a warning is injected into the reviewer context.
@@ -28,7 +34,8 @@ The reviewer still scores the name but is alerted to potential ambiguity."""
 
 SEMANTIC_SIM_SYNTHETIC_SCORE: float = 0.30
 """Score assigned to names that fail the critical semantic similarity gate.
-Low enough to guarantee routing to the refine_name pool."""
+The gate's non-winning resolution method records a quorum shortfall, so this
+score cannot authorize acceptance or a refine claim."""
 
 # Refine rotation cap
 DEFAULT_REFINE_ROTATIONS: int = get_sn_refine_rotations()

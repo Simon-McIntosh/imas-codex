@@ -35,6 +35,8 @@ from imas_codex.standard_names.budget import (
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    SEMANTIC_SIM_GATE_MODEL,
+    SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
 )
 from imas_codex.standard_names.provenance import detect_value_provenance
 from imas_codex.standard_names.source_paths import (
@@ -48,6 +50,41 @@ if TYPE_CHECKING:
     from imas_codex.standard_names.state import StandardNameBuildState
 
 logger = logging.getLogger(__name__)
+
+
+def backfill_semantic_similarity_gate_resolution_method(gc: Any | None = None) -> int:
+    """Type legacy deterministic gate reviews without granting them authority.
+
+    The model and reviewer-model pair is the durable identity of these rows.
+    Scores are deliberately not part of the predicate because genuine reviewer
+    verdicts can share the same normalized score.
+    """
+
+    def _backfill(client: Any) -> int:
+        rows = list(
+            client.query(
+                """
+                MATCH (review:StandardNameReview)
+                WHERE review.model = $model_identity
+                  AND review.reviewer_model = $model_identity
+                  AND review.resolution_method IS NULL
+                SET review.resolution_method = $resolution_method
+                RETURN count(review) AS updated
+                """,
+                model_identity=SEMANTIC_SIM_GATE_MODEL,
+                resolution_method=SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
+            )
+            or []
+        )
+        return int(rows[0]["updated"]) if rows else 0
+
+    if gc is not None:
+        return _backfill(gc)
+
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as client:
+        return _backfill(client)
 
 
 def normalize_spelling(name: str) -> str:
@@ -8170,6 +8207,8 @@ async def process_review_name_batch(
         from imas_codex.standard_names.audits import semantic_similarity_check
         from imas_codex.standard_names.defaults import (
             SEMANTIC_SIM_CRITICAL,
+            SEMANTIC_SIM_GATE_MODEL,
+            SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
             SEMANTIC_SIM_SYNTHETIC_SCORE,
             SEMANTIC_SIM_WARNING,
         )
@@ -8281,11 +8320,13 @@ async def process_review_name_batch(
             except Exception:
                 pass  # best-effort
 
-        # Critical: skip LLM review, force into refine pipeline
+        # Critical: skip LLM review and record a non-winning diagnostic verdict.
+        # The resulting quorum shortfall prevents both acceptance and a refine
+        # claim until the lifecycle owns a deliberate route for this evidence.
         if sem_sim is not None and sem_sim < SEMANTIC_SIM_CRITICAL:
             logger.info(
                 "review_name: semantic gate FAILED for %s (sim=%.3f < %.2f) — "
-                "routing to refine",
+                "recording non-winning verdict",
                 sn_id,
                 sem_sim,
                 SEMANTIC_SIM_CRITICAL,
@@ -8295,12 +8336,7 @@ async def process_review_name_batch(
                     sn_id=sn_id,
                     claim_token=claim_token,
                     score=SEMANTIC_SIM_SYNTHETIC_SCORE,
-                    scores={
-                        "grammar": 15.0 / 20.0,
-                        "semantic": 2.0 / 20.0,
-                        "convention": 15.0 / 20.0,
-                        "completeness": 5.0 / 20.0,
-                    },
+                    scores={"semantic": float(sem_sim)},
                     comments=(
                         f"semantic_similarity_gate: sim={sem_sim:.3f} below "
                         f"critical {SEMANTIC_SIM_CRITICAL:.2f}. Name is "
@@ -8314,7 +8350,7 @@ async def process_review_name_batch(
                             f"threshold. The name does not stand alone."
                         ),
                     },
-                    model="(semantic_similarity_gate)",
+                    model=SEMANTIC_SIM_GATE_MODEL,
                     llm_cost=0.0,
                     llm_tokens_in=0,
                     llm_tokens_out=0,
@@ -8322,6 +8358,7 @@ async def process_review_name_batch(
                     llm_tokens_cached_write=0,
                     llm_service="standard-names",
                     run_id=mgr.run_id,
+                    resolution_method=SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
                 )
                 processed += 1
                 if on_event:
