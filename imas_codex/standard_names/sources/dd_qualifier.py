@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import re
 
+from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
 from imas_codex.standard_names.sources.base import (
     ELIGIBLE,
     Qualification,
@@ -68,6 +69,13 @@ def qualify_dd(candidate: SourceCandidate) -> Qualification:
         to LLM composition, or a skip/not_physical result with reason codes.
     """
     # --- Structural checks (Python predicates) ---
+
+    node_category = candidate.metadata.get("node_category", "")
+    if node_category not in SN_SOURCE_CATEGORIES:
+        return not_physical(
+            "node_category_ineligible",
+            f"DD node category {node_category!r} is not eligible for standard names.",
+        )
 
     # S0: String-typed leaves — names, descriptions, identifiers.
     # Match STR_0D / STR_1D (string scalars/arrays) via the trailing underscore —
@@ -133,7 +141,6 @@ def qualify_dd(candidate: SourceCandidate) -> Qualification:
     # data, not physics quantities. Top-level <ids>/time (depth 1) is
     # exempt; nested time paths (depth >= 3 segments) with coordinate
     # category are filtered.
-    node_category = candidate.metadata.get("node_category", "")
     if leaf == "time" and len(hierarchy) >= 3 and node_category == "coordinate":
         return skip(
             "temporal_coordinate",

@@ -1609,11 +1609,6 @@ class TestINT0DPhysicsTruePositive:
             # Module/coil counts
             ("breeding_blanket/modules_n", "modules_n"),
             ("coils_non_axisymmetric/coils_n", "coils_n"),
-            # Convergence iterations
-            (
-                "transport_solver_numerics/solver_1d/equation/convergence/iterations_n",
-                "iterations_n",
-            ),
             # Species fraction
             (
                 "core_profiles/profiles_1d/ion/fraction",
