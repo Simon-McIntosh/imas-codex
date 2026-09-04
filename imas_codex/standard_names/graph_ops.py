@@ -13413,17 +13413,18 @@ def reconcile_grammar_segments() -> dict[str, int]:
     case. Such a name no longer recomposes to itself, and a re-composition from
     its DD leaf would mint a divergent ``_at_pedestal`` near-duplicate.
 
-    This idempotent sweep re-parses every name through the authoritative ISN
-    parser and realigns any drifted segment column to the parse. Names the
+    This idempotent sweep re-parses every live name through the authoritative
+    ISN parser and realigns any drifted segment column to the parse. Names the
     ISN grammar cannot parse are skipped (their segments are owned by the
     quarantine path, never wiped here). Safe to run every rotation.
 
-    Every lifecycle stage is in range. A superseded or exhausted identity
-    carries the same drifted columns as a live one, and its history is what a
-    published catalog resolves a retired name through, so the sweep repairs it
-    rather than leaving it behind; the ``StandardNameChange`` written beside
-    each realignment is what keeps a rewrite of a tombstoned identity
-    reviewable.
+    A superseded or exhausted identity is a tombstone: rewriting its stored
+    segments as a side effect of a routine sweep changes a historical record a
+    published catalog may still resolve through, for no benefit to the live
+    graph. The sweep quarantines every terminal-stage identity rather than
+    touching it; :func:`realign_grammar_segments_for_name` is the deliberate,
+    operator-named route that reaches a tombstoned identity when a repair to
+    it is actually intended.
 
     Kind is another deterministic projection of the canonical name. The same
     maintenance step refreshes a stale stored kind and records every change in
@@ -13432,12 +13433,16 @@ def reconcile_grammar_segments() -> dict[str, int]:
     Returns ``{"names_realigned": n}``; the stable result shape remains scoped
     to grammar segments while kind refresh reports through its own log entry.
     """
+    from imas_codex.standard_names.ledger import LIVE_NAME
+
     cols = _GRAMMAR_SEGMENT_COLUMNS
     select = ", ".join(f"sn.{c} AS {c}" for c in cols)
     set_clause = ", ".join(f"sn.{c} = b.{c}" for c in cols)
     batch: list[dict[str, Any]] = []
     with GraphClient() as gc:
-        rows = gc.query(f"MATCH (sn:StandardName) RETURN sn.id AS id, {select}")
+        rows = gc.query(
+            f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
+        )
         for r in rows:
             parsed = _parse_grammar(r["id"])
             # A successful ISN parse always yields a physical_base; an all-None
