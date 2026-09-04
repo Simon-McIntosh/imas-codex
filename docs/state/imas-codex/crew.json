@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:17:19",
+  "updated": "2026-09-04T11:33:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1858,6 +1858,15 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-mockexposure",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-nameprop",
         "harness": "codex",
         "role": "implement",
@@ -3454,6 +3463,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-01"
+      },
+      {
+        "id": "inv-verdictreaders",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "inv-wcrreuse",
@@ -65504,6 +65522,152 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T091843111164-n-sli-verdict-reader-map",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-verdict-reader-map",
+        "node_definition": {
+          "done_when": "A report at the declared path names each consumer of review score, scores, comments, comments_per_dim, model and resolution_method across imas_codex/standard_names, with the file and line of each read, and states for each whether it would present the embedding gate's synthetic row as a model verdict. Ground it in the write site: workers.py around line 8297 calls persist_reviewed_name with the constant SEMANTIC_SIM_SYNTHETIC_SCORE of 0.30 from defaults.py, four invented per-dimension scores of grammar 15/20, semantic 2/20, convention 15/20 and completeness 5/20 that no model produced, a comment prefixed semantic_similarity_gate, and model set to the literal (semantic_similarity_gate) \u2014 while resolution_method is left null, which is the field a reader would key on. Report the count of live StandardNameReview rows carrying that constant score, and separately the count whose model field names the gate, so the two can be compared; if the role cannot reach the graph, say so plainly rather than estimating. State which single field a fix should key on so no reader has to parse prose or a model string, and whether emitting only the dimension the gate actually measured would break any named reader. Do not change repository files.",
+          "estimated_hours": 0.5,
+          "goal": "Map every reader that presents a StandardNameReview score as a reviewer verdict",
+          "id": "n-sli-verdict-reader-map",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-verdict-reader-map-manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sli-verdict-reader-map.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-verdictreaders",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T09:18:51Z",
+        "completed_at": "2026-09-04T09:32:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 793,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 793,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "5a1f09f4aa63f1a3bcb76d00e197e8433169c696",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "static census of every score/scores/comments/comments_per_dim/model/resolution_method read under imas_codex/standard_names, reported with file and line",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-verdict-reader-map.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-verdict-reader-map-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06bb6-b662-7842-ada1-f3ae688d1174",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8059904,
+            "cached_input_tokens_cumulative": 8059904,
+            "input_tokens": 8366263,
+            "input_tokens_cumulative": 8366263,
+            "output_tokens": 27608,
+            "output_tokens_cumulative": 27608,
+            "reasoning_output_tokens": 9391,
+            "reasoning_output_tokens_cumulative": 9391
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 8274,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 10974,
+              "external_wait": null,
+              "log_age_seconds": 10853,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 10876,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 36999,
+          "peak_input_tokens": 16426167
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "investigation node; its deliverable is the reader map at the declared report path and it changed no repository file by design",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -65634,6 +65798,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1583
+    "_version": 1586
   }
 }
