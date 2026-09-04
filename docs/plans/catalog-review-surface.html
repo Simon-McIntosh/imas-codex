@@ -20,8 +20,8 @@
   <title>Catalog Review Surface Integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-01">
-<meta name="plan-version" content="10">
+<meta name="plan-modified" content="2026-09-04">
+<meta name="plan-version" content="11">
 <meta name="plan-commits" content="bcb25e0e,9fa88452">
 <meta name="plan-artifacts" content="docs/evidence/catalog-review-surface/reuse-map.md,docs/evidence/catalog-review-surface/graph-substrate-audit.md,imas_codex/schemas/standard_name.yaml,imas_codex/standard_names/promote.py,tests/standard_names/test_promote_reviewer_actor.py">
 <meta name="plan-impl" content="0.57">
@@ -186,6 +186,9 @@
 </div>
 <div class="r-comment" data-section="§4a" data-id="c-20260901T1345-blocked" data-who="reckon-ship" data-when="2026-09-01T13:45:00+00:00">
     <div class="r-comment-body">SESSION CLOSE on this plan at impl 0.57, and the stop is a named dependency rather than exhausted effort. Landed here: the reuse map (bcb25e0e), the reviewer-actor field that made deliverable five measurable at all (9fa88452), the substrate audit whose NO-GO was correct, and the first current verified backup of the live graph. Deliverables one and two were already landed before this session and are proven live on fork pull requests 4 and 5. WHAT REMAINS IS GATED ON ANOTHER PLAN'S DECISIONS: the lead chose an isolated substrate for the rehearsal, standing one up needs graph init and switch, and the audit found direct graph init unsafe on the running service while load and clear act on whatever the single active symlink resolves to. So a hard dependency on graph-destructive-command-safety is now recorded, and its two open decisions are the lead's to lock. The alternative - creating a scratch graph with commands that cannot yet be aimed at a named target, hours after those same commands took the live graph down - is exactly the risk the audit was commissioned to surface.</div>
+</div>
+<div class="r-comment" data-section="§4a" data-id="c-20260904T2130-blocker-stale" data-who="reckon-ship" data-when="2026-09-04T21:30:00+00:00">
+    <div class="r-comment-body">CURRENCY CORRECTION, and it reopens this plan for work: f-crs-002's stated blocker no longer exists. That followup holds the rehearsal shut on graph-destructive-command-safety, whose "two open decisions are the lead's to lock" — that plan is now status shipped at impl 1.0 in S9 with an EMPTY open-decision set, and its own summary states the outcome the rehearsal was waiting for, that destructive commands name their target. So the exemption f-crs-002 claimed was true when written and is false now, which makes it a FOLDABLE row rather than an authority-blocked one, and the pattern is the one this project keeps meeting: a stored classification carries no observation time, so a stale verdict and a current one are indistinguishable until someone compares them against the thing they describe. Nothing here re-derives the substrate audit's findings, which stand as measured on 2026-09-01: the active symlink rather than IMAS_CODEX_GRAPH is the data selector, backup_existing_data() writes markers rather than recoverable data, and the audit's own go-condition was that a full export exist with path, size and mtime recorded plus an active-link assertion before every load or clear. What has changed is that the mechanism to satisfy that condition is now shipped rather than pending a decision. The node that follows must therefore VERIFY the aiming mechanism against the current tree before it uses it — this correction establishes that the decisions are locked, not that any particular command signature exists — and only then run the fold-back with one accepted prose edit and one edit the pipeline must refuse, prove the unwind, and capture the traceability receipt on catalog_reviewer_actor that 9fa88452 made measurable.</div>
 </div>
 </section>
 </main>

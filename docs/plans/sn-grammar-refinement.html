@@ -152,6 +152,39 @@
     makes turnaround fast — but it means a broken grammar breaks every concurrent worker, so
     each grammar change is gated by the suite in the main checkout before any worker wave opens.</p>
 
+    <h2 id="s7">§7 — One upstream release carries the grammar and four vocabulary gaps</h2>
+    <p>Four separate quantities are each blocked on a token the ISN closed vocabulary does not
+    have, and they were raised as four independent asks against four different plans. They are
+    one deliverable. Because the grammar is developed editable here and pinned only once
+    settled, the release that carries the rendering rules is the same release that should carry
+    the missing tokens — so the upstream chain of fork pull request, upstream pull request, tag
+    and two pin bumps runs <em>once</em> rather than five times.</p>
+    <table>
+      <thead><tr><th>Gap</th><th>Surface</th><th>Raised by</th></tr></thead>
+      <tbody>
+      <tr><td>a measurement-direction token that is not an ordinal</td>
+          <td>6 strain-gauge identities</td><td><code>sn-release-readiness</code> §12</td></tr>
+      <tr><td>a Stokes component index</td>
+          <td>8 sources</td><td>polarimetry cohort</td></tr>
+      <tr><td><code>relative_humidity</code> as a physical base</td>
+          <td>1 source, WEST <code>camera_x_rays/detector_humidity</code></td>
+          <td><code>sn-west-cohort-treatment</code> §4</td></tr>
+      <tr><td>an iron-core &beta; token</td><td>1 source</td><td>WEST cohort</td></tr>
+      </tbody>
+    </table>
+    <p>The strain-gauge case states the shape of all four: no non-ordinal token exists, so the
+    names can only be spelled by folding onto the generic sensor direction-vector identities,
+    which asserts something the source does not say. Each gap is therefore a genuine vocabulary
+    absence rather than a spelling preference, and the same test applies to each before it is
+    accepted — the data-dictionary documentation and unit must support the token, the corpus must
+    show the quantity is not already nameable, and the token must fit its base family. Rejecting a
+    candidate is a legitimate outcome and is recorded beside its accepted alternative.</p>
+    <p>The tokens are additive to a closed vocabulary, so they cannot change how any existing
+    name parses; the rendering rules in §2 and §3 can. That asymmetry decides the order within the
+    release: vocabulary and rendering are developed in parallel in separate worktrees, each gated
+    by the grammar suite, and merged into the editable checkout one at a time so a fleet-visible
+    break is attributable to the change that caused it.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="operator-renders-by-arity" data-choice="single-base-operand-renders-adjacent" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
