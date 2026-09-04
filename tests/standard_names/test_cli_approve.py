@@ -7,7 +7,7 @@ from unittest.mock import patch
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
-from imas_codex.standard_names.promote import ApprovalReport
+from imas_codex.standard_names.promote import ApprovalReport, UndoApprovalReport
 
 MOCK_TARGET = "imas_codex.standard_names.promote.run_approval"
 
@@ -52,6 +52,41 @@ def test_sn_approve_nonzero_exit_on_blocked():
 
     assert result.exit_code != 0, result.output
     assert "blocked" in result.output.lower()
+
+
+def test_sn_approve_names_refused_promotions_and_exits_nonzero():
+    report = ApprovalReport(
+        promotion_refused=[
+            {
+                "sn_id": "electron_temperature",
+                "target_id": "electron_temperature",
+                "reason": "catalog lifecycle promotion preconditions were not met",
+            }
+        ]
+    )
+    with patch(MOCK_TARGET, return_value=report):
+        result = CliRunner().invoke(
+            sn, ["approve", "--isnc", "/tmp/isnc", "--base", "main"]
+        )
+
+    assert result.exit_code != 0, result.output
+    assert "promotion" in result.output.lower()
+    assert "electron_temperature" in result.output
+    assert "preconditions were not met" in result.output
+
+
+def test_sn_approve_undo_reports_both_lifecycle_reversals():
+    target = "imas_codex.standard_names.promote.undo_approval"
+    report = UndoApprovalReport(pr_number=12, demoted=["a"])
+    with patch(target, return_value=report):
+        result = CliRunner().invoke(
+            sn,
+            ["approve", "--isnc", "/tmp/isnc", "--pr-number", "12", "--undo"],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert "approved/active" in result.output
+    assert "accepted/draft" in result.output
 
 
 def test_sn_merge_alias_is_absent():
