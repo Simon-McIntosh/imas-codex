@@ -37,6 +37,7 @@ def _maintenance_mocks(stack: ExitStack) -> dict[str, MagicMock]:
         "reconcile_source_status_liveness": {},
         "retire_unreachable_hint_edits": 0,
         "reconcile_grammar_segments": {},
+        "reconcile_catalog_status": {},
         "reconcile_reviewable_name_stage": {},
         "reconcile_standard_name_cocos_links": {},
         "reconcile_standard_name_unit_edges": {},

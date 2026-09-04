@@ -1634,8 +1634,21 @@ async def run_sn_pools(
         # an idempotent net. Runs BEFORE the pools so the review pool sees the
         # advanced names the same run.
         from imas_codex.standard_names.graph_ops import (
+            reconcile_catalog_status,
             reconcile_reviewable_name_stage,
         )
+
+        catalog_status = await _global_maintenance_call(
+            reconcile_catalog_status, default={}
+        )
+        if catalog_status.get("total_changed", 0):
+            logger.info(
+                "run_sn_pools: catalog-status reconcile — %d draft, "
+                "%d superseded, %d deprecated",
+                catalog_status.get("drafted", 0),
+                catalog_status.get("superseded", 0),
+                catalog_status.get("deprecated", 0),
+            )
 
         entry_result = await _global_maintenance_call(
             reconcile_reviewable_name_stage, default={}

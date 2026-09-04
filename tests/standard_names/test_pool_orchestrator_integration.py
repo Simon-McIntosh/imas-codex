@@ -47,6 +47,7 @@ def _stub_parent_lifecycle_startup():
         patch(f"{_GO}.reconcile_source_status_liveness", return_value={}),
         patch(f"{_GO}.retire_unreachable_hint_edits", return_value=0),
         patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
+        patch(f"{_GO}.reconcile_catalog_status", return_value={}),
         patch(f"{_GO}.reconcile_reviewable_name_stage", return_value={}),
         patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
         patch(
@@ -155,6 +156,7 @@ class TestReconcileRunsBeforePools:
                 _GO,
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_catalog_status=MagicMock(return_value={}),
                 reconcile_standard_name_cocos_links=MagicMock(return_value={}),
                 reconcile_standard_name_unit_edges=MagicMock(
                     return_value={
@@ -447,6 +449,7 @@ class TestFinalizeWithCorrectStatus:
                 ),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_catalog_status=MagicMock(return_value={}),
                 reconcile_standard_name_cocos_links=MagicMock(return_value={}),
                 reconcile_standard_name_unit_edges=MagicMock(
                     return_value={
@@ -544,6 +547,7 @@ class TestFinalizeWithCorrectStatus:
                 ),
                 reconcile_provenance=MagicMock(return_value={}),
                 reconcile_grammar_segments=MagicMock(return_value={}),
+                reconcile_catalog_status=MagicMock(return_value={}),
                 reconcile_standard_name_cocos_links=MagicMock(return_value={}),
                 reconcile_standard_name_unit_edges=MagicMock(
                     return_value={
