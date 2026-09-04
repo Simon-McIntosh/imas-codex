@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T00:48:08",
+  "updated": "2026-09-05T00:58:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -457,10 +457,11 @@
         "id": "impl-backupcurrency",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
+        "session_id": "01a06e90-6789-7923-87e0-3ca870066beb",
+        "session_model": "gpt-5.6-sol",
         "sessions": {
-          "gpt-5.6-sol": "01a05e27-6f63-7ff2-a319-a266f961f5b5"
+          "gpt-5.6-sol": "01a05e27-6f63-7ff2-a319-a266f961f5b5",
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e90-6789-7923-87e0-3ca870066beb"
         },
         "created": "2026-09-01"
       },
@@ -75936,6 +75937,156 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T223502625862-n-crs-graph-pull-names-its-target",
+        "plan": "catalog-review-surface",
+        "section": "\u00a74b",
+        "node": "n-crs-graph-pull-names-its-target",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1909,
+                "cached_input_tokens": 494527,
+                "input_tokens": 496438,
+                "output_tokens": 4328,
+                "reasoning_output_tokens": 709,
+                "total_tokens": 500766,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "The locked ruling on graph-destructive-command-safety is that a destructive graph command NAMES its destination and refuses when the resolved symlink disagrees. load and clear now do, and their refusal was probed live tonight returning exit 1 with 'Refusing to clear'. graph_pull at imas_codex/cli/graph/registry.py:1124 was missed: it takes no destination at all, its remote path derives profile.name, and its local path omits the required target when it calls into the local load. It is the third destructive caller the ruling governs, so the gap is in the ruling's coverage rather than in the ruling. DELIVER: graph_pull requires an explicit target, compares it against the active symlink BEFORE any stop, fetch or load, refuses on disagreement naming both the requested and the resolved target, and passes the target through to the local graph_load so the guard cannot be bypassed one call deeper. Match the refusal shape load and clear already use rather than inventing a second one, and say in your manifest which existing guard you reused. THE GATE IS THAT THE REFUSAL FIRES, not that the argument exists: add a test invoking graph_pull with a target that disagrees with the active symlink and asserting it refuses before any destructive step runs, and show that test FAILS when your comparison is removed. Report the existing tests/cli graph-safety suite before and after with 0 added failures. THIS TOUCHES A COMMAND THAT CAN DESTROY A 15 GB LIVE GRAPH. Run no real pull, no load, no clear and no service restart; test through the ordinary test seams only. A peer holds imas_codex/graph/neo4j_ops.py; do not edit it. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and NEVER drop --no-sync: that environment is shared with the main checkout and every peer, and syncing it from a worktree repoints its editable install at your worktree and breaks all of them. Capture each run to a file once with its exact command, exit status and log path, then read the file rather than piping it. Report failure count and failure ids before and after, and judge yourself on ADDED failures against your own measured base.",
+          "estimated_hours": null,
+          "goal": "Make graph pull name its destination and refuse when the resolved symlink disagrees",
+          "id": "n-crs-graph-pull-names-its-target",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502625862-n-crs-graph-pull-names-its-target/manifest.md",
+          "plan": "catalog-review-surface",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74b",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/cli/graph/registry.py",
+            "tests/cli/test_graph_pull_target.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-pulltarget",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T22:35:09Z",
+        "completed_at": "2026-09-04T22:56:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1267,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1267,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d89f837bdb9ac6bb906728e3354471f3138ba148",
+        "commits": [
+          "2eda1fefbbca29aac57f250c5b88b848171bcfd2",
+          "a5ff4a77951f8c97becf734f5aa9426342ed0f2f"
+        ],
+        "changed_lines": {
+          "added": 98,
+          "removed": 5,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/cli/test_graph_destructive_target.py tests/cli/test_graph_destructive_backup.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502625862-n-crs-graph-pull-names-its-target/after-scope-graph-safety.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502625862-n-crs-graph-pull-names-its-target/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a06e8f-c2a3-7120-9806-57f0a8940bdc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5794304,
+            "cached_input_tokens_cumulative": 5794304,
+            "input_tokens": 5913144,
+            "input_tokens_cumulative": 5913144,
+            "output_tokens": 17713,
+            "output_tokens_cumulative": 17713,
+            "reasoning_output_tokens": 4470,
+            "reasoning_output_tokens_cumulative": 4470
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 22183,
+          "peak_input_tokens": 11707448
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "scope_acceptances": [
+          {
+            "path": "imas_codex/cli/graph/__init__.py",
+            "reason": "coordinator-authorized mid-flight: the command help described a signature the command now refuses"
+          },
+          {
+            "path": "imas_codex/graph/AGENTS.md",
+            "reason": "coordinator-authorized mid-flight: the guidance described pull without its required target"
+          },
+          {
+            "path": "tests/cli/test_graph_destructive_backup.py",
+            "reason": "coordinator-authorized mid-flight: making the target mandatory staled this test's invocation while leaving its dump-failure-before-fetch assertion intact"
+          }
+        ],
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-crs-graph-pull-names-its-target",
+          "session_id": "01a06e8f-c2a3-7120-9806-57f0a8940bdc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T22:56:16Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -76080,6 +76231,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1669
+    "_version": 1671
   }
 }
