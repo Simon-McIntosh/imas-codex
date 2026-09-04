@@ -12954,17 +12954,19 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
 
     ``status`` is distinct from the pipeline's ``name_stage``: it gates what a
     catalog may publish. New and historical names without a catalog status are
-    drafts, while pipeline-terminal identities need terminal catalog statuses
-    so they remain available as graph history without returning to an export.
+    drafts. Superseded identities carry the successor-aware terminal catalog
+    status, while exhausted identities remain drafts because they never entered
+    a catalog and are quarantined for repair.
 
     Approval is the sole writer of ``'active'``. Accordingly, this reconcile
-    only changes null or draft values: superseded pipeline identities become
-    ``'superseded'``, exhausted identities become ``'deprecated'``, and any
-    remaining null becomes ``'draft'``. Existing active and terminal statuses
-    never match a write predicate. Terminal transitions run first so the draft
-    count reports only non-terminal nulls and each changed name is counted once.
+    makes superseded pipeline identities ``'superseded'``, repairs every
+    exhausted identity to ``status='draft'`` and
+    ``validation_status='quarantined'``, and makes any remaining null status
+    ``'draft'``. It never writes ``'deprecated'``; that transition belongs only
+    to withdrawal of a name that was actually active. Terminal transitions run
+    first so each changed name is counted once.
 
-    Returns dict: {drafted, superseded, deprecated, total_changed}.
+    Returns dict: {drafted, superseded, quarantined, deprecated, total_changed}.
     """
     own = gc is None
     client = GraphClient() if own else gc
@@ -12978,12 +12980,14 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             RETURN count(sn) AS changed
             """
         )
-        deprecated_rows = client.query(
+        quarantined_rows = client.query(
             """
             MATCH (sn:StandardName)
             WHERE sn.name_stage = 'exhausted'
-              AND (sn.status IS NULL OR sn.status = 'draft')
-            SET sn.status = 'deprecated'
+              AND (coalesce(sn.status, '') <> 'draft'
+                   OR coalesce(sn.validation_status, '') <> 'quarantined')
+            SET sn.status = 'draft',
+                sn.validation_status = 'quarantined'
             RETURN count(sn) AS changed
             """
         )
@@ -13002,16 +13006,18 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
     result = {
         "drafted": drafted_rows[0]["changed"] if drafted_rows else 0,
         "superseded": superseded_rows[0]["changed"] if superseded_rows else 0,
-        "deprecated": deprecated_rows[0]["changed"] if deprecated_rows else 0,
+        "quarantined": quarantined_rows[0]["changed"] if quarantined_rows else 0,
+        "deprecated": 0,
     }
     result["total_changed"] = sum(result.values())
     if result["total_changed"]:
         logger.info(
             "reconcile_catalog_status: set %d name(s) to draft, %d to "
-            "superseded, and %d to deprecated",
+            "superseded, and %d exhausted name(s) to draft/quarantined; "
+            "deprecated writes: 0",
             result["drafted"],
             result["superseded"],
-            result["deprecated"],
+            result["quarantined"],
         )
     return result
 
@@ -13356,9 +13362,13 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
                             ),
                             origin="sourceless_reconcile",
                         )
-                    except Exception:  # pragma: no cover - audit crumb must not block the heal
+                    except (
+                        Exception
+                    ):  # pragma: no cover - audit crumb must not block the heal
                         logger.debug(
-                            "Failed to record reattachment of %s", dd_path, exc_info=True
+                            "Failed to record reattachment of %s",
+                            dd_path,
+                            exc_info=True,
                         )
             if not name_gained_source:
                 # A recorded detachment exists but no source was restored:
@@ -15976,8 +15986,8 @@ def persist_reviewed_name(
                 sn.claim_token                = null,
                 sn.claimed_at                 = null,
                 sn.validation_status = CASE
-                  WHEN $grammar_valid THEN sn.validation_status
-                  ELSE 'quarantined'
+                  WHEN $target_stage = 'exhausted' THEN 'quarantined'
+                  ELSE sn.validation_status
                 END,
                 sn.validation_issues = CASE
                   WHEN $grammar_issue IS NULL THEN sn.validation_issues
@@ -22916,6 +22926,9 @@ def stop_refine_name_attempt(
                      OR coalesce(sn.refine_attempts, 0) >= $rotation_cap
                    THEN 'exhausted' ELSE 'reviewed' END AS target_stage
             SET sn.name_stage = target_stage,
+                sn.validation_status = CASE
+                    WHEN target_stage = 'exhausted' THEN 'quarantined'
+                    ELSE sn.validation_status END,
                 sn.refine_stop_reason = CASE
                     WHEN target_stage = 'exhausted' AND NOT $terminal
                     THEN $attempts_exhausted ELSE $reason END,
