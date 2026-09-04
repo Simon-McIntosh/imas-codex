@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T00:29:14",
+  "updated": "2026-09-05T00:48:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -457,8 +457,8 @@
         "id": "impl-backupcurrency",
         "harness": "codex",
         "role": "implement",
-        "session_id": "01a05e27-6f63-7ff2-a319-a266f961f5b5",
-        "session_model": "gpt-5.6-sol",
+        "session_id": null,
+        "session_model": null,
         "sessions": {
           "gpt-5.6-sol": "01a05e27-6f63-7ff2-a319-a266f961f5b5"
         },
@@ -2375,6 +2375,17 @@
         "created": "2026-09-03"
       },
       {
+        "id": "impl-pulltarget",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a06e8f-c2a3-7120-9806-57f0a8940bdc",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e8f-c2a3-7120-9806-57f0a8940bdc"
+        },
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-quarcensus",
         "harness": "codex",
         "role": "implement",
@@ -2600,9 +2611,11 @@
         "id": "impl-releaseguard",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06e8f-c299-7800-953c-2ae2f6ce64c0",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e8f-c299-7800-953c-2ae2f6ce64c0"
+        },
         "created": "2026-09-04"
       },
       {
@@ -2902,6 +2915,15 @@
         "role": "implement",
         "session_id": "01a02e10-63ca-7872-892b-3f2a2a2891c2",
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-solidangle",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-sourceattach",
@@ -4003,9 +4025,11 @@
         "id": "test-mergedhead",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06e8f-c29f-7ba2-bb23-1d3780a87ac4",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e8f-c29f-7ba2-bb23-1d3780a87ac4"
+        },
         "created": "2026-09-04"
       },
       {
@@ -75777,6 +75801,141 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T223502626005-n-wcr-a-failed-export-stops-publication",
+        "plan": "sn-west-catalog-release",
+        "section": "release-run-residues",
+        "node": "n-wcr-a-failed-export-stops-publication",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1909,
+                "cached_input_tokens": 494527,
+                "input_tokens": 496438,
+                "output_tokens": 4328,
+                "reasoning_output_tokens": 709,
+                "total_tokens": 500766,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "run_review_release in imas_codex/standard_names/catalog_release.py can assemble and publish staging content without first propagating an unsuccessful ExportReport, so a failed export does not stop the step consuming its output and a reviewer may receive stale content rather than none. MEASURE BEFORE YOU CLOSE IT, because this is a fail-open guard and the surrounding tests may be passing partly BECAUSE it fails open: flip the propagation closed in a scratch copy first, run the release and export suites, and report how many tests fail and their ids. That number is the finding and belongs in your manifest whether or not you absorb it. Then land the change: an unsuccessful ExportReport must propagate before any assemble or publish step runs, and the refusal must NAME which gate failed rather than surfacing as a generic error. Pin it with a test that constructs an unsuccessful report, asserts publication is refused, and FAILS if the propagation is removed. If the exposed failures are legitimate consequences you cannot absorb in this write scope, leave them failing and say so rather than widening the swallow to reach green - a guard that passes its own test by disabling itself reports a safety it does not provide. Note that a peer landed a scoping change in this same module tonight: the release names list is now built from the manifest rows' terminal ids rather than a union with mint_sn_list, so read the current file rather than assuming its earlier shape. Do NOT cut a candidate, push a branch or tag, or open or modify a pull request. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and NEVER drop --no-sync: that environment is shared with the main checkout and every peer, and syncing it from a worktree repoints its editable install at your worktree and breaks all of them. Capture each run to a file once with its exact command, exit status and log path, then read the file rather than piping it. Report failure count and failure ids before and after, and judge yourself on ADDED failures against your own measured base.",
+          "estimated_hours": null,
+          "goal": "Make an unsuccessful export report stop the step that would publish its output",
+          "id": "n-wcr-a-failed-export-stops-publication",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502626005-n-wcr-a-failed-export-stops-publication/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-run-residues",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_release.py",
+            "tests/standard_names/test_export_report_gate.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-releaseguard",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T22:35:09Z",
+        "completed_at": "2026-09-04T22:45:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 640,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 640,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d89f837bdb9ac6bb906728e3354471f3138ba148",
+        "commits": [
+          "872c8ea1341fddc2a6040c033be82e1547102d64"
+        ],
+        "changed_lines": {
+          "added": 107,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_export*.py tests/standard_names/test_*release*.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502626005-n-wcr-a-failed-export-stops-publication/after-export-release.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T223502626005-n-wcr-a-failed-export-stops-publication/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e8f-c299-7800-953c-2ae2f6ce64c0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9337344,
+            "cached_input_tokens_cumulative": 9337344,
+            "input_tokens": 9664374,
+            "input_tokens_cumulative": 9664374,
+            "output_tokens": 23974,
+            "output_tokens_cumulative": 23974,
+            "reasoning_output_tokens": 8221,
+            "reasoning_output_tokens_cumulative": 8221
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 32195,
+          "peak_input_tokens": 19001718
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-wcr-a-failed-export-stops-publication",
+          "session_id": "01a06e8f-c299-7800-953c-2ae2f6ce64c0",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T22:45:49Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -75921,6 +76080,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1662
+    "_version": 1669
   }
 }
