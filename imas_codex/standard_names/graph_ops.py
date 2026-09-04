@@ -6899,6 +6899,7 @@ def persist_generated_name_winners(
                     write_batch,
                     allow_missing=True,
                     allow_own_pending_reservation=True,
+                    allow_dead_end_revival=True,
                 )
                 locked_ids = {
                     row["id"]
@@ -9964,6 +9965,7 @@ def _lock_claimed_name_bindings(
     *,
     allow_missing: bool,
     allow_own_pending_reservation: bool,
+    allow_dead_end_revival: bool = False,
 ) -> list[dict[str, Any]]:
     """Lock source claims and classify their proposed name bindings.
 
@@ -9977,9 +9979,15 @@ def _lock_claimed_name_bindings(
     A binding is refused for three reasons, all reported the same way: the
     target's lifecycle stage forbids it, its unit disagrees, or the attachment
     guard finds the pairing inconsistent with the sources the name already
-    carries (see :func:`_guard_existing_target_pairings`). Refusal is per
-    pairing — one bad source never fails its batch — so this is the single
-    point at which every claimed-source persister inherits the guard.
+    carries (see :func:`_guard_existing_target_pairings`). A compose proposal
+    has one governed lifecycle exception: an exact DD source may revive a
+    superseded or exhausted spelling when no successor at any depth is live.
+    The identity re-enters at ``drafted`` with pending validation and a linked
+    ``StandardNameChange`` recording its prior stage and triggering source.
+    Existing lineage edges remain intact. Attachments never receive that
+    authority. Refusal is per pairing — one bad source never fails its batch —
+    so this is the single point at which every claimed-source persister
+    inherits the guard.
 
     A non-bindable target releases the exact source claim back to
     ``extracted`` without resetting ``attempt_count``. The retained attempt
@@ -10041,6 +10049,72 @@ def _lock_claimed_name_bindings(
         OPTIONAL MATCH (sns)-[owned:PRODUCED_NAME]->(target)
         WITH b, sns, target, owned,
              CASE
+               WHEN $allow_dead_end_revival
+                    AND b.source_type = 'dd'
+                    AND target.name_stage IN $revivable_stages
+                    AND b.attachment_error IS NULL
+                    AND (b.unit IS NULL OR target.unit IS NULL
+                         OR target.unit = b.unit)
+                    AND EXISTS {
+                      MATCH (sns)-[:FROM_DD_PATH]->(:IMASNode)
+                    }
+                    AND NOT EXISTS {
+                      MATCH (target)-[:HAS_SUCCESSOR*1..]->(
+                        successor:StandardName)
+                      WHERE successor.name_stage IS NOT NULL
+                        AND NOT (successor.name_stage IN $terminal_stages)
+                    }
+                    AND NOT EXISTS {
+                      MATCH (successor:StandardName)-[:REFINED_FROM*1..]->(
+                        target)
+                      WHERE successor.name_stage IS NOT NULL
+                        AND NOT (successor.name_stage IN $terminal_stages)
+                    }
+               THEN target.name_stage
+               ELSE null
+             END AS prior_stage
+        FOREACH (_ IN CASE WHEN prior_stage IS NULL THEN [] ELSE [1] END |
+          SET target.name_stage = $reviewable_stage,
+              target.status = 'draft',
+              target.validation_status = 'pending',
+              target.validation_issues = null,
+              target.validation_layer_summary = null,
+              target.quarantine_reason = null,
+              target.validated_at = null,
+              target.reviewer_score_name = null,
+              target.reviewer_scores_name = null,
+              target.reviewer_comments_name = null,
+              target.reviewer_comments_per_dim_name = null,
+              target.reviewer_model_name = null,
+              target.reviewed_name_at = null,
+              target.review_quorum_shortfall = null,
+              target.review_quorum_shortfall_at = null,
+              target.review_resolution_method = null,
+              target.refine_stop_reason = null,
+              target.refine_stopped_at = null,
+              target.refine_collision_name = null,
+              target.claim_token = null,
+              target.claimed_at = null,
+              target.run_id = coalesce(sns.run_id, target.run_id)
+        )
+        FOREACH (_ IN CASE WHEN prior_stage IS NULL THEN [] ELSE [1] END |
+          CREATE (change:StandardNameChange)
+          SET change.id = 'sn-change:' + randomUUID(),
+              change.from_name = prior_stage,
+              change.to_name = $reviewable_stage,
+              change.operation = 'revive_dead_end_identity',
+              change.reason = 'source ' + sns.id +
+                ' independently composed this retired identity while no live ' +
+                'successor existed',
+              change.origin = 'compose',
+              change.run_id = sns.run_id,
+              change.changed_at = datetime(),
+              change.internal = true
+          CREATE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+        )
+        WITH b, sns, target, owned
+        WITH b, sns, target, owned,
+             CASE
                WHEN target.name_stage IN $stable_stages THEN true
                WHEN $allow_own_pending
                     AND target.name_stage = $pending_stage
@@ -10097,8 +10171,17 @@ def _lock_claimed_name_bindings(
         binding_query,
         batch=batch,
         allow_own_pending=allow_own_pending_reservation,
+        allow_dead_end_revival=allow_dead_end_revival,
         stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
+        revivable_stages=sorted(
+            {
+                NameStage.superseded.value,
+                NameStage.exhausted.value,
+            }
+        ),
+        terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
         pending_stage=NameStage.pending.value,
+        reviewable_stage=NameStage.drafted.value,
     )
 
     outcomes_by_source = {row["id"]: row.get("outcome", "winner") for row in rows}
@@ -10373,6 +10456,7 @@ def persist_claimed_attachments(
                     batch,
                     allow_missing=False,
                     allow_own_pending_reservation=False,
+                    allow_dead_end_revival=False,
                 )
                 locked_ids = {
                     row["id"]
@@ -10458,6 +10542,7 @@ def stage_claimed_generated_candidates(
                     batch,
                     allow_missing=True,
                     allow_own_pending_reservation=True,
+                    allow_dead_end_revival=True,
                 )
                 locked_ids = {
                     row["id"]
