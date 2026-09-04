@@ -13,6 +13,7 @@ from __future__ import annotations
 import pytest
 
 from imas_codex.standard_names.sources.base import (
+    ExtractionBatch,
     QualificationStatus,
     SourceCandidate,
 )
@@ -31,9 +32,139 @@ def _candidate(path: str, **overrides: object) -> SourceCandidate:
         "unit": overrides.pop("unit", "m"),
         "description": overrides.pop("description", "Test quantity"),
         "documentation": overrides.pop("documentation", ""),
+        "node_category": overrides.pop("node_category", "quantity"),
         **overrides,
     }
     return SourceCandidate.from_dd_row(row)
+
+
+_CONSTRAINT_WEIGHT_PATH = "equilibrium/time_slice/constraints/faraday_angle/weight"
+
+
+class _ExtractionGraph:
+    """Return one ineligible node only when an explicit path bypasses filtering."""
+
+    def __init__(self) -> None:
+        self.queries: list[str] = []
+
+    def __enter__(self) -> _ExtractionGraph:
+        return self
+
+    def __exit__(self, *_args: object) -> None:
+        return None
+
+    def query(self, query: str, **_params: object) -> list[dict]:
+        self.queries.append(query)
+        if "MATCH (dv:DDVersion" in query:
+            return [
+                {
+                    "dd_version": "4.1.1",
+                    "cocos_version": None,
+                    "cocos_params": None,
+                }
+            ]
+        if "n.id IN $explicit_paths" in query:
+            return [
+                {
+                    "path": _CONSTRAINT_WEIGHT_PATH,
+                    "description": "Weight of the constraint",
+                    "documentation": "Weight used by the equilibrium fit.",
+                    "unit": "1",
+                    "unit_from_rel": "1",
+                    "unit_relationships": ["1"],
+                    "data_type": "FLT_0D",
+                    "node_category": "fit_artifact",
+                    "ids_name": "equilibrium",
+                    "cluster_id": None,
+                    "error_node_ids": [],
+                }
+            ]
+        return []
+
+
+def _extract_with_graph(
+    monkeypatch: pytest.MonkeyPatch,
+    graph: _ExtractionGraph,
+    **kwargs: object,
+) -> list[ExtractionBatch]:
+    from imas_codex.standard_names.sources import dd
+
+    monkeypatch.setattr("imas_codex.graph.client.GraphClient", lambda: graph)
+    monkeypatch.setattr(dd, "_apply_typed_dd_resolutions", lambda rows, _version: rows)
+    monkeypatch.setattr(dd, "_apply_unit_overrides", lambda rows, **_kwargs: rows)
+    monkeypatch.setattr(
+        "imas_codex.standard_names.enrichment.enrich_paths", lambda rows: rows
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.enrichment.group_by_concept_and_unit",
+        lambda *_args, **_kwargs: [
+            ExtractionBatch(
+                source="dd",
+                group_key="counterfactual",
+                items=[],
+                context="",
+            )
+        ],
+    )
+    return dd.extract_dd_candidates(write_skipped=False, **kwargs)
+
+
+def test_normal_extraction_excludes_fit_artifact_by_node_category(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The normal graph query excludes an ineligible category."""
+    graph = _ExtractionGraph()
+
+    batches = _extract_with_graph(monkeypatch, graph, force=True)
+
+    assert batches == []
+    assert any("n.node_category IN $sn_categories" in query for query in graph.queries)
+
+
+def test_explicit_extraction_enforces_the_same_node_category_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Fixed-path extraction cannot bypass the shared category authority."""
+    graph = _ExtractionGraph()
+
+    batches = _extract_with_graph(
+        monkeypatch,
+        graph,
+        explicit_paths=[_CONSTRAINT_WEIGHT_PATH],
+    )
+
+    assert batches == []
+    assert any("n.id IN $explicit_paths" in query for query in graph.queries)
+
+
+def test_category_authority_preserves_measurements_and_excludes_bookkeeping() -> None:
+    """Node category alone separates measurements from fit bookkeeping."""
+    humidity = _candidate(
+        "camera_x_rays/detector_humidity",
+        data_type="FLT_0D",
+        unit="1",
+        documentation=("Fraction of humidity (0-1) measured at the detector level"),
+        node_category="quantity",
+    )
+    assert qualify_dd(humidity).eligible
+
+    ineligible_paths = (
+        _CONSTRAINT_WEIGHT_PATH,
+        "equilibrium/time_slice/convergence/iterations_n",
+        "transport_solver_numerics/solver_1d/equation/convergence/iterations_n",
+    )
+    for path in ineligible_paths:
+        result = qualify_dd(
+            _candidate(
+                path,
+                data_type="INT_0D" if path.endswith("iterations_n") else "FLT_0D",
+                unit="1",
+                node_category="fit_artifact",
+            )
+        )
+        assert not result.eligible
+        assert result.reason_code == "node_category_ineligible"
+        assert result.status == QualificationStatus.not_physical_quantity
 
 
 # ============================================================================

@@ -1,8 +1,8 @@
 """Shared node classification logic — single source of truth.
 
-Both the DD build pipeline (``build_dd._classify_node``) and the
-one-off migration CLI (``dd migrate-categories``) delegate to this
-module so that rules cannot drift.
+The DD build pipeline (``build_dd._classify_node``) delegates to this module,
+and targeted maintenance reuses the same build-path upsert so rules cannot
+drift.
 
 Two-pass architecture:
 
@@ -188,8 +188,6 @@ _PHYSICS_INT_LEAVES: frozenset[str] = frozenset(
         "pixels_n_vertical",  # Detector pixel count
         "voxels_n",  # Voxel count
         "fluids_n",  # Number of fluids in model
-        # Convergence
-        "iterations_n",  # Convergence iteration count
         # Composition
         "fraction",  # Species fraction (sometimes INT)
     }
@@ -263,8 +261,19 @@ _TRANSPORT_SOLVER_COEFF_RE: re.Pattern[str] = re.compile(
 #: convergence diagnostics (residuals, iteration counts, delta_relative,
 #: time_step) — numerical artefacts, not physics quantities.
 _TRANSPORT_SOLVER_CONVERGENCE_RE: re.Pattern[str] = re.compile(
-    r"^transport_solver_numerics/convergence(?:/|$)"
+    r"^transport_solver_numerics/(?:[^/]+/)*convergence(?:/|$)"
 )
+
+
+def _is_constraint_fit_artifact(parts: list[str]) -> bool:
+    """Return whether a constraint leaf records fitting bookkeeping."""
+    if "constraints" not in parts:
+        return False
+    last_seg = parts[-1] if parts else ""
+    return last_seg == "weight" or any(
+        seg == "reconstructed" or seg.endswith("_reconstructed") for seg in parts
+    )
+
 
 # ──────────────────────────────────────────────────────────────────
 # Representation constants
@@ -415,7 +424,7 @@ def classify_node_pass1(
     -------
     str
         One of ``"error"``, ``"metadata"``, ``"coordinate"``, ``"structural"``,
-        ``"geometry"``, ``"quantity"``.
+        ``"geometry"``, ``"quantity"``, ``"fit_artifact"``.
     """
     parts = path.split("/")
     last_seg = parts[-1] if parts else name
@@ -505,6 +514,11 @@ def classify_node_pass1(
         ):
             return "fit_artifact"
 
+    # Constraint weights and reconstructed values are fitting bookkeeping,
+    # regardless of which equilibrium constraint family contains them.
+    if _is_constraint_fit_artifact(parts):
+        return "fit_artifact"
+
     # Rule F3: transport_solver_numerics/boundary_conditions_*/… → fit_artifact
     # Solver boundary-condition configuration nodes (value, rho_tor_norm,
     # identifier, …) are numerical-solver internals, not physics concepts.
@@ -521,6 +535,10 @@ def classify_node_pass1(
     # counts (iterations_n), per-equation containers — are numerical artefacts
     # of the iterative solver, not independent physics quantities.
     if _TRANSPORT_SOLVER_CONVERGENCE_RE.match(path):
+        return "fit_artifact"
+
+    # Convergence iteration counts are solver bookkeeping across IDSs.
+    if last_seg == "iterations_n" and "convergence" in parts:
         return "fit_artifact"
 
     # ── Representation rules (before quantity/geometry fallthrough) ──
