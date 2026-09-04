@@ -614,11 +614,14 @@ class TestRefineTerminalClaimFence:
         assert "sn.claim_token = $token" in cypher
         assert "sn.name_stage = 'refining'" in cypher
         assert "coalesce(sn.reviewer_comments_name, '')" in cypher
+        assert (
+            "sn.validation_status = CASE WHEN target_stage = 'exhausted' "
+            "THEN 'quarantined' ELSE sn.validation_status END" in cypher
+        )
         for preserved in (
             "chain_length",
             "reviewer_score_name",
             "review_count_name",
-            "validation_status",
             "REFINED_FROM",
             "PRODUCED_NAME",
             "HAS_STANDARD_NAME",
