@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T12:17:52",
+  "updated": "2026-09-04T13:33:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2242,6 +2242,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-quargate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-quiescence",
         "harness": "codex",
         "role": "implement",
@@ -3005,6 +3014,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-truepositive",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-umbrellamove",
@@ -66235,6 +66253,299 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T101002885906-n-wct-mint-honours-the-manifest",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a71",
+        "node": "n-wct-mint-honours-the-manifest",
+        "node_definition": {
+          "done_when": "mint_sn_list stops widening the batch by immediate family. The family closure at imas_codex/standard_names/minting.py:100-120 collects direct parents, siblings and own children of a manifest-bound name, checking only that the relative is not superseded or exhausted, and that is what admitted the surplus: 150 names bound only to data-dictionary paths outside the manifest, 42 derived structural parents and 1 name with no source at all, exactly the 193 beyond the 218 manifest-bound identities in the 411-name artifact. Replace it with the locked rule: manifest-bound names, UNION accepted derived parents of those names that have no data-dictionary binding. Drop the sibling and child arms entirely and qualify the parent arm using the same graph facts export.py:495-518 already computes for has_dd_source_binding and has_derived_producer rather than any domain or filename heuristic. Membership stays EXISTENTIAL per the locked decision multi-binding-batch-membership: a name with several StandardNameSource bindings is admitted when any one of them is in the manifest, and an additional binding outside it never disqualifies. Express the zero invariant that way too, as every non-derived-parent batch name having at least one manifest producer, never as every producer being in the manifest. tests/standard_names/test_minting.py::test_mint_live_closure at lines 181-198 currently pins the over-broad behaviour and must be rewritten to expect the accepted structural parent alone; add the case that decides the rule, one name produced by two data-dictionary sources with only one in the manifest, required to appear exactly once, plus negative cases for a sibling, an own child, a direct parent whose only producer is an external data-dictionary path, and a wholly source-less family member. Gate: 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_minting.py tests/standard_names/test_review_release.py tests/standard_names/test_export_manifest_scope.py -q -p no:cacheprovider' at exit 0 with before and after failure ids recorded, and write the manifest with a non-terminal status before any long run.",
+          "estimated_hours": 1.2,
+          "goal": "Make the batch mint admit only what the manifest authorises",
+          "id": "n-wct-mint-honours-the-manifest",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-mint-honours-the-manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/minting.py",
+            "tests/standard_names/test_minting.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-mintscope",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T10:10:13Z",
+        "completed_at": "2026-09-04T10:22:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 742,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 742,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f921ac1cccb8ddc9042ac6703b171f0c2e2ab507",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-mint-honours-the-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06be5-be83-7023-a488-b3a4ead2d537",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2851840,
+            "cached_input_tokens_cumulative": 2851840,
+            "input_tokens": 2897826,
+            "input_tokens_cumulative": 2897826,
+            "output_tokens": 13659,
+            "output_tokens_cumulative": 13659,
+            "reasoning_output_tokens": 5453,
+            "reasoning_output_tokens_cumulative": 5453
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 11353,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 14053,
+              "external_wait": null,
+              "log_age_seconds": 13933,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 13956,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 19112,
+          "peak_input_tokens": 5749666
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "retired unlanded after two lead reversals; the worktree is clean at base and the obsolete narrowing diff is captured to the session scratchpad",
+        "resume_waiver": {
+          "session_id": "01a06be5-be83-7023-a488-b3a4ead2d537",
+          "source": "pointer",
+          "reason": "the node's premise is withdrawn, not unfinished: the lead has ruled that family inclusion is not a fault and that the pull-request body must not carry provenance verbosity, so there is nothing for a resumed turn to continue"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_minting.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260904T101127100747-n-sli-graph-fault-census",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a71",
+        "node": "n-sli-graph-fault-census",
+        "node_definition": {
+          "done_when": "A report at the declared path carries a census the next session can re-run and compare, covering the axes this plan repaired and the fault classes it did not. Measure and record, each as a single number with the query that produced it: the distribution of status, name_stage, docs_stage and validation_status; the four pairing invariants that must hold, which are zero null status, every exhausted name at status draft with validation quarantined, every superseded name at status superseded, and zero names at status active because approval has never run; names with no StandardNameSource binding at all; sources with no produced name; sources bound to more than one live name; superseded names whose superseded_by scalar disagrees with the successor edge, last measured about 1945 null; names reachable from a tombstone, which was driven to zero and must remain zero; sources parked at the compose attempt cap, last measured 216 graph-wide; failed sources carrying no error text, last measured 59 of 283; and names carrying a review_quorum_shortfall, last measured 98 at reviewed plus 16 superseded plus 1 accepted. Then run the graph-marked suite as its own measure: 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -m graph tests/graph/test_sn_graph.py -q -p no:cacheprovider' and record its exit status and failure ids; if it skips, state the skip reason rather than reporting a pass. For every figure with a prior value quoted above, print the prior value beside the new one and the signed difference, and list separately every invariant whose count is not zero. Change no repository file; the deliverable is the census.",
+          "estimated_hours": 0.8,
+          "goal": "Record a re-runnable fault census of the standard-name graph so a regression is measurable",
+          "id": "n-sli-graph-fault-census",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-graphcensus",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T10:11:39Z",
+        "completed_at": "2026-09-04T10:23:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 706,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 706,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "f921ac1cccb8ddc9042ac6703b171f0c2e2ab507",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -m graph tests/graph/test_sn_graph.py -q -p no:cacheprovider",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06be7-1181-7861-946c-715cfc5f3f13",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5578624,
+            "cached_input_tokens_cumulative": 5578624,
+            "input_tokens": 5759016,
+            "input_tokens_cumulative": 5759016,
+            "output_tokens": 29498,
+            "output_tokens_cumulative": 29498,
+            "reasoning_output_tokens": 10956,
+            "reasoning_output_tokens_cumulative": 10956
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 11441,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 14141,
+              "external_wait": null,
+              "log_age_seconds": 14021,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 14044,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 40454,
+          "peak_input_tokens": 11337640
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "census node; its deliverable is the re-runnable report at the declared path and it made no graph mutation and no repository change by design",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -m",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -66365,6 +66676,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1596
+    "_version": 1600
   }
 }
