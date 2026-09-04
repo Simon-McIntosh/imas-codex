@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T15:19:07",
+  "updated": "2026-09-04T17:25:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -573,6 +573,15 @@
         "created": "2026-09-03"
       },
       {
+        "id": "impl-boundarypoint",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-boundband",
         "harness": "codex",
         "role": "implement",
@@ -642,6 +651,15 @@
         "role": "implement",
         "session_id": "01a02e3d-e99c-7762-ac60-86634ad660ac",
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-carrierprompt",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-cascade",
@@ -1335,6 +1353,15 @@
           "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "d8c254f0-a46c-4441-9fe6-8e81e0189d23"
         },
         "created": "2026-09-03"
+      },
+      {
+        "id": "impl-gapreason",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-gatehonesty",
@@ -2442,6 +2469,15 @@
         "created": "2026-09-03"
       },
       {
+        "id": "impl-release210",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-releasecheckout",
         "harness": "codex",
         "role": "implement",
@@ -2737,6 +2773,15 @@
           "gpt-5.6-sol": "01a05b7a-d73d-7310-a593-1065509275ab"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-slotprompt",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-snapsafe",
@@ -72262,6 +72307,410 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T130254372337-n-wct-geometric-property-routing",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a74",
+        "node": "n-wct-geometric-property-routing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 578,
+                "cached_input_tokens": 651721,
+                "input_tokens": 652301,
+                "output_tokens": 1155,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 653456,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "A report at the declared path names, with file and line, the compose and attachment logic that turned three geometric-property paths into generic coordinate identities, and states the smallest change that routes them by what they measure. Eligibility is already exonerated and must not be re-audited: local_coordinate_frame fires only when the source hierarchy contains an exact x1_unit_vector, x2_unit_vector or x3_unit_vector segment and never tests a leaf named x, z or position, so it cannot have touched these paths, and temporal_coordinate is likewise structurally precise. The three measured cases are equilibrium/time_slice/boundary/geometric_axis/z, which composed as vertical_coordinate_of_geometric_axis and was rejected at attachment as a distinct-vector conflict with equilibrium/time_slice/boundary/dr_dz_zero_point/z; ece/channel/position/z, which composed as vertical_coordinate_of_measurement_position and was rejected against ece/channel/delta_position_suprathermal/z; and equilibrium/time_slice/boundary/outline/z, which composed CORRECTLY as vertical_outline_of_plasma_boundary and failed only on a dead identity. That contrast is the evidence to explain: the same z-leaf shape produced a geometric-property name once and a generic coordinate name twice, so establish what differs between them. Report whether the attachment distinct-vector check is right to refuse, given that a boundary geometric axis and a dr_dz zero point are different quantities that merely share a component axis, and whether the fault lies in the proposal, in the attachment rule, or in the prompt guidance that produced the coordinate spelling. Read the compose prompts as well as the code, because a finding earlier in this session traced a skip decision to prompt latitude rather than to any predicate. Do not change repository files.",
+          "estimated_hours": 0.6,
+          "goal": "Locate why a geometric property is composed as a generic coordinate identity",
+          "id": "n-wct-geometric-property-routing",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing-manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-geomroute",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T13:03:04Z",
+        "completed_at": "2026-09-04T13:09:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 370,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 370,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "8acb404e0bcd5f56559853869f8b444c3fdd572c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "static trace of compose and attachment logic plus the three measured runtime outcomes supplied in the dispatch",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c83-fe99-7c72-95ce-c4247848bb2d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2215424,
+            "cached_input_tokens_cumulative": 2215424,
+            "input_tokens": 2325360,
+            "input_tokens_cumulative": 2325360,
+            "output_tokens": 15414,
+            "output_tokens_cumulative": 15414,
+            "reasoning_output_tokens": 7980,
+            "reasoning_output_tokens_cumulative": 7980
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 21727,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 24427,
+              "external_wait": null,
+              "log_age_seconds": 24306,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 24329,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23394,
+          "peak_input_tokens": 4540784
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "investigation node; deliverable is the routing trace at the declared report path",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-geometric-property-routing",
+          "session_id": "01a06c83-fe99-7c72-95ce-c4247848bb2d",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T13:09:14Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T132437369429-n-wct-release-the-capped-cohort",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a72",
+        "node": "n-wct-release-the-capped-cohort",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2077,
+                "cached_input_tokens": 690668,
+                "input_tokens": 692747,
+                "output_tokens": 1502,
+                "reasoning_output_tokens": 286,
+                "total_tokens": 694249,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "The sources still parked at the compose attempt cap are released with an audit trail, and a first bounded drain pass over them is reported. Select them by exactly this predicate so no other row is touched: StandardNameSource with status failed, attempt_count at or above 5, and last_error containing 'attempt cap'. Confirm the count before writing anything and report it; the coordinator measured 210, so report what you actually find and proceed with what the predicate selects. Release them through the sanctioned exact-source retry route so every row gets a StandardNameSourceRetry event recording its prior state, clearing attempt_count, last_error and any stale claim, and record the changed-row count. Then WRITE THE MANIFEST with the release counts before starting any drain, because a run that ends with the drain unwritten is indistinguishable from a crash and the release must be recoverable on its own. Then run the pipeline scoped to that cohort in the FOREGROUND with --cost-limit 150 and --skip-global-maintenance, the latter mandatory for a scoped run, and stop cleanly when the node's time fence approaches rather than being killed mid-write. The lead has authorised 150 US dollars; report ACTUAL spend beside that ceiling. Composition is served free by the local hosted_vllm deepseek-v4-flash seat so spend will be dominated by review and docs. Report the per-status split across the cohort after the pass \u2014 composed, attached, failed, skipped, still extracted \u2014 and for every source that failed again its NEW error text, because a fresh reason is the finding. The dead-end identity revival landed earlier today, so collisions with retired identities that previously blocked these sources should now resolve, and one that still fails on a collision is worth naming. Composition is NOT deterministic: no temperature or seed is set on that seat and one source produced two different spellings across attempts, so a differing proposal is not by itself an error. Names left mid-pipeline at the fence are normal state, not stranded, and the coordinator will continue the drain.",
+          "estimated_hours": 1.5,
+          "goal": "Release the capped cohort and start its pipeline drain",
+          "id": "n-wct-release-the-capped-cohort",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-release-capped-cohort-manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wct-release-capped-cohort.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-release210",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T13:24:44Z",
+        "completed_at": "2026-09-04T14:06:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2505,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2505,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "aefd50a68b2a548eb7a0ababaa9b2dc8d4cbb3cf",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "audited exact-source release of the capped cohort then a bounded foreground pipeline drain with --skip-global-maintenance --cost-limit 150",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-release-capped-cohort.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-release-capped-cohort-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c97-d363-70e1-bb49-cc14c503ca64",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17202560,
+            "cached_input_tokens_cumulative": 17202560,
+            "input_tokens": 17437257,
+            "input_tokens_cumulative": 17437257,
+            "output_tokens": 26681,
+            "output_tokens_cumulative": 26681,
+            "reasoning_output_tokens": 9903,
+            "reasoning_output_tokens_cumulative": 9903
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 23027,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 25727,
+              "external_wait": null,
+              "log_age_seconds": 25606,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+                "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 25629,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Optional live graph corroboration is unavailable in this worktree because imas_codex/graph/models.py is absent and import tries to regenerate it on the read-only filesystem; the graph MCP schema call requires approval while approval policy is never. The dispatch-provided runtime rows were sufficient for the static root-cause report; but the stop-on-two-failed-attempts fence requires this node to report blocked rather than retry a third route.",
+              "elapsed_seconds": 1297,
+              "external_wait": null,
+              "log_age_seconds": 927,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing-manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing-manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/reports/wct-geometric-property-routing-manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wct-geometric-property-routing",
+              "phase": "starting",
+              "plan": "sn-west-cohort-treatment",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T130254372337-n-wct-geometric-property-routing",
+              "session": "ship-sli-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T130254372337-n-wct-geometric-property-routing",
+                "session_id": "01a06c83-fe99-7c72-95ce-c4247848bb2d",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 948,
+              "terminal_at": "2026-09-04T13:08:53Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-geometric-property-routing"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 36584,
+          "peak_input_tokens": 34639817
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "governed graph transitions and a pipeline drain; the deliverable is the report at the declared path",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-release-the-capped-cohort",
+          "session_id": "01a06c97-d363-70e1-bb49-cc14c503ca64",
+          "session_source": "stream",
+          "retained_at": "2026-09-04T14:06:29Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -72406,6 +72855,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1616
+    "_version": 1623
   }
 }
