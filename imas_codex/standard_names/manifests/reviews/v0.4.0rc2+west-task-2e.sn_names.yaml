@@ -446,8 +446,8 @@ unmatched_sources:
 - summary/fusion/neutron_rates/total/value
 - summary/global_quantities/power_steady/value
 - summary/global_quantities/tau_energy/value
-pr_number: null
-pr_url: null
+pr_number: 13
+pr_url: https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/13
 merge_commit: null
 manifest_sources:
 - source_path: barometry/gauge/pressure
