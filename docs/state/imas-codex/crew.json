@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:49:10",
+  "updated": "2026-09-04T11:57:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1320,9 +1320,11 @@
         "id": "impl-gatemarker",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06bc6-25ec-7171-8e02-04e2ebea955e",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06bc6-25ec-7171-8e02-04e2ebea955e"
+        },
         "created": "2026-09-04"
       },
       {
@@ -65920,6 +65922,160 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T093525444900-n-sli-gate-verdict-provenance",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-gate-verdict-provenance",
+        "node_definition": {
+          "done_when": "The semantic-similarity gate writes a schema-declared resolution_method instead of leaving it null, and stops emitting per-dimension scores for dimensions it did not measure. Three parts, all measured. First, add a non-winning method such as semantic_similarity_gate to the ReviewResolutionMethod enum in imas_codex/schemas/standard_name.yaml near lines 470-499; the winning set is derived from the enum DESCRIPTION text by graph_ops.py:5969-6011, so the new description must not read as winning, and a test must assert the derived winning set is unchanged. Second, the gate writer at workers.py:8284-8317 passes that method to persist_reviewed_name and emits only the semantic dimension it actually measured, dropping the invented grammar 15/20, convention 15/20 and completeness 5/20 values; the reader census proved sparse dimension maps are compatibility-safe because every consumer treats scores_json as an opaque or iterated mapping. Third, backfill the existing rows idempotently: 36 live StandardNameReview rows carry the literal (semantic_similarity_gate) in both model and reviewer_model and all 36 score 0.30, so key the backfill on that model identity, never on the score, because 50 rows score 0.30 and 14 of them are genuine reviews. Report first-pass and second-pass counts with the second at zero. CRITICAL non-goal: the row must NOT become acceptable or claimable as a result. Today the null method makes _quorum_admits_acceptance record a review_quorum_shortfall and the row is not admitted; that behaviour must be preserved and asserted, because giving the gate reviewer authority to make it claimable is the wrong way to fix the routing. Regenerate models from the worktree schemas with build-models under PYTHONPATH rather than syncing the shared environment. Gate: 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_docs_review_resolution.py tests/standard_names/test_export_resolution_method.py -q -p no:cacheprovider' plus your own new test file, at exit 0, with before and after failure ids recorded, and write the manifest with a non-terminal status before any long run.",
+          "estimated_hours": 1.2,
+          "goal": "Give the embedding-similarity gate typed provenance that no reader has to infer",
+          "id": "n-sli-gate-verdict-provenance",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-gate-verdict-provenance.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/schemas/standard_name.yaml",
+            "imas_codex/standard_names/workers.py",
+            "imas_codex/standard_names/defaults.py",
+            "tests/standard_names/test_gate_verdict_provenance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-gatemarker",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T09:35:42Z",
+        "completed_at": "2026-09-04T09:56:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1226,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1226,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d1f2ff83e53bebd0ff69a8b2d3e2ded8d08a02dd",
+        "commits": [
+          "0c25621905160b95122445b07ef0777214f0ae0d"
+        ],
+        "changed_lines": {
+          "added": 188,
+          "removed": 12,
+          "files": 4
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_export_resolution_method.py tests/standard_names/test_rd_quorum_integrity.py tests/standard_names/test_review_docs_stages.py tests/standard_names/test_refine_attempt_budget.py tests/standard_names/test_gate_verdict_provenance.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "69 passed, 0 failed at the candidate commit; 66 passed with 3 expected failures at the baseline; the four pre-existing gate files unedited"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-gate-verdict-provenance.md",
+        "scope_changed": false,
+        "session_id": "01a06bc6-25ec-7171-8e02-04e2ebea955e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8412928,
+            "cached_input_tokens_cumulative": 8412928,
+            "input_tokens": 8601902,
+            "input_tokens_cumulative": 8601902,
+            "output_tokens": 26497,
+            "output_tokens_cumulative": 26497,
+            "reasoning_output_tokens": 10405,
+            "reasoning_output_tokens_cumulative": 10405
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 9284,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 11984,
+              "external_wait": null,
+              "log_age_seconds": 11863,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 11887,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 36902,
+          "peak_input_tokens": 17014830
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_docs_review_resolution.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -66050,6 +66206,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1589
+    "_version": 1591
   }
 }
