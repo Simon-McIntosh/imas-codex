@@ -46,7 +46,7 @@ def test_registered_field_compounds_are_not_bare_fields() -> None:
     legitimate_names = (
         "straight_field_line_angle",
         "poloidal_straight_field_line_angle",
-        "magnetic_field_at_pedestal_top_low_field_side_magnitude",
+        "magnetic_field_magnitude_at_pedestal_top_low_field_side",
     )
 
     for name in legitimate_names:
@@ -56,7 +56,7 @@ def test_registered_field_compounds_are_not_bare_fields() -> None:
 
 
 def test_registered_field_locus_is_not_token_repetition() -> None:
-    legitimate_name = "magnetic_field_at_pedestal_top_low_field_side_magnitude"
+    legitimate_name = "magnetic_field_magnitude_at_pedestal_top_low_field_side"
 
     assert repeated_token_check({"id": legitimate_name}) == []
     assert repeated_token_check({"id": "magnetic_magnetic_field_strength"})

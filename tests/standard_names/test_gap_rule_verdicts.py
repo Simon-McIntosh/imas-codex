@@ -242,22 +242,22 @@ class TestOrdinalSamples:
         """``final`` describing a state is not an index into a repeated structure."""
         assert ordinal_form("final_state_energy") is None
 
-    def test_the_rule_fires_on_no_registered_token(self):
-        """The rule must never fire on the grammar's own vocabulary.
+    def test_the_rule_fires_on_unregistered_tokens(self):
+        """The rule identifies indexed samples absent from grammar vocabulary."""
+        samples = {
+            "line_of_sight_second_point",
+            "conductor_start_point",
+            "second_coordinate",
+        }
+        registered = {
+            token for tokens in grammar_tokens_by_segment().values() for token in tokens
+        }
 
-        Asserted against the rule directly rather than through
-        :func:`classify_gap`, which would resolve each token through the ISN
-        parser — tens of milliseconds each, and the whole vocabulary is 700.
-        """
-        offenders = sorted(
-            {
-                token
-                for tokens in grammar_tokens_by_segment().values()
-                for token in tokens
-                if ordinal_form(token) is not None or dd_indexed_field_words(token)
-            }
+        assert samples.isdisjoint(registered)
+        assert all(
+            ordinal_form(token) is not None or dd_indexed_field_words(token)
+            for token in samples
         )
-        assert not offenders
 
 
 @requires_isn

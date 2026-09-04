@@ -213,7 +213,7 @@ def test_projection_and_transformation_follow_public_canonical_order() -> None:
 
     produced = seg.compose_name()
 
-    assert produced == ("perpendicular_normalized_momentum_flux_due_to_e_cross_b_drift")
+    assert produced == ("perpendicular_momentum_flux_normalized_due_to_e_cross_b_drift")
     assert _public_round_trips(produced)
 
 
