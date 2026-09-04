@@ -27,7 +27,7 @@ def graph() -> None:
       imas-codex graph export              Export graph to archive
       imas-codex graph load ARCHIVE TARGET Load archive into the named active graph
       imas-codex graph push                Push archive to GHCR
-      imas-codex graph pull                Fetch + load from GHCR
+      imas-codex graph pull TARGET         Fetch + load into the named active graph
       imas-codex graph fetch               Download archive (no load)
       imas-codex graph tags                List GHCR versions
       imas-codex graph prune               Remove GHCR tags
