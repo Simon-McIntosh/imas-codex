@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.92">
-<meta name="plan-version" content="151">
+<meta name="plan-version" content="152">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0,d36d8b6c,75a5d2ca,9e4773f7,9da911db,95421a4e,329b6cda,7b6a558a,18939154,35317df">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -589,6 +589,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260904T035653459996-n-wcr-candidate-recut" data-who="impl-westrecut" data-when="2026-09-04T06:17:54.616Z">
     <div class="r-comment-body"><p>correctly refused: the candidate it cut was withdrawn (PR 14 closed) and the cut was not scope-correct, 193 of 411 published names unbound to a manifest path; the binding rule is owned by sn-west-cohort-treatment. Its roster-freeze commits landed and the node was superseded by n-wcr-cut-the-second-rc-and-open-the-pr</p></div>
+</div>
+<div class="r-comment" data-section="release-run-residues" data-id="c-20260904T2200-solid-angle-shipped" data-who="reckon-ship" data-when="2026-09-04T22:00:00+00:00">
+    <div class="r-comment-body">THE PER-SOLID-ANGLE BLOCKER IS SPENT, AND IT WAS THE ONE HOLDING THE RECUT. The open followup on the four emission-rate names says the direction to try is source_rate with the solid-angle structure expressed through the grammar, and that if the grammar cannot express it then this is an ISN vocabulary gap of exactly the shape mass_flow_rate was. The gap was raised, and it CLOSED: per_solid_angle is declared as an operator in the installed 0.8.9 grammar at imas_standard_names/grammar/vocabularies/operators.yml:315, with per_steradian carried as an advisory alias onto it, and its own comment states the intended arithmetic exactly — division by the solid angle the quantity is emitted into, adding sr^-1 to the unit, so a volumetric source rate m^-3.s^-1 becomes m^-3.s^-1.sr^-1. That is the unit those four names actually carry. Both halves the followup needed are therefore present under the current pin: source_rate is the established base for m^-3.s^-1 on 19 accepted names against 1 using bare rate, and per_solid_angle is the operator that restores the steradian the bare rate spelling drops. So the four names are now a rename through the sanctioned route rather than an upstream ask, and the locked decision hard-xray-solid-angle is satisfied rather than pending. THIS IS THE SECOND STALE BLOCKER FOUND TONIGHT and it has the same shape as the review-surface one: a followup recorded a dependency correctly, the dependency was then satisfied elsewhere, and nothing went back to the row that was waiting on it. Both were found by testing a stored claim against the thing it describes rather than by reading it again. Two constraints carry into the work. hard_xray_rate at 0.812 and spectral_rate at 0.694 are open, while spectral_bremsstrahlung_rate at 0.825 and rate_due_to_fusion at 0.825 have spent their rotation cap and need rescoring before an edit can land. And the route is imas-codex sn edit NAME --hint DIRECTION --reason WHY, never a rename to a guessed spelling and never a hand write, because the review quorum is what decides whether the new spelling is better and it has been consistent about these four.</div>
 </div>
 </section>
 </main>
