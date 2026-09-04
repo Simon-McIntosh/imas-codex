@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from imas_codex.standard_names import audits
 
-_DECIBEL_RATIO_NAME = (
-    "logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel"
-)
+_DECIBEL_RATIO_NAME = "spectral_signal_to_noise_ratio_logarithm_of_spectrometer_channel"
 
 
 def test_decibel_quantity_with_logarithm_prefix_is_quarantined() -> None:

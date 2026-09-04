@@ -235,13 +235,13 @@ def test_uncertainty_index_of_temperature():
 # ---------------------------------------------------------------------------
 
 
-def test_maximum_of_temperature_at_plasma_boundary():
+def test_temperature_maximum_at_plasma_boundary():
     """Locus is preserved: inner is temperature_at_plasma_boundary, plus HAS_LOCUS."""
-    edges = derive_edges("maximum_of_temperature_at_plasma_boundary")
+    edges = derive_edges("temperature_maximum_at_plasma_boundary")
     co = [e for e in edges if e.edge_type == "HAS_PARENT"]
     locus = [e for e in edges if e.edge_type == "HAS_LOCUS"]
     assert len(co) == 1
-    assert co[0].from_name == "maximum_of_temperature_at_plasma_boundary"
+    assert co[0].from_name == "temperature_maximum_at_plasma_boundary"
     assert co[0].to_name == "temperature_at_plasma_boundary"
     assert co[0].props["operator"] == "maximum"
     assert co[0].props["operator_kind"] == "unary_prefix"

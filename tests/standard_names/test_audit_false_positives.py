@@ -52,7 +52,7 @@ _SPECTRAL_PARENTS = frozenset(
 
 _UNIT_FALSE_POSITIVES = (
     ("energy_confinement_enhancement_factor", "1"),
-    ("tendency_of_rotation_frequency_of_neoclassical_tearing_mode", "s^-2"),
+    ("rotation_frequency_time_derivative_of_neoclassical_tearing_mode", "s^-2"),
     ("tendency_of_total_thermal_plasma_internal_energy", "W"),
 )
 
