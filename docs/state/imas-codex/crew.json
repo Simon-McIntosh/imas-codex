@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T10:32:26",
+  "updated": "2026-09-04T10:50:46",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2765,6 +2765,15 @@
       },
       {
         "id": "impl-statusaxis",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "impl-statusmarker",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -65051,6 +65060,162 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T081337560336-n-sli-status-axis-reconcile",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a73",
+        "node": "n-sli-status-axis-reconcile",
+        "node_definition": {
+          "done_when": "A new reconcile function in graph_ops.py, called from the loop.py startup maintenance sequence through _global_maintenance_call beside reconcile_reviewable_name_stage and gated by skip_global_maintenance like its siblings, brings every StandardName.status under maintenance by this mapping measured on the live graph today: 1195 live names with a null status become draft, 1640 names at name_stage superseded lacking a terminal status become superseded, 278 names at name_stage exhausted lacking one become deprecated, the 323 already at status superseded do not change, and no row is ever written to active or moved off active because the approval fold owns that value alone. The gate is 'uv run --no-sync pytest tests/standard_names/test_catalog_status_reconcile.py tests/standard_names/test_scoped_global_maintenance.py tests/standard_names/test_pool_orchestrator_integration.py tests/standard_names/test_pool_orchestration_contracts.py -q -p no:cacheprovider' at exit 0, plus a live-graph run reporting per-transition counts on the first pass and zero changes on an immediate second pass, both recorded. Before writing the wiring, flip it into place in a scratch copy and count what the existing sparse startup-maintenance mocks expose, and put that number in the manifest first: those failures are what the missing maintenance step was resting on. Any exposed failure in a file outside the declared write paths is reported with its ids rather than edited.",
+          "estimated_hours": 1.5,
+          "goal": "Bring the catalog status axis under one idempotent sn run reconcile step that never writes active",
+          "id": "n-sli-status-axis-reconcile",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-status-axis-reconcile.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/standard_names/loop.py",
+            "tests/standard_names/test_catalog_status_reconcile.py",
+            "tests/standard_names/test_scoped_global_maintenance.py",
+            "tests/standard_names/test_pool_orchestrator_integration.py",
+            "tests/standard_names/test_pool_orchestration_contracts.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-statusaxis",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T08:13:59Z",
+        "completed_at": "2026-09-04T08:29:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 925,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 925,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "68158cc970ae6f2971baa4f2e86947384534c218",
+        "commits": [
+          "67adc0ccec8b57089a2f5b0d5e703a21f19d6e47"
+        ],
+        "changed_lines": {
+          "added": 185,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/standard_names/test_catalog_status_reconcile.py tests/standard_names/test_scoped_global_maintenance.py tests/standard_names/test_pool_orchestrator_integration.py tests/standard_names/test_pool_orchestration_contracts.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-status-axis-reconcile-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-status-axis-reconcile.md",
+        "scope_changed": false,
+        "session_id": "01a06b7b-563b-74f3-b377-b2c03303e521",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7930624,
+            "cached_input_tokens_cumulative": 7930624,
+            "input_tokens": 8084559,
+            "input_tokens_cumulative": 8084559,
+            "output_tokens": 25390,
+            "output_tokens_cumulative": 25390,
+            "reasoning_output_tokens": 6696,
+            "reasoning_output_tokens_cumulative": 6696
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4381,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 7081,
+              "external_wait": null,
+              "log_age_seconds": 6960,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 6983,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 32086,
+          "peak_input_tokens": 16015183
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_catalog_status_reconcile.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -65181,6 +65346,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1579
+    "_version": 1581
   }
 }
