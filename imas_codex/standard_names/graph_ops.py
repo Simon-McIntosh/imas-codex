@@ -10373,7 +10373,7 @@ def persist_claimed_vocab_gaps(
                 locked_ids = {row["id"] for row in locked_rows}
                 locked_source_ids = {row["source_id"] for row in locked_rows}
                 winner_outcomes = [
-                    item for item in batch if item["sns_id"] in locked_ids
+                    dict(item) for item in batch if item["sns_id"] in locked_ids
                 ]
                 actionable_source_ids = {
                     item["source_id"]
@@ -10386,6 +10386,37 @@ def persist_claimed_vocab_gaps(
                     for gap in gaps_by_source.get(source_id, [])
                     if source_id in locked_source_ids
                 ]
+                for item in winner_outcomes:
+                    if item.get("status") != "vocab_gap":
+                        continue
+                    source_id = item["source_id"]
+                    source_gaps = gaps_by_source.get(source_id, [])
+                    statements: list[str] = []
+                    for gap in source_gaps:
+                        reason = str(gap.get("reason") or "").strip()
+                        if not reason:
+                            raise ValueError(
+                                "vocab_gap source outcome for "
+                                f"{source_id!r} requires a non-empty reason"
+                            )
+                        segment = str(gap.get("segment") or "").strip()
+                        token = str(gap.get("token") or "").strip()
+                        if not segment or not token:
+                            raise ValueError(
+                                "vocab_gap source outcome for "
+                                f"{source_id!r} requires a segment and token"
+                            )
+                        statement = (
+                            f"missing {segment} vocabulary token {token!r}: {reason}"
+                        )
+                        if statement not in statements:
+                            statements.append(statement)
+                    if not statements:
+                        raise ValueError(
+                            "vocab_gap source outcome for "
+                            f"{source_id!r} requires a non-empty reason"
+                        )
+                    item["last_error"] = "; ".join(statements)
                 if winner_gaps:
                     written = write_vocab_gaps(
                         winner_gaps,
