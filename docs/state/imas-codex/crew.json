@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T23:15:57",
+  "updated": "2026-09-04T23:22:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1600,6 +1600,15 @@
         "created": "2026-09-02"
       },
       {
+        "id": "impl-isneditable",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-isnpin",
         "harness": "clive",
         "role": "implement",
@@ -1683,6 +1692,15 @@
         "created": "2026-09-03"
       },
       {
+        "id": "impl-isntail",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-isnupstream",
         "harness": "claude",
         "role": "implement",
@@ -1693,7 +1711,7 @@
       },
       {
         "id": "impl-isnvocab",
-        "harness": "claude-opus",
+        "harness": "codex",
         "role": "implement",
         "session_id": null,
         "session_model": null,
@@ -3582,6 +3600,15 @@
           "gpt-5.6-sol": "01a03e38-408d-7853-801c-8fe86f310d1f"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "inv-s10reuse",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "inv-skiprule",
@@ -74580,6 +74607,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1635
+    "_version": 1639
   }
 }
