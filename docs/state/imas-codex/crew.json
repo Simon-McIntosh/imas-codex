@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T18:02:55",
+  "updated": "2026-09-04T21:51:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -4082,6 +4082,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-01"
+      },
+      {
+        "id": "test-shadowdiff",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "test-signdiag",
@@ -73094,6 +73103,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1627
+    "_version": 1628
   }
 }

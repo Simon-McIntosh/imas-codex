@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -172,6 +172,18 @@
 <div class="r-dec" data-key="editable-grammar-during-development" data-choice="editable-then-repin" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
     <p class="r-dec-q">editable-grammar-during-development</p>
     <p class="r-dec-rat">Lead ruling 2026-09-04: install the standard-names grammar editable from the sibling checkout for the duration and pin only once the grammar has settled, cutting the release-and-pin turnaround out of every iteration. One hazard is specific to this workstation and must be respected rather than discovered: every dispatched worker shares the main checkout&#x27;s environment through the .venv symlink, so an editable grammar becomes visible to the whole fleet the moment it changes. That is what makes turnaround fast, and it also means a broken grammar breaks every concurrent worker, so each grammar change is gated by the suite in the main checkout before any worker wave opens. The pin is restored to a released version before the WEST candidate is approved.</p>
+    </div>
+<div class="r-dec" data-key="operator-moves-only-past-a-locus-tail" data-choice="tail-gated" data-by="Simon McIntosh" data-when="2026-09-04T20:11:49+00:00">
+    <p class="r-dec-q">operator-moves-only-past-a-locus-tail</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04, narrowing operator-renders-by-arity on shadow-diff evidence. An operator is repositioned ONLY when the name carries an of_, at_ or due_to_ locus tail, and it lands between the base group and that tail. A name with no tail keeps its natural prefix reading. Arity was the wrong discriminator: applied by arity alone the rule fired on 183 of 350 names that already read correctly and made them worse - accumulated_ammonia_count became ammonia_count_accumulated, and flux_surface_averaged_magnetic_field_magnitude became magnetic_field_flux_surface_averaged_magnitude. Both reported cases carried a tail, which is what they had in common and what the first formulation missed. Tail-gating cuts the surface from 350 to 165: 148 prefix with a tail, 6 postfix with a tail, and the 11 indexed-operator names. Measured on a no-write comparison over 4937 identities.</p>
+    </div>
+<div class="r-dec" data-key="rendering-rule-not-a-rename-pass" data-choice="canonical-renderer-plus-reparse-rerender" data-by="Simon McIntosh" data-when="2026-09-04T20:11:49+00:00">
+    <p class="r-dec-q">rendering-rule-not-a-rename-pass</p>
+    <p class="r-dec-rat">Lead question 2026-09-04, answered: the fix lives in the ISN RENDERER, so it is a rule rather than a one-off shuffle, and a brand-new name is born canonical without anyone remembering anything. A prompt instruction was rejected as the primary mechanism because the composer is non-deterministic and a prompt rule measurably failed to shift a proposal on retry earlier the same day; prompt guidance stays only as reinforcement. The migration of existing names is therefore NEITHER re-generation nor string shuffling. Re-generation would spend LLM calls and risk returning a different name for unchanged meaning; a string rewrite would carry no provenance and no guarantee the result parses. The correct operation is parse the current spelling to its segments, re-render under the new template, and land the result as a supersede with provenance. The shadow diff proved that path end to end without a single LLM call: 350 proposals, all parsing, zero collisions, zero merges.</p>
+    </div>
+<div class="r-dec" data-key="composite-exemption-covers-nested-operands" data-choice="recursive" data-by="Simon McIntosh" data-when="2026-09-04T20:11:49+00:00">
+    <p class="r-dec-q">composite-exemption-covers-nested-operands</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04. The composite exemption must hold recursively, not just for the outermost operator. Measured leak: flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius rendered as ..._to_major_radius_square, so the exemption protected the outer flux_surface_averaged operator while the rule reached inside the ratio and reordered its second operand. Two names are affected. An operator anywhere within a composite operand tree keeps its position, because a reader cannot tell which operand a moved operator belonged to once the tree is flattened into a surface string.</p>
     </div>
 </section>
 
