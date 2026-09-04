@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 </head>
 <body>
 <main class="plan-doc">
@@ -276,6 +276,9 @@ scalar to follow lineage at all, and must traverse edges every time.</p>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260904T062500" data-who="reckon-ship" data-when="2026-09-04T06:25:00Z">
     <div class="r-comment-body"><p><strong>A sixth blocked name, found by the halted recut and confirmed against the graph: <code>neutron_rate</code>.</strong> It sits <code>drafted</code> / <code>pending</code> at Hz with subject <code>neutron</code>, and its whole family is retired around it — <code>neutron_rate_of_detector</code> exhausted, <code>neutron_rate_of_neutron_detector</code> superseded, <code>total_neutron_rate_due_to_fusion_reactions</code> superseded. No accepted successor exists anywhere in that lineage, so <strong>a cut made today would drop the neutron quantity pull request 12 already published</strong>, and the carry-over count cannot reach zero from the recut node alone.</p><p>This is the same failure mode §6 already records for the hard-x-ray cluster, and the same one this sprint met on the volumetric-rate names: a rename supersedes its predecessor immediately while the successor still has to earn acceptance, so a window opens in which the identity is unpublishable from both ends. It should be treated with the other Group E names, and it is one review rotation away rather than a physics problem — <code>drafted</code> is exactly the stage the review pool claims.</p><p>Recorded here rather than left in a stopped node's manifest, because the count of names a new cut would drop is a release gate and this is the sixth contributor to it.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260904T095941740347-n-wct-batch-admission-site" data-who="inv-batchmint" data-when="2026-09-04T10:08:33Z">
+    <div class="r-comment-body"><p>the widening is mint_sn_list step 2 at minting.py:100-120, a parent/sibling/child closure whose only check is that the related name is not dead; 150 out-of-manifest names plus 42 structural parents plus 1 source-less name equal exactly the 193 surplus over 218 manifest-bound identities. It is a batch-list defect, not an exporter-gate defect, and export.py needs no change. The any-binding reading is already what the base join implements, and test_mint_live_closure at test_minting.py:181-198 currently pins the over-broad behaviour</p></div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:59:25",
+  "updated": "2026-09-04T12:09:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3720,6 +3720,15 @@
           "gpt-5.6-sol": "01a03e99-8550-72c0-9c24-0af0d578618a"
         },
         "created": "2026-08-26"
+      },
+      {
+        "id": "test-graphcensus",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "test-graphsafety",
@@ -66085,6 +66094,136 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T095941740347-n-wct-batch-admission-site",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a71",
+        "node": "n-wct-batch-admission-site",
+        "node_definition": {
+          "done_when": "A report at the declared path names the exact code path that mints a review batch artifact from a source-path manifest, with file and line, and states which predicate admitted names not bound to any path in that manifest. The evidence to explain: the halted candidate carried 411 names from the 355-path manifest imas_codex/standard_names/manifests/west_production_dd_paths.yaml, of which 218 were bound to manifest paths, 150 to data-dictionary paths outside it, 42 were derived structural parents, and 1 had no source at all. The locked decision batch-scope-authority requires a cut of only manifest-bound names plus the accepted structural parents they need, which is roughly 260. Note that export.py already gates on name_stage approved OR id IN batch at lines 419-426 and 485-489, so the over-broad set is very likely in the batch LIST rather than in the exporter's gate; establish which, and if it is the exporter say so with the line. Report the concrete fix site and the smallest predicate change that reaches zero out-of-manifest names, whether the 42 structural parents come through the same path or a different one, and which existing test file covers the minting step. Trace how a name with several StandardNameSource bindings is treated when only one binding is in the manifest, because that case decides whether the rule is any-binding or all-bindings. Do not change repository files.",
+          "estimated_hours": 0.5,
+          "goal": "Name the step that admitted 150 out-of-manifest names into the WEST review batch",
+          "id": "n-wct-batch-admission-site",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-batch-admission-site-manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wct-batch-admission-site.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-batchmint",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T09:59:49Z",
+        "completed_at": "2026-09-04T10:08:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 524,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 524,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "8529178ce42019796ae675631701180120b3ee7b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "static trace of the mint-to-artifact path with a census of the committed v0.4.0rc2 batch artifact",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-batch-admission-site.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-batch-admission-site-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06bdc-3aca-7fc2-b362-ea4ec24dfed2",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 10732,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 13432,
+              "external_wait": null,
+              "log_age_seconds": 13312,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 13335,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "investigation node; its deliverable is the admission trace at the declared report path and it changed no repository file by design",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -66215,6 +66354,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1592
+    "_version": 1594
   }
 }
