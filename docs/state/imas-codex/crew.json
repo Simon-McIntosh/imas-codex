@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T09:02:53",
+  "updated": "2026-09-04T09:54:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1377,6 +1377,15 @@
           "gpt-5.6-sol": "01a05d03-9adc-72e1-8e2d-fbc890a3240e"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "impl-graphboundary",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
       },
       {
         "id": "impl-graphinit",
@@ -64635,6 +64644,169 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T070027275347-n-sli-protection-query-mocks",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-protection-query-mocks",
+        "node_definition": {
+          "done_when": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider exits 0 with 0 failures where the fail-closed guard alone leaves 38 failures plus 5 setup errors across thirteen files; every repair supplies an explicit protection-query mock rather than re-swallowing the GraphClient refusal, so grep for a broad except around the protected-set query returns 0; and the report lists each of the thirteen files with its failure count before and after",
+          "estimated_hours": 1.0,
+          "goal": "Give the thirteen suites an explicit approval-query mock so the fail-closed guard no longer surprises them",
+          "id": "n-sli-protection-query-mocks",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T070027275347-n-sli-protection-query-mocks/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "tests/standard_names/test_attachment_write_guards.py",
+            "tests/standard_names/test_cost_attribution.py",
+            "tests/standard_names/test_deletion_provenance_integrity.py",
+            "tests/standard_names/test_grammar_contract.py",
+            "tests/standard_names/test_graph_ops.py",
+            "tests/standard_names/test_metadata_invariants.py",
+            "tests/standard_names/test_persist_segment_edges.py",
+            "tests/standard_names/test_pool_orchestration_contracts.py",
+            "tests/standard_names/test_regen_count_increment.py",
+            "tests/standard_names/test_reviewer_per_dim.py",
+            "tests/standard_names/test_unit_consistency.py",
+            "tests/standard_names/test_validation_status.py",
+            "tests/standard_names/test_vocab_gaps.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "cx-guardmocks",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T07:00:41Z",
+        "completed_at": "2026-09-04T07:13:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 745,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 745,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "63e6c6d1cae15b802aa7d328a7bb256f4e9c054c",
+        "commits": [
+          "3570246e4ceac454cdfdccc8cc3a0ed6f5821aa1"
+        ],
+        "changed_lines": {
+          "added": 142,
+          "removed": 0,
+          "files": 13
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T070027275347-n-sli-protection-query-mocks/after-standard-names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T070027275347-n-sli-protection-query-mocks/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b38-38b7-70c2-b78c-4bc633bbffb1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5194240,
+            "cached_input_tokens_cumulative": 5194240,
+            "input_tokens": 5344907,
+            "input_tokens_cumulative": 5344907,
+            "output_tokens": 19833,
+            "output_tokens_cumulative": 19833,
+            "reasoning_output_tokens": 6283,
+            "reasoning_output_tokens_cumulative": 6283
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 2683,
+              "external_wait": null,
+              "log_age_seconds": 2562,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "working",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 2586,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 26116,
+          "peak_input_tokens": 10539147
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -64643,13 +64815,13 @@
         "backend": "codex-luna",
         "purpose": "dispatch",
         "opened_at": "2026-09-02T18:33:00Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-04T07:43:08Z",
+        "held_seconds": 133808,
         "utilisation_pct": 100.0,
         "resets_at": "2026-09-08T05:38:18Z",
         "effective_ceiling_pct": 95.0,
         "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       },
       {
@@ -64657,13 +64829,13 @@
         "backend": "codex-spark",
         "purpose": "dispatch",
         "opened_at": "2026-09-02T18:33:00Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-04T07:43:08Z",
+        "held_seconds": 133808,
         "utilisation_pct": 100.0,
         "resets_at": "2026-09-08T05:38:18Z",
         "effective_ceiling_pct": 95.0,
         "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       },
       {
@@ -64671,13 +64843,13 @@
         "backend": "codex-terra",
         "purpose": "dispatch",
         "opened_at": "2026-09-02T18:33:00Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-04T07:43:08Z",
+        "held_seconds": 133808,
         "utilisation_pct": 100.0,
         "resets_at": "2026-09-08T05:38:19Z",
         "effective_ceiling_pct": 95.0,
         "reason": "utilisation 100.0% is at or above the 95.0% ceiling for a dispatch (ceiling 100.0% less reserve)",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       },
       {
@@ -64765,6 +64937,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1571
+    "_version": 1574
   }
 }
