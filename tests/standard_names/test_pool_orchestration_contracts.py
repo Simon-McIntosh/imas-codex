@@ -41,6 +41,16 @@ from imas_codex.standard_names.pools import PoolSpec, pool_loop
 
 
 @pytest.fixture(autouse=True)
+def _no_approved_names():
+    """Make the approval-backed protection lookup explicit for this suite."""
+    with patch(
+        "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+        return_value=set(),
+    ):
+        yield
+
+
+@pytest.fixture(autouse=True)
 def _stub_parent_lifecycle_startup():
     """Stub the graph-backed derived-parent startup sweeps of run_sn_pools."""
     _go = "imas_codex.standard_names.graph_ops"
