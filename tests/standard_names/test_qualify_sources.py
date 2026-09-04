@@ -13,6 +13,7 @@ def _row(path: str, **kw: object) -> dict:
         "data_type": kw.pop("data_type", "FLT_1D"),
         "unit": kw.pop("unit", "Pa"),
         "description": kw.pop("description", "Test quantity"),
+        "node_category": kw.pop("node_category", "quantity"),
         **kw,
     }
 

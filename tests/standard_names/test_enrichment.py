@@ -48,7 +48,7 @@ def _make_row(
     unit: str | None = "eV",
     parent_type: str | None = "STRUCTURE",
     description: str = "Electron temperature",
-    node_category: str | None = None,
+    node_category: str = "quantity",
     ids_name: str = "core_profiles",
     cluster_id: str | None = "c1",
     cluster_label: str | None = "Electron temperature",
