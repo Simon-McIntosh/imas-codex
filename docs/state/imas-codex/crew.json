@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T01:49:55",
+  "updated": "2026-09-05T01:53:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2719,6 +2719,15 @@
         "created": "2026-08-19"
       },
       {
+        "id": "impl-resolutionhonour",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
         "id": "impl-resource",
         "harness": "codex",
         "role": "implement",
@@ -4173,9 +4182,11 @@
         "id": "test-resolutionbypass",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06ec6-f6f6-7400-988d-052e499b55cd",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06ec6-f6f6-7400-988d-052e499b55cd"
+        },
         "created": "2026-09-04"
       },
       {
@@ -76934,6 +76945,135 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T233520799580-n-sli-does-a-rebuild-bypass-a-resolution",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-does-a-rebuild-bypass-a-resolution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 909,
+                "cached_input_tokens": 605837,
+                "input_tokens": 606748,
+                "output_tokens": 2660,
+                "reasoning_output_tokens": 165,
+                "total_tokens": 609408,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "An investigation tonight established that _batch_create_path_nodes writes more than the category it was called for: it sets path.unit from the raw extraction and deletes and re-creates HAS_UNIT for every path in its batch. It also found a live DDResolution for DD 4.1.1 on equilibrium/time_slice/constraints/n_e/reconstructed whose PUBLISHED value is 1 while its EFFECTIVE value is m^-3, with retiring_release none-yet - a record that exists because a reconstructed constraint physically carries its parent quantity's unit. A raw-DD rebuild bypasses that record silently. REPORT FOUR COUNTS, each with the verbatim query that produced it. ONE, how many DD paths carry an active DDResolution whose effective value differs from the raw DD declaration. TWO, how many of those paths tonight's 54-path re-derivation cohort touched. THREE, for each touched path, whether the live unit now equals the RAW DD value or the RESOLUTION effective value, enumerated per path with all three values shown. FOUR, how many paths OUTSIDE tonight's cohort already show the live unit equal to the raw value while an active resolution says otherwise, since a rebuild is a routine operation and this condition may predate tonight entirely; report those two populations as separate numbers and never as a sum. STATE WHETHER THE GRAPH DISAGREES WITH ITS OWN RESOLUTION RECORDS TODAY AND ON HOW MANY ROWS, because that is the figure a repair would be sized from. If the answer is one row, report one row and the query that establishes it; do not enlarge a small count, and do not present a single instance as a class without evidence of further instances. DO NOT REPAIR ANYTHING and do not refresh the stale holdout row: if resolutions should win over raw DD then that holdout's m^-3 may be correct, and refreshing it now would fix in place a value a repair would reverse. That sequencing is why this node runs before any fix. Change no source file, write no graph value, touch no resolution record. Pin every DD probe to the version the graph declares current: both the DDVersion row and the pyproject data-dictionary setting read 4.1.1, and probing a different version has produced a confident wrong answer on this project before. Run any command with env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync and never drop --no-sync: that environment is shared with the main checkout and a peer.",
+          "estimated_hours": null,
+          "goal": "Count the data-dictionary paths whose resolution a raw rebuild would overwrite",
+          "id": "n-sli-does-a-rebuild-bypass-a-resolution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T233520799580-n-sli-does-a-rebuild-bypass-a-resolution/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sli-resolution-bypass-scope.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-resolutionbypass",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T23:35:27Z",
+        "completed_at": "2026-09-04T23:51:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 961,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 961,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "e84ea0b0ece5ec07609bc8e4caf2211c4a01e317",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "extract_paths_for_version('4.1.1') over 44150 raw paths compared against all 49 active current-version DDResolution rows and the reconstructed 54-path cohort predicate",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-resolution-bypass-scope.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T233520799580-n-sli-does-a-rebuild-bypass-a-resolution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06ec6-f6f6-7400-988d-052e499b55cd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7017088,
+            "cached_input_tokens_cumulative": 7017088,
+            "input_tokens": 7238604,
+            "input_tokens_cumulative": 7238604,
+            "output_tokens": 29263,
+            "output_tokens_cumulative": 29263,
+            "reasoning_output_tokens": 9131,
+            "reasoning_output_tokens_cumulative": 9131
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 38394,
+          "peak_input_tokens": 14255692
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "investigation node in a report-only scope: it changed no source file, graph value, holdout row or resolution record by design",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sli-does-a-rebuild-bypass-a-resolution",
+          "session_id": "01a06ec6-f6f6-7400-988d-052e499b55cd",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T23:51:28Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -77078,6 +77218,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1684
+    "_version": 1687
   }
 }
