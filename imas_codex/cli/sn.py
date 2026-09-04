@@ -5064,7 +5064,7 @@ def sn_release(
     help=(
         "Frozen sn-names batch artifact, by NAME (resolved under "
         "standard_names/manifests/reviews/) or path. Untouched batch names "
-        "auto-promote accepted→approved on approval; edited names still "
+        "auto-promote accepted drafts to approved active names; edited names still "
         "re-trigger the full review. Auto-located from the PR's review/<rc> "
         "branch when --pr is given."
     ),
@@ -5074,8 +5074,9 @@ def sn_release(
     is_flag=True,
     default=False,
     help=(
-        "Unwind a previously folded approval: names approved by this PR drop back "
-        "to accepted (provenance cleared); contested batch names revert to "
+        "Unwind a previously folded approval: names approved by this PR return "
+        "to pipeline stage accepted and catalog status draft (provenance cleared); "
+        "contested batch names revert to "
         "accepted. Accepted human edits are graph history and are NOT "
         "un-applied — revert wording via sn edit. Also deletes the fold-back "
         "tag (local + remote)."
@@ -5124,7 +5125,8 @@ def sn_approve(
     rename cascade (carrying PRODUCED_NAME provenance). Each proposal is scored
     by the full review pipeline: ≥ threshold → approved; below → contested
     (frozen for human adjudication). Untouched batch names auto-promote
-    accepted→approved. --undo unwinds the promotions of a folded approval.
+    accepted drafts become approved active names. --undo unwinds both lifecycle
+    transitions of a folded approval.
     """
     import subprocess as _subprocess
     from pathlib import Path
@@ -5212,7 +5214,7 @@ def sn_approve(
             raise click.UsageError("--undo requires --pr <url> or --pr-number")
         report = undo_approval(pr_number=pr_number, batch=batch)
         console.print(f"[green]✓ Approval of PR #{pr_number} unwound[/green]")
-        console.print(f"  approved → accepted: {len(report.demoted)}")
+        console.print(f"  approved/active → accepted/draft: {len(report.demoted)}")
         console.print(f"  contested → accepted: {len(report.contested_reverted)}")
         # The fold-back receipt no longer holds — delete the version tag so the
         # tag's absence again means "merged but not folded back".
@@ -5273,6 +5275,7 @@ def sn_approve(
     table.add_row("accepted", str(len(report.accepted)))
     table.add_row("staged for review", str(len(report.staged_for_review)))
     table.add_row("auto-approved", str(len(report.auto_approved)))
+    table.add_row("promotion refused", str(len(report.promotion_refused)))
     table.add_row("contested", str(len(report.contested)))
     table.add_row("quarantined", str(len(report.quarantined)))
     table.add_row("blocked", str(len(report.blocked)))
@@ -5297,12 +5300,23 @@ def sn_approve(
             f"\n[yellow]⚠ {len(report.quarantined)} edit(s) quarantined "
             "(below threshold) — flagged for human attention.[/yellow]"
         )
+    if report.promotion_refused:
+        console.print(
+            f"\n[red]✗ {len(report.promotion_refused)} catalog promotion(s) "
+            "refused:[/red]"
+        )
+        for refusal in report.promotion_refused[:10]:
+            console.print(
+                f"  - {refusal.get('target_id', refusal.get('sn_id', '?'))}: "
+                f"{refusal.get('reason', '')}"
+            )
     if report.blocked:
         console.print(
             f"\n[red]✗ {len(report.blocked)} edit(s) blocked (could not attach):[/red]"
         )
         for b in report.blocked[:10]:
             console.print(f"  - {b.get('sn_id', '?')}: {b.get('reason', '')}")
+    if report.promotion_refused or report.blocked:
         raise SystemExit(1)
 
     # ── Write the fold-back receipt: tag the merge commit ──────────────

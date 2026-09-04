@@ -97,7 +97,9 @@ class ApprovalOutcome:
 
     sn_id: str
     axis: str
-    decision: str  # accepted | staged_for_review | quarantined | blocked | unmatched | planned
+    decision: (
+        str  # accepted | staged_for_review | promotion_refused | contested | blocked
+    )
     target_id: str | None = None  # the reviewed node (rename successor / target)
     score: float | None = None
     reason: str = ""
@@ -115,9 +117,35 @@ class ApprovalReport:
     quarantined: list[dict[str, Any]] = field(default_factory=list)
     contested: list[dict[str, Any]] = field(default_factory=list)
     auto_approved: list[str] = field(default_factory=list)
+    promotion_refused: list[dict[str, str]] = field(default_factory=list)
     blocked: list[dict[str, Any]] = field(default_factory=list)
     unmatched: list[str] = field(default_factory=list)
     outcomes: list[ApprovalOutcome] = field(default_factory=list)
+
+
+def _record_promotion_refusal(
+    report: ApprovalReport,
+    *,
+    sn_id: str,
+    target_id: str,
+    axis: str,
+    score: float | None = None,
+) -> None:
+    """Record a catalog lifecycle guard refusal without claiming approval."""
+    reason = "catalog lifecycle promotion preconditions were not met"
+    report.promotion_refused.append(
+        {"sn_id": sn_id, "target_id": target_id, "reason": reason}
+    )
+    report.outcomes.append(
+        ApprovalOutcome(
+            sn_id=sn_id,
+            axis=axis,
+            decision="promotion_refused",
+            target_id=target_id,
+            score=score,
+            reason=reason,
+        )
+    )
 
 
 @dataclass(frozen=True)
@@ -1176,10 +1204,11 @@ def run_approval(
                     run_id=plan.run_id,
                     gc=gc,
                 )
+                promotion_succeeded = True
                 if disposition == "accepted" and all(
                     value is not None for value in approval_values
                 ):
-                    mark_catalog_name_approved(
+                    promotion_succeeded = mark_catalog_name_approved(
                         review_target,
                         catalog_pr_number=int(catalog_pr_number),
                         catalog_pr_url=str(catalog_pr_url),
@@ -1189,18 +1218,28 @@ def run_approval(
                         gc=gc,
                     )
                 if disposition == "accepted":
-                    report.accepted.append(review_target)
+                    if promotion_succeeded:
+                        report.accepted.append(review_target)
+                    else:
+                        _record_promotion_refusal(
+                            report,
+                            sn_id=change.sn_id,
+                            target_id=review_target,
+                            axis=change.axis,
+                            score=score,
+                        )
                 else:
                     report.staged_for_review.append(review_target)
-                report.outcomes.append(
-                    ApprovalOutcome(
-                        sn_id=change.sn_id,
-                        axis=change.axis,
-                        decision=disposition,
-                        target_id=review_target,
-                        score=score,
+                if promotion_succeeded:
+                    report.outcomes.append(
+                        ApprovalOutcome(
+                            sn_id=change.sn_id,
+                            axis=change.axis,
+                            decision=disposition,
+                            target_id=review_target,
+                            score=score,
+                        )
                     )
-                )
             else:
                 # A reviewer edit that fails re-review is neither approved nor
                 # silently reverted — it moves to the 'contested' holding state.
@@ -1253,6 +1292,13 @@ def run_approval(
                         ApprovalOutcome(
                             sn_id=nid, axis="name", decision="auto_approved"
                         )
+                    )
+                else:
+                    _record_promotion_refusal(
+                        report,
+                        sn_id=nid,
+                        target_id=nid,
+                        axis="name",
                     )
         if catalog_delta is not None:
             approved_additions = set(report.accepted) | set(report.auto_approved)
@@ -1406,7 +1452,8 @@ def undo_approval(
 
     * names ``approved`` by this PR (``catalog_pr_number`` matches), plus
       approved frozen-batch members without stamped PR provenance, drop back
-      to ``accepted`` with the catalog provenance fields cleared;
+      to pipeline stage ``accepted`` and catalog status ``draft`` with the
+      catalog provenance fields cleared;
     * ``contested`` names in *batch* (the frozen artifact list) drop back to
       ``accepted`` with the contested fields cleared.
 
@@ -1429,6 +1476,7 @@ def undo_approval(
                OR (sn.catalog_pr_number IS NULL AND sn.id IN $batch)
             SET sn.name_stage = 'accepted',
                 sn.docs_stage = 'accepted',
+                sn.status = 'draft',
                 sn.catalog_pr_number = null,
                 sn.catalog_pr_url = null,
                 sn.catalog_merge_commit_sha = null,
@@ -1477,7 +1525,7 @@ def mark_catalog_name_approved(
     editorial_outcome: str = "unchanged_ratification",
     gc: GraphClient,
 ) -> bool:
-    """Promote an accepted name and record its catalog editorial outcome."""
+    """Promote an accepted draft and record its catalog editorial outcome."""
     if catalog_pr_number <= 0 or not catalog_pr_url or not catalog_merge_commit_sha:
         raise ValueError("complete merged catalog PR metadata is required")
     if editorial_outcome not in _APPROVAL_OUTCOMES:
@@ -1491,8 +1539,11 @@ def mark_catalog_name_approved(
         MATCH (sn:StandardName {id: $name})
         WHERE sn.name_stage IN ['accepted', 'approved']
           AND sn.docs_stage = 'accepted'
+          AND coalesce(sn.status, 'draft') = 'draft'
+          AND coalesce(sn.validation_status, 'valid') <> 'quarantined'
         SET sn.name_stage = 'approved',
             sn.docs_stage = 'accepted',
+            sn.status = 'active',
             sn.catalog_pr_number = $pr_number,
             sn.catalog_pr_url = $pr_url,
             sn.catalog_merge_commit_sha = $merge_commit,

@@ -32,6 +32,7 @@ from imas_codex.standard_names.promote import (
     ApprovalReport,
     read_pr_changes,
     run_approval,
+    undo_approval,
 )
 
 APPROVAL = "imas_codex.standard_names.promote"
@@ -74,6 +75,101 @@ def _gc_exists(exists: bool = True) -> MagicMock:
     gc = MagicMock(name="gc")
     gc.query.return_value = [{"n": 1 if exists else 0}]
     return gc
+
+
+class _LifecycleGraph:
+    """Stateful graph double for catalog and pipeline lifecycle folds."""
+
+    def __init__(self) -> None:
+        self.names = {
+            "approved_candidate": {
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "validation_status": "valid",
+                "status": "draft",
+            },
+            "null_status_candidate": {
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "validation_status": "valid",
+                "status": None,
+            },
+            "contested_candidate": {
+                "name_stage": "contested",
+                "docs_stage": "accepted",
+                "validation_status": "valid",
+                "status": "draft",
+            },
+            "quarantined_candidate": {
+                "name_stage": "accepted",
+                "docs_stage": "accepted",
+                "validation_status": "quarantined",
+                "status": "draft",
+            },
+        }
+
+    def query(self, statement: str, **parameters):
+        if "MATCH (sn:StandardName {name_stage: 'approved'})" in statement:
+            demoted = []
+            batch = set(parameters["batch"])
+            for name, state in self.names.items():
+                matches_pr = state.get("catalog_pr_number") == parameters["pr"]
+                matches_batch = state.get("catalog_pr_number") is None and name in batch
+                if state["name_stage"] != "approved" or not (
+                    matches_pr or matches_batch
+                ):
+                    continue
+                state["name_stage"] = "accepted"
+                state["docs_stage"] = "accepted"
+                if "sn.status = 'draft'" in statement:
+                    state["status"] = "draft"
+                for field in (
+                    "catalog_pr_number",
+                    "catalog_pr_url",
+                    "catalog_merge_commit_sha",
+                    "catalog_reviewer_actor",
+                    "catalog_approved_at",
+                ):
+                    state[field] = None
+                demoted.append({"id": name})
+            return demoted
+
+        if "MATCH (sn:StandardName {name_stage: 'contested'})" in statement:
+            return []
+
+        name = parameters["name"]
+        state = self.names[name]
+        if "sn.name_stage IN ['accepted', 'approved']" in statement and state[
+            "name_stage"
+        ] not in {"accepted", "approved"}:
+            return []
+        if (
+            "sn.docs_stage = 'accepted'" in statement
+            and state["docs_stage"] != "accepted"
+        ):
+            return []
+        if "coalesce(sn.status, 'draft') = 'draft'" in statement and state[
+            "status"
+        ] not in {None, "draft"}:
+            return []
+        if "sn.status = 'draft'" in statement and state["status"] != "draft":
+            return []
+        if (
+            "validation_status" in statement
+            and state["validation_status"] == "quarantined"
+        ):
+            return []
+
+        state["name_stage"] = "approved"
+        if "sn.status = 'active'" in statement:
+            state["status"] = "active"
+        state["catalog_pr_number"] = parameters["pr_number"]
+        state["catalog_pr_url"] = parameters["pr_url"]
+        state["catalog_merge_commit_sha"] = parameters["merge_commit"]
+        return [{"id": name}]
+
+    def close(self) -> None:
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -164,6 +260,87 @@ class TestRunApprovalPassingReviewPath:
         assert report.accepted == []
         assert report.staged_for_review == ["ion_density"]
         assert not report.quarantined
+
+
+def test_approval_fold_alone_controls_catalog_status_and_undo_reverses_it():
+    graph = _LifecycleGraph()
+    batch = list(graph.names)
+    with (
+        patch(f"{APPROVAL}.read_pr_changes", return_value=[]),
+        patch(f"{APPROVAL}._prepare_additive_catalog_delta", return_value=None),
+    ):
+        report = run_approval(
+            isnc_dir="/x",
+            base_ref="b",
+            catalog_pr_number=12,
+            catalog_pr_url="https://example.test/pull/12",
+            catalog_merge_commit_sha="abc123",
+            batch=batch,
+            gc=graph,
+        )
+
+    assert report.auto_approved == ["approved_candidate", "null_status_candidate"]
+    assert graph.names["approved_candidate"]["status"] == "active"
+    assert graph.names["null_status_candidate"]["status"] == "active"
+    assert graph.names["contested_candidate"]["status"] == "draft"
+    assert graph.names["quarantined_candidate"]["status"] == "draft"
+    assert [row["target_id"] for row in report.promotion_refused] == [
+        "contested_candidate",
+        "quarantined_candidate",
+    ]
+    assert not (
+        set(report.auto_approved)
+        & {row["target_id"] for row in report.promotion_refused}
+    )
+
+    undo = undo_approval(pr_number=12, batch=batch, gc=graph)
+
+    assert undo.demoted == ["approved_candidate", "null_status_candidate"]
+    assert graph.names["approved_candidate"]["name_stage"] == "accepted"
+    assert graph.names["approved_candidate"]["status"] == "draft"
+    assert graph.names["null_status_candidate"]["status"] == "draft"
+
+
+def test_reviewed_edit_refused_by_catalog_guard_is_not_reported_as_approved():
+    change = ApprovalChange(
+        sn_id="elongation",
+        axis="name",
+        new_value="elongation_of_closed_flux_surface",
+    )
+    gc = _gc_exists(True)
+    with (
+        patch(f"{APPROVAL}.read_pr_changes", return_value=[change]),
+        patch(
+            f"{APPROVAL}.apply_edit",
+            return_value=_edit_plan(
+                target="elongation",
+                mode="rename",
+                successor="elongation_of_closed_flux_surface",
+            ),
+        ),
+        patch(f"{APPROVAL}._score_proposal", return_value=0.95),
+        patch(f"{APPROVAL}.persist_reviewed_name", return_value="accepted"),
+        patch(f"{APPROVAL}.mark_catalog_name_approved", return_value=False),
+    ):
+        report = run_approval(
+            isnc_dir="/x",
+            base_ref="b",
+            threshold=0.85,
+            catalog_pr_number=12,
+            catalog_pr_url="https://example.test/pull/12",
+            catalog_merge_commit_sha="abc123",
+            gc=gc,
+        )
+
+    assert report.accepted == []
+    assert report.promotion_refused == [
+        {
+            "sn_id": "elongation",
+            "target_id": "elongation_of_closed_flux_surface",
+            "reason": "catalog lifecycle promotion preconditions were not met",
+        }
+    ]
+    assert [outcome.decision for outcome in report.outcomes] == ["promotion_refused"]
 
 
 # ---------------------------------------------------------------------------
