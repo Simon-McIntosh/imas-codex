@@ -206,6 +206,34 @@
     predicate — and recording that it fails <em>by name</em>. Three separate guards in this
     record would have passed their own tests while providing nothing.</p>
 
+    <h2 id="import-guard">Leak three: the guard did not exist</h2>
+    <p>The section asked narrowly — establish whether a test exists that fails when an import
+    writes <code>origin</code> or <code>status</code>, and if not, write one. The answer was
+    that neither the test nor the guard was there. Committed at <code>d606bf09</code>.</p>
+    <p>What <em>did</em> exist is <code>guard_catalog_write_payloads</code>, which protects
+    pipeline-owned review scores and authority relationships and does not touch the editorial
+    axis at all. A reader finding it would reasonably have concluded the axis was covered,
+    which is exactly why this section insisted on a test rather than an argument.</p>
+    <table>
+      <thead><tr><th>Run</th><th>Result</th><th>What it establishes</th></tr></thead>
+      <tbody>
+        <tr><td>Base</td><td>11 passed, 0 failures</td><td>the pre-existing guard suite was green and silent on this axis</td></tr>
+        <tr><td>Guard disabled</td><td>exit 1, 1 failed</td><td><code>AssertionError: catalog import overwrote origin</code> — the test is real</td></tr>
+        <tr><td>Guard restored</td><td>12 passed, 0 failures</td><td>1 test added, 0 added failures</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The guard is a positive allow-list, which is the shape that fails closed by
+    construction.</strong> <code>record_catalog_import_provenance</code> matches an existing
+    identity and writes exactly <code>imported_at</code> and
+    <code>catalog_commit_sha</code> — the two things the locked import-write-authority
+    decision entitles an import to record. A deny-list would have to enumerate every editorial
+    field and would silently admit the next one added to the schema; an allow-list admits
+    nothing it does not name.</p>
+    <p>The consequence reaches another plan.
+    <code>sn-origin-provenance-backfill</code> was held behind this guard because recovery
+    without it buys one clean measurement before the next import undoes it. The guard now
+    exists and is proven, so that plan's stated precondition is satisfied.</p>
+
   </main>
 </body>
 </html>

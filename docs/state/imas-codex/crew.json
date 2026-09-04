@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T23:55:30",
+  "updated": "2026-09-05T00:04:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1306,9 +1306,11 @@
         "id": "impl-fitclassify",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06e66-9f56-7df3-97c8-9ee31e4f8ddc",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e66-9f56-7df3-97c8-9ee31e4f8ddc"
+        },
         "created": "2026-09-04"
       },
       {
@@ -1356,9 +1358,11 @@
         "id": "impl-foldback",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06e66-9f57-79a1-9e93-a353d2e8a01c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e66-9f57-79a1-9e93-a353d2e8a01c"
+        },
         "created": "2026-09-04"
       },
       {
@@ -1594,9 +1598,11 @@
         "id": "impl-importguard",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06e66-9f58-7cc1-800f-3ece80fefa55",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06e66-9f58-7cc1-800f-3ece80fefa55"
+        },
         "created": "2026-09-04"
       },
       {
@@ -75078,6 +75084,275 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T215001801849-n-crs-can-the-rehearsal-be-aimed-today",
+        "plan": "catalog-review-surface",
+        "section": "\u00a74a",
+        "node": "n-crs-can-the-rehearsal-be-aimed-today",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 550,
+                "cached_input_tokens": 384076,
+                "input_tokens": 384628,
+                "output_tokens": 1336,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 385964,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "This node decides nothing about the rehearsal's content and performs NO destructive operation. It answers one question with evidence: can an isolated-substrate rehearsal be stood up safely against the CURRENT tree. Two facts are established and must not be re-derived. graph-destructive-command-safety is shipped at impl 1.0 with both decisions locked: load and clear must NAME their destination and refuse when the resolved symlink disagrees, and both destructive call sites must point at a real dump through backup_graph_dump and ABORT when it fails, with the marker-writing function renamed to say what it does. And the substrate audit of 2026-09-01 recorded the go-condition: a full export exists with its path, size and mtime recorded, the stopped-graph digest is captured, and the active-link assertion passes before every load or clear. REPORT FOUR THINGS. FIRST, whether the aiming mechanism is present in the current tree: name the file and line where load, clear and graph pull take their destination argument, and the code that compares it against the resolved symlink and refuses on disagreement. If a signature differs from what the decision describes, report what you find rather than what was expected. SECOND, prove the refusal FIRES rather than merely exists, with the cheapest safe probe available: invoke a destructive command naming a target that deliberately disagrees with the active symlink and show it REFUSES, quoting exit status and message. Choose a probe that cannot succeed by accident, and if no probe is safe then say so and explain why instead of running one. THIRD, the backup position, because the newest verified archive is 2,458,442,456 bytes with sha256 e13a9054 from 2026-09-01 while live writes have happened since, so it is NOT current by the audit's own standard: report the newest archive path, size and mtime beside the newest live-tree mtime, state whether a current dump is producible today, and if that needs the service stopped report what the restart depends on, since a previous attempt sat in a SLURM queue on reason Priority with port 7687 refused. FOURTH, a plain GO or NO-GO verdict with the specific unmet condition named if it is no-go. A NO-GO IS A CORRECT AND USEFUL OUTCOME and must not be softened into a qualified go. Your only write path is the report; touch no source file and run no clear, no load, no pull and no service restart. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and NEVER drop --no-sync: that environment is shared with the main checkout and every peer worker, and syncing it from a worktree repoints its editable install at your worktree and breaks all of them. Capture each suite run to a file once with the exact command, exit status and log path, then read the file rather than piping it. Report failure count and failure ids BEFORE your change and AFTER it, and judge yourself on ADDED failures against your own measured base rather than on absolute green, because this checkout carries peer work in flight.",
+          "estimated_hours": null,
+          "goal": "Establish whether the fold-back rehearsal can be aimed and protected today, and report a go or no-go with evidence",
+          "id": "n-crs-can-the-rehearsal-be-aimed-today",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801849-n-crs-can-the-rehearsal-be-aimed-today/manifest.md",
+          "plan": "catalog-review-surface",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74a",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "docs/evidence/catalog-review-surface/rehearsal-aiming-check.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-foldback",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T21:50:13Z",
+        "completed_at": "2026-09-04T22:00:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 635,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 635,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "abd5be253452db300936d229a96eaaa02a9c36d8",
+        "commits": [
+          "251e5404e07a0a1a3d632aec380be297b212361f"
+        ],
+        "changed_lines": {
+          "added": 148,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/cli/test_graph_destructive_target.py tests/cli/test_graph_destructive_backup.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801849-n-crs-can-the-rehearsal-be-aimed-today/after-graph-safety-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801849-n-crs-can-the-rehearsal-be-aimed-today/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e66-9f57-79a1-9e93-a353d2e8a01c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4732032,
+            "cached_input_tokens_cumulative": 4732032,
+            "input_tokens": 4885639,
+            "input_tokens_cumulative": 4885639,
+            "output_tokens": 23637,
+            "output_tokens_cumulative": 23637,
+            "reasoning_output_tokens": 9250,
+            "reasoning_output_tokens_cumulative": 9250
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 32887,
+          "peak_input_tokens": 9617671
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-crs-can-the-rehearsal-be-aimed-today",
+          "session_id": "01a06e66-9f57-79a1-9e93-a353d2e8a01c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T22:00:48Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T215001801834-n-sli-the-import-cannot-write-the-editorial-axis",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a74",
+        "node": "n-sli-the-import-cannot-write-the-editorial-axis",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 550,
+                "cached_input_tokens": 384076,
+                "input_tokens": 384628,
+                "output_tokens": 1336,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 385964,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "The locked import-write-authority decision states the rule exactly: an import is entitled to record THAT it happened, through imported_at and catalog_commit_sha, and is entitled to nothing on the editorial axis, meaning origin and status. The plan fixes the measure and nothing weaker satisfies it: a test that performs an import against an identity carrying a known origin and a known status, and asserts both survive unchanged. FIRST ESTABLISH WHETHER THE GUARD EXISTS in imas_codex/standard_names/catalog_import.py and say plainly which it is, because the plan records the decision as locked but the guard as unproven. If it is absent, write it and the test; if present, write only the test. THE TEST IS THE DELIVERABLE EITHER WAY and it must be shown to be real by the mutation check the plan demands: remove or disable the guard, run the test, show it FAILS and quote its assertion text, restore the guard, show it passes. Report both runs with exact command, exit status and log path; a test that still passes with the guard removed is not a test and the node is not done. This matters because a recorded catalog round-trip cleared origin and status on 1,091 identities and the provenance backfill that recovers them is held behind this guard, so recovery without it buys one clean measurement before the next import undoes it. A concurrent peer holds imas_codex/standard_names/graph_ops.py and catalog_release.py; do not edit either. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync, and NEVER drop --no-sync: that environment is shared with the main checkout and every peer worker, and syncing it from a worktree repoints its editable install at your worktree and breaks all of them. Capture each suite run to a file once with the exact command, exit status and log path, then read the file rather than piping it. Report failure count and failure ids BEFORE your change and AFTER it, and judge yourself on ADDED failures against your own measured base rather than on absolute green, because this checkout carries peer work in flight.",
+          "estimated_hours": null,
+          "goal": "Prove an import cannot write the editorial axis, with a test that fails when the guard is removed",
+          "id": "n-sli-the-import-cannot-write-the-editorial-axis",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801834-n-sli-the-import-cannot-write-the-editorial-axis/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_import.py",
+            "tests/standard_names/test_import_write_authority.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-importguard",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T21:50:13Z",
+        "completed_at": "2026-09-04T22:01:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 706,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 706,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "abd5be253452db300936d229a96eaaa02a9c36d8",
+        "commits": [
+          "d606bf092bf669a4ed4d9c4f741f0172b09f3098"
+        ],
+        "changed_lines": {
+          "added": 136,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_pipeline_authority_guard.py tests/standard_names/test_import_write_authority.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801834-n-sli-the-import-cannot-write-the-editorial-axis/after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T215001801834-n-sli-the-import-cannot-write-the-editorial-axis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e66-9f58-7cc1-800f-3ece80fefa55",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8834304,
+            "cached_input_tokens_cumulative": 8834304,
+            "input_tokens": 9004363,
+            "input_tokens_cumulative": 9004363,
+            "output_tokens": 21291,
+            "output_tokens_cumulative": 21291,
+            "reasoning_output_tokens": 6908,
+            "reasoning_output_tokens_cumulative": 6908
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 28199,
+          "peak_input_tokens": 17838667
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sli-the-import-cannot-write-the-editorial-axis",
+          "session_id": "01a06e66-9f58-7cc1-800f-3ece80fefa55",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T22:01:59Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run the test",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -75222,6 +75497,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1652
+    "_version": 1657
   }
 }
