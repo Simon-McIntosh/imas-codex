@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"       content="imas-codex">
+  <meta name="reckon-type"        content="evidence">
+  <meta name="plan-slug"          content="sn-grammar-refinement-landed">
+  <meta name="plan-title"         content="Grammar Refinement: What Landed">
+  <meta name="plan-summary"       content="Each rendering rule and vocabulary token, with the commit that landed it and the measure that proves the meaning survived.">
+  <meta name="plan-status"        content="active">
+  <meta name="plan-owner"         content="Simon McIntosh">
+  <meta name="plan-tags"          content="standard-names,isn-grammar,catalog-presentation">
+  <meta name="plan-evidence-for"  content="sn-grammar-refinement">
+  <title>Grammar Refinement: What Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="premise">The migration premise, proven rather than assumed</h2>
+    <p>The programme rests on one claim: an existing name can be moved to a new spelling
+    without re-deriving its meaning. A no-write shadow comparison established it before
+    anything was renamed, rendering every live identity under both the current and the
+    proposed templates with the graph held fixed. 350 identities would change, all 350
+    proposals were free of collision with zero landing on a live or retired identity and
+    zero many-to-one merges, and 331 were already publishable. The comparison cost no LLM
+    call at all.</p>
+    <p>It also produced the evidence that <em>narrowed the rule</em>, which is the part worth
+    keeping. Split by locus tail, 148 prefix and 6 postfix changes carry an
+    <code>of_</code>, <code>at_</code> or <code>due_to_</code> tail and read better, while
+    145 prefix and 38 mixed changes carry no tail and read worse —
+    <code>accumulated_ammonia_count</code> becoming
+    <code>ammonia_count_accumulated</code>. Arity had been the proposed discriminator and
+    was wrong; the tail is the discriminator, and tail-gating cut the surface from 350 to
+    165.</p>
+
+    <h2 id="indexed-operator">The demonstrator: an indexed operator renders its operand first</h2>
+    <p>Merged in the grammar repository at <code>12b5573</code>, from
+    <code>ff1738fd</code> (renderer and parser) and <code>0170736e</code> (expectations).
+    <code>derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface</code>
+    now renders as
+    <code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>,
+    and the nested form resolves the same way.</p>
+    <table>
+      <thead><tr><th>Revision</th><th>Grammar suite</th><th>Reading</th></tr></thead>
+      <tbody>
+        <tr><td><code>fbd86ca0</code> base</td><td>1145 passed, 0 failures</td><td>the base was green, so the exposure below is attributable</td></tr>
+        <tr><td><code>ff1738fd</code> renderer</td><td>29 failed, 1119 passed</td><td>every failure an existing assertion pinning the retired spelling</td></tr>
+        <tr><td><code>0170736e</code> expectations</td><td>1148 passed, 0 failures</td><td>3 tests added; no assertion relaxed or deleted</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The 29 failures are the deliverable, not the obstacle.</strong> Each one pinned
+    the index-before-operand spelling, so their count is the evidence the rule reached the
+    surface instead of passing vacuously. All 29 updates are spelling-only: the worker
+    reparsed every renderer-derived spelling and reported <code>ir_unchanged = true</code>
+    for all of them, with fused transformations, base, qualifier and locus segments, units,
+    dimension flags and operand trees all unchanged.</p>
+    <p>The recursive composite exemption holds, and its earlier leak is closed with a test
+    pinning it:
+    <code>flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code>
+    is unchanged byte for byte. That protection matters because the averaged ratio genuinely
+    averages the ratio, so reordering its second operand would assert something false.</p>
+
+    <h2 id="reuse-map">The reuse map, and the cause it located in another plan</h2>
+    <p>A read-only scout mapped what already exists for both halves of the programme:
+    18 candidate mechanisms, 18 fitness verdicts, 0 unverdicted, and all 22 declared segment
+    classes routed to their owning vocabulary file. Full record:
+    <a href="/imas-codex/evidence/sn-grammar-refinement/reuse-map">reuse map</a>.</p>
+    <p><strong>Its decisive finding belongs to the WEST release rather than to this plan.</strong>
+    The out-of-manifest leak that halted two candidates is
+    <code>run_review_release</code> computing its names list as the union of
+    <code>mint_sn_list().names</code> with the terminal manifest identities, while
+    <code>mint_sn_list</code> deliberately adds each name's parent, siblings and children on
+    top of its authoritative <code>PRODUCED_NAME</code> join. So the 150 unbound names were
+    neither a near-miss at the manifest boundary nor a defect in
+    <code>mint_sn_list</code>: that function is correct for the review-cohort contract it
+    documents and wrong as a release selector. One union is replaced; the function is not
+    touched.</p>
+    <p>Two findings shape this plan's own gates. Typed vocabulary registries get strict
+    validation and cross-registry duplicate refusal at load time, but <em>flat-list</em>
+    vocabularies have no equivalent load-time schema — so a syntactically valid, semantically
+    misclassified token round-trips happily and is caught only by an assertion on the
+    intended IR segment. And the migration path is lossless end to end with no LLM call:
+    lenient <code>parse()</code> of the stored spelling, <code>compose()</code> of its IR,
+    then <code>apply_edit</code> with rename at scope <code>self</code>, routing into
+    <code>persist_refined_name</code>, which provisions the successor, creates lineage,
+    supersedes the predecessor and migrates authoritative source bindings in one commit.</p>
+
+  </main>
+</body>
+</html>
