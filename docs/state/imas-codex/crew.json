@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T13:33:59",
+  "updated": "2026-09-04T13:40:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3019,9 +3019,11 @@
         "id": "impl-truepositive",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06c2e-be11-7600-becd-eca90b89d567",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06c2e-be11-7600-becd-eca90b89d567"
+        },
         "created": "2026-09-04"
       },
       {
@@ -66546,6 +66548,196 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260904T113211704134-n-sli-quarantine-rate-measures-live-names",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a71",
+        "node": "n-sli-quarantine-rate-measures-live-names",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 411,
+                "cached_input_tokens": 505370,
+                "input_tokens": 505783,
+                "output_tokens": 1056,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 506839,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "The graph quality suite returns to exit 0. It currently fails on one test: the quarantine rate measured 291 of 2634 at 11.0478 percent against a 5 percent ceiling, and the other nine tests pass. The cause is this session's own correct change: an exhausted name now carries validation_status quarantined as its repair marker, and all 278 of them fall inside that gate's population and numerator, which is how 278 plus 13 makes 291. Measured live, the rate over names that are NOT retired is 31 of 2611, or 1.19 percent, comfortably inside the ceiling. So the ceiling is sound and the population is wrong: a quarantine on a retired identity is a repair marker on something already withdrawn and says nothing about the quality of the live catalog, while counting it lets every exhausted name inflate a live-quality metric. Restrict the gate's population and numerator to names whose name_stage is not superseded and not exhausted, leave the 5 percent ceiling exactly as it is, and make the failure message print both the numerator and the denominator it used so a future reader can see which population was judged. Gate: 'UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -m graph tests/graph/test_sn_graph.py -q -p no:cacheprovider' at exit 0 with the before and after failure ids recorded, and state the live rate the assertion computed so the figure is on the record rather than inferred.",
+          "estimated_hours": 0.5,
+          "goal": "Scope the quarantine-rate gate to the population it is meant to judge",
+          "id": "n-sli-quarantine-rate-measures-live-names",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-quarantine-rate-live.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "tests/graph/test_sn_graph.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-quargate",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T11:32:18Z",
+        "completed_at": "2026-09-04T11:40:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 480,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 480,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "ae924bbd7379881035e43264c168a639ab8576cd",
+        "commits": [
+          "c8943780d97ab163f0532cfd796517b4671b98cb"
+        ],
+        "changed_lines": {
+          "added": 7,
+          "removed": 8,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -m graph tests/graph/test_sn_graph.py -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "10 passed, 0 failed; baseline was 291/2634 = 11.0478 percent with test_quarantine_rate the sole failure"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-quarantine-rate-live.md",
+        "scope_changed": false,
+        "session_id": "01a06c30-e6e4-7ec3-8317-4bd21de506e0",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 16281,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 18981,
+              "external_wait": null,
+              "log_age_seconds": 18861,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 18884,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2436,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4836,
+              "external_wait": null,
+              "log_age_seconds": 4130,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T101127100747-n-sli-graph-fault-census --gate <verdict> --commit []; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census.md\" --commit \"/home/ITER/mcintos/.config/reckon/crew/reports/sli-graph-fault-census-manifest.md\"]",
+              "node": "n-sli-graph-fault-census",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": null,
+              "project": "imas-codex",
+              "run_id": "r-20260904T101127100747-n-sli-graph-fault-census",
+              "session": "ship-sli-20260904",
+              "terminal_age_seconds": 4157,
+              "terminal_at": "2026-09-04T10:22:57Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-sli-graph-fault-census"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -m",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -66676,6 +66868,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1600
+    "_version": 1602
   }
 }
