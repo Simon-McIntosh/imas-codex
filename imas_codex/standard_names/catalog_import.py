@@ -1,4 +1,4 @@
-"""Catalog check — compare reviewed YAML entries against the graph (read-only).
+"""Catalog check and receipt recording without editorial graph writes.
 
 ``check_catalog`` reports which names are only in the catalog, only in the
 graph, or present in both but with differing editorial fields.  It never
@@ -10,10 +10,12 @@ Two other paths own the write side and do NOT live here:
   each entry's ``sources:`` block and rebuilds provenance) is the diff-by-id
   reconciler ``catalog_reconcile.reconcile_catalog``;
 - folding reviewed curator edits from a merged catalog PR back into the ledger
-  is ``sn approve``.
+  is ``sn approve``;
+- recording that a catalog was observed may stamp ``imported_at`` and
+  ``catalog_commit_sha`` on an existing identity, but cannot carry catalog
+  content or lifecycle fields into the graph.
 
-This module only compares; it never recreates nodes and never rebuilds
-provenance.
+This module never recreates nodes and never rebuilds provenance.
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from __future__ import annotations
 import logging
 import re
 import subprocess
+from contextlib import nullcontext
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -43,6 +46,64 @@ MANIFEST_FILENAME = "catalog.yml"
 SIDECAR_NAME_FIELDS: frozenset[str] = frozenset(
     {"kind", "status", "physics_domain", "links", "arguments", "sources"}
 )
+
+
+def record_catalog_import_provenance(
+    entries: list[dict[str, Any]],
+    *,
+    gc: Any | None = None,
+) -> int:
+    """Stamp import receipts on existing names through a positive allow-list.
+
+    Caller payloads are reduced to the identity and catalog commit before they
+    reach Cypher. The database supplies the timestamp, and ``MATCH`` prevents
+    the receipt path from creating an identity. Consequently catalog payloads
+    cannot set, clear, or replace ``origin`` or ``status`` through this
+    boundary even when callers supply those keys.
+    """
+    if not entries:
+        return 0
+
+    batch: list[dict[str, Any]] = []
+    refused: list[str] = []
+    for entry in entries:
+        name_id = entry.get("id")
+        if not name_id:
+            raise ValueError("catalog import provenance requires a non-empty id")
+        if "origin" in entry or "status" in entry:
+            refused.append(str(name_id))
+        batch.append(
+            {
+                "id": str(name_id),
+                "catalog_commit_sha": entry.get("catalog_commit_sha"),
+            }
+        )
+
+    if refused:
+        logger.warning(
+            "Refused catalog import origin/status fields for %d existing name(s): %s",
+            len(refused),
+            ", ".join(refused[:5]),
+        )
+
+    from imas_codex.graph.client import GraphClient
+
+    with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
+        rows = list(
+            write_gc.query(
+                """
+                UNWIND $batch AS b
+                MATCH (sn:StandardName {id: b.id})
+                SET sn.imported_at = datetime(),
+                    sn.catalog_commit_sha = coalesce(
+                        b.catalog_commit_sha, sn.catalog_commit_sha)
+                RETURN count(sn) AS updated
+                """,
+                batch=batch,
+            )
+            or []
+        )
+    return int(rows[0].get("updated", 0)) if rows else 0
 
 
 def guard_catalog_write_payloads(
