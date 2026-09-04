@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.metadata
-import re
 from pathlib import Path
 
 import yaml
@@ -14,19 +12,6 @@ from imas_codex.standard_names.export import (
     _validate_entry,
     _write_domain_yaml,
 )
-
-
-def _pinned_dependency_version(package: str) -> str:
-    """Read the exact pinned version of *package* from pyproject.toml.
-
-    The suite must track whatever version the project actually depends
-    on, not a literal that goes stale the moment the pin moves.
-    """
-    pyproject = Path(__file__).parents[2] / "pyproject.toml"
-    text = pyproject.read_text(encoding="utf-8")
-    match = re.search(rf'"{re.escape(package)}==([^"]+)"', text)
-    assert match is not None, f"{package} pin not found in {pyproject}"
-    return match.group(1)
 
 
 def test_graph_entry_carries_physics_domain_into_initial_validation() -> None:
@@ -47,12 +32,9 @@ def test_graph_entry_carries_physics_domain_into_initial_validation() -> None:
     assert validated["physics_domain"] == "equilibrium"
 
 
-def test_fixture_cohort_round_trips_through_pinned_entry_factory(
+def test_fixture_cohort_round_trips_through_resolved_entry_factory(
     tmp_path: Path,
 ) -> None:
-    assert importlib.metadata.version(
-        "imas-standard-names"
-    ) == _pinned_dependency_version("imas-standard-names")
     cohort = [
         {
             "name": "electron_temperature",

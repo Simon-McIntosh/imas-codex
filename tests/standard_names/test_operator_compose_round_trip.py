@@ -43,6 +43,28 @@ def _compose(
     qualifiers: list[str] | None = None,
     coordinate: str | None = None,
 ) -> str:
+    if coordinate is not None:
+        from imas_standard_names.grammar.ir import (
+            OperatorApplication,
+            OperatorKind,
+        )
+
+        from imas_codex.standard_names.grammar_adapter import compose_canonical_ir
+
+        operand = GrammarSegments(
+            base_token=base_token,
+            base_kind=base_kind,
+            qualifiers=qualifiers or [],
+        ).to_ir()
+        indexed = OperatorApplication(
+            kind=OperatorKind.UNARY_PREFIX,
+            op=f"{operator}_{coordinate}",
+        )
+        expression = operand.model_copy(
+            update={"operators": [indexed, *operand.operators]}
+        )
+        return compose_canonical_ir(expression)
+
     seg = GrammarSegments(
         base_token=base_token,
         base_kind=base_kind,
@@ -243,12 +265,11 @@ def _coord_indexed_prefix_operators() -> set[str]:
 
 @pytest.mark.parametrize("op", _registered_prefix_operators())
 def test_every_prefix_operator_round_trips(op) -> None:
-    """compose_name() for any registered unary_prefix op must round-trip.
+    """Every registered unary-prefix representation must round-trip.
 
-    Coordinate-indexed prefix operators (``derivative_with_respect_to``) bind a
-    coordinate via the operator item's ``coordinate``; the bare form is intentionally
-    rejected (it would drop the index), so they are tested with a registered
-    coordinate carrier.
+    Coordinate-indexed prefix operators bind a registered coordinate into the
+    public IR operator token. Their renderer places the operand before that index;
+    the bare form is intentionally rejected because it would drop the index.
     """
     coord = (
         "normalized_poloidal_flux_coordinate"
@@ -261,6 +282,11 @@ def test_every_prefix_operator_round_trips(op) -> None:
         qualifiers=["electron"],
         coordinate=coord,
     )
+    if op == "derivative_with_respect_to":
+        assert produced == (
+            "derivative_of_electron_temperature_with_respect_to_"
+            "normalized_poloidal_flux_coordinate"
+        )
     assert _public_round_trips(produced), (
         f"{op}: compose_name produced {produced!r}, which is not canonical "
         f"(public parse->compose does not return it unchanged)"
