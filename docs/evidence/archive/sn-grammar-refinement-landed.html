@@ -88,6 +88,41 @@
     <code>persist_refined_name</code>, which provisions the successor, creates lineage,
     supersedes the predecessor and migrates authoritative source bindings in one commit.</p>
 
+    <h2 id="tail-gate">The tail-gated operator rule, and the ambiguity it found</h2>
+    <p>An operator is repositioned only when the name carries an <code>of_</code>,
+    <code>at_</code> or <code>due_to_</code> locus tail, landing between the base group and
+    that tail. A name with no tail keeps its natural prefix reading. Committed at
+    <code>dd7c3aec</code>.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Base <code>12b5573</code></th><th>Candidate <code>dd7c3aec</code></th></tr></thead>
+      <tbody>
+        <tr><td>Grammar suite</td><td>1148 passed, 0 failures</td><td>1170 passed, 0 failures</td></tr>
+        <tr><td>Tests added</td><td>—</td><td>22</td></tr>
+        <tr><td>Live renderer changes</td><td>—</td><td>149 over 2974 names</td></tr>
+        <tr><td>Reparse failures / IR mismatches</td><td>—</td><td>0 / 0</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The first candidate exposed 21 failures against a zero-failure base, and one of
+    them was not a spelling.</strong> Twenty were existing assertions pinning retired
+    spellings, spread across binary locus scope, the extremum and flux-surface reduction
+    gates, nested operator round-trips, operator locus nesting, ordered operator chain
+    validation, the parser and the canonical render table. The twenty-first was a
+    combinatorial round-trip test that surfaced a genuine parser <em>ambiguity</em>: the
+    suffix <code>exposure_time_derivative</code> admitted two readings, and the parser now
+    resolves it by testing the remaining registered operand. A rule change that finds a
+    latent ambiguity is worth more than the rename it was commissioned for.</p>
+    <p>Both negative controls hold, which is the half the earlier arity formulation got
+    wrong. Untailed <code>accumulated_ammonia_count</code> and
+    <code>flux_surface_averaged_magnetic_field_magnitude</code> render byte-identical, and
+    relocation is recursively disabled throughout binary operand trees so a protected
+    ratio's operands are never reordered.</p>
+    <p><strong>The measured surface disagrees with the plan snapshot, and the measurement is
+    right.</strong> 141 prefix and 7 postfix changes against a recorded 148 and 6, over a live
+    catalog of 2974 names against the shadow diff's 4937 identities. These are different
+    populations rather than a contradiction: the shadow ran over every identity including the
+    1963 superseded, while this census counts live names. Both figures are correct for their
+    own scope, and the live one is what sizes the consumer-side migration.</p>
+
   </main>
 </body>
 </html>

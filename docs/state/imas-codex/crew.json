@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T23:49:00",
+  "updated": "2026-09-04T23:52:41",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -74794,6 +74794,143 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T212550085471-n-sgr-operator-moves-only-past-a-locus-tail",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a72",
+        "node": "n-sgr-operator-moves-only-past-a-locus-tail",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 423,
+                "cached_input_tokens": 254109,
+                "input_tokens": 254534,
+                "output_tokens": 1770,
+                "reasoning_output_tokens": 142,
+                "total_tokens": 256304,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "Implement the locked decision operator-moves-only-past-a-locus-tail in the renderer, and the locked decision composite-exemption-covers-nested-operands alongside it. The rule: an operator is repositioned ONLY when the name carries an of_, at_ or due_to_ locus tail, and it lands between the base group and that tail. A name with NO tail keeps its natural prefix reading, and that half is load-bearing, because an earlier arity-only formulation fired on 183 of 350 names and changed spellings that were already canonical: accumulated_ammonia_count became ammonia_count_accumulated and flux_surface_averaged_magnetic_field_magnitude became magnetic_field_flux_surface_averaged_magnitude. Both of those must now render byte-identical to their current spelling. The composite exemption holds RECURSIVELY: an operator anywhere inside a composite operand tree keeps its position, so a protected ratio's second operand is never reordered. THE GATE IS ROUND-TRIP SYMMETRY, so the parser change and the renderer change land together and parse of render of an IR must return that same IR. Pin four cases with tests: a tailed prefix operator repositioning, a tailed postfix operator repositioning, accumulated_ammonia_count unchanged byte for byte as the untailed control, and flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius unchanged byte for byte as the recursive-exemption control. Run tests/grammar plus tests/test_grammar_round_trip.py with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv and report the exact command, exit status, log path, failure count and failure ids before and after, and NAME EVERY EXISTING TEST whose expected spelling your change alters, because each one pins a retired spelling and their count is the evidence the rule reached the surface rather than passing vacuously. An existing assertion may be updated to the new spelling but never relaxed or deleted, and reparse each renderer-derived spelling to show its IR is unchanged. The surface should come out near 148 prefix and 6 postfix names carrying a tail; report the count you actually measure and treat a large disagreement as a finding to state rather than a number to match. Two constraints: do not touch physical_bases.yml, qualifiers.yml or components.yml, because a concurrent worker owns the vocabulary, and add no prompt text anywhere, because this rule belongs in the renderer so a new name is born canonical.",
+          "estimated_hours": null,
+          "goal": "Reposition an operator only when the name carries a locus tail",
+          "id": "n-sgr-operator-moves-only-past-a-locus-tail",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212550085471-n-sgr-operator-moves-only-past-a-locus-tail/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_standard_names/grammar/render.py",
+            "imas_standard_names/grammar/parser.py",
+            "imas_standard_names/grammar/vocabularies/operators.yml",
+            "tests/grammar"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-isntail",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T21:25:58Z",
+        "completed_at": "2026-09-04T21:51:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1539,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1539,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "12b557363ab0f2a6ed55bdaf619d3bc02a7e1e14",
+        "commits": [
+          "dd7c3aecb02b9a47a7716879dfb08eb0f084cf71"
+        ],
+        "changed_lines": {
+          "added": 433,
+          "removed": 119,
+          "files": 12
+        },
+        "tests_added": 22,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/grammar tests/test_grammar_round_trip.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212550085471-n-sgr-operator-moves-only-past-a-locus-tail/after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "operator relocates only past an of/at/due_to locus tail, recursively disabled inside binary operand trees; grammar suite 1148 to 1170 passed with zero failures at both ends, 22 tests added; live census 149 renderer changes over 2974 names with 0 reparse failures and 0 IR mismatches; first candidate exposed 21 failures of which 20 pinned retired spellings and 1 revealed a genuine parser ambiguity now resolved",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T212550085471-n-sgr-operator-moves-only-past-a-locus-tail/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06e50-6b81-7d93-856e-86f247a464e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13527552,
+            "cached_input_tokens_cumulative": 13527552,
+            "input_tokens": 13759181,
+            "input_tokens_cumulative": 13759181,
+            "output_tokens": 57894,
+            "output_tokens_cumulative": 57894,
+            "reasoning_output_tokens": 18657,
+            "reasoning_output_tokens_cumulative": 18657
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 76551,
+          "peak_input_tokens": 27286733
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260904/n-sgr-operator-moves-only-past-a-locus-tail",
+          "session_id": "01a06e50-6b81-7d93-856e-86f247a464e7",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T21:51:37Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "Run tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -74938,6 +75075,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1650
+    "_version": 1651
   }
 }
