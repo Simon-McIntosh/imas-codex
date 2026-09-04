@@ -93,6 +93,25 @@ NEO4J_NOT_RUNNING_MSG = (
     "Neo4j is not running. Check service with: systemctl --user status imas-codex-neo4j"
 )
 
+_GOVERNED_STANDARD_NAME_SCHEMA_IDS = frozenset(
+    {
+        "https://imas.iter.org/schemas/grammar_graph",
+        "https://imas.iter.org/schemas/standard_name",
+    }
+)
+
+
+def _refuse_governed_standard_name_write(schema: Any, node_type: str) -> None:
+    """Keep generic MCP writes outside the governed Standard Name schemas."""
+    class_definition = schema._view.get_class(node_type)
+    schema_id = str(class_definition.from_schema or "")
+    if schema_id in _GOVERNED_STANDARD_NAME_SCHEMA_IDS:
+        msg = (
+            f"add_to_graph refuses governed Standard Name node type {node_type}; "
+            "use the dedicated Standard Name pipeline"
+        )
+        raise ValueError(msg)
+
 
 def _serialize_neo4j_value(value: Any) -> Any:
     """Serialize Neo4j values to JSON-compatible types."""
@@ -2028,6 +2047,8 @@ class AgentsServer:
                 Validates each item against the Pydantic model for node_type, strips
                 private fields, then MERGEs nodes by id. Use for semantic data (files,
                 signals, paths). For infrastructure metadata, use update_facility_infrastructure.
+                Standard Name and grammar node types are governed by their dedicated
+                pipeline and are refused by this generic write tool.
 
                 CodeFile nodes are auto-deduplicated against existing discovered/ingested files.
 
@@ -2051,6 +2072,8 @@ class AgentsServer:
                 if node_type not in schema.node_labels:
                     msg = f"Unknown node type: {node_type}. Valid: {schema.node_labels}"
                     raise ValueError(msg)
+
+                _refuse_governed_standard_name_write(schema, node_type)
 
                 items = [data] if isinstance(data, dict) else data
                 if not items:
