@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
 <main class="plan-doc">
@@ -231,20 +231,20 @@ scalar to follow lineage at all, and must traverse edges every time.</p>
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="batch-scope-authority" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="batch-scope-authority" data-choice="manifest-paths-plus-their-parents" data-by="Simon McIntosh" data-when="2026-09-04T05:30:28+00:00">
     <p class="r-dec-q">What may a batch-scoped catalog cut publish?</p>
     <p class="r-dec-ctx">The halted candidate published 411 names from a 355-path manifest: 218 bound
     to manifest paths, 150 bound to data-dictionary paths outside it, 42 derived structural parents,
     one with no source. Structural parents are a deliberate inclusion from an earlier change;
     the 150 are not.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="manifest-paths-plus-their-parents">Only names bound to a manifest path, plus the accepted structural parents those names require.</button>
+      <button class="r-opt chosen" data-value="manifest-paths-plus-their-parents">Only names bound to a manifest path, plus the accepted structural parents those names require.</button>
       <button class="r-opt" data-value="whole-domain-files">Whole physics-domain files, accepting that a batch cut publishes unrelated names from the same domain.</button>
       <button class="r-opt" data-value="manifest-paths-only">Only names bound to a manifest path; withhold structural parents too.</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04. A batch-scoped cut publishes only names bound to a path in the batch manifest, plus the accepted structural parents those names require to be well-formed. That takes the candidate from 411 to roughly 260 and the out-of-manifest count to zero, which makes the pull-request body&#x27;s claim true and lets a reviewer check the cut against the manifest they were given. The rejected alternative of exporting whole physics-domain files is what produced the 150, and would have required rewriting the body to stop claiming the cut was minted from the batch manifest. Withholding structural parents as well was also rejected: it reintroduces the published-child-with-no-published-parent condition that the accepted-parents change was made to remove.</p>
     </div>
-<div class="r-dec" data-key="fit-artifact-exclusion" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="fit-artifact-exclusion" data-choice="exclude-fit-artifacts-by-node-category" data-by="Simon McIntosh" data-when="2026-09-04T05:30:28+00:00">
     <p class="r-dec-q">Are constraint weights and solver iteration counts nameable quantities?</p>
     <p class="r-dec-ctx">They carry units and node category quantity , so the pipeline
     sees them as eligible, but they describe a fit rather than the plasma. The same skip rule that
@@ -253,7 +253,7 @@ scalar to follow lineage at all, and must traverse edges every time.</p>
       <button class="r-opt" data-value="exclude-fit-artifacts">Exclude fit and representation artifacts by an explicit, stated rule; name everything else with a unit.</button>
       <button class="r-opt" data-value="name-everything-with-a-unit">Name every leaf quantity carrying a unit, including fit weights and iteration counts.</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04: fit weights and iteration counts are neither physical nor geometric quantities and are excluded; every leaf quantity carrying a unit is otherwise named. The lead also asked whether this was already resolved in the graph by the data-dictionary sources carrying a category label, and the check says it is - but inconsistently. node_category already carries fit_artifact on 417 nodes, so the vocabulary is right and no new rule is needed; what is wrong is the classification. The classifier labels plasma_profiles/.../temperature_fit/weight as fit_artifact while labelling the identical construct at equilibrium/time_slice/constraints/faraday_angle/weight as quantity. 54 leaf nodes are misclassified this way - the /weight and /reconstructed pairs across every equilibrium constraint - of which 29 are already bound as StandardNameSource and 2 have produced names. So the treatment is to repair the classification and drive eligibility off node_category rather than a path heuristic, which then names detector_humidity (correctly quantity, unit 1, with a physical definition) and excludes constraint weights (correctly fit_artifact) under one authority instead of two.</p>
     </div>
 </section>
 
@@ -266,6 +266,11 @@ scalar to follow lineage at all, and must traverse edges every time.</p>
     </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-20260904T052000" data-who="reckon-ship" data-when="2026-09-04T05:20:00Z">
+    <div class="r-comment-body"><p><strong>The lead asked whether the graph already resolves this through the data-dictionary category label. It does, and the classifier applies it inconsistently — which turns this section from writing a rule into repairing a classification.</strong></p><p><code>node_category</code> already carries <code>fit_artifact</code> on <strong>417</strong> nodes, alongside <code>quantity</code> (8216), <code>geometry</code> (1089), <code>coordinate</code> (983), <code>metadata</code> (10913), <code>structural</code> (5957), <code>representation</code> (2312) and <code>identifier</code> (198). So the vocabulary needed already exists.</p><p>The classifier catches <code>plasma_profiles/profiles_1d/ion/temperature_fit/weight</code> and <code>core_instant_changes/.../density_fit/chi_squared</code> as <code>fit_artifact</code>, but labels the identical construct under <code>equilibrium/time_slice/constraints/</code> as <code>quantity</code>. <strong>54 leaf nodes are misclassified</strong> that way — the <code>/weight</code> and <code>/reconstructed</code> pairs across every equilibrium constraint, including <code>ip</code>, <code>flux_loop</code>, <code>diamagnetic_flux</code>, <code>faraday_angle</code> and the b-field probes. <strong>29 of them are already bound as a <code>StandardNameSource</code>, and 2 have produced a standard name.</strong></p><p><strong>Revised treatment for this section.</strong> Repair the classification on the 54 so <code>fit_artifact</code> means what it says; make source eligibility read <code>node_category</code> rather than a path heuristic; and retire the two names minted from misclassified sources. Under that one authority <code>camera_x_rays/detector_humidity</code> (<code>quantity</code>, unit 1, “Fraction of humidity (0-1) measured at the detector level”) is named, and the constraint weights are excluded — without either outcome needing a bespoke rule. This is graph-wide rather than the six WEST instances, and it is why the section's earlier framing, which proposed writing a new exclusion rule, is superseded by this comment.</p></div>
+</div>
+</section>
 </main>
 </body>
 </html>
