@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T14:55:27",
+  "updated": "2026-09-04T15:02:13",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3511,9 +3511,11 @@
         "id": "inv-skiprule",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06c6f-740f-71b1-87a9-5becc0eadbdb",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"read-only\"}": "01a06c6f-740f-71b1-87a9-5becc0eadbdb"
+        },
         "created": "2026-09-04"
       },
       {
@@ -71744,6 +71746,178 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T124021530269-n-wct-skip-rule-audit",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a74",
+        "node": "n-wct-skip-rule-audit",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1180,
+                "cached_input_tokens": 615732,
+                "input_tokens": 616914,
+                "output_tokens": 961,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 617875,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "A report at the declared path names, with file and line, every predicate that can set a StandardNameSource to status skipped, and identifies which one skipped camera_x_rays/detector_humidity. That source is the worked case and the lead has already ruled that it must be named: it carries unit 1, node_category quantity, is_leaf true, a documentation string reading 'Fraction of humidity (0-1) measured at the detector level', and it sits at status skipped with attempt_count 1. Humidity is a physical property, so a rule that skips it is over-broad. Report how many of the 1412 currently skipped sources were skipped by that same predicate and how many by each of the others, so the blast radius of any change is a number rather than a guess. State the smallest predicate change that admits a source with a unit and a physical definition while still excluding solver bookkeeping such as constraint weights and iteration counts, and name every test file that covers the rule. Two known related findings to check against rather than rediscover: a leaf invariant around imas_codex/standard_names/dd.py line 524 and a qualify_dd structural-prefix condition were recorded as wrongly excluding roughly 336 data-child quantities including tf/coil/current, and pf_active/coil/current is presently parked at the compose attempt cap rather than skipped, so establish whether those are the same rule or two. Do not change repository files.",
+          "estimated_hours": 0.6,
+          "goal": "Name the predicate that skips a source carrying a unit and a physical definition",
+          "id": "n-wct-skip-rule-audit",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-skip-rule-audit-manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requires_decisions": [],
+          "role": "investigate",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wct-skip-rule-audit.md"
+          ]
+        },
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-skiprule",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-04T12:40:37Z",
+        "completed_at": "2026-09-04T13:01:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1255,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1255,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "fdb8945cf4acf91e5736e5fa40ee05b890963c33",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "static audit of every skipped-status writer plus the coordinator-supplied live reason census over all 1412 skipped sources",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-skip-rule-audit.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-skip-rule-audit-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06c6f-740f-71b1-87a9-5becc0eadbdb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14606848,
+            "cached_input_tokens_cumulative": 14606848,
+            "input_tokens": 14948463,
+            "input_tokens_cumulative": 14948463,
+            "output_tokens": 35460,
+            "output_tokens_cumulative": 35460,
+            "reasoning_output_tokens": 11359,
+            "reasoning_output_tokens_cumulative": 11359
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 20378,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 23078,
+              "external_wait": null,
+              "log_age_seconds": 22958,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 22981,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 46819,
+          "peak_input_tokens": 29555311
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "investigation node; deliverable is the predicate inventory and verdict at the declared report path",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-skip-rule-audit",
+          "session_id": "01a06c6f-740f-71b1-87a9-5becc0eadbdb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T13:01:32Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -71888,6 +72062,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1611
+    "_version": 1613
   }
 }
