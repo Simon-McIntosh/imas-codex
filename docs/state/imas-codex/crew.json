@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T22:42:24",
+  "updated": "2026-09-04T23:15:57",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -73712,6 +73712,730 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T202401123229-n-sgr-indexed-operator-renders-operand-first",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a73",
+        "node": "n-sgr-indexed-operator-renders-operand-first",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1339,
+                "cached_input_tokens": 849816,
+                "input_tokens": 851157,
+                "output_tokens": 1227,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 852384,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "The standard-names renderer emits an indexed operator as operator, operand, index, and the parser accepts that form symmetrically. Today derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface puts the coordinate before the thing being differentiated; it must render as derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate. The operator is unary_prefix with indexed true and index_params coord, declared in imas_standard_names/grammar/vocabularies/operators.yml, and the template that emits the index immediately after the operator token lives in imas_standard_names/grammar/render.py. THE GATE THAT MATTERS IS ROUND-TRIP SYMMETRY: parse of render of an IR must return that same IR, so the parser change and the renderer change land together and tests/grammar plus tests/test_grammar_round_trip.py must both pass. Add cases for the direct form and for the nested form, because nesting compounds the disorder: time_derivative_of_derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface. Two constraints from locked decisions. The composite exemption is RECURSIVE: an operator anywhere inside a composite operand tree keeps its position, and a measured leak previously reordered the second operand of a protected ratio into major_radius_square, so add a test pinning that a ratio's operands are untouched. And this rule belongs in the RENDERER rather than in any prompt, so a brand-new name is born canonical; add no prompt text in this node. Do not bump the package version and do not release, because the consumer will install this checkout editable. Report the exact test command with before and after failure ids, and name every existing test whose expected spelling changes, since each one pins the old form and is evidence the change reached the surface.",
+          "estimated_hours": 1.2,
+          "goal": "Put the differentiated operand ahead of its index in an indexed-operator name",
+          "id": "n-sgr-indexed-operator-renders-operand-first",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sgr-indexed-operator-order.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_standard_names/grammar/render.py",
+            "imas_standard_names/grammar/parser.py",
+            "tests/grammar/test_indexed_operator_order.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-isnrender",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T20:24:12Z",
+        "completed_at": "2026-09-04T20:55:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1866,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1866,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "fbd86ca09553b5b9b4900d539fd769258ae38bb6",
+        "commits": [
+          "ff1738fd5981091c79930dbf112370d6fe3ae270",
+          "0170736ee6dc1212516449b5166244e3049f4c6a"
+        ],
+        "changed_lines": {
+          "added": 203,
+          "removed": 82,
+          "files": 10
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv uv run --no-sync pytest tests/grammar tests/test_grammar_round_trip.py -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T202401123229-n-sgr-indexed-operator-renders-operand-first/after-0170736.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "indexed operator renders operand before index; grammar suite 1148 passed 0 failures at 0170736; 29 exposed old-spelling failures all resolved; IR unchanged on all 29 rows",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sgr-indexed-operator-order.md",
+        "scope_changed": false,
+        "session_id": "01a06e17-de07-7a32-aceb-0c2bf8834c8f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8549632,
+            "cached_input_tokens_cumulative": 8549632,
+            "input_tokens": 8626344,
+            "input_tokens_cumulative": 8626344,
+            "output_tokens": 37893,
+            "output_tokens_cumulative": 37893,
+            "reasoning_output_tokens": 10527,
+            "reasoning_output_tokens_cumulative": 10527
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 48194,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 50894,
+              "external_wait": null,
+              "log_age_seconds": 50773,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+                "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 50796,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 22586,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 25286,
+              "external_wait": null,
+              "log_age_seconds": 24739,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: []"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-unlock-geometric-axis-manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T132231800657-n-wct-unlock-the-geometric-axis --gate <verdict> --commit []; changed_paths: []",
+              "node": "n-wct-unlock-the-geometric-axis",
+              "phase": "starting",
+              "plan": "sn-west-cohort-treatment",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T132231800657-n-wct-unlock-the-geometric-axis",
+              "session": "ship-sli-20260904",
+              "terminal_age_seconds": 24776,
+              "terminal_at": "2026-09-04T13:31:11Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-unlock-the-geometric-axis"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 14702,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 17402,
+              "external_wait": null,
+              "log_age_seconds": 16657,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[\"be6241c5e914327bbd3c7c9f1e2cdf2c893cb8c1\"]; changed_paths: [\"imas_codex/standard_names/graph_ops.py\"",
+                "\"imas_codex/standard_names/loop.py\"",
+                "\"tests/standard_names/test_typed_gap_states_its_reason.py\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-typed-gap-reason.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T152802110992-n-sli-a-typed-gap-states-what-is-missing --gate <verdict> --commit [\"be6241c5e914327bbd3c7c9f1e2cdf2c893cb8c1\"]; changed_paths: [\"imas_codex/standard_names/graph_ops.py\" --commit \"imas_codex/standard_names/loop.py\" --commit \"tests/standard_names/test_typed_gap_states_its_reason.py\"]",
+              "node": "n-sli-a-typed-gap-states-what-is-missing",
+              "phase": "working",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T152802110992-n-sli-a-typed-gap-states-what-is-missing",
+              "session": "ship-sli-20260904",
+              "terminal_age_seconds": 16689,
+              "terminal_at": "2026-09-04T15:45:58Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-sli-a-typed-gap-states-what-is-missing"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 12673,
+              "budget_seconds": 3000,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 15673,
+              "external_wait": null,
+              "log_age_seconds": 13884,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[\"844a721fa8b7eddc29d46078f7d536149b6d2317\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-cut-the-second-rc.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T154628471229-n-wcr-cut-the-second-rc-and-open-the-pr --gate <verdict> --commit [\"844a721fa8b7eddc29d46078f7d536149b6d2317\"]",
+              "node": "n-wcr-cut-the-second-rc-and-open-the-pr",
+              "phase": "working",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T154628471229-n-wcr-cut-the-second-rc-and-open-the-pr",
+              "session": "ship-sli-20260904",
+              "terminal_age_seconds": 13930,
+              "terminal_at": "2026-09-04T16:31:57Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wcr-cut-the-second-rc-and-open-the-pr"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 48420,
+          "peak_input_tokens": 17175976
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "scope_acceptances": [
+          {
+            "path": "tests/grammar/test_binary_operand_vocabulary.py",
+            "reason": "pinned old indexed-operator spelling; the renderer rule necessarily changes its expected strings"
+          },
+          {
+            "path": "tests/grammar/test_indexed_derivative_and_over_locus.py",
+            "reason": "pinned old indexed-operator spelling; renderer rule changes its expected strings"
+          },
+          {
+            "path": "tests/grammar/test_indexed_derivative_model_round_trip.py",
+            "reason": "pinned old indexed-operator spelling; renderer rule changes its expected strings"
+          },
+          {
+            "path": "tests/grammar/test_ir_and_render.py",
+            "reason": "pinned old nested-prefix spelling; renderer rule changes its expected strings"
+          },
+          {
+            "path": "tests/grammar/test_model_parser_operator_parity.py",
+            "reason": "operator parity table pins the derivative_with_respect_to spelling"
+          },
+          {
+            "path": "tests/grammar/test_parser.py",
+            "reason": "pinned old nested-prefix spelling; renderer rule changes its expected strings"
+          },
+          {
+            "path": "tests/grammar/test_render_canonical.py",
+            "reason": "canonical render table pins the nested-operator row"
+          }
+        ],
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-sli-20260904/n-sgr-indexed-operator-renders-operand-first",
+          "session_id": "01a06e17-de07-7a32-aceb-0c2bf8834c8f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T20:55:18Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T154628471229-n-wcr-cut-the-second-rc-and-open-the-pr",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-wcr-cut-the-second-rc-and-open-the-pr",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1242,
+                "cached_input_tokens": 750503,
+                "input_tokens": 751747,
+                "output_tokens": 1028,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 752775,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "cb1ae9b3-ea7d-4cb3-a3e5-4dce71ac7512",
+            "session_id": "ship-sli-20260904"
+          },
+          "done_when": "A pull request is open and NOT a draft on Simon-McIntosh/imas-standard-names-catalog carrying a freshly cut candidate, the superseded draft PR 14 is closed with a reason, and the new URL is recorded. Run 'imas-codex sn release --batch west_production_dd_paths --dry-run' first and record what it reports, then the same command without --dry-run, both in the FOREGROUND. An RC batch targets the fork by default, so do not pass --target upstream and do not pass --final. Four checks are mandatory before reporting success. First, every exported entry must read status draft: count entries whose status is active and require zero, because the exporter used to write that value as a literal and a review candidate publishes as draft until an approved pull request promotes it. Second, record the roster size, the published count, and for information only how many published names are bound to no path in west_production_dd_paths.yaml; carrying accompanying accepted names is NOT a defect under the lead's ruling that the batch is a weak scoping device. Third, check the pull request title and body for the strings co-authored-by, generated with, claude and copilot, and strip any hit with gh pr edit, saying so; authorship is the operator's. Fourth, the new pull request must be ready for review rather than a draft, and PR 14 must be closed with a comment saying it is superseded by the new one and naming it. Report the release version, branch, tag, frozen artifact path, entry count, and both pull-request URLs, and write the manifest with a non-terminal status before the non-dry run.",
+          "estimated_hours": 1.0,
+          "goal": "Cut a fresh WEST candidate and leave exactly one reviewable pull request open",
+          "id": "n-wcr-cut-the-second-rc-and-open-the-pr",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-cut-the-second-rc.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/manifests/reviews"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-rccut2",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T15:46:46Z",
+        "completed_at": "2026-09-04T16:32:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2757,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2757,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "1ee7027bbb6fdcc4ad3155e8acae173088f5eaa5",
+        "commits": [
+          "844a721fa8b7eddc29d46078f7d536149b6d2317"
+        ],
+        "changed_lines": {
+          "added": 2237,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn release --batch west_production_dd_paths --dry-run",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex/staging/.export_report.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-cut-the-second-rc.md",
+        "scope_changed": false,
+        "session_id": "01a06d19-de9e-7833-b5b9-81f1cdaf070c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16344832,
+            "cached_input_tokens_cumulative": 16344832,
+            "input_tokens": 16475969,
+            "input_tokens_cumulative": 16475969,
+            "output_tokens": 24097,
+            "output_tokens_cumulative": 24097,
+            "reasoning_output_tokens": 9262,
+            "reasoning_output_tokens_cumulative": 9262
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 31545,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: Stopped on instruction; not at fault. The node was ordered to stand down after the fork PR was halted;; it has cut; pushed and opened nothing since; and it did not close or comment on PR 13.; The declared measure cannot be met by this node as specified; for two independent reasons:; 1. The candidate this node cut is withdrawn. Its CI and preview evidence measures a closed pull request.; 2. The cut was not scope-correct - 193 of 411 published names are not bound to a manifest path - and the; rule that fixes it is owned by sn-west-cohort-treatment; which blocks this release plan. No scope-correct; candidate can be cut until that plan lands.; A separate; pre-existing condition would also have held the carry-over gate above zero: neutron_rate is; drafted on the WEST DD neutron source with no accepted successor; so any cut made today drops the neutron; quantity PR 12 published.",
+              "elapsed_seconds": 34245,
+              "external_wait": null,
+              "log_age_seconds": 34124,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 chore(standard-names): freeze the next WEST review roster",
+                "397e9a68 chore(standard-names): record the withdrawn roster's review reference"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "complete",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+                "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 34148,
+              "terminal_at": "2026-09-04T06:17:31Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 5937,
+              "budget_seconds": 2700,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 8637,
+              "external_wait": null,
+              "log_age_seconds": 8091,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: []"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/wct-unlock-geometric-axis-manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T132231800657-n-wct-unlock-the-geometric-axis --gate <verdict> --commit []; changed_paths: []",
+              "node": "n-wct-unlock-the-geometric-axis",
+              "phase": "starting",
+              "plan": "sn-west-cohort-treatment",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T132231800657-n-wct-unlock-the-geometric-axis",
+              "session": "ship-sli-20260904",
+              "terminal_age_seconds": 8128,
+              "terminal_at": "2026-09-04T13:31:11Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wct-unlock-the-geometric-axis"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 33359,
+          "peak_input_tokens": 32820801
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-sli-20260904/n-wcr-cut-the-second-rc-and-open-the-pr",
+          "session_id": "01a06d19-de9e-7833-b5b9-81f1cdaf070c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T16:32:43Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-wcr-candidate-recut",
+        "node_definition": {
+          "done_when": "the new fork pull request reports success on all of validate, build and review-edit-guard, its preview address returns HTTP 200, and the report states four numbers: published entry count, domain file count, withheld count, and the count of identities carried by the superseded pull request that are absent from the new cut, which must be 0",
+          "estimated_hours": 1.25,
+          "goal": "Cut the review candidate that supersedes the red pull request on the current catalog main",
+          "id": "n-wcr-candidate-recut",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/manifests/reviews",
+            "/home/ITER/mcintos/.config/reckon/crew/reports/wcr-candidate-recut.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-westrecut",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T03:57:01Z",
+        "completed_at": "2026-09-04T06:17:54.616Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8448,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8453,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "04a6d957a40be2a658c70d6f371b286185c8cf7b",
+        "commits": [
+          "ca097d2735655ca25e8c0a9dde069c22052ea8aa",
+          "397e9a683425bf7e27406194d79d0123feb8bcec"
+        ],
+        "changed_lines": {
+          "added": 2228,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+        "scope_changed": false,
+        "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 159244,
+            "cache_creation_input_tokens_cumulative": 159244,
+            "cache_read_input_tokens": 669060,
+            "cache_read_input_tokens_cumulative": 669060,
+            "inference_geo": "not_available",
+            "input_tokens": 10,
+            "input_tokens_cumulative": 10,
+            "output_tokens": 6949,
+            "output_tokens_cumulative": 6949,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.100745,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.100745
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 18909,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: work in progress \u2014 this is the pre-work placeholder manifest",
+              "elapsed_seconds": 21609,
+              "log_age_seconds": 21213,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none yet; changed_paths: none yet"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T215612074191-n-wcr-fusion-subject-reissue/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-fusion-subject-reissue",
+              "phase": "blocked",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260903T215612074191-n-wcr-fusion-subject-reissue",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 21584,
+              "terminal_at": "2026-09-03T21:57:15Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-fusion-subject-reissue"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 112.518,
+          "generated_tokens": 6949,
+          "generation_seconds": 107.744,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 17.0,
+          "machine_seconds": 4.774,
+          "peak_input_tokens": 169946,
+          "tokens_per_second": 64.5,
+          "wall_tokens_per_second": 61.76
+        },
+        "attempt": 3,
+        "attempt_kind": "resume",
+        "resume_waiver": {
+          "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+          "source": "pointer",
+          "reason": "the node's declared measure was superseded by n-wcr-cut-the-second-rc-and-open-the-pr, which cut v0.4.0rc4+west-task-2e and opened PR 15; resuming would re-cut a withdrawn candidate"
+        },
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut",
+          "session_id": "dea4663c-311d-459a-b3dc-d4868167114a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-04T06:17:54.616Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -73856,6 +74580,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1632
+    "_version": 1635
   }
 }

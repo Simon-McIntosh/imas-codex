@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.92">
-<meta name="plan-version" content="149">
+<meta name="plan-version" content="151">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0,d36d8b6c,75a5d2ca,9e4773f7,9da911db,95421a4e,329b6cda,7b6a558a,18939154,35317df">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -131,7 +131,10 @@
     <div class="r-comment-body"><p>LAND: the refreshed manifest is the PR-3 receipt and the exact fold-back cohort; main held the superseded PR-2 artifact which would feed 4 removed and 5 added identities into a governed approval; stranding cause is a coordinator completion omission, the worker manifest did record the revision</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260904T115851501646-n-wcr-cut-the-rc-and-open-the-fork-pr" data-who="impl-rccut" data-when="2026-09-04T12:30:55Z">
-    <div class="r-comment-body"><p>fork PR 14 is open from review/v0.4.0rc3+west-task-2e carrying 385 published entries, every one reading status draft and none active, the first candidate cut since the exporter stopped writing that value as a literal. Roster 409, 28 unmatched source paths, one ISN semantic exclusion (radial_coordinate, a structural parent with 40 children and no data-dictionary binding) and two grammar parse exclusions on an unregistered locus spelling. PR title and body carry none of the four forbidden attribution strings. The manifest&#x27;s commit field again named a real nine-character prefix with an invented tail, refused by promotion and recovered with rev-parse</p></div>
+    <div class="r-comment-body"><p>fork PR 14 is open from review/v0.4.0rc3+west-task-2e carrying 385 published entries, every one reading status draft and none active, the first candidate cut since the exporter stopped writing that value as a literal. Roster 409, 28 unmatched source paths, one ISN semantic exclusion (radial_coordinate, a structural parent with 40 children and no data-dictionary binding) and two grammar parse exclusions on an unregistered locus spelling. PR title and body carry none of the four forbidden attribution strings. The manifest's commit field again named a real nine-character prefix with an invented tail, refused by promotion and recovered with rev-parse</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260904T154628471229-n-wcr-cut-the-second-rc-and-open-the-pr" data-who="impl-rccut2" data-when="2026-09-04T16:32:43Z">
+    <div class="r-comment-body"><p>second WEST release candidate cut as v0.4.0rc4+west-task-2e and PR 15 opened ready-for-review; release dry-run exit 0 all_gates_passed=true, roster 431, published 384, published_without_manifest_path 182</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
     <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>
@@ -555,6 +558,9 @@
 </div>
 <div class="r-comment" data-section="release-contract" data-id="c-run-r-20260904T045554384846-n-wcr-halt-fork-pr" data-who="cx-prhalt" data-when="2026-09-04T04:59:06Z">
     <div class="r-comment-body"><p>fork pull request 13 CLOSED with an explanatory comment naming the successor, pull requests 11 and 12 left OPEN and untouched, upstream never involved, forbidden comment terms 0 - each verified independently by the orchestrator afterwards. No physicist saw the premature candidate</p></div>
+</div>
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260904T035653459996-n-wcr-candidate-recut" data-who="impl-westrecut" data-when="2026-09-04T06:17:54.616Z">
+    <div class="r-comment-body"><p>correctly refused: the candidate it cut was withdrawn (PR 14 closed) and the cut was not scope-correct, 193 of 411 published names unbound to a manifest path; the binding rule is owned by sn-west-cohort-treatment. Its roster-freeze commits landed and the node was superseded by n-wcr-cut-the-second-rc-and-open-the-pr</p></div>
 </div>
 </section>
 </main>
