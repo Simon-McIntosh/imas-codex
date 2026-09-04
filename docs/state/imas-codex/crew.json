@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T11:46:41",
+  "updated": "2026-09-04T11:49:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -65831,6 +65831,95 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260903T151345329064-n-a-spend-hold-expires",
+        "plan": "sn-west-catalog-release",
+        "section": "entry-gate",
+        "node": "n-a-spend-hold-expires",
+        "node_definition": {
+          "done_when": "a test proves a hold built from a rejection whose text names a reset time stores that time and reads as expired once it passes, a second test proves a hold whose reset time is unknown does not block indefinitely but is re-probed, and uv run --project . pytest tests/test_budget.py -q exits 0",
+          "estimated_hours": 2.0,
+          "goal": "Make a budget hold derived from a provider rejection record the reset time the rejection itself states, so the hold expires on its own, because a hold written from a refusal currently stores no reset time at all and only a served run writes a budget record while a hold blocks every run, which leaves it self-sustaining and refusing a lane the provider is serving",
+          "id": "n-a-spend-hold-expires",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/a-spend-hold-expires.json",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "entry-gate",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "reckon/budget.py",
+            "reckon/ledger.py",
+            "tests/test_budget.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-reckonbudget",
+        "backend": "claude",
+        "local": false,
+        "agent": {
+          "alias": "sonnet 5",
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-03T15:13:49Z",
+        "completed_at": "2026-09-03T15:14:45.180Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 49,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 56,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "2322564aa326bcbb6d124608c62c845b1201a119",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "a reckon session dispatched a broader node on the same two files five seconds later, so this one yields: the owning project holds the plan record and its goal generalises to any exhaustion judgement outliving its evidence, while this node only parsed the stated reset time",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/reports/a-spend-hold-expires.json",
+        "scope_changed": false,
+        "session_id": "f79953c7-d26c-4be1-89b0-0bd8d256afb4",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "stopped in favour of the repository owner's own node on the same file",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/test_budget.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -65961,6 +66050,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1588
+    "_version": 1589
   }
 }
