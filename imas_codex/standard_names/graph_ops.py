@@ -11854,6 +11854,21 @@ def fetch_manifest_source_release_rows(
             """,
             paths=paths,
         )
+        ambiguous_bindings: list[str] = []
+        for row in source_rows or []:
+            direct_ids = sorted(row.get("direct_ids") or [])
+            produced_id = row.get("produced_sn_id")
+            if len(direct_ids) > 1 and produced_id not in direct_ids:
+                ambiguous_bindings.append(
+                    f"{row['source_path']} has direct targets {direct_ids!r} "
+                    f"but produced_sn_id is {produced_id!r}"
+                )
+        if ambiguous_bindings:
+            detail = "; ".join(ambiguous_bindings)
+            raise ValueError(
+                "ambiguous manifest source binding; reconcile the source before "
+                f"release: {detail}"
+            )
         seed_ids = sorted(
             {
                 name_id
@@ -11892,8 +11907,6 @@ def fetch_manifest_source_release_rows(
                 seed_id = direct_ids[0]
             if seed_id is None and produced_id:
                 seed_id = produced_id
-            if seed_id is None and direct_ids:
-                seed_id = direct_ids[0]
             terminal = terminal_by_seed.get(str(seed_id)) if seed_id else None
             skip_reason = str(row.get("skip_reason") or "").strip()
             skip_detail = str(row.get("skip_reason_detail") or "").strip()

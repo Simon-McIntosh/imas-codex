@@ -2,7 +2,7 @@
 
 Exercised against a LOCAL bare repo with the export/publish/PR steps injected —
 no live graph (sn-names focus) and no live GitHub call. A separate graph-marked
-test drives the sn-sources → mint path.
+test drives the sn-sources → terminal-name projection.
 """
 
 from __future__ import annotations
@@ -109,6 +109,51 @@ def _write_names_focus(tmp_path, *, name="demo-batch", filename="batch.yaml"):
         encoding="utf-8",
     )
     return p
+
+
+def _write_sources_focus(tmp_path, source_path="equilibrium/time_slice/ip"):
+    ids, relative_path = source_path.split("/", 1)
+    path = tmp_path / "sources.yaml"
+    path.write_text(
+        "kind: sn_sources\n"
+        "schema_version: 1\n"
+        "name: demo-sources\n"
+        "sources:\n"
+        f"  {ids}:\n"
+        f"    - {relative_path}\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+class _ManifestProjectionClient:
+    def __init__(self, *, direct_ids: list[str], produced_sn_id: str | None):
+        self.direct_ids = direct_ids
+        self.produced_sn_id = produced_sn_id
+
+    def query(self, cypher: str, **params):
+        if "UNWIND $paths AS path" in cypher:
+            return [
+                {
+                    "source_path": params["paths"][0],
+                    "source_status": "attached",
+                    "skip_reason": None,
+                    "skip_reason_detail": None,
+                    "produced_sn_id": self.produced_sn_id,
+                    "direct_ids": self.direct_ids,
+                }
+            ]
+        if "MATCH (start:StandardName)" in cypher:
+            return [
+                {
+                    "start_id": name_id,
+                    "target_id": name_id,
+                    "terminal_stage": "accepted",
+                    "depth": 0,
+                }
+                for name_id in params["seed_ids"]
+            ]
+        raise AssertionError(f"unexpected graph query: {cypher}")
 
 
 def _add_upstream_remote(isnc_repo: Path, tmp_path: Path) -> Path:
@@ -786,20 +831,104 @@ def test_review_release_empty_focus_errors(isnc_repo, tmp_path):
     assert any("focus" in e for e in report.errors)
 
 
-# ── graph-marked: sn-sources focus is minted through run_review_release ────
+def test_review_release_source_batch_excludes_unbound_family(
+    isnc_repo, tmp_path, monkeypatch
+):
+    focus = _write_sources_focus(tmp_path)
+    bound_name = "plasma_current"
+    parent_name = "current"
+    sibling_name = "toroidal_current"
+    child_name = "plasma_current_density"
+    broader_family = [
+        bound_name,
+        parent_name,
+        sibling_name,
+        child_name,
+    ]
+    monkeypatch.setattr(
+        "imas_codex.standard_names.minting.mint_sn_list",
+        lambda *_args, **_kwargs: SimpleNamespace(names=broader_family),
+    )
+    record: dict = {}
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Source-bound batch",
+        gc=_ManifestProjectionClient(
+            direct_ids=[bound_name], produced_sn_id=bound_name
+        ),
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter(record),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [], report.errors
+    assert report.names == [bound_name]
+    assert record["review_batch"] == [bound_name]
+    frozen = yaml.safe_load(Path(report.artifact_path).read_text(encoding="utf-8"))
+    assert frozen["names"] == [bound_name]
+    assert set(broader_family) - set(report.names) == {
+        parent_name,
+        sibling_name,
+        child_name,
+    }
+
+
+def test_review_release_refuses_ambiguous_manifest_source(isnc_repo, tmp_path):
+    focus = _write_sources_focus(tmp_path)
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "Ambiguous source batch",
+        gc=_ManifestProjectionClient(
+            direct_ids=["plasma_current", "toroidal_current"],
+            produced_sn_id=None,
+        ),
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        **_PR_TARGET,
+    )
+
+    assert report.errors == [
+        "manifest source resolution failed: ambiguous manifest source binding; "
+        "reconcile the source before release: equilibrium/time_slice/ip has "
+        "direct targets ['plasma_current', 'toroidal_current'] but "
+        "produced_sn_id is None"
+    ]
+    assert report.names == []
+    assert report.artifact_path is None
+
+
+# ── graph-marked: sn-sources focus projects terminal names ────────────────
 
 PREFIX = "__revreltest__"
 LEAF = f"{PREFIX}/leaf1"
 
 
 @pytest.fixture
-def mint_source(tmp_path):
+def terminal_name_source(tmp_path):
     with GraphClient() as gc:
         gc.query("MATCH (n) WHERE n.id STARTS WITH $p DETACH DELETE n", p=PREFIX)
         gc.query(
             """
             MERGE (n:StandardName {id: $nid})
               SET n.name_stage='accepted', n.source_paths=[$leaf]
+            MERGE (source:StandardNameSource {id: 'dd:' + $leaf})
+              SET source.source_type='dd', source.source_id=$leaf,
+                  source.status='attached', source.produced_sn_id=$nid
+            MERGE (source)-[:PRODUCED_NAME]->(n)
             """,
             nid=f"{PREFIX}_name",
             leaf=LEAF,
@@ -810,7 +939,9 @@ def mint_source(tmp_path):
 
 
 @pytest.mark.graph
-def test_review_release_mints_from_sources(isnc_repo, tmp_path, mint_source):
+def test_review_release_projects_terminal_name_from_sources(
+    isnc_repo, tmp_path, terminal_name_source
+):
     ids, leaf = LEAF.split("/", 1)
     focus = tmp_path / "src.yaml"
     focus.write_text(
