@@ -1562,6 +1562,18 @@ def run_review_release(
             report.source_reconciliation = export_report.to_dict().get(
                 "source_reconciliation", {}
             )
+        if getattr(export_report, "all_gates_passed", True) is False:
+            failed_gates = [
+                gate.gate
+                for gate in getattr(export_report, "gate_results", ())
+                if not gate.passed and not gate.skipped
+            ]
+            failed_gate_names = ", ".join(failed_gates) or "unnamed export gate"
+            report.errors.append(
+                f"Export quality gates failed: {failed_gate_names}. "
+                "Resolve the failed export before publishing."
+            )
+            return report
     except Exception as exc:
         report.errors.append(f"export failed: {exc}")
         return report
