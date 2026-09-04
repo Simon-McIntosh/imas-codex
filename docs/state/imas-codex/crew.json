@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-04T08:14:14",
+  "updated": "2026-09-04T08:40:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -52,27 +52,33 @@
         "id": "cx-exportstatus",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b0b-d298-7183-b659-aed9331c37c4",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b0b-d298-7183-b659-aed9331c37c4"
+        },
         "created": "2026-09-04"
       },
       {
         "id": "cx-fitclass",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b0e-a7f8-7d52-9e78-00f90a86583a",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"medium\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b0e-a7f8-7d52-9e78-00f90a86583a"
+        },
         "created": "2026-09-04"
       },
       {
         "id": "cx-importguard",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06b0d-310b-73d3-9f96-0480a815195d",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06b0d-310b-73d3-9f96-0480a815195d"
+        },
         "created": "2026-09-04"
       },
       {
@@ -88,6 +94,15 @@
       },
       {
         "id": "cx-prhalt",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-04"
+      },
+      {
+        "id": "cx-protection",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -63940,6 +63955,377 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T061157996165-n-sli-export-reads-status",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a72",
+        "node": "n-sli-export-reads-status",
+        "node_definition": {
+          "done_when": "grep -c \"\\\"status\\\": \\\"active\\\"\" imas_codex/standard_names/export.py returns 0, the added tests assert that a name whose graph status is draft exports as draft and that an export refuses when any name in the cut carries a null status, both demonstrated failing when the change is reverted, and uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider reports zero failures added against the base revision",
+          "estimated_hours": 1.0,
+          "goal": "Make the exported catalog status read the graph instead of asserting a literal",
+          "id": "n-sli-export-reads-status",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T061157996165-n-sli-export-reads-status/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_status_authority.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-exportstatus",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T06:12:11Z",
+        "completed_at": "2026-09-04T06:37:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1518,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1518,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "b3f0bdd381062dfbff6f935a2c835e9a6c3c42ae",
+        "commits": [
+          "bee0e29682d3be376e2d9b419521adb4785146dd"
+        ],
+        "changed_lines": {
+          "added": 155,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T061157996165-n-sli-export-reads-status/after-standard-names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T061157996165-n-sli-export-reads-status/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b0b-d298-7183-b659-aed9331c37c4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10141696,
+            "cached_input_tokens_cumulative": 10141696,
+            "input_tokens": 10318205,
+            "input_tokens_cumulative": 10318205,
+            "output_tokens": 23875,
+            "output_tokens_cumulative": 23875,
+            "reasoning_output_tokens": 6733,
+            "reasoning_output_tokens_cumulative": 6733
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3926,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The 45-minute fence expired with the live cut still running and nothing pushed. The dispatch required the; cut; the CI poll and the preview fetch to stay in the foreground; but the harness moved the release command; to the background at its own 600-second ceiling; which is not something the worker can override. At the fence; the fork had no new branch; tag or PR; so the CI and preview evidence does not exist yet.; Second; independent of timing: the carry-over gate cannot reach 0 from this node. neutron_rate is drafted; on the WEST DD neutron source and no accepted successor exists for it; so any candidate cut today drops the; neutron quantity PR 12 published. Closing it needs a review rotation on neutron_rate - graph content; outside this node's declared write scope.",
+              "elapsed_seconds": 6626,
+              "external_wait": null,
+              "log_age_seconds": 4617,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 (chore(standard-names): freeze the next WEST review roster); changed_paths: imas_codex/standard_names/manifests/reviews/v0.4.0rc2+west-task-2e.sn_names.yaml"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "stopped",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 4623,
+              "terminal_at": "2026-09-04T04:55:03Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3359,
+              "budget_seconds": 1200,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4559,
+              "external_wait": null,
+              "log_age_seconds": 4380,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/wcr-halt-fork-pr.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T045554384846-n-wcr-halt-fork-pr --gate <verdict> --commit none; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/wcr-halt-fork-pr.md\" --commit \"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md\"]",
+              "node": "n-wcr-halt-fork-pr",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T045554384846-n-wcr-halt-fork-pr",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 4408,
+              "terminal_at": "2026-09-04T04:58:38Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-halt-fork-pr"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 30608,
+          "peak_input_tokens": 20459901
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260904T061316305508-n-sli-import-write-guard",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a74",
+        "node": "n-sli-import-write-guard",
+        "node_definition": {
+          "done_when": "a new test performs an import against an identity carrying a known origin together with a known status and asserts both survive unchanged; the report shows that test FAILING when the guard is reverted and PASSING with it, quoting both runs; and uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider reports zero failures added against the base revision",
+          "estimated_hours": 1.0,
+          "goal": "Stop a catalog import writing the editorial axis, proven by a test that fails without the guard",
+          "id": "n-sli-import-write-guard",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T061316305508-n-sli-import-write-guard/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "open",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_import.py",
+            "tests/standard_names/test_import_editorial_guard.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "open",
+        "member": "cx-importguard",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T06:13:40Z",
+        "completed_at": "2026-09-04T06:37:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1443,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1443,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "b3f0bdd381062dfbff6f935a2c835e9a6c3c42ae",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "enumeration of every code path able to write a StandardName editorial field, each classified with its caller",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T061316305508-n-sli-import-write-guard/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T061316305508-n-sli-import-write-guard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06b0d-310b-73d3-9f96-0480a815195d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7562624,
+            "cached_input_tokens_cumulative": 7562624,
+            "input_tokens": 7812927,
+            "input_tokens_cumulative": 7812927,
+            "output_tokens": 28653,
+            "output_tokens_cumulative": 28653,
+            "reasoning_output_tokens": 9906,
+            "reasoning_output_tokens_cumulative": 9906
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 4015,
+              "budget_seconds": 2700,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The 45-minute fence expired with the live cut still running and nothing pushed. The dispatch required the; cut; the CI poll and the preview fetch to stay in the foreground; but the harness moved the release command; to the background at its own 600-second ceiling; which is not something the worker can override. At the fence; the fork had no new branch; tag or PR; so the CI and preview evidence does not exist yet.; Second; independent of timing: the carry-over gate cannot reach 0 from this node. neutron_rate is drafted; on the WEST DD neutron source and no accepted successor exists for it; so any candidate cut today drops the; neutron quantity PR 12 published. Closing it needs a review rotation on neutron_rate - graph content; outside this node's declared write scope.",
+              "elapsed_seconds": 6715,
+              "external_wait": null,
+              "log_age_seconds": 4705,
+              "log_fresh": false,
+              "manifest_commits": [
+                "ca097d27 (chore(standard-names): freeze the next WEST review roster); changed_paths: imas_codex/standard_names/manifests/reviews/v0.4.0rc2+west-task-2e.sn_names.yaml"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T035653459996-n-wcr-candidate-recut/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-wcr-candidate-recut",
+              "phase": "stopped",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T035653459996-n-wcr-candidate-recut",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 4711,
+              "terminal_at": "2026-09-04T04:55:03Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-candidate-recut"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3448,
+              "budget_seconds": 1200,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4648,
+              "external_wait": null,
+              "log_age_seconds": 4469,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/wcr-halt-fork-pr.md\"",
+                "\"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260904T045554384846-n-wcr-halt-fork-pr --gate <verdict> --commit none; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/wcr-halt-fork-pr.md\" --commit \"/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T045554384846-n-wcr-halt-fork-pr/manifest.md\"]",
+              "node": "n-wcr-halt-fork-pr",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260904T045554384846-n-wcr-halt-fork-pr",
+              "session": "ship-wcr-20260903",
+              "terminal_age_seconds": 4497,
+              "terminal_at": "2026-09-04T04:58:38Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-wcr-20260903/n-wcr-halt-fork-pr"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 38559,
+          "peak_input_tokens": 15375551
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "no_commit": "verification node; its deliverable is the enumeration, and closing the paths it found needs a scope it correctly refused to cross",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -64070,6 +64456,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1561
+    "_version": 1567
   }
 }
