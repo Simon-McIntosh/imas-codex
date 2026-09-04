@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-04">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
 <main class="plan-doc">
@@ -199,6 +199,10 @@ A repair that survives one round trip is a repair; one that does not was a readi
 <div class="r-dec" data-key="review-feedback-architecture" data-choice="markers-flush-through-pipeline-approval-promotes" data-by="Simon McIntosh" data-when="2026-09-04T06:21:34+00:00">
     <p class="r-dec-q">review-feedback-architecture</p>
     <p class="r-dec-rat">Lead ruling 2026-09-04, correcting this plan&#x27;s §4 premise. There is NO import path and none should exist; what exists is the approve CLI tool. Exactly two things travel back from a review pull request. Comments and edits are ITERATIVE MARKERS, never authoritative content: they flush through the generate/review/score pipeline and produce a new commit on the same pull request, and that loop repeats until everything is resolved. An approval signal, once the pull request is approved, PROMOTES THE LIFECYCLE on those names, and that is the single mechanism moving status from draft to active. Verified against the code: catalog_import.py has no CLI route and writes no StandardName content - no SET sn., no MERGE (sn, no CREATE (sn - which is consistent with the separate finding that nothing in the codebase writes StandardName.origin=&#x27;catalog_edit&#x27;. So the 2096 markers are residue from a path already removed, and a guard against an import writing the editorial axis defends a hazard that no longer exists. The work owed is not a guard but a verification: that no write path can put reviewer-authored content into the graph as authoritative, and that sn approve is confined to advancing lifecycle rather than importing content.</p>
+    </div>
+<div class="r-dec" data-key="protection-trigger" data-choice="approved-states-only" data-by="Simon McIntosh" data-when="2026-09-04T06:30:41+00:00">
+    <p class="r-dec-q">protection-trigger</p>
+    <p class="r-dec-rat">Lead ruling 2026-09-04: filter_protected is scoped to approved states. The mechanism is kept, because one thing the pipeline must not do is silently rewrite the description of a name that is published catalog authority - that content passed a human gate, so changing it has to return through that gate as a steer, a new commit and a re-approval. What changes is the trigger. origin=&#x27;catalog_edit&#x27; fails three ways: nothing in the codebase writes it, it is inaccurate in both directions (182 names with real edit records excluded, roughly 2031 with none included), and its own docstring encodes the blind-accept model the lead has ruled out. name_stage=&#x27;approved&#x27; fails none: one writer in sn approve at promote.py:885, written only when a pull request is approved, and meaning exactly published authority. Protection becomes a consequence of approval rather than a marker someone must remember to set, which is the same property required of the status axis. It moves from 2096 names to zero today and grows one pull request at a time. Two details land in the same change: the guard must fail CLOSED, because on a query error it currently logs treating-all-as-pipeline and returns an empty set, so protection disappears exactly when something is wrong; and refuse_pipeline_authority_loss is kept unchanged, since it refuses the batch rather than silently stripping fields and becomes the more important of the two guards under this model.</p>
     </div>
 </section>
 
