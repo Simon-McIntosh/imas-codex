@@ -11,7 +11,8 @@ Public surface:
   keyword) RRF search. Mirrors :mod:`imas_codex.graph.dd_search`.
 - :func:`fetch_standard_names` — fetch full entries by id list.
 - :func:`find_related` — bucketed cross-relation discovery.
-- :func:`check_names` — existence + Levenshtein suggestions.
+- :func:`check_names` — existence by direct id match, plus Levenshtein
+  suggestions for the names that are absent.
 - :func:`summarise_family` — family overview keyed on physical_base.
 """
 
@@ -939,19 +940,72 @@ def _resolve_related_types(relationship_types: str) -> set[str]:
 # ---------------------------------------------------------------------------
 
 
+class SuggestionPoolExhausted(RuntimeError):
+    """Raised when the nearest-match enumeration fills its row limit.
+
+    A pool that reaches its limit is a truncated view of the catalogue, so
+    the nearest candidate it holds need not be the nearest one that exists.
+    Reaching the limit is therefore an error rather than an answer.
+    """
+
+
+#: Row limit for the nearest-match enumeration. The number is headroom, not
+#: the safeguard: the pool refuses when it fills, so a catalogue that outgrows
+#: this limit produces an error instead of a suggestion drawn from a slice.
+SUGGESTION_POOL_LIMIT: int = 50_000
+
+
+def _suggestion_pool(gc: Any, limit: int) -> dict[str, str | None]:
+    """Return ``{id: physical_base}`` for nearest-match scoring.
+
+    Ordered by id so the same catalogue always yields the same pool, and
+    refuses when the row count reaches ``limit`` — a filled pool cannot say
+    which candidate is nearest, only which is nearest among those it read.
+    """
+    rows = (
+        gc.query(
+            """
+            MATCH (sn:StandardName)
+            RETURN sn.id AS id, sn.physical_base AS physical_base
+            ORDER BY sn.id
+            LIMIT $cap
+            """,
+            cap=limit,
+        )
+        or []
+    )
+    if len(rows) >= limit:
+        raise SuggestionPoolExhausted(
+            f"nearest-match pool filled its limit of {limit} rows; the "
+            "catalogue is at least that large, so any suggestion drawn from "
+            "this pool would come from a truncated slice of it"
+        )
+    return {r["id"]: r.get("physical_base") for r in rows if r.get("id")}
+
+
 def check_names(
     names: list[str],
     *,
     gc: Any = None,
-    suggestion_pool_limit: int = 5000,
+    suggestion_pool_limit: int = SUGGESTION_POOL_LIMIT,
 ) -> list[dict]:
     """Validate that names exist in the StandardName catalogue.
 
     For each input, returns ``{name, exists, suggestion, reason}`` where
     ``suggestion`` is the closest-Levenshtein candidate when
     ``exists=False``. Grammar-share is a tiebreaker only.
+
+    Existence is answered by matching the id directly, so a verdict never
+    depends on how much of the catalogue an enumeration happened to return.
+    The enumeration survives only to propose a nearest match for a name that
+    is absent, and it is built lazily: a batch in which every name exists
+    reads no pool at all.
     """
     if not names:
+        return []
+
+    wanted = [n for n in ((raw or "").strip() for raw in names) if n]
+    if not wanted:
         return []
 
     own_gc = False
@@ -961,29 +1015,29 @@ def check_names(
         gc = GraphClient()
         own_gc = True
     try:
-        all_rows = (
+        rows = (
             gc.query(
                 """
                 MATCH (sn:StandardName)
-                RETURN sn.id AS id, sn.physical_base AS physical_base
-                LIMIT $cap
+                WHERE sn.id IN $ids
+                RETURN sn.id AS id
                 """,
-                cap=suggestion_pool_limit,
+                ids=sorted(set(wanted)),
             )
             or []
         )
-        catalog = {r["id"]: r.get("physical_base") for r in all_rows if r.get("id")}
+        present = {r["id"] for r in rows if r.get("id")}
 
+        catalog: dict[str, str | None] | None = None
         results: list[dict] = []
-        for raw in names:
-            n = (raw or "").strip()
-            if not n:
-                continue
-            if n in catalog:
+        for n in wanted:
+            if n in present:
                 results.append(
                     {"name": n, "exists": True, "suggestion": "", "reason": ""}
                 )
                 continue
+            if catalog is None:
+                catalog = _suggestion_pool(gc, suggestion_pool_limit)
             best = _levenshtein_suggest(n, catalog)
             results.append(
                 {
@@ -1406,6 +1460,8 @@ __all__ = [
     "fetch_standard_names",
     "find_related",
     "check_names",
+    "SuggestionPoolExhausted",
+    "SUGGESTION_POOL_LIMIT",
     "summarise_family",
     "search_standard_names_vector",
     "search_standard_names_with_documentation",
