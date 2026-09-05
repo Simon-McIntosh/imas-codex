@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-impl" content="0.87">
 <meta name="plan-commits" content="ff1738fd,0170736e,12b5573,b61430cb,dd7c3aec,eefcdf86,b95b1360,324a1f1a">
 <meta name="plan-artifacts" content="docs/evidence/sn-grammar-refinement/reuse-map.md,docs/evidence/sn-grammar-refinement/merged-head-measurement.md,docs/evidence/sn-grammar-refinement/repaired-head-measurement.md">
@@ -351,6 +351,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260905T071108799560-n-sgr-size-the-reviewer-findings" data-who="test-triagecensus" data-when="2026-09-05T08:02:56Z">
     <div class="r-comment-body"><p>sized the four reviewer-finding families against the live cohort and the 431-name WEST roster: operator placement 133 live/20 WEST, generic loci 202/57, competing bases 21/9, incomplete direction stems 380/48</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20260905T131932620265-n-sgr-the-target-load-unit-is-an-energy-flux" data-who="cl-release" data-when="2026-09-05T13:46:28.595Z">
+    <div class="r-comment-body"><p>row 67&#x27;s blocker is cleared: the sn edit dry run flips from &#x27;DD source cohort disagrees on unit authority&#x27; to acceptance. Recorded two DDGap unit_defect facts and two active DDResolutions for the wall target-load paths at effective W.m^-2, corrected the stored units and repointed HAS_UNIT, and marked the mismatch-axis exception correct_in_graph so a rebuild reproduces it. Found and fixed a latent bug in shared enforcement machinery on the way: _classify_graph_port_preflight hard-coded the expected DDGap kind as self_contradiction and so silently refused the graph port write for every cohort that was not the ionisation-potential one; it now derives the kind from the evidence gap id. Method caveat, declared by the worker: it edited before measuring, so its before-figure is reconstructed by inspection rather than measured, with the one pre-existing caller of the fixed helper re-run separately to confirm behaviour is preserved.</p></div>
 </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
