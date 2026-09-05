@@ -190,3 +190,98 @@ gap before a checkpoint is mechanical, not hygiene.
   scheduler leg.
 - Prefer a second detached checkout at the base revision for failure
   attribution, over the worker's own statement of its base.
+
+## What the shared routing config should change
+
+These are for the project that owns crew dispatch and the flight configuration.
+Each is evidenced from this workstation's own records rather than proposed from
+preference. The first is a safety gap and the rest are consistency.
+
+### The claude lanes' budget check reads the wrong number, in the wrong unit
+
+`budget_check: true` is set on both claude backends, and it provides no
+protection. The preflight reports, for both:
+
+```
+utilisation_pct: 1.21   rate_limit_type: overage   resets_at: 2026-10-01T00:00:00Z
+detail: "backend 'claude' exposes no account-limit surface to read"
+```
+
+The lane's own stream carries the gating signal, twenty-two times in one run:
+
+```json
+{"status": "allowed_warning", "rateLimitType": "overage", "utilization": 1.21,
+ "unifiedWindows": {"five_hour": {"utilization": 0.48, "resetsAt": 2026-09-05T12:00Z},
+                    "seven_day": {"utilization": 0.14, "resetsAt": 2026-09-10T18:00Z}}}
+```
+
+Two errors compound. The preflight reads the top-level **overage** figure — the
+account's position against a horizon three weeks out, whose reset stamp is
+exactly the `2026-10-01` the preflight repeats — rather than
+`unifiedWindows.five_hour`, which is what actually gates the next request and
+stood at 48% with three and a half hours to run. And `utilization` is a
+**fraction**: 1.21 means 121%, and it is being rendered as `1.21%`, a hundredfold
+optimistic. So the fence reads a lane at 1.21% when its gating window is at 48%,
+and will keep reading 1.21% until October regardless of any five-hour exhaustion.
+
+The `detail` line is the tell — it says no account-limit surface can be read
+while the number it prints comes from one. The signal is present and unparsed,
+which is the same shape the shared guidance already records for spend refusals.
+
+This is the reverse of the hazard that guidance warns about. A stale hold is
+self-sustaining and visible: the fleet stops and someone asks why. A stale
+**clearance** is silent, and it is what the claude lanes have now.
+
+### Two backends over one account keep two budget records
+
+`claude` and `claude-opus` are `command: claude` on one account. Their budget
+states are tracked separately and were last observed 26 hours apart —
+`2026-09-05T08:03Z` against `2026-09-04T06:17Z` — while carrying the identical
+1.21 figure, because it is one account's number read twice. So a lane can be
+cleared on a sibling's day-old reading of a shared account, and the four codex
+presets hold together today only because they happened to be probed together.
+
+Declaring the account a backend belongs to would make the sharing explicit and
+let one observation serve every preset over it.
+
+### The local lane is the least completely specified backend
+
+`clive` declares `launch`, `command`, `model`, `effort` and `alias`. Its sibling
+`clive-glm` additionally declares `sandbox`, `session_reuse` and `time_budget`,
+as do all four codex presets and both claude presets. A dispatch to `clive`
+resolves `sandbox: worktree-full` from a shipped default rather than from the
+lane, and takes a default time budget.
+
+Give it an explicit `time_budget`, and make it **longer** than the metered lanes'
+rather than equal. That is not generosity: this lane's own configuration comment
+already records that its thinking is intrinsic and unbudgetable, and the measured
+thinking share here is 83% by characters, with over 95% observed independently on
+two nodes in the parallel trial. A lane that cannot be told to think less needs
+to be given time to finish, or it will keep spending whole budgets on
+preliminaries. The one node run here spent 40 minutes on baseline measurement and
+never reached its edit.
+
+### The local lane reports no output-token usage
+
+Every assistant message from `deepseek-v4-flash` carries `output_tokens: 0`, and
+no usage total appears anywhere in the stream. Confirmed independently on two
+further nodes in the parallel trial. Input tokens *are* reported, so the rework
+metric that the `by_spec_level` rows were qualified on remains computable for
+this lane — but throughput and cost-per-node are not, and any tok/s figure for it
+is a character-derived estimate that must be labelled as one.
+
+### Member `harness` does not route, and reads as though it does
+
+A member registered `--harness claude-opus` ran on sonnet, because dispatch falls
+through to `default_backend`. Hit independently by both coordinators in this
+trial, in different projects, on the same day. Either make the member's declared
+harness route its dispatches, or stop accepting the flag — a field that is
+recorded, displayed, and ignored will keep costing this.
+
+### A live worker cannot be steered
+
+A message to a CLI-launched worker's session returns success and never reaches
+its turn. The orchestration guidance lists messaging the worker as a recovery
+step before redispatch; for this launch kind the only channel is
+`crew resume --advice`, which needs the run terminal first. Either deliver peer
+messages into a CLI run's turn, or remove that row so nobody plans around it.
