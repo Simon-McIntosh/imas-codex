@@ -1099,6 +1099,19 @@ def _run_exclusion_accounting_gate(
     )
 
 
+def _catalog_entry_files(entry_dir: Path) -> list[Path]:
+    """The catalog's own entry files: ``<entry_dir>/<domain>.yml|.yaml``.
+
+    Names the set rather than walking the checkout and filtering: only the
+    direct per-domain files under ``standard_names/`` are catalog entries,
+    so a virtual environment or any other directory nested beside them
+    cannot inject rows into the comparison. This is the same per-domain
+    layout the exporter writes and the path convention defines
+    (``standard_names/<domain>.ya?ml``).
+    """
+    return sorted([*entry_dir.glob("*.yml"), *entry_dir.glob("*.yaml")])
+
+
 def detect_divergence(
     candidates: list[dict[str, Any]],
     catalog_root: str | Path | None = None,
@@ -1114,6 +1127,12 @@ def detect_divergence(
     for callers outside the release gate; :func:`run_export` never uses that
     heuristic and skips the gate when no checkout is available.
 
+    The catalog read is a named set, not a checkout walk: only the direct
+    ``standard_names/<domain>.yml`` / ``.yaml`` entry files are read
+    (:func:`_catalog_entry_files`), so files in a virtual environment or any
+    other directory nested inside the checkout can never become comparison
+    rows.
+
     Returns a list of divergence findings.
     """
     findings: list[DivergenceEntry] = []
@@ -1121,7 +1140,7 @@ def detect_divergence(
     if catalog_root is not None:
         catalog_entries = {}
         standard_names = Path(catalog_root) / "standard_names"
-        for path in sorted(standard_names.glob("*.yml")):
+        for path in _catalog_entry_files(standard_names):
             payload = yaml.safe_load(path.read_text(encoding="utf-8")) or []
             if not isinstance(payload, list):
                 raise ValueError(f"{path}: domain catalog is not a YAML sequence")
