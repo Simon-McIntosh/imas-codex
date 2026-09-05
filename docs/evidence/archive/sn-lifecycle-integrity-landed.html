@@ -274,6 +274,41 @@
     example moved. The test is stronger for it, because it no longer claims solver bookkeeping
     is physics.</p>
 
+    <h2 id="resolution-honoured">A rebuild that erased the physics it was reviewed to keep</h2>
+    <p>Closing the classification leak required re-deriving a cohort of Data Dictionary paths.
+    <code>_batch_create_path_nodes</code> turned out to write more than the category it was
+    called for: it sets <code>path.unit</code> from the raw extraction and rebuilds
+    <code>HAS_UNIT</code> for every path in its batch, consulting no resolution at all.
+    Committed at <code>87df539d</code>.</p>
+    <table>
+      <thead><tr><th>Reconstructed constraint</th><th>Raw DD</th><th>Resolved</th><th>After repair</th></tr></thead>
+      <tbody>
+        <tr><td><code>j_parallel</code></td><td><code>1</code></td><td><code>A.m^-2</code></td><td><code>A.m^-2</code></td></tr>
+        <tr><td><code>j_phi</code></td><td><code>1</code></td><td><code>A.m^-2</code></td><td><code>A.m^-2</code></td></tr>
+        <tr><td><code>n_e</code></td><td><code>1</code></td><td><code>m^-3</code></td><td><code>m^-3</code></td></tr>
+        <tr><td><code>pressure</code></td><td><code>1</code></td><td><code>Pa</code></td><td><code>Pa</code></td></tr>
+        <tr><td><code>pressure_rotational</code></td><td><code>1</code></td><td><code>Pa</code></td><td><code>Pa</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The restored values are the argument.</strong> Each is the unit its own quantity
+    carries, against a raw declaration that had flattened all five to dimensionless. The
+    resolutions were not stylistic overrides — they encode the physics that a reconstructed
+    constraint carries its parent quantity's unit, and the rebuild was erasing exactly that.
+    49 paths were exposed to it; 5 had been overwritten and 0 disagreements predated the
+    cohort run, which is what made the finding attributable.</p>
+    <p><strong>A held-open test settled a decision rather than a number.</strong> The tracked
+    holdout expecting <code>m^-3</code> was left failing across three nodes on the stated
+    reason that refreshing it to the raw value might fix in place a number a repair would
+    reverse. That is what happened: <code>m^-3</code> was right, and a session that had
+    "fixed" the red test by updating its expectation would have written the wrong unit into
+    the holdout and called the suite green. It now passes on its own, never having been edited
+    in either direction.</p>
+    <p>The scope rule is narrow and its exclusions are tested, not just its positive case: a
+    resolution applies only when active, on the unit field, at exactly the version being
+    written, and the focused suite pins the fall-back to raw for both a retired record and an
+    other-version record. The projection sits before the scalar write and the unit-edge
+    normalization alike, so the two write paths cannot drift.</p>
+
   </main>
 </body>
 </html>

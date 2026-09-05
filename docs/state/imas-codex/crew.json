@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T01:53:35",
+  "updated": "2026-09-05T02:24:46",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2722,9 +2722,11 @@
         "id": "impl-resolutionhonour",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a06ed9-122a-7fc1-a440-f227b71d72f8",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a06ed9-122a-7fc1-a440-f227b71d72f8"
+        },
         "created": "2026-09-04"
       },
       {
@@ -77074,6 +77076,141 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260904T235505448169-n-sli-a-rebuild-honours-an-active-resolution",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-a-rebuild-honours-an-active-resolution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 960,
+                "cached_input_tokens": 633160,
+                "input_tokens": 634122,
+                "output_tokens": 223,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 634345,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "A measurement established the exact position, so do not re-derive it. 49 DD paths carry an active DD 4.1.1 resolution that changes the raw declaration, all of them unit resolutions. _batch_create_path_nodes sets path.unit from the raw extraction and deletes and re-creates HAS_UNIT for every path in its batch, consulting no resolution. A cohort rebuild run tonight touched 5 of those 49, and all 5 now hold the raw value against their active resolution, so the graph disagrees with its own resolution records on exactly 5 rows. Paths outside that cohort showing the condition: 0, so this is entirely tonight's and nothing predates it. THE WRITE PATH CLOSES BEFORE THE DATA IS REPAIRED, which is this plan's own ordering rule and the reason it exists: repairing 5 rows while the writer still overwrites them buys one clean measurement before the next rebuild undoes it. So make _batch_create_path_nodes consult the active resolution for the version it is writing and persist the RESOLVED effective unit, on both the scalar and the HAS_UNIT edge, falling back to the raw declaration only where no active resolution applies. A resolution that is retired or belongs to another version must NOT apply; state how you determined which resolutions are active. THE GATE HAS TWO HALVES AND BOTH ARE REQUIRED. First a test that fails when the honouring is removed: build a fixture path carrying an active resolution whose effective value differs from raw, rebuild it, assert the persisted scalar and edge both hold the EFFECTIVE value, then show that same test fails against the raw-writing behaviour. Second, the live repair as its consequence rather than as a separate act: re-derive those 5 paths through the fixed writer and report the disagreement count before and after, which must go 5 to 0. Re-derive through the backing code; never patch the 5 rows with a direct Cypher update. REPORT THE FIVE PATHS INDIVIDUALLY with their raw value, their resolution effective value and the value the graph holds after your run, so a reader can check each rather than trust a count. Also report the whole-graph disagreement count afterwards across all 49 exposed paths, which should read 0 and would reveal any row you moved the wrong way. THE SUITE GATE: tests/standard_names currently stands at 6 failures and 6997 passing, and tests/core at 924 passing with 0 failures. Added failures against both must be 0. One of those 6 is test_docs_holdout_set.py::test_docs_holdout_physics_authority_matches_dd_path_bindings, which expects m^-3 where the graph now holds 1 - IF your change restores that path to its resolved m^-3 then that test will PASS and the count drops to 5, which is a legitimate outcome to report rather than to engineer; do not edit that holdout row either way. Run every check with env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync and never drop --no-sync: that environment is shared with the main checkout. Capture each run to a file once with its exact command, exit status and log path, then read the file.",
+          "estimated_hours": null,
+          "goal": "Make a data-dictionary path rebuild honour an active resolution instead of overwriting it",
+          "id": "n-sli-a-rebuild-honours-an-active-resolution",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T235505448169-n-sli-a-rebuild-honours-an-active-resolution/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/graph/build_dd.py",
+            "tests/graph/test_rebuild_honours_resolution.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-resolutionhonour",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-04T23:55:14Z",
+        "completed_at": "2026-09-05T00:22:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1658,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1658,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "7cc95dbfbe2731060d421324504cdb2b93279388",
+        "commits": [
+          "87df539d43ddd49a137bb2bd2fe12912bb12cc49"
+        ],
+        "changed_lines": {
+          "added": 186,
+          "removed": 10,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T235505448169-n-sli-a-rebuild-honours-an-active-resolution/after-final-standard-names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T235505448169-n-sli-a-rebuild-honours-an-active-resolution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a06ed9-122a-7fc1-a440-f227b71d72f8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14542080,
+            "cached_input_tokens_cumulative": 14542080,
+            "input_tokens": 14752659,
+            "input_tokens_cumulative": 14752659,
+            "output_tokens": 37285,
+            "output_tokens_cumulative": 37285,
+            "reasoning_output_tokens": 11856,
+            "reasoning_output_tokens_cumulative": 11856
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 49141,
+          "peak_input_tokens": 29294739
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sli-a-rebuild-honours-an-active-resolution",
+          "session_id": "01a06ed9-122a-7fc1-a440-f227b71d72f8",
+          "session_source": "pointer",
+          "retained_at": "2026-09-05T00:22:52Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -77218,6 +77355,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1687
+    "_version": 1689
   }
 }
