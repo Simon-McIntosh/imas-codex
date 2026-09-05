@@ -71,6 +71,30 @@ client-side usage record says zero while the engine says a third. Any cost or
 cache analysis built on this lane's client usage records — including the table
 below as first written — is wrong in the same direction.
 
+**Three cache figures are now in circulation and they measure three different
+things.** Recorded explicitly, because blending them would be worse than any one
+of them:
+
+| Figure | What it is | Source |
+|---|---|---|
+| **0%** | clive, client-side `cache_read_input_tokens` in the terminal `result` record | measured here, three streams |
+| **34%** | clive, engine-side `vllm:prefix_cache_hits_total / …_queries_total` | the serving project |
+| **93.8%** | a **codex**-shaped usage block, so not this lane | reported as clive by a third session |
+
+The last row is a field-name confusion worth naming so it is not repeated. The
+codex lane's usage block is
+`{input_tokens, cached_input_tokens, cache_write_input_tokens, output_tokens, reasoning_output_tokens}`,
+and its cached share here measured 97.9%. The clive lane emits the **Anthropic**
+shape instead — `{input_tokens, cache_creation_input_tokens, cache_read_input_tokens, output_tokens, …}` —
+because it is the claude-code CLI reaching a local OpenAI-compatible endpoint
+through a wrapper. Grepped across all three clive streams: `cached_input_tokens`
+appears **zero** times, `cache_read_input_tokens` once each in the terminal
+record. So the client-side zero is a zero on the field this lane actually
+populates, and the 93.8% belongs to a different lane.
+
+The 0%-versus-34% gap is therefore the reporting defect, and it is unaffected by
+that confusion.
+
 What survives, because the comparison is still lopsided:
 
 
@@ -82,7 +106,7 @@ direction that explains everything else:
 |---|---:|---:|---:|
 | codex / gpt-5.6-sol | 20,124,632 | 19,695,744 (97.9%) | 428,888 |
 | claude / sonnet-5 | 24,233,869 | 23,983,548 (99.0%) | 250,321 |
-| clive / deepseek-v4-flash | 19,974,934 | **0** | 19,974,934 |
+| clive / deepseek-v4-flash | 19,974,934 | **0 reported** | see below |
 
 The `clive` row is what the **client** reports, and the engine contradicts it:
 about 34% of prefix queries hit. The metered lanes report 97.9% and 99.0%
