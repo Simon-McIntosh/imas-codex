@@ -252,6 +252,40 @@ Recorded as a correction rather than edited away, because the first reading of
 this — "the message silently vanishes" — was wrong in a way that would have sent
 the fix to the wrong layer.
 
+### The class, once three instances were on the table
+
+The messaging finding turned out not to be about one channel. Sent to the
+repository that owns crew dispatch, it prompted a search that found two
+first-party instances of the same shape, in the only two cases that repository
+had ever exercised:
+
+- Its worker-to-worker peer channel produced exactly two questions in one
+  session — at 12:04:41Z and 12:48:16Z — and **both went unanswered forever.**
+  Neither carries an `answered_at`. Both workers blocked with a NEEDS-HELP brief
+  and were unblocked by hand. Two for two, so the premise that a worker can reach
+  the worker it needs is false in every case it has been tried.
+- Plus the coordinator-to-worker case measured here.
+
+**One of the three fails well, and the difference is the whole lesson.** The peer
+channel *names the unanswered question and blocks*. My send *returned
+`success: true`* and expired silently. Both channels are equally broken; only one
+is diagnosable. Both of the blocked manifests were understood in seconds, while
+the undelivered message took a stream-wide grep, a record count and two delivery
+notices arriving after the fact to establish — and my first conclusion from that
+evidence was wrong.
+
+So the principle worth carrying into whatever replaces any of them: **a channel
+that cannot deliver should say so at the point of sending.** A success return on
+a message that will expire is the one behaviour that guarantees the sender plans
+around it, and it converts a cheap failure into an expensive investigation.
+
+Ownership was settled the right way too, and it is worth recording as a pattern
+for cross-project findings: the approval gate belongs to the host harness rather
+than to crew dispatch, so the owning repository recorded it explicitly as **not
+ours** — so that nobody spends an afternoon hunting it in the wrong codebase — and
+kept the two halves that are theirs. A finding routed to a repository that cannot
+fix it is worth less than the same finding routed there with the boundary drawn.
+
 ## The checkpoint is a stop-the-world operation, not a background one
 
 Recorded here because it constrains every wave from now on. The graph backup runs
