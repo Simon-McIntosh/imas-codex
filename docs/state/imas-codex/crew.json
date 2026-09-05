@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T23:10:51",
+  "updated": "2026-09-05T23:11:52",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -82626,6 +82626,168 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T210544181293-n-sli-the-gate-comment-stops-claiming-a-routing",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-the-gate-comment-stops-claiming-a-routing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 766,
+                "cached_input_tokens": 506749,
+                "input_tokens": 507517,
+                "output_tokens": 399,
+                "reasoning_output_tokens": 98,
+                "total_tokens": 507916,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "11b50f59-c77b-4356-8bb3-6dafc6d0a4c0",
+            "session_id": "ship-s10-20260905"
+          },
+          "done_when": "The comment block above the semantic-similarity gate in imas_codex/standard_names/workers.py no longer states that the synthetic low score routes the name to the refine_name pool, because it does not: the null resolution method it writes creates a review_quorum_shortfall and the refine claim requires that shortfall to be null, so the row is unclaimable by the pool it names. Replace the claim with what actually happens. grep -c 'routes the name to the refine' over workers.py returns 0. The docstring in defaults.py already states the correct behaviour and must be left unchanged. Change no executable code: git show --stat must list workers.py only, and a diff of the file with comment lines stripped must be empty - state that you ran that check. Added failures in tests/standard_names against a base you measure yourself is 0.",
+          "estimated_hours": null,
+          "goal": "The semantic gate's comment stops claiming it routes a failing name to the refine pool",
+          "id": "n-sli-the-gate-comment-stops-claiming-a-routing",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T210544181293-n-sli-the-gate-comment-stops-claiming-a-routing/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "25m",
+          "write_paths": [
+            "imas_codex/standard_names/workers.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-gate",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-05T21:06:22Z",
+        "completed_at": "2026-09-05T21:10:01.960Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 185,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 219,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "837b960d1d5e5d0d83017eaf6f7db37e44c730b8",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T210544181293-n-sli-the-gate-comment-stops-claiming-a-routing/manifest.md",
+        "scope_changed": false,
+        "session_id": "a3326100-476f-445b-95e1-fb6ab50fedf2",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 23431,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: REQUIRED GUARD CHANGE BEFORE ENDPOINT IS REACHABLE: standard_names/workers.py review_name semantic gate (critical 0.55) rejects the bare anchor 'beta' for every description measured (0.475-0.508); a real rescore (completed, run_id=sn-rescore-20260905T140457Z) parked beta at name_stage='reviewed' (validation valid) rather than accepted, and the supersede and docs steps that require 'accepted' are refused by their own guards. The change exceeds this node's write scope (docs/evidence only) and requires a pipeline code change plus a design decision the plan does not settle (see follow_ons).",
+              "elapsed_seconds": 27031,
+              "external_wait": null,
+              "log_age_seconds": 21911,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5bb65c468f802536205eaaa140f601eda26d2952"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-beta-is-the-total-beta",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+                "session_id": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 21949,
+              "terminal_at": "2026-09-05T15:00:24Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-beta-is-the-total-beta"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sli-the-gate-comment-stops-claiming-a-routing",
+          "session_id": "a3326100-476f-445b-95e1-fb6ab50fedf2",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T21:10:01.960Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -82770,6 +82932,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1750
+    "_version": 1751
   }
 }
