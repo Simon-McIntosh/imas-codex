@@ -58,7 +58,22 @@ Of the mid-flight estimate, 83% is thinking (150,095 characters) against sonnet'
 delivered work. Over 95% by characters was observed independently on two nodes in
 the parallel trial.
 
-### The local lane has no prompt caching, and that is the whole cost story
+### The local lane caches about a third of what the metered lanes cache
+
+**Corrected 2026-09-05, and the first version of this section over-claimed.** I
+wrote that the lane has *no* prompt caching, reading a client-side
+`cache_read_input_tokens: 0` as a fact about the engine. The serving project then
+sampled the live two-card engine's own metrics: `prefix_cache_hit_rate = 0.3389`.
+vLLM automatic prefix caching **is** active and hitting about 34%.
+
+So this is substantially a **reporting gap** rather than a compute gap: the
+client-side usage record says zero while the engine says a third. Any cost or
+cache analysis built on this lane's client usage records — including the table
+below as first written — is wrong in the same direction.
+
+What survives, because the comparison is still lopsided:
+
+
 
 The input columns diverge by more than an order of magnitude, and in the
 direction that explains everything else:
@@ -69,19 +84,33 @@ direction that explains everything else:
 | claude / sonnet-5 | 24,233,869 | 23,983,548 (99.0%) | 250,321 |
 | clive / deepseek-v4-flash | 19,974,934 | **0** | 19,974,934 |
 
-Confirmed independently: a completed node in the parallel trial reports 7,975,223
-input tokens with zero cache reads. So the local lane re-processes its entire
-context on every turn — roughly **forty-six times** the fresh input of the codex
-node for work of comparable length.
+The `clive` row is what the **client** reports, and the engine contradicts it:
+about 34% of prefix queries hit. The metered lanes report 97.9% and 99.0%
+*cached* on the same axis. So the honest statement is that this lane re-reads
+roughly **two thirds** of its context every turn against a couple of percent on
+the metered lanes — a real and large gap, and not the total absence the zeros
+suggested.
 
-That is the ceiling on this lane, and it is not a model-quality property. It
-explains the throughput (~22–29 tok/s against sonnet's 52), it explains why a
-long node degrades rather than accelerating as context accumulates, and it says
-what would move the number most: prompt caching on the local endpoint, not a
-different model or a different effort setting. The parallel project's ledger
-prices its clive node at $41.15 — notional, since the lane is free, but the
-figure is what those tokens would cost metered, and it is six times its own Opus
-review of comparable output.
+That still explains the throughput (~22–33 tok/s against sonnet's 52 and Opus's
+78) and why a long node does not accelerate as context accumulates. And it
+sharpens rather than weakens the recommendation: **34% cumulative is well short
+of what a properly cached agentic conversation reaches**, so there is headroom at
+the endpoint, and closing it is worth more than changing model or effort. What
+changes is that the lever is *cache configuration*, not *cache introduction*.
+
+**Two instrument lessons, and I am the cautionary half of the first.** A
+client-side zero is a statement about the client. I read it as a statement about
+the engine, wrote a section headline on it, and it drove a config recommendation.
+The engine's own metrics were one query away and I did not think to ask for them
+because the absence looked like data. That is the same shape as the four other
+corrections in this record: an instrument's silence read as a measurement.
+
+The second is the serving project's, and worth carrying if anyone scrapes that
+endpoint: matching vLLM metric names **by substring** silently sums each
+counter's `_created` timestamp gauge and the `external_` cross-instance counters
+into the real totals. Match exact bare names. On this engine they are
+`vllm:kv_cache_usage_perc` — not `gpu_cache_usage_perc` —
+`vllm:prefix_cache_queries_total` and `vllm:prefix_cache_hits_total`.
 
 **Node shape follows from this.** A free lane with no caching is cheapest per
 token and dearest per turn. It suits work with a small, stable context and a
