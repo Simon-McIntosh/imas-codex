@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T10:53:32",
+  "updated": "2026-09-05T14:06:54",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -293,6 +293,15 @@
         "role": "documentation",
         "session_id": "01a02e03-b7b5-7e60-a02e-fae61ca19101",
         "created": "2026-08-23"
+      },
+      {
+        "id": "graph-checkpoint",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "impl-abharness",
@@ -78246,6 +78255,515 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260905T074303748555-n-wcr-the-divergence-scan-names-its-subtrees",
+        "plan": "sn-west-catalog-release",
+        "section": "release-run-residues",
+        "node": "n-wcr-the-divergence-scan-names-its-subtrees",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1562,
+                "cached_input_tokens": 800041,
+                "input_tokens": 801605,
+                "output_tokens": 914,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 802519,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "A release run that completed successfully reported 387 divergence entries sourced from environment YAML files inside the catalog checkout's .venv, so a reader cannot tell a real divergence from an artefact of the traversal. detect_divergence lives at imas_codex/standard_names/export.py:1102 and the gate is GATE_D, divergence_detection, declared at :98. CONSTRAIN THE SCAN BY NAMING WHAT IT SHOULD READ rather than by excluding what it should not: the catalog's own entry files are a known, enumerable set, and a scan that walks a checkout and filters afterwards will pick up the next unexpected directory too. State which subtrees or file set you made it read and why that set is the right one. THE MEASURE IS THE ENTRY COUNT AND ITS COMPOSITION: run the release dry run before and after with env -u VIRTUAL_ENV UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD IMAS_CODEX_SN_ISNC=/home/ITER/mcintos/Code/imas-standard-names-catalog uv run --no-sync imas-codex sn release --batch west_production_dd_paths --dry-run, and report the divergence entry count each time together with how many of the remaining entries resolve to a real catalog entry file. Entries from a virtual environment must reach 0, and a genuine divergence must still be reported: prove that second half by constructing a fixture where a catalog entry really has diverged and showing the scan still finds it, because a scan that reports nothing is not a fixed scan. Add that fixture as a test which FAILS if the scan is narrowed to nothing. Report tests/standard_names before and after; its base is 5 failures and added failures must be 0. Do NOT cut a candidate, push a branch or tag, or open or modify a pull request. Never drop --no-sync: the environment is shared with the main checkout and four peer workers. A peer holds imas_codex/standard_names/graph_ops.py; do not edit it.",
+          "estimated_hours": null,
+          "goal": "Stop the divergence scan reporting rows from a virtual environment",
+          "id": "n-wcr-the-divergence-scan-names-its-subtrees",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T074303748555-n-wcr-the-divergence-scan-names-its-subtrees/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-run-residues",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_divergence_scan_scope.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-residue",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T07:43:42Z",
+        "completed_at": "2026-09-05T08:55:18.426Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4287,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4296,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "5a9702f40891888c03d4713cbfd205db98b2f0d3",
+        "commits": [
+          "45e70dfb55504df26c114c1d6c2922c9a813e565"
+        ],
+        "changed_lines": {
+          "added": 171,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/ -q -p no:cacheprovider (5 failed, same 5 ids as baseline, 0 added) plus 4 new fixture tests proving both halves",
+          "exit_status": 1,
+          "log_path": "/tmp/after_tests_standard_names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T074303748555-n-wcr-the-divergence-scan-names-its-subtrees/manifest.md",
+        "scope_changed": false,
+        "session_id": "7f324b5f-f4ab-4aa6-91d8-f98894db6824",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no rate-limit event in the stream yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-wcr-the-divergence-scan-names-its-subtrees",
+          "session_id": "7f324b5f-f4ab-4aa6-91d8-f98894db6824",
+          "session_source": "pointer",
+          "retained_at": "2026-09-05T08:55:18.426Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260905T084942049611-n-wcr-the-post-copy-check-names-its-entry-set",
+        "plan": "sn-west-catalog-release",
+        "section": "release-run-residues",
+        "node": "n-wcr-the-post-copy-check-names-its-entry-set",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2101,
+                "cached_input_tokens": 349373,
+                "input_tokens": 351476,
+                "output_tokens": 1472,
+                "reasoning_output_tokens": 200,
+                "total_tokens": 352948,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "check_catalog in imas_codex/standard_names/catalog_import.py discovers its entries at lines 376-380 with catalog_dir.rglob('*') filtered by suffix, so it reads every YAML file anywhere under the checkout including the virtual environment. That is the measured cause of the 387 divergence rows a real release publish reported: the release transcript carries 'Post-copy check found 387 diverged entries' immediately after a pydantic parse error on .venv/lib/python3.13/site-packages/markdown_it/port.yaml. EVIDENCE, a fixed target rather than a judgement: extract the discovery into a named helper that returns the catalog's own per-domain entry files, and gate it with a unit test over a temporary fixture tree containing two things. First, a real per-domain entry file directly under the standard_names directory, for example equilibrium.yml, which the helper MUST return. Second, a nested directory under the checkout holding a YAML file that a whole-tree walk would pick up, named dot-venv so it reads as a virtual environment, which the helper MUST NOT return. The test fails if the helper is restored to a walk-and-filter, and it fails if the helper is narrowed to nothing. ESTABLISH THE LAYOUT RATHER THAN ASSUMING IT: assemble_review_catalog in export.py writes one file per domain directly under the standard_names directory, and _catalog_entry_records globs that directory one level deep, so two independent sites treat the layout as flat. check_catalog instead calls _derive_domain_from_path, which implies nesting was once expected. Read the live catalog checkout at /home/ITER/mcintos/Code/imas-standard-names-catalog, list what is actually there, and state the real layout in your manifest. If entry files genuinely sit one level deeper, name that two-level set explicitly, because naming a two-level set is still naming a set and excluding what you do not want is the shape this node exists to remove. FENCE: do NOT run imas-codex sn release in any mode, do NOT construct a GraphClient, and keep your test away from the graph. check_catalog opens a graph connection, so test the extracted helper directly rather than the function that calls it. The gate is that unit test plus tests/standard_names, whose base is 5 failures and whose added failures must be 0. Do not touch imas_codex/standard_names/export.py; a peer holds it.",
+          "estimated_hours": 1.0,
+          "goal": "Make the post-copy catalog check read a named entry-file set instead of walking the whole checkout",
+          "id": "n-wcr-the-post-copy-check-names-its-entry-set",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T084942049611-n-wcr-the-post-copy-check-names-its-entry-set/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-run-residues",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "imas_codex/standard_names/catalog_import.py",
+            "tests/standard_names/test_catalog_entry_discovery.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-postcopy",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T08:49:48Z",
+        "completed_at": "2026-09-05T09:23:52.543Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2017,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2044,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "4be834fa78a22a30b2ef90f889d4dcfdee485404",
+        "commits": [
+          "2dd345c1b424a150fe1320852eb54140b91c0c84"
+        ],
+        "changed_lines": {
+          "added": 131,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync python -m pytest tests/standard_names/ -q (27 before, 27 after, identical id sets, comm -13 empty) plus two mutant proofs: restore the walk and the gate fails; narrow the helper to nothing and the gate fails",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T084942049611-n-wcr-the-post-copy-check-names-its-entry-set/after_pytest.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T084942049611-n-wcr-the-post-copy-check-names-its-entry-set/manifest.md",
+        "scope_changed": false,
+        "session_id": "f31592b1-b2da-4e12-b45e-c3006212bd0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4251492,
+            "input_tokens_cumulative": 4251492,
+            "output_tokens": 24657,
+            "output_tokens_cumulative": 24657,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 21.873884999999994,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 21.873884999999994
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1790,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The whole-cohort stage cannot pass its mandatory exact-route preflight: row 67 is refused by `sn edit` because its DD source cohort has conflicting unit authorities `W` and `W.m^-2`. Repair requires graph/unit/source-binding changes outside the report-only write scope. A partial 148-name migration and direct-graph bypass were not taken.",
+              "elapsed_seconds": 5090,
+              "external_wait": null,
+              "log_age_seconds": 3761,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/sgr-cohort-rename-map.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072450514906-n-sgr-migrate-the-live-cohort/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072450514906-n-sgr-migrate-the-live-cohort/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-migrate-the-live-cohort",
+              "phase": "complete",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T072450514906-n-sgr-migrate-the-live-cohort",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T072450514906-n-sgr-migrate-the-live-cohort",
+                "session_id": "01a07074-c7f8-7040-baca-575973990e62",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 3797,
+              "terminal_at": "2026-09-05T07:46:29Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-migrate-the-live-cohort"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2041.044,
+          "generated_tokens": 24657,
+          "generation_seconds": 1437.334,
+          "input_budget_tokens": 492288,
+          "input_utilisation_pct": 24.5,
+          "machine_seconds": 603.71,
+          "peak_input_tokens": 120591,
+          "tokens_per_second": 17.15,
+          "wall_tokens_per_second": 12.08
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-wcr-the-post-copy-check-names-its-entry-set",
+          "session_id": "f31592b1-b2da-4e12-b45e-c3006212bd0e",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T09:23:52.543Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260905T085354281227-n-sli-the-backup-target-is-the-live-database",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-sli-the-backup-target-is-the-live-database",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1463,
+                "cached_input_tokens": 360757,
+                "input_tokens": 362222,
+                "output_tokens": 998,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 363220,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "A checkpoint is about to be taken and the two access paths may not name the same database. GraphClient documents at client.py:101 that NEO4J_URI and NEO4J_PASSWORD override any profile, so a worker with the linked .env reaches the graph by those variables. The backup machinery does not: backup_graph_dump and the graph export command both call resolve_neo4j, which on this workstation returns profile 'codex' with host 'titan' and data_dir ~/.local/share/imas-codex/neo4j. From the main checkout that hostname does not resolve, getent hosts titan returns nothing, there is no matching Host entry in the ssh config, the auto-tunnel reports 'Could not resolve hostname titan', and the tunnel port 17687 is closed. Meanwhile workers queried the live graph successfully as recently as 08:31Z, counting 4937 StandardName identities. EVIDENCE, and report it without changing anything: state the host and port a GraphClient built the ordinary way actually connects to, WITHOUT printing any credential and WITHOUT reading the .env file's contents; report only whether each variable is set and what host and port the resulting connection reports. Then state what resolve_neo4j returns in the same process, and whether the two name the same database. Settle it with a fact both sides can be compared on, such as the node count and the current DD version read through the live connection, set beside whatever the profile's local data_dir contains. FENCE: read only. Do NOT run imas-codex graph export, backup, load, switch, clear or start, do NOT stop or restart any database, do NOT write any graph value, and change no repository file. Never pipe, tee or redirect imas-codex CLI output; the CLI logs to ~/.local/share/imas-codex/logs and piping blocks command auto-approval. Your deliverable is the report at the manifest path plus a plain verdict: the backup command would dump the same database the workers read, or it would not, or it would fail before dumping anything. If it would not, name what a coordinator must change before a checkpoint is safe to take.",
+          "estimated_hours": 0.5,
+          "goal": "Establish whether the database the backup command would dump is the same one the workers are reading",
+          "id": "n-sli-the-backup-target-is-the-live-database",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T085354281227-n-sli-the-backup-target-is-the-live-database/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T085354281227-n-sli-the-backup-target-is-the-live-database"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "clive-graphtarget",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T08:54:02Z",
+        "completed_at": "2026-09-05T09:28:44.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2026,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2082,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "fffd9b00432b3ad443b25c4914cc410617777284",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only connection probes: GraphClient and resolve_neo4j URI comparison, SHOW DATABASE, DDVersion, check_database_lock",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T085354281227-n-sli-the-backup-target-is-the-live-database/report.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T085354281227-n-sli-the-backup-target-is-the-live-database/manifest.md",
+        "scope_changed": false,
+        "session_id": "94b0bc69-3ef9-48e6-87c1-6b18826214e9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5775115,
+            "input_tokens_cumulative": 5775115,
+            "output_tokens": 46672,
+            "output_tokens_cumulative": 46672,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 30.042375000000003,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 30.042375000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2044,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The whole-cohort stage cannot pass its mandatory exact-route preflight: row 67 is refused by `sn edit` because its DD source cohort has conflicting unit authorities `W` and `W.m^-2`. Repair requires graph/unit/source-binding changes outside the report-only write scope. A partial 148-name migration and direct-graph bypass were not taken.",
+              "elapsed_seconds": 5344,
+              "external_wait": null,
+              "log_age_seconds": 4016,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/sgr-cohort-rename-map.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072450514906-n-sgr-migrate-the-live-cohort/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072450514906-n-sgr-migrate-the-live-cohort/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-migrate-the-live-cohort",
+              "phase": "complete",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T072450514906-n-sgr-migrate-the-live-cohort",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T072450514906-n-sgr-migrate-the-live-cohort",
+                "session_id": "01a07074-c7f8-7040-baca-575973990e62",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 4051,
+              "terminal_at": "2026-09-05T07:46:29Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-migrate-the-live-cohort"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2078.443,
+          "generated_tokens": 46672,
+          "generation_seconds": 1953.73,
+          "input_budget_tokens": 492288,
+          "input_utilisation_pct": 31.2,
+          "machine_seconds": 124.713,
+          "peak_input_tokens": 153578,
+          "tokens_per_second": 23.89,
+          "wall_tokens_per_second": 22.46
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only connection-identity investigation; its deliverable is the verdict and its probe evidence, and it changed no repository file and no graph value by design",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sli-the-backup-target-is-the-live-database",
+          "session_id": "94b0bc69-3ef9-48e6-87c1-6b18826214e9",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T09:28:44.245Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -78390,6 +78908,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1708
+    "_version": 1712
   }
 }
