@@ -985,6 +985,13 @@ classes:
       created_at:
         description: ISO 8601 timestamp when this name was created
         range: datetime
+      updated_at:
+        description: >-
+          ISO 8601 timestamp of the last substantive modification of this
+          identity. Set on every Cypher write that changes a StandardName
+          property, excluding transient claim/lock markers that mark
+          contention rather than modification.
+        range: datetime
       generated_at:
         description: ISO 8601 timestamp when LLM generation occurred
         range: datetime
