@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T23:02:27",
+  "updated": "2026-09-05T23:06:36",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -4044,6 +4044,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "opus-mergedhead",
+        "harness": "claude-opus",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "opus-namecheck",
         "harness": "claude-opus",
         "role": "implement",
@@ -4080,9 +4089,27 @@
         "created": "2026-09-05"
       },
       {
+        "id": "opus-sixteen",
+        "harness": "claude-opus",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "opus-supersede",
         "harness": "claude-opus",
         "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "opus-tombstone",
+        "harness": "claude-opus",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -82294,6 +82321,310 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T205538484381-n-sli-is-the-supersede-scalar-worth-keeping",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-is-the-supersede-scalar-worth-keeping",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 4508,
+                "cached_input_tokens": 440974,
+                "input_tokens": 445484,
+                "output_tokens": 1902,
+                "reasoning_output_tokens": 641,
+                "total_tokens": 447386,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "11b50f59-c77b-4356-8bb3-6dafc6d0a4c0",
+            "session_id": "ship-s10-20260905"
+          },
+          "done_when": "The report at the write path enumerates EVERY reader and writer of the superseded_by scalar in the package with a file:line, states for each whether the REFINED_FROM edge can answer the same question, and reports what breaks if the field is removed. It measures the drift directly: how many superseded names have an edge successor and a null scalar, how many carry both and AGREE, and how many carry both and DISAGREE - that last count is the one that decides this, because a shadow field that never disagrees is a cache and one that does is a second authority. It characterises the 511 names with no successor by either route: whether they predate the supersede pattern, whether they share a cause, and whether they are a scalar problem at all. It ends with a recommendation of retire or repair and the reason. A recommendation without the disagreement count is not an answer.",
+          "estimated_hours": null,
+          "goal": "A recommendation on whether to retire the superseded_by scalar, carrying the evidence a schema removal needs",
+          "id": "n-sli-is-the-supersede-scalar-worth-keeping",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T205538484381-n-sli-is-the-supersede-scalar-worth-keeping/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a75",
+          "spec_level": "open",
+          "time_budget": "35m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/supersede-scalar-disposition.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "open",
+        "member": "opus-supersede",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T20:55:47Z",
+        "completed_at": "2026-09-05T21:02:24.445Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 391,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 397,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "4fb2d4d500f2063b902957ac097a4c3f5634e4f4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -p no:cacheprovider over the five test files touching the field, at the base revision",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/supersede-scalar-disposition.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T205538484381-n-sli-is-the-supersede-scalar-worth-keeping/manifest.md",
+        "scope_changed": false,
+        "session_id": "8429ae9b-ce59-45bb-9693-220e8c1ce669",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 75.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-06T00:10:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 105963,
+            "cache_creation_input_tokens_cumulative": 105963,
+            "cache_read_input_tokens": 1836763,
+            "cache_read_input_tokens_cumulative": 1836763,
+            "inference_geo": "not_available",
+            "input_tokens": 42,
+            "input_tokens_cumulative": 42,
+            "output_tokens": 24577,
+            "output_tokens_cumulative": 24577,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.5926465,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.5926465
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 22801,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: REQUIRED GUARD CHANGE BEFORE ENDPOINT IS REACHABLE: standard_names/workers.py review_name semantic gate (critical 0.55) rejects the bare anchor 'beta' for every description measured (0.475-0.508); a real rescore (completed, run_id=sn-rescore-20260905T140457Z) parked beta at name_stage='reviewed' (validation valid) rather than accepted, and the supersede and docs steps that require 'accepted' are refused by their own guards. The change exceeds this node's write scope (docs/evidence only) and requires a pipeline code change plus a design decision the plan does not settle (see follow_ons).",
+              "elapsed_seconds": 26401,
+              "external_wait": null,
+              "log_age_seconds": 21281,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5bb65c468f802536205eaaa140f601eda26d2952"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-beta-is-the-total-beta",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+                "session_id": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 21319,
+              "terminal_at": "2026-09-05T15:00:24Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-beta-is-the-total-beta"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1618,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4018,
+              "external_wait": null,
+              "log_age_seconds": 1900,
+              "log_fresh": false,
+              "manifest_commits": [
+                "07486c695 (fix(standard-names): score a bare base against its vocabulary definition); changed_paths: imas_codex/standard_names/workers.py",
+                "tests/standard_names/test_name_gate_definition_floor.py"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T194823055515-n-sgr-the-name-gate-reads-the-vocabulary-definition/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260905T194823055515-n-sgr-the-name-gate-reads-the-vocabulary-definition --gate <verdict> --commit 07486c695 (fix(standard-names): score a bare base against its vocabulary definition); changed_paths: imas_codex/standard_names/workers.py --commit tests/standard_names/test_name_gate_definition_floor.py",
+              "node": "n-sgr-the-name-gate-reads-the-vocabulary-definition",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T194823055515-n-sgr-the-name-gate-reads-the-vocabulary-definition",
+              "session": "ship-s10-20260905",
+              "terminal_age_seconds": 1919,
+              "terminal_at": "2026-09-05T20:23:45Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sgr-the-name-gate-reads-the-vocabulary-definition"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 609,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 2709,
+              "external_wait": null,
+              "log_age_seconds": 2185,
+              "log_fresh": false,
+              "manifest_commits": [
+                "d8abbdf0a8c31d9107e7d5cf62a5481a3e13bc2f"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T201019171176-n-srr-the-existence-check-matches-the-id/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260905T201019171176-n-srr-the-existence-check-matches-the-id --gate <verdict> --commit d8abbdf0a8c31d9107e7d5cf62a5481a3e13bc2f",
+              "node": "n-srr-the-existence-check-matches-the-id",
+              "phase": "starting",
+              "plan": "sn-release-readiness",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T201019171176-n-srr-the-existence-check-matches-the-id",
+              "session": "ship-s10-20260905",
+              "terminal_age_seconds": 2273,
+              "terminal_at": "2026-09-05T20:17:50Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-srr-the-existence-check-matches-the-id"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 303,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 2403,
+              "external_wait": null,
+              "log_age_seconds": 1462,
+              "log_fresh": false,
+              "manifest_commits": [
+                "725ac26c1; changed_paths: imas_codex/standard_names/graph_ops.py",
+                "tests/standard_names/test_failed_source_reason.py"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T201515554443-n-sli-a-failed-source-names-its-reason/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260905T201515554443-n-sli-a-failed-source-names-its-reason --gate <verdict> --commit 725ac26c1; changed_paths: imas_codex/standard_names/graph_ops.py --commit tests/standard_names/test_failed_source_reason.py",
+              "node": "n-sli-a-failed-source-names-its-reason",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T201515554443-n-sli-a-failed-source-names-its-reason",
+              "session": "ship-s10-20260905",
+              "terminal_age_seconds": 1478,
+              "terminal_at": "2026-09-05T20:31:05Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sli-a-failed-source-names-its-reason"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 393.505,
+          "generated_tokens": 24577,
+          "generation_seconds": 306.786,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 11.9,
+          "machine_seconds": 86.719,
+          "peak_input_tokens": 119177,
+          "tokens_per_second": 80.11,
+          "wall_tokens_per_second": 62.46
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only research; the deliverable is the disposition report and no repository change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sli-is-the-supersede-scalar-worth-keeping",
+          "session_id": "8429ae9b-ce59-45bb-9693-220e8c1ce669",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T21:02:24.445Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -82438,6 +82769,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1745
+    "_version": 1749
   }
 }
