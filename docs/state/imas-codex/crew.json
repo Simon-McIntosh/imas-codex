@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T02:42:24",
+  "updated": "2026-09-05T09:28:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -567,6 +567,24 @@
         "created": "2026-08-24"
       },
       {
+        "id": "impl-betafamily",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "impl-betatokenwithdraw",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "impl-blockedrename",
         "harness": "claude",
         "role": "implement",
@@ -877,6 +895,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-03"
+      },
+      {
+        "id": "impl-cohortmigration",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "impl-cohortstage",
@@ -3858,6 +3885,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "opus-betafamily",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "rev-a",
         "harness": "codex",
         "role": "review",
@@ -3927,6 +3963,15 @@
           "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "son-updatedat",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "spec-axisspell",
@@ -4375,6 +4420,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-03"
+      },
+      {
+        "id": "test-triagecensus",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "test-unsourced",
@@ -77506,6 +77560,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1691
+    "_version": 1697
   }
 }
