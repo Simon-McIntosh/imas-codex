@@ -8059,6 +8059,56 @@ async def _run_rd_quorum_cycles(
     }
 
 
+@lru_cache(maxsize=1)
+def _closed_vocabulary_definitions() -> dict[str, str]:
+    """Map every closed-vocabulary base and carrier token to its definition.
+
+    Physical bases and geometry carriers both carry an optional normative
+    ``definition``; tokens that declare none are absent from the mapping so a
+    caller can tell "defined" from "empty".
+    """
+    from imas_standard_names.grammar import vocab_loaders
+
+    definitions: dict[str, str] = {}
+    for token, entry in vocab_loaders.load_physical_bases().bases.items():
+        text = (entry.definition or "").strip()
+        if text:
+            definitions[token] = text
+    for token, entry in vocab_loaders.load_geometry_carriers().carriers.items():
+        text = (entry.definition or "").strip()
+        if text:
+            definitions[token] = text
+    return definitions
+
+
+def semantic_gate_name_text(name: str) -> str:
+    """Return the name-side text the semantic gate scores a description against.
+
+    The gate is a cosine between a name and its description at a floor
+    calibrated on multi-word identifiers. A name that is a single vocabulary
+    token carries too little text to reach that floor at any description, so
+    the coupling rejects the vocabulary's own bare tokens by construction
+    rather than on merit. Where the closed vocabulary defines the token, its
+    definition is the prose the description should agree with, so score
+    against that instead of against the identifier.
+
+    The substitution stays scoped to a name that parses to exactly one token:
+    a qualifier carries no definition, and a composed definition of a
+    multi-word name scores good names down onto the floor. Every other name —
+    multi-token, unparseable, or a token the vocabulary leaves undefined —
+    keeps the identifier text, so an unknown token still fails closed.
+    """
+    try:
+        from imas_standard_names.grammar.parser import parse
+
+        ir = parse(name, strict=True).ir
+    except Exception:
+        return name
+    if ir.operators or ir.qualifiers or ir.projection or ir.locus or ir.mechanism:
+        return name
+    return _closed_vocabulary_definitions().get(ir.base.token) or name
+
+
 async def process_review_name_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -8194,6 +8244,12 @@ async def process_review_name_batch(
         # expensive LLM review and persist a synthetic low score that
         # routes the name to the refine_name pool.
         #
+        # The name-side text comes from ``semantic_gate_name_text``: a name
+        # that is a single defined vocabulary token is scored against the
+        # vocabulary's definition of that token, because one token cannot
+        # reach a floor calibrated on multi-word identifiers. Every other
+        # name keeps the identifier text.
+        #
         # EXCEPT for deterministic parents: their description is the
         # canonical placeholder until ``GENERATE_DOCS`` runs, so the
         # cosine similarity is meaningless. Cosine sim between a
@@ -8292,7 +8348,7 @@ async def process_review_name_batch(
             try:
                 sem_sim, sem_issues = await _asyncio.to_thread(
                     semantic_similarity_check,
-                    sn_id,
+                    semantic_gate_name_text(sn_id),
                     item.get("description") or "",
                 )
             except Exception:
