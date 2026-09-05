@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.94">
-<meta name="plan-version" content="157">
+<meta name="plan-version" content="158">
 <meta name="plan-commits" content="337f93d8,cc6bf548,e56b3c23,c8329ed5,c22671b0,d36d8b6c,75a5d2ca,9e4773f7,9da911db,95421a4e,329b6cda,7b6a558a,18939154,35317df">
 <meta name="plan-artifacts" content="https://github.com/Simon-McIntosh/imas-standard-names-catalog/pull/7,https://Simon-McIntosh.github.io/imas-standard-names-catalog/pr-7/,imas_codex/standard_names/manifests/reviews/v0.3.0rc3+west-task-2e.sn_names.yaml,crew/reports/west-review-pr-recut.md">
 </head>
@@ -608,7 +608,10 @@
     <div class="r-comment-body"><p>named the divergence scan's entry-file set instead of globbing a directory, and found that the reported defect lives elsewhere: the 387 virtual-environment rows come from the post-copy check_catalog walk in catalog_import.py, proved from the earlier release cut's transcript, which the dry run never reaches. Declared its own dry-run measure vacuous rather than claiming the identical before and after count as a pass, and proved both halves by fixture with a counterfactual probe instead.</p></div>
 </div>
 <div class="r-comment" data-section="release-run-residues" data-id="c-run-r-20260905T084942049611-n-wcr-the-post-copy-check-names-its-entry-set" data-who="clive-postcopy" data-when="2026-09-05T09:23:52.543Z">
-    <div class="r-comment-body"><p>replaced the post-copy check&#x27;s whole-checkout walk with a named per-domain entry set, establishing the real layout from the live catalog checkout rather than assuming it, and explaining the original noise: the main branch carries no standard_names directory, so the walk reached the virtual environment. Reported a baseline of 27 where the brief stated 5 rather than quietly adopting the figure it was given.</p></div>
+    <div class="r-comment-body"><p>replaced the post-copy check's whole-checkout walk with a named per-domain entry set, establishing the real layout from the live catalog checkout rather than assuming it, and explaining the original noise: the main branch carries no standard_names directory, so the walk reached the virtual environment. Reported a baseline of 27 where the brief stated 5 rather than quietly adopting the figure it was given.</p></div>
+</div>
+<div class="r-comment" data-section="release-run-residues" data-id="c-run-r-20260905T135640450235-n-wcr-the-fallback-body-carries-the-reviewing-guide" data-who="clive-postcopy" data-when="2026-09-05T13:57:47Z">
+    <div class="r-comment-body"><p>abandoned at launch, not by the worker. 55 bytes of stderr reading &#x27;clive: endpoint discovery contains no reachable models&#x27; one second after dispatch, an empty stream, no manifest, during the serving project&#x27;s four-card transition. An established clive session on another node kept serving throughout, so the outage is in the discovery leg rather than the serving leg. The node&#x27;s brief is unchanged and will be redispatched when discovery answers again.</p></div>
 </div>
 </section>
 </main>
