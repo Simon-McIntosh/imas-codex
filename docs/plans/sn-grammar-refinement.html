@@ -187,6 +187,60 @@
     by the grammar suite, and merged into the editable checkout one at a time so a fleet-visible
     break is attributable to the change that caused it.</p>
 
+    <h2 id="s8">§8 — The migration: re-render the whole live cohort</h2>
+    <p>The rendering rules landed; the stored spellings did not move. A live census measured
+    <strong>149 renderer changes over 2,974 live names</strong> — 141 prefix and 7 postfix under
+    the locus-tail rule, plus one indexed-operator name — with zero reparse failures and zero IR
+    mismatches. Until those identities are re-rendered, the reviewer's four largest findings
+    remain true of the catalog even though the grammar that produced them is fixed.</p>
+    <p><strong>Scope is the whole live cohort, not the WEST roster.</strong> Lead ruling: a
+    rendering rule that applies to the grammar applies to every name the grammar produced.
+    Migrating only the batch would leave the catalog internally inconsistent and would guarantee
+    a second migration later, against names that by then carry published authority.</p>
+    <p><strong>The operation is parse, re-render, supersede — never regeneration and never a
+    string rewrite.</strong> Re-generation would spend LLM calls and risk a different name for
+    unchanged meaning; a string rewrite carries no provenance and no guarantee the result parses.
+    The shadow diff proved this path end to end without a single LLM call: 350 proposals, all
+    parsing, zero collisions, zero merges. Descriptions and documentation are untouched
+    throughout, because these are rendering defects and the meaning of every affected name is
+    unchanged.</p>
+    <p><strong>A full-cohort parse is unavoidable and is the point.</strong> The delta is
+    discovered rather than predicted — you cannot know which identities move without parsing all
+    of them. It also surfaces what a render-only check cannot see: the same census found
+    <strong>7 pre-existing parse failures</strong>, one of which turned out to need a rejected
+    token rather than a new one. Round-trip equality is the acceptance gate, so every proposed
+    spelling is reparsed and its IR compared before anything is written.</p>
+
+    <h2 id="s9">§9 — The beta family: one quantity, and a token to withdraw</h2>
+    <p>The reviewer asked why both <code>beta</code> and <code>plasma_beta</code> exist. The
+    measured family is larger than the pair and carries three separate defects.</p>
+    <p><strong>Beta is by definition a plasma quantity, so the qualifier is redundant.</strong>
+    Lead ruling. <code>plasma_beta</code> (accepted) and
+    <code>normalized_toroidal_plasma_beta</code> (accepted) both carry it;
+    <code>poloidal_beta</code> and <code>toroidal_beta</code> already do not, so the corpus is
+    internally inconsistent about its own convention. Note that
+    <code>normalized_toroidal_beta</code> already exists as <em>superseded</em>: a previous
+    rename moved the correct spelling into the redundant one, so this migration reverses an
+    earlier one and needs a revival route rather than a fresh mint.</p>
+    <p><strong>The family is a physics relation, not a list.</strong> Lead:
+    1/&beta; = 1/&beta;<sub>p</sub> + 1/&beta;<sub>t</sub>, with &beta;<sub>N</sub> the
+    normalized form. So <code>beta</code> is TOTAL beta, and <code>poloidal_beta</code> and
+    <code>toroidal_beta</code> are its two components. <strong>That exposes a documentation
+    error rather than a spelling one:</strong> the description on <code>beta</code> currently
+    reads "Toroidal beta (&beta;_tor)", which is a different quantity that already has its own
+    accepted name. Correcting it is a genuine meaning repair and is the one place in this
+    programme where a description must change.</p>
+    <p><strong>The iron-core &beta; token added for the vocabulary gap must be withdrawn.</strong>
+    <code>beta_inclination</code> was accepted in §7 as a geometry qualifier for the oblique
+    iron-core angle. The graph contradicts it: <code>beta_angle_of_ferritic_element</code> and
+    <code>beta_angle_of_passive_loop</code> were both <em>superseded</em> in favour of
+    <code>tilt_angle_</code> and <code>vertical_angle_</code> spellings, so the project already
+    rejected &beta; as a prefix for a geometric angle and recorded the alternative. The sibling
+    it was chosen to pair with is <code>alpha_angle_of_iron_core_segment</code>, which is
+    accepted and live. No name uses <code>beta_inclination</code> yet, so withdrawing it is
+    clean; the iron-core angle takes a descriptive spelling consistent with the superseded
+    precedent instead.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="operator-renders-by-arity" data-choice="single-base-operand-renders-adjacent" data-by="Simon McIntosh" data-when="2026-09-04T19:45:57+00:00">
