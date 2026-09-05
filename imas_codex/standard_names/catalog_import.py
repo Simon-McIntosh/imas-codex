@@ -344,6 +344,30 @@ _GRAPH_ONLY_FIELDS = {
 _ISN_REMOVED_FIELDS: frozenset[str] = frozenset({"constraints", "validity_domain"})
 
 
+def _catalog_entry_files(catalog_dir: Path) -> list[Path]:
+    """Return the catalog's own per-domain entry files, one level deep.
+
+    Entry files live directly under ``standard_names/``, one file per
+    domain (``standard_names/equilibrium.yml``) — the same flat layout the
+    exporter writes and every other reader globs. A set is named here
+    explicitly so the check walks only the catalog's own entry directory
+    rather than the whole checkout: a whole-tree walk reaches the virtual
+    environment and any other nested YAML, none of which are entries.
+
+    An absent ``standard_names/`` directory yields an empty set, matching
+    the exporter's ``_catalog_entry_records`` behaviour of reading a flat
+    layout that has not yet been written.
+    """
+    sn_dir = catalog_dir / "standard_names"
+    if not sn_dir.is_dir():
+        return []
+    return sorted(
+        p
+        for p in sn_dir.iterdir()
+        if p.suffix in (".yml", ".yaml") and p.is_file() and p.name != MANIFEST_FILENAME
+    )
+
+
 def check_catalog(
     catalog_dir: Path,
 ) -> CheckResult:
@@ -373,12 +397,10 @@ def check_catalog(
     catalog_sha = _resolve_catalog_sha(catalog_dir)
     result = CheckResult(catalog_commit_sha=catalog_sha)
 
-    # Parse catalog entries
-    yaml_files = sorted(
-        p
-        for p in catalog_dir.rglob("*")
-        if p.suffix in (".yml", ".yaml") and p.is_file() and p.name != MANIFEST_FILENAME
-    )
+    # Parse catalog entries — the catalog's own per-domain files, never a
+    # whole-tree walk (a walk reaches the virtual environment and other
+    # nested YAML under the checkout that are not entries).
+    yaml_files = _catalog_entry_files(catalog_dir)
 
     catalog_entries: dict[str, dict[str, Any]] = {}
     warnings: list[str] = []
