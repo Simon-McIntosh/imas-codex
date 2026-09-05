@@ -151,7 +151,29 @@ falls below threshold, that the gate then skips the reviewer call entirely, and 
 rejected the name. Making the synthetic origin unmistakable — a distinct resolution method, or a tier
 the aggregate readers refuse to treat as a verdict — is the fix.</p>
 
-<h2 id="s6">§6 — Ordering: why the leaks come first</h2>
+<h2 id="s5a">§5a — A timestamp is uniform or it is noise</h2>
+    <p><code>StandardName.updated_at</code> is written at <strong>3 of 218</strong> property-write
+    sites in <code>graph_ops.py</code> and read at none. Measured today after the static Cypher
+    detector flagged two of those three writes as naming a property LinkML does not declare.</p>
+    <p>Two obvious dispositions were both wrong. Declaring it would legitimise a field that is
+    stale after 98.6% of modifications — worse than absent, because a reader would trust it.
+    Removing it repeats <code>origin-axis-disposition</code>, which retired an axis on exactly
+    this evidence. <strong>Lead ruling: if we are using timestamps then we adopt them uniformly
+    so they actually become useful — plug the gaps.</strong></p>
+    <p>So the field is declared AND made true: every substantive write to a
+    <code>StandardName</code> maintains it, and a static check fails when a new write path omits
+    it, because a rule without a check decays and this one already has. The exemption is
+    transient lock writes — <code>_refine_claim_release_lock</code> and
+    <code>_structural_authority_lock</code> — which mark contention rather than modification and
+    already have their own allowlist section.</p>
+    <p>The other seven timestamps on this label are event-specific by design:
+    <code>created_at</code>, <code>validated_at</code>, <code>harmonized_at</code>,
+    <code>embedded_at</code>, <code>imported_at</code>, <code>reviewed_name_at</code> and
+    <code>reviewed_docs_at</code> each mark one event and are correctly written in one place.
+    <code>updated_at</code> is the only general-purpose one, and generality is precisely what
+    made it decay.</p>
+
+    <h2 id="s6">§6 — Ordering: why the leaks come first</h2>
 <p>The lead's instruction is the governing constraint on this plan and it is not a preference. Every
 item in §2 through §5 is a write path or a classifier that <em>produces</em> the defect a repair plan
 would remove. Running the repairs first means each of them is re-created by the next export, the next
