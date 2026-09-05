@@ -88,15 +88,73 @@ gate that reaches the surface the change touches.
 Repair dispatched to the same member for continuity, at spec-level `exact`, with
 all four sites named and a symmetric per-alias predicate specified.
 
-### clive / deepseek-v4-flash — `n-wcr-the-divergence-scan-names-its-subtrees` — in flight
+### clive / deepseek-v4-flash — `n-wcr-the-divergence-scan-names-its-subtrees` — first turn
 
-Observed at 33 minutes into a 40-minute budget: 88 tool calls (68 Bash, 19 Read,
-1 Write), no commit, and only the orientation stub manifest written at
-minute two. One untracked file had appeared outside the node's two declared write
-paths, at `imas_codex/standard_names/manifests/reviews/`, shaped like a release
-roster. The coordinator messaged the worker to land its commit and manifest
-before budget rather than after, and to account for that file without staging it.
-Verdict to follow.
+The first turn ran to its 2400-second budget and past it, and produced **no edit
+to the file the node exists to change.** At termination: 88 tool calls (68 Bash,
+19 Read, 1 Write), zero commits, and the orientation stub manifest still as
+written at minute two. `git status` in its worktree showed `export.py` untouched.
+
+The whole budget went on baseline measurement. That is partly the brief's fault
+and partly not, and the two halves should be scored separately.
+
+**The brief's half.** The measure demanded two release dry runs plus two
+`tests/standard_names` runs inside 40 minutes, against a comparable claude node
+given 55 minutes that used 31. The node was under-budgeted for its own measure.
+That is an orchestrator error and it must not be charged to the model.
+
+**The model's half.** The last four minutes were spent recovering a pytest tally
+line that a progress bar had overwritten, after the worker had written in its own
+reasoning that it did not need the number: *"I don't strictly need the total — the
+orchestrator's measure is 5 failures before, added failures 0."* It then ran the
+same `--collect-only` command three more times with different greps. It does not
+budget its own remaining time against the deliverable.
+
+**What it got right**, and this is the field that matters most for a trial: it
+identified the 5 `tests/standard_names` failures as pre-existing, correctly, and
+did not attempt to fix or absorb them. Own-versus-inherited attribution passed.
+
+**What the run found anyway.** By exercising the release path it exposed a real
+defect the node was not looking for: `imas-codex sn release --dry-run` mints a
+release-shaped roster into the repository and advances the release-candidate
+counter, because `_freeze_review_artifact` is called at step three and `dry_run`
+is not consulted until step five. Recorded on the release plan; it very likely
+explains the rc2, rc3 and rc4 rosters already sitting in that directory. A node
+that lands nothing can still be worth its wall clock.
+
+**One repository rule broken.** It piped `imas-codex` CLI output through `tail`,
+which the repository instructions ban explicitly and with a stated reason (the
+CLI auto-logs, and piping blocks command auto-approval). The instruction was in a
+file it had been told to read first.
+
+Resumed with the measuring handed back as given, told to commit before measuring.
+
+## Steering a live worker does not work on this launch kind
+
+`SendMessage` addressed to the worker's session returned `success: true`. The
+message never arrived: **zero plain-text user records in the worker's stream**,
+across four subsequent tool rounds, and a grep for the message text over the
+8 MB transcript returns nothing.
+
+This matters because the orchestration skill's continuity table lists "message
+the worker" as a recovery step before redispatch. For a CLI-launched crew run
+there is no live steering channel at all: the only channel is
+`reckon crew resume --advice`, which requires the run to be terminal first. So
+correcting a worker that is burning its budget on the wrong thing costs a
+`crew stop` — and the stop is what makes the advice deliverable.
+
+The recovery worked: stop, then resume with the measurements handed back as
+established facts. But the sequence should not require killing a healthy process
+to say one sentence to it.
+
+## The checkpoint is a stop-the-world operation, not a background one
+
+Recorded here because it constrains every wave from now on. The graph backup runs
+`neo4j-admin database dump`, which refuses while the database is in use — the
+remote path stops Neo4j, waits 30 seconds for a GPFS lock reclaim, dumps, and
+restarts. So a backup requires every graph-touching worker to be at rest, and a
+node holding a read-only Cypher session is as blocking as one writing. The work
+gap before a checkpoint is mechanical, not hygiene.
 
 ## Standing method
 
