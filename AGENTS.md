@@ -20,7 +20,7 @@ keeps only what a worker editing any file needs, plus these pointers.
 - **SourceFile Lifecycle** — [`imas_codex/ingestion/AGENTS.md`](imas_codex/ingestion/AGENTS.md)
 - **LLM Access** — [`imas_codex/llm/AGENTS.md`](imas_codex/llm/AGENTS.md) (call layer, prompts, routing, service tagging)
 - **Exploration** (persistence, data classification) — [`imas_codex/discovery/AGENTS.md`](imas_codex/discovery/AGENTS.md)
-- **Graph Operations** (zero-row rule, Cypher, Neo4j mgmt, lock files, vector/semantic search) — [`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md)
+- **Graph Operations** (zero-row rule, Cypher, Neo4j mgmt, lock files, vector/semantic search) **+ how to dispatch graph work, and checkpointing** — [`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md)
 - **Services** — Neo4j connection in [`imas_codex/graph/AGENTS.md`](imas_codex/graph/AGENTS.md); **Embedding server** in [`imas_codex/embeddings/AGENTS.md`](imas_codex/embeddings/AGENTS.md)
 - **Release Workflow** — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
 - **Standard Names** (pipeline, family harmonization, lifecycle, naming) — [`imas_codex/core/AGENTS.md`](imas_codex/core/AGENTS.md)
@@ -31,6 +31,43 @@ keeps only what a worker editing any file needs, plus these pointers.
 - **Feature Plan Documentation** — [`docs/AGENTS.md`](docs/AGENTS.md)
 - **MCP Server Deployment** — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
 - **Fallback: MCP Server Not Running** — [`imas_codex/cli/AGENTS.md`](imas_codex/cli/AGENTS.md)
+
+## Graph Work Is The Repository's Critical Path
+
+Almost every capability here resolves through the knowledge graph, so a node that
+reaches Neo4j wrongly fails in ways that look like something else. **Read
+[Dispatching graph work](imas_codex/graph/AGENTS.md) before dispatching or
+writing any node that touches the graph.** The five that cost the most when
+missed:
+
+1. **`review` and `investigate` can never reach Neo4j.** They resolve to a
+   read-only sandbox and are not execution-capable, so a live query routed there
+   fails before it starts and reads as a credential fault. Live graph work goes
+   to `test` or `implement`.
+2. **A worktree without the `.env` symlink fails auth before doing any work.**
+   That is a provisioning fault, never evidence the credential is wrong.
+3. **Derive a gate from what the change can reach, not from where its code
+   lives.** `imas_codex/standard_names/graph_ops.py` is Cypher in the
+   standard-names package: gate it with `tests/standard_names`. Gating two such
+   commits on `tests/graph` alone hid 22 added failures for hours (2026-09-05).
+4. **The default markers exclude `graph`, so Cypher you edit is never
+   executed.** Proving a modified statement parses needs `-m graph` against a
+   live database, or an `EXPLAIN` per statement. A green default run says nothing
+   about validity.
+5. **A missing property returns zero rows, not an error** — so a query can be
+   confidently wrong and completely silent. The binding rule and its detector are
+   in the graph file.
+
+**Provisioning, in one line:** link what must be shared (`.env`, `.venv`), copy
+what must diverge (the gitignored generated models). Symlinking a generated model
+lets a worktree's `build-models --force` write through into the main checkout and
+replace every peer's models — the `uv sync`-from-a-worktree hazard in a new
+costume.
+
+**Checkpointing:** one verified checkpoint protects a body of work, taken from the
+main checkout; there is no recurring backup discipline. It stops the database, so
+every graph-touching worker must be at rest, and it needs `-o` into `BACKUPS_DIR`
+or the currency instrument never sees it. Detail in the graph file.
 
 ## Project Philosophy
 

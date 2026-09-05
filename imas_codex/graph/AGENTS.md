@@ -96,6 +96,126 @@ Tests in `tests/graph/` are **parametrized from the schema** — they validate g
 
 **On test failure, fix the root cause, not the schema.** Three cases: (a) building a new capability → declare in LinkML first, then write code; (b) code writing non-compliant data → fix the code or the bad data; (c) stale data from a prior schema version → migrate/remove the data. Never add schema declarations just to make tests green.
 
+## Dispatching graph work (binding)
+
+A worker that must reach Neo4j needs four things and three of them are decided at
+dispatch time, not by the worker. Every line below was measured on this
+repository; the dates say when.
+
+**The role decides whether the graph is reachable at all.** `review` and
+`investigate` resolve to a read-only sandbox and are `execution_capable: false`,
+so they can never open a Neo4j session — a live query routed there fails before
+it starts, and the failure looks like a credential problem rather than a routing
+one. Route any node that reads or writes the graph to `test` or `implement`.
+
+**The worktree needs the credential, and it is a link.** The main checkout's
+`.env` holds `NEO4J_PASSWORD` at mode 600. `NEO4J_URI` is **not** set: while
+`GraphClient` documents that the env vars override any profile, with the URI
+unset both it and `resolve_neo4j()` resolve the same endpoint from the profile.
+So a worktree without the `.env` symlink fails auth before doing any work, and
+that is a provisioning fault, not evidence the credential is wrong. Measured
+2026-09-05 across eleven live worktrees: every one carries `.env` **and** `.venv`
+as symlinks into the main checkout, never copies, so exactly one 600-mode secret
+exists on disk. Never copy, print, stage or commit the file.
+
+```bash
+ln -sfn /home/ITER/mcintos/Code/imas-codex/.env "$W/.env"   # link, never copy
+readlink "$W/.env"                                          # must resolve to the main checkout
+```
+
+**Probe through a real client, never through the profile alone.**
+`resolve_neo4j()` called outside the application's env loading can resolve a
+different path and report a tunnel failure for a host nothing uses. Measured
+2026-09-05: a bare probe from the main checkout reported
+`Could not resolve hostname titan` and a closed port, while workers were
+querying 4,937 identities through the live endpoint at the same moment.
+Establish reachability with an ordinary `GraphClient` and read the host and port
+it reports.
+
+**Derive the gate from what the change can reach, not from where its code
+lives.** `imas_codex/standard_names/graph_ops.py` is Cypher and sits in the
+standard-names package, so a change there is gated by `tests/standard_names` —
+not by `tests/graph`. Measured 2026-09-05: two commits rewriting 118 SET clauses
+were gated on `tests/graph` alone and added 22 failures to `tests/standard_names`
+that nothing measured for hours.
+
+**The default markers exclude `graph`, so Cypher you edit is never executed by
+the default gate.** The ~445 graph-marked tests need a live Neo4j and are
+deselected by `addopts`. A change to query *text* that must be proven to parse
+needs `-m graph` against a live database, or an `EXPLAIN` of each modified
+statement. A green default run says nothing about whether the statement is valid.
+
+**Append to a SET clause; never prepend.** Several standard-names tests mock
+`GraphClient` and dispatch on a literal `SET <alias>.<field>` prefix or an exact
+query string. Comma-separated assignments to independent properties are
+order-independent in Cypher, so a new assignment goes last. A prepended one
+shifts the leading token, misroutes the fakes, and fails assertions that have
+nothing to do with the change — the mechanism behind the 22 failures above.
+
+**Read the zero-row rule below before writing any query.** A property the schema
+does not declare returns zero rows rather than erroring, so a query can be
+confidently wrong and silent.
+
+### Link what must be shared; copy what must diverge
+
+`.env` and `.venv` are symlinked into a worktree. The **generated models are
+copied**, and the distinction is load-bearing rather than incidental.
+
+| Resource | Provisioned by | Why |
+|---|---|---|
+| `.env` | symlink | One 600-mode secret on disk, identical everywhere, never duplicated. |
+| `.venv` | symlink | One 69,826-entry environment per repository; a copy is 1.76 GiB of GPFS. |
+| `imas_codex/graph/models.py`, `dd_models.py`, `config/models.py`, `graph/schema_context_data.py`, `agents/schema-reference.md` | **`cp -n`** | Derived from *that tree's* schemas. A worktree changing a schema must regenerate them locally, and its copy is then legitimately different from the main checkout's. |
+
+**Never symlink a generated model file.** It fails in both directions. Reading,
+the worktree sees the main checkout's copy, which does not reflect the schema the
+worktree just edited — so its tests measure the wrong tree. Writing is worse:
+`build-models --force` in the worktree would write *through* the symlink into the
+main checkout, replacing every peer worker's models with one node's in-progress
+schema change. That is the `uv sync`-from-a-worktree hazard in a new costume — a
+worktree mutating a shared resource under peers who did not ask for it.
+
+So the rule is: **a worktree that edits `imas_codex/schemas/` must run
+`build-models --force` in its own tree before it measures anything.** The copy
+placed at creation is a starting point, not a guarantee of currency. Where the
+worktree and the main checkout disagree after such an edit, the worktree is right
+and the main checkout is behind; refresh the main checkout with
+`uv run build-models --force` after integration.
+
+Two corollaries measured 2026-09-05:
+
+- A node that declared one new schema attribute had to regenerate before
+  `test_generated_model_currency` would pass, and said so in its manifest. That
+  is the expected sequence, not a defect.
+- Absent models are a *plausible* cause of a large failure count in a fresh
+  worktree, which makes them worth ruling out explicitly rather than assuming.
+  When 22 unexplained failures appeared, the node that investigated regenerated
+  models in **both** trees first and reproduced the count either way, which is
+  what let it attribute the failures to the code change rather than to
+  provisioning. Rule the artifact out by measurement before reasoning past it.
+
+### Checkpointing the graph
+
+**One checkpoint is enough to protect a body of work, and it may be taken from
+the main checkout.** There is no recurring backup discipline to maintain.
+
+The dump stops the world: `neo4j-admin database dump` refuses while the database
+is in use, so `imas-codex graph export` stops the SLURM-hosted server, dumps, and
+restarts by default. Every graph-touching worker must be at rest first — a node
+holding a read-only session blocks it exactly as much as one writing.
+
+Pass `-o` to place the archive in `BACKUPS_DIR`. A bare `graph export` writes to
+`EXPORTS_DIR` while `get_backup_currency` reads `BACKUPS_DIR`, so the archive
+otherwise lands where the currency instrument does not look and never registers
+as a backup at all.
+
+Do not expect `status: current` with `age_seconds: 0`. The restart writes into
+the live tree after the archive is sealed, so a freshly-taken checkpoint reads
+`stale` by a few seconds. That is a property of the instrument, not a defect in
+the archive. **The archive's existence and its verified contents are the
+protection** — a gzip tar carrying a non-empty `graph.dump` member, plus a live
+read afterwards returning the same node count as before.
+
 ## Graph Operations
 
 **Schema verification:** Before writing Cypher queries, verify property names against `agents/schema-reference.md` (auto-generated) or call `get_graph_schema()`. Common pitfall: WikiChunk/CodeChunk text content is stored in the `text` property.
