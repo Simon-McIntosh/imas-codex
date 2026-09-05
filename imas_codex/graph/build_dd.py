@@ -2055,21 +2055,26 @@ def phase_build(
                     paths=batch,
                 )
 
-        # Final-pass: refresh n.unit from the LATEST version's resolved unit.
+        # Final-pass: refresh n.unit from the latest version's effective unit.
         # Per-version node creation only writes the unit when a path is first
         # ADDED, so a path whose unit changed in a later version (e.g. a DD
         # correction W→Wb, or an as_parent placeholder that newer versions
         # resolve differently) would otherwise keep its first-introduced unit
-        # forever. Overwrite with the latest version's value so n.unit always
-        # reflects the current DD. The HAS_UNIT edge self-heal in
-        # _batch_create_path_nodes re-syncs the edge to this value.
+        # forever. Exact-version active resolutions replace the raw declaration
+        # before either representation is written. The HAS_UNIT edge self-heal
+        # below re-syncs the edge to the same effective value.
         unit_updates = [
             {"id": path, "unit": info.get("units", "")}
             for path, info in latest_paths.items()
         ]
+        resolved_unit_updates = []
         if unit_updates:
             for i in range(0, len(unit_updates), 1000):
                 batch = unit_updates[i : i + 1000]
+                batch = _apply_exact_active_unit_resolutions(
+                    client, batch, latest_version
+                )
+                resolved_unit_updates.extend(batch)
                 client.query(
                     """
                     UNWIND $paths AS p
@@ -2086,7 +2091,7 @@ def phase_build(
         # whose unit is now empty/sentinel correctly end with no edge).
         from imas_codex.units import resolve_dd_unit
 
-        latest_ids = [u["id"] for u in unit_updates]
+        latest_ids = [u["id"] for u in resolved_unit_updates]
         for i in range(0, len(latest_ids), 1000):
             id_batch = latest_ids[i : i + 1000]
             client.query(
@@ -2098,14 +2103,13 @@ def phase_build(
                 ids=id_batch,
             )
         latest_unit_edges = []
-        for path, info in latest_paths.items():
-            raw = info.get("units", "")
-            if raw:
+        for update in resolved_unit_updates:
+            if update["unit"]:
                 # Path-aware: corrects DD declarations that contradict the
                 # quantity's dimensionality (see units.resolve_dd_unit).
-                normalized = resolve_dd_unit(path, raw)
+                normalized = resolve_dd_unit(update["id"], update["unit"])
                 if normalized:
-                    latest_unit_edges.append({"id": path, "unit": normalized})
+                    latest_unit_edges.append({"id": update["id"], "unit": normalized})
         for i in range(0, len(latest_unit_edges), 1000):
             edge_batch = latest_unit_edges[i : i + 1000]
             client.query(
@@ -3408,6 +3412,68 @@ def _classify_node(
     )
 
 
+def _apply_exact_active_unit_resolutions(
+    client: GraphClient,
+    paths: list[dict],
+    version: str,
+) -> list[dict]:
+    """Project reviewed unit authority onto one exact-version write batch."""
+    if not paths:
+        return []
+
+    from imas_codex.graph.models import (
+        DDResolutionField,
+        DDResolutionStatus,
+        DDResolutionValueKind,
+    )
+
+    resolution_rows = client.query(
+        """
+        MATCH (resolution:DDResolution)
+        WHERE resolution.path IN $path_ids
+          AND resolution.dd_version = $version
+          AND resolution.field = $field
+          AND resolution.status = $status
+        RETURN resolution.path AS path,
+               resolution.effective_kind AS effective_kind,
+               resolution.effective_value AS effective_value
+        """,
+        path_ids=[path["id"] for path in paths],
+        version=version,
+        field=DDResolutionField.unit.value,
+        status=DDResolutionStatus.active.value,
+    )
+
+    effective_units: dict[str, str] = {}
+    for resolution in resolution_rows:
+        path = resolution["path"]
+        if path in effective_units:
+            raise ValueError(
+                f"multiple active unit resolutions claim {(path, version)!r}"
+            )
+        if resolution["effective_kind"] != DDResolutionValueKind.string.value:
+            raise ValueError(
+                f"active unit resolution for {(path, version)!r} is not a string"
+            )
+        try:
+            effective = json.loads(resolution["effective_value"])
+        except (TypeError, json.JSONDecodeError) as exc:
+            raise ValueError(
+                f"active unit resolution for {(path, version)!r} is not valid JSON"
+            ) from exc
+        if not isinstance(effective, str):
+            raise ValueError(
+                f"active unit resolution for {(path, version)!r} is not a string"
+            )
+        effective_units[path] = effective
+
+    _create_unit_nodes(client, set(effective_units.values()))
+    return [
+        {**path, "unit": effective_units.get(path["id"], path["unit"])}
+        for path in paths
+    ]
+
+
 def _batch_create_path_nodes(
     client: GraphClient,
     paths_data: dict[str, dict],
@@ -3501,6 +3567,7 @@ def _batch_create_path_nodes(
     # Process in batches to avoid memory issues
     for i in range(0, len(path_list), batch_size):
         batch = path_list[i : i + batch_size]
+        batch = _apply_exact_active_unit_resolutions(client, batch, version)
 
         # Step 1: Create IMASNode nodes
         client.query(
