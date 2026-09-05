@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T14:06:54",
+  "updated": "2026-09-05T15:48:24",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3933,6 +3933,15 @@
         "sessions": {
           "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "bbf54e3e-1b44-4f14-a4d1-ab085184e8bf"
         },
+        "created": "2026-09-05"
+      },
+      {
+        "id": "opus-cohortmigration",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-05"
       },
       {
@@ -78764,6 +78773,202 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T120738430664-n-crs-a-current-checkpoint-exists",
+        "plan": "catalog-review-surface",
+        "section": "",
+        "node": "n-crs-a-current-checkpoint-exists",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1254,
+                "cached_input_tokens": 394545,
+                "input_tokens": 395801,
+                "output_tokens": 1648,
+                "reasoning_output_tokens": 413,
+                "total_tokens": 397449,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "The newest verified recovery archive is imas-codex-graph-dev-6fc745c-20260901T125109Z.tar.gz at 2,458,442,456 bytes, written 2026-09-01, so the graph has been unbacked for four days while a sprint has been mutating it. A current checkpoint is also the last unmet condition on this plan's fold-back rehearsal. THE OPERATION: run imas-codex graph export with no facility filter, so the whole graph is captured, and let it restart the server, which is its default. That command stops Neo4j, dumps, and restarts; a peer node established today that the dump refuses while the database is live and therefore cannot silently capture the wrong store, and that the backup path and the worker path resolve to one store at bolt://98dci4-gpu-0002:7687 with data_dir under ~/.local/share/imas-codex/.neo4j/codex. The server runs as a SLURM job named codex-neo4j on 98dci4-gpu-0002, so the restart depends on the scheduler and is the part that can go wrong. EVIDENCE, all four required, written to docs/evidence/catalog-review-surface/graph-checkpoint.md as a short record and repeated in your manifest: first, the archive path and byte size, and that it is a gzip tar carrying a non-empty graph.dump member. Second, get_backup_currency in imas_codex.graph.neo4j_ops reports status current with age_seconds 0, quoted verbatim. Third, imas-codex graph status shows the server serving again. Fourth, a live read through an ordinary GraphClient returns 4937 StandardName identities and DDVersion 4.1.1, which is what a peer measured through the same connection at 08:31Z today, so an equal count is evidence the store came back intact rather than partially. IF THE RESTART DOES NOT COME BACK, that is the one outcome that matters more than the archive: report it as a blocker immediately with the SLURM queue state and the exact command that would resubmit, and do not attempt repeated resubmissions. Every graph-touching worker on this project is blocked while the server is down, so a fast honest blocker beats a slow recovery attempt. FENCE: do not run graph load, switch, clear, init, push or pull, and do not delete or prune any existing archive, including the four-day-old one, which stays until this one is verified. Never pipe, tee or redirect imas-codex CLI output; the CLI logs to ~/.local/share/imas-codex/logs and piping blocks command auto-approval, so run each command directly and read its log afterwards. Change no source file; the evidence record is your only repository write.",
+          "estimated_hours": 1.0,
+          "goal": "Produce a current full-graph checkpoint and prove the database came back",
+          "id": "n-crs-a-current-checkpoint-exists",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T120738430664-n-crs-a-current-checkpoint-exists/manifest.md",
+          "plan": "catalog-review-surface",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "60m",
+          "write_paths": [
+            "docs/evidence/catalog-review-surface/graph-checkpoint.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "graph-checkpoint",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T12:07:42Z",
+        "completed_at": "2026-09-05T12:21:41.515Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 833,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 839,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5b5faf1769d477ac616c3c9b6c13f2e3cabfe9b8",
+        "commits": [
+          "08db6d3e58acc90163a497de38f9d46d4b8896ea"
+        ],
+        "changed_lines": {
+          "added": 154,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex graph export -o into BACKUPS_DIR, then archive integrity, graph status, and a live GraphClient read of StandardName count and current DDVersion",
+          "exit_status": 0,
+          "log_path": "docs/evidence/catalog-review-surface/graph-checkpoint.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T120738430664-n-crs-a-current-checkpoint-exists/manifest.md",
+        "scope_changed": false,
+        "session_id": "c25000b7-e1fe-4e7c-a2fb-06697579faba",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 1.21,
+          "rate_limit_type": "overage",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-10-01T00:00:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 128479,
+            "cache_creation_input_tokens_cumulative": 128479,
+            "cache_read_input_tokens": 5347557,
+            "cache_read_input_tokens_cumulative": 5347557,
+            "inference_geo": "not_available",
+            "input_tokens": 106,
+            "input_tokens_cumulative": 106,
+            "output_tokens": 40330,
+            "output_tokens_cumulative": 40330,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.967348500000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.967348500000001
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 13664,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: The whole-cohort stage cannot pass its mandatory exact-route preflight: row 67 is refused by `sn edit` because its DD source cohort has conflicting unit authorities `W` and `W.m^-2`. Repair requires graph/unit/source-binding changes outside the report-only write scope. A partial 148-name migration and direct-graph bypass were not taken.",
+              "elapsed_seconds": 16964,
+              "external_wait": null,
+              "log_age_seconds": 15636,
+              "log_fresh": false,
+              "manifest_commits": [
+                "[]; changed_paths: [\"/home/ITER/mcintos/.config/reckon/crew/reports/sgr-cohort-rename-map.md\"]"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072450514906-n-sgr-migrate-the-live-cohort/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072450514906-n-sgr-migrate-the-live-cohort/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-migrate-the-live-cohort",
+              "phase": "complete",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T072450514906-n-sgr-migrate-the-live-cohort",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T072450514906-n-sgr-migrate-the-live-cohort",
+                "session_id": "01a07074-c7f8-7040-baca-575973990e62",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 15671,
+              "terminal_at": "2026-09-05T07:46:29Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-migrate-the-live-cohort"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 835.875,
+          "generated_tokens": 40330,
+          "generation_seconds": 607.881,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.9,
+          "machine_seconds": 227.994,
+          "peak_input_tokens": 139181,
+          "tokens_per_second": 66.35,
+          "wall_tokens_per_second": 48.25
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-crs-a-current-checkpoint-exists",
+          "session_id": "c25000b7-e1fe-4e7c-a2fb-06697579faba",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T12:21:41.515Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -78908,6 +79113,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1712
+    "_version": 1714
   }
 }
