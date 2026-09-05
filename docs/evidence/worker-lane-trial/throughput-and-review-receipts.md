@@ -421,11 +421,33 @@ Its committed change (naming the entry-file set instead of globbing a directory)
 is a genuine improvement to `detect_divergence` and does not fix the reported
 defect. The real repair is a follow-on node against `catalog_import.py`.
 
-One review note on its diff, minor and worth carrying: it widened the read from
-`*.yml` to `*.yml` plus `*.yaml`, and asserts a `<domain>.ya?ml` convention in a
-docstring. Every other catalog read in that module globs `*.yml`, and
-`assemble_review_catalog` writes `f"{domain}.yml"`. The convention claim is
-unsourced and the widening is in the opposite direction to the node's purpose.
+I raised one review note on its diff and **it was wrong, which makes three
+coordinator errors today.** I flagged that it widened the read from `*.yml` to
+`*.yml` plus `*.yaml` on an unsourced docstring claim of a `.ya?ml` convention.
+The claim is sourced: `catalog_import.py` carries
+`_DOMAIN_PATH_RE = re.compile(r"standard_names/([^/]+)\.ya?ml$")`, which both
+accepts either suffix and requires a direct child. The worker's read set matches
+the repository's own regex exactly, and my objection came from checking two write
+sites rather than the definition.
+
+Its final return is the strongest of the four nodes on any lane:
+
+- Gate: `tests/standard_names` at 5 failures, **the same five ids as baseline,
+  zero added**, both logs on disk.
+- It declared its own headline measure **vacuous** rather than banking it. The
+  before and after dry runs both report 101 divergence entries and zero from a
+  virtual environment, and it said plainly that the dry run executes only Gate D
+  against a catalog checkout sitting on blank main, so neither run could have
+  surfaced such a row. A worker with a weaker conscience reports "0 virtual
+  environment entries, target met".
+- Having lost its measure, it built a replacement: four fixture tests, one
+  proving a genuine divergence is still reported and one proving a
+  `.venv`-nested YAML can never become a comparison authority — plus a
+  **counterfactual probe** confirming the first test fails if the scan is
+  narrowed to nothing. That is the two-sided gate the brief asked for, obtained
+  by a route the brief did not suggest.
+- It cited the earlier release cut by run id when proving where the 387 rows come
+  from, and left the out-of-fence file alone.
 
 ### A free lane priced like a metered one
 
