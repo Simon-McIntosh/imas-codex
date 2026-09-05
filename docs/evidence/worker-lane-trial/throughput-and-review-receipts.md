@@ -129,6 +129,31 @@ file it had been told to read first.
 
 Resumed with the measuring handed back as given, told to commit before measuring.
 
+### codex / gpt-5.6-sol — `n-sgr-size-the-reviewer-findings` — 0 defects
+
+The third control, and the strongest return of the three. An attribution-only
+census sizing four reviewer-finding families against the live catalogue and the
+frozen 431-name batch roster. Report-only: no source, graph, pipeline, release or
+plan mutation, and its gate was a report-integrity check rather than a test suite.
+
+Reading it found nothing to correct, and four things worth copying:
+
+- It carries the **verbatim** Cypher and Python predicates it ran, not a
+  description of them, so every figure is re-derivable without the author.
+- It ran a **property-coverage positive control** before trusting any count —
+  4,937 of 4,937 for `id`, `name_stage` and `kind` — which is the direct guard
+  against this project's silent-zero class, where naming a property the schema
+  does not declare returns zero rather than erroring.
+- It named the two live identities that do not parse under the current grammar
+  and stated the adjusted denominator (2,685 rather than 2,687) instead of
+  quietly dropping them.
+- It reported live, superseded and exhausted populations separately and never
+  summed them, which is where family counts in this project usually go wrong.
+
+Cost of the discipline: 3040 s and 18.3 tok/s, the slowest of the three, for a
+node that wrote no code. Whether that trade is right depends on whether the
+figures are load-bearing. Here they are: they size the remaining migration.
+
 ## Steering a live worker does not work on this launch kind
 
 `SendMessage` addressed to the worker's session returned `success: true`. The
