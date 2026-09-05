@@ -151,11 +151,24 @@ against 31,678 on the two-card one. So every transcript-size figure above belong
 to the engine that produced it, and the ~350 system records per turn are no longer
 a reason to expect a large transcript here.
 
-**One four-card run also wrote no terminal `result` record despite ending
-normally**, so no usage totals reached the ledger at all. That is distinct from
-the earlier case, where a run ended with a background task still live. If it
-recurs, "blind in flight, measurable at promotion" fails even for a clean exit,
-and this lane has no first-party throughput figure under any circumstance.
+**Withdrawn: a claim that a run ending normally wrote no `result` record.** It
+wrote one — about two minutes *after* the follower reported the run complete, and
+the reading was taken before it landed. So "no usage totals" is true only of runs
+that end with a background task still live, which is the case recorded above.
+
+**What replaces it is an ordering rule, and it is more useful than the claim
+was.** Let the run go terminal, confirm the `result` record has landed, *then*
+promote. The follower's `complete` transition precedes the record, so promoting on
+that event can capture nothing.
+
+**That rule has a variant of its own, measured here.** Two of sixteen ledger rows
+from this session carry an empty `throughput` block. One is correct — an abandoned
+launch that never produced a turn. The other is the node that was stopped
+mid-flight and resumed: its terminal `result` record exists and carries
+`input 7,948,981`, `output 27,871` and `$40.44`, but it lives in
+**`resume-1.jsonl`**, and the promotion recorded nothing. So the data exists and
+the ledger is empty. A resumed run's accounting is in the resume stream, and
+whatever reads it should look there.
 
 ## Reviewed-code receipts
 
