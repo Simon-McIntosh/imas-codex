@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T09:34:08",
+  "updated": "2026-09-05T09:40:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -38,6 +38,15 @@
         "role": "implement",
         "session_id": "c4283d0f-4079-4b90-bea6-4d584a1301bd",
         "created": "2026-08-22"
+      },
+      {
+        "id": "clive-residue",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "cx-catalogpin",
@@ -77697,6 +77706,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1698
+    "_version": 1699
   }
 }
