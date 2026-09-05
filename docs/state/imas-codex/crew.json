@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T22:13:28",
+  "updated": "2026-09-05T23:02:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -40,6 +40,33 @@
         "created": "2026-08-22"
       },
       {
+        "id": "clive-census",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "clive-drain",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "clive-gate",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "clive-graphtarget",
         "harness": "clive",
         "role": "test",
@@ -49,7 +76,25 @@
         "created": "2026-09-05"
       },
       {
+        "id": "clive-ledger",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "clive-postcopy",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "clive-probe",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -81,6 +126,33 @@
         "id": "clive-sectionaudit",
         "harness": "clive",
         "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "clive-tail",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "clive-units",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "clive-vocab",
+        "harness": "clive",
+        "role": "implement",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -3963,6 +4035,15 @@
         "created": "2026-09-05"
       },
       {
+        "id": "opus-failreason",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
         "id": "opus-namecheck",
         "harness": "claude-opus",
         "role": "implement",
@@ -3991,6 +4072,15 @@
       },
       {
         "id": "opus-sectionaudit",
+        "harness": "claude-opus",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "opus-supersede",
         "harness": "claude-opus",
         "role": "test",
         "session_id": null,
@@ -81613,6 +81703,597 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T194823055515-n-sgr-the-name-gate-reads-the-vocabulary-definition",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a79",
+        "node": "n-sgr-the-name-gate-reads-the-vocabulary-definition",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3918,
+                "cached_input_tokens": 280793,
+                "input_tokens": 284713,
+                "output_tokens": 633,
+                "reasoning_output_tokens": 269,
+                "total_tokens": 285346,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "11b50f59-c77b-4356-8bb3-6dafc6d0a4c0",
+            "session_id": "ship-s10-20260905"
+          },
+          "done_when": "Every bare physical base the gate previously scored in the 0.475-0.508 band against its own description scores at or above 0.771 against the vocabulary definition, with the 0.55 critical floor itself unchanged; beta clears the gate; reverting the change fails the added test by name; added failures in tests/standard_names against a base you measure yourself in this worktree is 0.",
+          "estimated_hours": null,
+          "goal": "The name-review semantic gate scores a bare-base name's description against the ISN vocabulary definition of that token rather than the token's surface form",
+          "id": "n-sgr-the-name-gate-reads-the-vocabulary-definition",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T194823055515-n-sgr-the-name-gate-reads-the-vocabulary-definition/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a79",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/workers.py",
+            "tests/standard_names/test_name_gate_definition_floor.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "opus-namegate",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T19:48:46Z",
+        "completed_at": "2026-09-05T20:24:03.746Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2111,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2117,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "2b5b40209da51e27fe38ed6a09a54f146983c9f4",
+        "commits": [
+          "07486c69578c75349d05ed0fd7adeb20bfc5b6a2"
+        ],
+        "changed_lines": {
+          "added": 223,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 13,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_name_gate_definition_floor.py -p no:cacheprovider, with the change reverted to base as a counterfactual",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T194823055515-n-sgr-the-name-gate-reads-the-vocabulary-definition/logs/newtest.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T194823055515-n-sgr-the-name-gate-reads-the-vocabulary-definition/manifest.md",
+        "scope_changed": false,
+        "session_id": "02f3a1c8-4b6b-49a6-adc3-a3c49a7b7d3b",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 48.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-06T00:10:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 122524,
+            "cache_creation_input_tokens_cumulative": 122524,
+            "cache_read_input_tokens": 5554199,
+            "cache_read_input_tokens_cumulative": 5554199,
+            "inference_geo": "not_available",
+            "input_tokens": 110,
+            "input_tokens_cumulative": 110,
+            "output_tokens": 31689,
+            "output_tokens_cumulative": 31689,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.795114499999999,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.795114499999999
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 18778,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: [\"REQUIRED GUARD CHANGE BEFORE ENDPOINT IS REACHABLE: standard_names/workers.py review_name semantic gate (critical 0.55) rejects the bare anchor 'beta' for every description measured (0.475-0.508); a real rescore (completed; run_id=sn-rescore-20260905T140457Z) parked beta at name_stage='reviewed' (validation valid) rather than accepted; and the supersede and docs steps that require 'accepted' are refused by their own guards. The change exceeds this node's write scope (docs/evidence only) and requires a pipeline code change plus a design decision the plan does not settle (see follow_ons).\"]",
+              "elapsed_seconds": 22378,
+              "external_wait": null,
+              "log_age_seconds": 17257,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5bb65c468f802536205eaaa140f601eda26d2952"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-beta-is-the-total-beta",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+                "session_id": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 17296,
+              "terminal_at": "2026-09-05T15:00:24Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-beta-is-the-total-beta"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2113.395,
+          "generated_tokens": 31689,
+          "generation_seconds": 435.519,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.3,
+          "machine_seconds": 1677.876,
+          "peak_input_tokens": 133226,
+          "tokens_per_second": 72.76,
+          "wall_tokens_per_second": 14.99
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sgr-the-name-gate-reads-the-vocabulary-definition",
+          "session_id": "02f3a1c8-4b6b-49a6-adc3-a3c49a7b7d3b",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T20:24:03.746Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260905T201515554443-n-sli-a-failed-source-names-its-reason",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-a-failed-source-names-its-reason",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2365,
+                "cached_input_tokens": 438609,
+                "input_tokens": 440976,
+                "output_tokens": 478,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 441454,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "11b50f59-c77b-4356-8bb3-6dafc6d0a4c0",
+            "session_id": "ship-s10-20260905"
+          },
+          "done_when": "Every write path that sets a source status to failed refuses a null or empty last_error, matching the shape of the vocab_gap refusal already landed; the two known sites at graph_ops.py:8878 and the batch writeback at graph_ops.py:10337 are both covered; reverting the refusal fails an added test by name; and you report the live count of failed sources carrying no last_error before and after, measured yourself, against the 59 of 103 recorded at audit time. Backfilling the existing 59 is explicitly NOT in scope - close the write path only, and say what remains.",
+          "estimated_hours": null,
+          "goal": "A source cannot be written to failed status without a non-empty reason",
+          "id": "n-sli-a-failed-source-names-its-reason",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T201515554443-n-sli-a-failed-source-names-its-reason/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_failed_source_reason.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "opus-failreason",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T20:15:41Z",
+        "completed_at": "2026-09-05T20:31:22.307Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 934,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 941,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "4fb2d4d500f2063b902957ac097a4c3f5634e4f4",
+        "commits": [
+          "725ac26c1846515e490a59e3fe71dac229f969dd"
+        ],
+        "changed_lines": {
+          "added": 243,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 18,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names/test_failed_source_reason.py plus a focused gate over the six files touching the three changed functions, with both guard call sites deleted as a counterfactual",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T201515554443-n-sli-a-failed-source-names-its-reason/new-test.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T201515554443-n-sli-a-failed-source-names-its-reason/manifest.md",
+        "scope_changed": false,
+        "session_id": "aebc64d1-6790-416e-a4d5-c50415491f78",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 49.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-06T00:10:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 103371,
+            "cache_creation_input_tokens_cumulative": 103371,
+            "cache_read_input_tokens": 3587412,
+            "cache_read_input_tokens_cumulative": 3587412,
+            "inference_geo": "not_available",
+            "input_tokens": 80,
+            "input_tokens_cumulative": 80,
+            "output_tokens": 25761,
+            "output_tokens_cumulative": 25761,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.4718410000000004,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.4718410000000004
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 20391,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: [\"REQUIRED GUARD CHANGE BEFORE ENDPOINT IS REACHABLE: standard_names/workers.py review_name semantic gate (critical 0.55) rejects the bare anchor 'beta' for every description measured (0.475-0.508); a real rescore (completed; run_id=sn-rescore-20260905T140457Z) parked beta at name_stage='reviewed' (validation valid) rather than accepted; and the supersede and docs steps that require 'accepted' are refused by their own guards. The change exceeds this node's write scope (docs/evidence only) and requires a pipeline code change plus a design decision the plan does not settle (see follow_ons).\"]",
+              "elapsed_seconds": 23991,
+              "external_wait": null,
+              "log_age_seconds": 18871,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5bb65c468f802536205eaaa140f601eda26d2952"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-beta-is-the-total-beta",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+                "session_id": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 18909,
+              "terminal_at": "2026-09-05T15:00:24Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-beta-is-the-total-beta"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 936.877,
+          "generated_tokens": 25761,
+          "generation_seconds": 377.674,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 11.7,
+          "machine_seconds": 559.203,
+          "peak_input_tokens": 116585,
+          "tokens_per_second": 68.21,
+          "wall_tokens_per_second": 27.5
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sli-a-failed-source-names-its-reason",
+          "session_id": "aebc64d1-6790-416e-a4d5-c50415491f78",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T20:31:22.307Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260905T201019171176-n-srr-the-existence-check-matches-the-id",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712",
+        "node": "n-srr-the-existence-check-matches-the-id",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 663,
+                "cached_input_tokens": 398501,
+                "input_tokens": 399166,
+                "output_tokens": 1568,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 400734,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "11b50f59-c77b-4356-8bb3-6dafc6d0a4c0",
+            "session_id": "ship-s10-20260905"
+          },
+          "done_when": "Every one of the 83 identities the current default cap silently drops is reported as existing, measured against the live population of 5083 rather than asserted; existence verdicts are unchanged when the suggestion-pool cap is deliberately set far below the population, which is the counterfactual that proves the answer no longer depends on the cap; any enumeration retained for nearest-match suggestions carries a deterministic ordering and raises rather than returning when its row count reaches its cap; reverting the change reproduces at least one false absent by name; added failures in tests/standard_names against a base you measure yourself in this worktree is 0.",
+          "estimated_hours": null,
+          "goal": "The standard-name existence check answers from a direct id match instead of an unordered capped enumeration",
+          "id": "n-srr-the-existence-check-matches-the-id",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T201019171176-n-srr-the-existence-check-matches-the-id/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "imas_codex/standard_names/search.py",
+            "tests/standard_names/test_name_existence_check.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "opus-namecheck",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T20:10:35Z",
+        "completed_at": "2026-09-05T20:18:26.645Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 465,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 471,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "fe0fb293fdb9d98d2d6d6326155057aa4776ae77",
+        "commits": [
+          "d8abbdf0a8c31d9107e7d5cf62a5481a3e13bc2f"
+        ],
+        "changed_lines": {
+          "added": 247,
+          "removed": 12,
+          "files": 2
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused unit and live-graph suites plus a direct measurement against the live catalogue; the package suite was ALSO started but timed out and did not complete, so the suite-delta half is unmeasured and is deferred to integration verification at the merged head",
+          "exit_status": 0,
+          "log_path": "/tmp/srr-logs/evidence.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T201019171176-n-srr-the-existence-check-matches-the-id/manifest.md",
+        "scope_changed": false,
+        "session_id": "b0cf3264-cbd7-4ada-9f3e-d4908f3c2c2b",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 47.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-06T00:10:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 82975,
+            "cache_creation_input_tokens_cumulative": 82975,
+            "cache_read_input_tokens": 2034238,
+            "cache_read_input_tokens_cumulative": 2034238,
+            "inference_geo": "not_available",
+            "input_tokens": 52,
+            "input_tokens_cumulative": 52,
+            "output_tokens": 23739,
+            "output_tokens_cumulative": 23739,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.440604,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.440604
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 20087,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: [\"REQUIRED GUARD CHANGE BEFORE ENDPOINT IS REACHABLE: standard_names/workers.py review_name semantic gate (critical 0.55) rejects the bare anchor 'beta' for every description measured (0.475-0.508); a real rescore (completed; run_id=sn-rescore-20260905T140457Z) parked beta at name_stage='reviewed' (validation valid) rather than accepted; and the supersede and docs steps that require 'accepted' are refused by their own guards. The change exceeds this node's write scope (docs/evidence only) and requires a pipeline code change plus a design decision the plan does not settle (see follow_ons).\"]",
+              "elapsed_seconds": 23687,
+              "external_wait": null,
+              "log_age_seconds": 18567,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5bb65c468f802536205eaaa140f601eda26d2952"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-beta-is-the-total-beta",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+                "session_id": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 18605,
+              "terminal_at": "2026-09-05T15:00:24Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-beta-is-the-total-beta"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 514.991,
+          "generated_tokens": 23739,
+          "generation_seconds": 352.893,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 9.6,
+          "machine_seconds": 162.098,
+          "peak_input_tokens": 96189,
+          "tokens_per_second": 67.27,
+          "wall_tokens_per_second": 46.1
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-srr-the-existence-check-matches-the-id",
+          "session_id": "b0cf3264-cbd7-4ada-9f3e-d4908f3c2c2b",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T20:18:26.645Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -81757,6 +82438,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1732
+    "_version": 1745
   }
 }

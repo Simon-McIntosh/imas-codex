@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-05">
-<meta name="plan-version" content="97">
+<meta name="plan-version" content="98">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/embedding-gap.md,docs/evidence/sn-release-readiness/suite-four-disposition.md,docs/evidence/sn-release-readiness/import-order-timeout.md,docs/evidence/sn-release-readiness/strain-ordinal-edit.md,docs/evidence/sn-release-readiness/unsourced-ancestry.md">
 <meta name="plan-impl" content="0.94">
@@ -992,6 +992,9 @@
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20260905T195654769260-n-srr-the-open-remainder-has-a-reuse-map" data-who="opus-scout" data-when="2026-09-05T20:04:18.546Z">
     <div class="r-comment-body"><p>13 candidate rows across 3 areas with 13 of 13 anchors independently re-resolved, 4 consume / 6 extend / 3 unfit-as-sole-solution; names the propagation seam for the ungrounded cohort at provenance_lifecycle.py:324 and warns its caller also gates the governed edit path, and identifies the shared virtualenv rather than the revision as the mechanism by which two workers measure different failure counts at one commit</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20260905T201019171176-n-srr-the-existence-check-matches-the-id" data-who="opus-namecheck" data-when="2026-09-05T20:18:26.645Z">
+    <div class="r-comment-body"><p>existence now resolves by direct id match: all 83 identities the old capped scan dropped report as existing, verdicts are identical with the pool starved to 5, the pool refuses at 5000 against a 5083 catalogue and returns 5083 ordered rows at 50000; 7 unit and 2 live-graph tests pass. Suite delta NOT measured - that run timed out - so it carries to the merged-head verification</p></div>
 </div>
 <div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T160441383261-n-sourceattach" data-who="impl-sourceattach" data-when="2026-09-01T16:13:02Z">
     <div class="r-comment-body"><p>5/5 bound via apply_signed_manifest with receipts, 0 identity changes, idempotent on replay, USD 0.000000 of 15.00; 5 further candidates refused on unit mismatch. CRITERION WAS INSUFFICIENT AND THE BINDINGS NEED RE-JUDGING: the node met its stated done-when exactly, but that done-when made unit equality the discriminator, and every one of the five carries an unstated semantic element - aggregation, GGD locus, module locus, central-measurement locus, non-linear-response qualifier - so under the lead's stricter test of whether a pipeline run on that source would regenerate the same name, each is inexact by the amount its delta names</p></div>
