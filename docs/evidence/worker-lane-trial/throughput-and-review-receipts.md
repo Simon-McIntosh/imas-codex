@@ -77,6 +77,33 @@ a scripted static-analysis pass.
 | 3 | The mirror fault in the same function: a block assigning `ancestor.source_paths` stamps only `old`, so a genuinely modified identity carries no stamp. | No, same predicate. Worker-owned. |
 | 4 | The schema description says the property records "the last substantive modification", but the pass injected into idempotent `coalesce(new, old)` batch writebacks that sweep the whole cohort every pipeline pass. The value it will hold is when the pipeline last touched the node. | No: no test can assert a description against an intention. Worker-owned. |
 
+**Two of those four were misattributed, and the repair worker corrected me.**
+Findings 2 in the table above — the two blocks I called source-only — do assign
+`StandardName` properties: `sn.run_id = coalesce(sns.run_id, sn.run_id)` and
+`sn.source_paths = CASE … END`, both several lines past the end of the diff hunk
+I read. I judged the statements from a truncated view and reported a conclusion
+the visible lines supported but the code did not.
+
+The repair node held to the checkable contract over my prose, said so explicitly
+rather than deviating quietly, explained that a rule broad enough to flag those
+two overshoots to six or more, and put in their place a second self-assignment
+lock I had missed entirely — `SET name.name_stage = name.name_stage` in
+`supersede_exhausted_standard_name_orphans`. So the count of four held while its
+composition changed: **two locks and one under-stamp, not three over-stamps and
+one under-stamp.**
+
+It also found why my under-stamp was invisible to the obvious fix. The
+pre-existing block-boundary scanner ended a SET clause at the first `WHERE`,
+including the one inside a Cypher list comprehension — which truncated the very
+statement holding the under-stamp. A naive symmetric predicate would have found
+three, reported itself clean, and left the real gap in place. That scanner bug is
+the node's best work and nothing in the brief pointed at it.
+
+Worth recording for the trial, because it cuts against the framing: **the
+reviewer was wrong twice and the reviewed worker was right.** A control column
+built from coordinator review inherits the coordinator's errors, which is the
+argument for the independent read-only reviewer the parallel project is using.
+
 One structural hole alongside them, and this one is mine. The gate ran
 `pytest tests/graph/` under the repo's default markers, which exclude the marker
 that needs a live database. **None of the 118 modified Cypher statements has ever
