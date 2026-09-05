@@ -9916,6 +9916,40 @@ def _complete_source_fences(items: list[dict[str, Any]]) -> list[dict[str, Any]]
     ]
 
 
+def _require_failure_reason(source_id: Any, reason: Any) -> str:
+    """Return the trimmed failure reason, refusing a null or empty one.
+
+    A source parked at ``failed`` with no ``last_error`` cannot be triaged:
+    the reader cannot tell a transient fault from a permanent one, so the row
+    is neither returned to the queue nor closed, and it accumulates silently.
+    Every write path able to set a source status to ``failed`` therefore
+    states its reason or refuses the write, in the same shape as the
+    ``vocab_gap`` refusal.
+    """
+    text = str(reason or "").strip()
+    if not text:
+        raise ValueError(
+            f"failed source outcome for {source_id!r} requires a non-empty reason"
+        )
+    return text
+
+
+def _guard_failed_source_reasons(batch: list[dict[str, Any]]) -> None:
+    """Refuse any outcome that parks a source at ``failed`` without a reason.
+
+    Runs before the graph is opened, so a reasonless failure never reaches a
+    transaction. The write itself coalesces ``last_error`` onto whatever the
+    source already carried, which is exactly what makes an absent reason
+    invisible at the write site.
+    """
+    for item in batch:
+        if item.get("status") != "failed":
+            continue
+        item["last_error"] = _require_failure_reason(
+            item.get("sns_id"), item.get("last_error")
+        )
+
+
 def _guard_existing_target_pairings(
     gc: Any, batch: list[dict[str, Any]], *, targets_may_be_missing: bool
 ) -> dict[str, str]:
@@ -10317,11 +10351,13 @@ def persist_claimed_source_outcomes(
     """Consume exact source claims and persist terminal/retry diagnostics.
 
     The claim CAS and source mutation share one transaction. Items without a
-    complete fence are rejected before opening the graph.
+    complete fence, and terminal failures without a reason, are rejected
+    before opening the graph.
     """
     batch = _complete_source_fences(outcomes)
     if not batch:
         return []
+    _guard_failed_source_reasons(batch)
     with GraphClient() as gc:
         rows = gc.query(
             """
@@ -10359,6 +10395,7 @@ def persist_claimed_vocab_gaps(
     batch = _complete_source_fences(outcomes)
     if not batch:
         return []
+    _guard_failed_source_reasons(batch)
     gaps_by_source: dict[str, list[dict[str, Any]]] = {}
     for gap in gaps:
         source_id = gap.get("source_id")
@@ -10725,7 +10762,12 @@ def mark_sources_failed(
     Increments attempt_count. If below max_attempts, returns to 'extracted'
     for retry. At max_attempts, transitions to terminal 'failed' status.
     Token-verified. Returns count of updated sources.
+
+    ``error`` is the reason the terminal state will carry, so a null or empty
+    one is refused before the graph is opened rather than parking an
+    untriageable source.
     """
+    error = _require_failure_reason(source_ids, error)
     with GraphClient() as gc:
         result = gc.query(
             """
