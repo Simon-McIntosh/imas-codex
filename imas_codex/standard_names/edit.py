@@ -1510,23 +1510,42 @@ def _fold_target_successor_names(
 _FOLD_CHAIN_MAX_DEPTH = 64
 
 
-def _fold_chain_walk(
+@dataclass(frozen=True, slots=True)
+class _FoldLineage:
+    """What a reverse-REFINED_FROM walk from a tombstoned target found.
+
+    ``successors`` holds the live names the lineage resolves to — the tip of
+    the chain, which is the identity that inherited the target's meaning and
+    therefore the name a caller should fold into instead. It is empty when
+    the lineage is absent or dead-ends in tombstones of its own.
+    ``closes_on_old`` marks the chain that terminates on the name currently
+    being folded, and ``over_depth`` marks a walk that ran past its bound
+    without resolving either.
+    """
+
+    successors: tuple[str, ...] = ()
+    closes_on_old: bool = False
+    over_depth: bool = False
+
+
+def _fold_lineage_walk(
     transaction: Any, snapshot: dict[str, Any], old: str, into: str
-) -> tuple[bool, str | None]:
-    """Walk ``into``'s REFINED_FROM descendants for a straight chain to ``old``.
+) -> _FoldLineage:
+    """Resolve ``into``'s successor by walking its REFINED_FROM descendants.
+
+    Successor lineage is carried by the edges, so the walk is what answers
+    who inherited a tombstoned spelling — the scalar summary of the same
+    fact is written for a fraction of the population and cannot. Each hop
+    descends only through a descendant confirmed superseded, so the names
+    the walk returns are the live tip of the chain: an intermediate that is
+    still live stops the walk exactly as a direct live successor would, and
+    a branch leading to a different name anywhere along the way keeps the
+    target spelling load-bearing.
 
     A chain of any depth whose every live descendant is ``old`` closes onto
-    ``into`` as its own root identity — each hop is confirmed superseded
-    before the walk descends through it, so an intermediate that is still
-    live stops the walk exactly as a direct live successor would. A branch
-    that leads to a different name anywhere along the way keeps the target
-    spelling load-bearing, so the walk refuses instead of descending into it.
-
-    Returns ``(True, None)`` when the chain closes on ``old``. Returns
-    ``(False, reason)`` when a live successor — direct or found while
-    descending — is not ``old``. Returns ``(False, None)`` when ``into`` has
-    no successor lineage at all, leaving the caller's other free-identity
-    checks (sources, parent, child) to decide.
+    ``into`` as its own root identity and resolves no successor, leaving the
+    caller's other free-identity checks (sources, parent, child) to decide —
+    as does a target with no successor lineage at all.
     """
     element_id = snapshot["target_element_id"]
     relationships = snapshot.get("relationships") or []
@@ -1534,29 +1553,22 @@ def _fold_chain_walk(
     for _ in range(_FOLD_CHAIN_MAX_DEPTH):
         successors = _fold_target_successor_names(relationships, element_id)
         if successors == {old}:
-            return True, None
-        live = sorted(successors - {old})
+            return _FoldLineage(closes_on_old=True)
+        live = tuple(sorted(successors - {old}))
         if len(successors) != 1 or not live:
-            if live:
-                return False, (
-                    f"target {into!r} is superseded and has successor lineage: "
-                    + ", ".join(live)
-                )
-            return False, None
+            return _FoldLineage(successors=live)
         (candidate,) = live
         if candidate in visited:
-            return False, None
+            return _FoldLineage()
         candidate_snapshot = _fold_snapshot(transaction, candidate, into)
         if candidate_snapshot is None or (
             candidate_snapshot["old_properties"].get("name_stage") != "superseded"
         ):
-            return False, (
-                f"target {into!r} is superseded and has successor lineage: {candidate}"
-            )
+            return _FoldLineage(successors=live)
         visited.add(candidate)
         element_id = candidate_snapshot["old_element_id"]
         relationships = candidate_snapshot.get("relationships") or []
-    return False, f"target {into!r} successor lineage exceeds walk depth"
+    return _FoldLineage(over_depth=True)
 
 
 def _fold_tombstone_target_reason(
@@ -1565,32 +1577,46 @@ def _fold_tombstone_target_reason(
     """Refuse a tombstoned fold target that is not a free identity.
 
     A tombstoned identity can be re-occupied only when nothing reads it: no
-    recorded successor and no successor lineage other than a chain of any
-    depth that closes back onto the name now being folded into it, no
-    sources bound to or projected onto it, and neither a parent nor a child.
-    A target whose only live descendant, at the end of that chain, is the
-    name being folded is a straight-line refinement chain closing on itself,
-    not a third-party identity being taken, so that case alone is admitted —
-    provided every intermediate on the way is itself superseded, with no
-    other lineage of its own. Any other live descendant, or a chain that
-    passes through a still-live intermediate, makes the spelling
-    load-bearing, so the fold refuses and the caller folds into whatever
-    holds the live meaning instead.
+    successor lineage other than a chain of any depth that closes back onto
+    the name now being folded into it, no sources bound to or projected onto
+    it, and neither a parent nor a child. A target whose only live
+    descendant, at the end of that chain, is the name being folded is a
+    straight-line refinement chain closing on itself, not a third-party
+    identity being taken, so that case alone is admitted — provided every
+    intermediate on the way is itself superseded, with no other lineage of
+    its own. Any other live descendant, or a chain that passes through a
+    still-live intermediate, makes the spelling load-bearing, so the fold
+    refuses and names the tip of the lineage as the identity holding the
+    live meaning to fold into instead.
+
+    The successor is resolved from the REFINED_FROM edges rather than from
+    the ``superseded_by`` summary, because the edges carry the relation for
+    the whole population while the scalar is written for a small fraction of
+    it. The scalar is still consulted, but only after the walk and only to
+    refuse: a recorded successor that no lineage carries is the graph
+    disagreeing with itself about whether the spelling is dead, and a guard
+    resolves that disagreement by refusing rather than by admitting.
 
     Returns ``(reason, closing_straight_chain)``.
     """
     target_properties = snapshot["target_properties"]
+    lineage = _fold_lineage_walk(transaction, snapshot, old, into)
+    if lineage.over_depth:
+        return f"target {into!r} successor lineage exceeds walk depth", False
+    if lineage.successors:
+        return (
+            f"target {into!r} is superseded and has successor lineage: "
+            + ", ".join(lineage.successors)
+            + " — fold into the successor instead"
+        ), False
     successor = target_properties.get("superseded_by")
     if successor:
         return (
-            f"target {into!r} is superseded and records successor {successor!r} — "
-            "fold into the successor instead"
+            f"target {into!r} is superseded and records successor {successor!r} "
+            "that no successor lineage carries — repair the lineage, or fold "
+            "into the recorded successor instead"
         ), False
-    closing_straight_chain, chain_reason = _fold_chain_walk(
-        transaction, snapshot, old, into
-    )
-    if chain_reason:
-        return chain_reason, False
+    closing_straight_chain = lineage.closes_on_old
     target_sources = _fold_source_rows(snapshot, into)
     if target_sources:
         return (
