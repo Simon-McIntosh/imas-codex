@@ -332,14 +332,31 @@ as do all four codex presets and both claude presets. A dispatch to `clive`
 resolves `sandbox: worktree-full` from a shipped default rather than from the
 lane, and takes a default time budget.
 
-Give it an explicit `time_budget`, and make it **longer** than the metered lanes'
-rather than equal. That is not generosity: this lane's own configuration comment
-already records that its thinking is intrinsic and unbudgetable, and the measured
-thinking share here is 83% by characters, with over 95% observed independently on
-two nodes in the parallel trial. A lane that cannot be told to think less needs
-to be given time to finish, or it will keep spending whole budgets on
-preliminaries. The one node run here spent 40 minutes on baseline measurement and
-never reached its edit.
+Give it an explicit `time_budget` **and treat it as advisory, because for this
+launch kind it is not a fence.** Measured: a node here ran past its 2400-second
+budget and kept going until a `crew stop` ended it; two nodes in the parallel
+trial ran 8128 s and 7733 s against 60-minute budgets with nothing stopping them.
+All three delivered correct, gate-green work at the end, so the overrun cost wall
+clock rather than quality — but a coordinator planning a wave around the
+configured figure is planning around a number the harness does not apply.
+
+**Do not read a wall-clock number as a property of the lane.** Corrected by the
+parallel project's lead: those two-hour walls were measured on the 2×H200
+deployment, a 4×H200 one is being stood up, and the figure is expected to move.
+So the recommendation is the framing, not the number: declare a budget so the
+ledger records an intent, and plan on the assumption that nothing enforces it.
+
+What *is* hardware-independent, and worth stating because it compounds with the
+steering finding above: **a clive node can be neither steered nor time-boxed, so
+its only fence is a person watching.** More cores will change how long it runs,
+not whether anything stops it.
+
+The related lane property is real and separate: this backend's own configuration
+comment records that its thinking is intrinsic and its budget parameter ignored,
+and the measured thinking share is 83% by characters here and over 95% on two
+nodes in the parallel trial. A lane that cannot be told to think less cannot be
+made faster by asking; it can only be given work whose shape does not invite
+exploration.
 
 ### The local lane reports no output-token usage
 
@@ -481,6 +498,29 @@ asking what the check never sees.
 This belongs in the shared guidance next to the fail-open guard rule, which is
 its sibling: a fail-open guard reports a protection it does not provide, and a
 regime-bound check reports a coverage it does not have.
+
+### Implicit test contracts on incidental structure
+
+A near relative of the regime-bound check, and it caught both projects on the
+same day. A test can silently make something *incidental* into a contract, so a
+change that is semantically free breaks it — or worse, a change that is
+semantically real passes.
+
+- **Query text.** Several standard-names tests mock `GraphClient` and dispatch on
+  the literal leading token of a `SET` clause. Comma-separated assignments to
+  independent properties are order-independent in Cypher, so *prepending* an
+  assignment is free semantically and cost 22 test failures. The fix is to append,
+  which is correct and one line — but query text is now a contract in this
+  repository, and nothing says so at the call sites.
+- **Field-name sets.** In the parallel project, corroboration tests monkeypatch
+  the host diagnostics dict, so the *set of key names* a topology read expects is
+  a contract there. A renamed key passes the gate and fails in production. Same
+  class, opposite direction: here a free change breaks a test, there a breaking
+  change passes one.
+
+Both are invisible at the site of the change and only findable by reading what
+the test actually asserts on. Worth one line in a repository's own guidance
+wherever it holds: *these tests pin query text* / *these tests pin key names*.
 
 ### The cost of the specificity lever, stated honestly
 
