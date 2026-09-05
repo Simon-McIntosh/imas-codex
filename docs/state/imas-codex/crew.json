@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T23:06:36",
+  "updated": "2026-09-05T23:10:51",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -109,7 +109,8 @@
         "session_id": "7f324b5f-f4ab-4aa6-91d8-f98894db6824",
         "session_model": "deepseek-v4-flash",
         "sessions": {
-          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\"}": "7f324b5f-f4ab-4aa6-91d8-f98894db6824"
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\"}": "7f324b5f-f4ab-4aa6-91d8-f98894db6824",
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":492288}": "b7ec48d4-bdba-4d44-b383-aa780d2b457c"
         },
         "created": "2026-09-05"
       },
@@ -82769,6 +82770,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1749
+    "_version": 1750
   }
 }
