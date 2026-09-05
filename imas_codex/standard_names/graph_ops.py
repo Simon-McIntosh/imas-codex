@@ -21134,7 +21134,7 @@ def supersede_exhausted_standard_name_orphans(
                     UNWIND $rows AS expected
                     MATCH (name:StandardName {id: expected.name_id})
                     WHERE elementId(name) = expected.name_element_id
-                    SET name.updated_at = datetime(), name.name_stage = name.name_stage
+                    SET name.name_stage = name.name_stage
                     RETURN collect(name.id) AS ids
                     """,
                     rows=actions,
@@ -21648,7 +21648,7 @@ def supersede_into_ancestor(
                         """
                         MATCH (old:StandardName {id: $old_id}),
                               (ancestor:StandardName {id: $ancestor_id})
-                        SET old.updated_at = datetime(), ancestor.updated_at = datetime(), old.claimed_at = old.claimed_at,
+                        SET old.claimed_at = old.claimed_at,
                             ancestor.claimed_at = ancestor.claimed_at
                         RETURN old.id AS old_id
                         """,
@@ -21866,7 +21866,7 @@ def supersede_into_ancestor(
                            THEN ancestor_source.source_id ELSE ancestor_source.id END)
                            AS ancestor_paths
                     SET old.updated_at = datetime(), old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
-                        ancestor.source_paths =
+                        ancestor.updated_at = datetime(), ancestor.source_paths =
                           [path IN ancestor_paths WHERE path IS NOT NULL]
                     """,
                     old_id=old_id,

@@ -78,3 +78,44 @@ def test_substantive_write_with_updated_at_is_not_flagged(tmp_path: Path) -> Non
     findings = audit_standard_name_touch(fixture)
 
     assert not findings
+
+
+def test_stamp_without_matching_property_write_is_flagged(tmp_path: Path) -> None:
+    """A compare-and-set lock that modifies nothing must not stamp updated_at."""
+    fixture = tmp_path / "overstamp_fixture.py"
+    fixture.write_text(
+        "QUERY = '''\n"
+        "MATCH (sn:StandardName {id: $id})\n"
+        "SET sn.updated_at = datetime(), sn.claimed_at = sn.claimed_at\n"
+        "RETURN sn.id AS id\n"
+        "'''\n",
+        encoding="utf-8",
+    )
+
+    findings = audit_standard_name_touch(fixture)
+
+    assert len(findings) == 1
+    finding = findings[0]
+    assert finding.alias == "sn"
+    assert finding.properties == ()
+    assert finding.stamped is True
+    assert finding.path == fixture
+
+
+def test_stamp_removed_from_self_assignment_only_write_is_not_flagged(
+    tmp_path: Path,
+) -> None:
+    """The same lock, restored to drop the stray stamp, produces no finding."""
+    fixture = tmp_path / "overstamp_repaired_fixture.py"
+    fixture.write_text(
+        "QUERY = '''\n"
+        "MATCH (sn:StandardName {id: $id})\n"
+        "SET sn.claimed_at = sn.claimed_at\n"
+        "RETURN sn.id AS id\n"
+        "'''\n",
+        encoding="utf-8",
+    )
+
+    findings = audit_standard_name_touch(fixture)
+
+    assert not findings
