@@ -555,20 +555,51 @@ _TRANSIENT_TOUCH_EXEMPT_PROPERTIES = frozenset(
 
 @dataclass(frozen=True, slots=True)
 class StandardNameTouchFinding:
-    """One Cypher SET clause that modifies StandardName without stamping it."""
+    """One Cypher SET clause whose ``updated_at`` stamp disagrees with its writes."""
 
     path: Path
     line: int
     alias: str
     properties: tuple[str, ...]
+    stamped: bool
 
     def __str__(self) -> str:
         """Render a compact source-located finding."""
-        props = ", ".join(self.properties)
+        props = ", ".join(self.properties) or "(none)"
+        if self.stamped:
+            return (
+                f"{self.path}:{self.line}: SET {self.alias}.updated_at is set "
+                f"although this statement assigns no other property of "
+                f"{self.alias} ({props})"
+            )
         return (
             f"{self.path}:{self.line}: SET {self.alias}.({props}) does not also "
             f"set {self.alias}.updated_at in the same statement"
         )
+
+
+_BRACKET_OPEN = "([{"
+_BRACKET_CLOSE = ")]}"
+
+
+def _next_top_level_keyword(text: str, start: int) -> int | None:
+    """Return the position of the next clause keyword outside bracket nesting.
+
+    A Cypher list comprehension embeds its own ``WHERE``
+    (``[x IN xs WHERE ...]``), so a bracket-blind keyword scan ends a SET
+    clause's body at that embedded keyword and hides any property write that
+    follows later in the same SET.
+    """
+    depth = 0
+    pos = start
+    for match in _CYPHER_KEYWORD_RE.finditer(text, start):
+        segment = text[pos : match.start()]
+        depth += sum(1 for char in segment if char in _BRACKET_OPEN)
+        depth -= sum(1 for char in segment if char in _BRACKET_CLOSE)
+        if depth <= 0:
+            return match.start()
+        pos = match.start()
+    return None
 
 
 def _cypher_set_blocks(text: str) -> Iterable[tuple[int, int, int]]:
@@ -576,22 +607,24 @@ def _cypher_set_blocks(text: str) -> Iterable[tuple[int, int, int]]:
     set_positions = [m.start() for m in re.finditer(r"\bSET\b", text)]
     for pos in set_positions:
         body_start = pos + 3
-        next_keyword = next(
-            (match.start() for match in _CYPHER_KEYWORD_RE.finditer(text, body_start)),
-            None,
-        )
+        next_keyword = _next_top_level_keyword(text, body_start)
         body_end = next_keyword if next_keyword is not None else len(text)
         yield pos, body_start, body_end
 
 
 def audit_standard_name_touch(root: Path | str) -> tuple[StandardNameTouchFinding, ...]:
-    """Flag Cypher writes that modify StandardName without stamping ``updated_at``.
+    """Flag Cypher writes whose ``updated_at`` stamp disagrees with the alias.
 
-    A statement that writes only a transient claim/lock marker (see
-    ``_TRANSIENT_TOUCH_EXEMPT_PROPERTIES``) is exempt: it marks contention,
-    not a modification of the identity. Dynamically assembled SET clauses
-    (an f-string whose body is a variable) cannot be proved either way by
-    static analysis and are silently skipped, the same limitation the
+    A statement stamps ``StandardName.updated_at`` if, and only if, it also
+    assigns at least one other, non-exempt property of that same alias (see
+    ``_TRANSIENT_TOUCH_EXEMPT_PROPERTIES``). Both directions are checked: a
+    substantive write with no stamp, and a stamp on an alias the statement
+    does not otherwise touch. A property assigned to itself
+    (``alias.prop = alias.prop``, a compare-and-set lock idiom) never counts
+    as an assignment — it acquires a write lock without changing anything.
+    Dynamically assembled SET clauses (an f-string whose body is a variable,
+    or an ``alias += $map`` merge) cannot be proved either way by static
+    analysis and are silently skipped, the same limitation the
     declared-property audit above accepts for unresolved aliases.
     """
     findings: list[StandardNameTouchFinding] = []
@@ -611,12 +644,27 @@ def audit_standard_name_touch(root: Path | str) -> tuple[StandardNameTouchFindin
             line_base = int(getattr(node, "lineno", 1))
             for alias in sorted(sn_aliases):
                 prop_re = re.compile(rf"\b{re.escape(alias)}\.(\w+)\s*=")
+                self_assign_re = re.compile(
+                    rf"\b{re.escape(alias)}\.(\w+)\s*=\s*{re.escape(alias)}\.\1\b"
+                )
+                merge_re = re.compile(rf"\b{re.escape(alias)}\s*\+=")
                 for set_pos, body_start, body_end in blocks:
                     body_text = text[body_start:body_end]
-                    props = {m.group(1) for m in prop_re.finditer(body_text)}
-                    if not props or "updated_at" in props:
+                    if "{dynamic}" in body_text or merge_re.search(body_text):
                         continue
-                    if props <= _TRANSIENT_TOUCH_EXEMPT_PROPERTIES:
+                    self_assigned = {
+                        m.group(1) for m in self_assign_re.finditer(body_text)
+                    }
+                    props = {
+                        m.group(1) for m in prop_re.finditer(body_text)
+                    } - self_assigned
+                    if not props:
+                        continue
+                    stamped = "updated_at" in props
+                    substantive = (
+                        props - _TRANSIENT_TOUCH_EXEMPT_PROPERTIES - {"updated_at"}
+                    )
+                    if bool(substantive) == stamped:
                         continue
                     line = line_base + text.count("\n", 0, set_pos)
                     findings.append(
@@ -624,7 +672,8 @@ def audit_standard_name_touch(root: Path | str) -> tuple[StandardNameTouchFindin
                             path=path,
                             line=line,
                             alias=alias,
-                            properties=tuple(sorted(props)),
+                            properties=tuple(sorted(substantive)),
+                            stamped=stamped,
                         )
                     )
     return tuple(findings)
