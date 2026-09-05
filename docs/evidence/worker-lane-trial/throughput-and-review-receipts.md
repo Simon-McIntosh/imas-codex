@@ -369,3 +369,69 @@ kind it cannot work.
 Exempt a coordinator's message to a run it dispatched from the approval gate, or
 fail the send immediately with the reason. Reporting success on a message that
 will expire is the one behaviour that guarantees the sender plans around it.
+
+## What decides whether the local lane succeeds
+
+Three nodes on `deepseek-v4-flash`, two of them from the parallel project, land on
+the same answer: **the governing variable is how specified the brief is, not how
+hard the task is.** The model does not decide well when a measurement is
+finished, and it does not need to when the target is fixed.
+
+| Node | Brief shape | First materialisation | Outcome |
+|---|---|---|---|
+| divergence scan (here) | "measure before and after, decide the file set" | never, in 40 min | no edit, whole budget on baseline |
+| the same node, resumed | measurements handed back as given, commit before measuring | within minutes | committed change, honest measure, real cause found |
+| stale-pin inventory (parallel) | read-only judgement over ~70 files | after a guard refused its fan-out and forced a sequential read | 46 pins classified, verdicts checkable and correct |
+| class-margin repair (parallel) | field name, formula, sign rule, two fixtures, all numeric | **assistant turn 6, 17 seconds in** | one commit, +181/-1, gate 12 of 12, no defect on a hunk-by-hunk read |
+
+The two extremes are the same model on the same lane hours apart. What separates
+them is that one brief named the target and the other asked the worker to decide
+when it had measured enough.
+
+That is an orchestrator lever, not a model limitation, and it is cheap to pull.
+It also matches the caching finding above: a lane that re-reads its whole context
+every turn gets more expensive the longer it explores, so a brief that invites
+exploration is the worst possible fit for it, and one that names a fixed target
+is the best.
+
+### The trial's sharpest result: the worker was right about the brief
+
+The divergence node was aimed at the wrong function, by me. I wrote that the
+scan lived in `detect_divergence` and named its line. The worker measured, found
+its own gate could not discriminate — the release dry run never executes the
+post-copy check at all, so virtual-environment rows were already zero at baseline
+— and then found the real source: `check_catalog` in `catalog_import.py`
+discovers entry files with `catalog_dir.rglob("*")` plus a suffix filter, which
+is exactly the walk-a-checkout-and-filter shape the plan bans.
+
+It proved that from the transcript of the earlier release cut rather than by
+argument: `Post-copy check found 387 diverged entries` appears immediately after
+a pydantic parse error on
+`.venv/lib/python3.13/site-packages/markdown_it/port.yaml`. Then it stopped,
+because that file is outside its write fence, and routed it to `follow_ons` with
+the note that no concurrent node holds it.
+
+So the same day produced two coordinator errors, each caught by the worker it
+was given to: a claude node corrected my attribution of two defects, and a local
+node corrected the target of a whole brief. **On the axis this trial exists to
+measure — does the returned work survive a careful read — the local lane's
+failure was mine.**
+
+Its committed change (naming the entry-file set instead of globbing a directory)
+is a genuine improvement to `detect_divergence` and does not fix the reported
+defect. The real repair is a follow-on node against `catalog_import.py`.
+
+One review note on its diff, minor and worth carrying: it widened the read from
+`*.yml` to `*.yml` plus `*.yaml`, and asserts a `<domain>.ya?ml` convention in a
+docstring. Every other catalog read in that module globs `*.yml`, and
+`assemble_review_catalog` writes `f"{domain}.yml"`. The convention claim is
+unsourced and the widening is in the opposite direction to the node's purpose.
+
+### A free lane priced like a metered one
+
+The parallel project's ledger prices its two clive nodes at $41.15 and $52.13.
+The lane is free and locally served, so those are notional — what the tokens
+would have cost metered, inflated by the absence of caching. That is a defect in
+any routing decision that reads cost from the ledger: **the cheapest lane on this
+workstation records the highest per-node cost of the three.** A ledger that
+prices a free lane should either record zero or mark the figure as imputed.
