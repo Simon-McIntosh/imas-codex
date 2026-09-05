@@ -191,6 +191,36 @@
     Data Dictionary value would fix in place a number that a resolution-authority repair might
     reverse, so it stays red with a stated reason rather than green with a hidden decision.</p>
 
+    <h2 id="five-gaps">Five gaps raised, two that were never gaps</h2>
+    <p>The upstream release was scoped around four vocabulary gaps, and a fifth surfaced from a
+    census during the work. Judged on the same evidence rule, two of the five turned out to be
+    already covered by shipped tokens.</p>
+    <table>
+      <thead><tr><th>Gap</th><th>Outcome</th><th>What settled it</th></tr></thead>
+      <tbody>
+        <tr><td>relative humidity</td><td>token added</td><td>generic <code>fraction</code> does not name a saturation ratio</td></tr>
+        <tr><td>Stokes component index</td><td>4 tokens added</td><td>an unindexed parameter erases which coordinate is stored</td></tr>
+        <tr><td>iron-core &beta;</td><td>token added</td><td>bare <code>beta</code> collides with normalized plasma pressure</td></tr>
+        <tr><td>strain-gauge measurement direction</td><td><strong>rejected</strong></td><td>a shipped ordinal carrier pair already binds all six leaves</td></tr>
+        <tr><td><code>power_flux_density</code></td><td><strong>rejected</strong></td><td>a shipped energy-flux identity already carries W&middot;m<sup>&minus;2</sup> at the target</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Neither rejection rested on the token feeling marginal.</strong> This programme
+    carries a deliberate inclusion bias, because two valid bases were wrongly dismissed on it
+    before. A rejection therefore needs positive evidence that an existing spelling carries the
+    meaning — and in both cases that evidence was produced by <em>spelling it</em>:
+    <code>energy_flux_maximum_at_inner_divertor_target</code> was shown to strict-parse and
+    round-trip with a <code>flux</code> base and an <code>energy</code> channel, and the
+    strain-gauge carriers were pinned by six round-trip tests plus one asserting the rejected
+    spelling does not resolve.</p>
+    <p>Both rejections also fixed the artifact that disagreed with them, rather than only
+    recording a verdict: the canonical render table now demonstrates the accepted spelling
+    instead of constructing an undeclared token, and the strain-gauge alternatives are pinned
+    in tests. A rejection that leaves the contradiction standing is half-landed.</p>
+    <p>The arithmetic is worth stating plainly. Two rejections cost one render-table example
+    and a handful of pinning tests. Two duplicate bases would have been a permanent fork in a
+    closed vocabulary, which every future name would have to be spelled around.</p>
+
   </main>
 </body>
 </html>
