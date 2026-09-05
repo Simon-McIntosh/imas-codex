@@ -435,3 +435,56 @@ would have cost metered, inflated by the absence of caching. That is a defect in
 any routing decision that reads cost from the ledger: **the cheapest lane on this
 workstation records the highest per-node cost of the three.** A ledger that
 prices a free lane should either record zero or mark the figure as imputed.
+
+## The regime-bound check
+
+Both projects independently found the same defect class today, and it is worth
+naming because it is what a green gate cannot see. **A regime-bound check is one
+whose inputs never leave the regime its correctness assumes.** It passes, it is
+honestly written, and it is silent about everything outside that regime.
+
+Three worked examples from today, at three severities:
+
+| Severity | Defect | The regime it never left |
+|---|---|---|
+| High | A stationary-point census takes the first `2*maxsize` admitted origins via `jnp.where(size=)` and publishes `overflow False`, so a field admitting more than 60 origins silently drops the rest. | The gate's two analytic fields admit 2 origins each. A probe on the gate's own lattice admitted 147 and changed 31 of 39 published keys. |
+| Low | A Cypher SET-clause boundary scanner ends the clause at the first `WHERE`, including the one inside a list comprehension, truncating the statement that held the fault being looked for. | Every statement the checker had been run against had no list comprehension in its SET body. |
+| Latent | New code reads four keys off a live diagnostics dict; the tests monkeypatch that dict. | The gate never reads the real host, so it cannot say whether the keys exist there. Checked by hand; they do. |
+
+The remedy is one question, and it found all three: **before trusting a green
+gate, name one input that leaves the regime and ask whether the gate would
+notice.** None of the three came from reading the diff harder. Each came from
+asking what the check never sees.
+
+This belongs in the shared guidance next to the fail-open guard rule, which is
+its sibling: a fail-open guard reports a protection it does not provide, and a
+regime-bound check reports a coverage it does not have.
+
+### The cost of the specificity lever, stated honestly
+
+The finding that a fixed-target brief transforms this lane's output is real, and
+it is not free. A brief can only name the target when the coordinator already
+knows the answer's shape, so the lever trades worker exploration for coordinator
+work — and both of today's coordinator errors are that trade showing up on the
+other side of the ledger. A brief specific enough to make the local lane succeed
+is specific enough to be confidently wrong, and mine was: I named the function,
+the line, and the gate, and the function was not where the defect lived.
+
+So the recommendation is not "write more specific briefs" on its own. It is:
+write the target-naming brief, and expect the worker to contradict it. The two
+nodes that corrected me today both did so because their measures were checkable
+and their fences held — not because the briefs were good.
+
+## A dispatch validator false positive worth fixing
+
+The fully-specified check refused a node on the string `'<domain>'`, reporting
+that it "leaves the worker to infer intent". It was a path template —
+`standard_names/<domain>.yml` — in a sentence that then named the concrete
+example file. Angle brackets in a path are ordinary notation, not an unresolved
+instruction, and the brief had to be reworded into prose to pass.
+
+This is the sixth phrasing refusal this session, after `correctly`,
+`a good outcome`, `IS CLEAN`, `is a readable`, and a trailing `DECIDE`. Most of
+those were fair. This one cost a rewrite that made the brief longer and no
+clearer, which is the failure mode a phrasing gate has to avoid: if it pushes
+authors toward prose, it is trading precision for compliance.
