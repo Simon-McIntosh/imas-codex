@@ -42,14 +42,52 @@ local tool execution. Its API-time rate is 86.7 tok/s.
 The codex row is a single cumulative `turn.completed` usage block. Its input
 figure of 20,124,632 tokens is 97.9% cache reads.
 
-**The clive row is an estimate, because the local server reports
-`output_tokens: 0` on every assistant message.** The figure above is character
-count over four, taken across text, tool-call inputs and thinking blocks. That is
-a measurement gap in the local lane worth closing before any spend decision rests
-on it: a lane whose throughput cannot be read from its own stream cannot be
-compared honestly with one that can. Of that estimate, 83% is thinking
-(150,095 characters) against sonnet's 54% — the local model spends far more of
-its output on reasoning per unit of delivered work.
+**The clive row above is a mid-flight estimate, and mid-flight is the only place
+an estimate is needed.** Every assistant message from the local server reports
+`output_tokens: 0`, so nothing can be read while a run is in progress; the figure
+above is character count over four across text, tool-call inputs and thinking.
+But the terminal `result` record does carry totals, and `crew complete` reads
+them — corrected by the parallel project after I had written the gap up as
+absolute. So the lane is measurable **at promotion** and blind **in flight**,
+which is a smaller defect than I first reported, and still a real one: a
+coordinator cannot see a local run's consumption while deciding whether to let it
+continue.
+
+Of the mid-flight estimate, 83% is thinking (150,095 characters) against sonnet's
+54% — the local model spends far more of its output on reasoning per unit of
+delivered work. Over 95% by characters was observed independently on two nodes in
+the parallel trial.
+
+### The local lane has no prompt caching, and that is the whole cost story
+
+The input columns diverge by more than an order of magnitude, and in the
+direction that explains everything else:
+
+| Lane | Input tokens | Of which cached | Fresh input |
+|---|---:|---:|---:|
+| codex / gpt-5.6-sol | 20,124,632 | 19,695,744 (97.9%) | 428,888 |
+| claude / sonnet-5 | 24,233,869 | 23,983,548 (99.0%) | 250,321 |
+| clive / deepseek-v4-flash | 19,974,934 | **0** | 19,974,934 |
+
+Confirmed independently: a completed node in the parallel trial reports 7,975,223
+input tokens with zero cache reads. So the local lane re-processes its entire
+context on every turn — roughly **forty-six times** the fresh input of the codex
+node for work of comparable length.
+
+That is the ceiling on this lane, and it is not a model-quality property. It
+explains the throughput (~22–29 tok/s against sonnet's 52), it explains why a
+long node degrades rather than accelerating as context accumulates, and it says
+what would move the number most: prompt caching on the local endpoint, not a
+different model or a different effort setting. The parallel project's ledger
+prices its clive node at $41.15 — notional, since the lane is free, but the
+figure is what those tokens would cost metered, and it is six times its own Opus
+review of comparable output.
+
+**Node shape follows from this.** A free lane with no caching is cheapest per
+token and dearest per turn. It suits work with a small, stable context and a
+clear finish line, and it is the wrong home for a node that must read widely
+before it can act — which is exactly what the divergence-scan node was asked to
+do, and exactly where it spent its first budget.
 
 The clive stream also emits 35,404 `system` records against sonnet's 535 for a
 node of comparable length, which is why its transcript is 7.7 MB.
