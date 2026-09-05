@@ -176,8 +176,9 @@ def reclassify_standard_name_domain(
                                (:PhysicsDomain)
                 DELETE old_domain
                 WITH DISTINCT name
-                SET name.updated_at = datetime(), name.physics_domain = $domain,
-                    name.source_domains = [$domain]
+                SET name.physics_domain = $domain,
+                    name.source_domains = [$domain],
+                    name.updated_at = datetime()
                 MERGE (domain:PhysicsDomain {id: $domain})
                 MERGE (name)-[:HAS_PHYSICS_DOMAIN]->(domain)
                 CREATE (change:StandardNameChange {
@@ -1740,7 +1741,7 @@ def scope_focus_names(
         cypher = """
             UNWIND $ids AS sid
             MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-            SET sn.updated_at = datetime(), sn.name_stage = 'pending',
+            SET sn.name_stage = 'pending',
                 sn.docs_stage = 'pending',
                 sn.run_id = $run_id,
                 sn.reviewed_name_at = null,
@@ -1748,14 +1749,15 @@ def scope_focus_names(
                 sn.reviewer_score_name = null,
                 sn.reviewer_score_docs = null,
                 sn.claim_token = null,
-                sn.claimed_at = null
+                sn.claimed_at = null,
+                sn.updated_at = datetime()
             RETURN count(DISTINCT sn) AS n
             """
     else:
         cypher = """
             UNWIND $ids AS sid
             MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-            SET sn.updated_at = datetime(), sn.run_id = $run_id
+            SET sn.run_id = $run_id, sn.updated_at = datetime()
             RETURN count(DISTINCT sn) AS n
             """
     own = gc is None
@@ -1827,7 +1829,7 @@ WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
     MATCH (fixture_source:StandardNameSource)-[:PRODUCED_NAME]->(descendant)
     WHERE fixture_source.id STARTS WITH $fixture_source_id_prefix
   }
-SET name.updated_at = datetime(), name.run_id = $run_id
+SET name.run_id = $run_id, name.updated_at = datetime()
 RETURN collect(name.id) AS stamped_ids
 """
 
@@ -6541,15 +6543,17 @@ def _write_grammar_decomposition(
     edge_delete_types = "|".join(
         ["HAS_SEGMENT", *(rel for _seg, rel in _SEGMENT_EDGE_TYPES)]
     )
-    columns_to_null = "sn.updated_at = datetime(),\n                    " + (
+    columns_to_null = (
         ",\n                    ".join(
             f"sn.{col} = null" for col in _GRAMMAR_SEGMENT_COLUMNS
         )
+        + ",\n                    sn.updated_at = datetime()"
     )
-    columns_to_set = "sn.updated_at = datetime(),\n                " + (
+    columns_to_set = (
         ",\n                ".join(
             f"sn.{col} = ${col}" for col in _GRAMMAR_SEGMENT_COLUMNS
         )
+        + ",\n                sn.updated_at = datetime()"
     )
     typed_edge_foreach = "\n                ".join(
         f"FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = '{seg}' "
@@ -7009,13 +7013,14 @@ def persist_generated_name_winners(
                       SET sns.compose_hint_status = 'consumed',
                           sns.compose_hint_consumed_at = datetime()
                     )
-                    SET sn.updated_at = datetime(), sn.name_stage = 'drafted',
+                    SET sn.name_stage = 'drafted',
                         sn.chain_length = coalesce(sn.chain_length, 0),
                         sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
                         sn.docs_chain_length = coalesce(sn.docs_chain_length, 0),
                         sn.generated_at = coalesce(sn.generated_at, datetime()),
                         sn.model = coalesce(sn.model, b.model),
                         sn.run_id = coalesce(sns.run_id, sn.run_id),
+                        sn.updated_at = datetime(),
                         sns.claim_token = null,
                         sns.claimed_at = null,
                         sns.status = 'composed',
@@ -7028,10 +7033,11 @@ def persist_generated_name_winners(
                            reservation.created_target
                     MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
                     WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
-                    SET sn.updated_at = datetime(), sn.source_paths = CASE
+                    SET sn.source_paths = CASE
                       WHEN uri IN coalesce(sn.source_paths, [])
                       THEN sn.source_paths
-                      ELSE coalesce(sn.source_paths, []) + uri END
+                      ELSE coalesce(sn.source_paths, []) + uri END,
+                      sn.updated_at = datetime()
                     __RETIRE_FINALIZED_SOURCE_GAPS__
                     """.replace(
                                 "__RETIRE_FINALIZED_SOURCE_GAPS__",
@@ -7082,10 +7088,11 @@ def persist_generated_name_winners(
                            produced.created_target
                     MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
                     WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
-                    SET sn.updated_at = datetime(), sn.source_paths = CASE
+                    SET sn.source_paths = CASE
                       WHEN uri IN coalesce(sn.source_paths, [])
                       THEN sn.source_paths
-                      ELSE coalesce(sn.source_paths, []) + uri END
+                      ELSE coalesce(sn.source_paths, []) + uri END,
+                      sn.updated_at = datetime()
                     __RETIRE_FINALIZED_SOURCE_GAPS__
                     """.replace(
                                 "__RETIRE_FINALIZED_SOURCE_GAPS__",
@@ -10012,11 +10019,12 @@ def _lock_claimed_name_bindings(
     target_clause = (
         """
         MERGE (target:StandardName {id: b.sn_id})
-        ON CREATE SET target.updated_at = datetime(), target.created_at = datetime(),
+        ON CREATE SET target.created_at = datetime(),
                       target.name_stage = $pending_stage,
                       target.reservation_source_id = sns.id,
                       target.reservation_claim_token = b.claim_token,
-                      target.reservation_claim_seq = b.claim_seq
+                      target.reservation_claim_seq = b.claim_seq,
+                      target.updated_at = datetime()
         """
         if allow_missing
         else "OPTIONAL MATCH (target:StandardName {id: b.sn_id})"
@@ -10529,10 +10537,11 @@ def persist_claimed_attachments(
                                produced.created_target
                         MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                         WITH sns, sn, b, 'dd:' + b.source_id AS uri
-                        SET sn.updated_at = datetime(), sn.source_paths = CASE
+                        SET sn.source_paths = CASE
                             WHEN uri IN coalesce(sn.source_paths, [])
                             THEN sn.source_paths
-                            ELSE coalesce(sn.source_paths, []) + uri END
+                            ELSE coalesce(sn.source_paths, []) + uri END,
+                            sn.updated_at = datetime()
                         RETURN sns.id AS id
                         """,
                         batch=winner_batch,
@@ -11562,7 +11571,7 @@ def refresh_name_claims(sn_ids: list[str], claim_token: str) -> int:
             """
             UNWIND $ids AS nid
             MATCH (sn:StandardName {id: nid, claim_token: $token})
-            SET sn.updated_at = datetime(), sn.claimed_at = datetime()
+            SET sn.claimed_at = datetime(), sn.updated_at = datetime()
             RETURN count(sn) AS refreshed
             """,
             ids=list(sn_ids),
@@ -13066,7 +13075,7 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
                 """
                 UNWIND $updates AS u
                 MATCH (sn:StandardName {id: u.id})
-                SET sn.updated_at = datetime(), sn.source_paths = u.paths
+                SET sn.source_paths = u.paths, sn.updated_at = datetime()
                 """,
                 updates=updates,
             )
@@ -13110,7 +13119,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             MATCH (sn:StandardName)
             WHERE sn.name_stage = 'superseded'
               AND (sn.status IS NULL OR sn.status = 'draft')
-            SET sn.updated_at = datetime(), sn.status = 'superseded'
+            SET sn.status = 'superseded', sn.updated_at = datetime()
             RETURN count(sn) AS changed
             """
         )
@@ -13120,8 +13129,9 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             WHERE sn.name_stage = 'exhausted'
               AND (coalesce(sn.status, '') <> 'draft'
                    OR coalesce(sn.validation_status, '') <> 'quarantined')
-            SET sn.updated_at = datetime(), sn.status = 'draft',
-                sn.validation_status = 'quarantined'
+            SET sn.status = 'draft',
+                sn.validation_status = 'quarantined',
+                sn.updated_at = datetime()
             RETURN count(sn) AS changed
             """
         )
@@ -13129,7 +13139,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             """
             MATCH (sn:StandardName)
             WHERE sn.status IS NULL
-            SET sn.updated_at = datetime(), sn.status = 'draft'
+            SET sn.status = 'draft', sn.updated_at = datetime()
             RETURN count(sn) AS changed
             """
         )
@@ -14469,7 +14479,7 @@ def normalize_stored_standard_name_kinds() -> int:
                 """
                 UNWIND $updates AS u
                 MATCH (sn:StandardName {id: u.id})
-                SET sn.updated_at = datetime(), sn.kind = u.kind
+                SET sn.kind = u.kind, sn.updated_at = datetime()
                 """,
                 updates=updates,
             )
@@ -18293,7 +18303,7 @@ def supersede_prior_source_names(
                         AND source.source_id STARTS WITH 'derived:'
                        THEN source.source_id
                        ELSE source.id END) AS paths
-                SET old.updated_at = datetime(), old.source_paths = [p IN paths WHERE p IS NOT NULL]
+                SET old.source_paths = [p IN paths WHERE p IS NOT NULL], old.updated_at = datetime()
                 """,
                 names=sorted({plan["old_name"] for plan in deferred}),
             )
@@ -21865,9 +21875,11 @@ def supersede_into_ancestor(
                              AND ancestor_source.source_id STARTS WITH 'derived:'
                            THEN ancestor_source.source_id ELSE ancestor_source.id END)
                            AS ancestor_paths
-                    SET old.updated_at = datetime(), old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
-                        ancestor.updated_at = datetime(), ancestor.source_paths =
-                          [path IN ancestor_paths WHERE path IS NOT NULL]
+                    SET old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
+                        ancestor.source_paths =
+                          [path IN ancestor_paths WHERE path IS NOT NULL],
+                        old.updated_at = datetime(),
+                        ancestor.updated_at = datetime()
                     """,
                     old_id=old_id,
                     ancestor_id=ancestor_id,
