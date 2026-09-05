@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T22:09:04",
+  "updated": "2026-09-05T22:13:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3955,6 +3955,15 @@
       },
       {
         "id": "opus-cohortmigration",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
+      },
+      {
+        "id": "opus-namecheck",
         "harness": "claude-opus",
         "role": "implement",
         "session_id": null,
@@ -81413,6 +81422,197 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T195848878255-n-sli-the-section-verdicts-are-measured",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a76",
+        "node": "n-sli-the-section-verdicts-are-measured",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1688,
+                "cached_input_tokens": 346452,
+                "input_tokens": 348142,
+                "output_tokens": 1588,
+                "reasoning_output_tokens": 470,
+                "total_tokens": 349730,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "11b50f59-c77b-4356-8bb3-6dafc6d0a4c0",
+            "session_id": "ship-s10-20260905"
+          },
+          "done_when": "The report at the write path gives \u00a72, \u00a73, \u00a74, \u00a75 (each of its five footgun rows separately) and \u00a75a a verdict of closed or open. Every verdict cites either a file:line in the tree at the base revision or a live-graph count obtained in this run. Every open row states what remains. Zero rows left unverdicted.",
+          "estimated_hours": null,
+          "goal": "A closed-or-open verdict for every section of sn-lifecycle-integrity, each backed by code or a live-graph count",
+          "id": "n-sli-the-section-verdicts-are-measured",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T195848878255-n-sli-the-section-verdicts-are-measured/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "30m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/sli-section-closure-audit.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "opus-sectionaudit",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T20:00:50Z",
+        "completed_at": "2026-09-05T20:10:06.962Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 547,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 556,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "2bfef9978ef8ec2423bb01b56d27e59a7498a862",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "every section row verdicted closed or open with a file:line at the base revision or a live-graph count from this run; coordinator confirmed 9 of 9 rows carry a verdict",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/sli-section-closure-audit.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T195848878255-n-sli-the-section-verdicts-are-measured/manifest.md",
+        "scope_changed": false,
+        "session_id": "8fe8d9d3-bd32-46b6-9e27-6ab4e112b859",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 40.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-06T00:10:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 1,
+          "tokens": {
+            "cache_creation_input_tokens": 115087,
+            "cache_creation_input_tokens_cumulative": 115087,
+            "cache_read_input_tokens": 3212646,
+            "cache_read_input_tokens_cumulative": 3212646,
+            "inference_geo": "not_available",
+            "input_tokens": 68,
+            "input_tokens_cumulative": 68,
+            "output_tokens": 25313,
+            "output_tokens_cumulative": 25313,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.3903580000000013,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.3903580000000013
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 19413,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: [\"REQUIRED GUARD CHANGE BEFORE ENDPOINT IS REACHABLE: standard_names/workers.py review_name semantic gate (critical 0.55) rejects the bare anchor 'beta' for every description measured (0.475-0.508); a real rescore (completed; run_id=sn-rescore-20260905T140457Z) parked beta at name_stage='reviewed' (validation valid) rather than accepted; and the supersede and docs steps that require 'accepted' are refused by their own guards. The change exceeds this node's write scope (docs/evidence only) and requires a pipeline code change plus a design decision the plan does not settle (see follow_ons).\"]",
+              "elapsed_seconds": 23013,
+              "external_wait": null,
+              "log_age_seconds": 17893,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5bb65c468f802536205eaaa140f601eda26d2952"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-beta-is-the-total-beta",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+                "session_id": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 17932,
+              "terminal_at": "2026-09-05T15:00:24Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-beta-is-the-total-beta"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 551.589,
+          "generated_tokens": 25313,
+          "generation_seconds": 375.683,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 12.8,
+          "machine_seconds": 175.906,
+          "peak_input_tokens": 128301,
+          "tokens_per_second": 67.38,
+          "wall_tokens_per_second": 45.89
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "read-only closure audit; the deliverable is the verdict report and no repository change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sli-the-section-verdicts-are-measured",
+          "session_id": "8fe8d9d3-bd32-46b6-9e27-6ab4e112b859",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T20:10:06.962Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [
@@ -81557,6 +81757,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1730
+    "_version": 1732
   }
 }
