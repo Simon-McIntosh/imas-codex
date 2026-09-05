@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T10:49:00",
+  "updated": "2026-09-05T10:53:32",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -38,6 +38,15 @@
         "role": "implement",
         "session_id": "c4283d0f-4079-4b90-bea6-4d584a1301bd",
         "created": "2026-08-22"
+      },
+      {
+        "id": "clive-graphtarget",
+        "harness": "clive",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "clive-postcopy",
@@ -78381,6 +78390,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1707
+    "_version": 1708
   }
 }
