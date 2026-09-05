@@ -380,6 +380,17 @@ def _validate_pr_notes(
     return validate_pr_text(title, body)
 
 
+# The catalog's stable reviewing-guide document (root REVIEWING.md on the
+# catalog's main branch, which the release targets for every review PR),
+# addressed as a github blob URL — the same URL shape the exclusion ledger
+# link composes in catalog_release.py, so this body never falls back to a
+# bare URL that wraps mid-path in the review column.
+REVIEWING_GUIDE_URL = (
+    "https://github.com/Simon-McIntosh/imas-standard-names-catalog/blob/main/"
+    "REVIEWING.md"
+)
+
+
 def _static_pr_body(
     *,
     rc_version: str,
@@ -401,7 +412,9 @@ def _static_pr_body(
         f"{_count_phrase(counts['changed'], 'change')}, and "
         f"{_count_phrase(counts['removed'], 'removal')}. "
         "Review the fixed batch view and check each entry's wording, units, and "
-        "physics meaning before approving."
+        "physics meaning before approving. "
+        "See the [catalog reviewing guide "
+        f"(REVIEWING.md)]({REVIEWING_GUIDE_URL}) for the fields you may edit."
     )
 
 
