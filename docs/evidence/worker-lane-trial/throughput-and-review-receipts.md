@@ -145,6 +145,18 @@ do, and exactly where it spent its first budget.
 The clive stream also emits 35,404 `system` records against sonnet's 535 for a
 node of comparable length, which is why its transcript is 7.7 MB.
 
+**That flood belonged to the two-card deployment, not to the lane, and it is
+gone.** The same brief produced 3,899 stream records on the four-card launch
+against 31,678 on the two-card one. So every transcript-size figure above belongs
+to the engine that produced it, and the ~350 system records per turn are no longer
+a reason to expect a large transcript here.
+
+**One four-card run also wrote no terminal `result` record despite ending
+normally**, so no usage totals reached the ledger at all. That is distinct from
+the earlier case, where a run ended with a background task still live. If it
+recurs, "blind in flight, measurable at promotion" fails even for a clean exit,
+and this lane has no first-party throughput figure under any circumstance.
+
 ## Reviewed-code receipts
 
 The count that matters: **defects found by reading the diff that the node's own
