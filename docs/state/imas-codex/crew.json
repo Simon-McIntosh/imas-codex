@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T09:28:01",
+  "updated": "2026-09-05T09:34:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -77416,6 +77416,143 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260905T072353945907-n-sgr-withdraw-the-iron-core-beta-token",
+        "plan": "sn-grammar-refinement",
+        "section": "\u00a79",
+        "node": "n-sgr-withdraw-the-iron-core-beta-token",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1635,
+                "cached_input_tokens": 734627,
+                "input_tokens": 736264,
+                "output_tokens": 4304,
+                "reasoning_output_tokens": 1782,
+                "total_tokens": 740568,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "329cba0c-161e-4ebe-9019-e4729fb24232",
+            "session_id": "ship-s10-20260904"
+          },
+          "done_when": "beta_inclination was added last night as a geometry-category qualifier for the oblique iron-core angle. THE GRAPH CONTRADICTS THAT CHOICE AND THE LEAD HAS RULED AGAINST IT. Beta is by definition a plasma quantity, and beta as a prefix for a geometric angle was already tried and retired here: beta_angle_of_ferritic_element and beta_angle_of_passive_loop are both SUPERSEDED, in favour of tilt_angle and vertical_angle spellings. So the pattern the token would create has a recorded rejection behind it. Remove beta_inclination from imas_standard_names/grammar/vocabularies/qualifiers.yml and its entry from qualifier_categories.yml, regenerate through build-grammar and commit the regenerated output, and remove only the beta_inclination assertions from tests/test_vocabulary_gap_tokens.py while leaving every other token's assertions in that file untouched. VERIFY NO NAME DEPENDS ON IT before removing: search the shipped catalog snapshot and report the count of names using beta_inclination, which is expected to be zero because the iron-core angle was never named, and STOP AND REPORT rather than removing if it is not zero. THE GATE: the file's own invariant requires every qualifiers.yml token to appear in exactly one category, so tests/grammar/test_qualifier_categories.py must stay green; run tests/grammar plus tests/test_grammar_round_trip.py plus tests/test_codegen_drift.py plus tests/test_vocabulary_gap_tokens.py and report the exact command, exit status, log path and failure ids before and after, with added failures 0. This is time-critical: the upstream release is awaiting a tag and must not ship a token with a recorded rejection behind it. Run every check with UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv PYTHONPATH=$PWD uv run --no-sync.",
+          "estimated_hours": null,
+          "goal": "Withdraw the iron-core beta qualifier token before the release is tagged",
+          "id": "n-sgr-withdraw-the-iron-core-beta-token",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072353945907-n-sgr-withdraw-the-iron-core-beta-token/manifest.md",
+          "plan": "sn-grammar-refinement",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a79",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "write_paths": [
+            "imas_standard_names/grammar/vocabularies/qualifiers.yml",
+            "imas_standard_names/grammar/vocabularies/qualifier_categories.yml",
+            "imas_standard_names/grammar/model_types.py",
+            "tests/test_vocabulary_gap_tokens.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-betatokenwithdraw",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T07:24:00Z",
+        "completed_at": "2026-09-05T07:33:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 564,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 564,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "59754b7d628351984af430f83883626b242701c3",
+        "commits": [
+          "4796155b40fa32349ce40a909f3632a043a73e7c"
+        ],
+        "changed_lines": {
+          "added": 3,
+          "removed": 24,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-standard-names/.venv PYTHONPATH=$PWD uv run --no-sync pytest tests/grammar tests/test_grammar_round_trip.py tests/test_codegen_drift.py tests/test_vocabulary_gap_tokens.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072353945907-n-sgr-withdraw-the-iron-core-beta-token/after-suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "beta_inclination withdrawn from the closed vocabulary before the release is tagged; census confirmed 0 users among 42 shipped snapshot names, so the removal is safe; qualifiers.yml, its category entry and the generated Qualifier enum all drop it, build-grammar --check reports files in sync, and the grammar gate moves 1195 to 1191 passed with 0 added failures, the drop being exactly the 4 beta-specific assertions removed while all 19 non-beta token cases stand",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T072353945907-n-sgr-withdraw-the-iron-core-beta-token/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a07073-ef1f-7491-a173-403d152de512",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6173824,
+            "cached_input_tokens_cumulative": 6173824,
+            "input_tokens": 6312444,
+            "input_tokens_cumulative": 6312444,
+            "output_tokens": 19756,
+            "output_tokens_cumulative": 19756,
+            "reasoning_output_tokens": 6022,
+            "reasoning_output_tokens_cumulative": 6022
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 25778,
+          "peak_input_tokens": 12486268
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-5be88ee0fdc3/ship-s10-20260904/n-sgr-withdraw-the-iron-core-beta-token",
+          "session_id": "01a07073-ef1f-7491-a173-403d152de512",
+          "session_source": "pointer",
+          "retained_at": "2026-09-05T07:33:24Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -77560,6 +77697,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1697
+    "_version": 1698
   }
 }
