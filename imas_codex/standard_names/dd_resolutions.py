@@ -597,6 +597,7 @@ def _classify_graph_port_preflight(
         path = str(expected["path"])
         published = json.loads(str(expected["published_value"]))
         effective = json.loads(str(expected["effective_value"]))
+        expected_kind = str(expected["evidence"]).rsplit(":", 1)[-1]
         existing_matches = _graph_port_record_matches(row, expected)
         claim_ids = list(row.get("claim_ids") or [])
         cardinality_matches = (
@@ -605,7 +606,7 @@ def _classify_graph_port_preflight(
             and int(row.get("version_count") or 0) == 1
             and int(row.get("effective_unit_count") or 0) == 1
             and row.get("gap_paths") == [path]
-            and row.get("gap_kinds") == ["self_contradiction"]
+            and row.get("gap_kinds") == [expected_kind]
             and row.get("gap_versions") == [expected["dd_version"]]
             and row.get("gap_observed_values") == [published]
             and row.get("gap_expected_values") == [effective]
@@ -966,6 +967,133 @@ def expand_ionisation_potential_resolution_cohort(
         evidence=evidence,
         graph=graph,
         existing=len(IONISATION_POTENTIAL_RESOLUTION_PATHS) - len(records),
+        added=len(records),
+    )
+
+
+TARGET_LOAD_RESOLUTION_PATHS = (
+    "wall/global_quantities/power_density_inner_target_max",
+    "wall/global_quantities/power_density_outer_target_max",
+)
+
+
+def _target_load_resolution_id(path: str) -> str:
+    digest = hashlib.sha256(
+        _canonical_json(
+            {
+                "path": path,
+                "dd_version": "4.1.1",
+                "field": DDResolutionField.unit.value,
+                "published": "W",
+                "effective": "W.m^-2",
+            }
+        ).encode()
+    ).hexdigest()
+    return f"dd_resolution:{digest}"
+
+
+def target_load_resolution_records(
+    *,
+    manifest: DDResolutionManifest,
+    recorded_by: str,
+    recorded_at: datetime,
+    reason: str,
+) -> tuple[dict[str, Any], ...]:
+    """Build graph records for the divertor-target-load cohort's two W-tagged paths.
+
+    Four DD sources feed one standard name for a peak areal power density at a
+    divertor target: two declare ``W.m^-2`` and two declare ``W``. As with the
+    ionisation-potential and psi cohorts above, the DD contradicts itself on
+    one physical quantity, so there is no single DD answer to mirror — the
+    dimensionally-correct ``W.m^-2`` is the effective value for both.
+    """
+    existing = {
+        record.path: record
+        for record in manifest.resolutions
+        if record.state == DDResolutionStatus.active
+        and record.dd_version == "4.1.1"
+        and record.field == DDResolutionField.unit
+        and record.path in TARGET_LOAD_RESOLUTION_PATHS
+    }
+    invalid = [
+        path
+        for path, record in existing.items()
+        if record.observed
+        != DDResolutionValue(kind=DDResolutionValueKind.string, value="W")
+        or record.effective
+        != DDResolutionValue(kind=DDResolutionValueKind.string, value="W.m^-2")
+        or record.upstream_reference != _NONE_YET
+    ]
+    if invalid:
+        raise DDResolutionGraphPortConflict(
+            "existing target-load authority disagrees on exact paths: "
+            + ", ".join(sorted(invalid))
+        )
+    records = []
+    for path in TARGET_LOAD_RESOLUTION_PATHS:
+        if path in existing:
+            continue
+        record = DDResolutionRecord(
+            id=_target_load_resolution_id(path),
+            gap_id=f"dd_gap:{path}:unit_defect",
+            path=path,
+            dd_version="4.1.1",
+            field=DDResolutionField.unit,
+            observed=DDResolutionValue(kind=DDResolutionValueKind.string, value="W"),
+            effective=DDResolutionValue(
+                kind=DDResolutionValueKind.string, value="W.m^-2"
+            ),
+            reason=reason,
+            recorded_by=recorded_by,
+            recorded_at=recorded_at,
+            upstream_reference=_NONE_YET,
+            retiring_release=_NONE_YET,
+            state=DDResolutionStatus.active,
+        )
+        records.append(_graph_record(record))
+    return tuple(records)
+
+
+def expand_target_load_resolution_cohort(
+    *,
+    recorded_by: str,
+    reason: str,
+    recorded_at: datetime | None = None,
+    manifest: DDResolutionManifest | None = None,
+    graph_port: DDResolutionGraphPort | None = None,
+) -> DDResolutionCohortReceipt:
+    """Materialize missing exact evidence and resolution bridges for the target-load cohort."""
+    authority = manifest or load_dd_resolution_manifest()
+    timestamp = recorded_at or datetime.now(UTC)
+    records = target_load_resolution_records(
+        manifest=authority,
+        recorded_by=recorded_by,
+        recorded_at=timestamp,
+        reason=reason,
+    )
+    from imas_codex.standard_names.dd_gaps import write_dd_gaps
+
+    reports = [
+        {
+            "path": record["path"],
+            "source_path": record["path"],
+            "kind": "unit_defect",
+            "reason": reason,
+            "reporter": recorded_by,
+            "observed_at": _canonical_datetime(timestamp),
+            "observed_dd_version": record["dd_version"],
+            "observed_value": json.loads(record["published_value"]),
+            "expected_value": json.loads(record["effective_value"]),
+            "evidence_rule": "unit_equals_expected",
+        }
+        for record in records
+    ]
+    evidence = write_dd_gaps(reports)
+    graph = port_dd_resolution_records(records, graph_port=graph_port)
+    return DDResolutionCohortReceipt(
+        evidence=evidence,
+        graph=graph,
+        existing=len(TARGET_LOAD_RESOLUTION_PATHS) - len(records),
         added=len(records),
     )
 

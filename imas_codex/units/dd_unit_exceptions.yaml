@@ -115,12 +115,20 @@ dd_unit_bugs:
   # -- Areal power density tagged with total power `W`.
   #    A peak power density (per unit area) is W.m^-2; two wall global-quantity
   #    paths named power_density_*_target_max carry the total-power unit `W`.
+  #    The DD contradicts ITSELF here: the four DD sources of one standard name
+  #    for this same divertor-target load split two against two — the sibling
+  #    divertors/summary paths for the identical peak-load quantity declare
+  #    W.m^-2. There is therefore no single DD answer to mirror, so this
+  #    carries `correct_in_graph` (as psi and ionisation potential above), not
+  #    suppression alone.
   - path: "wall/global_quantities/power_density_*_target_max"
     dd_unit: W
     correct_unit: W.m^-2
+    correct_in_graph: true
     reason: >-
       A peak areal power density is W.m^-2; the DD tags these
-      power_density_*_target_max paths with total power W.
+      power_density_*_target_max paths with total power W while sibling
+      facets of the identical divertor-target-load quantity declare W.m^-2.
 
   # -- Ionisation potential (an ENERGY) tagged with the charge unit `e`.
   #    Unlike every other entry here, the DD contradicts ITSELF on this
