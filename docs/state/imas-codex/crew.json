@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T23:24:40",
+  "updated": "2026-09-05T23:27:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -4186,6 +4186,15 @@
           "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "son-graphbase",
+        "harness": "claude",
+        "role": "test",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-05"
       },
       {
         "id": "son-retarget",
@@ -83321,6 +83330,197 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260905T210358573983-n-sli-the-merged-head-added-no-failures",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a76",
+        "node": "n-sli-the-merged-head-added-no-failures",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1043,
+                "cached_input_tokens": 494038,
+                "input_tokens": 495083,
+                "output_tokens": 653,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 495736,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "11b50f59-c77b-4356-8bb3-6dafc6d0a4c0",
+            "session_id": "ship-s10-20260905"
+          },
+          "done_when": "Run tests/standard_names at the merged head 837b960d1 and record the failure count and the full failure id list to a log. Compare against the base set of exactly five that three separate nodes reported today (test_docs_review_eligibility.py four ids, test_edit_prompt_injection.py one id) and state added failures as a number. ALSO run the graph-marked tests with -m graph, because two of the three merged commits change Cypher and the default markers exclude graph, so a green default run says nothing about them. If your count is not five, do not adopt either figure - report both and say which files the difference sits in, because this suite's base has already been measured at 5, 19 and 27 at nearby revisions today and its reproducibility is itself under investigation. Record the resolved imas_standard_names version alongside the counts.",
+          "estimated_hours": null,
+          "goal": "The added-failure count for the standard-names suite at the merged head, measured rather than inherited",
+          "id": "n-sli-the-merged-head-added-no-failures",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T210358573983-n-sli-the-merged-head-added-no-failures/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/merged-head-suite-delta.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "opus-mergedhead",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-05T21:04:15Z",
+        "completed_at": "2026-09-05T21:24:58.477Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1237,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1243,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "837b960d1d5e5d0d83017eaf6f7db37e44c730b8",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest tests/standard_names -p no:cacheprovider at the merged head, and the same plus tests/graph under -m graph",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T210358573983-n-sli-the-merged-head-added-no-failures/logs/merged-head-default.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T210358573983-n-sli-the-merged-head-added-no-failures/manifest.md",
+        "scope_changed": false,
+        "session_id": "9cc47d05-c701-4cad-b468-1508be13ab13",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 97.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-06T00:10:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 71580,
+            "cache_creation_input_tokens_cumulative": 71580,
+            "cache_read_input_tokens": 1238862,
+            "cache_read_input_tokens_cumulative": 1238862,
+            "inference_geo": "not_available",
+            "input_tokens": 36,
+            "input_tokens_cumulative": 36,
+            "output_tokens": 14742,
+            "output_tokens_cumulative": 14742,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.7039610000000003,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 1.7039610000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 23309,
+              "budget_seconds": 3600,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: REQUIRED GUARD CHANGE BEFORE ENDPOINT IS REACHABLE: standard_names/workers.py review_name semantic gate (critical 0.55) rejects the bare anchor 'beta' for every description measured (0.475-0.508); a real rescore (completed, run_id=sn-rescore-20260905T140457Z) parked beta at name_stage='reviewed' (validation valid) rather than accepted, and the supersede and docs steps that require 'accepted' are refused by their own guards. The change exceeds this node's write scope (docs/evidence only) and requires a pipeline code change plus a design decision the plan does not settle (see follow_ons).",
+              "elapsed_seconds": 26909,
+              "external_wait": null,
+              "log_age_seconds": 21789,
+              "log_fresh": false,
+              "manifest_commits": [
+                "5bb65c468f802536205eaaa140f601eda26d2952"
+              ],
+              "manifest_derived": false,
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T133440963429-n-sgr-beta-is-the-total-beta/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-sgr-beta-is-the-total-beta",
+              "phase": "starting",
+              "plan": "sn-grammar-refinement",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+              "session": "ship-s10-20260904",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260905T133440963429-n-sgr-beta-is-the-total-beta",
+                "session_id": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
+                "source": "stream"
+              },
+              "terminal_age_seconds": 21828,
+              "terminal_at": "2026-09-05T15:00:24Z",
+              "wait_age_seconds": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260904/n-sgr-beta-is-the-total-beta"
+            }
+          ]
+        },
+        "throughput": {
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1239.942,
+          "generated_tokens": 14742,
+          "generation_seconds": 195.201,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 8.5,
+          "machine_seconds": 1044.741,
+          "peak_input_tokens": 84794,
+          "tokens_per_second": 75.52,
+          "wall_tokens_per_second": 11.89
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "no_commit": "verification node; the deliverable is the measured delta and its logs, and no repository change was in scope",
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260905/n-sli-the-merged-head-added-no-failures",
+          "session_id": "9cc47d05-c701-4cad-b468-1508be13ab13",
+          "session_source": "stream",
+          "retained_at": "2026-09-05T21:24:58.477Z"
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "Run tests",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [
@@ -83465,6 +83665,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1755
+    "_version": 1757
   }
 }
