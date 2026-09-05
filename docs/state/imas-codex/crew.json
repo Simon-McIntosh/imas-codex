@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T09:40:55",
+  "updated": "2026-09-05T09:48:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -909,9 +909,11 @@
         "id": "impl-cohortmigration",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a07074-c7f8-7040-baca-575973990e62",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a07074-c7f8-7040-baca-575973990e62"
+        },
         "created": "2026-09-05"
       },
       {
@@ -3897,9 +3899,11 @@
         "id": "opus-betafamily",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "bbf54e3e-1b44-4f14-a4d1-ab085184e8bf",
+        "session_model": "claude-sonnet-5",
+        "sessions": {
+          "{\"alias\":\"sonnet 5\",\"backend\":\"claude\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-sonnet-5\",\"sandbox\":\"worktree-full\"}": "bbf54e3e-1b44-4f14-a4d1-ab085184e8bf"
+        },
         "created": "2026-09-05"
       },
       {
@@ -77706,6 +77710,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 1699
+    "_version": 1701
   }
 }
