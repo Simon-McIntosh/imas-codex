@@ -154,23 +154,38 @@ Cost of the discipline: 3040 s and 18.3 tok/s, the slowest of the three, for a
 node that wrote no code. Whether that trade is right depends on whether the
 figures are load-bearing. Here they are: they size the remaining migration.
 
-## Steering a live worker does not work on this launch kind
+## Steering a live worker: the message waits for a human who is not there
 
-`SendMessage` addressed to the worker's session returned `success: true`. The
-message never arrived: **zero plain-text user records in the worker's stream**,
-across four subsequent tool rounds, and a grep for the message text over the
-8 MB transcript returns nothing.
+`SendMessage` addressed to the worker's session returned `success: true`, and the
+message never reached the worker: **zero plain-text user records in its stream**
+across four subsequent tool rounds, and a grep for the message text over the 8 MB
+transcript returns nothing.
 
-This matters because the orchestration skill's continuity table lists "message
-the worker" as a recovery step before redispatch. For a CLI-launched crew run
-there is no live steering channel at all: the only channel is
-`reckon crew resume --advice`, which requires the run to be terminal first. So
-correcting a worker that is burning its budget on the wrong thing costs a
-`crew stop` — and the stop is what makes the advice deliverable.
+The mechanism is not a lost message. Two delivery notices arrived afterwards: the
+message was **held for the recipient user's approval**, and then **expired
+unapproved**. A dispatched crew worker has no human watching its socket, so a
+peer message to one is queued against an approval that can never come.
+
+That distinction decides the fix. The channel is not missing and not broken — it
+is gated on a human in a place where there is no human. Either exempt a
+coordinator's message to a run it dispatched from that approval gate, or make the
+send fail immediately with the reason rather than reporting success and expiring
+silently. The current behaviour is the worst of the three: the sender is told it
+worked.
+
+Until then the orchestration guidance's "message the worker" row does not apply
+to a CLI-launched run, and the only channel is `reckon crew resume --advice`,
+which requires the run to be terminal. So correcting a worker that is burning its
+budget on the wrong thing costs a `crew stop` first — the stop is what makes the
+advice deliverable.
 
 The recovery worked: stop, then resume with the measurements handed back as
 established facts. But the sequence should not require killing a healthy process
 to say one sentence to it.
+
+Recorded as a correction rather than edited away, because the first reading of
+this — "the message silently vanishes" — was wrong in a way that would have sent
+the fix to the wrong layer.
 
 ## The checkpoint is a stop-the-world operation, not a background one
 
@@ -278,10 +293,14 @@ trial, in different projects, on the same day. Either make the member's declared
 harness route its dispatches, or stop accepting the flag — a field that is
 recorded, displayed, and ignored will keep costing this.
 
-### A live worker cannot be steered
+### A message to a dispatched worker waits for approval from nobody
 
-A message to a CLI-launched worker's session returns success and never reaches
-its turn. The orchestration guidance lists messaging the worker as a recovery
-step before redispatch; for this launch kind the only channel is
-`crew resume --advice`, which needs the run terminal first. Either deliver peer
-messages into a CLI run's turn, or remove that row so nobody plans around it.
+A peer message to a CLI-launched worker's session returns `success: true`, is
+then held for the recipient user's approval, and expires undelivered — because a
+dispatched worker has no human watching its socket. The orchestration guidance
+lists messaging the worker as a recovery step before redispatch; for this launch
+kind it cannot work.
+
+Exempt a coordinator's message to a run it dispatched from the approval gate, or
+fail the send immediately with the reason. Reporting success on a message that
+will expire is the one behaviour that guarantees the sender plans around it.
