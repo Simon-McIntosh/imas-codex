@@ -182,7 +182,6 @@ imas_codex/standard_names/graph_ops.py|StandardName|quarantine_reason|23584
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_seq|10221
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_token|10220
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_source_id|10219
-imas_codex/standard_names/graph_ops.py|StandardName|updated_at|4327
 imas_codex/standard_names/graph_ops.py|StandardNameSource|_claim_lock|14557,14558,14630,14631,14672,14673,14709,14710
 imas_codex/standard_names/graph_ops.py|StandardNameSource|_drain_scope_lock|1379,1380
 imas_codex/standard_names/graph_ops.py|StandardNameSource|skipped_at|10461,10462,11106
@@ -535,3 +534,97 @@ def audit_cypher_properties(
         violations=tuple(violations),
         allowlisted=tuple(allowlisted),
     )
+
+
+# Properties that mark contention (a claim or lock) rather than a
+# modification of the StandardName identity. A Cypher statement that writes
+# only these properties on a StandardName-bound alias must not be required to
+# also stamp ``updated_at``.
+_TRANSIENT_TOUCH_EXEMPT_PROPERTIES = frozenset(
+    {
+        "_drain_scope_lock",
+        "_lifecycleless_reconcile_lock",
+        "_refine_claim_release_lock",
+        "_structural_authority_lock",
+        "reservation_source_id",
+        "reservation_claim_token",
+        "reservation_claim_seq",
+    }
+)
+
+
+@dataclass(frozen=True, slots=True)
+class StandardNameTouchFinding:
+    """One Cypher SET clause that modifies StandardName without stamping it."""
+
+    path: Path
+    line: int
+    alias: str
+    properties: tuple[str, ...]
+
+    def __str__(self) -> str:
+        """Render a compact source-located finding."""
+        props = ", ".join(self.properties)
+        return (
+            f"{self.path}:{self.line}: SET {self.alias}.({props}) does not also "
+            f"set {self.alias}.updated_at in the same statement"
+        )
+
+
+def _cypher_set_blocks(text: str) -> Iterable[tuple[int, int, int]]:
+    """Yield (set_keyword_start, body_start, body_end) for each SET clause."""
+    set_positions = [m.start() for m in re.finditer(r"\bSET\b", text)]
+    for pos in set_positions:
+        body_start = pos + 3
+        next_keyword = next(
+            (match.start() for match in _CYPHER_KEYWORD_RE.finditer(text, body_start)),
+            None,
+        )
+        body_end = next_keyword if next_keyword is not None else len(text)
+        yield pos, body_start, body_end
+
+
+def audit_standard_name_touch(root: Path | str) -> tuple[StandardNameTouchFinding, ...]:
+    """Flag Cypher writes that modify StandardName without stamping ``updated_at``.
+
+    A statement that writes only a transient claim/lock marker (see
+    ``_TRANSIENT_TOUCH_EXEMPT_PROPERTIES``) is exempt: it marks contention,
+    not a modification of the identity. Dynamically assembled SET clauses
+    (an f-string whose body is a variable) cannot be proved either way by
+    static analysis and are silently skipped, the same limitation the
+    declared-property audit above accepts for unresolved aliases.
+    """
+    findings: list[StandardNameTouchFinding] = []
+    for path in _source_paths(Path(root)):
+        for node, text in _python_strings(path):
+            if "StandardName" not in text or not re.search(r"\bSET\b", text):
+                continue
+            bindings: dict[str, set[str]] = {}
+            for match in _NODE_BINDING_RE.finditer(text):
+                bindings.setdefault(match["alias"], set()).add(match["label"])
+            sn_aliases = {
+                alias for alias, labels in bindings.items() if "StandardName" in labels
+            }
+            if not sn_aliases:
+                continue
+            blocks = list(_cypher_set_blocks(text))
+            line_base = int(getattr(node, "lineno", 1))
+            for alias in sorted(sn_aliases):
+                prop_re = re.compile(rf"\b{re.escape(alias)}\.(\w+)\s*=")
+                for set_pos, body_start, body_end in blocks:
+                    body_text = text[body_start:body_end]
+                    props = {m.group(1) for m in prop_re.finditer(body_text)}
+                    if not props or "updated_at" in props:
+                        continue
+                    if props <= _TRANSIENT_TOUCH_EXEMPT_PROPERTIES:
+                        continue
+                    line = line_base + text.count("\n", 0, set_pos)
+                    findings.append(
+                        StandardNameTouchFinding(
+                            path=path,
+                            line=line,
+                            alias=alias,
+                            properties=tuple(sorted(props)),
+                        )
+                    )
+    return tuple(findings)

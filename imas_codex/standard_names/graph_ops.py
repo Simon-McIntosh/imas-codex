@@ -176,7 +176,7 @@ def reclassify_standard_name_domain(
                                (:PhysicsDomain)
                 DELETE old_domain
                 WITH DISTINCT name
-                SET name.physics_domain = $domain,
+                SET name.updated_at = datetime(), name.physics_domain = $domain,
                     name.source_domains = [$domain]
                 MERGE (domain:PhysicsDomain {id: $domain})
                 MERGE (name)-[:HAS_PHYSICS_DOMAIN]->(domain)
@@ -1554,7 +1554,7 @@ def claim_manifest_drain_scope(
                                  item.drain_scope_claimed_at_epoch_ms OR
                                (node.drain_scope_claimed_at IS NULL AND
                                 item.drain_scope_claimed_at_epoch_ms IS NULL))
-                        SET node.drain_scope_id = $scope_id,
+                        SET node.updated_at = datetime(), node.drain_scope_id = $scope_id,
                             node.drain_scope_claimed_at = datetime(),
                             node.drain_scope_paths = item.paths
                         RETURN collect(node.id) AS ids
@@ -1666,7 +1666,7 @@ def release_manifest_drain_claims(
                 drain_scope_id: $scope_id
               })
               WHERE name.claim_token IS NOT NULL
-              SET name.name_stage = CASE
+              SET name.updated_at = datetime(), name.name_stage = CASE
                     WHEN name.name_stage = 'refining'
                     THEN 'reviewed' ELSE name.name_stage END,
                   name.docs_stage = CASE
@@ -1740,7 +1740,7 @@ def scope_focus_names(
         cypher = """
             UNWIND $ids AS sid
             MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-            SET sn.name_stage = 'pending',
+            SET sn.updated_at = datetime(), sn.name_stage = 'pending',
                 sn.docs_stage = 'pending',
                 sn.run_id = $run_id,
                 sn.reviewed_name_at = null,
@@ -1755,7 +1755,7 @@ def scope_focus_names(
         cypher = """
             UNWIND $ids AS sid
             MATCH (sns:StandardNameSource {id: sid})-[:PRODUCED_NAME]->(sn:StandardName)
-            SET sn.run_id = $run_id
+            SET sn.updated_at = datetime(), sn.run_id = $run_id
             RETURN count(DISTINCT sn) AS n
             """
     own = gc is None
@@ -1827,7 +1827,7 @@ WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
     MATCH (fixture_source:StandardNameSource)-[:PRODUCED_NAME]->(descendant)
     WHERE fixture_source.id STARTS WITH $fixture_source_id_prefix
   }
-SET name.run_id = $run_id
+SET name.updated_at = datetime(), name.run_id = $run_id
 RETURN collect(name.id) AS stamped_ids
 """
 
@@ -3168,7 +3168,7 @@ def _write_standard_name_edges(
             WHERE tgt.name_stage IS NULL OR tgt.name_stage = 'pending'
             WITH tgt, ok
             WHERE ok IN ['projection', 'coordinate', 'unary_postfix']
-            SET tgt.needs_composition = true
+            SET tgt.updated_at = datetime(), tgt.needs_composition = true
             """,
             batch=co_batch,
         )
@@ -3974,7 +3974,7 @@ def _materialize_derived_parent_rows(
             "AS authorized_children "
             "WHERE size(authorized_children) = size($bootstrap_edges) "
             "MERGE (parent:StandardName {id: $parent_id}) "
-            "ON CREATE SET parent.created_at = datetime()"
+            "ON CREATE SET parent.updated_at = datetime(), parent.created_at = datetime()"
             if bootstrap_missing
             else "MATCH (parent:StandardName {id: $parent_id}) "
             "WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }"
@@ -4178,7 +4178,7 @@ def _materialize_derived_parent_rows_batched(
         UNWIND $rows AS row
         MATCH (parent:StandardName {id: row.parent_id})
         WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }
-        SET parent.name_stage = CASE
+        SET parent.updated_at = datetime(), parent.name_stage = CASE
                 WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'
                 WHEN trim(coalesce(parent.description, '')) <> ''
                      AND parent.description <> row.description
@@ -5288,7 +5288,7 @@ def write_standard_names(
             """
             UNWIND $batch AS b
             MERGE (sn:StandardName {id: b.id})
-            SET sn.source_types = coalesce(b.source_types, sn.source_types),
+            SET sn.updated_at = datetime(), sn.source_types = coalesce(b.source_types, sn.source_types),
                 sn.description = coalesce(nullIf(b.description, ''), sn.description),
                 sn.documentation = coalesce(b.documentation, sn.documentation),
                 sn.kind = coalesce(b.kind, sn.kind),
@@ -5487,7 +5487,7 @@ def write_standard_names(
                 """
                 UNWIND $batch AS b
                 MERGE (sn:StandardName {id: b.id})
-                SET sn.physics_domain = coalesce(b.physics_domain, sn.physics_domain),
+                SET sn.updated_at = datetime(), sn.physics_domain = coalesce(b.physics_domain, sn.physics_domain),
                     sn.source_domains = coalesce(b.source_domains, sn.source_domains)
                 """,
                 batch=pd_batch,
@@ -5901,7 +5901,7 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                     """
                     UNWIND $batch AS b
                     MATCH (sn:StandardName {id: b.sn_id})
-                    SET sn.llm_cost_review_name = coalesce(sn.llm_cost_review_name, 0.0) + b.cost,
+                    SET sn.updated_at = datetime(), sn.llm_cost_review_name = coalesce(sn.llm_cost_review_name, 0.0) + b.cost,
                         sn.review_name_count = coalesce(sn.review_name_count, 0) + 1,
                         sn.llm_cost = coalesce(sn.llm_cost, 0.0) + b.cost
                     """,
@@ -5915,7 +5915,7 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                     """
                     UNWIND $batch AS b
                     MATCH (sn:StandardName {id: b.sn_id})
-                    SET sn.llm_cost_review_docs = coalesce(sn.llm_cost_review_docs, 0.0) + b.cost,
+                    SET sn.updated_at = datetime(), sn.llm_cost_review_docs = coalesce(sn.llm_cost_review_docs, 0.0) + b.cost,
                         sn.review_docs_count = coalesce(sn.review_docs_count, 0) + 1,
                         sn.llm_cost = coalesce(sn.llm_cost, 0.0) + b.cost
                     """,
@@ -5953,7 +5953,7 @@ def update_review_aggregates(
             OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
             WITH sn, count(r) AS n, avg(r.score) AS mean,
                  CASE WHEN count(r) > 1 THEN max(r.score) - min(r.score) ELSE 0.0 END AS spread
-            SET sn.review_count = n,
+            SET sn.updated_at = datetime(), sn.review_count = n,
                 sn.review_mean_score = CASE WHEN n > 0 THEN mean ELSE null END,
                 sn.review_disagreement = (n > 1 AND spread >= $threshold)
             RETURN sn.id AS id
@@ -6196,7 +6196,7 @@ def write_name_review_results(
             """
             UNWIND $batch AS b
             MATCH (sn:StandardName {id: b.id})
-            SET sn.reviewer_score_name = b.reviewer_score_name,
+            SET sn.updated_at = datetime(), sn.reviewer_score_name = b.reviewer_score_name,
                 sn.reviewed_name_at = b.reviewed_name_at,
                 sn.reviewer_scores_name = coalesce(b.reviewer_scores_name, sn.reviewer_scores_name),
                 sn.reviewer_comments_name = coalesce(b.reviewer_comments_name, sn.reviewer_comments_name),
@@ -6317,7 +6317,7 @@ def write_docs_review_results(
             """
             UNWIND $batch AS b
             MATCH (sn:StandardName {id: b.id})
-            SET sn.reviewer_score_docs = b.reviewer_score_docs,
+            SET sn.updated_at = datetime(), sn.reviewer_score_docs = b.reviewer_score_docs,
                 sn.reviewed_docs_at = b.reviewed_docs_at,
                 sn.reviewer_scores_docs = coalesce(b.reviewer_scores_docs, sn.reviewer_scores_docs),
                 sn.reviewer_comments_docs = coalesce(b.reviewer_comments_docs, sn.reviewer_comments_docs),
@@ -6541,11 +6541,15 @@ def _write_grammar_decomposition(
     edge_delete_types = "|".join(
         ["HAS_SEGMENT", *(rel for _seg, rel in _SEGMENT_EDGE_TYPES)]
     )
-    columns_to_null = ",\n                    ".join(
-        f"sn.{col} = null" for col in _GRAMMAR_SEGMENT_COLUMNS
+    columns_to_null = "sn.updated_at = datetime(),\n                    " + (
+        ",\n                    ".join(
+            f"sn.{col} = null" for col in _GRAMMAR_SEGMENT_COLUMNS
+        )
     )
-    columns_to_set = ",\n                ".join(
-        f"sn.{col} = ${col}" for col in _GRAMMAR_SEGMENT_COLUMNS
+    columns_to_set = "sn.updated_at = datetime(),\n                " + (
+        ",\n                ".join(
+            f"sn.{col} = ${col}" for col in _GRAMMAR_SEGMENT_COLUMNS
+        )
     )
     typed_edge_foreach = "\n                ".join(
         f"FOREACH (_ IN CASE WHEN t IS NOT NULL AND edge.segment = '{seg}' "
@@ -7005,7 +7009,7 @@ def persist_generated_name_winners(
                       SET sns.compose_hint_status = 'consumed',
                           sns.compose_hint_consumed_at = datetime()
                     )
-                    SET sn.name_stage = 'drafted',
+                    SET sn.updated_at = datetime(), sn.name_stage = 'drafted',
                         sn.chain_length = coalesce(sn.chain_length, 0),
                         sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
                         sn.docs_chain_length = coalesce(sn.docs_chain_length, 0),
@@ -7024,7 +7028,7 @@ def persist_generated_name_winners(
                            reservation.created_target
                     MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
                     WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
-                    SET sn.source_paths = CASE
+                    SET sn.updated_at = datetime(), sn.source_paths = CASE
                       WHEN uri IN coalesce(sn.source_paths, [])
                       THEN sn.source_paths
                       ELSE coalesce(sn.source_paths, []) + uri END
@@ -7078,7 +7082,7 @@ def persist_generated_name_winners(
                            produced.created_target
                     MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
                     WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
-                    SET sn.source_paths = CASE
+                    SET sn.updated_at = datetime(), sn.source_paths = CASE
                       WHEN uri IN coalesce(sn.source_paths, [])
                       THEN sn.source_paths
                       ELSE coalesce(sn.source_paths, []) + uri END
@@ -7119,12 +7123,12 @@ def persist_generated_name_winners(
                            OR parent.drain_scope_claimed_at IS NULL
                            OR parent.drain_scope_claimed_at < datetime()
                                 - duration('PT600S'))
-                    SET name.drain_scope_id = source.drain_scope_id,
+                    SET name.updated_at = datetime(), name.drain_scope_id = source.drain_scope_id,
                         name.drain_scope_claimed_at =
                           source.drain_scope_claimed_at,
                         name.drain_scope_paths = source.drain_scope_paths
                     FOREACH (parent IN parents |
-                      SET parent.drain_scope_id = source.drain_scope_id,
+                      SET parent.updated_at = datetime(), parent.drain_scope_id = source.drain_scope_id,
                           parent.drain_scope_claimed_at =
                             source.drain_scope_claimed_at,
                           parent.drain_scope_paths = reduce(
@@ -7237,7 +7241,7 @@ def _backfill_cluster_from_sources(
                          END
                 WITH sn, collect(c)[0] AS best_cluster
                 WHERE best_cluster IS NOT NULL
-                SET sn.primary_cluster_id = best_cluster.id
+                SET sn.updated_at = datetime(), sn.primary_cluster_id = best_cluster.id
                 MERGE (sn)-[:IN_CLUSTER]->(best_cluster)
                 RETURN sn.id AS sn_id, best_cluster.id AS cluster_id
                 """,
@@ -7296,7 +7300,7 @@ def _finalize_generated_name_stage(
                       AND sns.claim_seq = b.claim_seq
                       AND sns.status = 'extracted'
                     MATCH (sn:StandardName {id: b.sn_id})
-                    SET sn.name_stage = CASE
+                    SET sn.updated_at = datetime(), sn.name_stage = CASE
                             WHEN (sn.name_stage IS NULL
                                   OR sn.name_stage = 'pending')
                                  AND sn.description IS NOT NULL
@@ -7311,7 +7315,7 @@ def _finalize_generated_name_stage(
                         sn.model = coalesce(sn.model, b.model)
                     WITH sn, b, sns
                     WHERE sns IS NOT NULL
-                    SET sns.claim_token  = null,
+                    SET sn.updated_at = datetime(), sns.claim_token  = null,
                         sns.claimed_at   = null,
                         sns.status       = 'composed',
                         sns.composed_at  = datetime(),
@@ -7648,7 +7652,7 @@ def claim_names_for_validation(limit: int = 50) -> tuple[str, list[dict[str, Any
               AND (sn.claimed_at IS NULL
                    OR sn.claimed_at < datetime() - duration($timeout))
             WITH sn ORDER BY rand() LIMIT $limit
-            SET sn.claimed_at = datetime(), sn.claim_token = $token
+            SET sn.updated_at = datetime(), sn.claimed_at = datetime(), sn.claim_token = $token
             """,
             limit=limit,
             token=token,
@@ -7704,7 +7708,7 @@ def mark_names_validated(
             """
             UNWIND $batch AS b
             MATCH (sn:StandardName {id: b.id, claim_token: $token})
-            SET sn.validated_at = datetime(),
+            SET sn.updated_at = datetime(), sn.validated_at = datetime(),
                 sn.validation_issues = b.issues,
                 sn.validation_layer_summary = b.summary,
                 sn.validation_status = b.validation_status,
@@ -7724,7 +7728,7 @@ def release_validation_claims(token: str) -> int:
         result = gc.query(
             """
             MATCH (sn:StandardName {claim_token: $token})
-            SET sn.claimed_at = null, sn.claim_token = null
+            SET sn.updated_at = datetime(), sn.claimed_at = null, sn.claim_token = null
             RETURN count(sn) AS released
             """,
             token=token,
@@ -7752,7 +7756,7 @@ def claim_names_for_embedding(limit: int = 100) -> tuple[str, list[dict[str, Any
               AND (sn.claimed_at IS NULL
                    OR sn.claimed_at < datetime() - duration($timeout))
             WITH sn ORDER BY rand() LIMIT $limit
-            SET sn.claimed_at = datetime(), sn.claim_token = $token
+            SET sn.updated_at = datetime(), sn.claimed_at = datetime(), sn.claim_token = $token
             """,
             limit=limit,
             token=token,
@@ -7783,7 +7787,7 @@ def mark_names_embedded(
             """
             UNWIND $batch AS b
             MATCH (sn:StandardName {id: b.id, claim_token: $token})
-            SET sn.embedding = b.embedding,
+            SET sn.updated_at = datetime(), sn.embedding = b.embedding,
                 sn.embedded_at = datetime(),
                 sn.claimed_at = null,
                 sn.claim_token = null
@@ -7805,7 +7809,7 @@ def release_embedding_claims(token: str) -> int:
         result = gc.query(
             """
             MATCH (sn:StandardName {claim_token: $token})
-            SET sn.claimed_at = null, sn.claim_token = null
+            SET sn.updated_at = datetime(), sn.claimed_at = null, sn.claim_token = null
             RETURN count(sn) AS released
             """,
             token=token,
@@ -7866,7 +7870,7 @@ def mark_names_consolidated(name_ids: list[str]) -> int:
             """
             UNWIND $ids AS nid
             MATCH (sn:StandardName {id: nid})
-            SET sn.consolidated_at = datetime()
+            SET sn.updated_at = datetime(), sn.consolidated_at = datetime()
             RETURN count(sn) AS marked
             """,
             ids=name_ids,
@@ -8038,14 +8042,15 @@ def reset_standard_names(
                 "sn.embedding = null, sn.embedded_at = null, sn.model = null, "
                 "sn.generated_at = null, "
                 "sn.cocos_transformation_type = null, sn.cocos = null, sn.dd_version = null, "
-                "sn.name_stage = $to_stage"
+                "sn.name_stage = $to_stage, sn.updated_at = datetime()"
             )
             reset_params["to_stage"] = to_stage
         else:
             set_clause = (
                 "sn.embedding = null, sn.embedded_at = null, sn.model = null, "
                 "sn.generated_at = null, "
-                "sn.cocos_transformation_type = null, sn.cocos = null, sn.dd_version = null"
+                "sn.cocos_transformation_type = null, sn.cocos = null, sn.dd_version = null, "
+                "sn.updated_at = datetime()"
             )
 
         # Remove HAS_STANDARD_NAME, HAS_UNIT, and HAS_COCOS relationships and
@@ -8768,7 +8773,7 @@ def claim_unresolved_links(limit: int = 20) -> list[dict[str, Any]]:
                  ).minutes + 1.0 AS age_minutes
             ORDER BY rand() * age_minutes DESC
             LIMIT $limit
-            SET sn.claimed_at = datetime(), sn.claim_token = $token
+            SET sn.updated_at = datetime(), sn.claimed_at = datetime(), sn.claim_token = $token
             """,
             limit=limit,
             max_retries=_MAX_LINK_RETRIES,
@@ -8875,7 +8880,7 @@ def resolve_links_batch(
             gc.query(
                 """
                 MATCH (sn:StandardName {id: $id})
-                SET sn.links = $links,
+                SET sn.updated_at = datetime(), sn.links = $links,
                     sn.link_status = $status,
                     sn.link_checked_at = datetime(),
                     sn.link_retry_count = $retry_count,
@@ -9066,7 +9071,7 @@ def _normalize_bare_doc_links(
     for i in range(0, len(updates), 200):
         gc.query(
             "UNWIND $items AS it MATCH (sn:StandardName {id: it.id}) "
-            "SET sn.documentation = it.doc",
+            "SET sn.updated_at = datetime(), sn.documentation = it.doc",
             items=updates[i : i + 200],
         )
     if updates:
@@ -9212,7 +9217,7 @@ def resolve_doc_links(gc: Any | None = None) -> dict[str, int]:
                 gc.query(
                     """
                     MATCH (sn:StandardName {id: $id})
-                    SET sn.documentation = $docs,
+                    SET sn.updated_at = datetime(), sn.documentation = $docs,
                         sn.links = $links,
                         sn.link_status = 'resolved'
                     """,
@@ -9281,7 +9286,7 @@ def write_enrichment_results(
             """
             UNWIND $batch AS b
             MATCH (sn:StandardName {id: b.id})
-            SET sn.description = b.description,
+            SET sn.updated_at = datetime(), sn.description = b.description,
                 sn.documentation = b.documentation,
                 sn.links = b.links,
                 sn.validity_domain = b.validity_domain,
@@ -10007,7 +10012,7 @@ def _lock_claimed_name_bindings(
     target_clause = (
         """
         MERGE (target:StandardName {id: b.sn_id})
-        ON CREATE SET target.created_at = datetime(),
+        ON CREATE SET target.updated_at = datetime(), target.created_at = datetime(),
                       target.name_stage = $pending_stage,
                       target.reservation_source_id = sns.id,
                       target.reservation_claim_token = b.claim_token,
@@ -10524,7 +10529,7 @@ def persist_claimed_attachments(
                                produced.created_target
                         MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                         WITH sns, sn, b, 'dd:' + b.source_id AS uri
-                        SET sn.source_paths = CASE
+                        SET sn.updated_at = datetime(), sn.source_paths = CASE
                             WHEN uri IN coalesce(sn.source_paths, [])
                             THEN sn.source_paths
                             ELSE coalesce(sn.source_paths, []) + uri END
@@ -11477,7 +11482,7 @@ def claim_review_names(
             WHERE sn.validation_status = 'valid'
               AND (sn.claimed_at IS NULL
                    OR sn.claimed_at < datetime() - duration($cutoff))
-            SET sn.claimed_at = datetime(),
+            SET sn.updated_at = datetime(), sn.claimed_at = datetime(),
                 sn.claim_token = $token
             """,
             ids=name_ids,
@@ -11520,7 +11525,7 @@ def release_review_claims(token: str) -> int:
         result = gc.query(
             """
             MATCH (sn:StandardName {claim_token: $token})
-            SET sn.claimed_at = null,
+            SET sn.updated_at = datetime(), sn.claimed_at = null,
                 sn.claim_token = null
             RETURN count(sn) AS affected
             """,
@@ -11557,7 +11562,7 @@ def refresh_name_claims(sn_ids: list[str], claim_token: str) -> int:
             """
             UNWIND $ids AS nid
             MATCH (sn:StandardName {id: nid, claim_token: $token})
-            SET sn.claimed_at = datetime()
+            SET sn.updated_at = datetime(), sn.claimed_at = datetime()
             RETURN count(sn) AS refreshed
             """,
             ids=list(sn_ids),
@@ -11649,7 +11654,7 @@ def promote_stranded_reviewed(
             f"""
             MATCH (sn:StandardName)
             WHERE {name_where}
-            SET sn.name_stage = 'accepted'
+            SET sn.updated_at = datetime(), sn.name_stage = 'accepted'
             RETURN count(sn) AS n
             """,
             min_score=min_score,
@@ -11658,7 +11663,7 @@ def promote_stranded_reviewed(
             f"""
             MATCH (sn:StandardName)
             WHERE {docs_where}
-            SET sn.docs_stage = 'accepted'
+            SET sn.updated_at = datetime(), sn.docs_stage = 'accepted'
             RETURN count(sn) AS n
             """,
             min_score=min_score,
@@ -12205,7 +12210,7 @@ def retire_unreachable_hint_edits(gc: Any | None = None) -> int:
             WHERE sn.edit_status = 'open'
               AND sn.name_hint IS NOT NULL
               AND sn.name_stage IN ['accepted', 'exhausted']
-            SET sn.edit_status = 'rejected',
+            SET sn.updated_at = datetime(), sn.edit_status = 'rejected',
                 sn.reviewer_comments_name =
                     trim(coalesce(sn.reviewer_comments_name, '')
                     + ' [edit_rejected] name hints require a target that can '
@@ -12833,7 +12838,7 @@ def reconcile_standard_name_cocos_links(gc: Any | None = None) -> dict[str, int]
             """
             MATCH (s:StandardName)
             WHERE s.cocos_transformation_type IS NOT NULL AND s.cocos IS NULL
-            SET s.cocos = $conv
+            SET s.updated_at = datetime(), s.cocos = $conv
             RETURN count(s) AS n
             """,
             conv=convention,
@@ -13061,7 +13066,7 @@ def reconcile_standard_name_source_paths(gc: Any | None = None) -> dict[str, int
                 """
                 UNWIND $updates AS u
                 MATCH (sn:StandardName {id: u.id})
-                SET sn.source_paths = u.paths
+                SET sn.updated_at = datetime(), sn.source_paths = u.paths
                 """,
                 updates=updates,
             )
@@ -13105,7 +13110,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             MATCH (sn:StandardName)
             WHERE sn.name_stage = 'superseded'
               AND (sn.status IS NULL OR sn.status = 'draft')
-            SET sn.status = 'superseded'
+            SET sn.updated_at = datetime(), sn.status = 'superseded'
             RETURN count(sn) AS changed
             """
         )
@@ -13115,7 +13120,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             WHERE sn.name_stage = 'exhausted'
               AND (coalesce(sn.status, '') <> 'draft'
                    OR coalesce(sn.validation_status, '') <> 'quarantined')
-            SET sn.status = 'draft',
+            SET sn.updated_at = datetime(), sn.status = 'draft',
                 sn.validation_status = 'quarantined'
             RETURN count(sn) AS changed
             """
@@ -13124,7 +13129,7 @@ def reconcile_catalog_status(gc: Any | None = None) -> dict[str, int]:
             """
             MATCH (sn:StandardName)
             WHERE sn.status IS NULL
-            SET sn.status = 'draft'
+            SET sn.updated_at = datetime(), sn.status = 'draft'
             RETURN count(sn) AS changed
             """
         )
@@ -13205,7 +13210,7 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
               AND sn.description IS NOT NULL
               AND trim(sn.description) <> ''
             WITH DISTINCT sn
-            SET sn.name_stage = 'drafted',
+            SET sn.updated_at = datetime(), sn.name_stage = 'drafted',
                 sn.origin     = 'pipeline'
             RETURN count(sn) AS advanced
             """
@@ -13274,7 +13279,7 @@ def reconcile_descriptionless_composed_names(
               AND src.claim_token IS NULL
             WITH sn, collect(DISTINCT src) AS sources,
                  collect(DISTINCT produced) AS produced_edges
-            SET sn.name_stage = 'pending',
+            SET sn.updated_at = datetime(), sn.name_stage = 'pending',
                 sn.source_paths = [
                   path IN coalesce(sn.source_paths, [])
                   WHERE NOT path IN [source IN sources | source.id]
@@ -13458,7 +13463,7 @@ def reconcile_sourceless_pipeline_names(gc: Any | None = None) -> dict[str, int]
                     MERGE (sns)-[:PRODUCED_NAME]->(sn)
                     FOREACH (_ IN CASE WHEN dd IS NULL THEN [] ELSE [1] END |
                       MERGE (dd)-[:HAS_STANDARD_NAME]->(sn))
-                    SET sns.status = 'composed',
+                    SET sn.updated_at = datetime(), sns.status = 'composed',
                         sns.produced_sn_id = sn.id,
                         sns.composed_at = datetime(),
                         sns.claimed_at = null,
@@ -13693,7 +13698,9 @@ def reconcile_grammar_segments() -> dict[str, int]:
 
     cols = _GRAMMAR_SEGMENT_COLUMNS
     select = ", ".join(f"sn.{c} AS {c}" for c in cols)
-    set_clause = ", ".join(f"sn.{c} = b.{c}" for c in cols)
+    set_clause = (
+        ", ".join(f"sn.{c} = b.{c}" for c in cols) + ", sn.updated_at = datetime()"
+    )
     batch: list[dict[str, Any]] = []
     with GraphClient() as gc:
         rows = gc.query(
@@ -13994,7 +14001,7 @@ def write_run_provenance(
             """
             UNWIND $ids AS nid
             MATCH (sn:StandardName {id: nid})
-            SET sn.last_run_id = $rid,
+            SET sn.updated_at = datetime(), sn.last_run_id = $rid,
                 sn.last_run_at = datetime($ts)
             RETURN count(sn) AS n
             """,
@@ -14462,7 +14469,7 @@ def normalize_stored_standard_name_kinds() -> int:
                 """
                 UNWIND $updates AS u
                 MATCH (sn:StandardName {id: u.id})
-                SET sn.kind = u.kind
+                SET sn.updated_at = datetime(), sn.kind = u.kind
                 """,
                 updates=updates,
             )
@@ -14944,7 +14951,8 @@ def _claim_sn_atomic(
                           {seed_extra_where}
                         WITH sn{seed_with_extras}
                         ORDER BY {seed_order_by} LIMIT 1
-                        SET sn.claimed_at = datetime(),
+                        SET sn.updated_at = datetime(),
+                            sn.claimed_at = datetime(),
                             sn.claim_token = $token,
                             sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                             {stage_set}
@@ -14993,7 +15001,8 @@ def _claim_sn_atomic(
                             MATCH (sn)-[:HAS_UNIT]
                                 ->(:Unit {{id: $unit}})
                             WITH sn LIMIT $expand_limit
-                            SET sn.claimed_at = datetime(),
+                            SET sn.updated_at = datetime(),
+                                sn.claimed_at = datetime(),
                                 sn.claim_token = $token,
                                 sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
@@ -15014,7 +15023,8 @@ def _claim_sn_atomic(
                                 ->(:IMASSemanticCluster
                                     {{id: $cluster_id}})
                             WITH sn LIMIT $expand_limit
-                            SET sn.claimed_at = datetime(),
+                            SET sn.updated_at = datetime(),
+                                sn.claimed_at = datetime(),
                                 sn.claim_token = $token,
                                 sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
@@ -15035,7 +15045,8 @@ def _claim_sn_atomic(
                             MATCH (sn)-[:HAS_UNIT]
                                 ->(:Unit {{id: $unit}})
                             WITH sn LIMIT $expand_limit
-                            SET sn.claimed_at = datetime(),
+                            SET sn.updated_at = datetime(),
+                                sn.claimed_at = datetime(),
                                 sn.claim_token = $token,
                                 sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
@@ -15054,7 +15065,8 @@ def _claim_sn_atomic(
                               {scope_where}
                               AND sn.physics_domain = $fallback_domain
                             WITH sn LIMIT $expand_limit
-                            SET sn.claimed_at = datetime(),
+                            SET sn.updated_at = datetime(),
+                                sn.claimed_at = datetime(),
                                 sn.claim_token = $token,
                                 sn.claim_seq = coalesce(sn.claim_seq, 0) + 1
                                 {stage_set}
@@ -16104,7 +16116,7 @@ def persist_reviewed_name(
               AND (($claim_seq IS NULL
                     AND (sn.claim_token = $token OR sn.claim_token IS NULL))
                    OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
-            SET sn.reviewer_score_name        = $score,
+            SET sn.updated_at = datetime(), sn.reviewer_score_name        = $score,
                 sn.reviewer_scores_name       = $scores_json,
                 sn.reviewer_comments_name     = $comments,
                 sn.reviewer_comments_per_dim_name = $comments_per_dim_json,
@@ -16189,7 +16201,7 @@ def persist_reviewed_name(
             gc.query(
                 """
                 MATCH (sn:StandardName {id: $id})
-                SET sn.validation_issues = coalesce(sn.validation_issues, [])
+                SET sn.updated_at = datetime(), sn.validation_issues = coalesce(sn.validation_issues, [])
                     + [c IN $conflicts | '[edit_cascade] ' + c]
                 """,
                 id=sn_id,
@@ -16244,7 +16256,7 @@ def persist_reviewed_name(
                 gc.query(
                     """
                     MATCH (sn:StandardName {id: $id})
-                    SET sn.validation_issues = coalesce(sn.validation_issues, [])
+                    SET sn.updated_at = datetime(), sn.validation_issues = coalesce(sn.validation_issues, [])
                         + [c IN $conflicts | '[edit_cascade] ' + c]
                     """,
                     id=sn_id,
@@ -16641,7 +16653,7 @@ def persist_reviewed_docs(
                    OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
               AND sn.name_stage = 'accepted'
               AND sn.docs_stage = 'drafted'
-            SET sn.reviewer_score_docs        = $score,
+            SET sn.updated_at = datetime(), sn.reviewer_score_docs        = $score,
                 sn.reviewer_scores_docs       = $scores_json,
                 sn.reviewer_comments_docs     = $comments,
                 sn.reviewer_comments_per_dim_docs = $comments_per_dim_json,
@@ -16768,7 +16780,7 @@ WHERE sn.name_stage = 'accepted'
   AND sn.drain_claim_scope_id IS NULL
 WITH sn, sn.docs_stage AS prior_stage
 FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
-    SET sn.docs_stage = 'drafted',
+    SET sn.updated_at = datetime(), sn.docs_stage = 'drafted',
         sn.reviewer_score_docs = null,
         sn.reviewer_scores_docs = null,
         sn.reviewer_comments_docs = null,
@@ -16935,7 +16947,7 @@ def _charge_refine_name_attempts(
                 MATCH (sn:StandardName {id: sid})
                 WHERE sn.claim_token = $token
                   AND sn.name_stage = 'refining'
-                SET sn.refine_attempts = coalesce(
+                SET sn.updated_at = datetime(), sn.refine_attempts = coalesce(
                         sn.refine_attempts, coalesce(sn.chain_length, 0)
                     ) + 1
                 RETURN sn.id AS id, sn.refine_attempts AS refine_attempts
@@ -17081,7 +17093,7 @@ def _embed_single_standard_name(sn_id: str, description: str | None) -> None:
                 gc.query(
                     """
                     MATCH (sn:StandardName {id: $id})
-                    SET sn.embedding    = $embedding,
+                    SET sn.updated_at = datetime(), sn.embedding    = $embedding,
                         sn.embedded_at  = datetime()
                     """,
                     id=sn_id,
@@ -17145,7 +17157,8 @@ def claim_embed_batch(
                    OR sn.embed_claimed_at < datetime() - duration('PT5M'))
               {scope_where}
             WITH sn ORDER BY rand() LIMIT $limit
-            SET sn.embed_claimed_at = datetime(),
+            SET sn.updated_at = datetime(),
+                sn.embed_claimed_at = datetime(),
                 sn.embed_claim_token = $token
             """,
             limit=limit,
@@ -17180,7 +17193,7 @@ def release_embed_claims(
             """
             UNWIND $ids AS sid
             MATCH (sn:StandardName {id: sid, embed_claim_token: $token})
-            SET sn.embed_claimed_at = null,
+            SET sn.updated_at = datetime(), sn.embed_claimed_at = null,
                 sn.embed_claim_token = null
             RETURN count(sn) AS released
             """,
@@ -17203,7 +17216,7 @@ def persist_embed_batch(items: list[dict[str, Any]]) -> int:
             """
             UNWIND $items AS item
             MATCH (sn:StandardName {id: item.id})
-            SET sn.embedding = item.embedding,
+            SET sn.updated_at = datetime(), sn.embedding = item.embedding,
                 sn.embedded_at = datetime(),
                 sn.embed_text_hash = item.embed_text_hash,
                 sn.embed_failed_at = null,
@@ -17498,12 +17511,12 @@ def persist_refined_name(
                                   THEN old.edit_include_accepted
                                   ELSE $edit_include_accepted END
                                AS successor_edit_include_accepted
-                        SET old.superseded_from_stage = coalesce(
+                        SET old.updated_at = datetime(), old.superseded_from_stage = coalesce(
                                 old.superseded_from_stage, old.name_stage
                             ),
                             old.name_stage = 'refining'
                         MERGE (new:StandardName {{id: $new_name}})
-                        ON CREATE SET
+                        ON CREATE SET new.updated_at = datetime(),
                           new.name_stage        = 'drafted',
                           new.docs_stage        = 'pending',
                           new.validation_status = 'valid',
@@ -17545,6 +17558,7 @@ def persist_refined_name(
                           new.embed_text_hash   = null
                           {escalation_set}
                         ON MATCH SET
+                          new.updated_at = datetime(),
                           new.name_stage = CASE
                             WHEN coalesce(new.name_stage, '') IN ['', 'pending']
                              AND coalesce(new.origin, '') <> 'derived'
@@ -17779,7 +17793,7 @@ def persist_refined_name(
                         // has accepted it. A pipeline refine of a merely
                         // 'reviewed' name (never published) records a
                         // non-accepted sentinel, so no stub is emitted for it.
-                        SET old.name_stage  = 'superseded',
+                        SET old.updated_at = datetime(), new.updated_at = datetime(), old.name_stage  = 'superseded',
                             old.superseded_from_stage = coalesce(
                                 old.superseded_from_stage,
                                 CASE WHEN coalesce(old.docs_stage, '') = 'accepted'
@@ -18279,7 +18293,7 @@ def supersede_prior_source_names(
                         AND source.source_id STARTS WITH 'derived:'
                        THEN source.source_id
                        ELSE source.id END) AS paths
-                SET old.source_paths = [p IN paths WHERE p IS NOT NULL]
+                SET old.updated_at = datetime(), old.source_paths = [p IN paths WHERE p IS NOT NULL]
                 """,
                 names=sorted({plan["old_name"] for plan in deferred}),
             )
@@ -18356,7 +18370,7 @@ def supersede_prior_source_names(
                      old.edit_override_edits AS o_override_edits,
                      old.edit_include_accepted AS o_include_accepted,
                      old.edit_status AS o_edit_status
-                SET old.name_stage = 'superseded',
+                SET old.updated_at = datetime(), new.updated_at = datetime(), old.name_stage = 'superseded',
                     // Capture the predecessor's live name-axis stage before the
                     // flip so the export boundary can emit a deprecation stub
                     // only for names that had reached 'accepted'. Unlike the
@@ -18585,7 +18599,7 @@ def tombstone_supersede_into(
                   (into:StandardName {id: $into_id})
             WHERE into.name_stage IN ['accepted', 'approved']
               AND NOT EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(into) }
-            SET old.name_stage = 'superseded',
+            SET old.updated_at = datetime(), old.name_stage = 'superseded',
                 old.superseded_from_stage =
                     coalesce(old.superseded_from_stage, 'accepted'),
                 old.claim_token = null,
@@ -19162,7 +19176,7 @@ def deduplicate_scalar_selected_sources(
                       WHEN source.source_type = 'derived'
                         AND source.source_id STARTS WITH 'derived:'
                       THEN source.source_id ELSE source.id END) AS paths
-                    SET target.source_paths = [path IN paths WHERE path IS NOT NULL]
+                    SET target.updated_at = datetime(), target.source_paths = [path IN paths WHERE path IS NOT NULL]
                     """,
                     target_ids=target_ids,
                 )
@@ -21120,7 +21134,7 @@ def supersede_exhausted_standard_name_orphans(
                     UNWIND $rows AS expected
                     MATCH (name:StandardName {id: expected.name_id})
                     WHERE elementId(name) = expected.name_element_id
-                    SET name.name_stage = name.name_stage
+                    SET name.updated_at = datetime(), name.name_stage = name.name_stage
                     RETURN collect(name.id) AS ids
                     """,
                     rows=actions,
@@ -21161,7 +21175,7 @@ def supersede_exhausted_standard_name_orphans(
                       AND NOT EXISTS {
                         (:StandardNameSource)-[:PRODUCED_NAME]->(name)
                       }
-                    SET name.name_stage = 'superseded',
+                    SET name.updated_at = datetime(), name.name_stage = 'superseded',
                         name.status = 'superseded',
                         name.claimed_at = null,
                         name.claim_token = null
@@ -21634,7 +21648,7 @@ def supersede_into_ancestor(
                         """
                         MATCH (old:StandardName {id: $old_id}),
                               (ancestor:StandardName {id: $ancestor_id})
-                        SET old.claimed_at = old.claimed_at,
+                        SET old.updated_at = datetime(), ancestor.updated_at = datetime(), old.claimed_at = old.claimed_at,
                             ancestor.claimed_at = ancestor.claimed_at
                         RETURN old.id AS old_id
                         """,
@@ -21851,7 +21865,7 @@ def supersede_into_ancestor(
                              AND ancestor_source.source_id STARTS WITH 'derived:'
                            THEN ancestor_source.source_id ELSE ancestor_source.id END)
                            AS ancestor_paths
-                    SET old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
+                    SET old.updated_at = datetime(), old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
                         ancestor.source_paths =
                           [path IN ancestor_paths WHERE path IS NOT NULL]
                     """,
@@ -21872,7 +21886,7 @@ def supersede_into_ancestor(
                       AND NOT EXISTS {
                         MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(old)
                       }
-                    SET old.name_stage = 'superseded',
+                    SET old.updated_at = datetime(), old.name_stage = 'superseded',
                         old.status = 'superseded',
                         old.superseded_from_stage =
                           coalesce(old.superseded_from_stage, 'accepted'),
@@ -22069,7 +22083,7 @@ def release_enrich_claims(
             MATCH (n:StandardName {{id: sid}})
             WHERE n.claim_token = $token
               {stage_clause}
-            SET n.claimed_at = null, n.claim_token = null
+            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
             RETURN count(n) AS released
             """,
             ids=sn_ids,
@@ -22131,7 +22145,8 @@ def release_enrich_failed_claims(
             MATCH (n:StandardName {{id: sid}})
             WHERE n.claim_token = $token
               {stage_where}
-            SET {stage_set}
+            SET n.updated_at = datetime(),
+                {stage_set}
                 n.claimed_at = null,
                 n.claim_token = null
             RETURN count(n) AS released
@@ -22176,7 +22191,7 @@ def release_review_names_claims(
             MATCH (n:StandardName {{id: sid}})
             WHERE n.claim_token = $token
               {stage_clause}
-            SET n.claimed_at = null, n.claim_token = null
+            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
             RETURN count(n) AS released
             """,
             ids=sn_ids,
@@ -22225,7 +22240,8 @@ def release_review_names_failed_claims(
             MATCH (n:StandardName {{id: sid}})
             WHERE n.claim_token = $token
               {stage_where}
-            SET {stage_set}
+            SET n.updated_at = datetime(),
+                {stage_set}
                 n.claimed_at = null,
                 n.claim_token = null
             RETURN count(n) AS released
@@ -22271,7 +22287,7 @@ def release_review_docs_claims(
             WHERE n.claim_token = $token
               {stage_clause}
             WITH n  // Preserve name_stage; this release owns the docs axis.
-            SET n.claimed_at = null, n.claim_token = null
+            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
             RETURN count(n) AS released
             """,
             ids=sn_ids,
@@ -22321,7 +22337,8 @@ def release_review_docs_failed_claims(
             WHERE n.claim_token = $token
               {stage_where}
             WITH n  // Preserve name_stage; this release owns the docs axis.
-            SET {stage_set}
+            SET n.updated_at = datetime(),
+                {stage_set}
                 n.claimed_at = null,
                 n.claim_token = null
             RETURN count(n) AS released
@@ -22432,7 +22449,7 @@ WHERE sn.name_stage = $expected_stage
   AND sn.claim_token = $claim_token
   AND toString(sn.claimed_at) = $expected_claimed_at
   AND ($scope_run_id IS NULL OR sn.run_id = $scope_run_id)
-SET sn.name_stage = 'reviewed',
+SET sn.updated_at = datetime(), sn.name_stage = 'reviewed',
     sn.claim_token = null,
     sn.claimed_at = null
 RETURN sn.id AS id
@@ -22784,7 +22801,8 @@ def release_refine_name_claims(
             MATCH (n:StandardName {{id: sid}})
             WHERE n.claim_token = $token
               {stage_clause}
-            SET n.claimed_at = null,
+            SET n.updated_at = datetime(),
+                n.claimed_at = null,
                 n.claim_token = null,
                 n.name_stage = CASE
                     WHEN n.name_stage = 'refining' THEN 'reviewed'
@@ -22843,7 +22861,7 @@ def resubmit_pinned_rename_for_review(
             MATCH (sn:StandardName {id: $sn_id})
             WHERE sn.claim_token = $token AND sn.name_stage = 'refining'
             WITH sn, coalesce(sn.review_resubmit_count, 0) AS n
-            SET sn.name_stage = CASE WHEN n < $cap THEN 'drafted' ELSE 'reviewed' END,
+            SET sn.updated_at = datetime(), sn.name_stage = CASE WHEN n < $cap THEN 'drafted' ELSE 'reviewed' END,
                 sn.review_resubmit_count = CASE WHEN n < $cap THEN n + 1 ELSE n END,
                 sn.reviewer_score_name = CASE WHEN n < $cap
                                               THEN null ELSE sn.reviewer_score_name END,
@@ -22901,7 +22919,7 @@ def stage_name_for_rescore(
             // and the caller refuses the rescore. Dry-run retains the same
             // eligibility query but executes no mutation.
             FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
-                SET sn.name_stage = 'drafted',
+                SET sn.updated_at = datetime(), sn.name_stage = 'drafted',
                     sn.reviewer_score_name = null,
                     sn.review_resubmit_count = 0,
                     // The stale diagnosis of the last refinement goes; the
@@ -22988,7 +23006,7 @@ def restore_name_after_failed_rescore(
             WHERE sn.name_stage = 'drafted'
               AND sn.run_id = $run_id
               AND sn.validation_status = 'quarantined'
-            SET sn.name_stage = $prior_stage,
+            SET sn.updated_at = datetime(), sn.name_stage = $prior_stage,
                 sn.run_id = null,
                 sn.claim_token = null,
                 sn.claimed_at = null
@@ -23054,7 +23072,7 @@ def stop_refine_name_attempt(
                    WHEN $terminal
                      OR coalesce(sn.refine_attempts, 0) >= $rotation_cap
                    THEN 'exhausted' ELSE 'reviewed' END AS target_stage
-            SET sn.name_stage = target_stage,
+            SET sn.updated_at = datetime(), sn.name_stage = target_stage,
                 sn.validation_status = CASE
                     WHEN target_stage = 'exhausted' THEN 'quarantined'
                     ELSE sn.validation_status END,
@@ -23123,7 +23141,7 @@ def _mark_refine_docs_exhausted(
             MATCH (sn:StandardName {id: $sn_id})
             WHERE sn.claim_token = $token
               AND sn.docs_stage = 'refining'
-            SET sn.docs_stage = 'exhausted',
+            SET sn.updated_at = datetime(), sn.docs_stage = 'exhausted',
                 sn.claim_token = null,
                 sn.claimed_at = null,
                 // A docs-axis exhaust closes only a docs-steering edit.
@@ -23541,7 +23559,7 @@ def persist_generated_docs(
             MATCH (sn:StandardName {id: $sn_id})
             WHERE sn.claim_token = $token
               AND sn.name_stage = 'accepted'
-            SET sn.description      = $description,
+            SET sn.updated_at = datetime(), sn.description      = $description,
                 sn.documentation    = $documentation,
                 sn.docs_stage       = 'drafted',
                 sn.docs_chain_length = 0,
@@ -23576,7 +23594,7 @@ def persist_generated_docs(
         gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            SET sn.embed_text_hash = null
+            SET sn.updated_at = datetime(), sn.embed_text_hash = null
             """,
             id=sn_id,
         )
@@ -23609,7 +23627,7 @@ def release_generate_docs_claims(
             UNWIND $ids AS sid
             MATCH (n:StandardName {id: sid})
             WHERE n.claim_token = $token
-            SET n.claimed_at = null, n.claim_token = null
+            SET n.updated_at = datetime(), n.claimed_at = null, n.claim_token = null
             RETURN count(n) AS released
             """,
             ids=sn_ids,
@@ -23649,7 +23667,7 @@ def release_generate_docs_failed_claims(
             UNWIND $sn_ids AS sid
             MATCH (sn:StandardName {id: sid})
             WHERE sn.claim_token = $token
-            SET sn.claim_token = null,
+            SET sn.updated_at = datetime(), sn.claim_token = null,
                 sn.claimed_at  = null
             RETURN count(sn) AS released
             """,
@@ -23877,7 +23895,7 @@ def persist_refined_docs(
 
                         // 4. Update SN with new docs + advance chain
                         WITH sn, rev, cur_chain
-                        SET sn.description       = $new_desc,
+                        SET sn.updated_at = datetime(), sn.description       = $new_desc,
                             sn.documentation     = $new_doc,
                             sn.docs_stage        = 'drafted',
                             sn.docs_chain_length = cur_chain + 1,
@@ -23933,7 +23951,7 @@ def persist_refined_docs(
             gc.query(
                 """
                 MATCH (sn:StandardName {id: $id})
-                SET sn.embed_text_hash = null
+                SET sn.updated_at = datetime(), sn.embed_text_hash = null
                 """,
                 id=sn_id,
             )
@@ -24072,7 +24090,7 @@ def reset_standard_name_docs(
                 MATCH (sn:StandardName {id: sid})
                 WHERE sn.name_stage = 'accepted'
                   AND coalesce(sn.docs_stage, 'pending') = 'pending'
-                SET sn.run_id = $run_id
+                SET sn.updated_at = datetime(), sn.run_id = $run_id
                 """,
                 sn_ids=sn_ids,
                 run_id=run_id,
@@ -24118,7 +24136,7 @@ def stamp_harmonized_families(
                      AS not_accepted
                 WHERE not_accepted = 0 AND size(members) = size($ids)
                 FOREACH (sn IN members |
-                  SET sn.harmonized_at = datetime(),
+                  SET sn.updated_at = datetime(), sn.harmonized_at = datetime(),
                       sn.harmonized_group_signature = $sig
                 )
                 RETURN size(members) AS stamped_members
@@ -24133,7 +24151,7 @@ def stamp_harmonized_families(
                     gc.query(
                         """
                         MATCH (p:StandardName {id: $pid})
-                        SET p.harmonized_at = datetime(),
+                        SET p.updated_at = datetime(), p.harmonized_at = datetime(),
                             p.harmonized_group_signature = $sig
                         """,
                         pid=parent_id,
@@ -24164,7 +24182,7 @@ def release_refine_docs_claims(
             MATCH (sn:StandardName {id: sid})
             WHERE sn.claim_token = $token
               AND sn.docs_stage = 'refining'
-            SET sn.docs_stage  = 'reviewed',
+            SET sn.updated_at = datetime(), sn.docs_stage  = 'reviewed',
                 sn.claim_token = null,
                 sn.claimed_at  = null
             RETURN count(sn) AS released
@@ -24207,7 +24225,7 @@ def release_refine_docs_failed_claims(
             MATCH (sn:StandardName {id: sid})
             WHERE sn.claim_token = $token
               AND sn.docs_stage = 'refining'
-            SET sn.docs_stage  = 'reviewed',
+            SET sn.updated_at = datetime(), sn.docs_stage  = 'reviewed',
                 sn.claim_token = null,
                 sn.claimed_at  = null
             RETURN count(sn) AS released
@@ -24276,7 +24294,7 @@ def mark_for_refine_docs(
             """
             MATCH (sn:StandardName {id: $id})
             WHERE sn.claim_token = $token
-            SET sn.desc_name_similarity  = $sim,
+            SET sn.updated_at = datetime(), sn.desc_name_similarity  = $sim,
                 sn.docs_stage            = 'reviewed',
                 sn.reviewer_score_docs   = $synthetic_score,
                 sn.reviewer_model_docs   = '(desc_name_similarity_gate)',
@@ -24330,7 +24348,7 @@ def release_all_orphan_claims() -> dict[str, int]:
             """
             MATCH (n:StandardName)
             WHERE n.claimed_at IS NOT NULL
-            SET n.name_stage = CASE WHEN n.name_stage = 'refining'
+            SET n.updated_at = datetime(), n.name_stage = CASE WHEN n.name_stage = 'refining'
                                     THEN 'reviewed' ELSE n.name_stage END,
                 n.docs_stage = CASE WHEN n.docs_stage = 'refining'
                                     THEN 'reviewed' ELSE n.docs_stage END,
@@ -24935,6 +24953,7 @@ def _persist_structural_authority(
           AND [c IN children | elementId(c)] = $child_element_ids
           AND size(children) > 0
         SET parent += $parent_updates,
+            parent.updated_at = datetime(),
             parent._structural_authority_lock = true
         REMOVE parent._structural_authority_lock
         CREATE (authority:StructuralNameAuthority)
@@ -25590,7 +25609,7 @@ def release_enrich_parents_claims(
             UNWIND $sn_ids AS sid
             MATCH (sn:StandardName {id: sid})
             WHERE sn.claim_token = $token
-            SET sn.claim_token = null,
+            SET sn.updated_at = datetime(), sn.claim_token = null,
                 sn.claimed_at  = null
             RETURN count(sn) AS released
             """,
