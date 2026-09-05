@@ -8242,7 +8242,7 @@ async def process_review_name_batch(
         # Names below the critical threshold are semantically ambiguous
         # (e.g. "co_passing_density" — density of what?).  Skip the
         # expensive LLM review and persist a synthetic low score that
-        # routes the name to the refine_name pool.
+        # records the score; the name is routed to no pool.
         #
         # The name-side text comes from ``semantic_gate_name_text``: a name
         # that is a single defined vocabulary token is scored against the
