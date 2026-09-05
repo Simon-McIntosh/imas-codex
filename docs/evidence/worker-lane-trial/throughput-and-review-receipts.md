@@ -301,8 +301,23 @@ exactly the `2026-10-01` the preflight repeats — rather than
 `unifiedWindows.five_hour`, which is what actually gates the next request and
 stood at 48% with three and a half hours to run. And `utilization` is a
 **fraction**: 1.21 means 121%, and it is being rendered as `1.21%`, a hundredfold
-optimistic. So the fence reads a lane at 1.21% when its gating window is at 48%,
-and will keep reading 1.21% until October regardless of any five-hour exhaustion.
+optimistic.
+
+**Confirmed at the source, and the conclusion is stronger than the observation.**
+The reckon session read `_ClaudeDialect._budget` in `reckon/_backends.py`: it
+takes `info.get("utilization")`, a fraction, and assigns it straight into
+`utilisation_pct`, which is then compared against a 95 percent ceiling. So **the
+fence cannot fire on that lane at any utilisation** — a five-hour window at 99%
+reads `0.99%`. Not "reads the wrong number sometimes": never fires.
+
+The detail that makes it a textbook case: `unifiedWindows` appears seven times in
+that repository and **every one is inside a test fixture.** The correct field is
+sitting in reckon's own test data, unread by the parser that fixture feeds. A
+fail-open guard whose own tests contain the input that would have caught it.
+
+The separate-records half was reproduced independently too: 47 budget rows for
+`claude` against 16 for `claude-opus`, both landing on 1.21/overage nine minutes
+apart.
 
 The `detail` line is the tell — it says no account-limit surface can be read
 while the number it prints comes from one. The signal is present and unparsed,
@@ -474,6 +489,17 @@ would have cost metered, inflated by the absence of caching. That is a defect in
 any routing decision that reads cost from the ledger: **the cheapest lane on this
 workstation records the highest per-node cost of the three.** A ledger that
 prices a free lane should either record zero or mark the figure as imputed.
+
+**Confirmed on a larger sample, with a consequence neither project had seen.**
+Measured across 619 ledger rows rather than two nodes: `clive` at a median
+$21.59 per node against `claude`'s $1.61, so the free lane ranks about thirteen
+times dearer. A different magnitude from the figures above because the samples
+differ; the direction is identical. The consequence is that reckon shipped a
+routing view **whose routing quantity is cost per durable node** — so the surface
+built to make routing legible currently inverts the comparison it exists to
+support. That section's implementation figure has been reduced rather than left
+reading as landed, which is the right disposition: a legibility surface that
+misleads is worse than an absent one.
 
 ## The regime-bound check
 
