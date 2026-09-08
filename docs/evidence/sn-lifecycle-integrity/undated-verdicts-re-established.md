@@ -25,6 +25,41 @@ per-call arrays, including every cleared identity, are preserved in the
 durable drain logs named in the worker manifest. The 37 re-quarantines are the
 finding the prior scalar could not supply; they were not washed back to valid.
 
+The re-quarantined identities are:
+
+`derivative_with_respect_to_normalized_minor_radius_of_logarithm_of_density`,
+`first_local_tangential_coordinate`,
+`impurity_ion_photon_radiance_of_spectral_line_due_to_charge_exchange`,
+`flux_surface_normal_ion_charge_state_particle_flux`,
+`flux_surface_normal_momentum_diffusivity`,
+`inverse_of_tangential_surface_curvature_of_optical_element`,
+`inverse_of_second_local_tangential_front_surface_curvature_of_optical_element`,
+`inverse_of_curvature_of_iron_core_segment`,
+`inverse_of_first_local_tangential_back_surface_curvature_of_optical_element`,
+`flux_surface_normal_bulk_plasma_momentum_diffusivity`,
+`flux_surface_normal_plasma_momentum_diffusivity`,
+`inverse_of_second_local_tangential_back_surface_curvature_of_optical_element`,
+`magnetic_field_at_pedestal_top_high_field_side_magnitude`,
+`normalized_electron_larmor_radius_at_pedestal_top_high_field_side`,
+`normalized_molecular_gas_count_due_to_gas_injection`,
+`normalized_saturated_permeability_of_ferritic_element`,
+`parallel_normalized_gyrocenter_momentum_flux_of_gyrokinetic_eigenmode_due_to_e_cross_b_drift`,
+`normalized_electron_larmor_radius_at_pedestal_top_low_field_side`,
+`perturbed_pressure_bessel_1`, `pressure_bessel_1`,
+`perturbed_magnetic_field_of_wave_beam`, `plasma_internal_energy`,
+`per_toroidal_and_poloidal_mode_number_surface_current_of_ion_cyclotron_heating_antenna`,
+`root_mean_square_of_fluctuating_floating_electrostatic_potential`,
+`toroidal_coordinate_of_bragg_crystal`,
+`root_mean_square_of_variation_of_vacuum_wavelength_of_spectrometer_channel`,
+`tendency_of_derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface`,
+`root_mean_square_of_difference_of_wavelength_of_spectrometer_channel_and_reference_wavelength_of_spectrometer_channel`,
+`time_derivative_of_radial_width_of_neoclassical_tearing_mode`,
+`thermal_plasma_internal_energy`, `toroidal_line_averaged_plasma_velocity`,
+`vertical_coordinate_of_fibre_bundle`, `vertical_outline_of_control_surface`,
+`total_thermal_plasma_internal_energy`, `vertical_coordinate_of_hard_xray_detector`,
+`voltage_of_ion_cyclotron_heating_antenna_amplitude`, and
+`volume_integrated_electron_power_density`.
+
 | Population | Before | After |
 |---|---:|---:|
 | `valid` with null `validated_at` | 538 | 13 |
