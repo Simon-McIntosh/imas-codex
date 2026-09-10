@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="244">
+<meta name="plan-version" content="245">
 <meta name="plan-commits" content="72b7760c60ac307f641e7e8490b7f15e532d2104">
 <meta name="plan-artifacts" content="docs/evidence/sn-west-catalog-release/residue-currency.md,tests/standard_names/test_review_body_ledger_link.py">
 </head>
@@ -430,6 +430,9 @@ rows: 20   foldable-remaining: 0   unreconciled-runs: 0</pre><p><strong>Live poi
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260910T162403056080-n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix" data-who="clive-postcopy" data-when="2026-09-10T17:14:10.144Z">
     <div class="r-comment-body"><p>Four sites held the literal leading-token match, not two, and both halves were driven rather than argued. Prepending an unrelated field to the materializer SET clause broke three tests at base with two StopIteration and an empty-list assertion despite unchanged behaviour; with the repair the same perturbation gives 51 passed. Deleting the docs_stage coalesce makes the repaired test fail naming the missing field, so the check still fires. Both scratch experiments were reverted and graph_ops.py is byte-identical to HEAD in the committed tree, verified independently. It also found the fragility was already live in a second path: the batch materializer already begins its SET with parent.updated_at, exactly the shape that breaks a leading-token matcher. Suite 7355 passed, zero failures at both ends. The literal string is absent from both modules at the merged head.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260910T162451657145-n-swcr-the-merged-head-executes-its-own-cypher" data-who="clive-graphtarget" data-when="2026-09-10T17:52:15.859Z">
+    <div class="r-comment-body"><p>All three Cypher statements edited today parse and plan cleanly against the live database by EXPLAIN with no notifications, and the node stated the limit rather than overclaiming: none was proven executed live, only collected. No failure in either suite is attributable to the merge, established by re-running the audit against 533b8bfd9^ rather than by assertion. It found three instrument defects that matter more than the counts: a conftest torch gate has made every whole-tree pytest run exit 4 at collection since 2026-09-01, so no whole-tree figure quoted today was real; conftest module-scope pytestmark does not propagate under pytest 9.0.3, so the default markers do NOT exclude graph and live tests have been running on compute nodes without the tunnel; and the 13622 collected count is an abort-time artefact against a true graph selection of 774. It also refused to trust its own marker filtering before probing it.</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
     <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>
