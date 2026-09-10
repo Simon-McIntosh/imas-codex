@@ -96,6 +96,24 @@ def _maintenance_mocks(stack: ExitStack) -> dict[str, MagicMock]:
     return mocks
 
 
+def _bypassed_maintenance_writers(
+    maintenance: dict[str, MagicMock],
+) -> dict[str, MagicMock]:
+    """The mutating graph-wide writers a scoped run must bypass.
+
+    Excludes the orphan sweep. The sweep is the run's claim reaper, not a
+    maintenance writer: it only releases claims abandoned by dead workers, so
+    the loop starts it unconditionally even when ``skip_global_maintenance``
+    silences the mutating reconcile set. Asserting it absent would encode the
+    older contract that left stale claims wedging scoped drains.
+    """
+    return {
+        name: writer
+        for name, writer in maintenance.items()
+        if name != "run_orphan_sweep_loop"
+    }
+
+
 async def _run_loop(
     *,
     skip_global_maintenance: bool,
@@ -198,8 +216,13 @@ async def test_scoped_run_bypasses_complete_global_maintenance_set() -> None:
     result = await _run_loop(skip_global_maintenance=True)
     summary, maintenance, create_run, finalize_run, build_specs, run_pools, _ = result
 
-    for writer in maintenance.values():
+    # Every mutating graph-wide writer is bypassed under
+    # --skip-global-maintenance — and, positively, the orphan sweep is NOT:
+    # the claim reaper starts unconditionally, so a scoped run still releases
+    # claims abandoned by dead workers while the mutating set stays silent.
+    for writer in _bypassed_maintenance_writers(maintenance).values():
         writer.assert_not_called()
+    maintenance["run_orphan_sweep_loop"].assert_called()
     create_run.assert_called_once()
     finalize_run.assert_called_once()
     build_specs.assert_called_once()
@@ -327,8 +350,12 @@ async def test_scoped_idle_completion_refuses_transient_claim_residue() -> None:
             skip_global_maintenance=True,
         )
 
-    for writer in maintenance.values():
+    # Same contract as the bypass test: the mutating writers must stay
+    # absent, but the orphan sweep (the claim reaper) starts unconditionally
+    # even on this scoped idle path.
+    for writer in _bypassed_maintenance_writers(maintenance).values():
         writer.assert_not_called()
+    maintenance["run_orphan_sweep_loop"].assert_called()
     assert summary.stop_reason == "transient_scope_residue"
     finalize_kwargs = finalize_run.call_args.kwargs
     assert finalize_kwargs["status"] == "degraded"
