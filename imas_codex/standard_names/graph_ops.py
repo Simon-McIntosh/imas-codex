@@ -37,6 +37,7 @@ from imas_codex.standard_names.doc_links import find_name_references
 from imas_codex.standard_names.ledger import reattach_produced_name_edges
 from imas_codex.standard_names.protection import (
     ProtectedDeletionError,
+    automatic_deletion_protections,
     filter_automatic_deletion_candidates,
     refuse_protected_automatic_deletion,
 )
@@ -3319,6 +3320,58 @@ globals()["reconcile_structural_edges_for_" + "standard_names"] = (
 )
 
 
+def _clear_superseded_child_derived_parent_edges(gc: Any) -> int:
+    """Delete derived HAS_PARENT edges FROM superseded/exhausted children.
+
+    A dead (superseded/exhausted) child must not keep propping up a zombie
+    parent, so its derived edges are ordinarily reaped. But the edge is also
+    provenance for the identity it points INTO: deleting an incoming edge
+    strips that identity of a relationship it carries. An edge whose target
+    holds durable authority — recorded spend, ratification, a catalog binding
+    — therefore survives even though the child that carries it is dead. The
+    write path asks the same question of its candidates via
+    :func:`automatic_deletion_protections`; this cleanup asks it of the edge's
+    targets before deleting. Returns the number of edges actually deleted.
+    """
+    rows = gc.query(
+        """
+        MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
+        WHERE coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+          AND r.operator_kind IS NOT NULL
+        RETURN c.id AS child, p.id AS parent
+        """
+    )
+    pairs = [
+        (str(row["child"]), str(row["parent"]))
+        for row in (rows or [])
+        if row.get("child") and row.get("parent")
+    ]
+    if not pairs:
+        return 0
+    protected_parents = set(
+        automatic_deletion_protections(gc, sorted({parent for _c, parent in pairs}))
+    )
+    to_delete = [
+        {"child": child, "parent": parent}
+        for child, parent in pairs
+        if parent not in protected_parents
+    ]
+    if not to_delete:
+        return 0
+    gc.query(
+        """
+        UNWIND $pairs AS pair
+        MATCH (c:StandardName)-[r:HAS_PARENT]->(p:StandardName)
+        WHERE c.id = pair.child AND p.id = pair.parent
+          AND coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
+          AND r.operator_kind IS NOT NULL
+        DELETE r
+        """,
+        pairs=to_delete,
+    )
+    return len(to_delete)
+
+
 def rederive_structural_edges() -> dict[str, int]:
     """Reconcile HAS_PARENT/HAS_ERROR edges to the current derivation of LIVE names.
 
@@ -3332,7 +3385,9 @@ def rederive_structural_edges() -> dict[str, int]:
        and writes the current admitted set — idempotent);
     2. deletes any derived (``operator_kind``-bearing) HAS_PARENT edge still
        originating FROM a superseded/exhausted name, so dead names stop
-       propping up zombie parents (those parents become reapable, then drain);
+       propping up zombie parents (those parents become reapable, then drain)
+       — unless the edge's target carries durable authority, in which case the
+       edge is kept as provenance (``_clear_superseded_child_derived_parent_edges``);
     3. migrates inbound HAS_PARENT edges off superseded PARENTS to their live
        successor (``_rewire_has_parent_off_superseded``, which skips
        projection-of-self successors).
@@ -3351,16 +3406,7 @@ def rederive_structural_edges() -> dict[str, int]:
         if not names:
             return {"processed": 0, "dead_edges_cleared": 0, "migrated": 0}
         _write_standard_name_edges(gc, names, full_rebuild=True)
-        dead = gc.query(
-            """
-            MATCH (c:StandardName)-[r:HAS_PARENT]->(:StandardName)
-            WHERE coalesce(c.name_stage, '') IN ['superseded', 'exhausted']
-              AND r.operator_kind IS NOT NULL
-            DELETE r
-            RETURN count(r) AS n
-            """
-        )
-        dead_cleared = int(dead[0]["n"]) if dead else 0
+        dead_cleared = _clear_superseded_child_derived_parent_edges(gc)
         migrated = _rewire_has_parent_off_superseded(gc)
     logger.info(
         "rederive_structural_edges: processed %d live names, cleared %d "
