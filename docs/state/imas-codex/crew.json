@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T15:23:38",
+  "updated": "2026-09-10T15:47:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -122694,6 +122694,196 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T113842589600-n-srr-one-wedged-call-abandons-itself-not-the-run",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-one-wedged-call-abandons-itself-not-the-run",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1058,
+                "cached_input_tokens": 238298,
+                "input_tokens": 239358,
+                "output_tokens": 2436,
+                "reasoning_output_tokens": 952,
+                "total_tokens": 241794,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm at current HEAD that one overdue in-flight call still shuts the whole run down: quote the reproduction from the code path, or state plainly that it no longer reproduces. The recorded instance is in docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md under \"Second drain round\" - a scoped slice ran 764.976 s, of which one review_name LLM call was in flight for 711.1 s, the run logged \"no forward progress for ~600s despite pending work ... overdue_in_flight={review_name: 711.1} - wedged residue; signalling graceful shutdown\", and stopped with stop_reason=stalled having spent 0.833893 USD of a 50.17 USD limit while 6 review_name items were still pending. The mechanism sits in the stall-detection block of pools.py around line 720: when total processed has not advanced for stall_seconds and ANY pool reports an overdue in-flight call, the watchdog sets stop_event and returns, which ends every pool including ones holding claimable work. Repair it so the overdue call is abandoned in its own pool - cancelled, with its row claim released so the identity is reclaimable rather than stranded - the forward-progress clock is reset, and the other pools keep claiming. Prove BOTH halves by test, because a watchdog that never stops is worse than one that stops too eagerly: add tests/standard_names/test_stall_watchdog_scope.py asserting that one overdue in-flight call in one pool leaves the other pools running and releases the wedged claim, AND that a genuinely deadlocked run - pending work, nothing in flight anywhere, no progress - still shuts down as it does today. That test file is a deliverable of this node, so the node is incomplete without it. A passing suite never shows that a watchdog fires, so drive a wedged call and show the abandonment rather than only showing green. Where the behaviour is already correct at HEAD that is a success rather than a wasted node: verify it, add the missing test, and say so plainly. Make no live graph write, because a peer owns the graph. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha rather than by absolute green.",
+          "estimated_hours": null,
+          "goal": "A stall watchdog in imas_codex/standard_names/pools.py that abandons a single overdue in-flight call rather than stopping every pool that still has claimable work.",
+          "id": "n-srr-one-wedged-call-abandons-itself-not-the-run",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T11:38:43Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T113842589600-n-srr-one-wedged-call-abandons-itself-not-the-run/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/pools.py",
+            "tests/standard_names/test_stall_watchdog_scope.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-drain",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T11:38:54Z",
+        "completed_at": "2026-09-10T13:44:31.753Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7464,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7537,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "6ace7c045b12a804700f14db23ac6f59c9b9c949",
+        "commits": [
+          "18aceb0235f7128af440eebc61f6430bce13ee99"
+        ],
+        "changed_lines": {
+          "added": 269,
+          "removed": 8,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_stall_watchdog_scope.py tests/standard_names/test_pool_idle_exhaustion.py tests/standard_names/test_pool_orchestrator.py tests/standard_names/test_progress_display.py",
+          "exit_status": 0,
+          "log_path": "/tmp/srr_watchdog_gate2.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T113842589600-n-srr-one-wedged-call-abandons-itself-not-the-run/manifest.md",
+        "scope_changed": false,
+        "session_id": "d2279ead-28da-443e-b57d-3d3682040928",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 1168968,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 4270,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T13:44:31.753Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 1168968,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 294.28,
+          "generated_tokens": 4270,
+          "generation_seconds": 291.934,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 38.5,
+          "machine_seconds": 2.346,
+          "peak_input_tokens": 391821,
+          "tokens_per_second": 14.63,
+          "wall_tokens_per_second": 14.51
+        },
+        "follow_on_paths": [
+          "tests/standard_names"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-one-wedged-call-abandons-itself-not-the-run",
+          "session_id": "d2279ead-28da-443e-b57d-3d3682040928",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T13:44:31.753Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 52.0,
+        "orientation_input_tokens": 8344057.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -122964,6 +123154,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2104
+    "_version": 2105
   }
 }
