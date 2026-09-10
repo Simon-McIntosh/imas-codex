@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T17:41:17",
+  "updated": "2026-09-10T19:17:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -123263,6 +123263,194 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T162403056080-n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 672,
+                "cached_input_tokens": 379793,
+                "input_tokens": 380467,
+                "output_tokens": 4245,
+                "reasoning_output_tokens": 2779,
+                "total_tokens": 384712,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm the fragility reproduces before repairing it. tests/standard_names/test_component_system.py and tests/standard_names/test_derived_parent_lifecycle_repair.py match generated Cypher by its leading token, \"SET parent.name_stage\", so a statement that gains an unrelated field at the front of its SET clause fails them even though the behaviour is unchanged. Demonstrate it: move or prepend one unrelated assignment in the materializer SET clause in imas_codex/standard_names/graph_ops.py inside your worktree only, run the two modules, and quote the failures. That demonstration is a scratch experiment and must NOT be committed - revert it before you commit, and say in the manifest that you did. This exact fragility already cost a peer node a forced code placement: it had to put a new assignment at the END of a SET clause to satisfy a string matcher rather than where the statement read best, which is the test dictating the source. Replace the literal matching with assertions on what the write DOES: that the materializer sets the fields it is responsible for, whatever their order in the statement. Prove BOTH halves, because a matcher that asserts nothing is worse than a brittle one: the repaired tests must still FAIL when the write genuinely stops setting one of those fields, so make that happen in a scratch experiment too and quote the failure, then revert it. Where a module turns out already to assert behaviour rather than a prefix, say so plainly and leave it alone rather than rewriting a working test. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD UV_NO_SYNC=1 uv run pytest -p no:cacheprovider tests/standard_names/\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha rather than by absolute green.",
+          "estimated_hours": null,
+          "goal": "Two test modules assert the derived-parent write behaviour instead of matching a literal Cypher leading token.",
+          "id": "n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T16:24:03Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T162403056080-n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/standard_names/test_component_system.py",
+            "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-postcopy",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T16:24:12Z",
+        "completed_at": "2026-09-10T17:14:10.144Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2963,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2998,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f96f7c80a197100312dca2a98a93a623235f1d07",
+        "commits": [
+          "63702627bb8c73edffdf692e8b4b4a9ecd0c6957"
+        ],
+        "changed_lines": {
+          "added": 42,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T162403056080-n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix/after_standard_names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T162403056080-n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix/manifest.md",
+        "scope_changed": false,
+        "session_id": "c0b416e7-c239-4629-8a50-6d0d7115bdd3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 15889407,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 30839,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T17:14:10.144Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 15889407,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2993.299,
+          "generated_tokens": 30839,
+          "generation_seconds": 2211.238,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 34.4,
+          "machine_seconds": 782.061,
+          "peak_input_tokens": 350176,
+          "tokens_per_second": 13.95,
+          "wall_tokens_per_second": 10.3
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-matchers-assert-behaviour-not-a-cypher-prefix",
+          "session_id": "c0b416e7-c239-4629-8a50-6d0d7115bdd3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T17:14:10.144Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 49.0,
+        "orientation_input_tokens": 5342854.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -123533,6 +123721,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2107
+    "_version": 2108
   }
 }
