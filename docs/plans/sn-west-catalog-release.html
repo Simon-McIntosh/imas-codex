@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="240">
+<meta name="plan-version" content="241">
 <meta name="plan-commits" content="72b7760c60ac307f641e7e8490b7f15e532d2104">
 <meta name="plan-artifacts" content="docs/evidence/sn-west-catalog-release/residue-currency.md,tests/standard_names/test_review_body_ledger_link.py">
 </head>
@@ -416,6 +416,9 @@ rows: 20   foldable-remaining: 0   unreconciled-runs: 0</pre><p><strong>Live poi
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260910T104026902160-n-swcr-the-export-bucket-is-not-a-domain" data-who="clive-postcopy" data-when="2026-09-10T13:00:24.488Z">
     <div class="r-comment-body"><p>The reproduction is the reports-success-while-failing class in its purest form: emitted_count 0 while all_gates_passed stayed True, both identities rejected by ISN on input_value=unscoped. The exporter now derives the domain from producing sources, raises on a domainless node instead of minting the synthetic bucket, and reports missing_physics_domain rather than letting validation drop a name silently. Both identities emit and land in their real derived-domain files. The finding that matters far more than the two names: 198 accepted or approved identities carry a null physics domain and 170 of them resolve under this derivation, so that many names were droppable from any cut for a field the exporter could have computed. 28 are genuinely domainless and are now reported. It also surfaced a real precondition - the full-population export is blocked at both base and head by 9 identities with null graph status.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260910T130659157015-n-swcr-nine-identities-carry-no-catalog-status" data-who="clive-residue" data-when="2026-09-10T13:51:24.719Z">
+    <div class="r-comment-body"><p>The verdict is one defect nine times over, and it is not a state to tolerate: three write paths omit status on creation - persist_refined_name ON CREATE SET, the binding-reservation clause, and write_standard_names which sets it only ON CREATE so an existing null is never repaired - while the schema admits no null value. The cohort is exactly nine, all accepted on both axes, all minted today, all carrying recorded spend across 67 LLMCost rows at about 3.93 USD, so all undeletable. No signed manifest is needed because catalog status is orthogonal to the lifecycle axes, which removes the authorisation blocker I had fenced for. It made no graph write and left the repair as two ordered follow-ons with counterfactuals already written.</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
     <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>

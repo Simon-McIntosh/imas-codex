@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T15:47:30",
+  "updated": "2026-09-10T15:54:40",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -122884,6 +122884,193 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T130659157015-n-swcr-nine-identities-carry-no-catalog-status",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-nine-identities-carry-no-catalog-status",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1532,
+                "cached_input_tokens": 323449,
+                "input_tokens": 324983,
+                "output_tokens": 270,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 325253,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm at current HEAD that the export still refuses with \"Export blocked: 9 candidate identity(ies) have null graph status\" and quote it, or state plainly that it no longer reproduces. The nine, from the reproduction receipt: accumulated_coolant_absorbed_energy_of_calorimetry_component, alpha_angle_of_passive_loop_element, calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe, neutron_flux_maximum_at_first_wall, neutron_response_function_of_neutron_detector, opacity_at_ece_channel_emission_position, strain_of_strain_gauge, total_heating_power_due_to_fusion_reactions, wave_curvature_of_electron_cyclotron_beam. For each one report its name_stage, its producer count, whether it carries recorded LLM spend, and when its status was last written, then say which of two things the null means: a write path that failed to set the field, or a legitimate unset state the precondition should tolerate rather than refuse. Those are different defects with different repairs, so name the one you find per identity rather than treating the nine as one cohort. Repair only through a sanctioned path. If an identity needs a lifecycle transition that only a signed manifest can make, do NOT attempt it: report the exact transition, the identity, and the reason as a blocker for coordinator authorisation, because a signed apply requires a quiet graph that only the coordinator can schedule. Never patch the field with an in-place Cypher SET, and delete nothing: an identity carrying recorded spend is undeletable by standing ruling, and the instrument for that is the LLMCost attribution rather than any provenance test. The evidence file must carry the per-identity table, the verdict, whatever was repaired with its receipt, and the residue left for authorisation. Live graph work runs on the login node because the Neo4j tunnel is login-node-local, with every query a bounded indexed read under ten seconds. Never pipe, tee or redirect CLI output: read the log under ~/.local/share/imas-codex/logs afterwards.",
+          "estimated_hours": null,
+          "goal": "A disposition for the nine candidate identities carrying a null graph status, recorded in docs/evidence/sn-west-catalog-release/null-status-export-precondition.md, so the full-population export precondition can clear.",
+          "id": "n-swcr-nine-identities-carry-no-catalog-status",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T13:06:59Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T130659157015-n-swcr-nine-identities-carry-no-catalog-status/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/null-status-export-precondition.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-residue",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T13:07:07Z",
+        "completed_at": "2026-09-10T13:51:24.719Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2610,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2657,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b77c4b39e28cb2233d47cd4fb8479bb545a33d0a",
+        "commits": [
+          "059be8f043af50d2cee2c7657715231d44d822b5"
+        ],
+        "changed_lines": {
+          "added": 166,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn release --export-only --gate-only --staging /tmp/n-swcr-nine-staging --force",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-review.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T130659157015-n-swcr-nine-identities-carry-no-catalog-status/manifest.md",
+        "scope_changed": false,
+        "session_id": "39ec9ca1-51ae-4c3d-a8a8-e39faabf2900",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6169554,
+            "input_tokens_cumulative": 11393976,
+            "output_tokens": 15015,
+            "output_tokens_cumulative": 36776,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T13:51:24.719Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11393976,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 2652.765,
+          "generated_tokens": 36776,
+          "generation_seconds": 2574.213,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 23.0,
+          "machine_seconds": 78.552,
+          "peak_input_tokens": 233689,
+          "tokens_per_second": 14.29,
+          "wall_tokens_per_second": 13.86
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-nine-identities-carry-no-catalog-status",
+          "session_id": "39ec9ca1-51ae-4c3d-a8a8-e39faabf2900",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T13:51:24.719Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 57.0,
+        "orientation_input_tokens": 9540462.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -123154,6 +123341,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2105
+    "_version": 2106
   }
 }
