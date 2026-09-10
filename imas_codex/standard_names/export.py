@@ -1371,6 +1371,46 @@ def detect_divergence(
 # =============================================================================
 
 
+def _resolve_source_domains(gc: Any, name: str) -> list[str]:
+    """Return the physics domains recorded on a name's producing sources.
+
+    Mirrors how a derived parent inherits its children's domains in
+    graph_ops.py: a name with no stored domain takes its domain from the
+    sources that produced it, so an accepted identity is never minted into a
+    synthetic bucket the catalog model refuses. An empty result means no
+    domain is recorded anywhere; the caller reports the name rather than
+    emitting it.
+    """
+    rows = gc.query(
+        """
+        MATCH (sn:StandardName {id: $name})<-[:PRODUCED_NAME]-
+              (src:StandardNameSource)
+        WHERE src.physics_domain IS NOT NULL
+        RETURN DISTINCT src.physics_domain AS domain
+        """,
+        name=name,
+    )
+    return sorted({str(row["domain"]) for row in rows or [] if row.get("domain")})
+
+
+def _candidate_physics_domains(gc: Any, cand: dict[str, Any]) -> list[str]:
+    """Resolve the physics domains for one export candidate.
+
+    The graph node's stored domains take precedence; when the node carries
+    none, the producing sources' stored domains are used. An empty result
+    means no domain is recorded anywhere.
+    """
+    stored = cand.get("physics_domain") or []
+    if isinstance(stored, str):
+        stored = [stored]
+    stored = [
+        value.strip() for value in stored if isinstance(value, str) and value.strip()
+    ]
+    if stored:
+        return stored
+    return _resolve_source_domains(gc, cand["id"])
+
+
 def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
     """Convert a graph node dict to a catalog entry dict.
 
@@ -1380,9 +1420,13 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
     physics_domains = node.get("physics_domain") or []
     if isinstance(physics_domains, str):
         physics_domains = [physics_domains]
-    primary_physics_domain = (
-        pick_primary_domain(physics_domains) if physics_domains else "unscoped"
-    )
+    if not physics_domains:
+        raise ValueError(
+            f"cannot map {node['id']}: no physics domain on the node or its "
+            "producing sources; callers must resolve one before entry "
+            "conversion rather than minting a bucket the catalog refuses"
+        )
+    primary_physics_domain = pick_primary_domain(physics_domains)
 
     from imas_codex.standard_names.kind_derivation import derive_kind
 
@@ -2662,11 +2706,31 @@ def run_export(
     exported_names: list[str] = []
     invalid_candidates: dict[str, str] = {}
     ordering_exclusion_records: list[ExclusionRecord] = []
+    missing_domain_exclusions: list[ExclusionRecord] = []
     ordering_excluded_names: set[str] = set()
     all_candidate_names = {c["id"] for c in candidates}
 
     with GraphClient() as gc:
         for cand in candidates:
+            domains = _candidate_physics_domains(gc, cand)
+            if not domains:
+                # No stored domain and none on the producing sources: report
+                # the identity rather than emit a synthetic bucket the catalog
+                # model refuses and drops silently.
+                missing_domain_exclusions.append(
+                    ExclusionRecord(
+                        standard_name_id=cand["id"],
+                        stage="catalog_validation",
+                        reason="missing_physics_domain",
+                        detail=(
+                            "no physics domain on the identity or its "
+                            "producing sources; refusing to emit a bucket the "
+                            "catalog model does not define"
+                        ),
+                    )
+                )
+                continue
+            cand = {**cand, "physics_domain": domains}
             entry_dict = _graph_node_to_entry_dict(cand)
 
             # Ensure no provenance fields leak through
@@ -2883,6 +2947,7 @@ def run_export(
             for name, detail in invalid_candidates.items()
         ]
         + ordering_exclusion_records
+        + missing_domain_exclusions
     )
 
     accounting_gate = _run_exclusion_accounting_gate(report, population_ids)
