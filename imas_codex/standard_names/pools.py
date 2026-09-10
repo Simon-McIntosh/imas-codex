@@ -335,6 +335,7 @@ async def pool_loop(
     replica_idx: int = 0,
     provider_exhausted_event: asyncio.Event | None = None,
     free_pool_set: set[str] | None = None,
+    process_timeout: float | None = None,
 ) -> None:
     """Cooperative pool worker.
 
@@ -414,7 +415,18 @@ async def pool_loop(
 
         # ── Process ───────────────────────────────────────────────
         try:
-            count = await spec.process(batch)
+            if process_timeout is None:
+                count = await spec.process(batch)
+            else:
+                # Bound a single in-flight call so one wedged processor cannot
+                # freeze its pool (and, through the stall watchdog, the whole
+                # run) forever.  Once the call exceeds the pool's in-flight age
+                # bound it is abandoned HERE in its own pool — cancelled, its
+                # claim released below so the identity is reclaimable — and the
+                # pool resumes claiming instead of the run stopping.
+                count = await asyncio.wait_for(
+                    spec.process(batch), timeout=process_timeout
+                )
             # A processor returning anything but a count violates ProcessFn,
             # and adding it straight into the counter surfaces that violation
             # as an arithmetic error several frames from its cause. Name the
@@ -429,6 +441,31 @@ async def pool_loop(
             spec.health.total_processed += count
             spec.health.mark_progress()
             logger.debug("%s processed %d items", tag, count)
+        except TimeoutError:
+            # A single wedged call is abandoned in its own pool, never a
+            # run-wide stop: the process coroutine was cancelled by the
+            # timeout, the row claim is released so the identity is
+            # reclaimable rather than stranded, the pool's liveness clock is
+            # reset, and the loop resumes claiming.  Deliberately NOT counted
+            # as an error so a run that recovers is not promoted to failed.
+            spec.health.last_error = (
+                "process exceeded in-flight age bound — wedged call abandoned"
+            )
+            logger.warning(
+                "%s abandoned a wedged batch after %.0fs (claim released; resuming)",
+                tag,
+                process_timeout or 0.0,
+            )
+            if spec.release is not None:
+                try:
+                    await spec.release(batch)
+                except Exception as rel_exc:  # noqa: BLE001
+                    logger.exception(
+                        "%s release failed after wedge abandon (continuing): %s",
+                        tag,
+                        rel_exc,
+                    )
+            spec.health.mark_progress()
         except asyncio.CancelledError:
             logger.info("%s cancelled mid-batch", tag)
             raise
@@ -648,9 +685,17 @@ async def _idle_exhaustion_watchdog(
 
     Counter resets on any forward progress so the watchdog does not
     misfire during a transient lull (e.g. a slow generate batch
-    feeding the review pool). A claimed batch suppresses stall detection only
-    until *in_flight_stall_seconds* (default: *stall_seconds*) has elapsed, so
-    a processor that never returns cannot disable terminal stall signalling.
+    feeding the review pool).
+
+    An in-flight call that exceeds *in_flight_stall_seconds* (default:
+    *stall_seconds*) is the signal of a wedged call, not a dead run: its own
+    pool abandons it (the process call is bounded by the same bound in
+    ``pool_loop``, then cancelled with its claim released), so the watchdog
+    resets its forward-progress clock on such an observation and lets the
+    pools continue rather than tearing the run down over one call. The typed
+    stall — ``stalled_event`` then ``stop_event`` — fires only for a genuine
+    deadlock: pending work, **nothing in flight anywhere**, and no progress
+    for *stall_seconds*.
     """
     snapshots: dict[str, int] = {p.name: p.health.total_processed for p in pools}
     consecutive_idle = 0
@@ -719,20 +764,29 @@ async def _idle_exhaustion_watchdog(
                 if age is not None:
                     overdue_in_flight[p.name] = age
             no_in_flight = all(p.health.in_flight == 0 for p in pools)
+            if overdue_in_flight:
+                # An in-flight call has exceeded the pool's age bound; its own
+                # pool abandons it (timeout -> cancel -> release the claim ->
+                # re-claim) rather than the watchdog stopping the run over it.
+                # Reset the forward-progress clock and let the pools continue,
+                # so other pools' claimable work completes instead of the whole
+                # run being torn down for one wedged call.  The hard stop below
+                # requires NOTHING in flight anywhere.
+                last_progress_ts = now
+                continue
             should_stall = (
                 any(p.health.pending_count > 0 for p in pools)
-                and (no_in_flight or bool(overdue_in_flight))
+                and no_in_flight
                 and (now - last_progress_ts) >= stall_seconds
             )
             if not should_stall:
                 continue
             logger.warning(
                 "run_pools: no forward progress for ~%.0fs despite pending work "
-                "(pending=%s, overdue_in_flight=%s) — wedged residue; "
-                "signalling graceful shutdown",
+                "(pending=%s) and nothing in flight anywhere — genuinely "
+                "deadlocked; signalling graceful shutdown",
                 stall_seconds,
                 {p.name: p.health.pending_count for p in pools},
-                {name: round(age, 1) for name, age in overdue_in_flight.items()},
             )
             stalled_event.set()
             stop_event.set()
@@ -935,6 +989,14 @@ async def run_pools(
         )
         await asyncio.sleep(0)
 
+    # Each pool bounds its in-flight process calls at the same age the
+    # watchdog treats a call as overdue, so a wedged call is abandoned by its
+    # own pool instead of stopping the whole run.
+    process_timeout = (
+        in_flight_stall_seconds
+        if in_flight_stall_seconds is not None
+        else stall_seconds
+    )
     tasks = []
     for p in pools:
         for replica_idx in range(p.replicas):
@@ -949,6 +1011,7 @@ async def run_pools(
                         replica_idx=replica_idx,
                         provider_exhausted_event=provider_exhausted_event,
                         free_pool_set=free_pool_set,
+                        process_timeout=process_timeout,
                     ),
                     name=f"pool[{p.name}#{replica_idx}]",
                 )
