@@ -15,6 +15,19 @@ from unittest.mock import MagicMock
 
 import pytest
 
+
+def _is_materializer_statement(cypher: str) -> bool:
+    """Recognise the derived-parent materializer write by the fields it sets.
+
+    The match is on what the statement writes, not on its leading token: an
+    unrelated assignment placed at the front of the SET clause must not hide
+    the materializer from its own tests.
+    """
+    return (
+        "parent.name_stage = CASE" in cypher and "parent.origin = 'derived'" in cypher
+    )
+
+
 # ── Helpers ─────────────────────────────────────────────────────────────
 
 
@@ -298,7 +311,7 @@ def test_seed_parent_sources_routes_derived_through_review():
     from imas_codex.standard_names.graph_ops import seed_parent_sources
 
     assert seed_parent_sources(gc) == 1
-    write_query = next(q for q in captured_sets if "SET parent.name_stage" in q)
+    write_query = next(q for q in captured_sets if _is_materializer_statement(q))
     # Review-aware promotion (no blanket auto-accept): reviewed → accepted,
     # review-ready unreviewed → drafted (enters REVIEW_NAME).
     assert "parent.reviewer_score_name IS NOT NULL THEN 'accepted'" in write_query, (
@@ -315,6 +328,19 @@ def test_seed_parent_sources_routes_derived_through_review():
         "Parents must be stamped origin='derived' — the semantic-sim gate, "
         "REFINE_NAME claim, and export Gate C branch on this origin value."
     )
+    # The write sets every field it owns regardless of statement order; losing
+    # any one of them is a regression in the behaviour being written, not a
+    # reformat of the statement.
+    for marker in (
+        "parent.docs_stage = coalesce(parent.docs_stage, 'pending')",
+        "parent.validation_status = coalesce(parent.validation_status, 'valid')",
+        "parent.kind = $kind",
+        "parent.unit = coalesce($unit, parent.unit)",
+        "parent.physics_domain =",
+        "parent.description = CASE",
+        "parent.needs_composition = null",
+    ):
+        assert marker in write_query, f"materializer must set {marker!r}: {write_query}"
 
 
 def test_seed_parent_sources_keeps_seedable_operator_gate() -> None:
@@ -507,7 +533,7 @@ def test_seed_parent_sources_writes_honest_placeholder_description():
     write = next(
         (cypher, params)
         for cypher, params in captured
-        if "SET parent.name_stage" in cypher
+        if _is_materializer_statement(cypher)
     )
     cypher, params = write
     assert params["description"] == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER, (
