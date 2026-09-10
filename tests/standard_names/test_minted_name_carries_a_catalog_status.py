@@ -112,6 +112,38 @@ def test_refine_successor_minted_with_status_draft() -> None:
     assert _assigned(cypher, "new.status", "'draft'")
 
 
+def test_derived_parent_materialization_sets_status_draft() -> None:
+    """A bootstrapped derived-parent mint also carries the catalog status.
+
+    Derived parents are minted by the structural write path; leaving their
+    ``status`` unset reproduces the null the export gate refuses, so the
+    materializer's SET clause fills it the same way every other write does.
+    """
+    from imas_codex.standard_names.graph_ops import _materialize_derived_parent_rows
+
+    gc, _session, _tx = _mock_graph()
+    rows = [
+        {
+            "parent_id": "magnetic_field",
+            "child_data": [
+                {
+                    "id": "x_magnetic_field",
+                    "unit": "T",
+                    "edge_kinds": ["projection"],
+                }
+            ],
+            "edge_kinds": ["projection"],
+            "authorized_unit": "T",
+            "description": "(deterministic parent)",
+        }
+    ]
+
+    _materialize_derived_parent_rows(gc, rows, bootstrap_missing=True)
+
+    cypher = _cypher_matching(gc, "MERGE (parent:StandardName {id: $parent_id})")
+    assert _assigned(cypher, "parent.status", "coalesce(parent.status, 'draft')")
+
+
 def test_ordinary_write_heals_null_status_and_sets_draft_on_create() -> None:
     """write_standard_names sets draft on create and fills a pre-existing null.
 

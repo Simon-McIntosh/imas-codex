@@ -4156,7 +4156,8 @@ def _materialize_derived_parent_rows(
                     coalesce($geometry, parent.geometry),
                 parent.is_geometric_coordinate =
                     coalesce(parent.is_geometric_coordinate,
-                             $is_geometric_coordinate)
+                             $is_geometric_coordinate),
+                parent.status = coalesce(parent.status, 'draft')
             __PARENT_SCOPE__
             CALL (parent) {
                 OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)
@@ -4328,7 +4329,8 @@ def _materialize_derived_parent_rows_batched(
             parent.geometry = coalesce(row.geometry, parent.geometry),
             parent.is_geometric_coordinate =
                 coalesce(parent.is_geometric_coordinate,
-                         row.is_geometric_coordinate)
+                         row.is_geometric_coordinate),
+            parent.status = coalesce(parent.status, 'draft')
         WITH parent, row
         CALL (parent, row) {
             OPTIONAL MATCH (parent)-[stored_cocos:HAS_COCOS]->(:COCOS)
