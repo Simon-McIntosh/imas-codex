@@ -702,6 +702,33 @@ def _fetch_export_population(
     return [population_by_id[name] for name in sorted(population_by_id)]
 
 
+def _fetch_retired_batch_ids(*, batch: list[str] | None) -> list[str]:
+    """Return the batch identities the tombstone predicate would drop.
+
+    A retired identity a caller explicitly handed over as a candidate is an
+    exit the accounting must name. The population fetch removes these at the
+    boundary, so without this counter a retired batch member vanished
+    unrecorded while the exclusion-accounting gate still passed: candidate
+    count was derived from the shrunk universe, not from what the caller
+    handed in. Read-only; empty for a full (batch-less) export.
+    """
+    if not batch:
+        return []
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            f"""
+            MATCH (sn:StandardName)
+            WHERE sn.id IN $batch
+              AND NOT ({_tombstone_exclusion_clause()})
+            RETURN sn.id AS id
+            """,
+            batch=list(batch),
+        )
+    return [row["id"] for row in (rows or [])]
+
+
 def _fetch_graph_name_ids() -> set[str]:
     """Return the complete graph identity set used to classify link targets."""
     from imas_codex.graph.client import GraphClient
@@ -1084,6 +1111,21 @@ def _run_gate_c(
                         }
                     )
                     continue
+            # The auto-accept exemption deliberately skips the name-score
+            # threshold. Make the header's blanket ``min_score_applied`` claim
+            # observable as weaker than it reads when an exempt name publishes
+            # below it, rather than leaving the discrepancy silent.
+            exempt_score = cand.get("reviewer_score_name")
+            if exempt_score is not None and exempt_score < min_score:
+                logger.warning(
+                    "Publishing %s at %.3f below declared min_score_applied "
+                    "%.3f via the %s auto-accept exemption; the header "
+                    "threshold is not the one in force for exempt origins",
+                    cand["id"],
+                    exempt_score,
+                    min_score,
+                    cand.get("origin"),
+                )
             filtered.append(cand)
             continue
 
@@ -1227,6 +1269,7 @@ def _run_exclusion_accounting_gate(
                 "emitted": len(emitted_ids),
                 "excluded": len(excluded_ids),
                 "accounted_total": arithmetic_total,
+                "unaccounted": len(population_ids) - arithmetic_total,
             }
         )
 
@@ -2533,10 +2576,39 @@ def run_export(
         names_only=names_only,
     )
     population_ids = [candidate["id"] for candidate in population]
+    # The accounting universe is what the caller handed in, not the shrunk
+    # post-filter population. A review batch member the population fetch
+    # dropped (the tombstone predicate, or any other boundary) is still a
+    # handed-in candidate: count the retired ones under a named mechanism and
+    # let the arithmetic refuse any that remain unaccounted, so an exit nobody
+    # instrumented cannot pass the gate by shrinking the universe first.
+    retired_batch_ids = _fetch_retired_batch_ids(batch=review_batch)
+    population_set = set(population_ids)
+    if review_batch:
+        candidate_ids = population_ids + [
+            name for name in review_batch if name not in population_set
+        ]
+    else:
+        candidate_ids = population_ids
     graph_names = set(population_ids)
     if not skip_gate:
         graph_names.update(_fetch_graph_name_ids())
-    report.total_candidates = len(population_ids)
+    report.total_candidates = len(candidate_ids)
+    report.record_exclusions(
+        [
+            ExclusionRecord(
+                standard_name_id=name,
+                stage="candidate_selection",
+                reason="retired_identity",
+                detail=(
+                    "identity carries retired status or retired name_stage; "
+                    "listed in the candidate set but excluded at the "
+                    "population boundary"
+                ),
+            )
+            for name in retired_batch_ids
+        ]
+    )
     report.record_exclusions(eligibility_exclusions)
     logger.info(
         "Found %d population identity(ies): %d eligible, %d excluded before gates",
@@ -2950,7 +3022,7 @@ def run_export(
         + missing_domain_exclusions
     )
 
-    accounting_gate = _run_exclusion_accounting_gate(report, population_ids)
+    accounting_gate = _run_exclusion_accounting_gate(report, candidate_ids)
     report.gate_results.append(accounting_gate)
     if manifest_sources is not None:
         exported_ids = set(report.exported_names)
