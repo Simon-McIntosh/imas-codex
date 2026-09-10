@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T13:55:58",
+  "updated": "2026-09-10T14:55:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -121936,6 +121936,193 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T115720641298-n-srr-the-scoped-contract-admits-the-reaper",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-scoped-contract-admits-the-reaper",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1955,
+                "cached_input_tokens": 279403,
+                "input_tokens": 281360,
+                "output_tokens": 539,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 281899,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm at current HEAD that tests/standard_names/test_scoped_global_maintenance.py::test_scoped_idle_completion_refuses_transient_claim_residue and ::test_scoped_run_bypasses_complete_global_maintenance_set both fail, and quote the assertion that fails. Establish the cause before changing anything: the file registers run_orphan_sweep_loop among the mocked maintenance writers and then asserts every writer in that set is assert_not_called for a scoped run, while a commit landed earlier today deliberately starts the sweep unconditionally so a scoped run keeps the reaper that releases claims abandoned by dead workers. State in your manifest which of the two is wrong, the test encoding the older contract or the source change, and say why, quoting whichever you rely on. The evidence for the source change is in docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md: bundling the sweep under the maintenance gate is what left 31 hours-old claims wedging a drain while authorised budget idled. If the test is the side that is wrong, reconcile it so the sweep is no longer in the must-not-be-called set, and add the positive assertion that nothing currently holds: that a scoped run under --skip-global-maintenance DOES start the orphan sweep while the genuinely mutating global writers stay bypassed. That positive assertion is the deliverable of this node, because the property it names is currently unheld by any test. If instead you find the source change is wrong, do not revert it: imas_codex/standard_names/loop.py is the exclusive write path of a peer node, so report the precise change you would make as a blocker with its reasoning. Prove the reconciliation both ways: the mutating writers must still be asserted absent, or the test has stopped measuring the bypass it exists for. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD UV_NO_SYNC=1 uv run pytest -p no:cacheprovider tests/standard_names/\" captured once to a log file, quote its totals line, and show the suite moving from 2 failures at base to 0 attributable to this file.",
+          "estimated_hours": null,
+          "goal": "A scoped-maintenance contract in tests/standard_names/test_scoped_global_maintenance.py that admits the orphan sweep as a reaper rather than counting it among the maintenance writers a scoped run must bypass.",
+          "id": "n-srr-the-scoped-contract-admits-the-reaper",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T11:57:21Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T115720641298-n-srr-the-scoped-contract-admits-the-reaper/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/standard_names/test_scoped_global_maintenance.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-probe",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T11:57:34Z",
+        "completed_at": "2026-09-10T12:52:48.237Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3203,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3314,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "291fd5f108d17185226cd3e512e0c5842c999959",
+        "commits": [
+          "e3a76f1772613467139aa36733afc38099902405"
+        ],
+        "changed_lines": {
+          "added": 29,
+          "removed": 2,
+          "files": 1
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/",
+          "exit_status": 0,
+          "log_path": "/tmp/srr_suite_after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T115720641298-n-srr-the-scoped-contract-admits-the-reaper/manifest.md",
+        "scope_changed": false,
+        "session_id": "de7acb29-7a85-41cb-b92d-5cc2b44f7d55",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2468339,
+            "input_tokens_cumulative": 11540635,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 15033,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T12:52:48.237Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11540635,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 3309.268,
+          "generated_tokens": 15033,
+          "generation_seconds": 2894.811,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 44.8,
+          "machine_seconds": 414.457,
+          "peak_input_tokens": 455596,
+          "tokens_per_second": 5.19,
+          "wall_tokens_per_second": 4.54
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-scoped-contract-admits-the-reaper",
+          "session_id": "de7acb29-7a85-41cb-b92d-5cc2b44f7d55",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T12:52:48.237Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 29.0,
+        "orientation_input_tokens": 6584243.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -122206,6 +122393,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2100
+    "_version": 2101
   }
 }
