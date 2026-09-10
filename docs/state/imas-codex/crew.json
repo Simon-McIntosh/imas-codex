@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T00:35:10",
+  "updated": "2026-09-11T00:49:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -124587,6 +124587,194 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T202810908660-n-srr-every-exit-from-the-export-is-counted",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-every-exit-from-the-export-is-counted",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 5708,
+                "cached_input_tokens": 451914,
+                "input_tokens": 457624,
+                "output_tokens": 1537,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 459161,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm at current HEAD that the accounting can be passed while names vanish, and quote the evidence. The recorded case: a real cut lost EIGHTEEN names while both declared exclusion counters read zero and the exclusion_accounting gate passed, so a zero from either existing counter must never be read as a passing signal. Implement in imas_codex/standard_names/export.py the one check that cannot be fooled by an exit nobody instrumented: candidate count must equal published count plus accounted exclusions, and a mismatch is a REFUSAL rather than a warning. Add counters for the three known exits, which are the domain filter, the quarantine verdict, and retired-stage identities reaching candidate selection at all. Six further drops are unexplained and the strongest available signal is a null link_status, which held on nine of the eighteen against two of the published one hundred and ninety six: isolate their mechanism if you can, and if you cannot, say so plainly and let the arithmetic refusal catch them rather than inventing a counter that names the wrong cause. Resolve or state plainly as unresolved one more anomaly in the same header: a published name scored 0.568 against a declared min_score_applied of 0.65, so either the filter is not applied where the header says it is, or the header reports a threshold that is not the one used. Prove BOTH halves by test, because an arithmetic check that always passes is worse than none: add tests/standard_names/test_export_exit_accounting.py asserting that a cut whose numbers reconcile passes, AND that a cut carrying an uncounted exit refuses with a message naming the shortfall. That test file is a deliverable of this node, so the node is incomplete without it. The eighteen withheld names are named in the cohort-treatment plan section 9b, so the fix has a fixture: the same candidate set must either publish them or account for all eighteen by mechanism. Attempt no signed manifest apply and make no graph write, because a peer owns the graph. Live graph reads run on the login node because the Neo4j tunnel is login-node-local, bounded and indexed. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD UV_NO_SYNC=1 uv run pytest -p no:cacheprovider tests/standard_names/\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha.",
+          "estimated_hours": null,
+          "goal": "Every name handed to the export leaves it either published or counted with a stated mechanism, enforced by an arithmetic refusal.",
+          "id": "n-srr-every-exit-from-the-export-is-counted",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T20:28:12Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T202810908660-n-srr-every-exit-from-the-export-is-counted/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_exit_accounting.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-units",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T20:28:25Z",
+        "completed_at": "2026-09-10T22:45:55.823Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8176,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8250,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "d085addaacd29226f52fac45cfb7f2fb40d8cf4a",
+        "commits": [
+          "db7b4706d59cb74de933fa604bdfa0f0b9bc0356"
+        ],
+        "changed_lines": {
+          "added": 413,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/",
+          "exit_status": 0,
+          "log_path": "/tmp/gate_after_clean.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T202810908660-n-srr-every-exit-from-the-export-is-counted/manifest.md",
+        "scope_changed": false,
+        "session_id": "58deb95c-6560-459b-bc4f-cc376549c4ef",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 14292222,
+            "input_tokens_cumulative": 25340991,
+            "output_tokens": 15497,
+            "output_tokens_cumulative": 68279,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T22:45:55.823Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 25340991,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 8244.354,
+          "generated_tokens": 68279,
+          "generation_seconds": 7387.204,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 39.2,
+          "machine_seconds": 857.15,
+          "peak_input_tokens": 398479,
+          "tokens_per_second": 9.24,
+          "wall_tokens_per_second": 8.28
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-every-exit-from-the-export-is-counted",
+          "session_id": "58deb95c-6560-459b-bc4f-cc376549c4ef",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T22:45:55.823Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 73.0,
+        "orientation_input_tokens": 7343031.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -124857,6 +125045,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2114
+    "_version": 2115
   }
 }
