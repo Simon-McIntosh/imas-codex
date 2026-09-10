@@ -375,3 +375,151 @@ violation, under-spending the authorised ceiling is not.
   (`~/.local/share/imas-codex/logs/sn_sn-compose.log`) is the evidence, and the
   ledger sums match the run-reported spend exactly.
 - No figure was produced and no image read: this lane is not multimodal.
+
+# Third drain round (2026-09-10, ~18:40Z–18:56Z)
+
+The second round added its slice to the same ledger; this round resumes from
+that ledger (`campaign spend USD 100.660059`) toward the **raised 250.00 USD
+ceiling** through the ordinary scoped pools. The two throttles that ended the
+previous rounds are confirmed repaired at HEAD rather than assumed:
+
+- **The exact-name preflight required no hand sweep.** Both prior rounds
+  reaped a stale-claim block by hand before the preflight would pass. At this
+  round's entry the live claim count was **0**, the dry-run preflight
+  (`--name <177 ids> --dry-run`) returned "177 existing name(s) eligible; no
+  graph writes performed", and the real launch entered the pipeline without
+  any `_orphan_sweep_tick` being driven by hand. The sweep still ran
+  automatically inside the run ("Orphan sweep: no stuck claims found").
+- **A wedged call was abandoned in its own pool, not a stop.** The previous
+  rounds' killer — one `review_name` LLM call held 711 s past the 600 s bound,
+  ending the run at `stop_reason=stalled` — did not repeat. Slice 1's log
+  records the repair firing: `pool[review_name#0] abandoned a wedged batch
+  after 600s (claim released; resuming)` (20:50:48), and the run continued for
+  a further ~5 minutes to a graceful exit. Slice 1's `stop_reason` was
+  **`transient_scope_residue`**, never `stalled`.
+
+## Pre-round census (2026-09-10, ~18:15Z, base `6b674e90e`)
+
+| Population | Count |
+|---|---|
+| Total StandardName nodes | 5,110 |
+| Live (non-superseded) | 2,953 |
+| **Fully accepted on both axes** | **2,480** |
+| **Run scope** (live, non-terminal, not fully accepted) | **177** |
+| — name_stage: reviewed 113, drafted 27, accepted 26, pending 11 | |
+| — docs_stage: pending 127, reviewed 24, accepted 22, (null) 2, exhausted 2 | |
+| Missing name score (full live) / in scope | 391 / 45 |
+| Missing docs score (full live) / in scope | 404 / 137 |
+| No documentation text (full live) / in scope | 283 / 106 |
+| Live claims on entry | **0** |
+
+Campaign ledger at entry (`llm_at >= 2026-09-10T04:00Z`): rows 1,641,
+spend **USD 100.660059**, remaining under the raised 250 USD ceiling
+**USD 149.339941**.
+
+## Slice 1 (run started 2026-09-10 18:40:44.054Z, run_id `f048dd85-677f-4acc-8009-070c3d2dfcb8`)
+
+Exact invocation (identity list = the 177 in-scope `StandardName.id` values,
+the same set for every census; retained at
+`/tmp/srr3_scope_ids.txt`):
+
+```
+imas-codex sn run --name <177 in-scope identities> --skip-global-maintenance --time 25 --cost-limit 149.33
+```
+
+`--cost-limit 149.33` = 250.00 − 100.660059 (cumulative campaign total
+measured at pre-census, truncated to two decimals). No `--reseed`, no
+`--force`.
+
+Run record (`SNRun`, id `6f542d6c-1783-4861-941b-259150c24cb0`):
+`stop_reason=transient_scope_residue`, `cost_spent=USD 0.978848`,
+`cost_limit=149.33`, `elapsed_s=933.022`, started 18:40:44.054Z.
+
+The stop was a clean drain, not a throttle: the run logged "no eligible work
+for 30 consecutive polls (~30s) — signalling graceful shutdown" and exited
+through the degraded-stop contract (CLI exit 1) only because three
+claim-raced `refining` rows remained (each `_verify_claim_winners[name]:
+0/1 survived claim-race … stage=refining` at the 64-replica review start;
+claimed_at 18:40:47–18:40:48Z, ~17 minutes old at stop, under the run sweep's
+1800 s threshold). Per-pool: `review_name` processed 2 ($0.9075),
+`generate_docs` 1 ($0.0096), `review_docs` 1 ($0.0609), `enrich_parents` 1
+($0.0009), the rest 0.
+
+### Claim count before and after slice 1
+
+| Moment | Live claims | `claimed_at` range |
+|---|---|---|
+| Pre-launch census | 0 | — |
+| After slice 1 stopped | **3** | 18:40:47Z–18:40:48Z (the claim-race residue, `< 600 s` at stop; the next boundary sweep clears them) |
+
+### Ledger after slice 1 (`~18:57Z` read)
+
+| Measure | Value |
+|---|---|
+| Campaign rows | 1,659 |
+| Campaign spend | **USD 101.638907** |
+| Overspend | 0.0 |
+| **Remaining under the 250 USD ceiling** | **USD 148.361093** |
+| Spend this round (1 launched slice) | USD 0.978848 |
+
+The ledger delta (101.638907 − 100.660059 = 0.978848) matches the slice-1
+SNRun `cost_spent` exactly.
+
+## After-state (final for this round)
+
+| Measure | Entry | Final | Delta |
+|---|---|---|---|
+| Fully accepted both axes | 2,480 | **2,485** | **+5** |
+| Run scope | 177 | **170** | −7 |
+| Live claim tokens at stop | 0 | **3** | +3 |
+
+Run scope composition at stop — name_stage: reviewed 109, drafted 22, accepted
+25, pending 11, refining 3. docs_stage: pending 124, reviewed 24, accepted 18,
+(null) 2, exhausted 2. (The three `refining` rows are the claim-race residue;
+one `drafted` reviewed up; the accepted/docs-accepted counts moved +5 and −4
+net across the axes.)
+
+### Cumulative spend (final for this round)
+
+| Measure | Value |
+|---|---|
+| Campaign rows (`llm_at >= 2026-09-10T04:00Z`) | 1,659 |
+| Campaign spend | **USD 101.638907** |
+| Overspend | 0.0 |
+| **Remaining under the 250 USD ceiling** | **USD 148.361093** |
+
+The cumulative campaign total **101.638907 USD** is below the 250.00 USD
+ceiling; no slice breached it.
+
+### Which stop condition ended the round?
+
+**This node's own wall clock.** The 250 USD ceiling was not reached (148.36 USD
+still unspent) and the pipeline was not out of work — slice 1 drained 5 names
+to fully accepted both axes and its 3 residue claims are the review claim-race
+residue, not an empty queue; a second slice at `--cost-limit 148.36` was
+staged but the 55-minute fence expired before it could launch, and overrunning
+the fence is a contract violation while under-spending the authorised ceiling
+is not. Slice 1's own stop — `transient_scope_residue` after `no eligible
+work` — is the per-slice drain completing, distinct from the `stalled` stops
+that ended both earlier rounds.
+
+## Fences respected
+
+- `--skip-global-maintenance` on the invocation, `--name` scoped preflight the
+  exact 177-identity set atomically, `--time 25` bounds the slice,
+  `--cost-limit` is the remaining cumulative ceiling at launch (149.33 for
+  slice 1). No `--reseed`, no `--force`.
+- No hand sweep was executed; the only claim clearing observed was the run's
+  own orphan sweep ("no stuck claims found") and the `pool[review_name#0]
+  abandoned a wedged batch after 600s (claim released; resuming)` abandonment,
+  which is the stall-watchdog repair firing in production.
+- No signed manifest apply was attempted; a peer owns that path.
+- Live graph work ran on the login node; every query above is a bounded
+  indexed read under ten seconds. No CLI output was piped or redirected; the
+  run's own log (`~/.local/share/imas-codex/logs/sn_sn-compose.log`) is the
+  evidence, and the ledger sum matches the run-reported spend exactly.
+- One database quirk recorded for the next node: this Neo4j build
+  (2026.01.4, Cypher 5/25) rejects the bare `X NOT IN [...]` infix
+  (`Neo.ClientError.Statement.SyntaxError`); `NOT X IN [...]` parses. Any
+  edited-but-unexecuted Cypher statement using the bare `NOT IN` form will
+  fail at first live execution.
