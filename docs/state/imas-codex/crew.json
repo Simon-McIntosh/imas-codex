@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T00:10:51",
+  "updated": "2026-09-11T00:30:45",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -124204,6 +124204,197 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T202913086398-n-swcr-the-unobserved-remainder-by-instrument",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-unobserved-remainder-by-instrument",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1535,
+                "cached_input_tokens": 463600,
+                "input_tokens": 465137,
+                "output_tokens": 320,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 465457,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm the three subgroup counts at current HEAD and quote them before acting, because the recorded figures are from an earlier pass and a population that fell from 99 to 64 is still moving. The remainder is NOT one problem, and treating it as one cohort is what would make it look like sixty-four defects. The recorded partition: 8 rows valid with no description, which need their descriptions materialised BEFORE the validation drain can observe them, because the drain cannot observe a row it cannot audit, and the drain must then be run on exactly those ids rather than on a wider scope; 38 rows legacy quarantined, which are evidence-producing scoped audits each already carrying a per-row grammar reason, so these are REAL FINDINGS rather than damage and the correct action is to report them with their reasons rather than to clear them; and 18 rows pending, which need nothing at all because a pending row has no verdict to observe, so let them reach ordinary validation. Act only on the first subgroup, report the second with its per-row reasons, and leave the third untouched. Never clear a quarantine to make a count move: the previous pass drained 43 valid rows, observed 35, and NINE re-quarantined on genuine re-audit, five of them paid childless identities a cleanup had been refusing to touch, which established that those refusals were protecting rows whose valid status had never been observed rather than rows wrongly condemned. So a re-quarantine is a correct outcome and must be reported as one. Delete nothing: an identity carrying recorded LLM spend is undeletable by standing ruling, and the instrument for that is the LLMCost attribution rather than any provenance test. Attempt no signed manifest apply. The evidence file must carry the confirmed counts, the per-subgroup verdict, whatever was materialised and drained with its receipt, the 38 reasons, and the residue left for a later decision. Live graph work runs on the login node because the Neo4j tunnel is login-node-local, with bounded indexed reads under ten seconds each. Never pipe, tee or redirect CLI output: read the log under ~/.local/share/imas-codex/logs afterwards.",
+          "estimated_hours": null,
+          "goal": "A disposition for the rows carrying a verdict with no observation, recorded in docs/evidence/sn-west-catalog-release/the-unobserved-remainder.md, each subgroup through the instrument it needs.",
+          "id": "n-swcr-the-unobserved-remainder-by-instrument",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T20:29:15Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T202913086398-n-swcr-the-unobserved-remainder-by-instrument/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-unobserved-remainder.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-residue",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T20:29:34Z",
+        "completed_at": "2026-09-10T22:27:13.166Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6845,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7059,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "d085addaacd29226f52fac45cfb7f2fb40d8cf4a",
+        "commits": [
+          "aee148f57aa3ba28751311dc12fc32a0d7325ef9"
+        ],
+        "changed_lines": {
+          "added": 213,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "bounded live-graph census plus a focused local compose over the eight description-less identities",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T202913086398-n-swcr-the-unobserved-remainder-by-instrument/manifest.md",
+        "scope_changed": false,
+        "session_id": "39ec9ca1-51ae-4c3d-a8a8-e39faabf2900",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2660976,
+            "input_tokens_cumulative": 14054952,
+            "output_tokens": 21862,
+            "output_tokens_cumulative": 58638,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T22:27:13.166Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 14054952,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 7051.1,
+          "generated_tokens": 58638,
+          "generation_seconds": 6302.704,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 33.2,
+          "machine_seconds": 748.396,
+          "peak_input_tokens": 338004,
+          "tokens_per_second": 9.3,
+          "wall_tokens_per_second": 8.32
+        },
+        "follow_on_paths": [
+          "retirement/supersede).",
+          "coordinator/later",
+          "status=failed/attempts=5"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-unobserved-remainder-by-instrument",
+          "session_id": "39ec9ca1-51ae-4c3d-a8a8-e39faabf2900",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T22:27:13.166Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 52.0,
+        "orientation_input_tokens": 11106721.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -124474,6 +124665,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2112
+    "_version": 2113
   }
 }
