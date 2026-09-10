@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-10T12:39:14",
+  "updated": "2026-09-10T13:55:58",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -121561,6 +121561,381 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260910T103903396923-n-srr-drain-the-remaining-ceiling",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-drain-the-remaining-ceiling",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1379,
+                "cached_input_tokens": 165750,
+                "input_tokens": 167131,
+                "output_tokens": 4576,
+                "reasoning_output_tokens": 3398,
+                "total_tokens": 171707,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm first at current HEAD that the tail is still time-bound rather than exhausted, by reading the run scope before you start, and quote the count. Then run consecutive scoped slices of \"imas-codex sn run --name <the in-scope identities> --skip-global-maintenance --time 18 --cost-limit <150.00 minus the cumulative campaign total measured at that launch>\", never --reseed, never --force, until either the campaign total reaches 150.00 USD or a slice reports no eligible work. Prefer two long slices over four short ones: the previous node converted only 18 of its 55 wall-clock minutes into pipeline time because it re-censused between every slice, so take ONE census before the first slice and ONE after the last, plus the cheap claim count at each slice boundary. The evidence file must gain a section reporting, for every slice, the exact invocation, the SNRun stop_reason, cost_spent and elapsed_s, and the live claim count with its claimed_at range immediately before and immediately after. It must also report the before/after census of fully-accepted-on-both-axes, run scope with its name_stage and docs_stage composition, and the cumulative campaign spend computed from LLMCost rows with llm_at >= 2026-09-10T04:00Z. The cumulative campaign total must not exceed 150.00 USD; report the final figure beside that ceiling. State plainly which of the three stop conditions ended the round: the ceiling reached, no eligible work, or your own wall clock. Attempt no signed manifest apply, because a peer owns that path. Live graph reads run on the login node because the Neo4j tunnel is login-node-local, so keep every query a bounded indexed read under ten seconds. Never pipe, tee or redirect CLI output: read ~/.local/share/imas-codex/logs/sn_sn-compose.log afterwards.",
+          "estimated_hours": null,
+          "goal": "Extend docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md with a second drain round spending the remaining authorised campaign budget down from 99.826166 USD toward the 150.00 USD ceiling through the ordinary scoped pools.",
+          "id": "n-srr-drain-the-remaining-ceiling",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T10:39:04Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T103903396923-n-srr-drain-the-remaining-ceiling/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T10:39:14Z",
+        "completed_at": "2026-09-10T11:36:56.187Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3436,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3462,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "b0f254d0fab68621771983d9f23d1955ddc4307d",
+        "commits": [
+          "f2b096bb480fa1edc2cbf7797fd653ee8a698d41"
+        ],
+        "changed_lines": {
+          "added": 169,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn run --name <179 in-scope identities> --skip-global-maintenance --time 18 --cost-limit 50.17",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T103903396923-n-srr-drain-the-remaining-ceiling/manifest.md",
+        "scope_changed": false,
+        "session_id": "77b6a673-3fba-4c21-b042-e8ae0d9f85a0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4619082,
+            "input_tokens_cumulative": 4619082,
+            "output_tokens": 36422,
+            "output_tokens_cumulative": 36422,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T11:36:56.187Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4619082,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 3458.38,
+          "generated_tokens": 36422,
+          "generation_seconds": 2768.973,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 12.5,
+          "machine_seconds": 689.407,
+          "peak_input_tokens": 126880,
+          "tokens_per_second": 13.15,
+          "wall_tokens_per_second": 10.53
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-drain-the-remaining-ceiling",
+          "session_id": "77b6a673-3fba-4c21-b042-e8ae0d9f85a0",
+          "session_source": "stream",
+          "retained_at": "2026-09-10T11:36:56.187Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 56.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260910T104140262201-n-pidp-the-cleanup-consults-protection-before-deleting-a-parent-edge",
+        "plan": "paid-identity-deletion-protection",
+        "section": "",
+        "node": "n-pidp-the-cleanup-consults-protection-before-deleting-a-parent-edge",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2039,
+                "cached_input_tokens": 192163,
+                "input_tokens": 194204,
+                "output_tokens": 1158,
+                "reasoning_output_tokens": 513,
+                "total_tokens": 195362,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Confirm at current HEAD that rederive_structural_edges still deletes operator-bearing HAS_PARENT edges from superseded children without consulting whether the target carries protection: quote the reproduction, or state plainly that it no longer reproduces. This is the fourth site of one defect - every control this codebase places on identity integrity sits on the write path while the delete paths consult nothing - so the repair is to make the cleanup ask the same protection question the write path asks. A prior node established by measurement that _ARCHIVE_RECONSTRUCTABLE_COUNTERPART_LABELS is NOT the cause and that the reconstruction adapter restores the edge correctly before a later structural cleanup removes it again, so do not aim the repair at the adapter or widen that label set: a repair aimed there would change nothing while appearing plausible. Prove BOTH halves by test, because a cleanup that stops deleting anything is not a fix: add tests/standard_names/test_protected_parent_edge_cleanup.py asserting that a HAS_PARENT edge whose target carries protection survives the pass, AND that an ordinary dead HAS_PARENT edge with an unprotected target is still deleted by the same pass. That test file is a deliverable of this node, so the node is incomplete without it. A passing suite never shows that a guard fires, so drive the deletion at a protected target and show the refusal rather than only showing green. Explicitly OUT OF SCOPE for this node: the signed remediation that restores the two absent incoming edges on \"time\" and on flux_surface_averaged_current_density_due_to_wave_driven_current_drive. That is a separately authorised second piece which must come after this guard lands, because doing it first would let the same pass delete the edges again. Attempt no signed manifest apply, and make no live graph write: a peer owns the graph. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/standard_names/\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha rather than by absolute green.",
+          "estimated_hours": null,
+          "goal": "A superseded-child HAS_PARENT cleanup in imas_codex/standard_names/graph_ops.py that preserves an edge whose target carries protection while still deleting ordinary dead edges.",
+          "id": "n-pidp-the-cleanup-consults-protection-before-deleting-a-parent-edge",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-10T10:41:41Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T104140262201-n-pidp-the-cleanup-consults-protection-before-deleting-a-parent-edge/manifest.md",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_protected_parent_edge_cleanup.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-binding",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-10T10:41:54Z",
+        "completed_at": "2026-09-10T11:52:47.981Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4216,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4253,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "b0f254d0fab68621771983d9f23d1955ddc4307d",
+        "commits": [
+          "b324ff33a41feee9f21c5e16efb2f57b87d7a587"
+        ],
+        "changed_lines": {
+          "added": 197,
+          "removed": 11,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G pytest tests/standard_names/",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T104140262201-n-pidp-the-cleanup-consults-protection-before-deleting-a-parent-edge/scratch/after_suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260910T104140262201-n-pidp-the-cleanup-consults-protection-before-deleting-a-parent-edge/manifest.md",
+        "scope_changed": false,
+        "session_id": "e9e5744f-ed47-4470-8f7e-f7abbc2f6860",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 738583,
+            "input_tokens_cumulative": 10679383,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 39399,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-10T11:52:47.981Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 10679383,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4248.418,
+          "generated_tokens": 39399,
+          "generation_seconds": 3471.004,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 23.9,
+          "machine_seconds": 777.414,
+          "peak_input_tokens": 243236,
+          "tokens_per_second": 11.35,
+          "wall_tokens_per_second": 9.27
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-pidp-the-cleanup-consults-protection-before-deleting-a-parent-edge",
+          "session_id": "e9e5744f-ed47-4470-8f7e-f7abbc2f6860",
+          "session_source": "pointer",
+          "retained_at": "2026-09-10T11:52:47.981Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 51.0,
+        "orientation_input_tokens": 4467962.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -121831,6 +122206,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2098
+    "_version": 2100
   }
 }
