@@ -5438,7 +5438,12 @@ def write_standard_names(
             UNWIND $batch AS b
             MERGE (sn:StandardName {id: b.id})
             ON CREATE SET sn.status = 'draft'
-            SET sn.updated_at = datetime(), sn.source_types = coalesce(b.source_types, sn.source_types),
+            SET sn.updated_at = datetime(),
+                // A null catalog status is outside the enumerated vocabulary
+                // for a pipeline-minted identity; only fill the gap, never
+                // overwrite a non-null status this write did not set.
+                sn.status = coalesce(sn.status, 'draft'),
+                sn.source_types = coalesce(b.source_types, sn.source_types),
                 sn.description = coalesce(nullIf(b.description, ''), sn.description),
                 sn.documentation = coalesce(b.documentation, sn.documentation),
                 sn.kind = coalesce(b.kind, sn.kind),
@@ -10521,6 +10526,7 @@ def _lock_claimed_name_bindings(
         MERGE (target:StandardName {id: b.sn_id})
         ON CREATE SET target.created_at = datetime(),
                       target.name_stage = $pending_stage,
+                      target.status = 'draft',
                       target.reservation_source_id = sns.id,
                       target.reservation_claim_token = b.claim_token,
                       target.reservation_claim_seq = b.claim_seq,
@@ -18276,6 +18282,7 @@ def persist_refined_name(
                         MERGE (new:StandardName {{id: $new_name}})
                         ON CREATE SET new.updated_at = datetime(),
                           new.name_stage        = 'drafted',
+                          new.status            = 'draft',
                           // Documentation is prose written about a meaning,
                           // so it travels with the meaning and not with the
                           // spelling. A re-rendering keeps the predecessor's
