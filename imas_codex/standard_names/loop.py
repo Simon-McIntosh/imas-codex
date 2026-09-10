@@ -194,18 +194,86 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
     }
 
 
+class _SeatUnreachableError(RuntimeError):
+    """A pool could not reach the endpoint its seat configuration points at.
+
+    Raised after the transport failure so the surfaced text names the
+    configuration key holding the address — the thing a reader can fix —
+    rather than the endpoint URL, which sends the reader at a healthy service.
+    """
+
+
+#: Pool name → the model-seat configuration section that owns its endpoint.
+#: A wrong address therefore fails only the pools bound to that seat.
+_POOL_SEAT_KEY: dict[str, str] = {
+    "generate_name": "sn-compose",
+    "generate_docs": "sn-docs",
+    "refine_name": "sn-refine",
+    "refine_docs": "sn-refine",
+    "review_name": "sn-review.names",
+    "review_docs": "sn-review.docs",
+    "enrich_parents": "sn-parent-enrich",
+}
+
+#: Marker phrases that identify a failed connection to a model endpoint.  The
+#: classified message contributes its own fixed phrase, so a rewritten
+#: ``last_error`` is recognisable as well as a raw transport error.
+_SEAT_UNREACHABLE_MARKERS: tuple[str, ...] = (
+    "could not reach the endpoint configured for",
+    "connection refused",
+    "actively refused",
+    "connect error",
+    "connection attempt",
+    "failed to connect",
+    "could not connect",
+    "network unreachable",
+    "name or service not known",
+    "connection timed out",
+    "timed out",
+    "unreachable",
+)
+
+
+def _pool_seat_key(pool_name: str) -> str | None:
+    """Return the model-seat section owning *pool_name*'s endpoint, if known."""
+    return _POOL_SEAT_KEY.get(pool_name)
+
+
+def _seat_unreachable_text(text: str) -> bool:
+    """True when a pool error's recorded text marks a seat endpoint unreachable."""
+    lowered = text.lower()
+    return any(marker in lowered for marker in _SEAT_UNREACHABLE_MARKERS)
+
+
 def _pool_error_stop_reason(
     stop_reason: str,
     health_map: dict[str, Any] | None,
 ) -> tuple[str, int]:
-    """Refuse a nominally successful stop after a pool counted an error."""
-    error_count = sum(
+    """Refuse a nominally successful stop after a pool counted an error.
+
+    An unreachable model seat degrades the run instead of stopping it: the
+    pools bound to reachable seats have already claimed and completed, so only
+    the pools bound to the dead seat failed.  Any other counted pool error
+    keeps the hard refusal — a run must not report success while a real
+    processing bug was counted.
+    """
+    errored = [
+        health
+        for health in (health_map or {}).values()
+        if health is not None and int(getattr(health, "error_count", 0) or 0) > 0
+    ]
+    if errored and stop_reason in {"completed", "no_eligible_work"}:
+        error_count = sum(int(getattr(health, "error_count", 0)) for health in errored)
+        if all(
+            _seat_unreachable_text(getattr(health, "last_error", "") or "")
+            for health in errored
+        ):
+            return "degraded", error_count
+        return "failed", error_count
+    return stop_reason, sum(
         int(getattr(health, "error_count", 0) or 0)
         for health in (health_map or {}).values()
     )
-    if error_count and stop_reason in {"completed", "no_eligible_work"}:
-        return "failed", error_count
-    return stop_reason, error_count
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -517,6 +585,7 @@ def _build_pool_specs(
             Awaitable[int],
         ],
         *,
+        pool_name: str,
         heartbeat: bool = False,
         process_kwargs: dict[str, Any] | None = None,
     ) -> Callable[[dict[str, Any]], Awaitable[int]]:
@@ -526,32 +595,63 @@ def _build_pool_specs(
         StandardName claim lease while the processor runs, so a long batch
         cannot have its lease expire and be re-claimed by a peer worker. The
         heartbeat is cancelled as soon as the processor returns or raises.
+
+        *pool_name* names the owning pool so a transport failure can surface
+        the pool's seat configuration key rather than the dead endpoint URL.
         """
 
         async def _adapter(batch: dict[str, Any]) -> int:
             kwargs = process_kwargs or {}
-            if not heartbeat:
-                return await process_fn(
-                    batch["items"], mgr, stop_event, on_event=on_event, **kwargs
+
+            async def _process(
+                items: list[dict[str, Any]],
+                *,
+                beat_stop: asyncio.Event | None = None,
+            ) -> int:
+                if beat_stop is None:
+                    return await process_fn(
+                        items, mgr, stop_event, on_event=on_event, **kwargs
+                    )
+                beat = asyncio.create_task(
+                    _heartbeat_loop(sn_ids, token, beat_stop)
                 )
-            items = batch.get("items", [])
-            sn_ids = [it["id"] for it in items if it.get("id")]
-            token = items[0].get("claim_token") if items else None
-            if not (sn_ids and token):
-                return await process_fn(
-                    items, mgr, stop_event, on_event=on_event, **kwargs
-                )
-            beat_stop = asyncio.Event()
-            beat = asyncio.create_task(_heartbeat_loop(sn_ids, token, beat_stop))
+                try:
+                    return await process_fn(
+                        items, mgr, stop_event, on_event=on_event, **kwargs
+                    )
+                finally:
+                    beat_stop.set()
+                    beat.cancel()
+                    with contextlib.suppress(asyncio.CancelledError):
+                        await beat
+
             try:
-                return await process_fn(
-                    items, mgr, stop_event, on_event=on_event, **kwargs
-                )
-            finally:
-                beat_stop.set()
-                beat.cancel()
-                with contextlib.suppress(asyncio.CancelledError):
-                    await beat
+                if not heartbeat:
+                    return await _process(batch["items"])
+                items = batch.get("items", [])
+                sn_ids = [it["id"] for it in items if it.get("id")]
+                token = items[0].get("claim_token") if items else None
+                if not (sn_ids and token):
+                    return await _process(items)
+                beat_stop = asyncio.Event()
+                return await _process(items, beat_stop=beat_stop)
+            except _SeatUnreachableError:
+                raise
+            except Exception as exc:  # noqa: BLE001 — classify, then re-raise
+                if _seat_unreachable_text(str(exc)):
+                    seat = _pool_seat_key(pool_name)
+                    if seat is not None:
+                        env_key = (
+                            f"IMAS_CODEX_{seat.upper().replace('.', '_').replace('-', '_')}_API_BASE"
+                        )
+                        raise _SeatUnreachableError(
+                            f"{pool_name} pool could not reach the endpoint "
+                            f"configured for its seat; the address is set in "
+                            f"[tool.imas-codex.{seat}] (api-base / model-route) "
+                            f"or the {env_key} override — fix the configuration, "
+                            "not the service"
+                        ) from exc
+                raise
 
         return _adapter
 
@@ -667,6 +767,7 @@ def _build_pool_specs(
             ),
             process=_make_process_adapter(
                 process_generate_name_batch,
+                pool_name="generate_name",
                 process_kwargs={"compose_model": compose_model},
             ),
             release=_make_release_adapter(
@@ -682,7 +783,9 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_review_name_batch, heartbeat=True),
+            process=_make_process_adapter(
+                process_review_name_batch, pool_name="review_name", heartbeat=True
+            ),
             release=_make_release_adapter(
                 release_review_names_claims, ids_kwarg="sn_ids"
             ),
@@ -699,6 +802,7 @@ def _build_pool_specs(
             ),
             process=_make_process_adapter(
                 process_refine_name_batch,
+                pool_name="refine_name",
                 process_kwargs={"scope_run_id": scope_run_id},
             ),
             release=_make_release_adapter(
@@ -714,7 +818,9 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_generate_docs_batch),
+            process=_make_process_adapter(
+                process_generate_docs_batch, pool_name="generate_docs"
+            ),
             release=_make_release_adapter(
                 release_generate_docs_claims, ids_kwarg="sn_ids"
             ),
@@ -731,6 +837,7 @@ def _build_pool_specs(
             ),
             process=_make_process_adapter(
                 process_review_docs_batch,
+                pool_name="review_docs",
                 heartbeat=True,
             ),
             release=_make_release_adapter(
@@ -747,7 +854,9 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_refine_docs_batch),
+            process=_make_process_adapter(
+                process_refine_docs_batch, pool_name="refine_docs"
+            ),
             release=_make_release_adapter(
                 release_refine_docs_claims, ids_kwarg="sn_ids"
             ),
@@ -760,7 +869,11 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_enrich_parents_batch, heartbeat=True),
+            process=_make_process_adapter(
+                process_enrich_parents_batch,
+                pool_name="enrich_parents",
+                heartbeat=True,
+            ),
             release=_make_release_adapter(
                 release_enrich_parents_claims, ids_kwarg="sn_ids"
             ),
