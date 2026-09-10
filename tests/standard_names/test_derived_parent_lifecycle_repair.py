@@ -15,6 +15,18 @@ from imas_codex.standard_names.defaults import (
 )
 
 
+def _is_materializer_statement(cypher: str) -> bool:
+    """Recognise the derived-parent materializer write by the fields it sets.
+
+    The match is on what the statement writes, not on its leading token: an
+    unrelated assignment placed at the front of the SET clause must not hide
+    the materializer from its own tests.
+    """
+    return (
+        "parent.name_stage = CASE" in cypher and "parent.origin = 'derived'" in cypher
+    )
+
+
 class _StatefulDerivedParentGraph:
     """Minimal in-memory graph stub for derived-parent repair tests."""
 
@@ -532,7 +544,7 @@ def test_identity_rejection_reaps_only_the_invalid_pending_parent() -> None:
     materialized_ids = [
         item.kwargs["parent_id"]
         for item in gc.query.call_args_list
-        if "SET parent.name_stage" in item.args[0]
+        if _is_materializer_statement(item.args[0])
     ]
     assert materialized_ids == [valid["parent_id"]]
 
@@ -612,7 +624,7 @@ def test_pending_single_child_shadow_is_retired_with_deletion_ledger() -> None:
     assert "CREATE (edge_snapshot:StandardNameDeletedEdge)" in delete_call.args[0]
     assert delete_call.kwargs["deletion_operation"] == "remove_derived_parent"
     assert not any(
-        "SET parent.name_stage" in item.args[0] for item in gc.query.call_args_list
+        _is_materializer_statement(item.args[0]) for item in gc.query.call_args_list
     )
 
 
