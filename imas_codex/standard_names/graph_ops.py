@@ -31,6 +31,7 @@ from imas_codex.graph.models import NameStage, RefineStopReason
 from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
+    DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
     DEFAULT_REFINE_ROTATIONS,
 )
 from imas_codex.standard_names.doc_links import find_name_references
@@ -1813,6 +1814,9 @@ RETURN requested_name,
          status: candidate.status,
          claimed_at: candidate.claimed_at,
          claim_token: candidate.claim_token,
+         claim_stale: candidate.claimed_at IS NOT NULL
+                      AND candidate.claimed_at
+                          < datetime() - duration({seconds: $claim_timeout_s}),
          run_id: candidate.run_id,
          drain_scope_id: candidate.drain_scope_id,
          drain_scope_claimed_at: candidate.drain_scope_claimed_at,
@@ -1829,8 +1833,10 @@ UNWIND $names AS requested_name
 MATCH (name:StandardName {id: requested_name})
 WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
   AND NOT coalesce(name.status, '') IN $terminal_statuses
-  AND name.claimed_at IS NULL
-  AND name.claim_token IS NULL
+  AND (
+    (name.claimed_at IS NULL AND name.claim_token IS NULL)
+    OR name.claimed_at < datetime() - duration({seconds: $claim_timeout_s})
+  )
   AND name.drain_scope_id IS NULL
   AND name.drain_scope_claimed_at IS NULL
   AND name.drain_claim_scope_id IS NULL
@@ -1844,7 +1850,8 @@ WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
     MATCH (fixture_source:StandardNameSource)-[:PRODUCED_NAME]->(descendant)
     WHERE fixture_source.id STARTS WITH $fixture_source_id_prefix
   }
-SET name.run_id = $run_id, name.updated_at = datetime()
+SET name.run_id = $run_id, name.updated_at = datetime(),
+    name.claimed_at = null, name.claim_token = null
 RETURN collect(name.id) AS stamped_ids
 """
 
@@ -1871,7 +1878,13 @@ def _exact_name_scope_refusals(rows: list[dict[str, Any]]) -> list[str]:
             candidate.get("claimed_at") is not None
             or candidate.get("claim_token") is not None
         ):
-            refusals.append(f"{requested_name}: current worker claim")
+            # A claim older than the orphan sweep threshold is abandoned —
+            # reclaimable, not contention. A fresh claim, or a token carrying
+            # no timestamp (which the sweep also never clears), stays a live
+            # refusal. The age flag is computed by the preflight query with
+            # the same cutoff the sweep uses.
+            if not candidate.get("claim_stale", False):
+                refusals.append(f"{requested_name}: current worker claim (live)")
         if any(
             candidate.get(field) is not None
             for field in (
@@ -1935,6 +1948,7 @@ def scope_exact_standard_names(
                         _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
                         names=requested,
                         fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
+                        claim_timeout_s=DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
                     )
                 ]
                 returned = [str(row.get("requested_name") or "") for row in rows]
@@ -1958,6 +1972,7 @@ def scope_exact_standard_names(
                             ),
                             terminal_statuses=sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
                             fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
+                            claim_timeout_s=DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
                         )
                     )
                     if len(stamp_rows) != 1:
