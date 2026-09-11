@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-11T07:46:27",
+  "updated": "2026-09-11T10:13:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -125157,6 +125157,447 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260911T065909441422-n-swcr-the-post-copy-guard-compares-meaning-not-rendering",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-post-copy-guard-compares-meaning-not-rendering",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 485,
+                "cached_input_tokens": 561940,
+                "input_tokens": 562427,
+                "output_tokens": 1794,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 564221,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "A live cut of the WEST batch was REFUSED by this guard, exit 1, reporting 218 diverged entries, and the refusal was correct in shape while wrong in two of its terms. Confirm each class at current HEAD before changing anything, and quote the comparison that produces it. CLASS ONE, 218 of 218 entries diverge on description and documentation and on every one the difference is whitespace only: the published tree renders prose with line folds at roughly 73 columns because the catalog YAML writer folds, while the graph stores the same text flat with spaces, so collapsing whitespace makes catalog and graph identical on 218 of 218 for both fields. As written the byte-level comparison therefore refuses EVERY publish whose prose was folded, which is a render-versus-stored gap rather than a content difference. Repair it by comparing prose with whitespace collapsed. CLASS TWO, 5 of 218 diverge on physics_domain and the difference is real rather than cosmetic: the published tree carries a domain derived from the producing sources while the graph node stores none. The five are accumulated_coolant_absorbed_energy_of_calorimetry_component, etendue_of_soft_xray_detector, flux_surface_averaged_parallel_current_density, opacity_at_ece_channel_emission_position and total_neutron_rate. That derivation is the sanctioned export-side behaviour landed deliberately at 90bc98cff, where it made 170 otherwise-droppable identities emittable, so the export is right and the guard is comparing a stored scalar against a resolved value. The decision is already locked as post-copy-domain-comparison with the value resolve-in-the-comparison, so implement exactly that: teach the comparison to resolve each identity domain the way the exporter resolves it, taking the node value when it is set and the producing-source value when it is not. Do NOT write the derived value onto the five nodes, because a scalar mirroring an edge drifts from it and this repository has paid for that shape more than once. The stored field stays authoritative wherever it is set. Repair both classes in imas_codex/standard_names/publish.py and imas_codex/standard_names/catalog_import.py. Prove ALL FOUR halves by test in tests/standard_names/test_post_copy_divergence_comparison.py, because a guard that stops refusing is worse than one that refuses too much and this guard is the last thing standing between the graph and a published catalog: prose identical apart from folding PASSES, prose that genuinely differs STILL REFUSES, a node storing no domain whose producing source carries one PASSES, and a genuine domain disagreement STILL REFUSES. That test file is a deliverable of this node, so the node is incomplete without it. Make the guarded thing happen and show the refusal, because a passing suite never shows that a guard fires. Cut no candidate, open no request, push no branch or tag: the re-cut is a separate authorised operation that resumes once this lands. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD UV_NO_SYNC=1 uv run pytest -p no:cacheprovider tests/standard_names/\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha.",
+          "estimated_hours": null,
+          "goal": "The post-copy divergence guard compares published bytes against the graph on the terms both actually assert, so a folded prose render and a source-resolved domain stop reading as divergence while a genuine disagreement still refuses.",
+          "id": "n-swcr-the-post-copy-guard-compares-meaning-not-rendering",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-11T06:59:09Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T065909441422-n-swcr-the-post-copy-guard-compares-meaning-not-rendering/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/publish.py",
+            "imas_codex/standard_names/catalog_import.py",
+            "tests/standard_names/test_post_copy_divergence_comparison.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-gate",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-11T06:59:16Z",
+        "completed_at": "2026-09-11T08:08:59.883Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4130,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4183,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "4ea9de943cd0ea71c6bca3ba3fa4bf9ac3334fb0",
+        "commits": [
+          "36452eb2ed858317119af5e26db2420fd87abe96"
+        ],
+        "changed_lines": {
+          "added": 281,
+          "removed": 6,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T065909441422-n-swcr-the-post-copy-guard-compares-meaning-not-rendering/logs/after_suite_final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T065909441422-n-swcr-the-post-copy-guard-compares-meaning-not-rendering/manifest.md",
+        "scope_changed": false,
+        "session_id": "aadb3c4d-38dd-434c-a6ad-2ea8998034d7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 21020314,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 38779,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T08:08:59.883Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 777,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"The cut is REFUSED by the release tool's fail-closed post-copy divergence guard",
+              "elapsed_seconds": 4077,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 200,
+              "log_fresh": true,
+              "manifest_commits": [],
+              "manifest_derived": false,
+              "manifest_digest": "4618cf3f82071c16bd132ee193498618141d71a55451a7368d9509172eb8a51a",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-swcr-cut-the-candidate-and-open-the-fork-review-request",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request",
+              "session": "ship-s10-20260908",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request",
+                "session_id": "c0b416e7-c239-4629-8a50-6d0d7115bdd3",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 345,
+              "terminal_at": "2026-09-11T06:53:28Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-cut-the-candidate-and-open-the-fork-review-request"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 21020314,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4180.005,
+          "generated_tokens": 38779,
+          "generation_seconds": 3052.425,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 40.7,
+          "machine_seconds": 1127.58,
+          "peak_input_tokens": 413648,
+          "tokens_per_second": 12.7,
+          "wall_tokens_per_second": 9.28
+        },
+        "follow_on_paths": [
+          "test_export_sidecar_surface.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-post-copy-guard-compares-meaning-not-rendering",
+          "session_id": "aadb3c4d-38dd-434c-a6ad-2ea8998034d7",
+          "session_source": "pointer",
+          "retained_at": "2026-09-11T08:08:59.883Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 55.0,
+        "orientation_input_tokens": 7605342.0,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-cut-the-candidate-and-open-the-fork-review-request",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3353,
+                "cached_input_tokens": 543437,
+                "input_tokens": 546792,
+                "output_tokens": 224,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 547016,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "This node has live outward effect and is authorised for exactly one candidate. Take no target from this brief: none is stated on purpose, because target resolution belongs to the runbook and the tool, and a brief that named a checkout, repository, remote or path would itself be the defect. STEP 1, resolve identity: run \"imas-codex sn release status\" and quote EVERY field it prints - the path, the state, the latest tag, the batch release candidate and both remote values. Stop if any field is missing or a remote does not match what the tool itself resolves. Confirm the candidate continues the catalog series named by its own latest tag, and stop if it jumps to an unrelated version line, because two repositories here carry unrelated series and a jump is a target error rather than a numbering surprise. STEP 2, author the request text yourself into a file outside the repository: a short title, then a body of two to five sentences naming the facility, the manifest, the published count, the deliberate exclusions, the review instruction, the catalog REVIEWING.md contract and the preview shape. Never enumerate entries and never narrate unresolved defects. Every address in that body must be a descriptive Markdown link rather than a bare address, because a raw address wraps mid-path in a review column and becomes four lines of unreadable hash. Exactly one live review-contract link may appear: verify with a grep for REVIEWING.md over the body file. ZERO AI attribution anywhere in the title or body - no co-authored-by trailer, no generated-with footer, no tool self-credit, no robot emoji - and check the body file for the strings co-authored-by, generated with, claude and copilot before you submit, reading any hit rather than blindly stripping it. No plan, sprint, ticket or version identifiers in the title beyond the candidate the tool itself computes. STEP 3, rehearse: run the release with --dry-run plus the same batch, message, title and body-file arguments you will use for real. It must exit 0 and report the review batch, the batch size, a frozen artifact, no errors, no approved-baseline failure, and source accounting with zero unexplained paths. STOP and report rather than proceeding on ANY unresolved source, validation, semantic, byte-identity, prose or accounting finding, and never reach for a skip-gate flag to cross a failed gate. STEP 4, cut it with --target auto plus the same arguments, which sends the batch to a fork review request. The branch pushes to the FORK only. Never push to the upstream remote and never pass --final, which is the upstream release request and is NOT authorised here. STEP 5, prove the positive and the negative from the owning repositories rather than from the absence of a message in local output: the catalog remote alone must carry the expected review branch and the annotated candidate tag, the grammar remote must carry NEITHER, the catalog fork listing must show exactly the one fork review request you opened, and both organisation listings must show no request for this cut. Pass --repo explicitly on every listing query, because the tool defaults to the upstream repository in a fork clone and a wrong query once reported continuous integration absent while it was running. Record the upstream main SHA before the cut and prove it unchanged after. STEP 6, commit the frozen roster before the worktree can be reclaimed: the release writes a reproducible batch identity under imas_codex/standard_names/manifests/reviews/ beside tracked roster artifacts, so stage and commit that exact path, then report its byte size and its SHA-256 and prove it tracked at the committed revision. Never leave its preservation to worktree retention. STEP 7, gate the cut on its published bytes, reading them out of the tag the cut just pushed: two per-entry properties are invisible in the release summary and both break the reviewer surface silently, an entry whose physics domain is not a member of the declared vocabulary being rejected and withheld, and an entry whose kind disagrees with its derived kind publishing a structural claim the identity contradicts. Report both counts, which must be zero. STEP 8, resolve every address in the posted body: each destination must return HTTP 200 from the repository and branch it names, and the body read back from the request must contain the same Markdown destinations you authored. Use the complete names fork review request and upstream release request throughout your manifest, never the bare word request, because the bare form does not establish the state of the other target. Report the candidate, the published count, the branch, the tag, the request address, the roster size and digest, and both gate counts.",
+          "estimated_hours": null,
+          "goal": "A release candidate for the committed batch token west_production_dd_paths, cut to the fork with its review request opened and every ref proved from the owning repositories.",
+          "id": "n-swcr-cut-the-candidate-and-open-the-fork-review-request",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-11T05:47:47Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/manifests/reviews"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-postcopy",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-11T05:47:55Z",
+        "completed_at": "2026-09-11T06:55:52.676Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4023,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4077,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "856cbef0fcd3275b1cc282323242268e873f0e24",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "imas-codex sn release --batch west_production_dd_paths --target auto with the authored title and body file",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request/step4_cut.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "correct-refusal",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260911T054747432149-n-swcr-cut-the-candidate-and-open-the-fork-review-request/manifest.md",
+        "scope_changed": false,
+        "session_id": "c0b416e7-c239-4629-8a50-6d0d7115bdd3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6732496,
+            "input_tokens_cumulative": 27107489,
+            "output_tokens": 7516,
+            "output_tokens_cumulative": 44644,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-11T06:55:52.676Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 27107489,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 4073.846,
+          "generated_tokens": 44644,
+          "generation_seconds": 3240.919,
+          "input_budget_tokens": 1016576,
+          "input_utilisation_pct": 54.1,
+          "machine_seconds": 832.927,
+          "peak_input_tokens": 549967,
+          "tokens_per_second": 13.78,
+          "wall_tokens_per_second": 10.96
+        },
+        "follow_on_paths": [
+          "imas_codex/standard_names/catalog_import.py",
+          "/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": "the cut was refused at step four by the release tool fail-closed post-copy guard, so no candidate, branch, tag, request or roster was produced; the freeze artifact it had written was removed because it named a candidate that does not exist",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-cut-the-candidate-and-open-the-fork-review-request",
+          "session_id": "c0b416e7-c239-4629-8a50-6d0d7115bdd3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-11T06:55:52.676Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "c0b416e7-c239-4629-8a50-6d0d7115bdd3",
+          "source": "pointer",
+          "reason": "the resume path is deliberately discarded: a resumed session continues in its original worktree at 856cbef0 which predates the guard repair at 36452eb2e, so it would reproduce the same refusal; steps one to three are cheap to repeat and the authored body survives outside the repository"
+        },
+        "watch_override": null,
+        "tool_steps": 53.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -125427,6 +125868,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2117
+    "_version": 2119
   }
 }
