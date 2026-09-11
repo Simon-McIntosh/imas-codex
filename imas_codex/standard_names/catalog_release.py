@@ -50,6 +50,10 @@ class ExclusionLedgerLinkError(RuntimeError):
     """The exclusion ledger exists but no committed revision can be linked."""
 
 
+class ExportReportLinkError(RuntimeError):
+    """The per-reason exclusion breakdown is absent from a published cut."""
+
+
 class _GitHubClient:
     """The single pull-request boundary; every call goes over GitHub REST.
 
@@ -264,6 +268,56 @@ def body_with_exclusion_ledger_link(body: str, focus_file: str | Path) -> str:
         "node category that excluded it, are recorded in the "
         "[ledger of excluded source paths and their withholding data dictionary "
         f"node categories]({url}).\n"
+    )
+
+
+def export_report_blob_url(
+    *,
+    fork_owner: str,
+    upstream_repo: str,
+    branch: str,
+) -> str:
+    """Derive the reviewable address of the per-reason exclusion breakdown.
+
+    The export report is committed at the catalog root on the review branch
+    the cut pushes to the fork, so its address follows the fork owner and the
+    catalog repository the checkout resolves to — the same derivation shape
+    as the preview and exclusion-ledger addresses, never a hardcoded literal.
+    """
+    _upstream_owner, catalog = upstream_repo.split("/", 1)
+    return (
+        f"https://github.com/{fork_owner}/{catalog}/blob/{branch}/.export_report.json"
+    )
+
+
+def body_with_export_report_link(
+    body: str,
+    *,
+    checkout: str | Path,
+    fork_owner: str,
+    upstream_repo: str,
+    branch: str,
+) -> str:
+    """Append the reviewer's route to the per-reason exclusion breakdown.
+
+    A body that links to a report the cut did not publish is the same defect
+    as a report that was never written, so the absence refuses rather than
+    composing a dead address.
+    """
+    if not (Path(checkout) / ".export_report.json").is_file():
+        raise ExportReportLinkError(
+            ".export_report.json is absent from the published catalog checkout; "
+            "a review body that linked it would point at nothing"
+        )
+    url = export_report_blob_url(
+        fork_owner=fork_owner,
+        upstream_repo=upstream_repo,
+        branch=branch,
+    )
+    return (
+        f"{body.rstrip()}\n\nExcluded names, each with the exclusion reason that "
+        "withheld it, are recorded in the "
+        f"[export exclusion report (.export_report.json)]({url}).\n"
     )
 
 
@@ -2044,6 +2098,23 @@ def run_review_release(
         except ExclusionLedgerLinkError as exc:
             report.errors.append(f"{type(exc).__name__}: {exc}")
             return report
+        # The per-reason exclusion breakdown rides the published commit; give
+        # the reviewer a derived path to it. When the export wrote accounting
+        # for this cut, the publish must have carried it into the committed
+        # checkout, so an absent report refuses the PR rather than publishing
+        # a body that links a file that is not there.
+        if (staging_dir / ".export_report.json").is_file():
+            try:
+                body = body_with_export_report_link(
+                    body,
+                    checkout=isnc_path,
+                    fork_owner=fork_owner,
+                    upstream_repo=upstream_repo,
+                    branch=report.branch,
+                )
+            except ExportReportLinkError as exc:
+                report.errors.append(f"{type(exc).__name__}: {exc}")
+                return report
     try:
         pr_number, pr_url = pr_creator(
             branch=report.branch,
