@@ -506,12 +506,24 @@ def check_catalog(
     if not catalog_entries:
         return result
 
-    # Fetch graph entries
+    # Fetch graph entries.  An identity's domain is resolved the way the
+    # exporter resolves it: the node's stored value is authoritative where it
+    # is set, and a node storing none takes the producing sources' stored
+    # domain.  A scalar mirroring the PRODUCED_NAME edge is never written —
+    # the comparison reads the same rule the export reads, not a snapshot of
+    # it, so the stored field stays authoritative wherever it is set.
+    from imas_codex.standard_names.domain_priority import pick_primary_domain
+
     with GraphClient() as gc:
         rows = gc.query(
             """
             MATCH (sn:StandardName)
             WHERE sn.name_stage IN ['accepted', 'approved']
+            OPTIONAL MATCH (sn)<-[:PRODUCED_NAME]-(src:StandardNameSource)
+            WITH sn,
+                 sn.physics_domain AS stored_domain,
+                 [d IN collect(DISTINCT src.physics_domain)
+                  WHERE d IS NOT NULL AND toString(d) <> ''] AS source_domains
             RETURN sn.id AS id,
                    sn.description AS description,
                    sn.documentation AS documentation,
@@ -520,15 +532,33 @@ def check_catalog(
                    sn.source_paths AS source_paths,
                    sn.validity_domain AS validity_domain,
                    sn.constraints AS constraints,
-                   sn.physics_domain AS physics_domain,
-                   sn.catalog_commit_sha AS catalog_commit_sha
+                   sn.catalog_commit_sha AS catalog_commit_sha,
+                   CASE
+                     WHEN stored_domain IS NOT NULL
+                          AND toString(stored_domain) <> ''
+                     THEN [stored_domain]
+                     ELSE source_domains
+                   END AS resolved_physics_domains
             """
         )
 
     graph_entries: dict[str, dict[str, Any]] = {}
     graph_sha: str | None = None
     for row in rows:
-        graph_entries[row["id"]] = dict(row)
+        entry = dict(row)
+        resolved = row.get("resolved_physics_domains")
+        if not resolved:
+            # Legacy row shape: a directly-supplied stored domain is the node
+            # value, authoritative where set — the same as a resolved
+            # single-value list, so both row shapes compare on equal terms.
+            legacy = row.get("physics_domain")
+            resolved = [legacy] if legacy else []
+        if not isinstance(resolved, list):
+            resolved = [resolved] if resolved else []
+        entry["physics_domain"] = (
+            pick_primary_domain([str(d) for d in resolved]) if resolved else None
+        )
+        graph_entries[row["id"]] = entry
         if row.get("catalog_commit_sha") and not graph_sha:
             graph_sha = row["catalog_commit_sha"]
 
@@ -547,8 +577,14 @@ def check_catalog(
 
         diffs: dict[str, Any] = {}
         for fld in _CHECK_FIELDS:
-            cat_val = _normalize_field(cat.get(fld))
-            graph_val = _normalize_field(graph.get(fld))
+            if fld in _PROSE_FIELDS:
+                # Folded prose renders with line breaks the graph stores flat;
+                # compare the content with whitespace collapsed, not the bytes.
+                cat_val = _collapse_prose_whitespace(cat.get(fld))
+                graph_val = _collapse_prose_whitespace(graph.get(fld))
+            else:
+                cat_val = _normalize_field(cat.get(fld))
+                graph_val = _normalize_field(graph.get(fld))
             if cat_val != graph_val:
                 diffs[fld] = {"catalog": cat_val, "graph": graph_val}
 
@@ -558,6 +594,21 @@ def check_catalog(
             result.in_sync += 1
 
     return result
+
+
+#: Prose fields whose published rendering folds at the catalog writer's line
+#: width while the graph stores the same text flat.  Whitespace is therefore a
+#: render artifact of the byte comparison, not a content difference, so it is
+#: collapsed before comparing; a genuine wording difference survives the
+#: collapse and still refuses.
+_PROSE_FIELDS: frozenset[str] = frozenset({"description", "documentation"})
+
+
+def _collapse_prose_whitespace(val: Any) -> Any:
+    """Collapse internal whitespace runs in a prose string for comparison."""
+    if not isinstance(val, str):
+        return val
+    return " ".join(val.split())
 
 
 def _normalize_field(val: Any) -> Any:

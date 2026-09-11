@@ -19,6 +19,12 @@ Publish safety:
 - Post-copy: ``check_catalog``; a real divergence refuses the publish (the
   finding lands in ``report.errors`` so the command exits non-zero), while an
   uncomparable tree (graph unreachable) is skipped rather than blocked.
+  The comparison reads each side on the terms it asserts: prose fields are
+  compared with whitespace collapsed (the catalog writer folds lines the
+  graph stores flat — a render artifact, not a content difference), and an
+  identity's physics domain is resolved the way the exporter resolves it —
+  the stored value where set, the producing sources' value where not — never
+  by minting a stored mirror of the resolved value.
 """
 
 from __future__ import annotations
