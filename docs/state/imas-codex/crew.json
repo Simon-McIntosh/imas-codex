@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T11:10:17",
+  "updated": "2026-09-14T11:23:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -126481,6 +126481,198 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T070921906089-n-swcr-the-two-excluded-names-reach-a-verdict",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-two-excluded-names-reach-a-verdict",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1079,
+                "cached_input_tokens": 648143,
+                "input_tokens": 649224,
+                "output_tokens": 1728,
+                "reasoning_output_tokens": 59,
+                "total_tokens": 650952,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "The cut published 218 of 220 and excluded exactly two. Report each fully before acting on either, and quote what you read. For BOTH identities report: every producing DD path reached through PRODUCED_NAME from StandardNameSource, name_stage, docs_stage, status, validation_status with its per-row quarantine reason when set, reviewer_score_name, refine_attempts against the rotation cap so exhaustion is a measured fact rather than an assumption, edit_status, the count of name-axis HAS_REVIEW edges with the newest llm_at, and any quorum_shortfall with its resolution_method. Remember the identity property is id and there is no name property, and that a missing property returns zero rows rather than an error, so dump one node property-key set before asserting any field is absent. IDENTITY ONE, hot_neutral_temperature, is already measured and its recovery is the point of this node: score 0.30, refine_attempts 0 so the rotation budget is untouched, validation_status valid, docs_stage accepted, and a quorum_shortfall reading fewer reviewer seats scored than the chain defines with resolution_method semantic_similarity_gate over only 4 name-axis reviews. Its own routing record says refine and accept were withheld by the shortfall and that a RESCORE is the designed recovery, happening OUTSIDE the pool loop, which is why three drain rounds scoped by exact name never touched it and why a flush would not have either. Invoke that designed rescore recovery on this identity alone and report the score it reaches, whether the quorum completes, and whether name_stage advances. IDENTITY TWO, inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width, is quarantined at drafted with an open edit and is one of ten validation-blocked successors. Read its quarantine reason and state whether it is a genuine current finding or a verdict that predates the grammar it was judged against. If the reason is stale, revalidate through the sanctioned instrument and report the new verdict. If the reason is genuine, do NOT clear it: report what the identity would need, and say plainly whether its spelling compounds two distinct quantities, because a fold of two quantities is a compose defect rather than a validation one. Never clear a quarantine to make a count move, and delete nothing, because an identity carrying recorded spend is undeletable by standing ruling. Spend no more than 15.00 USD, which leaves the authorised campaign ceiling of 250.00 USD far from reached at a cumulative 101.638907 before this node. State the campaign total before and after. Close with a verdict per identity in three parts: whether it is landable now, what changed if anything, and the exact predicate still refusing it if it is not. A name that cannot land is an acceptable outcome when the predicate is named; a name reported as landable without a measured state change is not. Attempt no signed manifest apply. Cut no candidate and open no request: a new candidate would follow separately if these become landable. Live graph work runs on the login node because the Neo4j tunnel is login-node-local, with bounded indexed reads. Never pipe, tee or redirect CLI output: read the log under ~/.local/share/imas-codex/logs afterwards.",
+          "estimated_hours": null,
+          "goal": "Both names the candidate excluded either reach a landable state or have their exact blocking predicate named, recorded in docs/evidence/sn-west-catalog-release/the-two-excluded-names.md.",
+          "id": "n-swcr-the-two-excluded-names-reach-a-verdict",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T07:09:22Z",
+            "read_at": "2026-09-14T07:09:23Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 1.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T070921906089-n-swcr-the-two-excluded-names-reach-a-verdict/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-two-excluded-names.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-luna-a",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T07:09:31Z",
+        "completed_at": "2026-09-14T09:21:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7901,
+        "stalled": true,
+        "time_budget": "50m",
+        "base_sha": "1be5f46708069c290d7e43312578875af952adcb",
+        "commits": [
+          "459fc65ac1d23ad7b52bf99625254a70339bab09",
+          "07b896fb935cb189e6014e655043484309eab328",
+          "b8c9353c353c983633265ca07fdac31ddd24b953"
+        ],
+        "changed_lines": {
+          "added": 209,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn rescore hot_neutral_temperature --cost-limit 15.00, plus bounded GraphClient identity and source reads",
+          "exit_status": 3,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T070921906089-n-swcr-the-two-excluded-names-reach-a-verdict/resume-1.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T070921906089-n-swcr-the-two-excluded-names-reach-a-verdict/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 11376000,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 11651758,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 22979,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 7210
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T09:21:12Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 4.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T09:21:12Z"
+            }
+          ],
+          "notional_cost_usd": 10.1254,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": {
+          "attempt": 3,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260914T063523321753-n-swcr-the-two-excluded-names-reach-a-verdict",
+          "root_run_id": "r-20260914T063523321753-n-swcr-the-two-excluded-names-reach-a-verdict"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 46248576,
+          "cumulative_input_tokens": 46885109,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 30189,
+          "generation_seconds": 504456.255,
+          "machine_seconds": 1419.301,
+          "tokens_per_second": 0.06
+        },
+        "follow_on_paths": [
+          "17/4943"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-two-excluded-names-reach-a-verdict",
+          "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T09:21:12Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 79.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -126751,6 +126943,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2126
+    "_version": 2127
   }
 }
