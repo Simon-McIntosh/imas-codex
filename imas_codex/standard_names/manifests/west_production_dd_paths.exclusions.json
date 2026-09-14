@@ -683,6 +683,84 @@
    "reason": "excluded_metadata",
    "category": "metadata",
    "data_type": "STR_0D"
+  },
+  {
+   "path": "camera_x_rays/detector_humidity/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "camera_x_rays/detector_temperature/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "camera_x_rays/frame/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "core_profiles/profiles_1d/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/constraints/b_field_pol_probe/weight",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/constraints/faraday_angle/weight",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/constraints/flux_loop/weight",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/constraints/n_e_line/weight",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/contour_tree/node/z",
+   "reason": "excluded_representation",
+   "category": "representation",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/convergence/iterations_n",
+   "reason": "excluded_fit_artifact",
+   "category": "fit_artifact",
+   "data_type": "INT_0D"
+  },
+  {
+   "path": "equilibrium/time_slice/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_0D"
+  },
+  {
+   "path": "hard_x_rays/emissivity_profile_1d/time",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_1D"
+  },
+  {
+   "path": "summary/disruption/time/value",
+   "reason": "temporal_coordinate_skip",
+   "category": "coordinate",
+   "data_type": "FLT_0D"
   }
  ]
 }

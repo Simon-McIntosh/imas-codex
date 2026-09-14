@@ -40,10 +40,10 @@ provenance:
 counts:
   raw_leaves: 744          # all leaves listed across 22 IDS sheets
   after_structural_filter: 507   # minus ids_properties/* and code/*
-  eligible_sources: 355       # distinct nameable v4 sources (this file)
+  eligible_sources: 342       # distinct nameable v4 sources (this file)
   renamed_v3_to_v4: 61
   removed_no_v4_equivalent: 22
-  excluded_ineligible: 114
+  excluded_ineligible: 127
 
 # -----------------------------------------------------------------------------
 # Canonical source list. Grouped by IDS for readability; a loader flattens
@@ -89,19 +89,13 @@ sources:
     - time_slice/boundary/triangularity_upper
     - time_slice/constraints/b_field_pol_probe/measured
     - time_slice/constraints/b_field_pol_probe/reconstructed
-    - time_slice/constraints/b_field_pol_probe/weight
     - time_slice/constraints/faraday_angle/measured
     - time_slice/constraints/faraday_angle/reconstructed
-    - time_slice/constraints/faraday_angle/weight
     - time_slice/constraints/flux_loop/measured
     - time_slice/constraints/flux_loop/reconstructed
-    - time_slice/constraints/flux_loop/weight
     - time_slice/constraints/n_e_line/measured
     - time_slice/constraints/n_e_line/reconstructed
-    - time_slice/constraints/n_e_line/weight
     - time_slice/contour_tree/node/r
-    - time_slice/contour_tree/node/z
-    - time_slice/convergence/iterations_n
     - time_slice/global_quantities/area
     - time_slice/global_quantities/beta_pol
     - time_slice/global_quantities/beta_tor
@@ -156,7 +150,6 @@ sources:
     - time_slice/profiles_1d/triangularity_lower
     - time_slice/profiles_1d/triangularity_upper
     - time_slice/profiles_1d/volume
-    - time_slice/time
     - vacuum_toroidal_field/b0
     - vacuum_toroidal_field/r0
   core_profiles:
@@ -174,7 +167,6 @@ sources:
     - profiles_1d/grid/rho_tor
     - profiles_1d/grid/rho_tor_norm
     - profiles_1d/grid/volume
-    - profiles_1d/time
     - profiles_1d/zeff
     - vacuum_toroidal_field/b0
     - vacuum_toroidal_field/r0
@@ -287,7 +279,6 @@ sources:
     - emissivity_profile_1d/lower_bound
     - emissivity_profile_1d/peak_position
     - emissivity_profile_1d/rho_tor_norm
-    - emissivity_profile_1d/time
     - emissivity_profile_1d/upper_bound
   camera_x_rays:
     - aperture/centre/phi
@@ -307,11 +298,8 @@ sources:
     - camera/pixel_position/r
     - camera/pixel_position/z
     - detector_humidity
-    - detector_humidity/time
     - detector_temperature
-    - detector_temperature/time
     - filter_window/thickness
-    - frame/time
   camera_ir:
     - channel/camera/frame/apparent_temperature
   bremsstrahlung_visible:
@@ -382,7 +370,6 @@ sources:
     - boundary/triangularity_upper/value
     - boundary/x_point_main/r
     - boundary/x_point_main/z
-    - disruption/time/value
     - fusion/neutron_rates/total/value
     - gas_injection_accumulated/total/value
     - gas_injection_rates/total/value
@@ -518,4 +505,3 @@ resolution:
     - { path: wall/description_2d/limiter/unit/closed, reason: "not_found (boolean flag; structural, not SN-eligible)" }
     - { path: wall/description_2d/mobile/unit/closed, reason: "not_found (boolean flag; structural, not SN-eligible)" }
     - { path: polarimeter/channel/identifier, reason: "not_found (v4 dropped 'identifier'; use 'name', metadata not SN-eligible)" }
-
