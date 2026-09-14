@@ -393,7 +393,7 @@ max-concurrency = 256
 # and a vendor-diverse review quorum. Selection evidence belongs in benchmark
 # result artifacts.
 # Switch-back: model="openrouter/openai/gpt-5.5", reasoning-effort="high".
-model = "hosted_vllm/deepseek-v4-flash"
+model = "hosted_vllm/deepseek-v4.1-flash"
 model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
