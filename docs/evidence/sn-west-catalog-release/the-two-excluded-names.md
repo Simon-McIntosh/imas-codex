@@ -19,20 +19,40 @@ RETURN keys(sn) AS property_keys
 LIMIT 1
 ```
 
-That key-set query could not complete in this run. The login-node profile
-resolved to `bolt://localhost:7687`, but no listener was present. The
-persistent graph REPL and the sanctioned command both reproduced:
+The service allocation was job `1269941`, running on
+`98dci4-gpu-0002`. No address was hardcoded: `resolve_neo4j()` returned
+`bolt://98dci4-gpu-0002:7687`, and `GraphClient.from_profile()` used that
+result. The key-set read completed in 0.189009 seconds and returned:
 
 ```text
-Couldn't connect to localhost:7687 ... Connection refused
+run_id, review_resolution_method, grammar_parse_version, updated_at,
+embed_text_hash, reviewer_model_name, reviewed_name_at,
+reviewer_comments_per_dim_name, reviewer_scores_name, reviewer_comments_name,
+validation_diagnostics_json, review_quorum_shortfall_at, validated_at,
+review_quorum_shortfall, semantic_sim, source_dd_resolution_marker,
+source_raw_documentation, source_dd_resolution_manifest_digest,
+validation_status, reviewer_score_name, reviewer_model_docs, docs_model,
+review_mean_score, source_dd_resolution_ids,
+source_dd_resolution_converged_ids, reviewer_comments_docs,
+review_count, source_paths, source_raw_unit, reviewed_docs_at,
+review_disagreement, llm_cost, reviewer_score_docs, link_status,
+llm_cost_review_docs, docs_generated_at, review_docs_count,
+reviewer_scores_docs, generate_docs_count, reviewer_comments_per_dim_docs,
+validation_layer_summary, source_path, docs_chain_length,
+review_resubmit_count, claim_seq, source_documentation, source_unit,
+harmonized_at, docs_stage, review_input_hash, harmonized_group_signature,
+embedded_at, validation_issues, population, embedding, subject, name_stage,
+physical_base, kind, origin, physics_domain, documentation, id, created_at,
+links, catalog_commit_sha, imported_at, unit, source_types, status,
+source_domains, description
 ```
 
-The configured `codex-neo4j` allocation was job `1269941`, still `PENDING`
-with reason `Priority` at the observation time. Therefore the detailed state
-below is explicitly the latest bounded graph evidence already captured for
-these identities, supplemented by the coordinator's current population
-census; it is not presented as a new successful live query. The failed
-connection occurred before any graph write or provider call.
+This confirms that the identity property is `id`, while `name`,
+`refine_attempts`, and `edit_status` are absent on this particular node. The
+two-id state, source and review reads completed in 0.333534, 0.840012 and
+0.359916 seconds respectively, all below the ten-second ceiling. A projected
+null on the second identity is reported as null rather than treated as proof
+that its property key is absent.
 
 ## Detailed identity evidence
 
@@ -52,44 +72,58 @@ Producing paths and source state from the bounded source read:
 | `dd:spectrometer_visible/channel/polarization_spectroscopy/temperature_hot_neutrals` | `spectrometer_visible/channel/polarization_spectroscopy/temperature_hot_neutrals` | `dd` | `composed` |
 | `dd:spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_temperature` | `spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_temperature` | `dd` | `attached` |
 
-The latest bounded identity/review read reports:
+The bounded reads immediately before and after recovery report:
 
-| Field | Value |
-| --- | --- |
-| `name_stage` | `reviewed` |
-| `docs_stage` | `accepted` |
-| `status` | `draft` |
-| `validation_status` | `valid` |
-| Per-row quarantine reason | none; `validation_issues=[]` |
-| `reviewer_score_name` | `0.30` |
-| `refine_attempts` | `0` |
-| Rotation cap | `3` by the configured rescore/pool default |
-| `edit_status` | `null` |
-| Name-axis `HAS_REVIEW` count | `4` |
-| Newest name-axis `llm_at` | `2026-09-09T07:33:38.958344Z` |
-| `review_quorum_shortfall` | `fewer reviewer seats scored than the chain defines (method=semantic_similarity_gate)` |
-| `resolution_method` | `semantic_similarity_gate` |
+| Field | Before rescore | After rescore |
+| --- | --- | --- |
+| `name_stage` | `reviewed` | `reviewed` |
+| `docs_stage` | `accepted` | `accepted` |
+| `status` | `draft` | `draft` |
+| `validation_status` | `valid` | `valid` |
+| Per-row quarantine reason | none; `validation_issues=[]` | none; `validation_issues=[]` |
+| `reviewer_score_name` | `0.30` | `0.30` |
+| Raw `refine_attempts` | `null` | `null` |
+| Effective attempts against cap | `coalesce(null, 0) = 0` of configured cap `3` | `0/3` |
+| `edit_status` | `null` | `null` |
+| Name-axis `HAS_REVIEW` count | `4` | `5` |
+| Newest name-axis `llm_at` | `2026-09-09T07:33:38.958344Z` | `2026-09-14T09:12:20.463703Z` |
+| `review_quorum_shortfall` | `fewer reviewer seats scored than the chain defines (method=semantic_similarity_gate)` | unchanged |
+| `resolution_method` | `semantic_similarity_gate` | `semantic_similarity_gate` |
+| `run_id` | prior run | `sn-rescore-20260914T090836Z` |
 
-The four name-axis rows explain the score's limited authority. The score is
-below the review acceptance threshold and the shortfall also prevents either
-acceptance or a paid refinement decision. This is the exact refusal predicate:
-`name_stage` remains `reviewed` because the latest score is below the
-acceptance threshold, while `review_quorum_shortfall` is non-null, so the
-ordinary refine eligibility predicate excludes it. It is not currently
-`exhausted`; its zero attempt count leaves the rotation budget untouched.
+Before recovery, all four name-axis rows carried score `0.30` and
+`resolution_method=semantic_similarity_gate`. The fifth row created by the
+recovery carries the same score and method, with `llm_cost=0.0`. The score's
+authority therefore did not improve: the shortfall prevents either acceptance
+or a paid refinement decision. The exact refusal predicate remains a non-null
+`review_quorum_shortfall`; the ordinary refine eligibility predicate skips the
+row, while the score remains below the acceptance threshold. The identity is
+not exhausted and its `0/3` rotation budget remains untouched.
 
 The requested single-name recovery was invoked as:
 
 ```text
-imas-codex sn rescore hot_neutral_temperature --cost-limit 1.00
+imas-codex sn rescore hot_neutral_temperature --cost-limit 15.00
 ```
 
-It failed at `stage_name_for_rescore` while connecting to
-`localhost:7687`, before the drafted transition and before the scoped review
-pipeline. Consequently there is no post-rescore score, no completed quorum,
-and no name-stage advance to report. No graph state changed and no provider
-spend was incurred. The recovery remains the exact next action once the
-login-local graph service is reachable.
+The sanctioned command staged `reviewed -> drafted`, ran only this identity,
+and returned exit 3 with the explicit non-accepting receipt:
+
+```text
+rescored hot_neutral_temperature
+  reviewed -> drafted
+  run_id=sn-rescore-20260914T090836Z
+Outcome: below threshold
+Stage: reviewed
+Score: 0.30
+Inline review cost: $0.0000
+```
+
+The quorum did **not** complete and the name made no net lifecycle advance: it
+returned to `reviewed`, added one review row, retained the same score and
+shortfall, and spent no refinement attempt. Exit 3 is the command's documented
+negative outcome for a successor that did not land, not an infrastructure
+failure.
 
 ### `inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width`
 
@@ -112,15 +146,16 @@ The latest bounded identity read reports:
 | `validation_status` | `quarantined` |
 | Per-row quarantine reason | `parse_error: grammar round-trip failed for inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width` |
 | `reviewer_score_name` | `null` |
-| `refine_attempts` | `null` |
-| Rotation cap | `3` by the configured rescore/pool default |
+| Raw `refine_attempts` projection | `null` |
+| Effective attempts against cap | `coalesce(null, 0) = 0` of configured cap `3` |
 | `edit_status` | `open` |
 | Name-axis `HAS_REVIEW` count | `0` |
 | Newest name-axis `llm_at` | `null` |
 | `review_quorum_shortfall` | `null` (no name review has run) |
 | `resolution_method` | `null` |
 
-The quarantine is a genuine current finding, not the old verdict that was
+The post-rescore bounded read confirms that this row is unchanged. Its
+quarantine is a genuine current finding, not the old verdict that was
 rechecked against the superseded grammar. The sanctioned grammar read reports
 that the whole residue does not match a `physical_base` or `geometry_carrier`;
 the nearest candidate is `normalized_toroidal_flux_coordinate`, and no
@@ -135,12 +170,14 @@ validated; no review, score, stage, or row was changed here.
 
 | Identity | Landable now? | What changed in this run | Exact predicate still refusing it |
 | --- | --- | --- | --- |
-| `hot_neutral_temperature` | No | No state change: the scoped rescore reached the graph connection boundary and stopped before staging. | `review_quorum_shortfall` is non-null with `semantic_similarity_gate`; the score is 0.30 and the identity remains `reviewed`, so ordinary refine eligibility is withheld. |
+| `hot_neutral_temperature` | No | The designed rescore staged it, added one zero-cost name review, and returned it to `reviewed`; score stayed 0.30, quorum stayed incomplete, and attempts stayed 0/3. | `review_quorum_shortfall` is non-null with `semantic_similarity_gate`; name acceptance and ordinary refinement are both withheld. |
 | `inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width` | No | No state change: quarantine and open edit were preserved. | `validation_status=quarantined` because strict grammar round-trip fails for the stored spelling; it remains `drafted` with no name review. |
 
-Campaign spend before this node was **$101.638907**. The attempted rescore
-failed before a provider request, so spend after this node is also
-**$101.638907** (delta **$0.000000**, within the $15.00 node ceiling).
+The live `LLMCost` ledger immediately before recovery contained 1,692 rows and
+totalled **$101.638907**. Immediately afterward it still contained 1,692 rows
+and totalled **$101.638907**. The attributable delta is therefore
+**$0.000000**, matching the command's `$0.0000` receipt and remaining within
+the $15.00 node ceiling.
 
 The measured release arithmetic remains **220 = 218 published + 2 accounted
 exclusions**, residue zero. No candidate was cut, no request was opened, no
@@ -149,11 +186,12 @@ applied.
 
 ## Required follow-up
 
-Restart or otherwise make the configured `codex-neo4j` service reachable on
-the login-local endpoint, then rerun the bounded key-set and two-identity
-reads. Invoke the same single-name rescore for
-`hot_neutral_temperature`, record its returned score, quorum completion and
-stage, and re-run the grammar validation instrument for the quarantined
-identity. Only a measured state change can turn either verdict into
-landable; neither can be made landable by changing an export threshold or
+`hot_neutral_temperature` has now exercised its designed recovery, but the
+recovery itself again terminated at `semantic_similarity_gate` rather than a
+complete reviewer quorum. The next repair must establish why a rescore that is
+defined to buy a fresh quorum is still persisted as a non-quorate semantic-gate
+decision; blindly repeating the same command would only append another
+identical zero-cost review row. The long hard-X-ray identity separately needs
+a valid spelling derived for its one source quantity and then sanctioned
+revalidation. Neither can be made landable by lowering an export threshold or
 clearing its recorded quarantine.
