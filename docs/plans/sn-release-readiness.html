@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="147">
+<meta name="plan-version" content="148">
 <meta name="plan-commits" content="459279203f628c110ca9f8daa33cc674f93682d1,f4b32b332af6d7da7f7fb701ac5550ab6202bd1f">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/unsourced-origin-cause.md,docs/evidence/sn-release-readiness/unsourced-origin-verification.md,docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md">
 <meta name="plan-impl" content="0.95">
@@ -1122,6 +1122,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T152656234666-n-srr-the-grammar-refresh-follows-content-not-a-version-string" data-who="session-2a6f0db8b3e75a382796" data-when="2026-09-14T15:46:02Z">
     <div class="r-comment-body"><p>The grammar refresh now fires on content rather than on a version string. Defect reproduced first as installed=0.9.3 active=0.9.3 sync_calls=0, proving equal strings skipped the refresh regardless of content. A digest over the grammar inputs is stored on ISNGrammarVersion and compared instead; the version string stays as a readable label. Both directions are pinned: mutating vocabulary content at an unchanged version asserts one sync, an unchanged digest asserts zero, so a no-op stays a no-op rather than rewriting 803 tokens per command. Historic rows carry no digest and refresh once. Eight focused tests pass; the two full-suite failures were separately measured at both revisions and are a placement finding, not a regression.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T163300584877-n-srr-the-embed-service-requests-what-it-needs" data-who="session-2a6f0db8b3e75a382796" data-when="2026-09-14T16:43:03Z">
+    <div class="r-comment-body"><p>One constant, and the existing formulas were already right. _DEFAULT_GPUS moves from 8 to 1; deploy_embed&#x27;s workers = gpus and the unchanged min(workers+1,15) and max(workers*4,16) then generate gres/gpu:1, cpus-per-task 2 and mem 16G against the measured 8-GPU submission of gres/gpu:8, cpus-per-task 9 and mem 32G. Confirmed the second-source question the brief set: the gpus_per_node reads at services.py:74 and :298 are status-limit and target-validation only and do not feed the submission, so line 45 was the sole path. An explicit multi-GPU request still produces the larger footprint for a deliberate bulk re-embed. 18 passed, 0 failed. The running service was separately restarted by the coordinator onto the same shape, so the code default and the live job now agree rather than the default being a latent surprise at the next restart.</p></div>
 </div>
 <div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T122318417713-n-producerembeddrain" data-who="impl-embedgap" data-when="2026-09-01T12:34:30Z">
     <div class="r-comment-body"><p>Scoped runs now drain StandardName embeddings and refuse completion on a residual gap; regression fails pre-change at assert embedded is True and passes post-change 2/0; targeted pool suites 52 passed 0 failed; no LLM cost</p></div>
