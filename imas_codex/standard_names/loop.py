@@ -144,6 +144,9 @@ class RunSummary:
     compose_cost: float = 0.0
     review_cost: float = 0.0
     drain_report: list[dict[str, Any]] = field(default_factory=list)
+    stranded_count: int | None = None
+    stranded_by_state: dict[str, int] = field(default_factory=dict)
+    stranded_ids: list[str] = field(default_factory=list)
 
 
 # ── Status mapping ────────────────────────────────────────────────────
@@ -191,6 +194,9 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
         "domains_touched": sorted(summary.domains_touched),
         "stop_reason": summary.stop_reason,
         "drain_report": summary.drain_report,
+        "stranded_count": summary.stranded_count,
+        "stranded_by_state": summary.stranded_by_state,
+        "stranded_ids": summary.stranded_ids,
     }
 
 
@@ -489,7 +495,11 @@ def _build_pool_specs(
         release_review_docs_claims,
         release_review_names_claims,
     )
-    from imas_codex.standard_names.pools import POOL_NAMES, PoolSpec
+    from imas_codex.standard_names.pools import (
+        POOL_NAMES,
+        PoolSpec,
+        standard_name_pool_predicates,
+    )
     from imas_codex.standard_names.workers import (
         process_enrich_parents_batch,
         process_generate_docs_batch,
@@ -612,9 +622,7 @@ def _build_pool_specs(
                     return await process_fn(
                         items, mgr, stop_event, on_event=on_event, **kwargs
                     )
-                beat = asyncio.create_task(
-                    _heartbeat_loop(sn_ids, token, beat_stop)
-                )
+                beat = asyncio.create_task(_heartbeat_loop(sn_ids, token, beat_stop))
                 try:
                     return await process_fn(
                         items, mgr, stop_event, on_event=on_event, **kwargs
@@ -641,9 +649,7 @@ def _build_pool_specs(
                 if _seat_unreachable_text(str(exc)):
                     seat = _pool_seat_key(pool_name)
                     if seat is not None:
-                        env_key = (
-                            f"IMAS_CODEX_{seat.upper().replace('.', '_').replace('-', '_')}_API_BASE"
-                        )
+                        env_key = f"IMAS_CODEX_{seat.upper().replace('.', '_').replace('-', '_')}_API_BASE"
                         raise _SeatUnreachableError(
                             f"{pool_name} pool could not reach the endpoint "
                             f"configured for its seat; the address is set in "
@@ -757,6 +763,9 @@ def _build_pool_specs(
             _docs_cap,
         )
 
+    _state_predicates = {
+        predicate.pool: predicate for predicate in standard_name_pool_predicates()
+    }
     specs = [
         PoolSpec(
             name="generate_name",
@@ -777,6 +786,7 @@ def _build_pool_specs(
         ),
         PoolSpec(
             name="review_name",
+            state_predicate=_state_predicates["review_name"],
             claim=_make_claim_adapter(
                 claim_review_name_batch,
                 min_score=regen_score,
@@ -793,6 +803,7 @@ def _build_pool_specs(
         ),
         PoolSpec(
             name="refine_name",
+            state_predicate=_state_predicates["refine_name"],
             claim=_make_claim_adapter(
                 claim_refine_name_batch,
                 min_score=regen_score,
@@ -812,6 +823,7 @@ def _build_pool_specs(
         ),
         PoolSpec(
             name="generate_docs",
+            state_predicate=_state_predicates["generate_docs"],
             claim=_make_claim_adapter(
                 claim_generate_docs_batch,
                 priority_scope_run_id=drift_scope_run_id,
@@ -828,6 +840,7 @@ def _build_pool_specs(
         ),
         PoolSpec(
             name="review_docs",
+            state_predicate=_state_predicates["review_docs"],
             claim=_make_claim_adapter(
                 claim_review_docs_batch,
                 priority_scope_run_id=drift_scope_run_id,
@@ -847,6 +860,7 @@ def _build_pool_specs(
         ),
         PoolSpec(
             name="refine_docs",
+            state_predicate=_state_predicates["refine_docs"],
             claim=_make_claim_adapter(
                 claim_refine_docs_batch,
                 min_score=regen_score,
@@ -864,6 +878,7 @@ def _build_pool_specs(
         ),
         PoolSpec(
             name="enrich_parents",
+            state_predicate=_state_predicates["enrich_parents"],
             claim=_make_claim_adapter(
                 claim_enrich_parents_batch,
                 **({"domain": only_domain} if only_domain else {}),
@@ -2441,6 +2456,46 @@ async def run_sn_pools(
         summary.names_enriched = _total("generate_docs")
         summary.names_reviewed = _total("review_name") + _total("review_docs")
         summary.names_regenerated = _total("refine_name") + _total("refine_docs")
+
+        # Audit the state space through the predicates carried by the worker
+        # pool contract.  This is deliberately separate from pending counts:
+        # an identity no pending query or claim predicate admits is exactly the
+        # remainder the operator must see when a drain reports no work.
+        try:
+            from imas_codex.standard_names.defaults import DEFAULT_REFINE_ROTATIONS
+            from imas_codex.standard_names.pools import (
+                classify_identity_state_groups,
+                identity_state_groups,
+                standard_name_pool_predicates,
+            )
+
+            state_groups = await asyncio.to_thread(
+                identity_state_groups,
+                min_score=(min_score if min_score is not None else DEFAULT_MIN_SCORE),
+                rotation_cap=(
+                    rotation_cap
+                    if rotation_cap is not None
+                    else DEFAULT_REFINE_ROTATIONS
+                ),
+            )
+            stranded = classify_identity_state_groups(
+                state_groups,
+                standard_name_pool_predicates(),
+            )
+            summary.stranded_count = int(stranded["stranded_count"])
+            summary.stranded_by_state = dict(stranded["by_state"])
+            summary.stranded_ids = list(stranded["stranded_ids"])
+            logger.info(
+                "run_sn_pools: stranded identities=%d by_state=%s ids=%s",
+                summary.stranded_count,
+                _json.dumps(summary.stranded_by_state, sort_keys=True),
+                summary.stranded_ids,
+            )
+        except Exception as census_exc:  # noqa: BLE001 — run remains observable
+            logger.warning(
+                "run_sn_pools: stranded identity census unavailable: %s",
+                census_exc,
+            )
 
         # ── Async counter discrepancy check ───────────────────────
         # The SNRun node was bumped per-persist via bump_sn_run_counter.
