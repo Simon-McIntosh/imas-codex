@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="143">
+<meta name="plan-version" content="144">
 <meta name="plan-commits" content="459279203f628c110ca9f8daa33cc674f93682d1,f4b32b332af6d7da7f7fb701ac5550ab6202bd1f">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/unsourced-origin-cause.md,docs/evidence/sn-release-readiness/unsourced-origin-verification.md,docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md">
 <meta name="plan-impl" content="0.95">
@@ -1109,7 +1109,10 @@
     <div class="r-comment-body"><p>Superseded before producing work. The node was correct on the seats but carried an instruction the lead reversed minutes later: it was told to keep the hosted_vllm prefix on the grounds that the new serve runs vLLM so the name is accurate again, and the lead's decision is that the prefix should be engine-neutral precisely because the engine changed twice in one day. Redispatched as n-srr-the-seats-name-a-served-model-and-a-durable-route with the rename folded in, so the seat move, the route revert, the pin bump and the prefix change land as one commit rather than two rewrites of the same file.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T134655562460-n-srr-the-local-endpoint-marker-says-what-it-means" data-who="clive-b" data-when="2026-09-14T14:11:41.010Z">
-    <div class="r-comment-body"><p>Never reached an edit. The clive lane is hardcoded to the router at port 18802, so when the operator replaced the 4.1 serve the router lost its upstream and every turn was refused. Two findings stand regardless: the full 15-file rename measures 180787 tokens against the lane&#x27;s 172800 window and must be split, and the local agent lane shares a single point of failure with the pipeline seats because both resolve through that router. Scope folded into the combined node.</p></div>
+    <div class="r-comment-body"><p>Never reached an edit. The clive lane is hardcoded to the router at port 18802, so when the operator replaced the 4.1 serve the router lost its upstream and every turn was refused. Two findings stand regardless: the full 15-file rename measures 180787 tokens against the lane's 172800 window and must be split, and the local agent lane shares a single point of failure with the pipeline seats because both resolve through that router. Scope folded into the combined node.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T144944664532-n-srr-the-runbook-names-the-guard-that-actually-holds" data-who="codex-luna-a" data-when="2026-09-14T15:04:10Z">
+    <div class="r-comment-body"><p>Confirmed the sweep is structurally safe and found the runbook wrong twice over. LIVE_NAME excludes superseded and exhausted on the sweep&#x27;s driving MATCH, so the 706-tombstone rewrite cannot occur and never depended on a remembered flag. The census figures were stale by an order of magnitude: 51 drifting of 2456 terminal (2160 superseded, 296 exhausted) against the documented 706 of 2239. The flag nonetheless keeps its requirement for a different and previously unstated reason: eight other startup maintenance steps can reach terminal-stage identities, among them reconcile_catalog_status, reconcile_standard_name_cocos_links and structural_accept_derived_parents. Also surfaced that contested is not excluded by LIVE_NAME, currently harmless at zero rows.</p></div>
 </div>
 <div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T122318417713-n-producerembeddrain" data-who="impl-embedgap" data-when="2026-09-01T12:34:30Z">
     <div class="r-comment-body"><p>Scoped runs now drain StandardName embeddings and refuse completion on a residual gap; regression fails pre-change at assert embedded is True and passes post-change 2/0; targeted pool suites 52 passed 0 failed; no LLM cost</p></div>
