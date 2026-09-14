@@ -9,7 +9,7 @@
 #   Titan node: binds 0.0.0.0, access via network or tunnel
 #
 # For Titan deployment, submit via SLURM instead of systemd:
-#   sbatch ~/Code/imas-codex/slurm/codex-embed.sh
+#   imas-codex embed start
 # Then install the tunnel service on the login node:
 #   see imas-codex-embed-tunnel.service
 
