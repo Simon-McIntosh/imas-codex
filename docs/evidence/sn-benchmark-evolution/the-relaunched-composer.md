@@ -378,3 +378,55 @@ The precision spread is material, but the hash mismatch already prevents a compa
 The JSON receipt carries USD 0.000000 composition cost, USD 0.60048775 name-review cost, and USD 0.17078325 description-review cost, for attributable spend of **USD 0.77127100**. The CLI cost headline reports USD 0.6005 because it omits `description_reviewer_cost`; that undercount is a follow-on defect rather than the spend authority used here.
 
 Campaign spend after Measurement A is USD 103.643965 of USD 250.000000. Node spend is USD 0.771271 of USD 30.000000.
+
+## Measurement B: INDETERMINATE at the time fence
+
+Command:
+
+```text
+imas-codex sn bench --models hosted_vllm/deepseek-v4.1-flash --runs 3 --reviewer-model openrouter/anthropic/claude-opus-4.8 --physics
+```
+
+The immediate pre-run real completion passed:
+
+```json
+{"measurement":"B","position":"before","timestamp_utc":"2026-09-14T12:50:19.836207+00:00","endpoint":"http://98dci4-gpu-0003:18810/v1","request_model":"hosted_vllm/deepseek-v4.1-flash","served_model":"deepseek-v4.1-flash","response":{"ok":true},"cost_usd":0.0,"tokens":69,"response_count":1}
+```
+
+The command began at approximately 12:50:44Z and selected the 15-path physics fixture. Four of those paths existed in the DD but were not admitted as Standard Name sources:
+
+- `equilibrium/time_slice/boundary_separatrix/x_point/r`
+- `magnetics/ip/data`
+- `magnetics/rogowski_coil/current/data`
+- `pf_active/coil/b_field_max_timed/data`
+
+The CLI printed `Reference paths: 47/47`, confirming the already-recorded banner defect: that line reports the non-physics fixture length even though extraction selected 15 physics paths.
+
+The run remained at concurrency one and emitted no OOM, context-length overflow, connection failure, non-429 4xx, batch error, or retry. Its watchdog recorded several long but nonterminal calls. Three warning sequences stopped without an error after reaching 416, 186, and 474 seconds, indicating progress between calls. A later review or physics-judge call remained in flight through 652 seconds.
+
+At that point the node had exceeded its hard 55-minute execution fence across Measurement A and Measurement B. The foreground command was interrupted rather than allowed to continue beyond the fence:
+
+```text
+WARNING: LLM possible stall: 1 call(s) in flight, no completion for 652s
+^C
+Aborted!
+```
+
+The outer Measurement B span was approximately 12:50:44Z to 13:23:5xZ, about 33 minutes. A timestamp taken immediately after cleanup was 2026-09-14T13:24:02.377312362Z.
+
+The intended report path was `/home/ITER/mcintos/.local/share/imas-codex/benchmarks/sn_benchmark_20260914T125044.json`. It does not exist. Because the model unit did not complete, the benchmark's incremental save never landed. There is no post-run real completion, no complete validity bracket, no persisted cost receipt, and no physics verdict to recover.
+
+Measurement B is therefore **INDETERMINATE**. No absolute physics figure is reported. The missing post-probe and absent report are evidence against reporting a number, not zero-valued measurements.
+
+### Final seat decision
+
+The result-gated seat condition did not pass:
+
+- Measurement A hash equality failed: `636159b35205da41 != d66fef87c0f962f1`.
+- Measurement B was indeterminate and supplies no compensating authority.
+
+The authorized compose registration and temporary direct route remain because the old local model and port are retired. `[tool.imas-codex.sn-parent-enrich]` remains `openrouter/deepseek/deepseek-v4-flash`; it was not promoted to v4.1. The inactive local reviewer entries at lines 583 and 612 remain unchanged.
+
+### Final spend boundary
+
+Confirmed attributable node spend is USD 0.771271 from Measurement A. Campaign spend is therefore confirmed to at least USD 103.643965 from the supplied USD 102.872694 starting point. Measurement B produced no artifact-local receipt before interruption, so its exact provider spend is unknown and must not be reported as zero. The USD 30.000000 node ceiling was not knowingly exceeded; the missing partial-run cost receipt is a follow-on for the benchmark's durability contract.
