@@ -492,13 +492,13 @@ def classify_identity_state_groups(
     pool_predicates: Sequence[StandardNamePoolPredicate],
 ) -> dict[str, Any]:
     """Classify grouped identity states as terminal, claimable, or stranded."""
-    terminal_name_stages = {
-        "accepted",
-        "approved",
+    retired_name_stages = {
         "superseded",
         "exhausted",
         "contested",
     }
+    settled_name_stages = {"accepted", "approved"}
+    settled_docs_stages = {"accepted"}
     terminal_statuses = {"deprecated", "superseded"}
     population_count = 0
     terminal_count = 0
@@ -527,9 +527,12 @@ def classify_identity_state_groups(
         seen_ids.update(identities)
         population_count += count
 
+        name_stage = state.get("name_stage")
+        docs_stage = state.get("docs_stage")
         if (
-            state.get("name_stage") in terminal_name_stages
+            name_stage in retired_name_stages
             or state.get("status") in terminal_statuses
+            or (name_stage in settled_name_stages and docs_stage in settled_docs_stages)
         ):
             terminal_count += count
             continue
