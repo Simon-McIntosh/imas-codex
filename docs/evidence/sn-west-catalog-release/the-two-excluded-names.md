@@ -262,3 +262,87 @@ rejection of a `reference_evidence_repaired` disposition field. These were not
 triaged or repaired here. The inline hot attempt also stalled in that global
 maintenance surface before its receipt and was aborted; its graph mutation was
 read back, and the subsequent staged edit completed the governed route.
+
+## Follow-on steering of the exhausted X-ray width
+
+The live baseline for `inner_hard_xray_peak_width` was re-read before any
+attachment. It remains bound through `PRODUCED_NAME` to
+`hard_x_rays/emissivity_profile_1d/half_width_internal`, with the following
+state:
+
+| Field | Value |
+| --- | --- |
+| `name_stage` | `exhausted` |
+| `refine_attempts` | `3/3` |
+| `docs_stage` | `pending` |
+| `status` | `draft` |
+| `validation_status` | `valid` |
+| `validation_issues` | `[]` |
+| `unit` | `1` |
+| `reviewer_score_name` | `0.625` |
+| Name-axis review rows | `6` |
+| Prior aggregates | `0.750`, then `0.625` |
+| `edit_status` | `exhausted` |
+
+The runtime rename eligibility probe was run first with a grammar-valid
+probe spelling and `--scope self`. It returned:
+
+```text
+DRY RUN sn edit: inner_hard_xray_peak_width  mode=rename axis=name
+scope=only_self entry=review_name
+  would carry 1 producing source(s) to
+  'inner_hard_xray_peak_width_at_measurement_position'
+  would rename 'inner_hard_xray_peak_width' →
+  'inner_hard_xray_peak_width_at_measurement_position'
+```
+
+This confirms at runtime that an exhausted identity is admitted by the
+sanctioned rename vehicle; `_RENAME_ELIGIBLE_STAGES` includes `exhausted`.
+The probe was dry-run only and was not attached because that placeholder is not
+the proposed physics correction.
+
+The coordinator's proposed candidate was then tested through the same
+sanctioned dry-run:
+
+```text
+imas-codex sn edit inner_hard_xray_peak_width \
+  --rename inner_half_width_of_hard_xray_emissivity_peak \
+  --scope self --dry-run
+```
+
+It was refused before any graph write:
+
+```text
+BLOCKED
+new name fails ISN grammar round-trip: parse failed: ParseError: residue
+'inner_half_width_of_hard_xray_emissivity_peak' does not match any
+physical_base or geometry_carrier; nearest candidates: (none)
+```
+
+The fully specified predecessor,
+`inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width`,
+already carried the inner qualifier, normalized toroidal-flux coordinate,
+hard-X-ray emissivity peak, and half-width, but its recorded admission failure
+was likewise:
+
+```text
+parse_error: grammar round-trip failed for
+inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width
+```
+
+The two attempted complete semantic constructions therefore fail at the same
+closed-vocabulary boundary. The proposed spelling improves the plain-language
+semantic coverage relative to `inner_hard_xray_peak_width` by restoring
+`half_width` and `emissivity_peak`, while leaving the normalized coordinate to
+the authoritative description. The current ISN grammar has no registered
+`half_width` physical base or matching geometry carrier for that construction,
+so the candidate cannot be reviewed safely. No rename was attached, no review
+row was created, and campaign spend remained `$102.872694` across 1,712
+`LLMCost` rows.
+
+The final graph state is unchanged from the baseline: the identity remains
+`name_stage=exhausted`, `refine_attempts=3/3`, `docs_stage=pending`,
+`validation_status=valid`, and `edit_status=exhausted`, with its score at
+`0.625`. The WEST cut still does not carry it. This is an ISN vocabulary
+finding requiring an upstream grammar decision or vocabulary addition, not a
+reason to clear the recorded quarantine history or spend another no-op review.
