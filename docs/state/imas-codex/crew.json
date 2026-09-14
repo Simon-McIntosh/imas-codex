@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T17:26:21",
+  "updated": "2026-09-14T18:15:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -129129,6 +129129,387 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T154734912612-n-srr-two-suite-failures-are-attributed-by-measurement",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-two-suite-failures-are-attributed-by-measurement",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2160,
+                "cached_input_tokens": 656264,
+                "input_tokens": 658426,
+                "output_tokens": 994,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 659420,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "docs/evidence/sn-release-readiness/two-failures-attributed.md states, for each of tests/cli/test_sn_embed_preflight.py::test_run_sn_cmd_skips_embed_preflight_for_dry_run and tests/cli/test_sn_generate_cli.py::TestBackwardCompatibility::test_reset_to_drafted_dry_run, whether it fails at the current origin/main HEAD which does NOT contain the content-digest change, and whether it fails at commit ff540084d354b190858e410a697828905d3fa7af which does. THE QUESTION THIS SETTLES: a worker reported these two as environment-attributed with newly_added_failure_count 0, but it never armed a baseline, so the claim rests on reasoning rather than measurement. A separate node ran the whole suite green at 8541 passed and 0 failed roughly an hour earlier, which is evidence against them being pre-existing, so the two accounts disagree and only a measurement resolves it. RUN EACH NAMED TEST AT BOTH REVISIONS, capturing each run once to its own log file and reading the log afterwards, and quote the failing assertion or error for every failure you observe. Run on a debug partition, and if a failure is a graph-connection error quote the exact URI it tried to reach, because the project client resolves the graph host directly rather than through localhost and a test reaching bolt://localhost:17687 would itself be the finding. STATE A VERDICT IN ONE OF THREE FORMS: the failures are pre-existing and independent of the change, in which case say what makes them fail; or the change introduced them, in which case name the mechanism and do not repair it here; or they are environment-dependent and reproduce only under a particular placement, in which case name that placement. Change no source and no test; this node measures and reports only, and its only write is the evidence document. Never pipe, tee or redirect CLI output beyond the single captured log per run.",
+          "estimated_hours": 0.4,
+          "goal": "The two suite failures are attributed to either the content-digest change or the environment by measuring both revisions.",
+          "id": "n-srr-two-suite-failures-are-attributed-by-measurement",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T15:47:35Z",
+            "read_at": "2026-09-14T15:47:36Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 17.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T154734912612-n-srr-two-suite-failures-are-attributed-by-measurement/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-release-readiness/two-failures-attributed.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-luna-a",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T15:47:47Z",
+        "completed_at": "2026-09-14T16:01:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 827,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 827,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d253a67d4c93194ca787b939ea62cda36046de00",
+        "commits": [
+          "e03ebdd8593e3a00777993ed8fe562bd43c9a4ff",
+          "106771e064de2b956ab0a43dd68533250620f673"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 0
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "each named test run once at both revisions on all_debug",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T154734912612-n-srr-two-suite-failures-are-attributed-by-measurement/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T154734912612-n-srr-two-suite-failures-are-attributed-by-measurement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 9533952,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 9757617,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 25347,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 8058
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T16:01:34Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 17.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T16:01:34Z"
+            }
+          ],
+          "notional_cost_usd": 30.1015,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 119065216,
+          "cumulative_input_tokens": 120685298,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 33405,
+          "generation_seconds": 526451.041,
+          "machine_seconds": 3446.538,
+          "tokens_per_second": 0.06
+        },
+        "follow_on_paths": [
+          "source/config"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-two-suite-failures-are-attributed-by-measurement",
+          "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T16:01:34Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 75.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T152656234666-n-srr-the-grammar-refresh-follows-content-not-a-version-string",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-grammar-refresh-follows-content-not-a-version-string",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 566,
+                "cached_input_tokens": 650561,
+                "input_tokens": 651129,
+                "output_tokens": 558,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 651687,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "The graph's grammar refresh fires when the grammar CONTENT changes, where today it fires only when a package version STRING changes, proven by a test that mutates the vocabulary without moving the version and asserts the refresh runs, and by a second test that leaves content identical while moving nothing and asserts it does not. REPRODUCE THE DEFECT FIRST and quote what you observe. The gate is in _auto_sync_grammar in imas_codex/cli/sn.py near line 1150: it reads the active ISNGrammarVersion from the graph, compares it to the INSTALLED imas_standard_names.__version__, and returns early when the two strings are equal. That string is install-time metadata produced by hatch-vcs at build time, so it does not move when an editable dependency's source changes, and uv does not rebuild a path source on an ordinary sync. Measured today: the source carried a new locus for hours while the installed version and the graph's active version both read 0.8.1.dev32+g12b557363, so the gate reported in-sync and skipped the refresh; forcing the issue needed uv sync --reinstall-package imas-standard-names, an undocumented step discovered live and twice mis-diagnosed.\nTHE FIX: gate on a content digest of the grammar specification rather than on the version string. Compute a stable digest over the authoritative grammar inputs, which are the 26 YAML files under the installed imas_standard_names/grammar/vocabularies plus the grammar specification file beside them; derive the input set from the loader rather than by globbing a hardcoded list, so a vocabulary file added later is covered without anyone remembering to add it. The digest must be order-independent and whitespace-stable so that a reformat does not read as a content change, and it must be computed from the INSTALLED package that the runtime actually imports rather than from any checkout path.\nSTORE THE DIGEST ON THE ISNGrammarVersion NODE that sync_isn_grammar_to_graph already writes, in imas_codex/standard_names/grammar_sync.py, and have _auto_sync_grammar compare the computed digest against the stored one. Keep writing the version string as a human-readable label so a reader can still see which release the snapshot came from; it stops being the control and becomes provenance. A node with no stored digest, which every existing row will be, must be treated as stale so the first run after this change refreshes once and records the digest.\nPROVE BOTH DIRECTIONS, because a gate that never fires and a gate that always fires are equally wrong and only one of them is visible. Write a test that changes grammar content without changing the version and asserts the sync runs; write a test that changes nothing and asserts it does not run, so a no-op stays a no-op and we do not rewrite 803 tokens on every CLI invocation. State the measured elapsed time of one no-op gate check, because this runs at the start of every sn command and a digest over 26 files must not become a per-command cost worth noticing; if it exceeds roughly 100 milliseconds, cache it against the files' modification times and say so.\nDO NOT CHANGE WHAT THE SYNC WRITES, only when it is invoked. The token, segment, template and edge writes are correct and were verified today at 803 tokens, 22 segments and 7 templates for version 0.9.3. Do not alter the LIVE_NAME predicate or any maintenance step; those were audited separately today and are correct.\nGATE: run the tests covering the changed files, which include tests/cli and any test importing _auto_sync_grammar or sync_isn_grammar_to_graph, plus the standard-names suite. Report added failures against the base revision you were dispatched at, naming that sha and both failure id lists; zero added failures is required. The live graph is reachable from the login node and its active ISNGrammarVersion currently reads 0.9.3; keep any live query bounded and under ten seconds, and do not run a pipeline stage that composes, refines or reviews. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.5,
+          "goal": "The graph's grammar refresh fires on a change to the grammar content rather than on a change to a package version string.",
+          "id": "n-srr-the-grammar-refresh-follows-content-not-a-version-string",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T15:26:56Z",
+            "read_at": "2026-09-14T15:26:57Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 17.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152656234666-n-srr-the-grammar-refresh-follows-content-not-a-version-string/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/cli/sn.py",
+            "imas_codex/standard_names/grammar_sync.py",
+            "tests/cli/test_grammar_autosync.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T15:27:09Z",
+        "completed_at": "2026-09-14T15:46:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1133,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1133,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d253a67d4c93194ca787b939ea62cda36046de00",
+        "commits": [
+          "ff540084d354b190858e410a697828905d3fa7af"
+        ],
+        "changed_lines": {
+          "added": 247,
+          "removed": 18,
+          "files": 3
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest tests/cli/test_grammar_autosync.py tests/standard_names/test_grammar_writer.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152656234666-n-srr-the-grammar-refresh-follows-content-not-a-version-string/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T152656234666-n-srr-the-grammar-refresh-follows-content-not-a-version-string/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a087-8085-7b72-b757-a6c4e7f12d21",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8968960,
+            "cached_input_tokens_cumulative": 8968960,
+            "input_tokens": 9172603,
+            "input_tokens_cumulative": 9172603,
+            "output_tokens": 28834,
+            "output_tokens_cumulative": 28834,
+            "reasoning_output_tokens": 10969,
+            "reasoning_output_tokens_cumulative": 10969
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T15:46:02Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 17.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T15:46:02Z"
+            }
+          ],
+          "notional_cost_usd": 18.6912,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 8968960,
+          "cumulative_input_tokens": 18141563,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 39803
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run the tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-grammar-refresh-follows-content-not-a-version-string",
+          "session_id": "01a0a087-8085-7b72-b757-a6c4e7f12d21",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T15:46:02Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 63.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -129399,6 +129780,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2143
+    "_version": 2145
   }
 }
