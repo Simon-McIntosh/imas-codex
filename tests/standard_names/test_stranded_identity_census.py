@@ -2,6 +2,8 @@
 
 from datetime import UTC, datetime
 
+import pytest
+
 from imas_codex.standard_names.loop import RunSummary, summary_table
 from imas_codex.standard_names.pools import (
     classify_identity_state_groups,
@@ -80,11 +82,82 @@ def test_identity_admitted_by_a_pool_is_not_reported() -> None:
     assert result["stranded_ids"] == []
 
 
-def test_terminal_identity_is_not_reported() -> None:
-    result = _classify(_group("accepted_name", name_stage="accepted"))
+def test_accepted_name_with_exhausted_docs_is_stranded() -> None:
+    result = _classify(
+        _group(
+            "neutron_flux_due_to_fusion",
+            name_stage="accepted",
+            docs_stage="exhausted",
+            name_score_state="passing",
+        )
+    )
+
+    assert result["terminal_count"] == 0
+    assert result["claimable_count"] == 0
+    assert result["stranded_count"] == 1
+    assert result["stranded_ids"] == ["neutron_flux_due_to_fusion"]
+    state = next(iter(result["by_state"]))
+    assert "name_stage=accepted" in state
+    assert "docs_stage=exhausted" in state
+
+
+def test_accepted_name_with_accepted_docs_is_terminal() -> None:
+    result = _classify(
+        _group(
+            "accepted_name",
+            name_stage="accepted",
+            docs_stage="accepted",
+            name_score_state="passing",
+        )
+    )
 
     assert result["terminal_count"] == 1
     assert result["stranded_count"] == 0
+    assert result["stranded_ids"] == []
+
+
+def test_accepted_name_with_pending_docs_is_claimable() -> None:
+    result = _classify(
+        _group(
+            "accepted_name_pending_docs",
+            name_stage="accepted",
+            docs_stage="pending",
+            name_score_state="passing",
+        )
+    )
+
+    assert result["terminal_count"] == 0
+    assert result["claimable_count"] == 1
+    assert result["stranded_count"] == 0
+    assert result["stranded_ids"] == []
+
+
+@pytest.mark.parametrize("name_stage", ["superseded", "exhausted"])
+def test_retired_name_stage_stays_terminal(name_stage: str) -> None:
+    result = _classify(
+        _group(
+            f"{name_stage}_name",
+            name_stage=name_stage,
+            docs_stage="pending",
+        )
+    )
+
+    assert result["terminal_count"] == 1
+    assert result["claimable_count"] == 0
+    assert result["stranded_count"] == 0
+
+
+def test_count_mismatch_still_raises() -> None:
+    group = _group("count_mismatch")
+    group["count"] = 2
+
+    with pytest.raises(ValueError, match="aggregate count"):
+        _classify(group)
+
+
+def test_duplicate_identity_still_raises() -> None:
+    with pytest.raises(ValueError, match="more than one state group"):
+        _classify(_group("duplicate"), _group("duplicate"))
 
 
 def test_grouped_query_and_run_summary_preserve_the_census() -> None:
