@@ -307,3 +307,18 @@ The resumed benchmark constraints are therefore:
 6. Preserve the existing pre/post endpoint probes around each measurement.
 
 These facts lower the risk of a future resumed campaign from endpoint death to an attributable refusal, but they do not clear the current blocker: the configured one-request check still received HTTP 404 for the bare model ID before any benchmark request could be sized or scheduled.
+
+## Temporary direct route and successful configured completion
+
+The router diagnosis dissolved the HTTP 404 as a transient replacement-window result and identified the persistent hang mechanism at port 18802: admission is keyed by client IP, so all login-node processes share two in-flight slots and four queued slots, while the queue waits on a condition with no timeout. The upstream model remained healthy during the observed router hangs.
+
+Commit `b2c633c1c` temporarily changed only the `ambix-local` API base from the preferred router at `http://98dci4-gpu-0003:18802/v1` to the direct serve at `http://98dci4-gpu-0003:18810/v1`. It preserved the existing rotation warning and added the mechanism and revert condition: return to 18802 once the router bounds queued waits.
+
+The first completion through the direct route returned an `LLMResult`, after which the receipt script raised `AttributeError` while trying to read a nonexistent `.value` attribute. That was an instrumentation failure after a successful provider response, not a provider error. The corrected receipt check then completed with one request and no retry:
+
+```json
+{"timestamp_utc":"2026-09-14T12:13:32.480782+00:00","request_model":"hosted_vllm/deepseek-v4.1-flash","served_model":"deepseek-v4.1-flash","api_base":"http://98dci4-gpu-0003:18810/v1"}
+{"response":{"ok":true},"cost_usd":0.0,"tokens":69,"response_count":1}
+```
+
+The configured route is therefore proven end to end. The application-facing model is registered, `_acompletion_local` strips the compatibility prefix to the bare dotted ID, the direct endpoint accepts it, and the structured response returns through the project call layer. This receipt clears the route precondition for Measurement A while leaving the temporary-port rollback obligation open.
