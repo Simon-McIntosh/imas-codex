@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T18:49:27",
+  "updated": "2026-09-14T20:49:03",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -130132,6 +130132,388 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T161600502614-n-swcr-the-final-excluded-name-is-steered-to-its-successor",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-final-excluded-name-is-steered-to-its-successor",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 677,
+                "cached_input_tokens": 698713,
+                "input_tokens": 699392,
+                "output_tokens": 2874,
+                "reasoning_output_tokens": 762,
+                "total_tokens": 702266,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "inner_hard_xray_peak_width reaches an accepted successor named inner_hard_xray_half_width_of_emissivity_peak, or that steered candidate is scored and rejected with every reviewer figure recorded, in docs/evidence/sn-west-catalog-release/the-two-excluded-names.md. CONFIRM THE STARTING STATE FIRST and quote it: the identity reads name_stage=exhausted, reviewer_score_name=0.625, refine_attempts=3/3, docs_stage=pending, status=draft, validation_status=valid, unit=1, with one producer hard_x_rays/emissivity_profile_1d/half_width_internal.\nEVERY BLOCKER THAT PREVIOUSLY STOPPED THIS IS NOW CLEARED, and you should verify each rather than trust the list. The ISN grammar admits the spelling: emissivity_peak was added as a position locus with allowed_relations at and of, released as v0.9.3, and the graph's active ISNGrammarVersion now reads 0.9.3 with emissivity_peak present as a GrammarToken under segments geometry, position and path. Note the graph property is value rather than token; a query on t.token returns zero rows for every token and means nothing. The spelling parses and round-trips: base half_width, qualifiers inner and hard_xray, locus emissivity_peak under an of relation. _RENAME_ELIGIBLE_STAGES at imas_codex/standard_names/edit.py:109 admits exhausted, so the spent rotation budget is not an obstacle and a steered rename re-enters the identity at REVIEW_NAME.\nRUN sn edit --dry-run FIRST and quote what it returns. If it refuses, quote the exact refusal and stop rather than attempting a second spelling; a refusal now would mean one of the cleared blockers is not actually cleared, which is a finding worth more than a workaround. If it is admitted, attach with --scope self, which is correct because this identity has no siblings sharing the edited segment.\nWRITE THE --reason FROM THE PHYSICS AND THE DD PATH, never from preference, because the reason is shown to the reviewer as expert intent and a weak one simply fails to counter the reviewer's pull back toward the accepted spelling. The substance to ground it in: the DD field is half_width_internal and the accepted description reads \"Inward half-width of the hard X-ray emissivity peak in normalized toroidal flux coordinate\", while the current spelling inner_hard_xray_peak_width carries none of half-width, emissivity, or the coordinate. It therefore states a width where the quantity is a half-width, a factor of two; names a peak that could be a count-rate or spectral peak rather than the emissivity profile's; and gives a dimensionless extent with nothing naming what it is normalized against. The successor restores the half-width and binds it to the emissivity peak as a locus. The coordinate remains in the documentation rather than the name, which is a deliberate choice you should state: the unit is 1 and the documentation carries the normalization.\nTHEN DRIVE THE REVIEW so the steered candidate is scored, using a scoped run that carries --skip-global-maintenance, because eight startup maintenance steps can otherwise reach terminal-stage identities. EVIDENCE REQUIRED: the starting spelling with its recorded 0.750 and 0.625 aggregates; the dry-run output; every candidate attached with its per-reviewer scores and aggregate; the ISN round-trip result; the final name_stage read back from the graph; and whether the WEST cut would now carry the identity. A rename review ACCEPTS only at an aggregate at or above 0.85.\nDOCUMENTATION IS NOT THIS NODE'S JOB. The identity will still read docs_stage=pending after an accepted rename, and a separate node earns its documentation exactly as hot_neutral_temperature_at_plasma_boundary did. Do not invoke the documentation pools.\nDelete nothing, clear no quarantine, and do not touch the other formerly excluded identity. The compose seat resolves to a locally served model and you must not invoke compose; refine and review resolve to remote providers and are what this node uses. Live graph work runs on the login node because the project client resolves the graph host directly. Spend no more than 15.00 USD and state the campaign total before and after; it stands at 103.60 USD against an authorised 250.00 USD ceiling. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.0,
+          "goal": "The last excluded WEST identity reaches an accepted successor spelling or a scored rejection through a steered edit.",
+          "id": "n-swcr-the-final-excluded-name-is-steered-to-its-successor",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T16:16:00Z",
+            "read_at": "2026-09-14T16:16:01Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 17.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T161600502614-n-swcr-the-final-excluded-name-is-steered-to-its-successor/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-two-excluded-names.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-luna-a",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T16:16:15Z",
+        "completed_at": "2026-09-14T16:54:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2315,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2315,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "30790519c5772afbb5d51eadfa66f7f467485dc5",
+        "commits": [
+          "f96165a18c0762163221529249df35950b4f978a",
+          "08437ce096140ab49a9b859f1cb19c1d7de06f6f"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 0
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn edit dry-run, attach and scoped review rotation against the live graph",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T161600502614-n-swcr-the-final-excluded-name-is-steered-to-its-successor/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T161600502614-n-swcr-the-final-excluded-name-is-steered-to-its-successor/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 6945920,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7420093,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 23799,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 7299
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T16:54:50Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 18.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T16:54:50Z"
+            }
+          ],
+          "notional_cost_usd": 36.8132,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 140097280,
+          "cumulative_input_tokens": 142032322,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 31098,
+          "generation_seconds": 529353.14,
+          "machine_seconds": 3739.728,
+          "tokens_per_second": 0.06
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-final-excluded-name-is-steered-to-its-successor",
+          "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T16:54:50Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 52.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T165519155989-n-swcr-the-graph-is-measured-fit-on-a-stable-lane",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-graph-is-measured-fit-on-a-stable-lane",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 446,
+                "cached_input_tokens": 748552,
+                "input_tokens": 749000,
+                "output_tokens": 1032,
+                "reasoning_output_tokens": 299,
+                "total_tokens": 750032,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "A health verdict for the Standard Name graph is recorded in docs/evidence/sn-west-catalog-release/graph-health-before-the-next-cut.md, stating for each instrument the figure measured, the figure last recorded, and whether it moved. The question this answers is whether the graph is fit to cut a fork review PR for the WEST batch, so every figure must be one a reader can act on rather than a reassurance. RUN THESE INSTRUMENTS, each once, and report what each printed. First, the graph-marked quality suite: pytest -m graph tests/graph/test_sn_graph.py, which auto-skips below ten accepted StandardName nodes so a skip is itself a finding; run it on the login node because the graph is reached from there, and report the totals line verbatim plus every failure id. Second, the standard-names suite tests/standard_names as the unit-level check, reporting added failures against the base revision you were dispatched at, naming that sha and both failure id lists rather than an absolute green. Third, the release accounting: run the export or catalog rehearsal that emits the candidate, published, exclusion and residue counts and its gate tally, and record all of them; the standing figures to compare against are 220 candidates, 218 published, 2 accounted exclusions, residue 0 and 8 of 8 gates, measured at the last re-mint. Fourth, a census of lifecycle integrity over the live graph, bounded and on the login node with no single query exceeding ten seconds: count identities by name_stage and by status, count accepted identities holding zero PRODUCED_NAME sources, count identities whose docs_stage is pending, and count quarantined identities. Known open counts to compare against, all previously surfaced and none of them yours to repair here, are 22 live names without recoverable producing sources and 7 names fed by DD paths absent from the current DD. INTERPRET RATHER THAN ONLY TABULATE: state plainly whether anything moved in a direction that should stop a cut, and if a figure moved adversely name the identities behind it rather than only the count. A figure that matches its last recorded value is evidence of stability and must be shown as such. If an instrument cannot run, say which and why, and do not substitute a different one silently. This node changes no graph state, mints nothing, deletes nothing and clears no quarantine; it is a measurement only, and it must not run any pipeline stage that composes, refines or reviews. The compose seat names a model that no longer exists, so do not invoke compose for any reason. Report the campaign spend before and after; it was 102.872694 USD against an authorised 250.00 USD ceiling, and this node should approach zero because it runs no LLM stage. Spend no more than 5.00 USD. Never pipe, tee or redirect imas-codex CLI output; capture pytest to a log file once and read it afterwards.\n CONTEXT THAT CHANGED SINCE THIS BRIEF WAS FIRST WRITTEN, and your evidence must record it. The graph was stopped, dumped and restarted for a checkpoint at 2026-09-14T14:39:09Z; the archive is imas-codex-graph-dev-6e9f34e-20260914T143909Z.tar.gz at 2367 MB from a 2369.2 MB dump, and Neo4j came back as SLURM job 1270599 reading 5115 StandardName nodes. Measure the post-restart database and say so, because that is the state a release cut would be taken from, and name the archive as the restore point a reader would roll back to. Four earlier attempts at this census died on the local lane rather than on anything in the graph, so treat none of their partial figures as carried forward; measure everything fresh. Two cohort facts are settled and you should verify rather than rederive them: hot_neutral_temperature_at_plasma_boundary is name_stage accepted and docs_stage accepted at 0.9875 so the cut carries it, and inner_hard_xray_peak_width is name_stage exhausted at 0.625 with docs_stage pending and is blocked upstream on a grammar question, so the standing exclusion count is one rather than two. A corrected terminal-stage census was measured today at 51 drifting of 2456 terminal, 2160 superseded and 296 exhausted, replacing a stale documented figure of 706 of 2239; use the corrected figures as your comparison baseline.",
+          "estimated_hours": 1.0,
+          "goal": "A health verdict for the post-checkpoint Standard Name graph is recorded in docs/evidence/sn-west-catalog-release/graph-health-before-the-next-cut.md.",
+          "id": "n-swcr-the-graph-is-measured-fit-on-a-stable-lane",
+          "lane_declaration": {
+            "backend": "codex-spark",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T16:55:19Z",
+            "read_at": "2026-09-14T16:55:20Z",
+            "resolved_backend": "codex-spark",
+            "utilisation_pct": 18.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T165519155989-n-swcr-the-graph-is-measured-fit-on-a-stable-lane/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex-spark",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/graph-health-before-the-next-cut.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-spark",
+        "local": false,
+        "agent": {
+          "alias": "spark5.3",
+          "backend": "codex-spark",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.3-codex-spark",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T16:55:37Z",
+        "completed_at": "2026-09-14T17:23:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1677,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1677,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "556b06a47a3b52e08e306b1c8bf06d530d6f0452",
+        "commits": [
+          "90dfd2de186d91ec1a020c32e652daa303eec525"
+        ],
+        "changed_lines": {
+          "added": 96,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -m graph tests/graph/test_sn_graph.py; pytest tests/standard_names; release accounting rehearsal; bounded live census",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T165519155989-n-swcr-the-graph-is-measured-fit-on-a-stable-lane/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T165519155989-n-swcr-the-graph-is-measured-fit-on-a-stable-lane/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a0d8-7dda-7760-8272-e67cfa5c78ef",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7416448,
+            "cached_input_tokens_cumulative": 7416448,
+            "input_tokens": 7823523,
+            "input_tokens_cumulative": 7823523,
+            "output_tokens": 58189,
+            "output_tokens_cumulative": 58189,
+            "reasoning_output_tokens": 37322,
+            "reasoning_output_tokens_cumulative": 37322
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T17:23:34Z",
+          "effective_context_window": 121600,
+          "quota_windows": [
+            {
+              "window_minutes": 300,
+              "used_percent": 88.0,
+              "resets_at": 1789422949,
+              "observed_at": "2026-09-14T17:23:34Z"
+            },
+            {
+              "window_minutes": 10080,
+              "used_percent": 54.0,
+              "resets_at": 1789982337,
+              "observed_at": "2026-09-14T17:23:34Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 7416448,
+          "cumulative_input_tokens": 15239971,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 95511
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -m",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-graph-is-measured-fit-on-a-stable-lane",
+          "session_id": "01a0a0d8-7dda-7760-8272-e67cfa5c78ef",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T17:23:34Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 100.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -130402,6 +130784,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2148
+    "_version": 2150
   }
 }
