@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T15:40:05",
+  "updated": "2026-09-14T16:28:58",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -59,6 +59,15 @@
       },
       {
         "id": "clive-a",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
+      },
+      {
+        "id": "clive-b",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -128137,6 +128146,361 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T141523057219-n-srr-the-seats-follow-the-served-model",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-seats-follow-the-served-model",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1999,
+                "cached_input_tokens": 555358,
+                "input_tokens": 557359,
+                "output_tokens": 3950,
+                "reasoning_output_tokens": 1624,
+                "total_tokens": 561309,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Every local pipeline seat names deepseek-v4-flash, the local route points at the router again, the imas-standard-names pin reads 0.9.3, and the v4-pro entries are gone, proven by a repository search over pyproject.toml showing zero hits for deepseek-v4.1-flash, zero for deepseek-v4-pro, zero for 18810 and zero for 0.9.2, and by the configuration tests passing with zero added failures against your base sha. ESTABLISH THE STARTING STATE by listing every deepseek reference and the api-base with their line numbers before editing.\nWHY THIS REVERSES THIS AFTERNOON'S CHANGE, and it belongs in the commit body: the 4.1 serve was cancelled by the operator at 16:11:39 and a v4-flash serve was submitted six seconds later. The served model id is deepseek-v4-flash with hyphens and no dot, the engine is vLLM rather than SGLang, the native context is 1048576, and the declared direct port is 18800. Our seats currently name a 4.1 model that the new serve will 404, which is the same defect we cleared this afternoon, in reverse.\nTHE SEAT CHANGES, all in pyproject.toml. Line 396 sn-compose returns from hosted_vllm/deepseek-v4.1-flash to hosted_vllm/deepseek-v4-flash. Lines 583 and 612, cycle 0 of the name-review quorum and the local-only fallback profile, ALREADY read hosted_vllm/deepseek-v4-flash and are now correct; verify and leave them. Lines 341 sn-parent-enrich and 732 proposer-model move from openrouter/deepseek/deepseek-v4-flash to the local hosted_vllm/deepseek-v4-flash and gain whatever route and key keys the sibling local seats carry so they resolve through the ambix-local route, because the lead's standing rule is that there is no reason to pay a remote provider for a model served on premise. Lines 662 and 680, both openrouter/deepseek/deepseek-v4-pro, are DELETED from their lists. Line 663 stays openrouter/deepseek/deepseek-v4-flash. Lines 314 and 474 are comments about retired models and must be made accurate.\nKEEP THE hosted_vllm/ PREFIX EXACTLY AS IT IS. A rename of that marker to local/ was prepared and is deliberately NOT part of this node: the new serve runs vLLM, so the prefix is accurate again, and renaming a load-bearing marker while the engine is in flux is the worst possible moment. Do not rename it, do not add a second prefix, and do not touch _LOCAL_MODEL_PREFIXES or _LOCAL_ENDPOINT_PREFIXES.\nRETURN THE LOCAL ROUTE TO THE ROUTER. The api-base of [tool.imas-codex.model-routes.ambix-local] currently reads http://98dci4-gpu-0003:18810/v1, a direct serve that no longer exists. Set it back to http://98dci4-gpu-0003:18802/v1. The comment above it records that 18810 was a temporary bypass of a router whose admission queue waited without a timeout; the operator has since bounded that wait to 30 seconds returning 503 with Retry-After and made consumers per-process rather than per-host, so the stated revert condition is met. Rewrite that comment to describe the router as the route and drop the bypass note, keeping the standing warning that serve ports are internal and rotate.\nBUMP THE IMAS-STANDARD-NAMES PIN FROM 0.9.2 TO 0.9.3 in BOTH places, lines 18 and 184, leaving the [tool.uv.sources] editable entry at line 1049 untouched. Version 0.9.3 was published today and the editable source is already at that content, so the pin names a version older than the source it points at. This matters beyond tidiness: the graph refreshes its grammar snapshot only when the graph's active ISNGrammarVersion differs from the INSTALLED imas_standard_names version, both currently read 0.8.1.dev32+g12b557363, so the refresh is skipped while the graph's 79026 grammar tokens lack the emissivity_peak locus that 0.9.3 added.\nDO NOT RUN uv sync AND DO NOT EDIT ~/.config/reckon/flight.yaml. The sync is the coordinator's to sequence when workers are at rest, and a peer session owns the flight host layer.\nGATE: run tests/core/test_settings.py, tests/test_settings_sn.py, tests/config if present, tests/discovery and tests/standard_names, capturing once to a log file and reading it afterwards. Report added failures against your base sha with both failure id lists. BE ALERT TO ONE CLASS OF FALSE FAILURE: a test that hardcodes the old model id, the 18810 port, or a 204800 context ceiling will now fail for reasons unrelated to the code under test. If you find one, fix the fixture to match the served reality and say which and why; do not pin a test to a value the infrastructure no longer has. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.0,
+          "goal": "Every local pipeline seat names the served deepseek-v4-flash model, the local route points at the router, and the standard-names pin reads 0.9.3.",
+          "id": "n-srr-the-seats-follow-the-served-model",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T14:15:23Z",
+            "read_at": "2026-09-14T14:15:24Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 15.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T141523057219-n-srr-the-seats-follow-the-served-model/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "pyproject.toml"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T14:15:36Z",
+        "completed_at": "2026-09-14T14:20:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 277,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 277,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "6e9f34ec1b02f74505a9de497c674234352abe6e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T141523057219-n-srr-the-seats-follow-the-served-model/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a045-ff0b-7081-8455-192922af5ecd",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T14:20:13Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 15.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T14:20:13Z"
+            }
+          ],
+          "notional_cost_usd": 3.5297,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "Stopped by the coordinator four minutes in, at zero commits, before it wrote anything.",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-seats-follow-the-served-model",
+          "session_id": "01a0a045-ff0b-7081-8455-192922af5ecd",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T14:20:13Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 21.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T134655562460-n-srr-the-local-endpoint-marker-says-what-it-means",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-local-endpoint-marker-says-what-it-means",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1040,
+                "cached_input_tokens": 531253,
+                "input_tokens": 532295,
+                "output_tokens": 584,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 532879,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "The code accepts local/ as a local-endpoint prefix alongside the existing hosted_vllm/, and every deepseek seat in pyproject.toml names a served 4.1 model under local/, with the v4-pro entries deleted, while the existing test suite stays green because the legacy prefix is still accepted. THIS IS STEP ONE OF A TWO-STEP RENAME and the split is deliberate: the full rename spans 15 files and 180787 estimated tokens, which exceeds this lane's 172800 usable input window, so step one moves the code and the configuration while step two, a separate node, updates the test fixtures and then deletes the legacy prefix. DO NOT DELETE hosted_vllm/ IN THIS NODE. Removing it here would break the nine test modules that still spell it and that you are not scoped to edit.\nWHY THE PREFIX IS CHANGING, and this belongs in the commit body because the old name misled two sessions today: the marker says vLLM while the endpoint behind it runs SGLang. The prefix never reaches the wire, because _acompletion_local strips it and sends the bare served id through a plain OpenAI-compatible client to the configured api_base, and the relay matches ids exactly with no splitting, so an unstripped prefix would 404. The marker is therefore a local-route marker rather than a provider selector, and local/ names where the model is served rather than which engine serves it.\nTHE CODE CHANGES. In imas_codex/discovery/base/llm.py, _LOCAL_MODEL_PREFIXES at line 875 currently reads (\"ollama/\", \"hosted_vllm/\", \"openai/localhost\"); add \"local/\" to it, keeping hosted_vllm/ for now. Correct the _acompletion_local docstring, which says vLLM serves the bare served_name, to state that the local endpoint serves the bare served name without naming an engine. In imas_codex/settings.py, _LOCAL_ENDPOINT_PREFIXES at line 310 reads (\"hosted_vllm/\", \"ollama/\"); add \"local/\" there too, and update the surrounding docstring at about line 324 which enumerates the locally-served prefixes. Check imas_codex/standard_names/pools.py and imas_codex/standard_names/fanout/config.py for the same enumerations and extend them consistently; each carries the prefix in prose or in a tuple and you must read both rather than assume.\nA KNOWN WRINKLE THAT IS NOT YOURS TO RESOLVE: after this change the category _LOCAL_MODEL_PREFIXES and one of its members both carry the word local. The lead has directed that this be fixed separately. Do not rename the category, do not restructure the tuples, and do not choose a different prefix to avoid the overlap.\nTHE SEAT CHANGES, all in pyproject.toml. Line 396 sn-compose becomes local/deepseek-v4.1-flash. Lines 583 and 612, cycle 0 of the name-review quorum and the local-only fallback profile, move from the retired hosted_vllm/deepseek-v4-flash to local/deepseek-v4.1-flash. Lines 341 sn-parent-enrich and 732 proposer-model move from openrouter/deepseek/deepseek-v4-flash to local/deepseek-v4.1-flash and gain whatever route and key keys their sibling local seats carry so they resolve through the ambix-local route; the lead's rule is that there is no reason to pay a remote provider for a model served on premise. Lines 662 and 680, both openrouter/deepseek/deepseek-v4-pro, are DELETED from their lists. Line 663 becomes openrouter/deepseek/deepseek-v4.1-flash, which exists on OpenRouter and belongs in a list documented as OpenRouter ids for remote comparison. Lines 314 and 474 are comments naming retired models and must be corrected.\nTHE PRICING BLOCK AT LINES 779 AND 783 IS THE DANGEROUS PART: a missing price has previously broken every curated seat here, so every surviving OpenRouter deepseek id needs a matching pricing entry with its source, and any entry whose model no longer appears must be removed rather than orphaned. State which entries you added, changed or removed.\nDOCUMENT THE ADJACENCY, in two or three lines beside the route definition. Two different things are called local here and neither controls the other: reckon's agent lane, selected by dispatching with --local and resolved through local_backend in the operator's flight config, chooses which agent CLI runs a worker, while the local/ model prefix chooses which model the standard-name pipeline calls. They presently reach the same endpoint, which is why they are confusable.\nDO NOT change the api-base of the ambix-local route, which currently points at port 18810 deliberately and temporarily to bypass a router whose admission queue waits without a timeout.\nGATE: run tests/core/test_settings.py, tests/test_settings_sn.py, tests/discovery and tests/standard_names, capture once to a log file and read it afterwards, and report added failures against the base revision you were dispatched at, naming that sha and both failure id lists. ZERO added failures is required, and because the legacy prefix is still accepted the existing fixtures must still pass unchanged; if any fixture fails, that is evidence the dual-prefix acceptance is incomplete and you must fix the code rather than the fixture. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.2,
+          "goal": "The code accepts local/ as a local-endpoint prefix alongside hosted_vllm/, and every deepseek seat names a served 4.1 model under local/ with the v4-pro entries deleted.",
+          "id": "n-srr-the-local-endpoint-marker-says-what-it-means",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T13:46:56Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T134655562460-n-srr-the-local-endpoint-marker-says-what-it-means/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "pyproject.toml",
+            "imas_codex/settings.py",
+            "imas_codex/discovery/base/llm.py",
+            "imas_codex/standard_names/pools.py",
+            "imas_codex/standard_names/fanout/config.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-b",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 172800
+        },
+        "dispatched_at": "2026-09-14T13:47:05Z",
+        "completed_at": "2026-09-14T14:11:41.010Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1434,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1476,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6e9f34ec1b02f74505a9de497c674234352abe6e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T134655562460-n-srr-the-local-endpoint-marker-says-what-it-means/manifest.md",
+        "scope_changed": false,
+        "session_id": "afc1b3e1-3e15-4678-af03-5348e45e1430",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": "backpressure",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 987976,
+            "input_tokens_cumulative": 987976,
+            "output_tokens": 6901,
+            "output_tokens_cumulative": 6901,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "run died after 1 consumer-queue retries (api_retry 429); the lane refused (queue full) \u2014 backpressure on an unmetered lane, not a spent budget",
+          "lane_backpressure": true,
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-14T14:11:41.010Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 987976,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1472.416,
+          "generated_tokens": 6901,
+          "generation_seconds": 1464.558,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 44.9,
+          "machine_seconds": 7.858,
+          "peak_input_tokens": 89877,
+          "tokens_per_second": 4.71,
+          "wall_tokens_per_second": 4.69
+        },
+        "resume_remedy": {
+          "command": "reckon crew resume --run r-20260914T134655562460-n-srr-the-local-endpoint-marker-says-what-it-means --advice continue",
+          "session_id": "afc1b3e1-3e15-4678-af03-5348e45e1430",
+          "source": "stream"
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "follow_on_paths": null,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "Zero commits and a clean worktree: the local lane refused every turn while the router had no upstream, so the node never reached an edit.",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-local-endpoint-marker-says-what-it-means",
+          "session_id": "afc1b3e1-3e15-4678-af03-5348e45e1430",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T14:11:41.010Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "afc1b3e1-3e15-4678-af03-5348e45e1430",
+          "source": "stream",
+          "reason": "Its scope is now carried by n-srr-the-seats-name-a-served-model-and-a-durable-route, which folds the prefix rename together with the seat and route changes into one commit. Resuming this session would put two workers in pyproject.toml."
+        },
+        "watch_override": null,
+        "tool_steps": 19.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -128407,6 +128771,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2137
+    "_version": 2140
   }
 }
