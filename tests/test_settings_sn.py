@@ -62,8 +62,9 @@ def test_compose_seat_uses_ambix_local_route():
     import imas_codex.settings as mod
 
     route_api_base = mod._get_section("model-routes")["ambix-local"]["api-base"]
+    assert route_api_base == "http://98dci4-gpu-0003:18802/v1"
     assert mod.get_model_config("sn-compose") == {
-        "model": "hosted_vllm/deepseek-v4-flash",
+        "model": "local/deepseek-v4-flash",
         "api_base": route_api_base,
         "api_key_env": "AMBIX_API_KEY",
     }
@@ -74,7 +75,7 @@ def test_local_review_seat_uses_ambix_local_route():
 
     route_api_base = mod._get_section("model-routes")["ambix-local"]["api-base"]
     resolved = mod.resolve_model_source(
-        "sn-review:names", candidate_model="hosted_vllm/deepseek-v4-flash"
+        "sn-review:names", candidate_model="local/deepseek-v4-flash"
     )
     assert resolved.api_base == route_api_base
     assert resolved.api_key_env == "AMBIX_API_KEY"
@@ -89,11 +90,15 @@ def test_changing_named_route_updates_every_referencing_seat(monkeypatch):
     monkeypatch.setattr(mod, "_get_section", lambda name: configured.get(name, {}))
 
     compose = mod.get_model_config("sn-compose")
+    parent_enrich = mod.get_model_config("sn-parent-enrich")
     review = mod.resolve_model_source(
-        "sn-review:names", candidate_model="hosted_vllm/deepseek-v4-flash"
+        "sn-review:names", candidate_model="local/deepseek-v4-flash"
     )
+    fanout = mod.resolve_model_source("sn-fanout:proposer")
     assert compose["api_base"] == replacement
+    assert parent_enrich["api_base"] == replacement
     assert review.api_base == replacement
+    assert fanout.api_base == replacement
 
 
 def test_unknown_model_route_fails_at_resolution(monkeypatch):

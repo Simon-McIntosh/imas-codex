@@ -98,8 +98,9 @@ class TestSettingsFunctions:
 
     # Sections that intentionally use a LOCAL model (free, served on a
     # dedicated client) and are therefore EXEMPT from the openrouter/ prefix
-    # guard: sn-compose (hosted_vllm DeepSeek-V4) and embedding (local Qwen).
-    _LOCAL_MODEL_SECTIONS = frozenset({"sn-compose", "embedding"})
+    # guard: the locally routed compose and parent-enrichment seats, plus the
+    # local embedding model.
+    _LOCAL_MODEL_SECTIONS = frozenset({"sn-compose", "sn-parent-enrich", "embedding"})
 
     @pytest.mark.parametrize(
         "section",
@@ -224,7 +225,7 @@ class TestModuleLevelConstants:
 
 
 def test_free_local_endpoint_requires_explicit_trusted_classification():
-    assert settings.is_explicit_free_local_endpoint("hosted_vllm/deepseek-v4-flash")
+    assert settings.is_explicit_free_local_endpoint("local/deepseek-v4-flash")
     assert not settings.is_explicit_free_local_endpoint(
         "openrouter/openai/gpt-5.6-luna"
     )
@@ -251,7 +252,7 @@ def test_model_sources_separate_route_seats_from_candidate_selection():
     assert fixed.endpoint_class == "local-free"
 
     review_models = settings.get_model_source_models("sn-review:names")
-    assert "hosted_vllm/deepseek-v4-flash" in review_models
+    assert "local/deepseek-v4-flash" in review_models
     assert any(model.startswith("openrouter/") for model in review_models)
     with pytest.raises(ValueError, match="requires an explicit"):
         settings.resolve_model_source("sn-review:names")
@@ -263,7 +264,7 @@ def test_model_sources_separate_route_seats_from_candidate_selection():
 
 def test_local_reviewer_source_binds_its_own_endpoint_contract():
     resolved = settings.resolve_model_source(
-        "sn-review:names", candidate_model="hosted_vllm/deepseek-v4-flash"
+        "sn-review:names", candidate_model="local/deepseek-v4-flash"
     )
 
     assert resolved.api_key_env == "AMBIX_API_KEY"

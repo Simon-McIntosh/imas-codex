@@ -11,8 +11,8 @@ def test_registered_local_endpoint_uses_bare_served_model(monkeypatch):
     from imas_codex import settings
     from imas_codex.discovery.base import llm
 
-    model = "hosted_vllm/deepseek-v4.1-flash"
-    served_model = "deepseek-v4.1-flash"
+    model = "local/deepseek-v4-flash"
+    served_model = "deepseek-v4-flash"
     endpoint = "http://local.example.test/v1"
     monkeypatch.setattr(
         settings,

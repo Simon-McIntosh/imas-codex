@@ -324,7 +324,7 @@ def _patch_compose_deps():
         # reachable at all.
         patch(
             "imas_codex.settings.get_model",
-            return_value="hosted_vllm/local-model",
+            return_value="local/test-model",
         ),
         patch(
             "imas_codex.llm.prompt_loader.render_prompt",

@@ -153,6 +153,9 @@ class TestEnsureModelPrefix:
     def test_ollama_passthrough(self):
         assert ensure_model_prefix("ollama/qwen3:14b") == "ollama/qwen3:14b"
 
+    def test_local_passthrough(self):
+        assert ensure_model_prefix("local/model") == "local/model"
+
     def test_hosted_vllm_passthrough(self):
         assert ensure_model_prefix("hosted_vllm/model") == "hosted_vllm/model"
 

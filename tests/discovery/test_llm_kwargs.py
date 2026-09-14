@@ -36,7 +36,7 @@ def test_request_seed_is_additive_and_reaches_local_provider(monkeypatch):
     from imas_codex.discovery.base import llm
 
     base = {
-        "model": "hosted_vllm/advisory-candidate",
+        "model": "local/advisory-candidate",
         "api_key": "test-key",
         "messages": [{"role": "user", "content": "Return JSON."}],
         "response_format": None,

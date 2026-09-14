@@ -29,7 +29,7 @@ from imas_codex.cli.sn import (
 )
 
 _COMPOSE_CFG = {
-    "model": "hosted_vllm/deepseek-v4-flash",
+    "model": "local/deepseek-v4-flash",
     "api_base": "http://gpu-node:18800/v1",
     "api_key_env": "TEST_GPU_KEY",
 }
