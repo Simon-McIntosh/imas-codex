@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T20:49:03",
+  "updated": "2026-09-14T22:36:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -130514,6 +130514,205 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T191114095219-n-srr-the-census-sees-a-stranded-documentation-axis",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-census-sees-a-stranded-documentation-axis",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2948,
+                "cached_input_tokens": 643280,
+                "input_tokens": 646230,
+                "output_tokens": 549,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 646779,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "The stranded-identity census reports an identity whose name is accepted but whose documentation can never be claimed, where today it reports zero such identities no matter how many exist, proven by a test that places an accepted name at a docs stage no pool admits and asserts it is counted stranded, and by the live census naming neutron_flux_due_to_fusion. REPRODUCE THE DEFECT FIRST and quote what you observe before changing anything.\nTHE MECHANISM, which you must verify rather than take on trust. classify_identity_state_groups in imas_codex/standard_names/pools.py near line 490 declares terminal_name_stages containing accepted, approved, superseded, exhausted and contested, and then does: if state name_stage is in that set or status is terminal, add to terminal_count and CONTINUE. That continue skips the pool-predicate evaluation entirely. Because accepted is in the set, every identity with name_stage accepted is classified terminal and never tested against any predicate. The docs predicates are defined and passed in: standard_name_pool_predicates near line 300 builds generate_docs requiring docs_stage pending, review_docs requiring docs_stage drafted, and refine_docs requiring docs_stage reviewed with its own conditions. They are therefore never consulted for any accepted name, so no docs-axis stranding can ever be reported and both terminal_count and claimable_count are wrong for the whole accepted population.\nTHE LIVE INSTANCE is neutron_flux_due_to_fusion: name_stage accepted, docs_stage exhausted. No docs pool admits an exhausted docs stage, so no flush will ever reach it, and the census calls it terminal. Measured alongside it: 2479 accepted names have accepted docs, 24 are docs reviewed, 7 docs pending, 4 docs drafted and 1 docs exhausted.\nTHE SEMANTIC THE FIX MUST ENCODE is that an identity is terminal when its work is finished on every axis that applies to it, not when one axis reaches a stage that happens to be named accepted. A name at superseded, exhausted or contested is terminal because the identity itself is retired. A name at accepted or approved is terminal only when the documentation axis is also settled; when it is not, the identity is either claimable, if a docs predicate admits it, or stranded, if none does. DETERMINE AND STATE whether every accepted identity carries a documentation obligation, because derived parents are abstractions that may legitimately skip documentation; if such a class exists, it must classify as terminal rather than stranded, and you must say how you identified it from the state rather than by guessing.\nPROVE BOTH DIRECTIONS, because a census that never reports and one that reports everything are equally useless and only the first is quiet. Write a test that places an accepted name at a docs stage no pool admits and asserts it appears in stranded_ids with its state in by_state; write a test that places an accepted name with accepted documentation and asserts it stays terminal and is NOT stranded; and write a test that places an accepted name at docs_stage pending and asserts it is claimable by generate_docs rather than either terminal or stranded. Preserve the existing name-axis behaviour: an identity at name_stage superseded or exhausted must remain terminal, and the existing duplicate-identity and count-mismatch guards must keep raising.\nEVIDENCE THIS NODE MUST EMIT: the census output for the live population before and after your change, quoted, showing terminal_count, claimable_count and stranded_count in both; the stranded_ids list after the change, which must contain neutron_flux_due_to_fusion; and the test result reported as added failures against the base revision you were dispatched at, naming that sha and both failure id lists, where zero added is required.\nDO NOT REPAIR THE STRANDED ROW ITSELF and do not add a pool predicate that admits an exhausted docs stage; re-admitting an exhausted row to the pool that exhausted it would loop. The deliberate operator route out already exists, and you should confirm it rather than build one: sn edit carries a docs mode whose preconditions are name_stage accepted with docs_stage in accepted or exhausted, and a hint mode that resets the producing sources and documentation so the identity is regenerated through the generate pools. Name which of those routes fits a docs-exhausted identity and say why, so the census reports a condition an operator can actually act on.\nA documentation drain is running against the live graph right now, so make no graph writes of any kind; this node changes code and tests only and its live reads must be bounded and under ten seconds. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.2,
+          "goal": "The stranded-identity census reports an accepted name whose documentation no pool can claim, instead of counting it terminal.",
+          "id": "n-srr-the-census-sees-a-stranded-documentation-axis",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T19:11:14Z",
+            "read_at": "2026-09-14T19:11:15Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 18.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T191114095219-n-srr-the-census-sees-a-stranded-documentation-axis/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/pools.py",
+            "tests/standard_names/test_stranded_identity_census.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T19:11:32Z",
+        "completed_at": "2026-09-14T19:21:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 624,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 624,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "26a1941cc7af6d65cc7615a98a84d72c5f17598b",
+        "commits": [
+          "12b9a96c277efbe4c02ecd3415021081fa70be2e"
+        ],
+        "changed_lines": {
+          "added": 82,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": 11,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest tests/standard_names/test_stranded_identity_census.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T191114095219-n-srr-the-census-sees-a-stranded-documentation-axis/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T191114095219-n-srr-the-census-sees-a-stranded-documentation-axis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a154-f064-7aa0-ba88-ac61647974c7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6091520,
+            "cached_input_tokens_cumulative": 6091520,
+            "input_tokens": 6289248,
+            "input_tokens_cumulative": 6289248,
+            "output_tokens": 22859,
+            "output_tokens_cumulative": 22859,
+            "reasoning_output_tokens": 6499,
+            "reasoning_output_tokens_cumulative": 6499
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T19:21:56Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 18.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T19:21:56Z"
+            }
+          ],
+          "notional_cost_usd": 12.8528,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 6091520,
+          "cumulative_input_tokens": 12380768,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 29358
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-census-sees-a-stranded-documentation-axis",
+          "session_id": "01a0a154-f064-7aa0-ba88-ac61647974c7",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T19:21:56Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 52.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -130784,6 +130983,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2150
+    "_version": 2151
   }
 }
