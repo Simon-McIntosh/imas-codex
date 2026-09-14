@@ -280,3 +280,30 @@ The rejected local route check returned before any billable provider result. Nod
 | Active name-review profile | `default` remote three-model quorum | unchanged |
 
 The next external fact required is an endpoint catalog and completion route that agree on the accepted bare model ID. Once a one-attempt configured-route check returns a structured response, Measurement A may begin with its pre/post endpoint probes; Measurement B remains ordered after A.
+
+## Measured serving envelope for the resumed benchmark
+
+The serve operator supplied a measured capacity envelope after the registered-route refusal. The engine now enforces `--context-length 204800`, converting an over-length prefill from an endpoint-killing allocation into a distinguishable HTTP 400 refusal.
+
+The positive and negative controls are both concrete:
+
+| Request shape | Observation | Consequence |
+|---|---|---|
+| 180,961 prefill tokens with 16 tool definitions | Completed in 20.8 seconds while another worker was live | Demonstrated lower bound for accepted agent-shaped context |
+| 281,421 prefill tokens | HTTP 400: `The input (281421 tokens) is longer than the model's context length (204800 tokens)` | Clean context refusal; serve remained reachable |
+| Approximately 360,000 prefill tokens before the enforced cap | Serve died earlier in the day | Historical unsafe shape; not a valid probe |
+
+The interval from 180,961 through 204,800 tokens remains untested. This node therefore adopts a strict request-size ceiling below 200,000 tokens rather than treating the configured 204,800 maximum as a demonstrated operating point. A future run must record any context-length HTTP 400 as a refused sample, never as endpoint loss and never as a score-bearing result.
+
+Concurrency changes the safe context envelope because prefill workspace grows with both request length and simultaneous streams. Measured single-stream throughput is 33.5 tokens per second and remains 33.6 tokens per second at concurrency 4. The knee is 4; beyond concurrency 8, per-stream throughput falls approximately as `1/concurrency`.
+
+The resumed benchmark constraints are therefore:
+
+1. Keep every rendered request below 200,000 tokens.
+2. Keep benchmark generation concurrency at or below 4.
+3. When requests are long-context and concurrent, ramp toward 4 rather than opening at peak concurrency.
+4. Treat HTTP 429 with a retry interval as queue backpressure.
+5. Stop on CUDA OOM, connection failure, or non-429 4xx; a context-length HTTP 400 is a clean refusal and makes the affected measurement non-score-bearing.
+6. Preserve the existing pre/post endpoint probes around each measurement.
+
+These facts lower the risk of a future resumed campaign from endpoint death to an attributable refusal, but they do not clear the current blocker: the configured one-request check still received HTTP 404 for the bare model ID before any benchmark request could be sized or scheduled.
