@@ -198,3 +198,24 @@ No benchmark command was launched and no generation or judge request was made. N
 - Correct the `--physics` reference-path banner so it reports the 15-path fixture selected by extraction.
 - Expose fail-on-first-provider-error behavior or otherwise prove zero retries for a future benchmark; composition still uses `max_retries=2` and can replace a dropped request.
 - Re-establish a stable endpoint window, then resume Measurement A on the login node before attempting Measurement B.
+
+## Configured-route check after serve settlement
+
+The lead subsequently confirmed that the serve had settled at `http://98dci4-gpu-0003:18802/v1`, that the router's literal model ID is `deepseek-v4.1-flash`, and that the `hosted_vllm/` prefix had not yet been proven end to end against the SGLang pass-through relay. A single minimal structured completion through the configured route was therefore required before either benchmark.
+
+The check used the production seat identifier, the configured `ambix-local` route, the seat's reasoning effort, and `max_retries=1`. It sent one request and failed with exit status 1:
+
+```text
+LLM failed after 1 attempts: Error code: 400 - {'error': {'message':
+'/chat/completions: Invalid model name passed in
+model=openai/hosted_vllm/deepseek-v4.1-flash. Call `/v1/models` to view
+available models for your key.'}}
+```
+
+The stack establishes that this was the direct local route, not a tunnel or OpenRouter fallback: `acall_llm_structured` selected `_acompletion_local`, which called the OpenAI-compatible client's `chat.completions.create` against the configured API base. The request reached the relay, but the forwarded model value was `openai/hosted_vllm/deepseek-v4.1-flash` rather than the served catalog ID `deepseek-v4.1-flash`.
+
+This is the configured-route defect the pre-measurement check was designed to expose. The `hosted_vllm/` compatibility prefix does not currently resolve to the dotted SGLang model ID through this path. No retry occurred, and the failure was an HTTP 400 model-resolution refusal rather than CUDA OOM.
+
+Both measurements remain unlaunched. Reporting either benchmark after bypassing the configured route would measure a different routing contract, so no candidate score, physics floor, dataset hash, wall-clock span, or seat decision is manufactured. Node spend remains USD 0.000000 of USD 30.000000, campaign spend remains USD 101.638907 of USD 250.000000, and both production seats remain unchanged.
+
+The immediate next action belongs outside this node's exclusive write scope: repair the local OpenAI-compatible route so `hosted_vllm/deepseek-v4.1-flash` is translated to the catalog model ID `deepseek-v4.1-flash`, then repeat this same one-call check with retries disabled. Only a successful receipt can reopen Measurement A.
