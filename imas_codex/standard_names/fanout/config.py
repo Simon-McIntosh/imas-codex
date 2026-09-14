@@ -67,7 +67,7 @@ class FanoutSettings(BaseModel):
     evidence_token_cap_escalation: int = 800
     """Total evidence-block token cap on Opus-escalation cycles."""
 
-    proposer_model: str = "hosted_vllm/deepseek-v4-flash"
+    proposer_model: str = "local/deepseek-v4-flash"
     """Proposer LLM model identifier.
 
     Defaults to the locally-hosted DeepSeek v4 flash endpoint so the

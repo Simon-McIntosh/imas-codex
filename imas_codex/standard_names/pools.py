@@ -114,8 +114,8 @@ def _pool_is_free(pool: str) -> bool:
     """Return True iff every model *pool* will call is a local/zero-cost endpoint.
 
     A pool is "free" when its configured model(s) route to a local endpoint
-    (``hosted_vllm/``, ``ollama/``, ``openai/localhost``) rather than a paid
-    OpenRouter model.  Free pools (e.g. ``generate_name`` on a local vLLM GPU)
+    (``local/``, ``hosted_vllm/``, ``ollama/``, ``openai/localhost``) rather
+    than a paid OpenRouter model. Free pools (e.g. ``generate_name`` on a local GPU)
     incur no dollar cost, so they must bypass the spend-fairness admission gate
     — their only real limit is GPU concurrency (replica count).
 

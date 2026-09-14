@@ -75,7 +75,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # litellm shares ONE process-global httpx connection pool across every model.
 # When many slow OpenRouter calls (review/docs) hold its connection slots,
-# free local-GPU (hosted_vllm) generate calls cannot acquire a connection —
+# free local-GPU generate calls cannot acquire a connection —
 # they wait client-side past the timeout and fail while the GPU sits idle.
 # Local calls therefore get their OWN AsyncOpenAI client with a generous,
 # isolated connection pool so local generation can never be starved by paid
@@ -122,8 +122,8 @@ async def _acompletion_local(kwargs: dict[str, Any]) -> Any:
     api_base, api_key, max_tokens, timeout, extra_body, …) and returns the
     OpenAI SDK response object, which is shape-compatible with the
     ``response.choices[0].message.content`` / ``response.usage`` access the
-    caller already uses for litellm responses. Strips the litellm provider
-    prefix from the model id (vLLM serves the bare ``served_name``).
+    caller already uses for litellm responses. Strips the endpoint-location
+    prefix because the local endpoint serves the bare model name.
     """
     client = _get_local_client(kwargs["api_base"], kwargs.get("api_key"))
     model = kwargs["model"]
@@ -704,11 +704,12 @@ MODEL_TOKEN_LIMITS: dict[str, dict[str, int]] = {
         # at reasoning_effort="max" spends most of the budget on reasoning; a
         # 32k cap let the model exhaust it mid-think and return finish_reason=
         # "length" with EMPTY content (the "empty response content" failures,
-        # 2026-06-16). The served context window is 512k, and generation is
+        # 2026-06-16). The served context window is 1,048,576, and generation is
         # free on the local GPU, so size the cap to the task with generous
         # margin rather than the minimum: ~18.5k answer tokens for a 25-path
-        # batch plus ample max-thinking headroom. 131072 sits well inside 512k
-        # even with a large prompt. (Defense in depth: an empty length-response
+        # batch plus ample max-thinking headroom. 131072 sits well inside the
+        # native 1,048,576-token context even with a large prompt. (Defense in
+        # depth: an empty length-response
         # is retryable and _bump_max_tokens_for_length grows the budget further
         # on the rare overrun.)
         "max_tokens": 131072,
@@ -718,6 +719,11 @@ MODEL_TOKEN_LIMITS: dict[str, dict[str, int]] = {
         # sustained load the tail runs longer: 600 s still left a ~5% APITimeout
         # tail on a real run (2026-06-15), so raised to 900 s to clear it.
         # Concurrency is bounded by the replica count, not this value.
+        "timeout": 900,
+    },
+    # Engine-neutral local model ids retain the established self-hosted limits.
+    "local": {
+        "max_tokens": 131072,
         "timeout": 900,
     },
     "default": {
@@ -872,14 +878,19 @@ def get_api_key_for_service_with_source(service: str) -> tuple[str, str]:
     return get_api_key(), "OPENROUTER_API_KEY_IMAS_CODEX"
 
 
-_LOCAL_MODEL_PREFIXES = ("ollama/", "hosted_vllm/", "openai/localhost")
+_LOCAL_MODEL_PREFIXES = (
+    "ollama/",
+    "local/",
+    "hosted_vllm/",
+    "openai/localhost",
+)
 
 
 def ensure_model_prefix(model: str) -> str:
     """Ensure model ID has the correct provider prefix for LiteLLM routing.
 
     OpenRouter models get the ``openrouter/`` prefix to preserve
-    ``cache_control`` blocks. Local models (ollama, vLLM) are passed
+    ``cache_control`` blocks. Local models are passed
     through without modification.
     """
     if any(model.startswith(p) for p in _LOCAL_MODEL_PREFIXES):
@@ -898,7 +909,7 @@ def _warn_if_missing_openrouter_prefix(model: str) -> None:
     Unprefixed model IDs silently route through the LiteLLM proxy, which
     strips ``cache_control`` (eliminating prompt-cache discounts of 80%+ on
     warm calls) and zeroes ``response_cost`` (breaking cost telemetry).
-    Local model prefixes (ollama/, hosted_vllm/, openai/localhost) are
+    Local model prefixes (ollama/, local/, hosted_vllm/, openai/localhost) are
     intentionally exempt.
     """
     if model in _PREFIX_WARNED:
@@ -1462,10 +1473,10 @@ def _finish_reason(response: Any) -> str | None:
 # was caused by completion-budget exhaustion (finish_reason='length'). The next
 # retry gets more headroom so reasoning + the JSON answer both fit.
 _LENGTH_RETRY_TOKEN_MULTIPLIER = 2
-# Ceiling for the bumped budget. Must stay ABOVE the base hosted_vllm cap
+# Ceiling for the bumped budget. Must stay ABOVE the base local-endpoint cap
 # (131072) so a rare length-exhaustion at the base budget can still grow, yet
-# well inside the served 512k context (leaving room for the prompt). 262144 =
-# half the context window.
+# well inside the served 1,048,576-token context (leaving room for the prompt).
+# 262144 is one quarter of the context window.
 _LENGTH_RETRY_TOKEN_CAP = 262144
 
 
@@ -1522,7 +1533,7 @@ def extract_cost(response: Any, *, model: str | None = None) -> float:
     """Extract actual LLM cost from a LiteLLM response.
 
     Priority:
-    1. Local models (hosted_vllm/, ollama/) → always 0.0
+    1. Local models (local/, hosted_vllm/, ollama/) → always 0.0
     2. OpenRouter response_cost from _hidden_params (most accurate)
     3. Fallback: Claude Sonnet rates ($3/$15 per 1M tokens)
 
@@ -2069,8 +2080,8 @@ def _build_kwargs(
 
     # Reasoning-effort passthrough — provider-shaped:
     #
-    # * ``hosted_vllm/`` (local vLLM, e.g. DeepSeek V4 served by ambix):
-    #   vLLM's OpenAI server takes ``chat_template_kwargs`` in the request
+    # * ``local/`` and legacy ``hosted_vllm/`` DeepSeek models:
+    #   the local OpenAI-compatible server takes ``chat_template_kwargs`` in the request
     #   body. DeepSeek V4 thinking mode requires
     #   ``{"thinking": true, "reasoning_effort": "high"|"max"}`` — WITHOUT
     #   this the model silently runs in non-think mode, which materially
@@ -2088,7 +2099,7 @@ def _build_kwargs(
     #   request ``"max"`` uniformly and get each provider's maximum effort.
     if reasoning_effort is not None:
         extra_body = kwargs.setdefault("extra_body", {})
-        if model.startswith("hosted_vllm/"):
+        if model.startswith(("local/", "hosted_vllm/")):
             extra_body["chat_template_kwargs"] = {
                 "thinking": True,
                 "reasoning_effort": reasoning_effort,
@@ -2358,11 +2369,11 @@ async def acall_llm_structured(
     total_cache_creation = 0
     response_count = 0
 
-    # Local endpoints (hosted_vllm) bypass litellm's shared connection pool —
+    # Local endpoints bypass litellm's shared connection pool —
     # they use a dedicated, isolated client so free GPU generation is never
     # starved by concurrent slow OpenRouter traffic. Detected by the api_base
     # the routing logic already resolved into kwargs for local models.
-    _use_local = model.startswith("hosted_vllm/") and _is_local_api_base(
+    _use_local = model.startswith(("local/", "hosted_vllm/")) and _is_local_api_base(
         kwargs.get("api_base")
     )
 
@@ -2818,7 +2829,7 @@ async def _acall_frozen_structured_transport(
     response_count = 0
     attempt_count = 0
     last_error: Exception | None = None
-    use_local = model.startswith("hosted_vllm/") and _is_local_api_base(
+    use_local = model.startswith(("local/", "hosted_vllm/")) and _is_local_api_base(
         routing_kwargs.get("api_base")
     )
     governor = None if use_local else get_rate_governor()
