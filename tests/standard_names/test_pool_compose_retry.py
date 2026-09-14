@@ -134,7 +134,7 @@ def _patch_compose_deps():
         ),
         patch(
             "imas_codex.settings.get_model",
-            return_value="hosted_vllm/test-model",
+            return_value="local/test-model",
         ),
         # Prompt rendering
         patch(

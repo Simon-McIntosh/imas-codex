@@ -15,7 +15,7 @@ requires = [
     "linkml>=1.9.3",
     "linkml-runtime>=1.9.5",
     "neo4j>=5.28.0,<6.0.0",
-    "imas-standard-names==0.9.2",
+    "imas-standard-names==0.9.3",
 ]
 build-backend = "hatchling.build"
 
@@ -181,7 +181,7 @@ dev = [
     # --- Catalog preview (mkdocs-driven via 'standard-names serve') ---
     "mkdocs>=1.6.1,<2.0.0",
     "mkdocs-material>=9.6.5,<10.0.0",
-    "imas-standard-names==0.9.2",
+    "imas-standard-names==0.9.3",
 ]
 
 [project.urls]
@@ -304,17 +304,14 @@ reasoning-effort = "high"
 
 [tool.imas-codex.model-routes.ambix-local]
 # This is the router. Serve ports are internal and rotate with topology: the
-# four-card variant declares 18800 and the two-card variant 18809, and which is
-# up is an operational decision. Pinning a serve port turns a routine rotation
-# into an outage for every pool the seat gates.
-# Port 18802 is the preferred router, but its per-IP admission queue can wait
-# without a timeout and silently hang every caller sharing the login-node IP.
-# Port 18810 bypasses it to the direct serve; return to 18802 once waits are bounded.
-api-base = "http://98dci4-gpu-0003:18810/v1"
+# current four-card serve declares 18800, and which internal serve is up is an
+# operational decision. Pinning a serve port turns a routine rotation into an
+# outage for every pool the seat gates, so consumers stay on the bounded router.
+api-base = "http://98dci4-gpu-0003:18802/v1"
 
 [tool.imas-codex.sn-refine]
 # Refine rewrites rejected names and documentation, so it uses a strong model.
-# Switch-back to local: model="hosted_vllm/deepseek-v4-flash"
+# Switch-back to local: model="local/deepseek-v4-flash"
 # with model-route="ambix-local", api-key-env="AMBIX_API_KEY".
 model = "openrouter/openai/gpt-5.5"
 # Reasoning effort for refine_name / refine_docs rewrites. "high" — NOT "max":
@@ -341,7 +338,10 @@ model = "openrouter/anthropic/claude-fable-5"
 # full documentation downstream — so it routes the cheap/fast compose model.
 # Switch to the docs tier (model="openrouter/anthropic/claude-sonnet-4.6",
 # reasoning-effort="high") if review_name rejects the synthesised descriptions.
-model = "openrouter/deepseek/deepseek-v4-flash"
+model = "local/deepseek-v4-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
 reasoning-effort = "medium"
 
 [tool.imas-codex.sn-classifier]
@@ -396,7 +396,7 @@ max-concurrency = 256
 # and a vendor-diverse review quorum. Selection evidence belongs in benchmark
 # result artifacts.
 # Switch-back: model="openrouter/openai/gpt-5.5", reasoning-effort="high".
-model = "hosted_vllm/deepseek-v4.1-flash"
+model = "local/deepseek-v4-flash"
 model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
@@ -464,7 +464,7 @@ dedup-similarity-threshold = 0.85
 # ``BudgetManager.pool_admit``). The right count therefore depends on how
 # many GPUs the vLLM server has:
 #
-#   * 4×H200 profile: the throughput inflection sits at ~96 generate
+#   * 4×H200 profile (current): the throughput inflection sits at ~96 generate
 #     replicas (table below, tuned 2026-05-17 with ``--max-num-seqs 1024
 #     --max-num-batched-tokens 32768``).
 #
@@ -474,8 +474,8 @@ dedup-similarity-threshold = 0.85
 #       2    | 192/128 / 64 |     359      |  76     | 43 %  |  14.2   ← deferred-queue regression
 #       3    | 128/ 96 / 48 |     344      |   0     | 26 %  |  20.0   ← codex-side coordination penalty
 #
-#   * 2×H200 profile (CURRENT default, ambix ``deepseek-v4-flash-2x``,
-#     TP=2): the throughput knee for REAL compose payloads sits at ~4
+#   * Historical 2×H200 profile (TP=2): the throughput knee for REAL compose
+#     payloads sits at ~4
 #     concurrent generate requests. Re-probed 2026-06-15 with realistic
 #     25-path max-thinking batches — the prior 2026-06-13 "16-way healthy at
 #     5.7 s" figure was a TRIVIAL-payload probe (a tiny generation returns
@@ -497,7 +497,7 @@ dedup-similarity-threshold = 0.85
 #     stays 25 (cross-path naming consistency) — batch size is a LATENCY
 #     knob, not a throughput knob: paths/s = GPU tok/s ÷ tokens-per-path,
 #     both fixed by max-thinking. Scale up via the env vars above on more
-#     GPUs. Pairs with the raised ``hosted_vllm`` request timeout (600 s) in
+#     GPUs. Pairs with the raised local-endpoint request timeout in
 #     ``discovery/base/llm.py`` — one max-thinking batch legitimately needs
 #     up to ~528 s at the knee.
 #
@@ -583,7 +583,7 @@ escalation-reasoning-effort = "high"
 # disputed items (sees both blind critiques).
 # To use one local reviewer, configure only the local model in this list.
 models = [
-  "hosted_vllm/deepseek-v4-flash",
+  "local/deepseek-v4-flash",
   "openrouter/anthropic/claude-haiku-4.5",
   "openrouter/openai/gpt-5.5",
 ]
@@ -612,7 +612,7 @@ disagreement-threshold = 0.20
 # Zero-cost local-only fallback.
 # Single DS4-flash reviewer; no quorum.
 models = [
-  "hosted_vllm/deepseek-v4-flash",
+  "local/deepseek-v4-flash",
 ]
 disagreement-threshold = 1.0
 
@@ -662,7 +662,6 @@ compose-models = [
     "openrouter/qwen/qwen3.7-plus",
     "openrouter/xiaomi/mimo-v2.5-pro",
     "openrouter/moonshotai/kimi-k3",
-    "openrouter/deepseek/deepseek-v4-pro",
     "openrouter/deepseek/deepseek-v4-flash",
     "openrouter/meta-llama/llama-4-maverick",
 ]
@@ -680,7 +679,6 @@ candidate-models = [
     "openrouter/google/gemini-3.1-pro-preview",
     "openrouter/openai/gpt-5.6-terra",
     "openrouter/anthropic/claude-sonnet-5",
-    "openrouter/deepseek/deepseek-v4-pro",
 ]
 # Frontier model used as independent judge for quality scoring.
 # Must be a strong reasoning model — evaluates 5 dimensions (0-100).
@@ -732,7 +730,10 @@ evidence-token-cap-escalation = 800
 # Note: Anthropic's structured-output API rejects schemas with ``oneOf``
 # (``FanoutPlan`` is a discriminated union over ``fn_id``); Gemini and
 # OpenAI accept it cleanly, vLLM/DeepSeek with outlines is also fine.
-proposer-model = "openrouter/deepseek/deepseek-v4-flash"
+proposer-model = "local/deepseek-v4-flash"
+model-route = "ambix-local"
+api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
 proposer-temperature = 0.1
 # DeepSeek V4 thinking mode for the local vLLM proposer. "high" not "max":
 # "max" is vLLM/DeepSeek-only; OpenRouter caps at high.

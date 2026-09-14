@@ -632,8 +632,12 @@ class TestReasoningEffortProviderShape:
             reasoning_effort="high",
         )
 
-    def test_hosted_vllm_gets_chat_template_kwargs(self):
-        kw = self._kwargs("hosted_vllm/deepseek-v4-flash")
+    @pytest.mark.parametrize(
+        "model",
+        ["local/deepseek-v4-flash", "hosted_vllm/deepseek-v4-flash"],
+    )
+    def test_local_deepseek_gets_chat_template_kwargs(self, model):
+        kw = self._kwargs(model)
         eb = kw.get("extra_body") or {}
         assert eb.get("chat_template_kwargs") == {
             "thinking": True,
@@ -670,9 +674,13 @@ class TestReasoningEffortProviderShape:
         eb = kw.get("extra_body") or {}
         assert eb.get("reasoning") == {"effort": "xhigh"}
 
-    def test_hosted_vllm_max_preserved(self):
-        # Local vLLM accepts "max" verbatim — it must not be remapped.
-        kw = self._kwargs_effort("hosted_vllm/deepseek-v4-flash", "max")
+    @pytest.mark.parametrize(
+        "model",
+        ["local/deepseek-v4-flash", "hosted_vllm/deepseek-v4-flash"],
+    )
+    def test_local_deepseek_max_preserved(self, model):
+        # The local DeepSeek endpoint accepts "max" verbatim.
+        kw = self._kwargs_effort(model, "max")
         eb = kw.get("extra_body") or {}
         assert eb.get("chat_template_kwargs") == {
             "thinking": True,

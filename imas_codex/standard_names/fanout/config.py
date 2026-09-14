@@ -4,7 +4,7 @@ Reads ``[tool.imas-codex.sn-fanout]`` from ``pyproject.toml`` into a
 :class:`FanoutSettings` Pydantic model and exposes :data:`CATALOG_VERSION`
 — a sha256 over the **fully rendered proposer prompt body** — for
 the literal ``catalog_version=<hex>`` line at the top
-of the Stage A system prompt.
+of the proposer system prompt.
 
 Hash semantics
 --------------
@@ -50,7 +50,7 @@ class FanoutSettings(BaseModel):
     """Master switch.  Default off until rolled out."""
 
     max_fan_degree: int = 3
-    """Hard cap on Stage A query count (parse-time bound)."""
+    """Hard cap on proposer query count (parse-time bound)."""
 
     function_timeout_s: float = 5.0
     """Per-runner ``asyncio.wait_for`` timeout."""
@@ -67,8 +67,8 @@ class FanoutSettings(BaseModel):
     evidence_token_cap_escalation: int = 800
     """Total evidence-block token cap on Opus-escalation cycles."""
 
-    proposer_model: str = "hosted_vllm/deepseek-v4-flash"
-    """Stage A LLM model identifier.
+    proposer_model: str = "local/deepseek-v4-flash"
+    """Proposer LLM model identifier.
 
     Defaults to the locally-hosted DeepSeek v4 flash endpoint so the
     full SN pipeline stays zero-cost end to end.  Override per-run
@@ -78,7 +78,7 @@ class FanoutSettings(BaseModel):
     """
 
     proposer_temperature: float = 0.1
-    """Stage A sampling temperature (low for plan stability)."""
+    """Proposer sampling temperature (low for output stability)."""
 
     fanout_cost_estimate_baseline: float = 0.005
     """Baseline parent-lease pad ($) for fan-out cycles."""
@@ -214,7 +214,7 @@ _PROMPT_NAME = "sn/fanout_propose"
 def _read_proposer_prompt_body() -> str:
     """Return the proposer prompt body (everything below the version line).
 
-    The body is the post-frontmatter Stage A system prompt **excluding**
+    The body is the post-frontmatter proposer system prompt **excluding**
     the literal ``catalog_version=<hex>`` line that we prepend at
     runtime.  The body — not the schema dict — is what is hashed,
     for the reasons given in the module docstring.
@@ -255,7 +255,7 @@ prompt prefix.
 
 
 def render_proposer_system_prompt() -> str:
-    """Return the Stage A system prompt with the version line prepended.
+    """Return the proposer system prompt with the version line prepended.
 
     Output shape::
 

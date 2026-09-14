@@ -273,7 +273,7 @@ def get_model_config(section: str) -> dict[str, str | None]:
     Example pyproject.toml::
 
         [tool.imas-codex.sn-compose]
-        model = "hosted_vllm/deepseek-v4-flash"
+        model = "local/deepseek-v4-flash"
         model-route = "ambix-local"
         api-key-env = "AMBIX_API_KEY"
 
@@ -307,7 +307,7 @@ _MODEL_ENDPOINTS: dict[str, dict[str, str | None]] = {}
 # safe to bind to a section's ``api-base`` when they appear in a mixed
 # ``models`` LIST — the openrouter/-prefixed entries in the same list must
 # keep default proxy routing.
-_LOCAL_ENDPOINT_PREFIXES = ("hosted_vllm/", "ollama/")
+_LOCAL_ENDPOINT_PREFIXES = ("local/", "hosted_vllm/", "ollama/")
 
 
 def register_model_endpoints() -> None:
@@ -321,8 +321,8 @@ def register_model_endpoints() -> None:
        ``api-base`` binds its singular ``model`` to that endpoint.
     2. Any ``[tool.imas-codex.*]`` subsection carrying a ``model-route`` or
        ``api-base`` and a ``models`` list (e.g. review quorums): only the
-       locally-served entries (``hosted_vllm/``, ``ollama/``) bind to the
-       endpoint; openrouter/-prefixed entries keep proxy routing.
+       locally-served entries (``local/``, ``hosted_vllm/``, ``ollama/``)
+       bind to the endpoint; openrouter/-prefixed entries keep proxy routing.
     """
     for section in MODEL_SECTIONS:
         try:
@@ -339,13 +339,19 @@ def register_model_endpoints() -> None:
 
     def _walk(node: dict) -> None:
         models = node.get("models")
-        api_base = (
-            _resolve_model_route(node, "configured model list")
+        proposer_model = node.get("proposer-model")
+        model_ids = (
+            models
             if isinstance(models, list)
-            else None
+            else [proposer_model]
+            if isinstance(proposer_model, str)
+            else []
         )
-        if api_base and isinstance(models, list):
-            for model_id in models:
+        api_base = (
+            _resolve_model_route(node, "configured local model") if model_ids else None
+        )
+        if api_base:
+            for model_id in model_ids:
                 if isinstance(model_id, str) and model_id.startswith(
                     _LOCAL_ENDPOINT_PREFIXES
                 ):
@@ -509,9 +515,15 @@ def resolve_model_source(
         api_base = config["api_base"]
         api_key_env = config["api_key_env"]
         endpoint_class = _get_section(name).get("endpoint-class")
-    elif source_id == "sn-review:names" and model.startswith(_LOCAL_ENDPOINT_PREFIXES):
-        config = _get_section("sn-review").get("names", {})
-        api_base = _resolve_model_route(config, "[tool.imas-codex.sn-review.names]")
+    elif source_id in {"sn-review:names", "sn-fanout:proposer"} and model.startswith(
+        _LOCAL_ENDPOINT_PREFIXES
+    ):
+        config = (
+            _get_section("sn-review").get("names", {})
+            if source_id == "sn-review:names"
+            else _get_section("sn-fanout")
+        )
+        api_base = _resolve_model_route(config, f"[tool.imas-codex.{source_id}]")
         api_key_env = config.get("api-key-env")
         endpoint_class = config.get("endpoint-class")
     if model.startswith(_LOCAL_ENDPOINT_PREFIXES):

@@ -18,6 +18,7 @@ from __future__ import annotations
 import pytest
 from pydantic import BaseModel
 
+from imas_codex.discovery.base.llm import _LOCAL_MODEL_PREFIXES
 from imas_codex.settings import (
     get_model,
     get_openrouter_pricing,
@@ -162,7 +163,11 @@ def _configured_paid_routes() -> list[tuple[str, str]]:
 
 @pytest.mark.parametrize(
     "seat,model",
-    [(s, m) for s, m in _configured_paid_routes() if not m.startswith("hosted_vllm/")],
+    [
+        (seat, model)
+        for seat, model in _configured_paid_routes()
+        if not model.startswith(_LOCAL_MODEL_PREFIXES)
+    ],
     ids=lambda v: str(v),
 )
 def test_every_paid_seat_is_priced_from_the_project_catalog(
