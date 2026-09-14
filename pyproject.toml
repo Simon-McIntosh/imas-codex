@@ -307,7 +307,10 @@ reasoning-effort = "high"
 # four-card variant declares 18800 and the two-card variant 18809, and which is
 # up is an operational decision. Pinning a serve port turns a routine rotation
 # into an outage for every pool the seat gates.
-api-base = "http://98dci4-gpu-0003:18802/v1"
+# Port 18802 is the preferred router, but its per-IP admission queue can wait
+# without a timeout and silently hang every caller sharing the login-node IP.
+# Port 18810 bypasses it to the direct serve; return to 18802 once waits are bounded.
+api-base = "http://98dci4-gpu-0003:18810/v1"
 
 [tool.imas-codex.sn-refine]
 # Refine rewrites rejected names and documentation, so it uses a strong model.

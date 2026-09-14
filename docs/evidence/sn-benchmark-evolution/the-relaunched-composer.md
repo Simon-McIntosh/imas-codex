@@ -280,3 +280,153 @@ The rejected local route check returned before any billable provider result. Nod
 | Active name-review profile | `default` remote three-model quorum | unchanged |
 
 The next external fact required is an endpoint catalog and completion route that agree on the accepted bare model ID. Once a one-attempt configured-route check returns a structured response, Measurement A may begin with its pre/post endpoint probes; Measurement B remains ordered after A.
+
+## Measured serving envelope for the resumed benchmark
+
+The serve operator supplied a measured capacity envelope after the registered-route refusal. The engine now enforces `--context-length 204800`, converting an over-length prefill from an endpoint-killing allocation into a distinguishable HTTP 400 refusal.
+
+The positive and negative controls are both concrete:
+
+| Request shape | Observation | Consequence |
+|---|---|---|
+| 180,961 prefill tokens with 16 tool definitions | Completed in 20.8 seconds while another worker was live | Demonstrated lower bound for accepted agent-shaped context |
+| 281,421 prefill tokens | HTTP 400: `The input (281421 tokens) is longer than the model's context length (204800 tokens)` | Clean context refusal; serve remained reachable |
+| Approximately 360,000 prefill tokens before the enforced cap | Serve died earlier in the day | Historical unsafe shape; not a valid probe |
+
+The interval from 180,961 through 204,800 tokens remains untested. This node therefore adopts a strict request-size ceiling below 200,000 tokens rather than treating the configured 204,800 maximum as a demonstrated operating point. A future run must record any context-length HTTP 400 as a refused sample, never as endpoint loss and never as a score-bearing result.
+
+Concurrency changes the safe context envelope because prefill workspace grows with both request length and simultaneous streams. Measured single-stream throughput is 33.5 tokens per second and remains 33.6 tokens per second at concurrency 4. The knee is 4; beyond concurrency 8, per-stream throughput falls approximately as `1/concurrency`.
+
+The resumed benchmark constraints are therefore:
+
+1. Keep every rendered request below 200,000 tokens.
+2. Keep benchmark generation concurrency at or below 4.
+3. When requests are long-context and concurrent, ramp toward 4 rather than opening at peak concurrency.
+4. Treat HTTP 429 with a retry interval as queue backpressure.
+5. Stop on CUDA OOM, connection failure, or non-429 4xx; a context-length HTTP 400 is a clean refusal and makes the affected measurement non-score-bearing.
+6. Preserve the existing pre/post endpoint probes around each measurement.
+
+These facts lower the risk of a future resumed campaign from endpoint death to an attributable refusal, but they do not clear the current blocker: the configured one-request check still received HTTP 404 for the bare model ID before any benchmark request could be sized or scheduled.
+
+## Temporary direct route and successful configured completion
+
+The router diagnosis dissolved the HTTP 404 as a transient replacement-window result and identified the persistent hang mechanism at port 18802: admission is keyed by client IP, so all login-node processes share two in-flight slots and four queued slots, while the queue waits on a condition with no timeout. The upstream model remained healthy during the observed router hangs.
+
+Commit `b2c633c1c` temporarily changed only the `ambix-local` API base from the preferred router at `http://98dci4-gpu-0003:18802/v1` to the direct serve at `http://98dci4-gpu-0003:18810/v1`. It preserved the existing rotation warning and added the mechanism and revert condition: return to 18802 once the router bounds queued waits.
+
+The first completion through the direct route returned an `LLMResult`, after which the receipt script raised `AttributeError` while trying to read a nonexistent `.value` attribute. That was an instrumentation failure after a successful provider response, not a provider error. The corrected receipt check then completed with one request and no retry:
+
+```json
+{"timestamp_utc":"2026-09-14T12:13:32.480782+00:00","request_model":"hosted_vllm/deepseek-v4.1-flash","served_model":"deepseek-v4.1-flash","api_base":"http://98dci4-gpu-0003:18810/v1"}
+{"response":{"ok":true},"cost_usd":0.0,"tokens":69,"response_count":1}
+```
+
+The configured route is therefore proven end to end. The application-facing model is registered, `_acompletion_local` strips the compatibility prefix to the bare dotted ID, the direct endpoint accepts it, and the structured response returns through the project call layer. This receipt clears the route precondition for Measurement A while leaving the temporary-port rollback obligation open.
+
+## Measurement A: completed on a changed population
+
+Command:
+
+```text
+imas-codex sn bench --models hosted_vllm/deepseek-v4.1-flash --max-candidates 20 --runs 3 --reviewer-model openrouter/anthropic/claude-opus-4.8
+```
+
+Report:
+
+`/home/ITER/mcintos/.local/share/imas-codex/benchmarks/sn_benchmark_20260914T121534.json`
+
+The real-completion validity probes both passed against the direct serve:
+
+| Position | UTC timestamp | Endpoint | Response | Attempts |
+|---|---|---|---|---:|
+| Immediately before | 2026-09-14T12:15:07.713791+00:00 | `http://98dci4-gpu-0003:18810/v1` | `{"ok":true}` | 1 |
+| Immediately after | 2026-09-14T12:47:40.784678+00:00 | `http://98dci4-gpu-0003:18810/v1` | `{"ok":true}` | 1 |
+
+The report records 1,845.3 seconds of benchmark wall-clock work: 1,660.15 seconds composing and 185.19 seconds reviewing. The output filename identifies command start at 12:15:34Z and the report timestamp is 12:47:14.368946Z, a 1,900-second outer span including extraction and setup. No batch error, compose error, review error, OOM, context refusal, connection failure, or non-429 4xx was recorded.
+
+### Population identity: comparison refused
+
+The incumbent and candidate populations are not identical:
+
+| Report | Extracted items | Dataset hash |
+|---|---:|---|
+| Incumbent, 2026-07-17 | 17 | `d66fef87c0f962f1` |
+| v4.1, 2026-09-14 | 12 | `636159b35205da41` |
+
+Eight of the first twenty reference paths currently exist in the DD but are not admitted as Standard Name sources. The emitted hash therefore differs from the locked incumbent hash. The v4.1 result is **not appendable to the July table**, and no delta or better/worse claim is made against its four model rows.
+
+The first seat condition fails: `636159b35205da41 != d66fef87c0f962f1`. Consequently the compose result cannot authorize the result-gated parent-enrich change, regardless of its score.
+
+### Absolute three-run result
+
+The aggregate report contains 36 candidates, 12 from each run. Its aggregate reference fields are overlap 9/47, precision 0.2500, and recall 0.1915; the precision denominator spans all 36 generated candidates and is therefore not the mean of the three per-run precisions.
+
+| Dimension | Run 1 | Run 2 | Run 3 | Mean | Spread |
+|---|---:|---:|---:|---:|---:|
+| Reference precision | 0.8333 | 0.6667 | 0.7500 | 0.7500 | 0.1666 |
+| Reference recall | 0.2128 | 0.1702 | 0.1915 | 0.1915 | 0.0426 |
+| Reference overlap | 10/47 | 8/47 | 9/47 | 9/47 | 2 names |
+| Grammar validity | 12/12 | 12/12 | 12/12 | 100% | 0 |
+| Field consistency | 12/12 | 12/12 | 12/12 | 100% | 0 |
+| Opus name-review mean | 0.915625 | 0.938542 | 0.939583 | 0.931250 | 0.023958 |
+| Opus description-review mean | 0.985417 | 0.991667 | 0.973958 | 0.983681 | 0.017709 |
+
+The precision spread is material, but the hash mismatch already prevents a comparative verdict. These values remain an absolute repeatability record only; endpoint variance and model variance cannot be separated from three runs.
+
+### Measurement A spend
+
+The JSON receipt carries USD 0.000000 composition cost, USD 0.60048775 name-review cost, and USD 0.17078325 description-review cost, for attributable spend of **USD 0.77127100**. The CLI cost headline reports USD 0.6005 because it omits `description_reviewer_cost`; that undercount is a follow-on defect rather than the spend authority used here.
+
+Campaign spend after Measurement A is USD 103.643965 of USD 250.000000. Node spend is USD 0.771271 of USD 30.000000.
+
+## Measurement B: INDETERMINATE at the time fence
+
+Command:
+
+```text
+imas-codex sn bench --models hosted_vllm/deepseek-v4.1-flash --runs 3 --reviewer-model openrouter/anthropic/claude-opus-4.8 --physics
+```
+
+The immediate pre-run real completion passed:
+
+```json
+{"measurement":"B","position":"before","timestamp_utc":"2026-09-14T12:50:19.836207+00:00","endpoint":"http://98dci4-gpu-0003:18810/v1","request_model":"hosted_vllm/deepseek-v4.1-flash","served_model":"deepseek-v4.1-flash","response":{"ok":true},"cost_usd":0.0,"tokens":69,"response_count":1}
+```
+
+The command began at approximately 12:50:44Z and selected the 15-path physics fixture. Four of those paths existed in the DD but were not admitted as Standard Name sources:
+
+- `equilibrium/time_slice/boundary_separatrix/x_point/r`
+- `magnetics/ip/data`
+- `magnetics/rogowski_coil/current/data`
+- `pf_active/coil/b_field_max_timed/data`
+
+The CLI printed `Reference paths: 47/47`, confirming the already-recorded banner defect: that line reports the non-physics fixture length even though extraction selected 15 physics paths.
+
+The run remained at concurrency one and emitted no OOM, context-length overflow, connection failure, non-429 4xx, batch error, or retry. Its watchdog recorded several long but nonterminal calls. Three warning sequences stopped without an error after reaching 416, 186, and 474 seconds, indicating progress between calls. A later review or physics-judge call remained in flight through 652 seconds.
+
+At that point the node had exceeded its hard 55-minute execution fence across Measurement A and Measurement B. The foreground command was interrupted rather than allowed to continue beyond the fence:
+
+```text
+WARNING: LLM possible stall: 1 call(s) in flight, no completion for 652s
+^C
+Aborted!
+```
+
+The outer Measurement B span was approximately 12:50:44Z to 13:23:5xZ, about 33 minutes. A timestamp taken immediately after cleanup was 2026-09-14T13:24:02.377312362Z.
+
+The intended report path was `/home/ITER/mcintos/.local/share/imas-codex/benchmarks/sn_benchmark_20260914T125044.json`. It does not exist. Because the model unit did not complete, the benchmark's incremental save never landed. There is no post-run real completion, no complete validity bracket, no persisted cost receipt, and no physics verdict to recover.
+
+Measurement B is therefore **INDETERMINATE**. No absolute physics figure is reported. The missing post-probe and absent report are evidence against reporting a number, not zero-valued measurements.
+
+### Final seat decision
+
+The result-gated seat condition did not pass:
+
+- Measurement A hash equality failed: `636159b35205da41 != d66fef87c0f962f1`.
+- Measurement B was indeterminate and supplies no compensating authority.
+
+The authorized compose registration and temporary direct route remain because the old local model and port are retired. `[tool.imas-codex.sn-parent-enrich]` remains `openrouter/deepseek/deepseek-v4-flash`; it was not promoted to v4.1. The inactive local reviewer entries at lines 583 and 612 remain unchanged.
+
+### Final spend boundary
+
+Confirmed attributable node spend is USD 0.771271 from Measurement A. Campaign spend is therefore confirmed to at least USD 103.643965 from the supplied USD 102.872694 starting point. Measurement B produced no artifact-local receipt before interruption, so its exact provider spend is unknown and must not be reported as zero. The USD 30.000000 node ceiling was not knowingly exceeded; the missing partial-run cost receipt is a follow-on for the benchmark's durability contract.
