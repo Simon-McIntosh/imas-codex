@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T12:25:56",
+  "updated": "2026-09-14T13:24:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -38,6 +38,15 @@
         "role": "implement",
         "session_id": "c4283d0f-4079-4b90-bea6-4d584a1301bd",
         "created": "2026-08-22"
+      },
+      {
+        "id": "claude-a",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       },
       {
         "id": "claude-opus-a",
@@ -4742,6 +4751,15 @@
           "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "session-2a6f0db8b3e75a382796",
+        "harness": "codex-terra",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       },
       {
         "id": "son-graphbase",
@@ -127358,6 +127376,192 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T111426581516-n-swcr-the-exhausted-xray-half-width-is-steered-to-a-parseable-spelling",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-exhausted-xray-half-width-is-steered-to-a-parseable-spelling",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1615,
+                "cached_input_tokens": 275344,
+                "input_tokens": 276961,
+                "output_tokens": 484,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 277445,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "inner_hard_xray_peak_width reads back from the live graph as name_stage=exhausted at refine_attempts 3 of 3, docs_stage pending, unit 1, bound to DD path hard_x_rays/emissivity_profile_1d/half_width_internal, and the WEST cut does not carry it. Its rotation is spent so refine_name cannot claim it. The sanctioned vehicle is imas-codex sn edit, and _RENAME_ELIGIBLE_STAGES at imas_codex/standard_names/edit.py:109 admits exhausted, so a steered rename re-enters the identity at REVIEW_NAME without needing rotation budget. CONFIRM THAT ELIGIBILITY HOLDS AT RUNTIME with sn edit --dry-run before attaching anything, and quote the exact refusal text if it does not hold. THE DIAGNOSIS TO ACT ON: the accepted description reads \"Inward half-width of the hard X-ray emissivity peak in normalized toroidal flux coordinate\" and the current spelling carries none of half-width, emissivity, or the coordinate, so it states a width where the quantity is a half-width, names a peak that could be count-rate or spectral, and gives a dimensionless extent with no coordinate naming what it is normalized against. Its predecessor inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width carried all three and died on a grammar round-trip parse_error, so the tension is that the fully specified spelling does not parse and the parseable spelling underspecifies. The coordinator's candidate is inner_half_width_of_hard_xray_emissivity_peak, which restores half-width and emissivity and leaves the coordinate to documentation on the grounds that unit 1 plus docs carry it. Treat that as a proposal to test rather than a prescription: if your own reading of the DD path, the unit, and the ISN closed vocabulary yields a better parseable spelling, propose that one and state the semantic difference in plain language. Write the --reason grounded in the DD path and the physics, never in preference, because the reason is shown to the reviewer as expert intent. Run --dry-run first and confirm the proposed candidate and its scope, then attach with --scope self because this identity has no siblings sharing the edited segment. Then drive the review so the steered candidate is scored. EVIDENCE THIS NODE MUST EMIT, all into the write path: the starting spelling with its two recorded aggregates 0.750 and 0.625, every candidate spelling attached with its per-reviewer scores and aggregate, the ISN grammar round-trip result for each candidate, the final name_stage read back from the graph, and whether the WEST cut would now carry the identity. A rename that review ACCEPTS must show the successor reading back as accepted with its aggregate at or above 0.85; a rename that review REJECTS must show the scored rejection with every reviewer figure. If the grammar refuses every spelling that carries all three semantic elements, report that as an ISN vocabulary finding with the exact refusal text for each attempted spelling, which escalates rather than being retried. Never clear a quarantine and delete nothing, because this identity carries recorded LLM spend. The compose seat names a model that no longer exists and compose must not be invoked; refine and review resolve to remote providers and are unaffected. Live graph work runs on the login node because the project client resolves the graph host directly rather than through localhost. Spend no more than 15.00 USD and state the campaign total before and after; it was 102.872694 USD against an authorised 250.00 USD ceiling. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.0,
+          "goal": "The exhausted hard X-ray half-width identity reaches an accepted successor or spends its steered-edit review, recorded in docs/evidence/sn-west-catalog-release/the-two-excluded-names.md.",
+          "id": "n-swcr-the-exhausted-xray-half-width-is-steered-to-a-parseable-spelling",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T11:14:27Z",
+            "read_at": "2026-09-14T11:14:28Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 9.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T111426581516-n-swcr-the-exhausted-xray-half-width-is-steered-to-a-parseable-spelling/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-two-excluded-names.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-luna-a",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T11:14:41Z",
+        "completed_at": "2026-09-14T11:21:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 428,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 428,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "7f8c79e13a14bc0b70253a28a61f0873baf059c8",
+        "commits": [
+          "c1913088b084774cc113504e2e8c35f8f60b8ac0"
+        ],
+        "changed_lines": {
+          "added": 84,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn edit --dry-run eligibility probe and candidate grammar round-trip against the live graph",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T111426581516-n-swcr-the-exhausted-xray-half-width-is-steered-to-a-parseable-spelling/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 7890432,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 8023870,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 12354,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 3870
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T11:21:49Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 9.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T11:21:49Z"
+            }
+          ],
+          "notional_cost_usd": 19.6139,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 82027904,
+          "cumulative_input_tokens": 83146410,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 16224,
+          "generation_seconds": 510199.429,
+          "machine_seconds": 2912.738,
+          "tokens_per_second": 0.03
+        },
+        "follow_on_paths": [
+          "vocabulary/grammar"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-exhausted-xray-half-width-is-steered-to-a-parseable-spelling",
+          "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T11:21:49Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 28.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -127628,6 +127832,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2130
+    "_version": 2133
   }
 }
