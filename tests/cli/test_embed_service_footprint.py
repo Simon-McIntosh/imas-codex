@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from click.testing import CliRunner
+
 
 def _deploy_request(**deploy_kwargs: int) -> dict[str, object]:
     from imas_codex.cli import services
@@ -91,3 +93,16 @@ def test_explicit_multi_gpu_embed_submission_retains_its_larger_footprint() -> N
     assert "#SBATCH --cpus-per-task=9" in submission
     assert "#SBATCH --mem=32G" in submission
     assert "--gpus 0,1,2,3,4,5,6,7 --workers 8" in submission
+
+
+def test_embed_start_forwards_explicit_gpu_count_to_the_deployer() -> None:
+    from imas_codex.cli import embed
+
+    with (
+        patch.object(embed, "_is_compute_target", return_value=True),
+        patch.object(embed, "deploy_embed") as deploy_embed,
+    ):
+        result = CliRunner().invoke(embed.embed, ["start", "--gpus", "8"])
+
+    assert result.exit_code == 0
+    deploy_embed.assert_called_once_with(8, None)
