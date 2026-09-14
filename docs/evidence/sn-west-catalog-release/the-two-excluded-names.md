@@ -125,6 +125,18 @@ shortfall, and spent no refinement attempt. Exit 3 is the command's documented
 negative outcome for a successor that did not land, not an infrastructure
 failure.
 
+The review claim was scoped to the single rescore `run_id`, but the common pool
+wrapper also emitted corpus-wide maintenance diagnostics: 17 of 4,943
+attachments failed its consistency guard, nine accepted-name attachments were
+left in place, 22 live names had no source, seven live names were fed by DD
+paths absent from the current DD, and 122 missing derived-parent targets were
+refused for incomplete authority. A bounded 7.516771-second read found zero
+`StandardNameChange` rows attributed to `sn-rescore-20260914T090836Z`, so the
+run left no durable attachment-detachment record under its own id. These
+corpus-wide findings are not part of either identity verdict and were not
+repaired here; the fact that a single-name recovery enters global maintenance
+is a separate scope-integrity follow-up.
+
 ### `inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width`
 
 Description: inward half-width of the hard X-ray emissivity peak in normalized
