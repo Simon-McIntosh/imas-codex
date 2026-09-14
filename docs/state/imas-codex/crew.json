@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T13:24:22",
+  "updated": "2026-09-14T15:40:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -56,6 +56,15 @@
         "session_model": null,
         "sessions": {},
         "created": "2026-09-08"
+      },
+      {
+        "id": "clive-a",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-14"
       },
       {
         "id": "clive-binding",
@@ -127562,6 +127571,572 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T111804265811-n-srr-a-locally-routed-seat-is-hijacked-onto-the-proxy-path",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-a-locally-routed-seat-is-hijacked-onto-the-proxy-path",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 622,
+                "cached_input_tokens": 286486,
+                "input_tokens": 287110,
+                "output_tokens": 3532,
+                "reasoning_output_tokens": 1658,
+                "total_tokens": 290642,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "A minimal completion through the configured [sn-compose] route reaches http://98dci4-gpu-0003:18802/v1 carrying the bare served model id deepseek-v4.1-flash and returns a completion, proven by one recorded request and its response, where today that same call returns HTTP 400 invalid model name openai/hosted_vllm/deepseek-v4.1-flash. CONFIRM THE DEFECT STILL REPRODUCES before changing anything, and quote the failing request and its 400. THE MECHANISM, which you must verify rather than trust: imas_codex/discovery/base/llm.py:1989 builds model_id = f\"openai/{ensure_model_prefix(model)}\" on the proxy branch, guarded by use_proxy = llm_location != \"local\" or bool(os.getenv(\"LITELLM_PROXY_URL\")) and bypass_proxy = has_direct_key and is_openrouter_model. For hosted_vllm/deepseek-v4.1-flash the is_openrouter_model test is False because it looks for the substring \"deepseek/\" with a trailing slash while the id contains \"deepseek-\", so bypass_proxy is False and a model carrying an explicitly configured api-base is routed through the LiteLLM proxy anyway, discarding the api_base that register_model_endpoints resolved for it. _acompletion_local at line 118 then cannot repair the string because _LOCAL_MODEL_PREFIXES at line 875 is (\"ollama/\", \"hosted_vllm/\", \"openai/localhost\") and none of those is a prefix of \"openai/hosted_vllm/...\", so the doubled id reaches the relay verbatim. Establish which of those two sites is the correct place to fix and say why in the commit body. The governing rule to encode: a model with a registered local endpoint must be called against THAT endpoint with the bare served id, and must never be rewritten onto the proxy path, because the ambix relay is a pass-through rather than LiteLLM and does not strip provider prefixes. Do not fix this by adding \"openai/hosted_vllm/\" to the strip list, which would leave the call still pointed at the proxy URL instead of the configured api-base and would paper over the routing error with a string repair. GATE: run the tests that cover the changed file, which include tests/discovery and any test importing ensure_model_prefix or _acompletion_local, and report added failures against the base revision rather than an absolute count, naming the base sha and both failure id lists. Add a regression test that asserts a model carrying a registered local api_base resolves to that api_base with the bare served id, and that a proxy-routed model is unaffected, so the two paths are pinned apart. Then prove the repair operationally with one real minimal completion against the live relay and record the request model string, the endpoint, and the response. The relay crashed three times today on CUDA OOM under agent-shaped load, so keep your proof call small, send exactly one, and if it returns an OOM or a provider error stop and report rather than retrying. Report the campaign spend before and after; it was 102.872694 USD against an authorised 250.00 USD ceiling. Do not change any model seat in pyproject.toml, which another node owns. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.5,
+          "goal": "A model carrying a registered local api-base is called against that endpoint with its bare served id instead of being rewritten onto the LiteLLM proxy path.",
+          "id": "n-srr-a-locally-routed-seat-is-hijacked-onto-the-proxy-path",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T11:18:04Z",
+            "read_at": "2026-09-14T11:18:05Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 9.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T111804265811-n-srr-a-locally-routed-seat-is-hijacked-onto-the-proxy-path/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/discovery/base/llm.py",
+            "tests/discovery/test_llm_routing.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T11:18:17Z",
+        "completed_at": "2026-09-14T11:26:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 475,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 475,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "7f8c79e13a14bc0b70253a28a61f0873baf059c8",
+        "commits": [
+          "77d52cc2d4ff12463d55e000e6d9ebef3a78de74"
+        ],
+        "changed_lines": {
+          "added": 95,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest tests/discovery",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T111804265811-n-srr-a-locally-routed-seat-is-hijacked-onto-the-proxy-path/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T111804265811-n-srr-a-locally-routed-seat-is-hijacked-onto-the-proxy-path/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a09fa3-a768-7ed0-b1cb-ba031511c139",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2983680,
+            "cached_input_tokens_cumulative": 2983680,
+            "input_tokens": 3122238,
+            "input_tokens_cumulative": 3122238,
+            "output_tokens": 16703,
+            "output_tokens_cumulative": 16703,
+            "reasoning_output_tokens": 7154,
+            "reasoning_output_tokens_cumulative": 7154
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T11:26:12Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 10.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T11:26:12Z"
+            }
+          ],
+          "notional_cost_usd": 6.4449,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2983680,
+          "cumulative_input_tokens": 6105918,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23857
+        },
+        "follow_on_paths": [
+          "pyproject.toml",
+          "v4.1"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run the tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-a-locally-routed-seat-is-hijacked-onto-the-proxy-path",
+          "session_id": "01a09fa3-a768-7ed0-b1cb-ba031511c139",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T11:26:12Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 32.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T120018700081-n-swcr-the-recovered-name-earns-its-documentation",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-recovered-name-earns-its-documentation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1267,
+                "cached_input_tokens": 380859,
+                "input_tokens": 382128,
+                "output_tokens": 2949,
+                "reasoning_output_tokens": 1366,
+                "total_tokens": 385077,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "hot_neutral_temperature_at_plasma_boundary reads back from the live graph with docs_stage accepted, where today it is name_stage=accepted at aggregate 0.9875 but docs_stage=pending, which is why the WEST cut does not carry it. CONFIRM THAT STARTING STATE FIRST and quote it, including its producing DD paths spectrometer_visible/channel/polarization_spectroscopy/temperature_hot_neutrals and spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_temperature, its unit eV, and its current description. Then drive the documentation stage through the ordinary pipeline so the identity gains reviewed and accepted documentation, using the sanctioned scoped run rather than writing graph text directly. THERE IS A SEMANTIC DEFECT TO RESOLVE IN THE DOCUMENTATION PASS, and it is the substantive work of this node rather than an aside. The accepted name says at_plasma_boundary while its own description says \"in the plasma edge or scrape-off layer\". These locate the quantity differently: the plasma boundary is the last closed flux surface, a surface, whereas the scrape-off layer is the open-field-line region outside it. Two reviewers scored the name 0.975 and 1.000 without reconciling that. Read the two producing DD paths and their enriched descriptions and determine which locus the measurement actually samples, then make the documentation state that locus unambiguously and consistently with the name. If the evidence shows the quantity is sampled in the scrape-off layer rather than at the boundary, then the NAME is wrong rather than the description, and the correct action is to report that with the evidence rather than to write documentation that papers over it; say so plainly and stop short of renaming, because a rename is a separate authorised decision. EVIDENCE THIS NODE MUST EMIT: the starting docs_stage and description; the DD-sourced determination of the locus with the path text you relied on; every documentation candidate produced with its per-reviewer scores and aggregate; the final docs_stage read back from the graph; and an explicit statement of whether the WEST cut would now carry this identity. Ground the documentation on the enriched node descriptions rather than the terse DD XML documentation, because the terse form loses the physics the reviewers score against. Do not invoke compose: that seat resolves to a locally served model whose endpoint is under an active benchmark and must not take concurrent load from this node. Documentation generation and review resolve to remote providers and are what this node uses. Live graph work runs on the login node because the project client resolves the graph host directly. Delete nothing, clear no quarantine, and do not touch the second excluded identity inner_hard_xray_peak_width, which is blocked upstream on a grammar question another node owns. Spend no more than 12.00 USD and state the campaign total before and after; it stands at 102.872694 USD against an authorised 250.00 USD ceiling. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.0,
+          "goal": "hot_neutral_temperature_at_plasma_boundary gains accepted documentation so the WEST cut can carry it.",
+          "id": "n-swcr-the-recovered-name-earns-its-documentation",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T12:00:19Z",
+            "read_at": "2026-09-14T12:00:19Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 10.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T120018700081-n-swcr-the-recovered-name-earns-its-documentation/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-recovered-name-documentation.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-luna-a",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T12:00:28Z",
+        "completed_at": "2026-09-14T12:14:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 819,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 819,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "4c8311fa6a5fad97ab16da8bd8c2932bfa58f6c7",
+        "commits": [
+          "384846bf04f304e053944c6c346862d63d7ab0ad"
+        ],
+        "changed_lines": {
+          "added": 181,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "live docs-only scoped run plus export check readback against bolt://98dci4-gpu-0002:7687",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T120018700081-n-swcr-the-recovered-name-earns-its-documentation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1334528,
+            "cached_input_tokens_cumulative": 9224960,
+            "input_tokens": 1382592,
+            "input_tokens_cumulative": 9406462,
+            "output_tokens": 12589,
+            "output_tokens_cumulative": 24943,
+            "reasoning_output_tokens": 1704,
+            "reasoning_output_tokens_cumulative": 5574
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T12:14:07Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 11.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T12:14:07Z"
+            }
+          ],
+          "notional_cost_usd": 21.5251,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 91197824,
+          "cumulative_input_tokens": 92472116,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 30517,
+          "generation_seconds": 513110.004,
+          "machine_seconds": 3140.014,
+          "tokens_per_second": 0.06
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-recovered-name-earns-its-documentation",
+          "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T12:14:07Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 68.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1800,
+                "cached_input_tokens": 775470,
+                "input_tokens": 777272,
+                "output_tokens": 1710,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 778982,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "PRECONDITION, and stop here if it fails. The local serving lane is FLAPPING rather than restored: an endpoint listing answered with deepseek-v4.1-flash at 11:04 and reported no reachable models at 11:08, and a dispatch between those two moments passed the correct model name and died in sixteen seconds at zero tokens with a terminal record reading subtype success, is_error true, and the text there is an issue with the selected model. So probe the endpoint at least five times over five minutes and require every probe to answer before benchmarking. If any probe fails, STOP and report the flap with its timestamps rather than benchmarking across it, because a quality measurement taken through an intermittent endpoint measures the endpoint. MEASURE: run \"imas-codex sn bench --models hosted_vllm/deepseek-v4.1-flash --runs 3 --physics\" over the full 54-path reference set with the configured judge and reviewer slate, writing the JSON report to a path you name in the evidence file. Three runs is not optional: a single LLM-judged score near a threshold is a coin flip, and this repository measured one such gate swinging 0.0755 on an unchanged re-run, ten times the margin it was being read against. COMPARE: find the most recent recorded benchmark result for the incumbent deepseek-v4-flash on the SAME reference dataset with the SAME judge, in docs/evidence/sn-benchmark-evolution, and quote it with its date and the run conditions. Compare per dimension rather than on a single headline number. VERDICT, and it has exactly three possible values, each of which you must be willing to report. FAVOURABLE means the v4.1 mean equals or exceeds the incumbent on every reported dimension AND the run-to-run spread across your three runs is SMALLER than the margin you are claiming. UNFAVOURABLE means the mean falls below the incumbent on any dimension by more than that spread. INDETERMINATE means the spread is as large as or larger than the margin, which is not a failure of the model but of the measurement, and the honest report is that more runs are needed rather than a verdict. ACT ONLY ON FAVOURABLE: update the compose seat at pyproject.toml line 396 and the parent-enrich seat at line 341 to the v4.1 model. Before touching line 341, confirm the v4.1 variant is actually offered by the provider that seat names, because that seat uses a remote provider while compose uses the local one, and a model available locally may not exist remotely. If it is not offered, leave that line alone and say so. On UNFAVOURABLE or INDETERMINATE change no seat at all and say which verdict you reached. Spend no more than 30.00 USD on judges and generation; the campaign total was 101.638907 USD against an authorised 250.00 USD ceiling before this node, and you must state it before and after. Attempt no signed manifest apply and drain no pipeline. Live graph reads run on the login node because the tunnel is login-node-local; the graph is reachable through the project client, which resolves the compute node directly rather than localhost. Never pipe, tee or redirect CLI output: read the log under ~/.local/share/imas-codex/logs afterwards.",
+          "estimated_hours": null,
+          "goal": "A measured verdict on the relaunched local composer against the recorded incumbent, recorded in docs/evidence/sn-benchmark-evolution/the-relaunched-composer.md.",
+          "id": "n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+          "lane_declaration": {
+            "backend": "codex-spark",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T09:17:49Z",
+            "read_at": "2026-09-14T09:17:50Z",
+            "resolved_backend": "codex-spark",
+            "utilisation_pct": 4.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-spark",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-benchmark-evolution/the-relaunched-composer.md",
+            "pyproject.toml"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-spark-a",
+        "backend": "codex-spark",
+        "local": false,
+        "agent": {
+          "alias": "spark5.3",
+          "backend": "codex-spark",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.3-codex-spark",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T09:17:59Z",
+        "completed_at": "2026-09-14T13:27:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 14942,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "f66479e1186010009183902edd6888c3ac80e6db",
+        "commits": [
+          "7d67bc93cd886a31da28d6d13261e4dfd8ad8ecf",
+          "82fb0bea9f791a41e5b1da658f12b9f1fe901a7f",
+          "1293373f4adf4fe958d532aaa195d571c2c445b5",
+          "b2c633c1cdd4dedf223994470ab2413178c97882",
+          "a09aa2a3f2da38d8404849da13a89237d6009129"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 75,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a081a8-16c6-7341-b764-2f4f92a1f163",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 33865600,
+            "cached_input_tokens_cumulative": 36249088,
+            "input_tokens": 33931259,
+            "input_tokens_cumulative": 36337538,
+            "output_tokens": 23681,
+            "output_tokens_cumulative": 36208,
+            "reasoning_output_tokens": 4957,
+            "reasoning_output_tokens_cumulative": 8677
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T13:27:01Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 14.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T13:27:01Z"
+            }
+          ],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "notional_cost_usd": "no_dated_rate",
+            "rate_basis": "no_dated_rate"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 68977152,
+          "cumulative_input_tokens": 70031101,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 44885,
+          "generation_seconds": 505995.65,
+          "machine_seconds": 4753.29,
+          "tokens_per_second": 0.09
+        },
+        "follow_on_paths": [
+          "0.170783",
+          "OOM/provider"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 7,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+          "session_id": "01a081a8-16c6-7341-b764-2f4f92a1f163",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T13:27:01Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": {
+          "session_id": "01a081a8-16c6-7341-b764-2f4f92a1f163",
+          "source": "pointer",
+          "reason": "The measurement it could still take is measurement B, which the lead has explicitly told me to leave. Nothing else in the node remains."
+        },
+        "watch_override": null,
+        "tool_steps": 25.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -127832,6 +128407,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2133
+    "_version": 2137
   }
 }
