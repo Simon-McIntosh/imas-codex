@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T17:07:50",
+  "updated": "2026-09-14T17:26:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -128935,6 +128935,200 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T142028771592-n-srr-the-seats-name-a-served-model-and-a-durable-route",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-seats-name-a-served-model-and-a-durable-route",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2084,
+                "cached_input_tokens": 565831,
+                "input_tokens": 567917,
+                "output_tokens": 528,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 568445,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Every local pipeline seat names deepseek-v4-flash, the local route points at the router again, the imas-standard-names pin reads 0.9.3, and the v4-pro entries are gone, proven by a repository search over pyproject.toml showing zero hits for deepseek-v4.1-flash, zero for hosted_vllm/ in the seat ids, zero for deepseek-v4-pro, zero for 18810 and zero for 0.9.2, and by the configuration tests passing with zero added failures against your base sha. ESTABLISH THE STARTING STATE by listing every deepseek reference and the api-base with their line numbers before editing.\nWHY THIS REVERSES THIS AFTERNOON'S CHANGE, and it belongs in the commit body: the 4.1 serve was cancelled by the operator at 16:11:39 and a v4-flash serve was submitted six seconds later. The served model id is deepseek-v4-flash with hyphens and no dot, the engine is vLLM rather than SGLang, the native context is 1048576, and the declared direct port is 18800. Our seats currently name a 4.1 model that the new serve will 404, which is the same defect we cleared this afternoon, in reverse.\nTHE SEAT CHANGES, all in pyproject.toml. Line 396 sn-compose returns from hosted_vllm/deepseek-v4.1-flash to local/deepseek-v4-flash. Lines 583 and 612, cycle 0 of the name-review quorum and the local-only fallback profile, read hosted_vllm/deepseek-v4-flash, whose model version is now correct but whose prefix must move, so they become local/deepseek-v4-flash. Lines 341 sn-parent-enrich and 732 proposer-model move from openrouter/deepseek/deepseek-v4-flash to the local local/deepseek-v4-flash and gain whatever route and key keys the sibling local seats carry so they resolve through the ambix-local route, because the lead's standing rule is that there is no reason to pay a remote provider for a model served on premise. Lines 662 and 680, both openrouter/deepseek/deepseek-v4-pro, are DELETED from their lists. Line 663 stays openrouter/deepseek/deepseek-v4-flash. Lines 314 and 474 are comments about retired models and must be made accurate.\nRENAME THE LOCAL-ENDPOINT PREFIX FROM hosted_vllm/ TO local/, ADDITIVELY. The lead's reason is future-proofing and it is the whole point: that marker said vLLM while the endpoint ran SGLang this afternoon, and runs vLLM again this evening, so naming it after an engine guarantees it will be wrong again. local/ names where the model is served rather than what serves it. ADD local/ ALONGSIDE hosted_vllm/ RATHER THAN REPLACING IT, because nine test modules outside your scope still spell the old marker and would break; a separate follow-up node updates those fixtures and then deletes the legacy entry. In imas_codex/discovery/base/llm.py, _LOCAL_MODEL_PREFIXES at about line 875 reads (\"ollama/\", \"hosted_vllm/\", \"openai/localhost\"): add \"local/\". Correct the _acompletion_local docstring, which claims vLLM serves the bare served_name, to say the local endpoint serves the bare served name without naming an engine. In imas_codex/settings.py, _LOCAL_ENDPOINT_PREFIXES at about line 310 reads (\"hosted_vllm/\", \"ollama/\"): add \"local/\", and update the enumerating docstring near line 324. Read imas_codex/standard_names/pools.py and imas_codex/standard_names/fanout/config.py and extend the same enumerations there; each carries the prefix in prose or a tuple, so read both rather than assume. THE SEAT IDS THEN USE THE NEW PREFIX: every local seat you touch below is written local/deepseek-v4-flash, not hosted_vllm/deepseek-v4-flash. A KNOWN WRINKLE THAT IS NOT YOURS: after this change the category _LOCAL_MODEL_PREFIXES and one member both carry the word local. The lead has directed that be fixed separately. Do not rename the category, do not restructure the tuples, and do not pick a different prefix to avoid the overlap.\nRETURN THE LOCAL ROUTE TO THE ROUTER. The api-base of [tool.imas-codex.model-routes.ambix-local] currently reads http://98dci4-gpu-0003:18810/v1, a direct serve that no longer exists. Set it back to http://98dci4-gpu-0003:18802/v1. The comment above it records that 18810 was a temporary bypass of a router whose admission queue waited without a timeout; the operator has since bounded that wait to 30 seconds returning 503 with Retry-After and made consumers per-process rather than per-host, so the stated revert condition is met. Rewrite that comment to describe the router as the route and drop the bypass note, keeping the standing warning that serve ports are internal and rotate.\nBUMP THE IMAS-STANDARD-NAMES PIN FROM 0.9.2 TO 0.9.3 in BOTH places, lines 18 and 184, leaving the [tool.uv.sources] editable entry at line 1049 untouched. Version 0.9.3 was published today and the editable source is already at that content, so the pin names a version older than the source it points at. This matters beyond tidiness: the graph refreshes its grammar snapshot only when the graph's active ISNGrammarVersion differs from the INSTALLED imas_standard_names version, both currently read 0.8.1.dev32+g12b557363, so the refresh is skipped while the graph's 79026 grammar tokens lack the emissivity_peak locus that 0.9.3 added.\nDO NOT RUN uv sync AND DO NOT EDIT ~/.config/reckon/flight.yaml. The sync is the coordinator's to sequence when workers are at rest, and a peer session owns the flight host layer.\nGATE: run tests/core/test_settings.py, tests/test_settings_sn.py, tests/config if present, tests/discovery and tests/standard_names, capturing once to a log file and reading it afterwards. Report added failures against your base sha with both failure id lists. BE ALERT TO ONE CLASS OF FALSE FAILURE: a test that hardcodes the old model id, the 18810 port, or a 204800 context ceiling will now fail for reasons unrelated to the code under test. If you find one, fix the fixture to match the served reality and say which and why; do not pin a test to a value the infrastructure no longer has. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.3,
+          "goal": "Every local pipeline seat names the served deepseek-v4-flash under an engine-neutral local prefix, the route points at the router, and the standard-names pin reads 0.9.3.",
+          "id": "n-srr-the-seats-name-a-served-model-and-a-durable-route",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T14:20:29Z",
+            "read_at": "2026-09-14T14:20:30Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 15.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T142028771592-n-srr-the-seats-name-a-served-model-and-a-durable-route/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "pyproject.toml",
+            "imas_codex/settings.py",
+            "imas_codex/discovery/base/llm.py",
+            "imas_codex/standard_names/pools.py",
+            "imas_codex/standard_names/fanout/config.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T14:20:40Z",
+        "completed_at": "2026-09-14T15:16:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3345,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3345,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6e9f34ec1b02f74505a9de497c674234352abe6e",
+        "commits": [
+          "a25b2190bcc255959a3112d7e739d5fd0a2b6fa4",
+          "18d8f94a1dce27eb1479999fa294ca5ea8f389dd",
+          "9a38c9f4be8d3d2dd1d878a5a3e131d872434e42"
+        ],
+        "changed_lines": {
+          "added": 55,
+          "removed": 79,
+          "files": 5
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest full suite on all_debug",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T142028771592-n-srr-the-seats-name-a-served-model-and-a-durable-route/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T142028771592-n-srr-the-seats-name-a-served-model-and-a-durable-route/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a04a-a41a-7cc2-8ee6-3a6703f2e65e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8915712,
+            "cached_input_tokens_cumulative": 8915712,
+            "input_tokens": 8961051,
+            "input_tokens_cumulative": 8961051,
+            "output_tokens": 19381,
+            "output_tokens_cumulative": 19381,
+            "reasoning_output_tokens": 4419,
+            "reasoning_output_tokens_cumulative": 4419
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T15:16:25Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 16.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T15:16:25Z"
+            }
+          ],
+          "notional_cost_usd": 65.0402,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 8915712,
+          "cumulative_input_tokens": 17876763,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 23800
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-seats-name-a-served-model-and-a-durable-route",
+          "session_id": "01a0a04a-a41a-7cc2-8ee6-3a6703f2e65e",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T15:16:25Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 36.0,
+        "orientation_input_tokens": 4170796.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -129205,6 +129399,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2142
+    "_version": 2143
   }
 }
