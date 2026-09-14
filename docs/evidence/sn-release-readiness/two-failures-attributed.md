@@ -74,8 +74,8 @@ Both failures are **environment-dependent and reproduce only under the
 `all_debug` compute placement** used by this mandated measurement. They are
 not pre-existing product failures demonstrated by a healthy graph path, and
 they are not introduced by `ff540084`: each failure is present at the parent
-revision and is byte-for-byte equivalent in its operative cause at the
-candidate revision. The placement cannot reach the login-node-local tunnel and
+revision and has the same operative cause at the candidate revision. The
+placement cannot reach the login-node-local tunnel and
 falls back to the refused `bolt://localhost:17687`; the separate healthy-suite
 run on a functioning graph path is consistent with this attribution.
 
