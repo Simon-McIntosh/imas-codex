@@ -45,7 +45,7 @@ import asyncio
 import logging
 import random
 import time
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -283,6 +283,286 @@ ProcessFn = Callable[[dict[str, Any]], Awaitable[int]]
 ReleaseFn = Callable[[dict[str, Any]], Awaitable[None]]
 
 
+@dataclass(frozen=True)
+class StandardNamePoolPredicate:
+    """One worker pool's read-only predicate over an aggregated name state."""
+
+    pool: str
+    admits: Callable[[Mapping[str, Any]], bool]
+
+
+def _name_form_is_vetted(state: Mapping[str, Any]) -> bool:
+    return state.get("name_score_state") != "missing" or (
+        state.get("origin") == "derived" and bool(state.get("has_live_child"))
+    )
+
+
+def standard_name_pool_predicates() -> tuple[StandardNamePoolPredicate, ...]:
+    """Return the predicates the StandardName worker pools discriminate on.
+
+    These objects are attached to :class:`PoolSpec` instances by the loop and
+    are also the input to the totality census.  Keeping the read-only state
+    predicate on the pool specification prevents the census from carrying a
+    second list of claimable lifecycle states.
+    """
+
+    terminal_stages = {"superseded", "exhausted", "contested"}
+
+    def review_name(state: Mapping[str, Any]) -> bool:
+        return (
+            state.get("name_stage") == "drafted"
+            and state.get("validation_status") == "valid"
+            and state.get("description_state") == "substantive"
+            and state.get("origin") != "derived"
+        )
+
+    def refine_name(state: Mapping[str, Any]) -> bool:
+        return (
+            state.get("name_stage") == "reviewed"
+            and state.get("name_score_state") == "below"
+            and bool(state.get("name_attempts_under_cap"))
+            and not bool(state.get("rename_resubmit_capped"))
+            and state.get("origin") != "derived"
+            and not bool(state.get("review_quorum_shortfall"))
+        )
+
+    def generate_docs(state: Mapping[str, Any]) -> bool:
+        return (
+            state.get("name_stage") == "accepted"
+            and state.get("docs_stage") == "pending"
+            and _name_form_is_vetted(state)
+        )
+
+    def review_docs(state: Mapping[str, Any]) -> bool:
+        return (
+            state.get("docs_stage") == "drafted"
+            and state.get("name_stage") not in terminal_stages
+            and _name_form_is_vetted(state)
+        )
+
+    def refine_docs(state: Mapping[str, Any]) -> bool:
+        return (
+            state.get("docs_stage") == "reviewed"
+            and state.get("docs_score_state") == "below"
+            and bool(state.get("docs_attempts_under_cap"))
+            and state.get("name_stage") not in terminal_stages
+            and bool(state.get("has_winning_docs_review"))
+            and not bool(state.get("docs_review_quorum_shortfall"))
+            and _name_form_is_vetted(state)
+        )
+
+    def enrich_parents(state: Mapping[str, Any]) -> bool:
+        return (
+            state.get("origin") == "derived"
+            and state.get("description_state") == "placeholder"
+            and bool(state.get("has_live_child"))
+        )
+
+    return (
+        StandardNamePoolPredicate("review_name", review_name),
+        StandardNamePoolPredicate("refine_name", refine_name),
+        StandardNamePoolPredicate("generate_docs", generate_docs),
+        StandardNamePoolPredicate("review_docs", review_docs),
+        StandardNamePoolPredicate("refine_docs", refine_docs),
+        StandardNamePoolPredicate("enrich_parents", enrich_parents),
+    )
+
+
+def identity_state_groups(
+    *,
+    min_score: float = 0.75,
+    rotation_cap: int = 3,
+    gc: Any | None = None,
+) -> list[dict[str, Any]]:
+    """Aggregate live identities by every state component a pool reads."""
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
+    from imas_codex.standard_names.graph_ops import (
+        docs_review_eligibility_params,
+        docs_review_eligibility_where,
+    )
+
+    query = f"""
+    MATCH (sn:StandardName)
+    WITH sn,
+         CASE
+           WHEN sn.description IS NULL THEN 'missing'
+           WHEN sn.description = $parent_desc_placeholder THEN 'placeholder'
+           ELSE 'substantive'
+         END AS description_state,
+         CASE
+           WHEN sn.reviewer_score_name IS NULL THEN 'missing'
+           WHEN sn.reviewer_score_name < $min_score THEN 'below'
+           ELSE 'passing'
+         END AS name_score_state,
+         CASE
+           WHEN sn.reviewer_score_docs IS NULL THEN 'missing'
+           WHEN sn.reviewer_score_docs < $min_score THEN 'below'
+           ELSE 'passing'
+         END AS docs_score_state,
+         coalesce(sn.refine_attempts, coalesce(sn.chain_length, 0))
+             < $rotation_cap AS name_attempts_under_cap,
+         coalesce(sn.docs_chain_length, 0) < $rotation_cap
+             AS docs_attempts_under_cap,
+         coalesce(sn.edit_mode, '') = 'rename'
+             AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap
+             AS rename_resubmit_capped,
+         EXISTS {{
+           MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+           WHERE NOT coalesce(child.name_stage, '') IN
+             ['superseded', 'exhausted', 'contested']
+         }} AS has_live_child,
+         {docs_review_eligibility_where()} AS has_winning_docs_review,
+         sn.claim_token IS NOT NULL OR sn.claimed_at IS NOT NULL AS claim_active
+    WITH sn.name_stage AS name_stage,
+         sn.docs_stage AS docs_stage,
+         sn.validation_status AS validation_status,
+         sn.status AS status,
+         sn.origin AS origin,
+         description_state,
+         name_score_state,
+         docs_score_state,
+         name_attempts_under_cap,
+         docs_attempts_under_cap,
+         sn.edit_mode AS edit_mode,
+         rename_resubmit_capped,
+         sn.review_quorum_shortfall IS NOT NULL AS review_quorum_shortfall,
+         sn.docs_review_quorum_shortfall IS NOT NULL
+             AS docs_review_quorum_shortfall,
+         has_live_child,
+         has_winning_docs_review,
+         claim_active,
+         collect(sn.id) AS identities
+    RETURN name_stage, docs_stage, validation_status, status, origin,
+           description_state, name_score_state, docs_score_state,
+           name_attempts_under_cap, docs_attempts_under_cap, edit_mode,
+           rename_resubmit_capped, review_quorum_shortfall,
+           docs_review_quorum_shortfall, has_live_child,
+           has_winning_docs_review, claim_active, identities,
+           size(identities) AS count
+    ORDER BY name_stage, docs_stage, validation_status, status, origin
+    """
+    params: dict[str, Any] = {
+        "min_score": min_score,
+        "rotation_cap": rotation_cap,
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        **docs_review_eligibility_params(),
+    }
+    if gc is not None:
+        return [dict(row) for row in gc.query(query, **params)]
+
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as graph:
+        return [dict(row) for row in graph.query(query, **params)]
+
+
+def _state_breakdown_key(state: Mapping[str, Any]) -> str:
+    fields = (
+        "name_stage",
+        "docs_stage",
+        "validation_status",
+        "status",
+        "origin",
+        "description_state",
+        "name_score_state",
+        "docs_score_state",
+        "name_attempts_under_cap",
+        "docs_attempts_under_cap",
+        "edit_mode",
+        "rename_resubmit_capped",
+        "review_quorum_shortfall",
+        "docs_review_quorum_shortfall",
+        "has_live_child",
+        "has_winning_docs_review",
+        "claim_active",
+    )
+
+    def display(value: Any) -> str:
+        if isinstance(value, bool):
+            return str(value).lower()
+        return str(value)
+
+    return ", ".join(f"{field}={display(state.get(field))}" for field in fields)
+
+
+def classify_identity_state_groups(
+    groups: Sequence[Mapping[str, Any]],
+    pool_predicates: Sequence[StandardNamePoolPredicate],
+) -> dict[str, Any]:
+    """Classify grouped identity states as terminal, claimable, or stranded."""
+    terminal_name_stages = {
+        "accepted",
+        "approved",
+        "superseded",
+        "exhausted",
+        "contested",
+    }
+    terminal_statuses = {"deprecated", "superseded"}
+    population_count = 0
+    terminal_count = 0
+    claimable_count = 0
+    overlap_count = 0
+    stranded_count = 0
+    stranded_ids: list[str] = []
+    overlap_ids: list[str] = []
+    by_state: dict[str, int] = {}
+    seen_ids: set[str] = set()
+
+    for state in groups:
+        identities = [str(identity) for identity in state.get("identities") or []]
+        count = int(state.get("count") or 0)
+        if count != len(identities):
+            raise ValueError(
+                "identity state aggregate count does not match its named identities: "
+                f"count={count}, identities={len(identities)}"
+            )
+        duplicate_ids = seen_ids.intersection(identities)
+        if duplicate_ids:
+            raise ValueError(
+                "identity appears in more than one state group: "
+                + ", ".join(sorted(duplicate_ids))
+            )
+        seen_ids.update(identities)
+        population_count += count
+
+        if (
+            state.get("name_stage") in terminal_name_stages
+            or state.get("status") in terminal_statuses
+        ):
+            terminal_count += count
+            continue
+
+        matching_pools = [
+            predicate.pool for predicate in pool_predicates if predicate.admits(state)
+        ]
+        if not matching_pools and state.get("claim_active"):
+            matching_pools.append("active_claim")
+        if matching_pools:
+            claimable_count += count
+            if len(matching_pools) > 1:
+                overlap_count += count
+                overlap_ids.extend(identities)
+            continue
+
+        stranded_ids.extend(identities)
+        stranded_count += count
+        state_key = _state_breakdown_key(state)
+        by_state[state_key] = by_state.get(state_key, 0) + count
+
+    return {
+        "population_count": population_count,
+        "terminal_count": terminal_count,
+        "claimable_count": claimable_count,
+        "stranded_count": stranded_count,
+        "stranded_ids": sorted(stranded_ids),
+        "by_state": dict(sorted(by_state.items())),
+        "overlap_count": overlap_count,
+        "overlap_ids": sorted(overlap_ids),
+    }
+
+
 @dataclass
 class PoolSpec:
     """Configuration for a single pool's worker loop.
@@ -312,6 +592,7 @@ class PoolSpec:
     process: ProcessFn
     weight: float = 0.0
     release: ReleaseFn | None = None
+    state_predicate: StandardNamePoolPredicate | None = None
     replicas: int = 1
     health: PoolHealth = field(init=False)
     backoff: _PoolBackoff = field(default_factory=_PoolBackoff)
