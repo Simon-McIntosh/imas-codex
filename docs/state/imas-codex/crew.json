@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T09:06:25",
+  "updated": "2026-09-14T09:41:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -126112,6 +126112,196 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T070720477033-n-srr-every-live-identity-is-terminal-or-claimable",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-every-live-identity-is-terminal-or-claimable",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1644,
+                "cached_input_tokens": 646499,
+                "input_tokens": 648145,
+                "output_tokens": 220,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 648365,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Establish the hole before closing it, and quote what you measure. A flush drains the existing pools, each pool claims by a predicate over lifecycle state, so a row no predicate admits is unreachable by any flush however often it runs. Three measured instances stand on this plan: 109 identities at name_stage reviewed carrying a quorum_shortfall, which review will not claim because they are not drafted and refine will not claim because the shortfall withholds the below-threshold routing; 10 identities at drafted and quarantined, which review_name will not claim because it takes drafted AND valid; and hot_neutral_temperature, whose designed recovery is a rescore that runs outside the pool loop entirely. Terminal states are legitimately unclaimable and are not the defect, so treat accepted, superseded, exhausted and contested as terminal along with any catalog-status-terminal row. The missing property is a guarantee that EVERY live identity is either terminal or claimable by exactly one pool, and nothing asserts it, so holes open silently and surface only when a drain reports no eligible work while rows sit in scope. Implement the check by deriving the claimable set from the pool claim predicates THEMSELVES rather than by restating them in a second place, because a restatement is a mirror that drifts from what it mirrors and this repository has paid for that shape repeatedly. Report the remainder as a named set with a count and a per-state breakdown, so a reader learns which state is stranded rather than only that something is. Expose it where an operator will meet it: the scoped run summary already reports pending counts per pool, so report the stranded count beside them. Prove BOTH halves by test in tests/standard_names/test_stranded_identity_census.py, because a census that always reports zero is worse than none: a row in a state no pool claims IS reported with its state named, AND a row that some pool can claim is NOT reported, so the check distinguishes rather than counting everything. Verify against the live graph as well as fixtures, and quote the current stranded count with its per-state breakdown, which should recognise the 109 and the 10 already recorded on this plan if they remain in that state. That test file is a deliverable of this node. Make no graph write, no repair of any stranded row, and no signed manifest apply: this node measures and reports, and repairing a stranded state is separate work that this census exists to make visible. Live graph reads run on the login node because the Neo4j tunnel is login-node-local, bounded and indexed. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD UV_NO_SYNC=1 uv run pytest -p no:cacheprovider tests/standard_names/\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha.",
+          "estimated_hours": null,
+          "goal": "A totality check over the live population that reports every identity which is neither terminal nor claimable by any worker pool.",
+          "id": "n-srr-every-live-identity-is-terminal-or-claimable",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T07:07:21Z",
+            "read_at": "2026-09-14T07:07:22Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 1.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T070720477033-n-srr-every-live-identity-is-terminal-or-claimable/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/pools.py",
+            "imas_codex/standard_names/loop.py",
+            "tests/standard_names/test_stranded_identity_census.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-terra-a",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T07:07:30Z",
+        "completed_at": "2026-09-14T07:39:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1892,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1892,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "1be5f46708069c290d7e43312578875af952adcb",
+        "commits": [
+          "432523c8e21d9bb9b8eece36e5222aa5a7f62c1b"
+        ],
+        "changed_lines": {
+          "added": 474,
+          "removed": 8,
+          "files": 3
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T070720477033-n-srr-every-live-identity-is-terminal-or-claimable/after-standard-names.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T070720477033-n-srr-every-live-identity-is-terminal-or-claimable/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08190-ae24-72f3-8162-5c4df798f0ca",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5020672,
+            "cached_input_tokens_cumulative": 10405632,
+            "input_tokens": 5027582,
+            "input_tokens_cumulative": 10903872,
+            "output_tokens": 16036,
+            "output_tokens_cumulative": 36710,
+            "reasoning_output_tokens": 7690,
+            "reasoning_output_tokens_cumulative": 12639
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T07:39:02Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 1.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T07:39:02Z"
+            }
+          ],
+          "notional_cost_usd": 144.825,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260914T065929262301-n-srr-every-live-identity-is-terminal-or-claimable",
+          "root_run_id": "r-20260914T065929262301-n-srr-every-live-identity-is-terminal-or-claimable"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 49746176,
+          "cumulative_input_tokens": 50605785,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 49349,
+          "generation_seconds": 489822.592,
+          "machine_seconds": 1580.843,
+          "tokens_per_second": 0.1
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-every-live-identity-is-terminal-or-claimable",
+          "session_id": "01a08190-ae24-72f3-8162-5c4df798f0ca",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T07:39:02Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 23.0,
+        "orientation_input_tokens": 5549522.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -126382,6 +126572,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2124
+    "_version": 2125
   }
 }
