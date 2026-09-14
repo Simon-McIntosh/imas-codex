@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.98">
-<meta name="plan-version" content="265">
+<meta name="plan-version" content="267">
 <meta name="plan-commits" content="72b7760c60ac307f641e7e8490b7f15e532d2104">
 <meta name="plan-artifacts" content="docs/evidence/sn-west-catalog-release/residue-currency.md,tests/standard_names/test_review_body_ledger_link.py">
 </head>
@@ -525,6 +525,12 @@ rows: 20   foldable-remaining: 0   unreconciled-runs: 0</pre><p><strong>Live poi
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T112739992811-n-swcr-the-graph-is-measured-fit-before-the-next-cut-local" data-who="clive-a" data-when="2026-09-14T14:38:15.894Z">
     <div class="r-comment-body"><p>Never completed a census. The clive lane resolves through the ambix router, and the serve behind it cycled through three SLURM job ids in one hour (1270394, 1270515, 1270628) while the router returned 503 no upstream catalogs are reachable between each. The final turn died on clive: global catalog is unreachable: HTTP Error 503. This is not a property of the node: it measures the graph, which was healthy throughout at 5115 StandardName nodes. It is the structural coupling that our local agent lane and our pipeline seats both resolve through one router, so a model rotation takes out the workers as well as the pipeline. Redispatched to a metered lane because the measurement gates a release cut and cannot wait on a serve in active churn.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T112526678535-n-swcr-the-graph-is-measured-fit-before-the-next-review-cut" data-who="claude-a" data-when="2026-09-14T11:27:07.712Z">
+    <div class="r-comment-body"><p>Stopped deliberately and superseded. It was dispatched to the Anthropic lane, which the lead corrected to the local lane moments later; the local re-dispatch and its successors carry the work. Nothing measured, nothing lost.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T151458287326-n-swcr-the-graph-is-measured-fit-after-the-checkpoint" data-who="clive-a" data-when="2026-09-14T15:16:24.510Z">
+    <div class="r-comment-body"><p>Stopped deliberately so the graph could be checkpointed, which requires every graph-touching worker at rest; this run was the one thing standing between the operator and a safe export. The checkpoint succeeded at 2367 MB. The census itself remains unmeasured after five attempts, four of which died on the local lane while the serve behind it cycled through three job ids, and it still gates a release cut.</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
     <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>
