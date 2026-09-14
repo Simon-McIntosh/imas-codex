@@ -355,7 +355,7 @@ new proposal. The starting state was:
 | Field | Starting value |
 | --- | --- |
 | Identity | `inner_hard_xray_peak_width` |
-| Producer | `hard_xrays/emissivity_profile_1d/half_width_internal` |
+| Producer | `hard_x_rays/emissivity_profile_1d/half_width_internal` |
 | `name_stage` | `exhausted` |
 | `reviewer_score_name` | `0.625` |
 | Prior recorded aggregates | `0.750`, then `0.625` |
@@ -410,7 +410,7 @@ scope=only_self entry=review_name
 ```
 
 No sibling was edited. The source readback for the new identity confirms one
-`PRODUCED_NAME` edge and `dd_path=hard_xrays/emissivity_profile_1d/half_width_internal`,
+`PRODUCED_NAME` edge and `dd_path=hard_x_rays/emissivity_profile_1d/half_width_internal`,
 with `dd_unit=1`, `dd_version=4.1.0`, and the enriched description quoted above.
 
 ### Grammar and review result
@@ -469,7 +469,7 @@ The new identity now reads:
 | Name-axis review edges | `0` |
 | `refine_attempts` | `3/3` inherited from the exhausted predecessor |
 | `docs_stage` | `pending` |
-| Producer | one `PRODUCED_NAME` edge for `hard_xrays/emissivity_profile_1d/half_width_internal` |
+| Producer | one `PRODUCED_NAME` edge for `hard_x_rays/emissivity_profile_1d/half_width_internal` |
 
 The exact goal was not reached: the candidate is neither accepted nor a scored
 rejection. It is blocked by the current validation predicate
@@ -487,3 +487,189 @@ formerly excluded identity was touched.
 Campaign spend was `$103.60` before and `$103.60` after. The stage-only edit and
 the zero-claim review made no LLM calls and spent `$0.00` against the `$15.00`
 node ceiling and `$250.00` campaign ceiling.
+
+## Authorized `_at_` successor: accepted by name review
+
+The canonical-locus refusal above was treated as the instrument selecting the
+relation, not as a quarantine to clear. ISN's `emissivity_peak` locus is a
+position whose relation order is `at`, then `of`: a field quantity evaluated at
+a position takes `_at_`, whereas intrinsic geometry of an object takes `_of_`.
+This quantity is a half-width of the hard X-ray emissivity field evaluated at
+its peak position, so the authorized successor was
+`inner_hard_xray_half_width_at_emissivity_peak`.
+
+The authority is concrete in both repositories. ISN registers
+`emissivity_peak` as `type: position` with `allowed_relations: [at, of]` in
+`imas_standard_names/grammar/vocabularies/locus_registry.yml:570-572`.
+`canonical_locus_check` in `imas_codex/standard_names/audits.py:3224` applies
+that ordering only when the parsed relation is `of`, the locus is a position,
+the name has field-evaluation structure, and `of` differs from the first
+allowed relation. Thus the earlier refusal was the intended ISN-owned guard,
+not a reviewer preference.
+
+### State before the authorized edit
+
+A bounded graph read immediately before the edit found all three identities in
+the following state. The queried property-key lists established that
+`superseded_by` was absent on both existing nodes; its projected value was
+therefore `null`, not a query failure.
+
+| Identity | State before edit | Score / reviews | Producer and lineage |
+| --- | --- | --- | --- |
+| `inner_hard_xray_peak_width` | `name_stage=superseded`, `edit_status=exhausted`, `validation_status=valid`, `refine_attempts=3/3`, `docs_stage=pending` | Historical aggregates `0.750`, then `0.625` | `source_paths=[]`; `superseded_by=null` |
+| `inner_hard_xray_half_width_of_emissivity_peak` | `name_stage=drafted`, `edit_status=open`, `validation_status=quarantined`, `quarantine_reason=null`, `docs_stage=pending` | No review rows; aggregate `null` | The DD source's `produced_sn_id` and its direct `PRODUCED_NAME` edge both pointed here; `superseded_by=null` |
+| `inner_hard_xray_half_width_at_emissivity_peak` | Not yet present | No review rows | No producer or lineage yet |
+
+The source was
+`dd:hard_x_rays/emissivity_profile_1d/half_width_internal`, with DD path
+`hard_x_rays/emissivity_profile_1d/half_width_internal`, unit `1`, and enriched
+description:
+
+> Internal (towards magnetic axis) half-width of the hard X-ray emissivity peak
+> in normalised toroidal flux coordinate (ρ_tor_norm). Characterizes the
+> inward radial extent of the emissivity peak from fast electrons.
+
+The edit reason named that DD path and the physical distinctions at stake: the
+generic `width` spelling omits `half_width`, changing the implied magnitude by
+a factor of two, and does not identify the emissivity-profile peak. The
+successor restores both. The unit and documentation retain the
+normalized-toroidal-flux coordinate context. It also stated that this is a
+field evaluated at the emissivity peak rather than an intrinsic geometric
+property of that peak, so the position locus takes `_at_`.
+
+### Required dry-run and attachment receipts
+
+The dry-run was performed against the quarantined `_of_` intermediate before
+any second write. It admitted the intermediate despite its terminal validation
+state, selected only that identity, and promised to carry exactly one producer:
+
+```text
+DRY RUN sn edit: inner_hard_xray_half_width_of_emissivity_peak  mode=rename
+axis=name scope=only_self entry=review_name
+
+Actions:
+  -  would carry 1 producing source(s) to
+'inner_hard_xray_half_width_at_emissivity_peak'
+  -  would rename 'inner_hard_xray_half_width_of_emissivity_peak' ->
+'inner_hard_xray_half_width_at_emissivity_peak'
+```
+
+The real `--scope self --stage-only` attachment then returned:
+
+```text
+APPLIED sn edit: inner_hard_xray_half_width_of_emissivity_peak  mode=rename
+axis=name scope=only_self entry=review_name
+
+Actions:
+  - verified 1 producing source(s) on
+'inner_hard_xray_half_width_at_emissivity_peak'
+  - renamed 'inner_hard_xray_half_width_of_emissivity_peak' ->
+'inner_hard_xray_half_width_at_emissivity_peak', entering name review
+  (edit_status=open, run_id=sn-edit-20260914T164244Z)
+
+  successor: inner_hard_xray_half_width_at_emissivity_peak
+```
+
+The refused `_of_` spelling was not deleted and its quarantine was not cleared.
+The edit superseded it and carried its producer to the new `_at_` identity.
+
+### ISN round-trip and review trajectory
+
+The active graph grammar read `ISNGrammarVersion.version=0.9.3` with
+`active=true`. `GrammarToken.value='emissivity_peak'` was present under the
+`geometry`, `position`, and `path` segments for that version. A strict parse and
+compose of the exact candidate returned:
+
+```text
+{'qualifiers': ['inner', 'hard_xray'], 'base': 'half_width',
+ 'locus': 'emissivity_peak', 'locus_type': 'position', 'relation': 'at',
+ 'composed': 'inner_hard_xray_half_width_at_emissivity_peak'}
+```
+
+The codex-side round-trip guard independently returned `(True, 'ok')`. The
+attached node subsequently read back with `grammar_parse_version=0.9.3`,
+`physical_base=half_width`, `subject=hard_xray`, and
+`position=emissivity_peak`.
+
+The scoped review command was:
+
+```text
+imas-codex sn run --name inner_hard_xray_half_width_at_emissivity_peak \
+  --only review_name --skip-global-maintenance -c 15 -t 20
+```
+
+It scoped every pool to one identity, bypassed global maintenance, claimed one
+`review_name` item, wrote three review rows, and exited `0` after processing one
+name. The complete name-review trajectory is:
+
+| Candidate and review | Role / reviewer | Dimension scores | Overall score | Recorded conclusion |
+| --- | --- | --- | --- | --- |
+| `inner_hard_xray_peak_width`, first rotation | Primary / `openrouter/x-ai/grok-4.5` | `20/10/15/12` | `0.7125` | Grammar valid, but generic width omitted half-width and normalized-flux context |
+| `inner_hard_xray_peak_width`, first rotation | Secondary / `openrouter/openai/gpt-5.6-luna` | `20/15/20/15` | `0.8750` | Meaning readable, but half-width and coordinate remained implicit |
+| `inner_hard_xray_peak_width`, first rotation | Escalator / `openrouter/anthropic/claude-sonnet-5` | `20/11/16/13` | `0.7500` | Authoritative aggregate `0.750`; another rotation required |
+| `inner_hard_xray_peak_width`, second rotation | Primary / `openrouter/x-ai/grok-4.5` | `20/8/15/12` | `0.6875` | Full-width ambiguity and missing coordinate remained material |
+| `inner_hard_xray_peak_width`, second rotation | Secondary / `openrouter/openai/gpt-5.6-luna` | `20/10/20/10` | `0.7500` | Exact DD half-width was still absent |
+| `inner_hard_xray_peak_width`, second rotation | Escalator / `openrouter/anthropic/claude-sonnet-5` | `18/8/14/10` | `0.6250` | Authoritative aggregate `0.625`; rotations exhausted |
+| `inner_hard_xray_half_width_of_emissivity_peak` | No reviewer claimed it | Not scored | `null` | Full validation quarantined the non-canonical `_of_` relation before review |
+| `inner_hard_xray_half_width_at_emissivity_peak` | Primary / `openrouter/x-ai/grok-4.5` | `20/18/18/20` | `0.9500` | Exact DD observable and locus; only minor directional phrasing ambiguity |
+| `inner_hard_xray_half_width_at_emissivity_peak` | Secondary / `openrouter/openai/gpt-5.6-luna` | `20/12/20/10` | `0.7750` | Correct observable; normalized coordinate is documented rather than named |
+| `inner_hard_xray_half_width_at_emissivity_peak` | Escalator / `openrouter/anthropic/claude-sonnet-5` | `20/17/18/17` | `0.9000` | Strict round-trip and faithful half-width; bounded completeness deduction for implicit coordinate |
+
+The final review group was
+`3f13e3f4-de76-48c8-82f1-1b14421b09d5`; all three rows have
+`llm_at=2026-09-14T16:46:57.096266Z`. The escalator resolved the disagreement by
+`authoritative_escalation`, and the persisted aggregate was `0.900`, above the
+`0.85` acceptance threshold. The pipeline receipt was:
+
+```text
+persist_reviewed_name: inner_hard_xray_half_width_at_emissivity_peak
+  -> name_stage=accepted (score=0.900, rotations=3/3, chain=4)
+review_name: inner_hard_xray_half_width_at_emissivity_peak
+  -> accepted (score=0.900, cycles=3, method=authoritative_escalation)
+review_name processed=1 spent=$0.2151 mean_cost=$0.215081
+```
+
+### Final graph state, producer, and lineage
+
+The final bounded readback is:
+
+| Identity | Final state | Producer state | Successor record |
+| --- | --- | --- | --- |
+| `inner_hard_xray_peak_width` | `name_stage=superseded`, `edit_status=exhausted`, score `0.625`, `refine_attempts=3/3`, `docs_stage=pending` | `source_paths=[]` | `superseded_by=null`; incoming successor chain exists through `_of_` |
+| `inner_hard_xray_half_width_of_emissivity_peak` | `name_stage=superseded`, `edit_status=applied`, `validation_status=quarantined`, `quarantine_reason=null`, score `null`, `docs_stage=pending` | `source_paths=[]` | `superseded_by=null`; direct successor is the accepted `_at_` identity |
+| `inner_hard_xray_half_width_at_emissivity_peak` | `name_stage=accepted`, `edit_status=applied`, `validation_status=valid`, score `0.900`, `refine_attempts=3/3`, `docs_stage=pending`, `status=draft`, unit `1` | `source_paths=['dd:hard_x_rays/emissivity_profile_1d/half_width_internal']` | Live tip of the successor chain |
+
+The accepted rename did **not** populate the `superseded_by` scalar on either
+retired spelling; both property-key sets still omit it and both projections
+read `null`. Lineage is nevertheless recorded by the authoritative edges:
+
+```text
+inner_hard_xray_half_width_at_emissivity_peak
+  -[:REFINED_FROM]-> inner_hard_xray_half_width_of_emissivity_peak
+  -[:REFINED_FROM]-> inner_hard_xray_peak_width
+```
+
+This agrees with `imas_codex/standard_names/edit.py`, whose lineage walk states
+that `REFINED_FROM` edges carry successor history for the whole population and
+the scalar summary is written only for a fraction. A retired spelling is thus
+resolved by walking incoming `REFINED_FROM` descendants, not by relying on the
+null scalar.
+
+The producer binding is complete in both directions. The accepted node has one
+incoming `PRODUCED_NAME` edge from
+`dd:hard_x_rays/emissivity_profile_1d/half_width_internal` and lists that source
+in `source_paths`; the source's `produced_sn_id` is the accepted `_at_` name.
+The source also retains two historical `PRODUCED_NAME` edges to earlier
+lower-bound candidates, but neither of the two retired spellings in this
+steered chain still owns the producer.
+
+The name-axis goal is met: the final successor is accepted at `0.900 >= 0.85`.
+The existing WEST cut still would **not** carry it yet because
+`docs_stage=pending`; documentation review is deliberately outside this node.
+Once documentation is accepted, the identity has an accepted, valid name and
+an intact DD producer ready for a subsequent cut.
+
+Campaign spend was `$103.60` before this review. The three reviewer calls spent
+`$0.215081`, so the arithmetic campaign total is `$103.815081` (about `$103.82`)
+afterward. That is `$0.215081` of the `$15.00` node cap and remains below the
+authorized `$250.00` campaign ceiling.
