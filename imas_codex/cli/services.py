@@ -29,6 +29,7 @@ import logging
 import os
 import subprocess
 import time
+from dataclasses import dataclass
 
 import click
 
@@ -47,6 +48,15 @@ _PROJECT = "$HOME/Code/imas-codex"
 # Per-service resource defaults
 _NEO4J_CPUS = 4
 _NEO4J_MEM = "32G"
+
+
+@dataclass(frozen=True)
+class ServiceFootprint:
+    """Resources requested for one service job."""
+
+    cpus: int
+    mem: str
+    gpus: int
 
 
 # ── Color-coded status helpers ───────────────────────────────────────────
@@ -544,6 +554,7 @@ def _submit_service_job(
 
     remote_home = _run_remote("echo $HOME", timeout=10).strip()
     services_dir_abs = f"{remote_home}/.local/share/imas-codex/services"
+    script_path = f"{services_dir_abs}/{job_name}.sh"
 
     gres_line = f"#SBATCH --gres=gpu:{gpus}\n" if gpus > 0 else ""
     nodelist_line = f"#SBATCH --nodelist={host}\n" if host else ""
@@ -578,9 +589,8 @@ def _submit_service_job(
     script_quoted = shlex.quote(script)
     submit_cmd = (
         f"mkdir -p {services_dir_abs} && "
-        f"printf '%s' {script_quoted} > /tmp/{job_name}.sh && "
-        f"sbatch /tmp/{job_name}.sh && "
-        f"rm -f /tmp/{job_name}.sh"
+        f"printf '%s' {script_quoted} > {script_path} && "
+        f"sbatch {script_path}"
     )
     output = _run_remote(submit_cmd, timeout=30, check=True)
     click.echo(f"  {output.strip().split(chr(10))[0]}")
@@ -1036,6 +1046,15 @@ def _neo4j_pre_launch(node: str | None = None) -> str:
 # ── Embed-specific service helpers ───────────────────────────────────────
 
 
+def _embed_service_footprint(gpus: int, workers: int) -> ServiceFootprint:
+    """Return the resource request for the configured embed worker count."""
+    return ServiceFootprint(
+        cpus=min(workers + 1, 15),
+        mem=f"{max(workers * 4, 16)}G",
+        gpus=gpus,
+    )
+
+
 def _embed_service_command(gpus: int, workers: int) -> str:
     """Build the shell command to start the embed server on a compute node.
 
@@ -1117,19 +1136,13 @@ def deploy_embed(gpus: int = _DEFAULT_GPUS, workers: int | None = None) -> dict:
     port = _embed_port()
 
     click.echo(f"Deploying embed server ({gpus} GPUs, {workers} workers)...")
-    # Scale CPUs and memory with worker count.
-    # Inference is GPU-bound; 1 CPU per worker + 1 for the uvicorn
-    # parent handles steady-state.  Thread-level parallelism (PyTorch
-    # intra-op threads) doesn't need dedicated CPUs — they share the
-    # allocation.  Cap at available CPUs minus neo4j headroom.
-    embed_cpus = min(workers + 1, 15)
-    embed_mem = f"{max(workers * 4, 16)}G"
+    footprint = _embed_service_footprint(gpus, workers)
     return _ensure_service_job(
         _EMBED_JOB,
         _embed_service_command(gpus, workers),
-        cpus=embed_cpus,
-        mem=embed_mem,
-        gpus=gpus,
+        cpus=footprint.cpus,
+        mem=footprint.mem,
+        gpus=footprint.gpus,
         health_cmd=f"curl -sf http://{host}:{port}/health",
         health_test='"status"',
     )
