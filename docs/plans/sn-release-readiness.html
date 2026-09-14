@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="134">
+<meta name="plan-version" content="135">
 <meta name="plan-commits" content="459279203f628c110ca9f8daa33cc674f93682d1,f4b32b332af6d7da7f7fb701ac5550ab6202bd1f">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/unsourced-origin-cause.md,docs/evidence/sn-release-readiness/unsourced-origin-verification.md,docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md">
 <meta name="plan-impl" content="0.95">
@@ -1074,6 +1074,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T070720477033-n-srr-every-live-identity-is-terminal-or-claimable" data-who="codex-terra-a" data-when="2026-09-14T07:39:02Z">
     <div class="r-comment-body"><p>The invariant now has an instrument, and it is derived rather than restated: claimability comes from the StandardNamePoolPredicate objects attached to the PoolSpec objects the operational workers already use, so the census reads the same predicates the pools claim by and cannot drift from them. The run summary carries stranded_count, stranded_by_state and stranded_ids beside the existing per-pool counters, so an operator meets the number where they already look. Terminal handling spans accepted, approved, superseded, exhausted and contested along with the catalog-terminal statuses. All four halves are distinguished on fixtures: a reviewed quorum-shortfall row and a drafted quarantined row are reported stranded with their states named, a drafted valid row is excluded as claimable, and an accepted row is excluded as terminal, so the check discriminates rather than counting everything. It also raises when an aggregate count disagrees with its own identity set. Suite 7379 to 7384, zero added failures. The live figure is explicitly UNMEASURED and the node said so rather than inventing one: no listener answered on either graph port because the database allocation is queued, and it declined to substitute the row-oriented scan that had already breached the ten-second bound.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T090555256649-n-srr-a-service-launcher-survives-its-own-submission" data-who="clive-gate" data-when="2026-09-14T09:06:18.353Z">
+    <div class="r-comment-body"><p>Lane flap, not work. The terminal record carries the contradictory shape a peer session documented: subtype success with is_error true, and its own text reading &#x27;There is an issue with the selected model (deepseek-v4.1-flash)&#x27;. The banner in the same stderr says the lane is serving that exact model, and clive --list answered with it minutes earlier then reported no reachable models, so endpoint discovery is intermittent rather than absent. The routing value itself is correct at flight.yaml line 246. Zero tokens, sixteen seconds, nothing to recover.</p></div>
 </div>
 <div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T122318417713-n-producerembeddrain" data-who="impl-embedgap" data-when="2026-09-01T12:34:30Z">
     <div class="r-comment-body"><p>Scoped runs now drain StandardName embeddings and refuse completion on a residual gap; regression fails pre-change at assert embedded is True and passes post-change 2/0; targeted pool suites 52 passed 0 failed; no LLM cost</p></div>

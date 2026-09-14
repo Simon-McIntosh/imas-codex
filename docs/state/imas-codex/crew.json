@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T09:41:29",
+  "updated": "2026-09-14T11:10:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -126302,6 +126302,185 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T090555256649-n-srr-a-service-launcher-survives-its-own-submission",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-a-service-launcher-survives-its-own-submission",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1610,
+                "cached_input_tokens": 752213,
+                "input_tokens": 753825,
+                "output_tokens": 1618,
+                "reasoning_output_tokens": 87,
+                "total_tokens": 755443,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Two defects, both confirmed at current HEAD before repair, and both quoted. FIRST: imas_codex/cli/services.py around line 582 writes the generated sbatch script to a temporary path, submits it, and removes it in the same shell command, so the file named by the SLURM Command field is guaranteed absent within a second of submission for every service job. Confirm it by reading that submit command, and by showing that scontrol reports Command=/tmp/codex-neo4j.sh for the live job 1269941 while that exact path does not exist on disk. The script is not lost, because scontrol write batch_script 1269941 recovers it in full while the job lives, but the most visible provenance field points at a deleted file and that sent two readers hunting for a missing script. Write the generated script instead into the services directory the same submit command already creates, beside the log file that job writes, and keep it there. Name it so a reader pairs it with its log without guessing. SECOND: the repository carries slurm/codex-embed.sh declaring cpus-per-task=16, mem=64G and gres=gpu:4, while the generated path launches that same service at 2 CPU, 16G and 1 GPU, which is what job 1242909 has actually run on for 35 days. So the committed launcher is not what runs, and reading the repository gives a reader the wrong footprint. Resolve the disagreement in the direction that leaves ONE source of truth rather than by editing two files into agreement: either make the standalone launcher derive its footprint from the same configuration the generated path reads, or remove it in favour of the generated path if it is redundant. State which you chose and why. Do not simply edit numbers until they match, because two places that happen to agree today will disagree again the first time one changes. Prove BOTH by test in tests/cli/test_service_launcher_is_recoverable.py: a submitted service job leaves its launch script readable at the durable path carrying the sbatch directives it was submitted with, AND the footprint the repository declares for a service equals the footprint the submission requests, so a future divergence fails the suite rather than shipping. That test file is a deliverable of this node. Submit no SLURM job, cancel none, and restart no service: job 1242909 has run for 35 days and job 1269941 has just started, and both carry live work this release depends on. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD UV_NO_SYNC=1 uv run pytest -p no:cacheprovider tests/cli tests/standard_names/\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha.",
+          "estimated_hours": null,
+          "goal": "A service job launcher that survives its own submission at a durable path, declaring the footprint the repository states.",
+          "id": "n-srr-a-service-launcher-survives-its-own-submission",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T09:05:55Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T090555256649-n-srr-a-service-launcher-survives-its-own-submission/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/cli/services.py",
+            "slurm/codex-embed.sh",
+            "tests/cli/test_service_launcher_is_recoverable.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-gate",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T09:06:03Z",
+        "completed_at": "2026-09-14T09:06:18.353Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 0,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 15,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "e71c2dbc1d5c6cc92fe645b74bf25aa88203f637",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": {
+          "command": "reckon crew dispatch on the local lane",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T090555256649-n-srr-a-service-launcher-survives-its-own-submission/stderr.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T090555256649-n-srr-a-service-launcher-survives-its-own-submission/manifest.md",
+        "scope_changed": false,
+        "session_id": "8ef15db9-5f40-436c-9580-e7b475d86e94",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-14T09:06:18.353Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 0,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 11.873,
+          "generated_tokens": 0,
+          "generation_seconds": 0.0,
+          "machine_seconds": 11.873,
+          "wall_tokens_per_second": 0.0
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "follow_on_paths": null,
+        "scope_acceptances": null,
+        "no_commit": "the local lane accepted the dispatch then refused its own advertised model; zero tokens consumed, no worker turn, clean worktree",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-a-service-launcher-survives-its-own-submission",
+          "session_id": "8ef15db9-5f40-436c-9580-e7b475d86e94",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T09:06:18.353Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 0.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -126572,6 +126751,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2125
+    "_version": 2126
   }
 }
