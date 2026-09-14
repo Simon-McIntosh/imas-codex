@@ -1128,41 +1128,44 @@ def _note_pipeline_version_drift() -> None:
 def _auto_sync_grammar(*, quiet: bool = False) -> None:
     """Idempotently sync the ISN grammar spec into the graph if stale.
 
-    Compares the graph's active ``ISNGrammarVersion`` against the installed
-    ``imas_standard_names`` version. When they differ (or no grammar is
-    present), runs :func:`sync_isn_grammar_to_graph` so the running pipeline
-    always composes against the installed grammar. A no-op when already in
-    sync.
+    Compares the graph's active grammar content digest against the installed
+    grammar inputs. The package version remains a provenance label, while the
+    digest detects editable-package vocabulary changes that retain a version.
+    A missing digest is stale so existing graph snapshots refresh once.
 
     Best-effort: any failure (graph unreachable, ISN missing) is logged and
     swallowed so it degrades gracefully rather than crashing a run.
     """
     try:
-        from imas_standard_names import __version__ as isn_version
-
         from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.grammar_sync import sync_isn_grammar_to_graph
+        from imas_codex.standard_names.grammar_sync import (
+            grammar_content_digest,
+            sync_isn_grammar_to_graph,
+        )
     except Exception:  # noqa: BLE001 — ISN absent / import failure
         logger.debug("auto grammar sync skipped (import failed)", exc_info=True)
         return
 
     try:
+        installed_digest = grammar_content_digest()
         with GraphClient() as gc:
             rows = list(
                 gc.query(
                     "MATCH (v:ISNGrammarVersion {active: true}) "
-                    "RETURN v.version AS version LIMIT 1"
+                    "RETURN v.version AS version, v.content_digest AS content_digest "
+                    "LIMIT 1"
                 )
                 or []
             )
-            active = rows[0]["version"] if rows else None
-            if active == isn_version:
+            active = rows[0] if rows else None
+            if active and active.get("content_digest") == installed_digest:
                 return  # already in sync — no-op
             sync_isn_grammar_to_graph(gc=gc)
         if not quiet:
+            active_version = active.get("version") if active else None
             console.print(
-                f"[dim]Grammar synced to ISN {isn_version}"
-                f" (was {active or 'unset'}).[/dim]"
+                f"[dim]Grammar synced to ISN content {installed_digest[:19]}"
+                f" (was {active_version or 'unset'}).[/dim]"
             )
     except Exception as exc:  # noqa: BLE001 — degrade gracefully
         logger.warning("auto grammar sync failed (continuing): %s", exc)
