@@ -322,3 +322,59 @@ The first completion through the direct route returned an `LLMResult`, after whi
 ```
 
 The configured route is therefore proven end to end. The application-facing model is registered, `_acompletion_local` strips the compatibility prefix to the bare dotted ID, the direct endpoint accepts it, and the structured response returns through the project call layer. This receipt clears the route precondition for Measurement A while leaving the temporary-port rollback obligation open.
+
+## Measurement A: completed on a changed population
+
+Command:
+
+```text
+imas-codex sn bench --models hosted_vllm/deepseek-v4.1-flash --max-candidates 20 --runs 3 --reviewer-model openrouter/anthropic/claude-opus-4.8
+```
+
+Report:
+
+`/home/ITER/mcintos/.local/share/imas-codex/benchmarks/sn_benchmark_20260914T121534.json`
+
+The real-completion validity probes both passed against the direct serve:
+
+| Position | UTC timestamp | Endpoint | Response | Attempts |
+|---|---|---|---|---:|
+| Immediately before | 2026-09-14T12:15:07.713791+00:00 | `http://98dci4-gpu-0003:18810/v1` | `{"ok":true}` | 1 |
+| Immediately after | 2026-09-14T12:47:40.784678+00:00 | `http://98dci4-gpu-0003:18810/v1` | `{"ok":true}` | 1 |
+
+The report records 1,845.3 seconds of benchmark wall-clock work: 1,660.15 seconds composing and 185.19 seconds reviewing. The output filename identifies command start at 12:15:34Z and the report timestamp is 12:47:14.368946Z, a 1,900-second outer span including extraction and setup. No batch error, compose error, review error, OOM, context refusal, connection failure, or non-429 4xx was recorded.
+
+### Population identity: comparison refused
+
+The incumbent and candidate populations are not identical:
+
+| Report | Extracted items | Dataset hash |
+|---|---:|---|
+| Incumbent, 2026-07-17 | 17 | `d66fef87c0f962f1` |
+| v4.1, 2026-09-14 | 12 | `636159b35205da41` |
+
+Eight of the first twenty reference paths currently exist in the DD but are not admitted as Standard Name sources. The emitted hash therefore differs from the locked incumbent hash. The v4.1 result is **not appendable to the July table**, and no delta or better/worse claim is made against its four model rows.
+
+The first seat condition fails: `636159b35205da41 != d66fef87c0f962f1`. Consequently the compose result cannot authorize the result-gated parent-enrich change, regardless of its score.
+
+### Absolute three-run result
+
+The aggregate report contains 36 candidates, 12 from each run. Its aggregate reference fields are overlap 9/47, precision 0.2500, and recall 0.1915; the precision denominator spans all 36 generated candidates and is therefore not the mean of the three per-run precisions.
+
+| Dimension | Run 1 | Run 2 | Run 3 | Mean | Spread |
+|---|---:|---:|---:|---:|---:|
+| Reference precision | 0.8333 | 0.6667 | 0.7500 | 0.7500 | 0.1666 |
+| Reference recall | 0.2128 | 0.1702 | 0.1915 | 0.1915 | 0.0426 |
+| Reference overlap | 10/47 | 8/47 | 9/47 | 9/47 | 2 names |
+| Grammar validity | 12/12 | 12/12 | 12/12 | 100% | 0 |
+| Field consistency | 12/12 | 12/12 | 12/12 | 100% | 0 |
+| Opus name-review mean | 0.915625 | 0.938542 | 0.939583 | 0.931250 | 0.023958 |
+| Opus description-review mean | 0.985417 | 0.991667 | 0.973958 | 0.983681 | 0.017709 |
+
+The precision spread is material, but the hash mismatch already prevents a comparative verdict. These values remain an absolute repeatability record only; endpoint variance and model variance cannot be separated from three runs.
+
+### Measurement A spend
+
+The JSON receipt carries USD 0.000000 composition cost, USD 0.60048775 name-review cost, and USD 0.17078325 description-review cost, for attributable spend of **USD 0.77127100**. The CLI cost headline reports USD 0.6005 because it omits `description_reviewer_cost`; that undercount is a follow-on defect rather than the spend authority used here.
+
+Campaign spend after Measurement A is USD 103.643965 of USD 250.000000. Node spend is USD 0.771271 of USD 30.000000.
