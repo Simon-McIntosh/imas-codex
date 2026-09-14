@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T22:36:29",
+  "updated": "2026-09-14T23:01:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -130713,6 +130713,366 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T185015159443-n-swcr-the-documentation-axis-is-drained",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-documentation-axis-is-drained",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 3113,
+                "cached_input_tokens": 627459,
+                "input_tokens": 630574,
+                "output_tokens": 664,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 631238,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Every identity whose name is accepted but whose documentation is not reaches docs_stage accepted, or is reported as unreachable with the predicate that withholds it, recorded in docs/evidence/sn-west-catalog-release/the-documentation-drain.md. THE ONE IDENTITY THAT MUST LAND is inner_hard_xray_half_width_at_emissivity_peak, because it is the last thing standing between the WEST cohort and a zero-exclusion cut; it reads accepted, applied, valid, unit 1, docs_stage pending, with producing DD source hard_x_rays/emissivity_profile_1d/half_width_internal.\nESTABLISH REACHABILITY BEFORE DRAINING, and this is the most important instruction in the brief. A flush drains pools, a pool claims by predicate, and a row no predicate admits is unreachable by any flush and will sit untouched while the run reports success. So FIRST census the population of accepted-name identities whose docs_stage is not accepted, quote that count, and confirm explicitly that inner_hard_xray_half_width_at_emissivity_peak is among the rows a docs pool predicate admits. If it is not admitted, stop and report the exact predicate that excludes it rather than draining around it; that is a finding worth more than a completed drain, and it is exactly how two identities were stranded earlier in this campaign.\nTHEN RUN THE DRAIN with sn run --flush on the documentation axis. This is deliberately UNSCOPED, so global startup maintenance will fire; that is intended for a drain rather than something to suppress, and a fresh restore point exists at imas-codex-graph-dev-6e9f34e-20260914T143909Z.tar.gz taken today. Do not pass --skip-global-maintenance, which is the fence for scoped single-name runs.\nTHE DOCUMENTATION FOR THE HARD X-RAY IDENTITY CARRIES A SEMANTIC REQUIREMENT. Its name encodes a field evaluated AT a position rather than a property OF one: the quantity is the inward half-width of the hard X-ray emissivity peak measured in normalized toroidal flux coordinate, and the locus emissivity_peak is registered in ISN as a position taking the at relation. The documentation must state what the half-width is measured across, at what height of the peak, and what the dimensionless extent is normalized against, because the name deliberately leaves the coordinate to the documentation and the unit is 1. If the generated documentation contradicts the name's locus semantics, that is a rejection to report rather than to accept.\nGROUND EVERY DOCUMENT on the enriched node description rather than the terse DD XML documentation, because the terse form loses the physics reviewers score against.\nEVIDENCE THIS NODE MUST EMIT: the pre-drain count of accepted-name identities lacking accepted documentation; the reachability confirmation for the hard X-ray identity; for every identity that gained documentation, its id and the per-reviewer scores and aggregate of the accepted document; for every identity still lacking documentation after the drain, its id and the predicate or stage that withholds it; the post-drain export accounting quoted as candidates, exported, accounted exclusions, residue and gate tally, against the pre-drain baseline of 220 candidates, 219 exported, 1 accounted exclusion, residue 0 and all gates passing; and a plain statement of whether the WEST cut would now carry inner_hard_xray_half_width_at_emissivity_peak.\nThe compose seat resolves to local/deepseek-v4-flash at http://98dci4-gpu-0003:18802/v1, verified serving, so composition is free; documentation generation and review resolve to remote providers and are the billed part. Spend no more than 25.00 USD and state the campaign total before and after; it stands at 103.82 USD against an authorised 250.00 USD ceiling. Delete nothing and clear no quarantine. Live graph work runs on the login node because the project client resolves the graph host directly. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.2,
+          "goal": "Every accepted-name identity lacking documentation gains it, or is reported with the predicate that withholds it.",
+          "id": "n-swcr-the-documentation-axis-is-drained",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T18:50:15Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T185015159443-n-swcr-the-documentation-axis-is-drained/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-documentation-drain.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T18:50:29Z",
+        "completed_at": "2026-09-14T20:18:43.106Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5275,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5294,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "2aa35899de203edc96592eff88271bea29ce0bda",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn run --flush --docs-only --cost-limit 25.00, measured by graph readback",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T185015159443-n-swcr-the-documentation-axis-is-drained/manifest.md",
+        "scope_changed": true,
+        "session_id": "4257230c-0a22-4e34-9b9d-6e2d1188e4a4",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-14T20:18:43.106Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "Zero commits and a clean worktree: the node was stopped mid-run to quiet the graph for the release cut, before it wrote its evidence document.",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-documentation-axis-is-drained",
+          "session_id": "4257230c-0a22-4e34-9b9d-6e2d1188e4a4",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T20:18:43.106Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 138.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T203706787249-n-swcr-the-unnamed-manifest-sources-are-classified",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-unnamed-manifest-sources-are-classified",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1159,
+                "cached_input_tokens": 702001,
+                "input_tokens": 703162,
+                "output_tokens": 572,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 703734,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Every one of the 25 WEST manifest source paths that produced no standard name is classified by measurement into exactly one of three dispositions, with the evidence for each, recorded in docs/evidence/sn-west-catalog-release/the-unnamed-manifest-sources.md. THE STARTING FACT, which you must reproduce rather than trust: the manifest imas_codex/standard_names/manifests/west_production_dd_paths.yaml declares 355 eligible sources across 22 IDS, expanded as ids/leaf from its sources mapping, and fetch_manifest_source_release_rows in imas_codex/standard_names/graph_ops.py returns 25 of those with no standard_name_id. A spot check of six found NO StandardNameSource node at all for any of them, so these are not stalled mid-pipeline candidates; nothing ever seeded them and no pool predicate can reach them. Confirm that for all 25 and quote the count of those with and without a source node.\nTHE 25 PATHS are barometry/gauge/pressure, calorimetry/group/component/energy_total/data, calorimetry/group/component/power, camera_ir/channel/camera/frame/apparent_temperature, camera_x_rays/camera/camera_dimensions, camera_x_rays/detector_humidity, camera_x_rays/detector_humidity/time, camera_x_rays/detector_temperature/time, camera_x_rays/frame/time, core_profiles/profiles_1d/time, equilibrium/time_slice/constraints/b_field_pol_probe/weight, equilibrium/time_slice/constraints/faraday_angle/weight, equilibrium/time_slice/constraints/flux_loop/weight, equilibrium/time_slice/constraints/n_e_line/weight, equilibrium/time_slice/contour_tree/node/z, equilibrium/time_slice/convergence/iterations_n, equilibrium/time_slice/profiles_1d/darea_dpsi, equilibrium/time_slice/profiles_1d/pressure, equilibrium/time_slice/time, gas_injection/valve/flow_rate, hard_x_rays/emissivity_profile_1d/half_width_external, hard_x_rays/emissivity_profile_1d/time, ic_antennas/antenna/module/strap/distance_to_conductor, spectrometer_visible/channel/isotope_ratios/signal_to_noise, and summary/disruption/time/value.\nCLASSIFY EACH INTO ONE OF THREE DISPOSITIONS and state the evidence: A, a valid standard-name source that was wrongly excluded, which must become nameable; B, genuinely ineligible, which must be recorded in the manifest's exclusions file with a category and reason alongside the 114 already there; or C, already represented by another source or name, which must name that representative. The inputs for that decision are the path's data-dictionary entry, specifically its type, units, lifecycle and documentation, its position relative to any /data child, and whether any existing StandardNameSource or StandardName already covers the same quantity; use those and not the path spelling alone.\nA KNOWN DEFECT ALMOST CERTAINLY EXPLAINS PART OF THIS AND YOU MUST CHECK IT FIRST. Three of the 25 are DD type STRUCTURE carrying real units: barometry/gauge/pressure is Pa, gas_injection/valve/flow_rate is m^3.Pa.s^-1, and camera_x_rays/detector_humidity is a structure. A signal STRUCTURE holds its measurement in a /data child, so the structure node is not a leaf, and this repository has a recorded deferred defect in which such quantities are wrongly refused as standard-name sources by a leaf invariant in the data-dictionary source module together with a qualify_dd prefix condition on STR types. Locate that invariant, quote it with its file and line, establish whether it is what refuses these three, and say so explicitly. A structure carrying units is a physical quantity and belongs in disposition A unless you can show otherwise.\nTHE OTHERS NEED THE SAME RIGOUR RATHER THAN A PATTERN MATCH. Seven paths end in a time coordinate and four are equilibrium fit constraint weights, and both groups look like disposition B; the exclusions file already carries a temporal_coordinate_skip category with 26 entries, so establish why these seven were not caught by it, because a filter that catches 26 of 33 is itself a finding. equilibrium/time_slice/profiles_1d/pressure is a core physical quantity and its absence is the least explicable of all 25; determine whether it is disposition A or C and do not settle for a plausible story.\nFIX WHAT IS BOUNDED AND REPORT WHAT IS NOT. If a classifier or invariant wrongly refuses disposition-A paths, repair it in code and regenerate the manifest through its own generator rather than hand-editing the manifest, because a hand-edited manifest reintroduces the same defect at the next regeneration. If the repair would exceed this node, land the classification document and name precisely what remains. NEVER hand-edit the manifest YAML to delete an inconvenient path.\nEVIDENCE REQUIRED: the disposition of all 25 with per-path evidence; the invariant quoted with file and line if one is implicated; before-and-after manifest counts if you regenerate; and the tests covering any changed classifier reported as added failures against your base sha with both failure id lists, zero added required. Run no pipeline stage: composing names for newly admitted sources is a separate node. Make no graph writes. Live reads must be bounded and under ten seconds. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.5,
+          "goal": "Every WEST manifest source that produced no standard name is classified as wrongly excluded, genuinely ineligible, or already represented, with per-path evidence.",
+          "id": "n-swcr-the-unnamed-manifest-sources-are-classified",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T20:37:07Z",
+            "read_at": "2026-09-14T20:37:09Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 19.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T203706787249-n-swcr-the-unnamed-manifest-sources-are-classified/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-unnamed-manifest-sources.md",
+            "imas_codex/standard_names/sources/dd.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T20:37:34Z",
+        "completed_at": "2026-09-14T20:56:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1135,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1135,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a491e9e362a47a83703d5dfbe21df2f1e2350571",
+        "commits": [
+          "68118a055f81ebdf081f773d3fe203ec1cbee0b0"
+        ],
+        "changed_lines": {
+          "added": 49,
+          "removed": 25,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "manifest re-expansion plus fetch_manifest_source_release_rows before and after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T203706787249-n-swcr-the-unnamed-manifest-sources-are-classified/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T203706787249-n-swcr-the-unnamed-manifest-sources-are-classified/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a1a3-b2d2-7802-b7cc-abe91f50089d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4146816,
+            "cached_input_tokens_cumulative": 4146816,
+            "input_tokens": 4360706,
+            "input_tokens_cumulative": 4360706,
+            "output_tokens": 16440,
+            "output_tokens_cumulative": 16440,
+            "reasoning_output_tokens": 3748,
+            "reasoning_output_tokens_cumulative": 3748
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T20:56:29Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 19.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T20:56:29Z"
+            }
+          ],
+          "notional_cost_usd": 18.4448,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4146816,
+          "cumulative_input_tokens": 8507522,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 20188
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-unnamed-manifest-sources-are-classified",
+          "session_id": "01a0a1a3-b2d2-7802-b7cc-abe91f50089d",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T20:56:29Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 54.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -130983,6 +131343,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2151
+    "_version": 2153
   }
 }
