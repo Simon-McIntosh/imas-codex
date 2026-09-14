@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T16:28:58",
+  "updated": "2026-09-14T17:07:50",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -128501,6 +128501,440 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T112739992811-n-swcr-the-graph-is-measured-fit-before-the-next-cut-local",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-graph-is-measured-fit-before-the-next-cut-local",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 264,
+                "cached_input_tokens": 313465,
+                "input_tokens": 313731,
+                "output_tokens": 470,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 314201,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "A health verdict for the Standard Name graph is recorded in docs/evidence/sn-west-catalog-release/graph-health-before-the-next-cut.md, stating for each instrument the figure measured, the figure last recorded, and whether it moved. The question this answers is whether the graph is fit to cut a fork review PR for the WEST batch, so every figure must be one a reader can act on rather than a reassurance. RUN THESE INSTRUMENTS, each once, and report what each printed. First, the graph-marked quality suite: pytest -m graph tests/graph/test_sn_graph.py, which auto-skips below ten accepted StandardName nodes so a skip is itself a finding; run it on the login node because the graph is reached from there, and report the totals line verbatim plus every failure id. Second, the standard-names suite tests/standard_names as the unit-level check, reporting added failures against the base revision you were dispatched at, naming that sha and both failure id lists rather than an absolute green. Third, the release accounting: run the export or catalog rehearsal that emits the candidate, published, exclusion and residue counts and its gate tally, and record all of them; the standing figures to compare against are 220 candidates, 218 published, 2 accounted exclusions, residue 0 and 8 of 8 gates, measured at the last re-mint. Fourth, a census of lifecycle integrity over the live graph, bounded and on the login node with no single query exceeding ten seconds: count identities by name_stage and by status, count accepted identities holding zero PRODUCED_NAME sources, count identities whose docs_stage is pending, and count quarantined identities. Known open counts to compare against, all previously surfaced and none of them yours to repair here, are 22 live names without recoverable producing sources and 7 names fed by DD paths absent from the current DD. INTERPRET RATHER THAN ONLY TABULATE: state plainly whether anything moved in a direction that should stop a cut, and if a figure moved adversely name the identities behind it rather than only the count. A figure that matches its last recorded value is evidence of stability and must be shown as such. If an instrument cannot run, say which and why, and do not substitute a different one silently. This node changes no graph state, mints nothing, deletes nothing and clears no quarantine; it is a measurement only, and it must not run any pipeline stage that composes, refines or reviews. The compose seat names a model that no longer exists, so do not invoke compose for any reason. Report the campaign spend before and after; it was 102.872694 USD against an authorised 250.00 USD ceiling, and this node should approach zero because it runs no LLM stage. Spend no more than 5.00 USD. Never pipe, tee or redirect imas-codex CLI output; capture pytest to a log file once and read it afterwards.",
+          "estimated_hours": 1.0,
+          "goal": "A health verdict for the Standard Name graph before the next fork review cut is recorded in docs/evidence/sn-west-catalog-release/graph-health-before-the-next-cut.md.",
+          "id": "n-swcr-the-graph-is-measured-fit-before-the-next-cut-local",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T11:27:40Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112739992811-n-swcr-the-graph-is-measured-fit-before-the-next-cut-local/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/graph-health-before-the-next-cut.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T11:27:49Z",
+        "completed_at": "2026-09-14T14:38:15.894Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 11232,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 11426,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "a46f0421d3d10a601861554d381bf584d36399c5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T112739992811-n-swcr-the-graph-is-measured-fit-before-the-next-cut-local/manifest.md",
+        "scope_changed": false,
+        "session_id": "30bdb3e8-dc13-4d3d-a949-d750c3296ab3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": "backpressure",
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 723622,
+            "input_tokens_cumulative": 723622,
+            "output_tokens": 3686,
+            "output_tokens_cumulative": 3686,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "run died after 1 consumer-queue retries (api_retry 429); the lane refused (queue full) \u2014 backpressure on an unmetered lane, not a spent budget",
+          "lane_backpressure": true,
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-14T14:38:15.894Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"Configured-route precheck failed before measurement: one direct _acompletion_local request reached the relay and received HTTP 400 because the forwarded model was openai/hosted_vllm/deepseek-v4.1-flash rather than served id deepseek-v4.1-flash. The user explicitly required stop on this defect. Measurement A and B remain unlaunched; no comparison or floor is reported; and both seats remain unchanged.\"",
+              "elapsed_seconds": 163,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 719,
+              "log_fresh": true,
+              "manifest_commits": [
+                "ecab950831569d1ef943a49b28166845221bf0e6",
+                "2d2164a9672957203aebead25d1c9123938a870a",
+                "41f8674814e6eb4840e208e17ddf8fed398e96de"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "313b3e353d938fa8f81170eb5f667a281e307292734e582ecdf1644bde69a9c3",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+              "phase": "working",
+              "plan": "sn-release-readiness",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+              "session": "ship-s10-20260908",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+                "session_id": "01a081a8-16c6-7341-b764-2f4f92a1f163",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 740,
+              "terminal_at": "2026-09-14T11:15:25Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-relaunched-composer-is-measured-before-it-is-seated"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 723622,
+          "detail": "generation and wall clock reported separately by the backend",
+          "elapsed_seconds": 1537.629,
+          "generated_tokens": 3686,
+          "generation_seconds": 1217.18,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 42.2,
+          "machine_seconds": 320.449,
+          "peak_input_tokens": 84497,
+          "tokens_per_second": 3.03,
+          "wall_tokens_per_second": 2.4
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest -m",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 5,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "Four dispatch and resume attempts over three and a half hours, zero commits, clean worktree: every turn was refused or killed by the local lane rather than by anything in the node.",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-graph-is-measured-fit-before-the-next-cut-local",
+          "session_id": "30bdb3e8-dc13-4d3d-a949-d750c3296ab3",
+          "session_source": "stream",
+          "retained_at": "2026-09-14T14:38:15.894Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 0.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
+      },
+      {
+        "run_id": "r-20260914T144944664532-n-srr-the-runbook-names-the-guard-that-actually-holds",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-runbook-names-the-guard-that-actually-holds",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 371,
+                "cached_input_tokens": 607922,
+                "input_tokens": 608295,
+                "output_tokens": 430,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 608725,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "The release runbook states the segment sweep's actual protection, where today it describes a hazard the code no longer has and prescribes a remembered flag as the remedy. CONFIRM THE CODE STATE FIRST AND QUOTE IT; do not take this brief's reading on trust, because the whole point of this node is that a document drifted from its code. The relevant facts to verify: imas_codex/standard_names/ledger.py line 29 defines LIVE_NAME as \"NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']\", and reconcile_grammar_segments in imas_codex/standard_names/graph_ops.py near line 14346 selects with MATCH (sn:StandardName) WHERE {LIVE_NAME}, so the sweep cannot reach a superseded or exhausted identity at all. Read the function body rather than its docstring, establish whether the exclusion is genuinely on the read that drives the write, and report what you find even if it contradicts the above.\nWHAT IS STALE. The section titled \"The segment sweep is a scheduled operation, not a rotation side effect\", beginning near line 358 of imas_codex/standard_names/AGENTS.md, says an unscoped sn run rewrites the segment columns of 706 tombstoned identities as a side effect of asking for one review, and presents --skip-global-maintenance as the fence against that. If the exclusion is confirmed, that hazard no longer exists and the section must say so: the protection is a predicate on the sweep's own query, which holds whether or not anyone remembers a flag, and realign_grammar_segments_for_name is the deliberate operator-named route that reaches a tombstoned identity when a repair to it is actually intended.\nDO NOT SIMPLY DELETE THE FLAG REQUIREMENT. --skip-global-maintenance appears in at least seven command rows in the same document and in a requirement line near 336, and it bypasses global startup, background and post-drain maintenance writes generally, not only this sweep. Determine from imas_codex/standard_names/loop.py what else it actually bypasses and keep the requirement wherever it is still earning its place, while removing the specific claim that it protects tombstones from this sweep. State in the document which hazard the flag does and does not address, because a fence kept for a reason that has expired is how the next reader learns to distrust the whole runbook.\nKEEP THE DRIFT CENSUS BUT CORRECT WHY IT READS AS IT DOES. The recipe tells an operator to take the terminal-stage drift census before and after a run and expect drifting 706 unchanged. That expectation is still correct, and the reason has changed: the terminal names are not merely unswept, they are excluded from the sweep's selection. Say that, because an operator who believes the count is stable because a flag fired will draw the wrong conclusion the first time they omit the flag.\nEVIDENCE THIS NODE MUST EMIT into the document and the manifest: the exact LIVE_NAME predicate quoted from source with its file and line; the line of the sweep query that applies it; a statement of whether any other maintenance step in the same startup path writes to terminal-stage identities, naming each maintenance function reached from the startup path in loop.py and quoting the predicate each one selects on; and a live count of terminal-stage identities and how many of them drift, so the document carries a current figure rather than an inherited one. The live graph is up and reachable from the login node; keep every query bounded and under ten seconds.\nSCOPE: documentation only. Change no Python, change no predicate, and do not alter the sweep's behaviour. If your reading finds the exclusion is NOT in force, then the document is right and the code is wrong; in that case write nothing, report the finding with your evidence, and stop, because that is a code change requiring its own node and its own authorisation.\nNever pipe, tee or redirect CLI output. Report the campaign spend before and after; it stands at 103.60 USD against an authorised 250.00 USD ceiling and this node should approach zero because it runs no LLM pipeline stage.",
+          "estimated_hours": 0.8,
+          "goal": "The release runbook states the segment sweep's actual protection instead of a hazard the code no longer has.",
+          "id": "n-srr-the-runbook-names-the-guard-that-actually-holds",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T14:49:45Z",
+            "read_at": "2026-09-14T14:49:45Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 16.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T144944664532-n-srr-the-runbook-names-the-guard-that-actually-holds/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/AGENTS.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-luna-a",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T14:49:57Z",
+        "completed_at": "2026-09-14T15:04:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 853,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 853,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ce9664c0436429afdcee16752db4b1737bfaa425",
+        "commits": [
+          "96c887b6c1e76adfa725ee41c18f898cc54c8e6b"
+        ],
+        "changed_lines": {
+          "added": 90,
+          "removed": 18,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "source read of ledger.py:29 and graph_ops.py:14346 plus a bounded live terminal-stage drift census",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T144944664532-n-srr-the-runbook-names-the-guard-that-actually-holds/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T144944664532-n-srr-the-runbook-names-the-guard-that-actually-holds/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9437952,
+            "cached_input_tokens_cumulative": 18662912,
+            "input_tokens": 9626337,
+            "input_tokens_cumulative": 19032799,
+            "output_tokens": 5054,
+            "output_tokens_cumulative": 29997,
+            "reasoning_output_tokens": 6035,
+            "reasoning_output_tokens_cumulative": 11609
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T15:04:10Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 16.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-14T15:04:10Z"
+            }
+          ],
+          "notional_cost_usd": 28.0479,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 109860736,
+          "cumulative_input_tokens": 111282582,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 41606,
+          "generation_seconds": 523161.456,
+          "machine_seconds": 3291.324,
+          "tokens_per_second": 0.08
+        },
+        "follow_on_paths": [
+          "706/2239"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-runbook-names-the-guard-that-actually-holds",
+          "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T15:04:10Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 85.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -128771,6 +129205,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2140
+    "_version": 2142
   }
 }
