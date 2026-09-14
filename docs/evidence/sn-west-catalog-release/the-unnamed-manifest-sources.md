@@ -2,10 +2,14 @@
 
 ## Result
 
-The live release projection reproduces the cardinality in the release
-manifest: `load_sources_file()` expands the `sources` mapping to **355** paths
-in **22** IDS, and `fetch_manifest_source_release_rows()` returns **25** rows
-with no `standard_name_id`.
+Before classification, the live release projection reproduced the cardinality
+in the release manifest: `load_sources_file()` expanded the `sources` mapping
+to **355** paths in **22** IDS, and
+`fetch_manifest_source_release_rows()` returned **25** rows with no
+`standard_name_id`.  Moving the 13 disposition-B paths to the authored
+exclusion sidecar changes the partition to **342 eligible** and **127 excluded**
+from 355 and 114 respectively.  Repeating the same release projection returns
+**12** unnamed rows: the 11 disposition-A paths and the one disposition-C path.
 
 The proposed explanation that these paths were never seeded is not current.
 Every one of the 25 has exactly one exact `StandardNameSource` (`dd:<path>`)
@@ -82,10 +86,10 @@ the representative column says otherwise.
 
 ## Why the temporal ledger is incomplete
 
-The committed exclusion sidecar contains **114** rows, including **26**
-`temporal_coordinate_skip` entries.  It nevertheless lacks the seven time
-coordinates above.  Six are caught by the current nested-time rule when passed
-through `extract_specific_paths(..., write_side_effects=False)`:
+The committed exclusion sidecar contained **114** rows, including **26**
+`temporal_coordinate_skip` entries, but lacked the seven time coordinates
+above.  Six are caught by the current nested-time rule when passed through
+`extract_specific_paths(..., write_side_effects=False)`:
 `detector_humidity/time`, `detector_temperature/time`, `frame/time`,
 `core_profiles/profiles_1d/time`, `equilibrium/time_slice/time`, and
 `emissivity_profile_1d/time`.  The seventh, `summary/disruption/time/value`,
@@ -93,31 +97,51 @@ is a time coordinate wrapped by a `time` parent and is not caught because the
 nested-time qualifier
 tests the leaf token itself.
 
-The evidence shows a stale manifest ledger, not a zero-row or source-seeding
-failure.  Regeneration must add the 13 B rows with their category and reason
-to `west_production_dd_paths.exclusions.json`, remove them from the 355-source
-input, and make the summary `time/value` case structurally ineligible before
-the generator is run.  The present worker fence does not authorize writes to
-that generated manifest or its sidecar, so those edits are deliberately not
-made here.
+The evidence shows a stale authored manifest ledger, not a zero-row or
+source-seeding failure.  There is no generator: the provenance records that
+the manifest was prepared from
+`research/west/Task_2e_WEST_DB_analysis_20251113.xlsx` on 2026-07-21.  The
+authored correction adds the 13 B rows with established reasons and categories
+to `west_production_dd_paths.exclusions.json` and removes them from the eligible
+source mapping.  The seven time coordinates use `temporal_coordinate_skip`,
+the five fit weights/bookkeeping values use `excluded_fit_artifact`, and the
+contour-tree coordinate uses `excluded_representation`.
 
 ## Reproducible measurements
 
-* `load_sources_file()` reported 355 paths across 22 IDS; the manifest declares
-  the same 355 eligible sources.
-* `fetch_manifest_source_release_rows()` returned 355 rows, 25 without a
+* Before: `load_sources_file()` reported 355 paths across 22 IDS and
+  `fetch_manifest_source_release_rows()` returned 355 rows, 25 without a
   terminal identity, and 0 of those 25 without a source node.
+* After: `load_sources_file()` reports 342 paths across the same 22 IDS; the
+  exclusion sidecar has 127 rows; the release projection returns 342 rows and
+  exactly 12 without a terminal identity.
 * A side-effect-free targeted extraction of all 25 kept 14 and filtered 11:
   the six leaf-time coordinates, four fit weights, and convergence iteration
   count.  It also admitted the three signal structures.
 * The focused qualifier suite passed: 84 passed, 0 failed.
+* The manifest provenance targets DD 4.0.0, while the live installed dictionary
+  is 4.1.1.  A bounded lookup resolved all 25 paths in 4.1.1 (25 requested,
+  25 resolved, 0 missing), so that version skew did not cause the gap.
+
+The exact remaining worklist is:
+
+1. `barometry/gauge/pressure`
+2. `calorimetry/group/component/energy_total/data`
+3. `calorimetry/group/component/power`
+4. `camera_ir/channel/camera/frame/apparent_temperature`
+5. `camera_x_rays/camera/camera_dimensions`
+6. `camera_x_rays/detector_humidity`
+7. `equilibrium/time_slice/profiles_1d/darea_dpsi`
+8. `equilibrium/time_slice/profiles_1d/pressure`
+9. `gas_injection/valve/flow_rate`
+10. `hard_x_rays/emissivity_profile_1d/half_width_external`
+11. `ic_antennas/antenna/module/strap/distance_to_conductor`
+12. `spectrometer_visible/channel/isotope_ratios/signal_to_noise`
 
 ## Required follow-on
 
-Generate the manifest and its exclusions sidecar from the classified DD rows,
-under an explicit write scope for both generated files.  The generator must
-retain the 11 A paths, drop and ledger the 13 B paths, and bind the one C path
-to its existing accepted representative.  The `summary/disruption/time/value`
-parent-structure case also needs a structural temporal-coordinate rule before
-that regeneration; composing names is intentionally outside this evidence
-node.
+Compose names for the 11 disposition-A sources in a separate pipeline node.
+Bind the disposition-C source to
+`spectral_signal_to_noise_ratio_of_spectrometer_channel` through the audited
+source-binding route in a separate node.  This classification node performs
+neither operation and makes no graph writes.
