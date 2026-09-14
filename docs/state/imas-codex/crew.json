@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T11:37:49",
+  "updated": "2026-09-14T11:48:40",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -126868,6 +126868,251 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T094026111036-n-srr-the-service-unit-points-at-a-file-that-exists",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-srr-the-service-unit-points-at-a-file-that-exists",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2014,
+                "cached_input_tokens": 810246,
+                "input_tokens": 812262,
+                "output_tokens": 290,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 812552,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Commit 03837c2b7 deleted slurm/codex-embed.sh because the generated submission path is now the single footprint authority, and imas_codex/config/services/imas-codex-embed.service line 12 still instructs a reader to run sbatch on that deleted file. Confirm both facts at current HEAD and quote them: that the referenced path is absent from the tree, and that the unit still names it. A pointer to something deleted is worse than no pointer, because it reads as current instruction. Replace it with the path that now owns compute-node deployment. Establish what that is from the code rather than assuming: imas_codex/cli/services.py holds the generated submission and its command group is the surface a reader should be sent to, so name the actual command a person would type, verified by running its help and quoting the usage line. While you are in that file, check every other path and command it names and correct any that no longer resolve, because the same deletion may have orphaned more than one line. Report which lines you changed and which you checked and found correct, so a reader can see the check was exhaustive rather than partial. Do not restore the deleted launcher, and do not edit imas_codex/cli/services.py: the generated path is deliberately the only footprint authority, and reintroducing a second one recreates the divergence that node removed. Change no SLURM job and restart no service, because the embed job has run for 35 days and carries live work. Gate: run \"srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G bash -lc export TMPDIR=/tmp; UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD UV_NO_SYNC=1 uv run pytest -p no:cacheprovider tests/cli\" captured once to a log file, quote its totals line, and judge by delta against the same command at your base sha. A documentation-only change that alters no behaviour should show zero added failures.",
+          "estimated_hours": null,
+          "goal": "The embed service unit directs a reader to a launch path that exists, replacing its reference to the launcher that was deleted.",
+          "id": "n-srr-the-service-unit-points-at-a-file-that-exists",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-14T09:40:26Z",
+            "read_at": "2026-09-14T09:40:27Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 5.0
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T094026111036-n-srr-the-service-unit-points-at-a-file-that-exists/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/config/services/imas-codex-embed.service"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-terra-a",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-14T09:40:36Z",
+        "completed_at": "2026-09-14T09:46:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 350,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 350,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "98b4a5990b99161ad1697aaeac391cf591cdd794",
+        "commits": [
+          "a1e1e01f425c3c4211aa7aec534dea3e497005ba"
+        ],
+        "changed_lines": {
+          "added": 1,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/cli",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T094026111036-n-srr-the-service-unit-points-at-a-file-that-exists/after-cli.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T094026111036-n-srr-the-service-unit-points-at-a-file-that-exists/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08190-ae24-72f3-8162-5c4df798f0ca",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 4537856,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 4780588,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 10967,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 1858
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-14T09:46:26Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 6.0,
+              "resets_at": 1789970252,
+              "observed_at": "2026-09-14T09:46:26Z"
+            }
+          ],
+          "notional_cost_usd": 154.5178,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "blocked",
+              "detail": "the worker manifest reports blocked: \"initializing run and collecting preconditions\"",
+              "elapsed_seconds": 111,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1242,
+              "log_fresh": false,
+              "manifest_commits": [],
+              "manifest_derived": false,
+              "manifest_digest": "7f1d260f818ee72e758bc99433f6945d9947168fa1e23039594545c62cc5bbd1",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "blocked",
+              "manifest_status": "blocked",
+              "marker": "!",
+              "needs_help_complete": false,
+              "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated/manifest.md; resolve the blocker before resuming the run",
+              "node": "n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+              "phase": "stopped",
+              "plan": "sn-release-readiness",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "decide",
+              "recovery_classification": "blocked",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+              "session": "ship-s10-20260908",
+              "session_resolution": {
+                "consulted": [
+                  "pointer",
+                  "stream",
+                  "ledger"
+                ],
+                "resolved": true,
+                "run_id": "r-20260914T091748687306-n-srr-the-relaunched-composer-is-measured-before-it-is-seated",
+                "session_id": "01a081a8-16c6-7341-b764-2f4f92a1f163",
+                "source": "pointer"
+              },
+              "terminal_age_seconds": 1292,
+              "terminal_at": "2026-09-14T09:19:00Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-relaunched-composer-is-measured-before-it-is-seated"
+            }
+          ]
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 54284032,
+          "cumulative_input_tokens": 55205706,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 12825,
+          "generation_seconds": 497379.379,
+          "machine_seconds": 1668.462,
+          "tokens_per_second": 0.03
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-srr-the-service-unit-points-at-a-file-that-exists",
+          "session_id": "01a08190-ae24-72f3-8162-5c4df798f0ca",
+          "session_source": "pointer",
+          "retained_at": "2026-09-14T09:46:26Z"
+        },
+        "predecessor_run": null,
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 22.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -127138,6 +127383,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2128
+    "_version": 2129
   }
 }

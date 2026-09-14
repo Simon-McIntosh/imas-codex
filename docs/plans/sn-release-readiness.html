@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-14">
-<meta name="plan-version" content="137">
+<meta name="plan-version" content="138">
 <meta name="plan-commits" content="459279203f628c110ca9f8daa33cc674f93682d1,f4b32b332af6d7da7f7fb701ac5550ab6202bd1f">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/unsourced-origin-cause.md,docs/evidence/sn-release-readiness/unsourced-origin-verification.md,docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md">
 <meta name="plan-impl" content="0.95">
@@ -1085,6 +1085,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T091054600293-n-srr-a-service-launcher-survives-its-own-submission" data-who="codex-terra-b" data-when="2026-09-14T09:31:47Z">
     <div class="r-comment-body"><p>Both defects reproduced at HEAD before repair and both are closed. The submit command no longer removes the script it just submitted, so a generated launcher now lives beside the log its job writes and the provenance field names a file that exists. The footprint disagreement was resolved in the direction I asked for and the one that leaves a single source of truth: the redundant standalone launcher declaring 16 CPU and 4 GPUs was REMOVED rather than edited into agreement with the 2 CPU the service has actually run on for 35 days, so generated submission is now the only footprint authority and the two cannot drift apart again. Five tests hold the durable path, the submitted directives and the footprint-to-directive link. Added failures zero, established properly: the after run carries 2 failures and both appear in the base failure list, so the after set is a subset. It also flagged that its base archive measured 22 additional failures which are instrument artifacts of the archive lacking git provenance and a graph tunnel, rather than claiming a 22-failure improvement.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T094026111036-n-srr-the-service-unit-points-at-a-file-that-exists" data-who="codex-terra-a" data-when="2026-09-14T09:46:26Z">
+    <div class="r-comment-body"><p>One line changed, and the verification around it is what makes it trustworthy. The reproduction was established three ways rather than asserted: the unit named the launcher, test -e reported the path absent, and the deleting commit shows 50 lines removed from that file. The replacement was established from the code rather than assumed - it ran the command help and quoted the usage line back, confirming that surface exists and that it submits a batch job on a compute target. It then checked every other path and command the unit names, four of them, and reported each as resolving, so the exhaustiveness is evidenced per line rather than claimed. Both halves hold at the merged head: zero references to the deleted launcher and two to the surviving command. Added failures zero with identical failure ids at base and after, and systemd-analyze accepted the changed unit. It restored no launcher, restarted no service and touched no SLURM job.</p></div>
 </div>
 <div class="r-comment" data-section="§7a" data-id="c-run-r-20260901T122318417713-n-producerembeddrain" data-who="impl-embedgap" data-when="2026-09-01T12:34:30Z">
     <div class="r-comment-body"><p>Scoped runs now drain StandardName embeddings and refuse completion on a residual gap; regression fails pre-change at assert embedded is True and passes post-change 2/0; targeted pool suites 52 passed 0 failed; no LLM cost</p></div>
