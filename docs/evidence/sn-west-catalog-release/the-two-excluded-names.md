@@ -346,3 +346,144 @@ The final graph state is unchanged from the baseline: the identity remains
 `0.625`. The WEST cut still does not carry it. This is an ISN vocabulary
 finding requiring an upstream grammar decision or vocabulary addition, not a
 reason to clear the recorded quarantine history or spend another no-op review.
+
+## Latest steered successor attempt: validation blocks the admitted spelling
+
+This later bounded attempt re-read the remaining identity before attaching a
+new proposal. The starting state was:
+
+| Field | Starting value |
+| --- | --- |
+| Identity | `inner_hard_xray_peak_width` |
+| Producer | `hard_xrays/emissivity_profile_1d/half_width_internal` |
+| `name_stage` | `exhausted` |
+| `reviewer_score_name` | `0.625` |
+| Prior recorded aggregates | `0.750`, then `0.625` |
+| `refine_attempts` | `3/3` |
+| `docs_stage` | `pending` |
+| `status` | `draft` |
+| `validation_status` | `valid` |
+| `validation_issues` | `[]` |
+| `unit` | `1` |
+| `edit_status` | `exhausted` |
+
+The DD source is one scalar, not a fold of two quantities. Its enriched source
+description reads:
+
+> Internal (towards magnetic axis) half-width of the hard X-ray emissivity peak
+> in normalised toroidal flux coordinate (ρ_tor_norm). Characterizes the inward
+> radial extent of the emissivity peak from fast electrons.
+
+The physics reason supplied to the edit was that the current generic `width`
+omits the half-width distinction, changing the implied magnitude by a factor of
+two, and omits the emissivity-profile locus. The proposed successor restores
+`half_width` and binds the quantity to the emissivity peak. The unit `1` and the
+description carry the normalized-coordinate context, so that coordinate is not
+duplicated as another identity segment.
+
+### Runtime dry-run and attachment
+
+The required dry-run was run before any write:
+
+```text
+DRY RUN sn edit: inner_hard_xray_peak_width  mode=rename axis=name
+scope=only_self entry=review_name
+
+Actions:
+  -  would carry 1 producing source(s) to
+'inner_hard_xray_half_width_of_emissivity_peak'
+  -  would rename 'inner_hard_xray_peak_width' →
+'inner_hard_xray_half_width_of_emissivity_peak'
+```
+
+The dry-run admitted the exhausted identity at `scope=only_self` and confirmed
+one producing source. The real scoped attachment returned:
+
+```text
+APPLIED sn edit: inner_hard_xray_peak_width  mode=rename axis=name
+scope=only_self entry=review_name
+  - verified 1 producing source(s) on
+'inner_hard_xray_half_width_of_emissivity_peak'
+  - renamed 'inner_hard_xray_peak_width' →
+'inner_hard_xray_half_width_of_emissivity_peak', entering name review
+  (edit_status=open, run_id=sn-edit-20260914T161947Z)
+```
+
+No sibling was edited. The source readback for the new identity confirms one
+`PRODUCED_NAME` edge and `dd_path=hard_xrays/emissivity_profile_1d/half_width_internal`,
+with `dd_unit=1`, `dd_version=4.1.0`, and the enriched description quoted above.
+
+### Grammar and review result
+
+The active graph grammar is `ISNGrammarVersion.version=0.9.3`. A bounded query
+for `GrammarToken.value='emissivity_peak'` returns the token under the
+`geometry` and `position` segments (and also the `path` projection); querying
+`t.token` would be the wrong instrument because the graph stores the spelling in
+`value`. The attached candidate reads back with `grammar_parse_version=0.9.3`
+and `physical_base=half_width`, `geometry=emissivity_peak`, establishing that
+the ISN grammar round-trip itself succeeds.
+
+The required scoped review command was:
+
+```text
+imas-codex sn run --name inner_hard_xray_half_width_of_emissivity_peak \
+  --only review_name --skip-global-maintenance -c 15 -t 20
+```
+
+The run bypassed global maintenance, scoped the population to one name, and
+exited with `review_name processed=0`, `in_flight=0`, `error_count=0`, and
+`$0.0000` review spend. It did not claim the candidate because review
+eligibility requires both `name_stage=drafted` and `validation_status=valid`;
+the attached candidate had been quarantined by the full validator before the
+review pool could claim it. No name-axis review rows were created for this
+candidate, so there are no per-reviewer scores or aggregate to report for it.
+
+The exact current validation issues are:
+
+```text
+[semantic] inner_hard_xray_half_width_of_emissivity_peak: WARNING - dimensionless unit '1' on physical quantity 'half_width' is unexpected. Quantities like 'half_width' normally carry SI units. Use '1' only for true dimensionless quantities (ratios, coefficients, counts).
+[canonical] audit:canonical_locus_check: name 'inner_hard_xray_half_width_of_emissivity_peak' has field-evaluation structure but uses intrinsic-geometry relation '_of_'. Rewrite as 'inner_hard_xray_half_width_at_emissivity_peak'.
+audit:canonical_locus_check: name 'inner_hard_xray_half_width_of_emissivity_peak' has field-evaluation structure but uses intrinsic-geometry relation '_of_'. Rewrite as 'inner_hard_xray_half_width_at_emissivity_peak'.
+```
+
+The semantic unit message is advisory; the blocking predicate is the two
+`canonical_locus_check` entries requiring `_at_` rather than `_of_`. This is a
+runtime contradiction to the assumption that grammar admission alone made the
+candidate reviewable: the grammar accepts `emissivity_peak` and the candidate
+round-trips, but the codex canonical-locus validator rejects the relation for a
+field-evaluation name.
+
+### Final readback and verdict
+
+The new identity now reads:
+
+| Field | Final value |
+| --- | --- |
+| Identity | `inner_hard_xray_half_width_of_emissivity_peak` |
+| `name_stage` | `drafted` |
+| `edit_status` | `open` |
+| `edit_mode` | `rename` |
+| `validation_status` | `quarantined` |
+| `validation_issues` | 1 advisory unit warning plus 2 identical canonical-locus refusals |
+| `reviewer_score_name` | `null` |
+| Name-axis review edges | `0` |
+| `refine_attempts` | `3/3` inherited from the exhausted predecessor |
+| `docs_stage` | `pending` |
+| Producer | one `PRODUCED_NAME` edge for `hard_xrays/emissivity_profile_1d/half_width_internal` |
+
+The exact goal was not reached: the candidate is neither accepted nor a scored
+rejection. It is blocked by the current validation predicate
+`canonical_locus_check(... uses intrinsic-geometry relation '_of_' ...)`, which
+requires the spelling `inner_hard_xray_half_width_at_emissivity_peak`. Clearing
+this quarantine or deleting the recorded candidate is forbidden by the
+identity's spend history, and this node does not attempt a second spelling.
+
+The WEST cut would **not** carry the identity now. Its `name_stage` is only
+`drafted`, its `validation_status` is `quarantined`, and its `docs_stage` is
+`pending`; the cut requires an accepted, valid name and accepted documentation.
+The original exhausted identity remains preserved in history and no other
+formerly excluded identity was touched.
+
+Campaign spend was `$103.60` before and `$103.60` after. The stage-only edit and
+the zero-claim review made no LLM calls and spent `$0.00` against the `$15.00`
+node ceiling and `$250.00` campaign ceiling.
