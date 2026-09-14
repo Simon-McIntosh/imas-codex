@@ -129,3 +129,154 @@ A resumed measurement is actionable only when all of these are simultaneously tr
 5. An immediate post-run listing contains `deepseek-v4.1-flash`.
 6. A same-population, same-judge incumbent record is available for per-dimension comparison.
 7. Marked run disagreement is reported as endpoint/model confounding and yields `INDETERMINATE`; seats move only after a valid `FAVOURABLE` result.
+
+## Corrected authority and resumed attempt
+
+The earlier 54-path premise was corrected before resumption. `BenchmarkConfig.max_candidates = 54` is a cap, not a fixture size. The committed non-physics fixture is the 47-entry `REFERENCE_NAMES` mapping in `imas_codex/standard_names/benchmark_reference.py`; the physics fixture is the 15 hard-case paths in `research/physics_bench_paths.json`. Both fixtures were last changed on 2026-08-23. The earlier `47/47` output is therefore not a population shortfall.
+
+The output remains defective under `--physics`: `imas_codex/cli/sn.py:3479` calculates `total_ref` from `REFERENCE_NAMES` unconditionally, while `_extract_candidates` selects the 15-path physics fixture. Consequently the banner cannot identify the physics population. This node records that defect as a follow-on and does not edit the CLI outside its scope.
+
+Placement was also corrected: graph enrichment makes the benchmark eligible for the repository's login-node exception, and its workload is network-bound. No further SLURM launch was attempted.
+
+### Comparable incumbent receipt
+
+The most recent comparable report was read before the resumed run:
+
+`/home/ITER/mcintos/.local/share/imas-codex/benchmarks/sn_benchmark_20260717T162402.json`
+
+It was written at 2026-07-17T16:40:48.571305Z after resolver repair `617333bd3`, used `max_candidates=20`, one run, temperature 0.0, Opus 4.8 as the sole reviewer, and no physics judge. It extracted 17 items and recorded `dataset_hash=d66fef87c0f962f1`.
+
+| Model | Reference precision | Reference recall | Overlap |
+|---|---:|---:|---:|
+| `hosted_vllm/deepseek-v4-flash` | 0.7059 | 0.2553 | 12/47 |
+| `openrouter/openai/gpt-5.6-luna` | 0.6471 | 0.2340 | 11/47 |
+| `openrouter/openai/gpt-5.5` | 0.6471 | 0.2340 | 11/47 |
+| `openrouter/openai/gpt-5.6-terra` | 0.5882 | 0.2128 | 10/47 |
+
+The incumbent row additionally records 17 candidates, 16 grammar-valid names, one grammar-invalid name, 16 field-consistent names, zero batch errors, Opus name-review mean 0.8139705882, and Opus description-review mean 0.9566176471. Its reviewer spend was USD 0.36551425 and local composition spend was USD 0.000000.
+
+### Measurement A: INDETERMINATE before launch
+
+Required command:
+
+```text
+imas-codex sn bench --models hosted_vllm/deepseek-v4.1-flash --max-candidates 20 --runs 3 --reviewer-model openrouter/anthropic/claude-opus-4.8
+```
+
+The immediate pre-run endpoint listing returned HTTP 503, so the command was not launched. A timestamped diagnostic listing immediately afterwards reproduced the same refusal:
+
+```json
+{"measurement":"A","position":"diagnostic-after-failed-preprobe","timestamp_utc":"2026-09-14T10:18:15.299653+00:00","http_status":503,"body":"{\"error\":{\"message\":\"no upstream catalogs are reachable\"}}"}
+```
+
+This is a direct recurrence of the earlier flap after the ten-success watch window. Under the locked validity rule, Measurement A is **INDETERMINATE** and no model numbers are reported. There is no emitted report, no candidate `dataset_hash`, no wall-clock benchmark span, and no post-run probe because no run began. The 503 receipt is the measurement outcome; a later successful probe cannot retroactively validate this attempt.
+
+### Measurement B: not started
+
+Measurement B must follow Measurement A and would run the same command with `--physics` added and `--max-candidates` omitted over the 15 hard-case paths. It was not launched after Measurement A's failed pre-run probe. No absolute physics figure exists from this attempt, and no incumbent delta is claimed.
+
+### Seat decision after resumed attempt
+
+Both necessary promotion conditions failed to become measurable:
+
+1. Measurement A emitted no `dataset_hash`, so equality with `d66fef87c0f962f1` is not established.
+2. Measurement A emitted no reference precision, so precision at or above 0.7059 is not established.
+
+Accordingly both seats remain unchanged:
+
+| Seat | Retained model | Reason |
+|---|---|---|
+| `[tool.imas-codex.sn-compose]` | `hosted_vllm/deepseek-v4-flash` | No matching-hash, threshold-clearing Measurement A result |
+| `[tool.imas-codex.sn-parent-enrich]` | `openrouter/deepseek/deepseek-v4-flash` | Promotion is jointly gated on the same missing Measurement A result; remote v4.1 availability was not reached as a decision point |
+
+### Spend after resumed attempt
+
+No benchmark command was launched and no generation or judge request was made. Node spend remains USD 0.000000 of USD 30.000000. Campaign spend remains USD 101.638907 of the authorized USD 250.000000.
+
+### Remaining follow-ons
+
+- Correct the `--physics` reference-path banner so it reports the 15-path fixture selected by extraction.
+- Expose fail-on-first-provider-error behavior or otherwise prove zero retries for a future benchmark; composition still uses `max_retries=2` and can replace a dropped request.
+- Re-establish a stable endpoint window, then resume Measurement A on the login node before attempting Measurement B.
+
+## Configured-route check after serve settlement
+
+The lead subsequently confirmed that the serve had settled at `http://98dci4-gpu-0003:18802/v1`, that the router's literal model ID is `deepseek-v4.1-flash`, and that the `hosted_vllm/` prefix had not yet been proven end to end against the SGLang pass-through relay. A single minimal structured completion through the configured route was therefore required before either benchmark.
+
+The check used the production seat identifier, the configured `ambix-local` route, the seat's reasoning effort, and `max_retries=1`. It sent one request and failed with exit status 1:
+
+```text
+LLM failed after 1 attempts: Error code: 400 - {'error': {'message':
+'/chat/completions: Invalid model name passed in
+model=openai/hosted_vllm/deepseek-v4.1-flash. Call `/v1/models` to view
+available models for your key.'}}
+```
+
+The stack establishes that this was the direct local route, not a tunnel or OpenRouter fallback: `acall_llm_structured` selected `_acompletion_local`, which called the OpenAI-compatible client's `chat.completions.create` against the configured API base. The request reached the relay, but the forwarded model value was `openai/hosted_vllm/deepseek-v4.1-flash` rather than the served catalog ID `deepseek-v4.1-flash`.
+
+This is the configured-route defect the pre-measurement check was designed to expose. The `hosted_vllm/` compatibility prefix does not currently resolve to the dotted SGLang model ID through this path. No retry occurred, and the failure was an HTTP 400 model-resolution refusal rather than CUDA OOM.
+
+Both measurements remain unlaunched. Reporting either benchmark after bypassing the configured route would measure a different routing contract, so no candidate score, physics floor, dataset hash, wall-clock span, or seat decision is manufactured. Node spend remains USD 0.000000 of USD 30.000000, campaign spend remains USD 101.638907 of USD 250.000000, and both production seats remain unchanged.
+
+The immediate next action belongs outside this node's exclusive write scope: repair the local OpenAI-compatible route so `hosted_vllm/deepseek-v4.1-flash` is translated to the catalog model ID `deepseek-v4.1-flash`, then repeat this same one-call check with retries disabled. Only a successful receipt can reopen Measurement A.
+
+## Authorized registration update and second route check
+
+The previous cause attribution was corrected by a peer reproduction: local endpoint registration occurs before proxy routing, and `_acompletion_local` strips `hosted_vllm/` for a registered model. The first HTTP 400 happened because only the old compose-seat ID was registered; the unregistered v4.1 identifier fell through to proxy shaping.
+
+The lead authorized changing the compose seat before measurement because the prior local model no longer exists. Commit `ab36d6dca` changed exactly one value:
+
+```toml
+[tool.imas-codex.sn-compose]
+model = "hosted_vllm/deepseek-v4.1-flash"
+model-route = "ambix-local"
+```
+
+The prior value was `hosted_vllm/deepseek-v4-flash`. The route, API base, reasoning effort, and every other seat remained unchanged.
+
+### Registered-route receipt: HTTP 404
+
+The required minimal completion was then repeated with `max_retries=1` before either benchmark. Its resolved request facts were:
+
+| Field | Value |
+|---|---|
+| Application model string | `hosted_vllm/deepseek-v4.1-flash` |
+| Configured endpoint | `http://98dci4-gpu-0003:18802/v1` |
+| Local client path | `_acompletion_local` |
+| Wire model demonstrated by relay response | `deepseek-v4.1-flash` |
+| Attempts | 1 |
+| Response | HTTP 404 `unknown model id: deepseek-v4.1-flash` |
+
+Exact response:
+
+```text
+LLM failed after 1 attempts: Error code: 404 - {'error': {'message':
+'unknown model id: deepseek-v4.1-flash'}}
+```
+
+This result exonerates the registration and stripping paths: unlike the first refusal, the relay now reports the bare dotted ID rather than `openai/hosted_vllm/...`. It also proves that the configured endpoint did not accept that bare ID at the time of the request. The failure is a non-429 4xx, so the explicit stop condition applies. It is neither consumer-queue backpressure nor CUDA OOM, and it was not retried.
+
+Measurement A and Measurement B were not launched. Their probe pairs, wall-clock benchmark spans, dataset hashes, precision, and physics floor therefore do not exist. No benchmark number is reported. The compose-seat registration change remains committed because the previous ID names the retired port-18800 model and restoring it would not recover a working configuration.
+
+### Other stale local reviewer entries
+
+No reviewer configuration was changed. Two name-review locations still carry the retired local ID:
+
+| Location | Value | Active now? |
+|---|---|---:|
+| `pyproject.toml:583`, base `[tool.imas-codex.sn-review.names]` models list | `hosted_vllm/deepseek-v4-flash` | no |
+| `pyproject.toml:612`, `[tool.imas-codex.sn-review.names.profiles.local-only]` | `hosted_vllm/deepseek-v4-flash` | no |
+
+The resolved active profile is `default`, whose current name reviewers are `openrouter/x-ai/grok-4.5`, `openrouter/openai/gpt-5.6-luna`, and `openrouter/anthropic/claude-sonnet-5`. Therefore neither stale local reviewer entry participates in the active quorum. Changing either remains a separate reviewer-quorum decision.
+
+### Final spend and seat state for this attempt
+
+The rejected local route check returned before any billable provider result. Node spend remains USD 0.000000 of USD 30.000000. Campaign spend remains USD 102.872694 of the authorized USD 250.000000.
+
+| Seat | Final value | Disposition |
+|---|---|---|
+| `[tool.imas-codex.sn-compose]` | `hosted_vllm/deepseek-v4.1-flash` | authorized registration update retained; measurement not reached |
+| `[tool.imas-codex.sn-parent-enrich]` | `openrouter/deepseek/deepseek-v4-flash` | unchanged; still result-gated |
+| Active name-review profile | `default` remote three-model quorum | unchanged |
+
+The next external fact required is an endpoint catalog and completion route that agree on the accepted bare model ID. Once a one-attempt configured-route check returns a structured response, Measurement A may begin with its pre/post endpoint probes; Measurement B remains ordered after A.
