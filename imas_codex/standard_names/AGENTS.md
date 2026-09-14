@@ -357,12 +357,37 @@ If help and this recipe disagree, stop and update the recipe before operating. K
 
 ### The segment sweep is a scheduled operation, not a rotation side effect
 
-`reconcile_grammar_segments` runs as a startup maintenance step of every unscoped `sn run`, and it covers every
-lifecycle stage: a superseded or exhausted identity carries the same drifted segment columns as a live one, and a
-published catalog resolves a retired name through that history. 706 of the 2239 terminal-stage names drift, so an
-unscoped run rewrites the segment columns of 706 tombstoned identities, each with its own `StandardNameChange`
-ledger entry, as a side effect of asking for one review. That write is correct and it is large and reviewable:
-schedule it as its own operation behind its own restore point, never discover it inside a rotation.
+`reconcile_grammar_segments` is a startup maintenance step of an unscoped
+`sn run`, but its own selection is live-only. The source of that predicate is
+`imas_codex/standard_names/ledger.py:29`:
+
+```python
+LIVE_NAME = "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
+```
+
+The sweep applies that predicate on the read which supplies the write, at
+`imas_codex/standard_names/graph_ops.py:14346`:
+
+```python
+f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
+```
+
+This is a real protection, not a remembered option: superseded and exhausted
+identities cannot enter the segment-realignment batch. `LIVE_NAME` does not
+exclude `contested`, so a contested identity would be considered live by this
+particular predicate; the current census has zero contested identities, which
+means the present terminal population is fully excluded. The separate
+`realign_grammar_segments_for_name` route remains the deliberate operator-named
+way to repair one terminal identity.
+
+The current bounded census, using the command below and the same strict parser
+as the sweep, is **2,456 terminal identities**: 2,160 superseded, 296
+exhausted, and 0 contested. **51** of those rows have parseable ids whose
+stored segment columns drift from the canonical parse. The former `706 of
+2239` figure is historical and must not be used as today's baseline. Before
+and after an ordinary scoped run, expect the current drift count to remain
+unchanged because terminal identities are excluded from this sweep's
+selection, not because an operator remembered a flag.
 
 Until it has been scheduled, an `sn run` dispatched for a single name is
 
@@ -370,10 +395,56 @@ Until it has been scheduled, an `sn run` dispatched for a single name is
 uv run --no-sync imas-codex sn run --name <standard-name> --only review --skip-global-maintenance
 ```
 
-`--skip-global-maintenance` is the fence. It bypasses the global startup, background, and post-drain
-maintenance writes for a run that already carries an explicit scope, so the sweep is not merely unfired — it is
-unreachable, and no after-the-fact proof is needed to establish that. Require it on every scoped single-name
-run until the sweep is scheduled.
+`--skip-global-maintenance` remains required for an explicitly scoped run, but
+for a broader reason than this sweep. In `loop.py`, the shared
+`_global_maintenance_call` returns its default without invoking the function
+when the flag is set, while separate `if not skip_global_maintenance` guards
+cover the orphaned-run sweep and post-drain fixups. The flag therefore keeps a
+scoped operation from running unrelated startup, background, or post-drain
+maintenance. It does **not** provide the segment sweep's protection: the
+sweep's own `LIVE_NAME` predicate does that whether or not the flag is
+remembered. Require the flag on every scoped single-name run to suppress the
+other global writes, not to fence tombstoned segment rows.
+
+The startup maintenance inventory below records the actual selector for every
+maintenance function reached before the worker pools. It distinguishes
+functions that can write terminal-stage `StandardName` properties from
+source-only, DD-only, or read-only checks:
+
+| Startup function | Selection predicate / scope | Can write a terminal `StandardName`? |
+| --- | --- | --- |
+| `mark_orphaned_standard_name_runs_stale` | `SNRun.status IN ['started', 'running']`, old heartbeat, and not the current run | No; writes `SNRun` rows |
+| `reconcile_standard_name_sources` | DD sources whose upstream path is absent/removed or stale; relinks/revives `StandardNameSource` rows | No |
+| `reconcile_vocab_gaps` | `MATCH (vg:VocabGap)`; reclassifies or removes gap rows | No; writes `VocabGap` rows |
+| `revive_unit_skipped_sources` | `sns.status='skipped' AND sns.skip_reason STARTS WITH 'dd_unit_'` with a live DD node | No |
+| `retry_vocab_gap_sources_on_grammar_change` | `sns.status='vocab_gap'` with a vocabulary signature different from the current one | No |
+| `reconcile_provenance` / `reattach_produced_name_edges` | Source scalar/edge desyncs; reattachment uses `LIVE_NAME` for the target | No; source edges/scalars only |
+| `reconcile_source_status_liveness` | Live-source pass uses a non-terminal target; cleanup pass selects sources with no live target and `terminal.name_stage IN $terminal_stages` | **Yes:** removes terminal source projections and resets source metadata; it can set terminal `source_paths` |
+| `retire_unreachable_hint_edits` | `sn.edit_status='open' AND sn.name_hint IS NOT NULL AND sn.name_stage IN ['accepted', 'exhausted']` | **Yes:** rejects exhausted name hints |
+| `reconcile_grammar_segments` | `WHERE LIVE_NAME` at `graph_ops.py:14346` | No for superseded/exhausted; contested would pass the predicate |
+| `reconcile_standard_name_kinds` | `WHERE LIVE_NAME` at `graph_ops.py:14516` | No for superseded/exhausted; contested would pass the predicate |
+| `reconcile_catalog_status` | `sn.name_stage='superseded' AND (status IS NULL OR status='draft')`; then `sn.name_stage='exhausted' AND coalesce(status,'') <> 'draft'`; then `sn.status IS NULL` | **Yes:** writes status on superseded/exhausted names |
+| `reconcile_reviewable_name_stage` (including its descriptionless/source-less helpers) | Main selector requires `name_stage IN ['', 'pending']`, valid status, a non-derived producer, and substantive description; helpers select only null/pending/drafted live pipeline rows | No terminal rows |
+| `reconcile_standard_name_cocos_links` | `cocos_transformation_type IS NOT NULL` and missing scalar/edge; no lifecycle filter | **Yes:** all lifecycle states, including terminal, are eligible |
+| `reconcile_dd_unit_corrections` | Stored DD nodes selected by the unit-exception registry | No; DD nodes only |
+| `reconcile_standard_name_unit_edges` | Names with a unit edge and `sn.unit IS NOT NULL` whose edge set is not exactly the scalar; no lifecycle filter | **Yes:** all lifecycle states, including terminal |
+| `reconcile_attachment_consistency` | All `StandardNameSource-[:PRODUCED_NAME]->StandardName` attachments; action skips historical superseded names and protected accepted names by default | **Yes:** exhausted/contested attachments can be detached and their terminal `source_paths` changed |
+| `reconcile_standard_name_dd_edges` | `NOT (sn.name_stage IN $terminal)` before materializing DD projections | No terminal rows |
+| `reconcile_standard_name_source_paths` | `WHERE NOT (sn.name_stage IN $terminal)` before rebuilding the scalar | No terminal rows |
+| `find_provenance_orphans`, `find_flux_surface_reduction_violations`, `find_removed_dd_sources` | Diagnostic queries over live names; the orphan ledger uses `LIVE_NAME` | No; read-only |
+| `refresh_drifted_sources` | `detect_source_drift` selects `sn.name_stage <> 'superseded'` when `include_accepted=True` | **Yes:** exhausted/contested rows are not excluded from source snapshot or docs-steering work |
+| `promote_stranded_reviewed` | Name/docs rows at `reviewed` with score at or above the active threshold; docs also requires accepted name and a winning docs review | No terminal rows |
+| `rederive_structural_edges` | Initial name read requires non-null stage and `NOT (name_stage IN ['superseded', 'exhausted', 'contested'])`; cleanup only removes dead structural edges | No terminal properties |
+| `seed_parent_sources` | `parent.name_stage IS NULL` with seedable structural children | No terminal rows |
+| `normalize_derived_parent_lifecycle` | Null/pending parents, or accepted parents with missing documentation/unit data | No terminal rows |
+| `structural_accept_derived_parents` | Derived/source-free parents with substantive descriptions and `name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']` | **Yes:** an exhausted derived parent can be promoted to accepted |
+| `reconcile_orphan_parent_sources` | Parent write requires `NOT coalesce(parent.name_stage, '') IN ['superseded', 'exhausted', 'contested']` | No terminal rows |
+
+The post-drain path is covered by the same flag as well: it suppresses
+`release_all_orphan_claims`, the repeated structural parent fixups,
+`resolve_doc_links`, and `restamp_harmonized_families` when they are invoked
+through the guarded maintenance path. Those protections are independent of
+the segment sweep and are why the flag remains part of the scoped-run recipe.
 
 `--name` is the flag that scopes by standard name, and it is the only one that does. `--focus` reads
 name-scoped and is not: it selects **data-dictionary paths**, so a standard-name id handed to it is prefixed
@@ -384,10 +455,11 @@ scopes to *IDS* names rather than standard-name ids and matched nothing for 380 
 correct for the DD-path work it is built for; it is wrong for a name.
 
 Keep the terminal-stage drift census as corroboration, not as the gate. Take it immediately before and
-immediately after the run and expect `drifting: 706` unchanged across the pair. Read the drift count alone, not
-the terminal population beside it: that population was 2239 when the sweep was ruled in-scope for every stage
-and it grows whenever an identity is superseded or exhausted, so a moved `terminal` figure is ordinary and a
-moved `drifting` figure is the sweep having fired.
+immediately after the run and expect the **current** `drifting: 51` unchanged across the pair. Read the drift
+count alongside the terminal population when interpreting a new measurement: the terminal population is now
+2456 and grows whenever an identity is superseded or exhausted, while the drift count changes only when a
+deliberate realignment or a sweep reaches a selected row. A moved terminal figure is ordinary; a moved drift
+figure requires identifying which maintenance writer reached the changed rows.
 
 ```bash
 uv run --no-sync python -c '
@@ -407,10 +479,10 @@ drift = [
 print({"terminal": len(rows), "drifting": len(drift)})'
 ```
 
-A moved figure means the scoped run wrote through the sweep despite the fence: stop and report rather than
-continuing, because the sweep has already run and the remaining question is what else it rewrote — and the
-maintenance skip failing to hold is itself the finding. To realign one identity
-without touching the other 705, use the name-scoped repair `imas-codex sn realign-segments NAME [--dry-run]` —
+A moved figure means the scoped run wrote through the sweep despite its own `LIVE_NAME` guard: stop and report
+rather than continuing, because the sweep reached a row it should not have selected or another maintenance
+writer changed the census. To realign one identity without touching the other terminal rows, use the name-scoped
+repair `imas-codex sn realign-segments NAME [--dry-run]` —
 that route and the whole-graph sweep share one ledger operation label, so a deliberate single repair stays
 queryable beside the scheduled sweep, and neither is ever a hand-written segment update.
 
