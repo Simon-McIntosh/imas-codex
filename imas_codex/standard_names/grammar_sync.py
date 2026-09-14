@@ -26,9 +26,15 @@ here:
 from __future__ import annotations
 
 import dataclasses
+import hashlib
+import json
 import logging
+import tempfile
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 from imas_codex.graph.client import GraphClient
 
@@ -66,6 +72,103 @@ _FINALISE_STATEMENTS: tuple[tuple[str, str], ...] = (
         "MATCH (v:ISNGrammarVersion) SET v.active = (v.version = $version)",
     ),
 )
+
+
+def _grammar_input_paths() -> tuple[Path, ...]:
+    """Return the installed files that the ISN grammar loader consumes.
+
+    ``_GRAMMAR_SPEC_PATH`` is the loader's installed-package location, so this
+    follows the runtime package rather than a checkout.  The vocabulary set is
+    discovered from that specification's sibling directory; adding a YAML
+    vocabulary therefore enters the digest without a codex-side file list.
+    """
+    from imas_standard_names.grammar_codegen import spec as grammar_spec
+
+    specification = Path(grammar_spec._GRAMMAR_SPEC_PATH)
+    vocabularies = tuple(sorted((specification.parent / "vocabularies").glob("*.yml")))
+    if not vocabularies:
+        raise RuntimeError(f"No grammar vocabularies found beside {specification}")
+    return (specification, *vocabularies)
+
+
+def _grammar_input_signature(paths: tuple[Path, ...]) -> list[dict[str, int | str]]:
+    """Return the file metadata that invalidates a persisted digest."""
+    return [
+        {
+            "path": str(path),
+            "mtime_ns": path.stat().st_mtime_ns,
+            "size": path.stat().st_size,
+        }
+        for path in paths
+    ]
+
+
+def _grammar_digest_cache_path() -> Path:
+    """Return the user-local cache used by the startup grammar freshness check."""
+    return Path.home() / ".cache" / "imas-codex" / "grammar-content-digest.json"
+
+
+def _cached_grammar_digest(signature: list[dict[str, int | str]]) -> str | None:
+    """Read a digest only when it was made from these exact file mtimes."""
+    try:
+        record = json.loads(_grammar_digest_cache_path().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if record.get("signature") != signature:
+        return None
+    digest = record.get("digest")
+    return digest if isinstance(digest, str) else None
+
+
+def _cache_grammar_digest(signature: list[dict[str, int | str]], digest: str) -> None:
+    """Persist a digest atomically; a cache miss remains correct if this fails."""
+    cache_path = _grammar_digest_cache_path()
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=cache_path.parent,
+            prefix=f".{cache_path.name}.",
+            delete=False,
+        ) as handle:
+            json.dump(
+                {"signature": signature, "digest": digest}, handle, sort_keys=True
+            )
+            temporary_path = Path(handle.name)
+        temporary_path.replace(cache_path)
+    except OSError:
+        logger.debug("grammar digest cache write failed", exc_info=True)
+
+
+def grammar_content_digest() -> str:
+    """Return a whitespace-stable digest of the installed grammar inputs."""
+    from imas_standard_names.grammar_codegen.spec import IncludeLoader
+
+    paths = _grammar_input_paths()
+    signature = _grammar_input_signature(paths)
+    if digest := _cached_grammar_digest(signature):
+        return digest
+    grammar_root = paths[0].parent
+    hasher = hashlib.sha256()
+    for path in paths:
+        with path.open(encoding="utf-8") as handle:
+            loader = IncludeLoader if path == paths[0] else yaml.SafeLoader
+            document = yaml.load(handle, Loader=loader)
+        canonical = json.dumps(
+            document,
+            ensure_ascii=True,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        hasher.update(path.relative_to(grammar_root).as_posix().encode())
+        hasher.update(b"\0")
+        hasher.update(canonical.encode())
+        hasher.update(b"\0")
+    digest = f"sha256:{hasher.hexdigest()}"
+    _cache_grammar_digest(signature, digest)
+    return digest
+
 
 _MERGE_CONTEXT_TOKENS = """
 UNWIND $rows AS row
@@ -112,6 +215,7 @@ class GrammarSyncReport:
     """Result of a grammar sync run."""
 
     isn_version: str
+    content_digest: str
     spec_version: str
     segments: int
     templates: int
@@ -125,18 +229,29 @@ class GrammarSyncReport:
 
 
 def _finalise_active_version(
-    gc: GraphClient, version: str, dry_run: bool
+    gc: GraphClient, version: str, content_digest: str, dry_run: bool
 ) -> dict[str, Any]:
-    """Set composite ``id`` props + rotate ``active`` flag to ``version``."""
-    report: dict[str, Any] = {"target_version": version, "applied": not dry_run}
+    """Set composite IDs, snapshot content, and rotate the active version."""
+    report: dict[str, Any] = {
+        "target_version": version,
+        "content_digest": content_digest,
+        "applied": not dry_run,
+    }
 
     if dry_run:
         report["planned_statements"] = list(_FINALISE_STATEMENTS)
         return report
 
     for label, cypher in _FINALISE_STATEMENTS:
-        gc.query(cypher, version=version)
+        gc.query(cypher, version=version, content_digest=content_digest)
         report[label] = "ok"
+    gc.query(
+        "MATCH (v:ISNGrammarVersion {version: $version}) "
+        "SET v.content_digest = $content_digest",
+        version=version,
+        content_digest=content_digest,
+    )
+    report["store ISNGrammarVersion.content_digest"] = "ok"
     return report
 
 
@@ -179,6 +294,7 @@ def sync_isn_grammar_to_graph(
         ) from exc
 
     spec = get_grammar_graph_spec()
+    content_digest = grammar_content_digest()
     spec_version = spec.get("version", "unknown")
     segments = len(spec["segments"])
     templates = len(spec["templates"])
@@ -212,7 +328,10 @@ def sync_isn_grammar_to_graph(
             dry_run=dry_run,
         )
         finalise_report = _finalise_active_version(
-            gc_local, version=isn_version, dry_run=dry_run
+            gc_local,
+            version=isn_version,
+            content_digest=content_digest,
+            dry_run=dry_run,
         )
         finalise_report["public context tokens"] = context_report
     except Exception as exc:  # noqa: BLE001 — surface as RuntimeError
@@ -230,6 +349,7 @@ def sync_isn_grammar_to_graph(
 
     return GrammarSyncReport(
         isn_version=isn_version,
+        content_digest=content_digest,
         spec_version=str(spec_version),
         segments=segments,
         templates=templates,
