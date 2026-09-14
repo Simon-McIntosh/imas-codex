@@ -1,0 +1,131 @@
+{
+  "updated": "2026-09-02T23:16:53",
+  "project": "reckon",
+  "doc": "crew",
+  "data": {
+    "members": [],
+    "runs": [
+      {
+        "run_id": "r-20260902T210020995337-codex-agents-md-sub-scoped",
+        "plan": "clive-local-workers",
+        "section": "\u00a79",
+        "node": "codex-agents-md-sub-scoped",
+        "node_definition": {
+          "done_when": "The imas-codex root AGENTS.md is about 22,063 estimated tokens (characters divided by 3.5) across 1,139 lines, the largest of the four mounted repositories, and every worker in it loads that file at startup before opening any source. It has exactly one sub-scoped sibling, imas_codex/standard_names/AGENTS.md, while imas-ambix at 1,772 tokens has two and nova at 4,200 has three, so the pattern to follow already exists in the fleet. Its heaviest blocks are a 2,092-token model and tool configuration section, a 2,006-token family harmonization section, a 1,068-token section on a wrong property name returning zero rows, a 1,013-token schema system section, a 931-token seven-pool pipeline section, a 904-token virtualenv section, a 688-token facility configuration section and a 648-token schema design guidelines section. Move each block into an AGENTS.md in the narrowest existing directory that owns the code it describes, choosing among imas_codex/llm, imas_codex/config, imas_codex/graph, imas_codex/ingestion, imas_codex/discovery, imas_codex/embeddings, imas_codex/core, imas_codex/cli, crew and docs, and create only files named AGENTS.md. Leave in the root only what a worker editing any file in the repository needs, plus a one-line pointer per moved block naming the file and what it covers. Measures: the root drops below 8,000 estimated tokens; nothing is lost, verified by asserting every level-2 and level-3 heading present before appears in exactly one AGENTS.md after; every new file opens with a sentence naming the sub-tree it governs; every pointer names a path that exists; and no file whose name is not AGENTS.md changes. Your gate is that heading census run as a script whose full output you record in the manifest, plus any existing test in the repository that reads AGENTS.md. Do NOT run the full suite and do NOT run any browser-driven or GPU-driven test",
+          "estimated_hours": null,
+          "goal": "Cut the imas-codex root AGENTS.md to a thin index by moving reference material to the scope that owns it",
+          "id": "codex-agents-md-sub-scoped",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T210020995337-codex-agents-md-sub-scoped/manifest.md",
+          "plan": "clive-local-workers",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a79",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "AGENTS.md",
+            "imas_codex/llm/AGENTS.md",
+            "imas_codex/config/AGENTS.md",
+            "imas_codex/graph/AGENTS.md",
+            "imas_codex/ingestion/AGENTS.md",
+            "imas_codex/discovery/AGENTS.md",
+            "imas_codex/embeddings/AGENTS.md",
+            "imas_codex/core/AGENTS.md",
+            "imas_codex/cli/AGENTS.md",
+            "crew/AGENTS.md",
+            "docs/AGENTS.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "flash-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "backend": "clive",
+          "effort": "medium",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-02T21:00:26Z",
+        "completed_at": "2026-09-02T21:16:19.865Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 944,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 953,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "76cd1525dde6f904f3c536aa71b89960c01a2212",
+        "commits": [
+          "7f41635f770e9700ba01cfd0c4119ab25e9675d4"
+        ],
+        "changed_lines": {
+          "added": 986,
+          "removed": 921,
+          "files": 10
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "heading census over every AGENTS.md plus the existing tests/graph/test_guidance_matches_schema.py that scans them",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T210020995337-codex-agents-md-sub-scoped/heading-census.txt",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "imas-codex root AGENTS.md 22,063 to 4,920 estimated tokens across ten new sub-scoped files, from one sibling to eleven. All 64 level-2 and level-3 headings appear in exactly one AGENTS.md afterwards, 0 missing, verified independently of the worker's census. Gate was the census plus the existing test that scans every imas_codex AGENTS.md; the full suite was deliberately not run under the new policy and the manifest records that as NOT ARMED rather than leaving it blank. Merged as e7e1085e.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T210020995337-codex-agents-md-sub-scoped/manifest.md",
+        "scope_changed": false,
+        "session_id": "712088b0-794d-4dba-b433-b2148231f4b9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4291026,
+            "input_tokens_cumulative": 4291026,
+            "output_tokens": 43727,
+            "output_tokens_cumulative": 43727,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 22.548305000000003,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 22.548305000000003
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "run the full suite",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      }
+    ],
+    "holds": [],
+    "_version": 1
+  }
+}
