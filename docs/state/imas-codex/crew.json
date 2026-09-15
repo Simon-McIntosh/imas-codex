@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T07:21:16",
+  "updated": "2026-09-15T09:39:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -85,6 +85,15 @@
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "e9e5744f-ed47-4470-8f7e-f7abbc2f6860"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "clive-c",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
       },
       {
         "id": "clive-census",
@@ -131690,6 +131699,214 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T052536440564-n-swcr-the-calorimetry-quarantine-is-revalidated",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-calorimetry-quarantine-is-revalidated",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1475,
+                "cached_input_tokens": 795136,
+                "input_tokens": 796613,
+                "output_tokens": 2017,
+                "reasoning_output_tokens": 495,
+                "total_tokens": 798630,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "accumulated_total_coolant_absorbed_energy_of_calorimetry_component leaves validation_status quarantined and reaches a scored name review, or the barrier preventing that is reported with its evidence, recorded in docs/evidence/sn-west-catalog-release/the-calorimetry-energy-quarantine.md. CONFIRM THE STARTING STATE and quote it: the identity reads name_stage exhausted, validation_status quarantined, reviewer_score_name 0.75, validation_issues null, quarantine_reason null, and refine_stop_reason grammar_invalid, and its producing source is calorimetry/group/component/energy_total/data.\nTHE QUARANTINE REASON IS STALE AND THAT IS THE FINDING TO VERIFY FIRST. The recorded stop reason says the name is grammar-invalid, but under the installed imas-standard-names 0.9.3 the spelling parses cleanly; confirm that yourself with the parser before anything else and quote the result. If it parses, the identity is quarantined for a condition that no longer holds, which is a stale-state defect rather than a naming defect, and the remedy is revalidation through the sanctioned route rather than a rename or a direct status write.\nFIND AND USE THE SANCTIONED REVALIDATION ROUTE. Establish what re-runs validation over a quarantined identity and clears a quarantine whose cause has lapsed; imas-codex sn has validation and audit surfaces and one of them owns this. NEVER write validation_status directly and never clear a quarantine by hand to make a count move; if no sanctioned route exists, that absence is the finding and you must report it rather than improvising one.\nA DISTINCT SIBLING EXISTS AND MUST NOT BE COLLAPSED ONTO. accumulated_coolant_absorbed_energy_of_calorimetry_component is accepted and valid, produced by calorimetry/group/component/energy_cumulated. That is a DIFFERENT data-dictionary path, energy_cumulated rather than energy_total, so the two are distinct quantities and the accepted one is not a duplicate to reuse. Read both DD entries and state in one sentence how the quantities differ, so a reviewer can see the pair is deliberate.\nEVIDENCE: the parse result for the quarantined spelling; the route you used with its output; the identity's validation_status, name_stage and any review score read back from the graph afterwards; and whether the WEST cut would now carry it. Spend no more than 10.00 USD; campaign total was 107.18 USD against a 250.00 USD ceiling, state it before and after. Delete nothing. Live graph work runs on the login node. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 0.8,
+          "goal": "The calorimetry energy identity leaves quarantine and reaches a scored review, or its barrier is reported.",
+          "id": "n-swcr-the-calorimetry-quarantine-is-revalidated",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-15T05:25:36Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T052536440564-n-swcr-the-calorimetry-quarantine-is-revalidated/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-calorimetry-energy-quarantine.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-15T05:25:50Z",
+        "completed_at": "2026-09-15T07:35:18.230Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 7743,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 7768,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "4d547b414de5f7d5ec582292c6fdf333159643bb",
+        "commits": [
+          "9d9428ba08a46e30fc020ef510ab9532765e5829"
+        ],
+        "changed_lines": {
+          "added": 239,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "parser check plus sanctioned revalidation with graph readback",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T052536440564-n-swcr-the-calorimetry-quarantine-is-revalidated/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T052536440564-n-swcr-the-calorimetry-quarantine-is-revalidated/manifest.md",
+        "scope_changed": false,
+        "session_id": "9e9aa2a4-f81d-44f1-be77-c8d0f320a5ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8089853,
+            "input_tokens_cumulative": 8089853,
+            "output_tokens": 48256,
+            "output_tokens_cumulative": 48256,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T07:35:18.230Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8244090,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 7765.053,
+          "generated_tokens": 54679,
+          "generation_seconds": 7723.492,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 76.5,
+          "machine_seconds": 41.561,
+          "peak_input_tokens": 152937,
+          "tokens_per_second": 7.08,
+          "wall_tokens_per_second": 7.04
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "docs/figures/sn-west-catalog-release/calorimetry-quarantine-revalidated.svg",
+            "reason": "A figure accompanying the evidence document it was scoped to write. The standing instruction is to illustrate research and evidence documents wherever a graphic aids understanding, so this is the encouraged behaviour landing one directory outside a narrowly drawn write path rather than a scope violation."
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-calorimetry-quarantine-is-revalidated",
+          "session_id": "9e9aa2a4-f81d-44f1-be77-c8d0f320a5ee",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T07:35:18.230Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 84.0,
+        "orientation_input_tokens": 6588305.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -131960,6 +132177,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2156
+    "_version": 2158
   }
 }
