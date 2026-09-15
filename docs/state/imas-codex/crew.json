@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-14T23:01:07",
+  "updated": "2026-09-15T02:54:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -131073,6 +131073,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260914T210133499777-n-swcr-the-eleven-unnamed-quantities-are-minted",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-eleven-unnamed-quantities-are-minted",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1233,
+                "cached_input_tokens": 732673,
+                "input_tokens": 733908,
+                "output_tokens": 692,
+                "reasoning_output_tokens": 74,
+                "total_tokens": 734600,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Each of the eleven WEST manifest paths that carry a physical quantity but no standard name either reaches an accepted name with accepted documentation, or is reported with the exact stage and reason it stopped, recorded in docs/evidence/sn-west-catalog-release/the-eleven-unnamed-quantities.md. THE ELEVEN PATHS are barometry/gauge/pressure, calorimetry/group/component/energy_total/data, calorimetry/group/component/power, camera_ir/channel/camera/frame/apparent_temperature, camera_x_rays/camera/camera_dimensions, camera_x_rays/detector_humidity, equilibrium/time_slice/profiles_1d/darea_dpsi, equilibrium/time_slice/profiles_1d/pressure, gas_injection/valve/flow_rate, hard_x_rays/emissivity_profile_1d/half_width_external, and ic_antennas/antenna/module/strap/distance_to_conductor. They were classified as valid sources wrongly withheld, with per-path data-dictionary evidence, in docs/evidence/sn-west-catalog-release/the-unnamed-manifest-sources.md; read that ledger first and treat its dispositions as settled rather than re-deciding them.\nTHE STARTING STATE IS MEASURED AND IT IS NOT A SEEDING PROBLEM. Every one of the twelve already has a StandardNameSource node; an earlier claim that none did was an artifact of querying a property the node does not carry, and the node keys its path as source_id rather than path. The measured per-path status is: EXTRACTED WITH ZERO ATTEMPTS for barometry/gauge/pressure, calorimetry/group/component/energy_total/data, calorimetry/group/component/power, camera_ir/channel/camera/frame/apparent_temperature, equilibrium/time_slice/profiles_1d/pressure, gas_injection/valve/flow_rate, hard_x_rays/emissivity_profile_1d/half_width_external and ic_antennas/antenna/module/strap/distance_to_conductor, which are eight sources seeded and never once attempted; FAILED AT FIVE ATTEMPTS for camera_x_rays/camera/camera_dimensions and equilibrium/time_slice/profiles_1d/darea_dpsi; and SKIPPED for camera_x_rays/detector_humidity at one attempt and spectrometer_visible/channel/isotope_ratios/signal_to_noise at two. Reproduce those twelve statuses yourself before acting and quote them, querying on source_id rather than on path.\nTHE THREE GROUPS NEED DIFFERENT TREATMENT AND MUST NOT BE RUN AS ONE UNDIFFERENTIATED BATCH. The eight extracted sources have never been attempted, so an ordinary focused scoped run is the whole of their treatment. The two failed sources have consumed five attempts each and a sixth blind attempt is not a plan: establish from the run records or logs WHY each failed, state the cause, and only then decide whether a retry is justified or whether the cause is a defect to report. The two skipped sources were declined by the composer rather than failing: find the predicate or condition that skipped each and quote it, because a skip with a reason is a decision and a skip without one is a gap. Treat a diagnosis you cannot complete as a finding to report rather than a retry to spend attempts on.\nTHREE OF THE ELEVEN ARE SIGNAL STRUCTURES rather than leaves: barometry/gauge/pressure is a STRUCTURE carrying Pa, calorimetry/group/component/power carries W, and camera_x_rays/detector_humidity is dimensionless. Each holds its measurement in a /data child. The classifier defect that used to refuse such quantities has been fixed and verified, so they are expected to be admitted; if any of the three is still refused at seeding, quote the exact refusal and treat it as a finding about that repair rather than as an eligibility decision.\nONE NAME HAS A SIBLING ALREADY IN THE CATALOG AND THE PAIR MUST READ AS A PAIR. inner_hard_xray_half_width_at_emissivity_peak was accepted today from hard_x_rays/emissivity_profile_1d/half_width_internal, with base half_width, qualifiers inner and hard_xray, and the position locus emissivity_peak under the at relation. hard_x_rays/emissivity_profile_1d/half_width_external is its outward counterpart. Do not dictate the spelling to the composer, but state in your evidence whether the accepted result is symmetric with its sibling, and if the two do not read as a pair, say so plainly rather than accepting an asymmetry a reviewer would notice immediately.\nTWO PATHS NEED A DUPLICATION CHECK BEFORE COMPOSITION IS TRUSTED. equilibrium/time_slice/profiles_1d/pressure is a core plasma quantity whose absence from the catalog is surprising, and calorimetry/group/component/energy_total/data is a leaf whose parent is also unnamed. For each, search the existing accepted names for a representative before accepting a newly composed name, and if one already exists, report that the path needs a source binding rather than a new identity, exactly as the classification ledger concluded for the signal-to-noise path.\nDRIVE THE FULL CHAIN, not only composition. A name that is accepted but undocumented is not exportable, as this batch has just demonstrated: the last WEST exclusion was cleared only when its documentation was accepted. So each of the eleven needs composition, name review to acceptance, and documentation generation and review to acceptance. Ground documentation on the enriched node description rather than the terse data-dictionary text.\nEVIDENCE REQUIRED: for every one of the eleven, the source status before and after the run, the composed name with its per-reviewer scores and aggregate, the documentation outcome with its scores, and the final name_stage and docs_stage read back from the graph; the count of the eleven that are now exportable; and the manifest unmatched count re-measured by expanding the manifest as ids/leaf and calling fetch_manifest_source_release_rows, which stood at 25 before the exclusions were recorded and should fall by every path you land. A path that stops short is an acceptable outcome reported with its stage and reason; a path silently skipped is not.\nComposition resolves to the local seat and is free; name review, documentation generation and documentation review resolve to remote providers and are the billed part. Spend no more than 30.00 USD and state the campaign total before and after. Delete nothing, clear no quarantine, and do not edit the manifest or its exclusions sidecar, which another node owns. Live graph work runs on the login node because the project client resolves the graph host directly. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.5,
+          "goal": "Each WEST manifest path carrying a physical quantity but no standard name reaches an accepted name with accepted documentation, or is reported with the stage and reason it stopped.",
+          "id": "n-swcr-the-eleven-unnamed-quantities-are-minted",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-14T21:01:34Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T210133499777-n-swcr-the-eleven-unnamed-quantities-are-minted/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-eleven-unnamed-quantities.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 1016576
+        },
+        "dispatched_at": "2026-09-14T21:01:48Z",
+        "completed_at": "2026-09-15T00:51:37.773Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13767,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 13789,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "6dce4d6a45760a698b36da920d3b94ae9dc92ec5",
+        "commits": [
+          "1f28bc72bc66b9e81c57a0c208cccf9ab795d3af",
+          "bdfb6f686f309e9d39219ef5aced691d32e5fb5c"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 0
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "focused scoped sn run rotations with graph readback of every path",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/logs/sn_sn-compose.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260914T210133499777-n-swcr-the-eleven-unnamed-quantities-are-minted/manifest.md",
+        "scope_changed": false,
+        "session_id": "b2fccc5b-64de-4914-b42e-da9302ffb071",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 20383530,
+            "input_tokens_cumulative": 20383530,
+            "output_tokens": 139606,
+            "output_tokens_cumulative": 139606,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-15T00:51:37.773Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 20835603,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 200000",
+          "elapsed_seconds": 8315.916,
+          "generated_tokens": 162968,
+          "generation_seconds": 7505.788,
+          "input_budget_tokens": 200000,
+          "input_utilisation_pct": 76.4,
+          "machine_seconds": 810.128,
+          "peak_input_tokens": 152754,
+          "tokens_per_second": 21.71,
+          "wall_tokens_per_second": 19.6
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-eleven-unnamed-quantities-are-minted",
+          "session_id": "b2fccc5b-64de-4914-b42e-da9302ffb071",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T00:51:37.773Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 57.0,
+        "orientation_input_tokens": 10814952.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -131343,6 +131546,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2153
+    "_version": 2154
   }
 }

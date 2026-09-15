@@ -16,7 +16,7 @@
 <meta name="plan-effort" content="M">
 <meta name="plan-sprint" content="S10">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-09-14">
+<meta name="plan-modified" content="2026-09-15">
 <meta name="plan-graph-handle" content="west-rc">
 <meta name="plan-depends-on" content="sn-west-review-rehearsal,sn-west-cohort-treatment">
 <meta name="plan-blocks" content="">
@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.98">
-<meta name="plan-version" content="271">
+<meta name="plan-version" content="272">
 <meta name="plan-commits" content="72b7760c60ac307f641e7e8490b7f15e532d2104">
 <meta name="plan-artifacts" content="docs/evidence/sn-west-catalog-release/residue-currency.md,tests/standard_names/test_review_body_ledger_link.py">
 </head>
@@ -543,6 +543,9 @@ rows: 20   foldable-remaining: 0   unreconciled-runs: 0</pre><p><strong>Live poi
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260914T203706787249-n-swcr-the-unnamed-manifest-sources-are-classified" data-who="session-2a6f0db8b3e75a382796" data-when="2026-09-14T20:56:29Z">
     <div class="r-comment-body"><p>All 25 unnamed WEST manifest sources classified with per-path evidence: 11 valid quantities wrongly withheld, 13 genuinely ineligible, 1 already represented. The 13 are recorded in the exclusions sidecar with categories, moving eligible sources 355 to 342 and recorded exclusions 114 to 127, and the unmatched count re-measured by the same instrument fell 25 to 12 exactly as required. It corrected two errors in my brief: the STRUCTURE classifier defect I told it to repair is already fixed and verified, and the manifest has no generator, its provenance recording preparation from an external analysis document. It established that the DD 4.0.0 manifest target against an installed 4.1.1 is not the cause, since all 25 paths resolve in 4.1.1. The contour-tree judgement is the strongest call: a node that may be an X or an O point is not one stable locus and must not be collapsed onto the accepted magnetic-axis name.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260914T210133499777-n-swcr-the-eleven-unnamed-quantities-are-minted" data-who="clive-a" data-when="2026-09-15T00:51:37.773Z">
+    <div class="r-comment-body"><p>Six of eleven withheld quantities are now exportable with an accepted name and accepted documentation: coolant_absorbed_power_of_calorimetry_component and gas_flow_of_valve and outer_hard_xray_half_width_at_emissivity_peak each at 1.0, total_plasma_pressure at 0.9125, surface_temperature at 0.925 and relative_humidity_of_detector at 0.9. The sibling pair came out right without being dictated: the outward half-width is symmetric with the previously accepted inward one, same base, same position locus, same at relation, after a first attempt without the locus was correctly exhausted at 0.5375. All three signal-STRUCTURE quantities were admitted with no refusal, confirming the classifier repair holds. Three exhausted their rotation below the 0.85 threshold, neutral_pressure at 0.688 and distance_of_antenna_strap at 0.7125 and the calorimetry energy identity at 0.75 after superseding a weaker spelling, and two produced no name at all, camera_dimensions failed at five attempts and darea_dpsi at four. The node vanished twice without a terminal manifest; the second time it had written its evidence first as instructed, so the record survived where the first vanish had left only the graph.</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
     <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>
