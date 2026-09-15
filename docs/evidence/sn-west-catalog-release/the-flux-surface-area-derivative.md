@@ -218,3 +218,114 @@ model family changed, the failure mode changed, and no identity was minted.
 Another seat would be an unplanned experiment after the fence explicitly says
 to stop. The source remains terminal with its exact spelling hint intact for a
 future, separately governed recovery.
+
+## The repaired classifier breaks the deadlock
+
+The composer-contract diagnosis above is the defect a subsequent worker
+repaired at the authority: `_operator_uses_bare_prefix` now classifies from the
+registry's `operator.token`, intersecting the public `BARE_PREFIX_OPERATORS`
+set with the registry's `unary_prefix` kind, and fails closed on unknown
+tokens. The three measured cases are `normalized=true`,
+`derivative_with_respect_to=false`, and the glued coordinate-token form
+`false`; the coordinate-indexed derivative now round-trips. Tests landed in
+`348b6a5fa`, implementation in `76a4e706c` — both present in this worktree's
+history at the merge `a7b9f1e35`. The one thing the composer's second failure
+mode needed (correct operator, non-bare prefix) is now expressible.
+
+With that repair at HEAD, the source was released once more through the same
+governed CLI — no workaround, the exact reason naming the repaired
+classification:
+
+```
+imas-codex sn retry --failed equilibrium/time_slice/profiles_1d/darea_dpsi \
+  --reason "release the exhausted local-composer failure for one focused attempt now that the bare-prefix classifier reads the registry operator token"
+
+retried: 1 of 1 requested source(s)
+  dd:equilibrium/time_slice/profiles_1d/darea_dpsi
+```
+
+Immediate read-back: `status=extracted`, `attempt_count=0`, the exact spelling
+hint still open
+(`derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate`).
+
+## One focused run composes, reviews, and accepts
+
+The single governed run — local compose seat, hint still ridden onto the
+source, all pools — completed under its stated budget:
+
+```
+sn run --focus equilibrium/time_slice/profiles_1d/darea_dpsi \
+  --skip-global-maintenance -c 12 -t 45
+```
+
+The grammatically valid candidate the composer previously could not land
+appeared on the first pool cycle and the name axis accepted it immediately:
+
+```
+12:36:15  pool generate_name: persisted 1 candidates
+12:37:58  persist_reviewed_name: derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate
+          → name_stage=accepted (score=1.000, rotations=0/3, chain=0)
+12:37:58  review_name: ... → accepted (score=1.000, cycles=2, method=quorum_consensus)
+```
+
+The docs axis followed under the same run: generated, re-reviewed on a doc-link
+mismatch (an authoritative-escalation round demoting to `reviewed` at 0.849,
+then the quorum accepting at 1.000):
+
+```
+12:44:31  persist_reviewed_docs: derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate
+          → docs_stage=accepted (score=1.000, chain=1/3, resolution=quorum_consensus)
+```
+
+Run summary (the full transcript and its digest are in the manifest):
+
+```
+stop_reason       no_eligible_work
+cost_spent        0.621714
+cost_limit        12.0
+names_composed    1
+names_enriched    1
+names_reviewed    3
+elapsed_s         840.930367
+```
+
+No grammar retry line and no `has no bare spelling` refusal appears anywhere in
+this run's log — the compose-step count of those strings is zero.
+
+## Final graph read-back
+
+```
+StandardNameSource dd:equilibrium/time_slice/profiles_1d/darea_dpsi
+  status         : composed
+  attempt_count  : 1            (released from the 5-cap before this run)
+  produced_sn_id : derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate
+
+StandardName derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate
+  name_stage  : accepted
+  docs_stage  : accepted
+  reviewer_score_name  : 1.000
+  reviewer_score_docs  : 1.000
+  PRODUCED_NAME edges  : 1 from dd:equilibrium/time_slice/profiles_1d/darea_dpsi
+```
+
+The spelling is the exact family tail the `dvolume_dpsi` source carries: the
+volume sibling is
+`derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate`,
+and this name swaps only the base (`area` for `volume`). The three already
+accepted flux-surface siblings were re-read after the run and remain
+`name_stage=accepted`, `docs_stage=accepted`, each with its own producer edge
+intact:
+
+```
+derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate   accepted/accepted  1 edge dd:darea_drho_tor
+derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate  accepted/accepted  1 edge dd:dvolume_dpsi
+derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate  accepted/accepted  1 edge dd:dvolume_drho_tor
+```
+
+`sn status --family` reports "No family found" for the new name and for the
+pre-existing accepted volume sibling alike: both are unparented with distinct
+`physical_base`s, so the family assembler — which groups by `HAS_PARENT`
+operator-kind or a shared base — has no group to return. That returns the same
+exit for both names and is an artifact of the family instrument, not a state
+regression in the new identity, whose accepted stage is read from the graph
+above.

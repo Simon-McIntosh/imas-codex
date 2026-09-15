@@ -412,6 +412,39 @@
     <a href="/imas-codex/evidence/sn-west-catalog-release/the-flux-surface-area-derivative">the
     flux-surface area derivative evidence</a>.</p>
   </section>
+  <section id="flux-surface-area-derivative-landed">
+    <h2>The flux-surface area derivative lands behind the repaired classifier</h2>
+    <p>With the operator-token bare-prefix classification repair at HEAD
+    (<code>76a4e706c</code> implementation, <code>348b6a5fa</code> tests, merged
+    <code>a7b9f1e35</code>), <code>equilibrium/time_slice/profiles_1d/darea_dpsi</code>
+    finally produced a grammatically valid name. The source was released once through
+    the same governed CLI — <code>sn retry --failed</code> reset it from the exhausted
+    five-attempt cap (<code>status=failed</code>, <code>attempt_count=5</code>,
+    <code>produced_sn_id=null</code>) to <code>status=extracted</code>,
+    <code>attempt_count=0</code>, the exact spelling hint still open. A single focused
+    run (<code>sn run --focus equilibrium/time_slice/profiles_1d/darea_dpsi
+    --skip-global-maintenance -c 12 -t 45</code>) then composed the candidate on the
+    first pool cycle, accepted the name axis at <code>score=1.000</code> by
+    quorum consensus, and accepted the docs axis at <code>score=1.000</code> in the
+    same run.</p>
+    <p>The landed identity is
+    <code>derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code> —
+    the exact family tail the <code>dvolume_dpsi</code> source carries
+    (<code>derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code>),
+    with only the base swapped. The final read-back shows the source at
+    <code>status=composed</code>, <code>attempt_count=1</code>, carrying one
+    <code>PRODUCED_NAME</code> edge to that identity, and the name at
+    <code>name_stage=accepted</code>, <code>docs_stage=accepted</code>. The three already
+    accepted flux-surface siblings (<code>darea_drho_tor</code> poloidal-base,
+    <code>dvolume_dpsi</code>, <code>dvolume_drho_tor</code>) were re-read after the run
+    and each still holds <code>name_stage=accepted</code>, <code>docs_stage=accepted</code>
+    with its own producer edge intact. Run spend was <code>$0.621714</code> across
+    ten LLM calls against the <code>$12.00</code> cap, with zero grammar-retry and zero
+    bare-spelling-refusal lines in its log. Full commands, quoted read-backs, and the
+    run summary are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/the-flux-surface-area-derivative">the
+    flux-surface area derivative evidence</a>.</p>
+  </section>
   <section id="operator-bare-prefix-classification">
     <h2>The composer now asks the registry about the operator, not its rendered coordinate form</h2>
     <p>The failure reproduced at base commit <code>ba946c6df</code>. The helper correctly
