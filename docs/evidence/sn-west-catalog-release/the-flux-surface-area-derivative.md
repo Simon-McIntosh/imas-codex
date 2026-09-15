@@ -1,27 +1,24 @@
-# The flux-surface area derivative: a model-side barrier, not the grammar
+# The flux-surface area derivative: the vendor-diverse seat fails differently
 
 ## Outcome
 
 `equilibrium/time_slice/profiles_1d/darea_dpsi` — the radial derivative of the
 cross-sectional area of a magnetic flux surface with respect to poloidal
-magnetic flux — does **not** gain an accepted standard name, and the WEST cut
-does **not** carry it. There is no composed name to export: the final,
-exact-spelling-guided composition attempt under the five-attempt cap failed the
-grammar round trip like every attempt before it, the source is terminal
-(`status=failed`, `attempt_count=5`, `produced_sn_id=null`), and the focused
-run exited with `names_composed=0` and `names_reviewed=0`.
+magnetic flux — still does **not** have a standard name, and the WEST cut still
+does **not** carry it. The governed escalation was exercised exactly once on
+the vendor-diverse seat `openrouter/anthropic/claude-fable-5`; it emitted
+grammar-invalid structured output, so no further seat was attempted.
 
-This is the goal's second branch, reported in full below: **the grammar is not
-the barrier, and the cause is visible, diagnosed, and resistant to the
-in-scope fix** — the local composer seat repeatedly emits grammar-invalid
-structured output for this source even when the prompt carries the exact,
-parseable target spelling as operator steering.
-
-Node LLM spend was `$0.00` — every composition call was the local
-`deepseek-v4-flash` seat (cache `MISS`, `cost=$0.0000`); with no produced name
-there were no paid review or documentation stages, so the campaign spend figure
-is unchanged (`107.18` USD before, `107.18` after, against the `250.00`
-ceiling).
+The failure is narrower than the local composer's. Fable selected the correct
+operator, `derivative_with_respect_to_poloidal_magnetic_flux_coordinate`, but
+marked it `bare_prefix=True`. `StandardNameIR` refuses that combination because
+this operator has no bare spelling. The focused run ended at exit 1 after
+252.724276 seconds with four counted `generate_name` pool errors,
+`names_composed=0`, `names_reviewed=0`, and `$4.356897` spent against the
+node's `$10.00` command cap. The complete 141,540-byte terminal transcript is
+stored at
+`/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T083636424567-n-swcr-the-area-derivative-is-named-on-a-diverse-seat/compose-fable.log`
+(SHA-256 `b3ebf837f7458286f1a15e572891242e93f283eb6d4557376707bcbcd8ebfc9f`).
 
 ## Starting state (quoted)
 
@@ -142,11 +139,82 @@ spelling, matching the family and the sibling the DD pairs it with. Whether
 family convention; it is moot for this cut because no composed name survived to
 be exported.
 
+## Vendor-diverse escalation (2026-09-15)
+
+The previous failure still reproduced before recovery:
+
+```
+status=failed  attempt_count=5  produced_sn_id=null
+PRODUCED_NAME edges=0  compose_hint_status=open
+```
+
+The sibling control remained present and useful:
+`derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate`
+was `name_stage=accepted`, `docs_stage=accepted`, with one producing source.
+This ruled out an empty graph read before the absence was treated as evidence.
+
+The source was then released only through the governed CLI:
+
+```
+imas-codex sn retry --failed equilibrium/time_slice/profiles_1d/darea_dpsi \
+  --reason "release the exhausted local-composer failure for one vendor-diverse composition attempt using the exact parseable sibling-family tail"
+
+retried: 1 of 1 requested source(s)
+  dd:equilibrium/time_slice/profiles_1d/darea_dpsi
+```
+
+The durable retry event is
+`source-retry:8dbf7131-a22b-4301-83c1-d28104db544e`; it records
+`previous_status=failed`, `previous_attempt_count=5`, and
+`previous_error="compose claim-attempt cap reached"`. Read-back immediately
+afterward showed `status=extracted` and `attempt_count=0`, with the exact source
+hint still open.
+
+The sole escalation run was:
+
+```
+imas-codex sn run \
+  --focus equilibrium/time_slice/profiles_1d/darea_dpsi \
+  --skip-global-maintenance \
+  --compose-model openrouter/anthropic/claude-fable-5 \
+  --time 20 --cost-limit 10
+```
+
+The routing receipt named the required model, direct OpenRouter route, and the
+project-specific key source. The first failed composition then reported:
+
+```
+Value error, operator
+'derivative_with_respect_to_poloidal_magnetic_flux_coordinate' has no bare
+spelling; ... input_value={'kind': 'unary_prefix', ...,
+'bare_prefix': True}
+```
+
+The same run logged five `composition retry 1/1` grammar-failure lines for the
+exact source and ultimately refused successful completion after four counted
+pool errors. The fifth claim had already reached the attempt cap; its late model
+response lost the claim race and was ignored. Final graph read-back is again:
+
+```
+status=failed  attempt_count=5  produced_sn_id=null
+PRODUCED_NAME edges=0  compose_hint_status=open
+```
+
+The intended identity is absent from the graph, while the accepted volume
+sibling remains present. The CLI corroborates the absence:
+
+```
+imas-codex sn status --family derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate
+No family found for
+'derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate'
+```
+
 ## Why a further retry is not a plan
 
-The in-scope fix (operator steering to the exact parseable spelling) is
-verified injected and did not change the outcome; a sixth attempt would re-run
-the identical experiment with no new information. The remaining lever — making
-the composer produce grammar-valid structured output for this source — lives in
-the composer seat/prompt rather than in the data path this node is scoped to,
-and is visible to the fleet as a follow-on.
+The local seat invented an absent compound base. The vendor-diverse seat instead
+found the correct operator and encoded it in a form the model schema explicitly
+forbids. That is the measured outcome required by the escalation branch: the
+model family changed, the failure mode changed, and no identity was minted.
+Another seat would be an unplanned experiment after the fence explicitly says
+to stop. The source remains terminal with its exact spelling hint intact for a
+future, separately governed recovery.
