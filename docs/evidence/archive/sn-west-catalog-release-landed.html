@@ -626,6 +626,36 @@
       (103,613 bytes, SHA-256
       <code>d0f58823ff806a203bc231f9e272876bf686258862931685973ab427688b3fc3</code>).</p>
   </section>
+  <section id="three-withheld-sources">
+    <h2>One of three identity-less WEST sources is recovered and two carry exact exclusions</h2>
+    <p>The bounded before read found all three exact
+      <code>StandardNameSource</code> rows and zero
+      <code>PRODUCED_NAME</code> edges. The visible-spectrometer source
+      <code>spectrometer_visible/channel/isotope_ratios/signal_to_noise</code>
+      is now attached through <code>imas-codex sn attach</code> to
+      <code>spectral_signal_to_noise_ratio_of_spectrometer_channel</code>.
+      Postflight verifies the source scalar, one source edge, one DD projection
+      and the target cache all agree; the target is accepted, documentation-
+      accepted and validation-valid. Change event
+      <code>sn-change:3395bdb8-1219-49b5-9099-3c7f78657633</code> records the
+      physics judgement.</p>
+    <table>
+      <thead>
+        <tr><th>DD source</th><th>Disposition</th><th>Measured reason</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>calorimetry/group/component/energy_total/data</code></td><td>excluded</td><td>Its validation-valid target <code>accumulated_total_coolant_absorbed_energy_of_calorimetry_component</code> is exhausted at 0.75. The 14:46:41 source-liveness receipt returned exactly one terminally bound source to extracted and dropped its edge, projection and cache; the attachment guard refuses to restore an exhausted target.</td></tr>
+        <tr><td><code>camera_x_rays/camera/camera_dimensions</code></td><td>excluded</td><td>The source remains failed at attempts 5/5 with <code>compose claim-attempt cap reached</code> and <code>position:camera_dimensions</code>. Historical camera-size candidates are terminal, and a dry-run attach to the closest accepted detector extent is refused for a hardware-locus mismatch.</td></tr>
+        <tr><td><code>spectrometer_visible/channel/isotope_ratios/signal_to_noise</code></td><td>accepted binding</td><td>The superseded generic collision is replaced by the accepted spectral representative; target name/docs/validation read accepted/accepted/valid.</td></tr>
+      </tbody>
+    </table>
+    <p>No recomposition ran, so spend was <strong>$0.00</strong> and the
+      conditional 10 USD/time-limit fence was not entered. No ad-hoc graph
+      mutation was used. Full before/after fields, representative descriptions,
+      guard refusals and exact commands are in
+      <a href="/imas-codex/evidence/sn-west-catalog-release/the-three-withheld-sources">the
+      three-source evidence record</a>, committed as <code>51607b3ea</code>.</p>
+  </section>
 </main>
 </body>
 </html>
