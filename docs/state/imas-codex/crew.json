@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T02:54:33",
+  "updated": "2026-09-15T07:00:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -131276,6 +131276,217 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T041944136288-n-swcr-the-exhausted-shortfalls-are-steered",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-exhausted-shortfalls-are-steered",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1750,
+                "cached_input_tokens": 756130,
+                "input_tokens": 757882,
+                "output_tokens": 2984,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 760866,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "Each of the three exhausted WEST identities either reaches an accepted successor or is reported with the exact barrier that prevents one, recorded in docs/evidence/sn-west-catalog-release/the-exhausted-shortfalls.md. CONFIRM EVERY STARTING STATE FROM THE GRAPH and quote it before acting. THE ROUTE IS NOT A FLUSH and you must not attempt one: review_name claims only name_stage drafted and refine_name only name_stage reviewed, so no pool predicate admits an exhausted identity and a drain will pass over these forever. sn edit admits exhausted at _RENAME_ELIGIBLE_STAGES in imas_codex/standard_names/edit.py, and a steered rename re-enters the identity at REVIEW_NAME without needing rotation budget; that route took an exhausted identity from 0.625 to 0.900 earlier in this campaign for 0.22 USD.\nTHE COMMON DIAGNOSIS, which the reviewers have effectively already written: every one of these scores grammar 20 of 20 and fails on semantics because the name is more generic than the quantity it denotes. A generic data-dictionary path never licenses a generic standard name, and in each case the better name is already present in the identity's own description or in the reviewer's comment. Read reviewer_comments_name on each identity in full and treat it as the specification.\nIDENTITY ONE, neutral_pressure, exhausted at 0.6875 with semantic 8 of 20 across 5 reviews and validation_status valid. The reviewer states the authoritative leaf is barometry/gauge/pressure, an instrument reading of neutral gas pressure in the vacuum vessel under a set of gauges, and that the bare form is indistinguishable from the accepted plasma-diagnostic family total_neutral_pressure, thermal_neutral_pressure, neutral_internal_state_pressure and total_neutral_internal_state_pressure. Note also that its stored description describes a kinetic pressure moment of a neutral population, which is the WRONG REFERENT for a gauge reading, so the description needs correcting alongside the name rather than being carried forward.\nIDENTITY TWO, distance_of_antenna_strap, exhausted at 0.7125 with semantic 9 and completeness 10 across 3 reviews and validation_status valid. The reviewer states the name fails standalone self-descriptiveness because it does not say the quantity is the clearance to the conducting wall behind the strap, and names fully specific siblings outer_radius_of_antenna_strap and inner_radius_of_antenna_strap as the standard to match. The identity's own description already states the referent exactly: distance from the antenna strap rear surface to the conducting wall behind it.\nIDENTITY THREE IS DIFFERENT AND MUST BE DIAGNOSED BEFORE ANY RENAME. accumulated_total_coolant_absorbed_energy_of_calorimetry_component sits at 0.75 with validation_status quarantined and validation_issues null. A quarantine with no recorded reason cannot be acted on, and a rename cannot land through it. Establish what quarantined this identity and whether the null reason is itself a defect in the write path that records quarantine causes; report that finding with the evidence. Only attempt a steered edit if the quarantine is cleared by the ordinary sanctioned route, and never clear a quarantine directly to make a count move.\nFOR EACH IDENTITY YOU STEER: run sn edit --dry-run first and quote the result; write the --reason from the data-dictionary path and the physics rather than from preference, because it is shown to the reviewer as expert intent and a weak reason simply fails to counter the pull back toward the prior spelling; use --scope self unless the dry run shows siblings sharing the edited segment; then drive review under a scoped run carrying --skip-global-maintenance. Where the description is wrong as well as the name, correct both, because an accepted name carrying a description of a different quantity is worse than an exhausted one.\nEVIDENCE REQUIRED for each of the three: the starting spelling, score and per-dimension breakdown; the dry-run output; every candidate attached with its per-reviewer scores and aggregate; the final name_stage and docs_stage read back from the graph; and whether the WEST cut would now carry it. An identity that cannot be steered is an acceptable outcome reported with its barrier. Spend no more than 20.00 USD and state the campaign total before and after. Delete nothing. Live graph work runs on the login node because the project client resolves the graph host directly. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.2,
+          "goal": "Each exhausted WEST identity reaches an accepted successor or is reported with the exact barrier preventing one.",
+          "id": "n-swcr-the-exhausted-shortfalls-are-steered",
+          "lane_declaration": {
+            "backend": "codex-luna",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T04:19:44Z",
+            "read_at": "2026-09-15T04:19:45Z",
+            "resolved_backend": "codex-luna",
+            "utilisation_pct": 19.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T041944136288-n-swcr-the-exhausted-shortfalls-are-steered/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex-luna",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-exhausted-shortfalls.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-luna-a",
+        "backend": "codex-luna",
+        "local": false,
+        "agent": {
+          "alias": "luna5.6",
+          "backend": "codex-luna",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-luna",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T04:19:55Z",
+        "completed_at": "2026-09-15T04:57:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2245,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2245,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "0be08a0ab9efa1ad9de55c99f3b04d761025ba2d",
+        "commits": [
+          "e1fad6777217da11bdb2be10d95b9b282ac0cf9c",
+          "469359f455d7992f24f0f2c8ecd4e615c55c286e"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 29,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "sn edit dry-run and scoped review rotation with graph readback per identity",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T041944136288-n-swcr-the-exhausted-shortfalls-are-steered/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T041944136288-n-swcr-the-exhausted-shortfalls-are-steered/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17236608,
+            "cached_input_tokens_cumulative": 24182528,
+            "input_tokens": 17335075,
+            "input_tokens_cumulative": 24755168,
+            "output_tokens": 22303,
+            "output_tokens_cumulative": 46102,
+            "reasoning_output_tokens": 5945,
+            "reasoning_output_tokens_cumulative": 13244
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T04:57:20Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 20.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T04:57:20Z"
+            }
+          ],
+          "notional_cost_usd": 44.486,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-luna",
+            "input_per_million": 0.2,
+            "output_per_million": 1.2,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 164279808,
+          "cumulative_input_tokens": 166612473,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 59346,
+          "generation_seconds": 572003.805,
+          "machine_seconds": 4438.916,
+          "tokens_per_second": 0.1
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-exhausted-shortfalls-are-steered",
+          "session_id": "01a08111-67d0-7eb2-8004-bf5eff81e69c",
+          "session_source": "pointer",
+          "retained_at": "2026-09-15T04:57:20Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 2,
+          "declared": 4,
+          "missing": [
+            "26a1691113f89f7002965e5fe575ca0695e22e56",
+            "8923c285e99fd914bddbbba649e9a6bb7d7f39c9"
+          ],
+          "message": "run 'r-20260915T041944136288-n-swcr-the-exhausted-shortfalls-are-steered' has a passing gate presenting 2 commit(s) of the 4 its manifest declares; missing: 26a1691113f89f7002965e5fe575ca0695e22e56, 8923c285e99fd914bddbbba649e9a6bb7d7f39c9. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 98.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -131546,6 +131757,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2154
+    "_version": 2155
   }
 }
