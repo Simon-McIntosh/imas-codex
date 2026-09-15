@@ -24,10 +24,14 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
+from imas_codex.standard_names import models as standard_name_models  # noqa: E402
 from imas_codex.standard_names.grammar_adapter import (  # noqa: E402
     is_canonical_name,
 )
-from imas_codex.standard_names.models import GrammarSegments  # noqa: E402
+from imas_codex.standard_names.models import (  # noqa: E402
+    GrammarSegments,
+    _operator_uses_bare_prefix,
+)
 
 
 def _public_round_trips(name: str) -> bool:
@@ -232,6 +236,59 @@ def test_operator_schema_does_not_ask_model_for_registry_kind() -> None:
     assert produced == "magnetic_field_magnitude", (
         f"registry kind should win; got {produced!r}"
     )
+    assert _public_round_trips(produced)
+
+
+@pytest.mark.parametrize(
+    ("operator", "expected"),
+    [
+        ("derivative_with_respect_to", False),
+        ("derivative_with_respect_to_poloidal_magnetic_flux_coordinate", False),
+        ("normalized", True),
+    ],
+)
+def test_bare_prefix_flag_follows_registry_membership(
+    operator: str, expected: bool
+) -> None:
+    """Only registered bare unary-prefix operators receive the bare flag."""
+    assert _operator_uses_bare_prefix(operator) is expected
+
+
+def test_coordinate_indexed_prefix_checks_its_registry_operator(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The bare-prefix lookup receives the operator, without its coordinate."""
+    checked_tokens: list[str] = []
+    registry_lookup = _operator_uses_bare_prefix
+
+    def record_lookup(token: str) -> bool:
+        checked_tokens.append(token)
+        return registry_lookup(token)
+
+    monkeypatch.setattr(
+        standard_name_models,
+        "_operator_uses_bare_prefix",
+        record_lookup,
+    )
+    seg = GrammarSegments(
+        base_token="temperature",
+        base_kind="quantity",
+        qualifiers=["electron"],
+        operators=[
+            {
+                "token": "derivative_with_respect_to",
+                "coordinate": "poloidal_magnetic_flux_coordinate",
+            }
+        ],
+    )
+
+    produced = seg.compose_name()
+
+    assert produced == (
+        "derivative_of_electron_temperature_with_respect_to_"
+        "poloidal_magnetic_flux_coordinate"
+    )
+    assert checked_tokens == ["derivative_with_respect_to"]
     assert _public_round_trips(produced)
 
 
