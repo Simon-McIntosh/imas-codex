@@ -187,7 +187,8 @@ def test_terminal_refine_quarantine_records_the_canonical_reason() -> None:
     assert stage == "exhausted"
     cypher, params = _quarantine_statement(graph)
     assert "sn.validation_issues = CASE" in cypher
-    assert "[$reason]" in cypher
+    assert "coalesce(sn.validation_issues, []) + [CASE" in cypher
+    assert "WHEN $detail = '' THEN $reason" in cypher
     assert params["reason"] == "grammar_invalid"
 
 

@@ -857,7 +857,7 @@ def _quarantine(
             sn.edit_status = 'rejected',
             {stage_set}
             sn.{score_field} = $score,
-            sn.merge_quarantine_reason = $reason,
+            sn.validation_issues = [$reason],
             sn.merge_quarantine_at = $ts
         """,
         id=review_target,

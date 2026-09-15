@@ -10600,7 +10600,6 @@ def _lock_claimed_name_bindings(
               target.validation_status = 'pending',
               target.validation_issues = null,
               target.validation_layer_summary = null,
-              target.quarantine_reason = null,
               target.validated_at = null,
               target.reviewer_score_name = null,
               target.reviewer_scores_name = null,
@@ -23982,7 +23981,6 @@ def stage_name_for_rescore(
                     sn.validation_status = 'pending',
                     sn.validation_issues = null,
                     sn.validation_layer_summary = null,
-                    sn.quarantine_reason = null,
                     sn.validated_at = null
             )
             RETURN prior_stage AS prior_stage
@@ -24125,6 +24123,13 @@ def stop_refine_name_attempt(
                      AND $reason IN ['grammar_invalid', 'vocabulary_gap']
                     THEN 'quarantined'
                     ELSE sn.validation_status END,
+                sn.validation_issues = CASE
+                    WHEN target_stage = 'exhausted'
+                     AND $reason IN ['grammar_invalid', 'vocabulary_gap']
+                    THEN coalesce(sn.validation_issues, []) + [CASE
+                        WHEN $detail = '' THEN $reason
+                        ELSE $reason + ': ' + $detail END]
+                    ELSE sn.validation_issues END,
                 sn.refine_stop_reason = CASE
                     WHEN target_stage = 'exhausted' AND NOT $terminal
                     THEN $attempts_exhausted ELSE $reason END,

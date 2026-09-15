@@ -420,7 +420,7 @@ def test_set_properties_accepts_temporal_bearing_target_snapshot(
         target_id="temporal-target",
     )
     row["mutations"][0]["arguments"] = {
-        "properties": {"quarantine_reason": "orphaned temporal target"}
+        "properties": {"validation_issues": ["orphaned temporal target"]}
     }
     path = tmp_path / "temporal-authority.json"
     file_sha256, payload_sha256 = _write_authority(path, [row])
@@ -439,13 +439,13 @@ def test_set_properties_accepts_temporal_bearing_target_snapshot(
     assert client.query(
         """
         MATCH (target:StandardName {id: 'temporal-target'})
-        RETURN target.quarantine_reason AS quarantine_reason,
+        RETURN target.validation_issues AS validation_issues,
                target.created_at AS created_at,
                target.generated_at AS generated_at
         """
     ) == [
         {
-            "quarantine_reason": "orphaned temporal target",
+            "validation_issues": ["orphaned temporal target"],
             "created_at": client.query(
                 "RETURN datetime('2026-08-21T12:34:56.123456789Z') AS value"
             )[0]["value"],

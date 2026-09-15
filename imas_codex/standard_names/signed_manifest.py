@@ -2018,7 +2018,7 @@ def _load_error_sibling_authority(
         ),
         "mutation_kind": mutation_kind,
         "guard_set": list(guard_set),
-        "quarantine_reason": _ERROR_SIBLING_REASON,
+        "validation_issues": [_ERROR_SIBLING_REASON],
     }
     authority_sha256 = _digest(authority_descriptor)
     return _Authority(
@@ -2087,7 +2087,7 @@ def _error_sibling_rows(query: _Query, reason: str) -> tuple[_LoadedRow, ...]:
                         "arguments": {
                             "properties": {
                                 "validation_status": "quarantined",
-                                "quarantine_reason": reason,
+                                "validation_issues": [reason],
                             }
                         },
                     },
@@ -2143,9 +2143,10 @@ def _apply_error_sibling_query_handle(query: _Query) -> dict[str, int]:
             MATCH (sn:StandardName {id: sid})
             SET sn.updated_at = datetime(),
                 sn.validation_status = 'quarantined',
-                sn.quarantine_reason = 'orphaned error sibling (parent name deleted)'
+                sn.validation_issues = [$reason]
             """,
             ids=orphan_ids,
+            reason=_ERROR_SIBLING_REASON,
         )
     return {"stale_marked": len(orphan_ids)}
 
