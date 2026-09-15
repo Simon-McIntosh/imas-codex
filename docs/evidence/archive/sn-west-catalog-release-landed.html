@@ -444,6 +444,44 @@
     cases and zero added failures. The focused pre-fix receipt held two failures and two
     passes; the same selection after the repair held four passes.</p>
   </section>
+  <section id="grammar-invalid-cohort-sample">
+    <h2>The grammar-invalid population is enumerated; local model availability blocks the recovery rate</h2>
+    <p>The live-graph positive control saw <strong>5,125</strong>
+      <code>StandardName</code> nodes, and the exact
+      <code>refine_stop_reason=grammar_invalid</code> predicate reproduced the
+      expected <strong>109</strong>. Producing-source evidence is recoverable for
+      <strong>72/109</strong>: 8 names have a live
+      <code>PRODUCED_NAME</code> edge and 65 retain the historical singular
+      <code>source_path</code> scalar, with one overlap; 37 have neither and
+      remain explicitly enumerated rather than filtered out.</p>
+    <p>Among that population, 47 distinct DD sources are unbound and already
+      claimable at <code>status=extracted</code> below the five-attempt cap. A
+      deterministic systematic sample selected 12 paths across the
+      lexicographically ordered 47-source population. Both the dry-run and live
+      <code>sn retry --failed</code> routes correctly refused all 12:
+      <code>eligible: 0 of 12</code>, <code>retried: 0 of 12</code>, and
+      <code>refused: 12 source path(s) were missing or not failed/attempt-capped</code>.
+      This is a guard firing on already-released state, not evidence that the
+      sources cannot compose.</p>
+    <p>The focused <code>sn run</code> stamped exactly those 12 paths and zero
+      outside paths, then failed closed before a first source claim or model
+      call because the required local compose endpoint returned HTTP 503. Its
+      anonymous catalog independently answered
+      <code>no upstream catalogs are reachable</code>. The honest metric is
+      therefore <strong>0 grammar-valid names produced / 0 sources tried</strong>,
+      not 0/12; actual spend was <strong>$0.00</strong> against a
+      <strong>$5.00</strong> cap. Every sampled source retains its prior status
+      and attempt count, no new name exists, and the historical name stages
+      remain eleven exhausted and one superseded. Resume is gated on a successful
+      live catalog response and must reuse the same 12 paths without paid
+      fallback.</p>
+    <p>The complete 109-row census, every sampled before/after stage, three
+      source-bound retry refusals, command forms, run-scope proof and terminal
+      log path are in
+      <a href="/imas-codex/evidence/sn-west-catalog-release/the-grammar-invalid-cohort">the
+      grammar-invalid cohort evidence</a>, committed as
+      <code>dae717738</code>.</p>
+  </section>
 </main>
 </body>
 </html>
