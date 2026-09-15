@@ -309,6 +309,47 @@
     other-version record. The projection sits before the scalar write and the unit-edge
     normalization alike, so the two write paths cannot drift.</p>
 
+    <h2 id="quarantine-reasons">A quarantine and its explanation are one write</h2>
+    <p>The live graph reproduced the defect before repair: <strong>660</strong> identities had
+    <code>validation_status='quarantined'</code>, <strong>538</strong> carried a non-null
+    <code>validation_issues</code>, zero carried <code>quarantine_reason</code>, zero carried
+    <code>merge_quarantine_reason</code>, and <strong>122</strong> carried no reason in any of
+    the three fields. A positive-control key read found <code>validation_issues</code> on sampled
+    quarantined rows and no <code>quarantine_reason</code> key. The same bounded census after the
+    code change remained 660 / 538 / 0 / 0 / 122 by design: this node made no graph writes and
+    did not invent historical explanations.</p>
+    <table>
+      <thead><tr><th>Write site</th><th>Disposition</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td><code>campaign.py:718</code></td><td>changed</td><td>replaced <code>quarantine_reason</code> with a one-item <code>validation_issues</code> list in the status statement</td></tr>
+        <tr><td><code>promote.py:856</code></td><td>changed</td><td>replaced <code>merge_quarantine_reason</code> with the canonical list in the approval-quarantine statement</td></tr>
+        <tr><td><code>edit.py:680</code></td><td>left unchanged</td><td>already writes dynamic status and <code>validation_issues</code> together</td></tr>
+        <tr><td><code>signed_manifest.py:2145</code></td><td>changed</td><td>the authority descriptor, signed mutation payload, and direct query-handle path now agree on <code>validation_issues</code></td></tr>
+        <tr><td><code>graph_ops.py:5468</code></td><td>left unchanged</td><td>candidate batch status is already paired with the candidate's validation issues</td></tr>
+        <tr><td><code>graph_ops.py:8213</code></td><td>left unchanged</td><td>the validation worker already writes issues and status atomically</td></tr>
+        <tr><td><code>graph_ops.py:16781</code></td><td>left unchanged</td><td>the conditional grammar quarantine already appends <code>$grammar_issue</code> in the same statement</td></tr>
+        <tr><td><code>graph_ops.py:24121</code></td><td>changed</td><td>terminal grammar and vocabulary failures now append the stored stop reason, plus detail when present, at the status transition</td></tr>
+      </tbody>
+    </table>
+    <p>The recovery census separated evidence from coincidence. Of the 122 reasonless identities,
+    114 were exhausted, seven superseded, and one accepted. A directly paired
+    <code>refine_stop_reason</code> recovered a true terminal reason for <strong>96</strong>:
+    34 <code>grammar_invalid</code>, 31 <code>successor_collision</code>, 30
+    <code>attempts_exhausted</code>, and one <code>vocabulary_gap</code>. The remaining
+    <strong>26 are unrecoverable from the inspected fields</strong>: 18 diagnostics payloads
+    were present but empty, eight were absent, none carried a run id, and their linked change
+    reasons described unrelated edits or maintenance. They remain null; no plausible account was
+    promoted into evidence.</p>
+    <p>The operator-visible detector is the reviewed campaign manifest. A quarantined row with a
+    null canonical reason now contributes <code>quarantined:reason_missing</code> to
+    <code>per_predicate</code> and carries the same marker in sampled evidence, so it cannot be
+    selected for repair while looking ordinarily explained. Commits <code>a22aa97b3</code> and
+    <code>cde021cf0</code> carry the red-first test and the implementation. Against source revision
+    <code>0be08a0a</code>, the regression overlay failed seven named tests while two controls for
+    already-compliant writers passed; after repair, the changed-path gate selected 174 tests and
+    passed all 174, with 17 graph-marked tests deselected and zero added failures. All four changed
+    Cypher statements also passed live <code>EXPLAIN</code> without executing a mutation.</p>
+
   </main>
 </body>
 </html>
