@@ -88,13 +88,15 @@ def _operator_registry() -> dict[str, dict[str, Any]]:
 
 @functools.cache
 def _operator_uses_bare_prefix(token: str) -> bool:
-    """Ask the public ISN composer how a unary-prefix operator is joined."""
-    from imas_standard_names.grammar import compose_standard_name
+    """Return whether a registered unary-prefix operator uses a bare join."""
+    from imas_standard_names.grammar.ir import BARE_PREFIX_OPERATORS
 
-    sample = compose_standard_name(
-        {"physical_base": "temperature", "transformation": token}
+    metadata = _operator_registry().get(token)
+    return bool(
+        metadata
+        and metadata.get("kind") == "unary_prefix"
+        and token in BARE_PREFIX_OPERATORS
     )
-    return not sample.startswith(f"{token}_of_")
 
 
 class GrammarOperator(BaseModel):
@@ -531,7 +533,7 @@ class GrammarSegments(BaseModel):
                 "kind": kind,
                 "op": token,
                 "bare_prefix": (
-                    _operator_uses_bare_prefix(token)
+                    _operator_uses_bare_prefix(operator.token)
                     if kind == "unary_prefix"
                     else False
                 ),
