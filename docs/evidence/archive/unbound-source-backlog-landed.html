@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="unbound-source-backlog-landed">
+  <meta name="plan-title" content="Unbound source backlog &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="unbound-source-backlog">
+  <title>Unbound source backlog landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Unbound source backlog &mdash; cumulative execution evidence</h1>
+  <p>One stable anchor per material landing.</p>
+
+  <section id="accepted-names-without-producers">
+    <h2>Nine accepted names have no producing source; the dry run cut none</h2>
+    <p><strong>Measured read-only on 2026-09-15</strong> at
+    <code>1f246a61406f0557a77ee6aa84f203f86268f795</code>. The live graph returned
+    <strong>9</strong> accepted names with no incoming <code>PRODUCED_NAME</code>,
+    exactly the bound of 9 at <code>2026-09-15T18:20Z</code>. Positive controls
+    saw 5,130 of 5,130 identities carrying <code>id</code> and 2,519 accepted names
+    with producers. No graph mutation was performed.</p>
+    <table>
+      <caption>Dry-run disposition of the nine-name cohort</caption>
+      <thead><tr><th>Disposition</th><th>Count</th><th>Identities</th></tr></thead>
+      <tbody>
+        <tr><td>Candidate before global emission gate</td><td><strong>4</strong></td><td><code>beta</code>; <code>equilibrium_weight_of_interferometer_beam</code>; <code>flux_surface_averaged_parallel_electric_field_at_separatrix</code>; <code>root_mean_square_spectral_width_of_spectrometer_channel</code></td></tr>
+        <tr><td>Explicitly excluded</td><td><strong>5</strong></td><td>one grammar parse failure, one quarantined validation, one documentation release hold, and two names with no winning docs review</td></tr>
+        <tr><td>Actually emitted</td><td><strong>0</strong></td><td>the independent <code>identity_token_collision</code> gate on <code>halo_current</code> blocked the whole cut</td></tr>
+      </tbody>
+    </table>
+    <p>The receipt states <code>total candidates: 2497</code>,
+    <code>exported: 0</code>, <code>excluded (below score): 1</code>,
+    <code>excluded (unreviewed): 31</code>, <code>excluded (domain): 0</code>,
+    with <strong>180 accounted exclusions</strong> and <strong>2,317 accounting
+    residue</strong>. Missing producer provenance is not an export predicate, but
+    this invocation did not produce a cut.</p>
+    <p>The trace attributes five rows to edit-driven renames predating the
+    current producer-carry postcondition, one to an automated refine predating
+    the empty-cohort refusal, and the remaining three to structural or explicit
+    detachment paths. It rules out <code>reconcile_source_status_liveness</code>:
+    its terminal set is exactly <code>superseded</code>, <code>exhausted</code>, and
+    <code>contested</code>, so an accepted target fails its deletion selector.
+    Full record:
+    <a href="/imas-codex/evidence/unbound-source-backlog/accepted-names-without-producers">accepted-names-without-producers.md</a>.</p>
+  </section>
+</main>
+</body>
+</html>
