@@ -445,7 +445,7 @@
     passes; the same selection after the repair held four passes.</p>
   </section>
   <section id="grammar-invalid-cohort-sample">
-    <h2>The grammar-invalid population is enumerated; local model availability blocks the recovery rate</h2>
+    <h2>The repaired path recovers two of twelve sampled sources without minting new identities</h2>
     <p>The live-graph positive control saw <strong>5,125</strong>
       <code>StandardName</code> nodes, and the exact
       <code>refine_stop_reason=grammar_invalid</code> predicate reproduced the
@@ -463,21 +463,40 @@
       <code>refused: 12 source path(s) were missing or not failed/attempt-capped</code>.
       This is a guard firing on already-released state, not evidence that the
       sources cannot compose.</p>
-    <p>The focused <code>sn run</code> stamped exactly those 12 paths and zero
-      outside paths, then failed closed before a first source claim or model
-      call because the required local compose endpoint returned HTTP 503. Its
-      anonymous catalog independently answered
-      <code>no upstream catalogs are reachable</code>. The honest metric is
-      therefore <strong>0 grammar-valid names produced / 0 sources tried</strong>,
-      not 0/12; actual spend was <strong>$0.00</strong> against a
-      <strong>$5.00</strong> cap. Every sampled source retains its prior status
-      and attempt count, no new name exists, and the historical name stages
-      remain eleven exhausted and one superseded. Resume is gated on a successful
-      live catalog response and must reuse the same 12 paths without paid
-      fallback.</p>
+    <p>The first focused <code>sn run</code> stamped exactly those 12 paths and
+      zero outside paths, then failed closed before a first source claim because
+      the local catalog returned HTTP 503. Once anonymous discovery returned
+      HTTP 200 with <code>deepseek-v4-flash</code>, the identical command and
+      source list ran through the direct local endpoint with no paid fallback.
+      All 12 sources were claimed. Two acquired <code>PRODUCED_NAME</code> edges
+      to accepted, validation-valid identities:
+      <code>current_per_toroidal_mode_due_to_wave_driven_current_drive</code>
+      and
+      <code>flux_surface_averaged_time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</code>.
+      Source-level recovery is therefore <strong>2/12 (16.7%)</strong>.</p>
+    <p>Both target identities predated this run, so the complementary identity
+      metric is <strong>0/12 newly composed</strong>; this agrees with the
+      authoritative <code>SNRun.names_composed=0</code> rather than contradicting
+      the two source attachments. Run
+      <code>d2ab6f52-541f-4b85-baa9-dc0a71ab1e59</code> ended
+      <code>degraded</code> with
+      <code>stop_reason=time_limit_reached</code> after 663.03 seconds, spending
+      <strong>$0.00</strong> against the <strong>$5.00</strong> cap. Ten sources
+      did not bind before the 600-second fence and 60-second grace period;
+      several reached explicit grammar failures and the single expanded-context
+      retry, while the rest were cancelled as slow calls.</p>
+    <p>The stale scope
+      <code>12ff2fff-0ada-493a-b973-cffad99158fa</code> now appears on zero
+      sources. Its sanctioned replacement
+      <code>fdce33f1-bee1-41f6-b3d7-bc46b3649d10</code> appears on exactly the
+      12 sampled sources and zero outside paths. The two attached sources have
+      cleared claims. The other ten remain extracted with current-run claim
+      tokens after cancellation; that cleanup residue is recorded for the
+      ordinary worker-failure/orphan route and was not changed by ad-hoc graph
+      mutation.</p>
     <p>The complete 109-row census, every sampled before/after stage, three
-      source-bound retry refusals, command forms, run-scope proof and terminal
-      log path are in
+      source-bound retry refusals, command forms, source-level and identity-level
+      metrics, run-scope proof and terminal log path are in
       <a href="/imas-codex/evidence/sn-west-catalog-release/the-grammar-invalid-cohort">the
       grammar-invalid cohort evidence</a>, committed as
       <code>dae717738</code>.</p>
