@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="unbound-source-backlog">
   <meta name="plan-title" content="Four Thousand Sources Produce No Standard Name">
   <meta name="plan-summary" content="Of 9,900 extracted sources 4,459 bind to no name; 1,283 await composition and 1,413 were skipped, 398 of them with no recorded reason">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,8 +22,8 @@
   <title>Four Thousand Sources Produce No Standard Name | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-08">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-09-15">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -115,6 +115,11 @@
     <h4 class="r-fu-title">Close the reason-less skip write path first; the 1,283 composition backlog can wait</h4>
     <div class="r-fu-body"><p><strong>Start with §3, not §2.</strong> The 398 reason-less skips are a defect that keeps growing, and the 1,283 uncomposed sources are throughput that does not. Make the write path unable to record a skip without a reason, then reconstruct what survives for the 398 and mark the rest as an honest unknown — a blank field is not a finding, an explicit unknown is.</p><p>The mechanism is narrow and already located: <code>non_nameable_reason</code> is written only when <code>source_status == 'skipped'</code> at <code>imas_codex/standard_names/graph_ops.py:12324</code>, and it never reads <code>last_error</code>, so a source that failed with a diagnostic and was later marked skipped loses it. Verify that line still says this before acting — it was read on 2026-09-08.</p><p><strong>Do not treat the 1,652 stale rows as backlog.</strong> A source rebinds when its name is superseded, so residue there is the mechanism working; counting them makes the problem look a third larger than it is.</p><p>For §2, establish eligibility before composing: a source extracted before an admission rule tightened may now be correctly inadmissible, and composing it mints a name the review pool then rejects, which costs money and produces churn. Report the eligible count first and size the <code>sn run</code> pass to it.</p></div>
     <pre class="r-fu-prompt">/reckon-ship unbound-source-backlog §3</pre>
+    </article>
+<article class="r-fu" data-id="f-usb-accepted-names-carry-no-provenance" data-status="open" data-written-by="ship-s10-20260908" data-written-at="2026-09-15T19:20:00Z" data-recommends-skill="/reckon-ship unbound-source-backlog" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Nine accepted names carry no producing source, and unlike the other orphan classes they are exportable</h4>
+    <div class="r-fu-body"><p>Measured on the live graph 2026-09-15. 2,340 StandardName nodes carry no <code>PRODUCED_NAME</code> edge, and all but nine fall into two explained classes. 2,076 are <code>superseded</code> — 1,752 valid and 324 quarantined — which is what a completed supersede leaves behind once it moves the producer to the successor. A further 243 are <code>exhausted</code>, produced by <code>reconcile_source_status_liveness</code> deliberately freeing a source from a terminal name so it can regenerate; <code>_TERMINAL_BINDING_NAME_STAGES</code> is <code>contested</code>, <code>exhausted</code>, <code>superseded</code>, and <code>sn attach</code> refuses the mirror operation for the same reason, so that class is the invariant rather than a fault.</p><p><strong>Nine are accepted, and <code>accepted</code> is absent from that terminal set, so this mechanism cannot have produced them.</strong> Eight are validation-valid and eight have lost even the historical <code>source_path</code> scalar, so the provenance is gone rather than merely unlinked: <code>beta</code>, <code>ion_pressure</code> (quarantined), <code>equilibrium_weight_of_interferometer_beam</code> (retains its scalar), <code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code>, <code>neutron_flux_due_to_fusion</code> (docs exhausted), <code>parallel_current_density_per_toroidal_mode_due_to_wave_driven_current</code>, <code>toroidal_wave_vector_normalized_of_beam_tracing_beam</code>, <code>flux_surface_averaged_parallel_electric_field_at_separatrix</code> and <code>root_mean_square_spectral_width_of_spectrometer_channel</code>.</p><p>The distinction that makes these matter more than the other 2,331: superseded and exhausted identities are not exportable, and accepted ones are. A name published into a catalog with nothing in the data dictionary justifying it is the failure this plan's reason-less-skip work exists to prevent, arriving from the opposite end of the pipeline. None of the nine is produced by a WEST manifest source, so no current cut carries one.</p><p>The disposition is a decision rather than work. An accepted, documented, valid name with no provenance can be demoted, deleted, or re-sourced, and two of them — <code>beta</code> and <code>ion_pressure</code> — are exactly the catch-all bases the grammar review flagged for gating. Nothing should mutate them before that ruling.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship unbound-source-backlog</pre>
     </article>
 </section>
 
