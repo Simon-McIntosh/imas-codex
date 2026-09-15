@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T07:00:25",
+  "updated": "2026-09-15T07:21:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -131487,6 +131487,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T043942455124-n-sli-a-quarantine-records-why",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-sli-a-quarantine-records-why",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1113,
+                "cached_input_tokens": 764383,
+                "input_tokens": 765498,
+                "output_tokens": 2571,
+                "reasoning_output_tokens": 448,
+                "total_tokens": 768069,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "A quarantined standard name carries its reason in one property that every writer sets and every reader consults, where today three writers use three different property names and 122 quarantined identities carry no reason at all. REPRODUCE THE MEASUREMENT FIRST and quote it: over the live graph, identities with validation_status quarantined total 660, of which 538 carry a non-null validation_issues, 0 carry a non-null quarantine_reason and 0 carry a non-null merge_quarantine_reason. That leaves 122 quarantined identities with no recorded reason in any of the three fields, and it means two write paths populate properties that exist on no row in the database.\nTHE THREE WRITE SITES, which you must read rather than take on trust. imas_codex/standard_names/campaign.py near line 715 sets validation_status to quarantined together with sn.quarantine_reason. imas_codex/standard_names/promote.py near line 856 sets validation_status to quarantined together with sn.merge_quarantine_reason and sn.merge_quarantine_at. imas_codex/standard_names/edit.py near line 681 writes sn.validation_issues. Establish every site that sets validation_status to quarantined, not only these three, and report the complete list with file and line; a fourth writer that sets the status without any reason at all would explain the 122 and is the thing most worth finding.\nTHE DEFECT IS THAT A STATUS AND ITS EXPLANATION ARE WRITTEN SEPARATELY AND INCONSISTENTLY. A reader asking why an identity is quarantined must already know which code path quarantined it in order to query the right property, and any single query returns null for the other two. That is how an operator concludes a quarantine has no reason when the reason exists under a different name, and it is how an identity with a genuinely missing reason becomes indistinguishable from one whose reason is merely stored elsewhere. The measured evidence that this is not hypothetical: validation_issues carries 538 reasons while the other two carry none, so the two paths that write them are invisible to every consumer.\nCONVERGE ON ONE PROPERTY AND MAKE THE STATUS AND THE REASON INSEPARABLE. validation_issues is the de facto canonical field because it is the only one with rows and the only one existing readers consult; adopt it unless your reading of the code shows a better choice, and if you choose differently, justify it from the readers rather than the writers. Every site that sets validation_status to quarantined must set the reason in the same statement, so the two cannot diverge. Preserve whatever the legacy properties hold if any row anywhere carries them, and say explicitly whether any does.\nDO NOT BACK-FILL A REASON YOU CANNOT SOURCE. For the 122 with no reason, an invented explanation is worse than a null: it would read as evidence. Establish whether any of them can have a true reason recovered from an audit trail, a StandardNameChange record or a run log, report how many can and cannot, and leave the unrecoverable ones null. Their remedy is that they become visible and re-derivable, not that they be given a plausible story.\nMAKE THE CONDITION DETECTABLE SO IT CANNOT SILENTLY RETURN. Add a check that a quarantined identity without a reason is reported rather than passed over, in the same spirit as the stranded-identity census that was repaired earlier in this campaign; state where you put it and why that is the surface an operator actually reads.\nEVIDENCE REQUIRED: the complete list of quarantine write sites with file and line; the before and after counts for all four figures measured above; the number of the 122 whose reason could be recovered and the number that could not; and the tests covering the changed paths reported as added failures against your base sha with both failure id lists, zero added required. Write a regression test that a quarantine write records a reason, and one that the detector reports a reasonless quarantine rather than staying silent.\nAnother node is concurrently steering three exhausted identities through sn edit and writes only docs/evidence/sn-west-catalog-release/the-exhausted-shortfalls.md, so do not touch that file. Make no graph writes of any kind: this node changes code and tests, and its live reads must be bounded and under ten seconds. Never pipe, tee or redirect CLI output.",
+          "estimated_hours": 1.5,
+          "goal": "A quarantined standard name carries its reason in one property that every writer sets and every reader consults.",
+          "id": "n-sli-a-quarantine-records-why",
+          "lane_declaration": {
+            "backend": "codex-terra",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T04:39:43Z",
+            "read_at": "2026-09-15T04:39:44Z",
+            "resolved_backend": "codex-terra",
+            "utilisation_pct": 19.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T043942455124-n-sli-a-quarantine-records-why/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "codex-terra",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/campaign.py",
+            "imas_codex/standard_names/promote.py",
+            "imas_codex/standard_names/edit.py",
+            "tests/standard_names/test_quarantine_reason.py",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "session-2a6f0db8b3e75a382796",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T04:39:56Z",
+        "completed_at": "2026-09-15T05:18:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2301,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2301,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "0be08a0ab9efa1ad9de55c99f3b04d761025ba2d",
+        "commits": [
+          "e7ca39523d4ee87b342b7b2485d1f7968dc6ae09"
+        ],
+        "changed_lines": {
+          "added": 44,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 9,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest focused quarantine gate on all_debug, red-first then after",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T043942455124-n-sli-a-quarantine-records-why/stream.jsonl",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T043942455124-n-sli-a-quarantine-records-why/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0a35d-5201-7640-9dfc-1dbba3bcf8bc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15577856,
+            "cached_input_tokens_cumulative": 15577856,
+            "input_tokens": 15673730,
+            "input_tokens_cumulative": 15673730,
+            "output_tokens": 37204,
+            "output_tokens_cumulative": 37204,
+            "reasoning_output_tokens": 10336,
+            "reasoning_output_tokens_cumulative": 10336
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T05:18:17Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 20.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T05:18:17Z"
+            }
+          ],
+          "notional_cost_usd": 51.4524,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 15577856,
+          "cumulative_input_tokens": 31251586,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 47540
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-sli-a-quarantine-records-why",
+          "session_id": "01a0a35d-5201-7640-9dfc-1dbba3bcf8bc",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T05:18:17Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 28.0,
+        "orientation_input_tokens": 3340474.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -131757,6 +131960,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2155
+    "_version": 2156
   }
 }
