@@ -346,6 +346,33 @@
     <a href="/imas-codex/evidence/sn-west-catalog-release/the-exhausted-shortfalls">the
     exhausted shortfalls evidence</a>.</p>
   </section>
+  <section id="calorimetry-quarantine-revalidated">
+    <h2>The calorimetry energy quarantine was stale and is cleared; the cut still withholds on stage</h2>
+    <p>The coolant identity
+    <code>accumulated_total_coolant_absorbed_energy_of_calorimetry_component</code>
+    read <code>validation_status=quarantined</code> with <code>validation_issues</code>
+    null, <code>quarantine_reason</code> null, <code>validated_at</code> null and
+    <code>refine_stop_reason=grammar_invalid</code>; the spelling
+    <em>does</em> parse under the installed <code>imas-standard-names</code> 0.9.3
+    (<code>coolant_absorbed_energy</code>, <code>CALORIMETRY_COMPONENT</code>,
+    <code>TOTAL</code>, <code>accumulated</code>), so the recorded grammar refusal
+    was stale. Re-running the deterministic admission gate over exactly this one
+    node through the sanctioned id-scoped drain
+    (<code>drain_validation_for_ids</code>) cleared the quarantine — it now reads
+    <code>valid</code> with empty <code>validation_issues</code> and an observed
+    <code>validated_at</code>, at no model spend, with no direct status write — while
+    leaving its accepted sibling
+    <code>accumulated_coolant_absorbed_energy_of_calorimetry_component</code>
+    (1-D cumulative coolant array from <code>energy_cumulated</code>, versus a 0-D
+    per-discharge total from <code>energy_total</code>) untouched and distinct. The
+    scored name review (0.75) was already on record. A fresh WEST cut would still
+    withhold the identity, but on lifecycle stage rather than validation:
+    <code>name_stage=exhausted</code> fails <code>name_not_accepted</code> even in a
+    names-only cut, and <code>docs_stage=pending</code> fails
+    <code>documentation_not_accepted</code> on a docs-carrying cut. Full before/drain/
+    after evidence and the export-admission walk in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/the-calorimetry-energy-quarantine">the calorimetry energy quarantine evidence</a>.</p>
+  </section>
 </main>
 </body>
 </html>
