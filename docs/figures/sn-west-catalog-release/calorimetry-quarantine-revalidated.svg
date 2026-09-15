@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440" role="img" aria-labelledby="title desc">
+  <title id="title">Calorimetry energy quarantine cleared by the sanctioned id-scoped revalidation drain</title>
+  <desc id="desc">Before: validation_status=quarantined with validation_issues null, validated_at null, refine_stop_reason grammar_invalid. The sanctioned drain re-runs the deterministic admission gate and re-stamps. After: validation_status=valid, validation_issues empty, validated_at stamped 2026-09-15T06:27:09Z, scored name review 0.75 unchanged; name_stage=exhausted and docs_stage=pending remain the cut barriers.</desc>
+  <rect width="960" height="440" fill="#ffffff"/>
+  <text x="40" y="36" font-family="sans-serif" font-size="22" font-weight="700" fill="#172554">Calorimetry energy quarantine: stale cause, cleared through the sanctioned drain</text>
+  <text x="40" y="60" font-family="sans-serif" font-size="13" fill="#475569">accumulated_total_coolant_absorbed_energy_of_calorimetry_component — imas-standard-names 0.9.3 parses the spelling (grammar_invalid was stale)</text>
+
+  <rect x="30" y="90" width="280" height="240" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="48" y="118" font-family="sans-serif" font-size="16" font-weight="700" fill="#7f1d1d">Before (live 2026-09-15)</text>
+  <text x="48" y="148" font-family="monospace" font-size="13" fill="#334155">validation_status:  quarantined</text>
+  <text x="48" y="170" font-family="monospace" font-size="13" fill="#334155">validation_issues:   null</text>
+  <text x="48" y="192" font-family="monospace" font-size="13" fill="#334155">validated_at:       null</text>
+  <text x="48" y="214" font-family="monospace" font-size="13" fill="#334155">quarantine_reason:  null</text>
+  <text x="48" y="236" font-family="monospace" font-size="13" fill="#334155">refine_stop_reason: grammar_invalid</text>
+  <text x="48" y="258" font-family="monospace" font-size="13" fill="#334155">name_stage:         exhausted</text>
+  <text x="48" y="280" font-family="monospace" font-size="13" fill="#334155">docs_stage:         pending</text>
+  <text x="48" y="302" font-family="monospace" font-size="13" fill="#334155">reviewer_score:     0.75</text>
+
+  <rect x="360" y="110" width="240" height="180" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="378" y="136" font-family="sans-serif" font-size="15" font-weight="700" fill="#1e40af">Sanctioned route</text>
+  <text x="378" y="160" font-family="monospace" font-size="12" fill="#334155">drain_validation_for_ids([sn_id])</text>
+  <text x="378" y="182" font-family="monospace" font-size="12" fill="#334155">1. claim (validated_at IS NULL)</text>
+  <text x="378" y="202" font-family="monospace" font-size="12" fill="#334155">2. validate_name_candidate (LLM-free)</text>
+  <text x="378" y="222" font-family="monospace" font-size="12" fill="#334155">3. re-stamp status/issues/validated_at</text>
+  <text x="378" y="250" font-family="monospace" font-size="12" fill="#475569">no direct validation_status write;</text>
+  <text x="378" y="266" font-family="monospace" font-size="12" fill="#475569">a genuine defect re-quarantines</text>
+  <line x1="314" y1="210" x2="356" y2="210" stroke="#dc2626" stroke-width="3"/>
+  <polygon points="356,203 366,210 356,217" fill="#dc2626"/>
+  <line x1="604" y1="200" x2="646" y2="200" stroke="#16a34a" stroke-width="3"/>
+  <polygon points="646,193 656,200 646,207" fill="#16a34a"/>
+
+  <rect x="660" y="90" width="270" height="240" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="678" y="118" font-family="sans-serif" font-size="16" font-weight="700" fill="#14532d">After (live 2026-09-15T06:27:09Z)</text>
+  <text x="678" y="148" font-family="monospace" font-size="13" fill="#334155">validation_status:  valid</text>
+  <text x="678" y="170" font-family="monospace" font-size="13" fill="#334155">validation_issues:  []</text>
+  <text x="678" y="192" font-family="monospace" font-size="13" fill="#334155">validated_at:       06:27:09.573Z</text>
+  <text x="678" y="214" font-family="monospace" font-size="13" fill="#475569">validation layers:  5/5 passed</text>
+  <text x="678" y="236" font-family="monospace" font-size="13" fill="#b45309">name_stage:         exhausted</text>
+  <text x="678" y="258" font-family="monospace" font-size="13" fill="#b45309">docs_stage:         pending</text>
+  <text x="678" y="280" font-family="monospace" font-size="13" fill="#334155">reviewer_score:     0.75 (unchanged)</text>
+
+  <rect x="30" y="348" width="900" height="58" rx="8" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+  <text x="48" y="372" font-family="sans-serif" font-size="15" font-weight="700" fill="#7c2d12">WEST cut still withholds — the quarantine is no longer the barrier</text>
+  <text x="48" y="394" font-family="monospace" font-size="13" fill="#7c2d12">export.py eligibility: name_stage=exhausted -&gt; name_not_accepted (also in a names-only cut); docs_stage=pending -&gt; documentation_not_accepted</text>
+</svg>
