@@ -582,6 +582,50 @@
       <a href="/imas-codex/evidence/sn-west-catalog-release/the-mid-pipeline-drain">the
       mid-pipeline flush evidence</a>, committed as <code>4190d6863</code>.</p>
   </section>
+  <section id="four-source-compose-recovery">
+    <h2>Three of four claim-free grammar-invalid sources compose before the 30-minute fence</h2>
+    <p>The source population and claim guard were re-read immediately before the
+      run. The same instrument that recorded 47 unbound, claimable DD sources now
+      returned 45 because the previous sample had attached two sources. Of those
+      45, 35 carried both <code>claim_token=null</code> and
+      <code>claimed_at=null</code>. The first four paths in lexicographic order
+      were selected; all four were <code>status=extracted</code>, unbound, below
+      the five-attempt cap, and traceable to an exhausted historical identity in
+      the recorded 47-source cohort.</p>
+    <table>
+      <thead>
+        <tr><th>DD source</th><th>Before identity and stage</th><th>After identity and stage</th><th>Source result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>charge_exchange/channel/bes/z_ion</code></td><td><code>neutral_beam_atomic_number</code>, exhausted</td><td><code>neutral_beam_charge_number</code>, accepted and validation-valid; name score 0.925, docs score 0.9375</td><td>composed, attempt 1</td></tr>
+        <tr><td><code>core_transport/model/profiles_1d/ion/state/momentum/poloidal/d</code></td><td><code>poloidal_ion_charge_state_momentum_diffusivity</code>, exhausted</td><td><code>poloidal_effective_ion_state_momentum_diffusivity</code>, exhausted and quarantined; name score 0.6875</td><td>composed, attempt 2</td></tr>
+        <tr><td><code>disruption/halo_currents/area/end_point/z</code></td><td><code>vertical_coordinate_of_halo_boundary</code>, exhausted</td><td>no identity</td><td>failed at attempt 5: <code>compose claim-attempt cap reached</code></td></tr>
+        <tr><td><code>edge_transport/model/ggd/neutral/momentum/d_pol/values</code></td><td><code>poloidal_neutral_momentum_diffusivity</code>, exhausted</td><td><code>poloidal_neutral_momentum_diffusion_coefficient</code>, drafted with validation pending</td><td>composed, attempt 2; attached to an identity created 2026-06-18</td></tr>
+      </tbody>
+    </table>
+    <p>The bounded command used these four exact <code>--focus</code> paths with
+      <code>--skip-global-maintenance --only compose --names-only -c 10 -t 30</code>.
+      It exited 0 on completion rather than on either limit. Authoritative
+      <code>SNRun 3b1fb51c-dcea-4268-8899-5b80ebb98fc1</code> reads
+      <code>status=completed</code>, <code>stop_reason=no_eligible_work</code>,
+      <code>names_composed=3</code>, <code>elapsed_s=1580.509</code>, and
+      <code>cost_spent=0.0</code> against <code>cost_limit=10.0</code>. The graph
+      read-back independently found three <code>PRODUCED_NAME</code> edges over
+      four tried sources, so the measured source-level composition recovery is
+      <strong>3/4 (75%)</strong>. Run scope
+      <code>b8ed7a90-6a18-4349-8255-9d6606e06f99</code> appears on exactly those
+      four sources and zero outside paths, and all four finished with null claim
+      tokens and timestamps.</p>
+    <p>The rate needs its lifecycle qualifier. Only one of four sources currently
+      lands on an accepted, validation-valid name. One composition is quarantined
+      after refinement proposed the identical spelling, one is attached to a
+      pre-existing drafted identity, and the uncomposed source exhausted its
+      attempt budget when local responses repeatedly outlived the five-minute
+      claim lease. The terminal transcript is
+      <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T123642231413-n-swcr-four-grammar-invalid-sources-measure-the-recovery-rate/focused-four-source-sn-run.log</code>
+      (103,613 bytes, SHA-256
+      <code>d0f58823ff806a203bc231f9e272876bf686258862931685973ab427688b3fc3</code>).</p>
+  </section>
 </main>
 </body>
 </html>
