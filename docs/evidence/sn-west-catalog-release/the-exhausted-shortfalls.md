@@ -190,8 +190,11 @@ review_docs: neutral_gas_pressure_of_gauge -> accepted
 ```
 
 The successor now satisfies name acceptance, documentation acceptance, and
-valid validation with its DD producer intact, so the current WEST admission
-gates would carry it. No cut was performed by this node.
+valid validation with its DD producer intact. Its physics domain is
+`mechanical_measurement_diagnostics`, its validation observation is
+`2026-09-15T04:26:15.178Z`, and both review shortfall fields are null, so the
+current WEST admission gates would carry it. No cut was performed by this
+node.
 
 ### Antenna strap distance
 
