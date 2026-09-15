@@ -373,6 +373,40 @@
     after evidence and the export-admission walk in
     <a href="/imas-codex/evidence/sn-west-catalog-release/the-calorimetry-energy-quarantine">the calorimetry energy quarantine evidence</a>.</p>
   </section>
+  <section id="flux-surface-area-derivative">
+    <h2>The flux-surface area derivative: a model-side barrier, not the grammar</h2>
+    <p><code>equilibrium/time_slice/profiles_1d/darea_dpsi</code> — the radial
+    derivative of the cross-sectional area of a magnetic flux surface with
+    respect to poloidal magnetic flux, unit <code>m^2.Wb^-1</code> — does not
+    gain an accepted standard name, and the WEST cut does not carry it. The
+    final, exact-spelling-guided composition attempt under the five-attempt cap
+    failed the grammar round trip like every attempt before it; the source is
+    terminal (<code>status=failed</code>, <code>attempt_count=5</code>,
+    <code>produced_sn_id=null</code>) and the focused run exited with
+    <code>names_composed=0</code> and <code>names_reviewed=0</code>.</p>
+    <p>The grammar is not the barrier: both
+    <code>derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code>
+    and the accepted toroidal sibling parse under imas-standard-names
+    0.9.3. The barrier is the local composer seat
+    (<code>deepseek-v4-flash</code>), which repeatedly emits grammar-invalid
+    structured output for this source — reaching for the absent
+    <code>rate_of_change_of_area_with_respect_to_poloidal_magnetic_flux</code>
+    base recorded in the graph's vocab-gap evidence — even when the prompt
+    carried the exact parseable spelling as operator steering on the final
+    attempt. The sibling <code>darea_drho_tor</code> shows the target-adjacent
+    outcome: <code>derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code>
+    is <code>name_stage=accepted</code> and <code>docs_stage=accepted</code>.</p>
+    <p>Node LLM spend was <code>$0.00</code> (local compose only; no paid review
+    or documentation stages ran), so the campaign total is unchanged at
+    <code>$107.18</code> against the <code>$250.00</code> ceiling. An open
+    question for the review — DD calls the quantity a "radial derivative" while
+    the three accepted flux-surface family members carry no radial qualifier —
+    is staged in the evidence; it is moot for this cut because no composed name
+    survived to be exported. Detailed quotes, compose-log records, the hint
+    verification, and the graph read-back are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/the-flux-surface-area-derivative">the
+    flux-surface area derivative evidence</a>.</p>
+  </section>
 </main>
 </body>
 </html>
