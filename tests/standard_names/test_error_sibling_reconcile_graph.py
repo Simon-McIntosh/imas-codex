@@ -83,14 +83,14 @@ def _states(graph: GraphClient) -> dict[str, dict[str, object]]:
         MATCH (name:StandardName)
         RETURN name.id AS id,
                name.validation_status AS validation_status,
-               name.quarantine_reason AS quarantine_reason
+               name.validation_issues AS validation_issues
         ORDER BY name.id
         """
     )
     return {
         str(row["id"]): {
             "validation_status": row["validation_status"],
-            "quarantine_reason": row["quarantine_reason"],
+            "validation_issues": row["validation_issues"],
         }
         for row in rows
     }
@@ -163,7 +163,7 @@ def test_mixed_cohort_marks_exactly_the_recognized_parentless_siblings(
                 "id": "lower_uncertainty_of_missing_current",
                 "model": _ERROR_MODEL,
                 "validation_status": "quarantined",
-                "quarantine_reason": "manual quarantine remains authoritative",
+                "validation_issues": ["manual quarantine remains authoritative"],
             },
         ],
     )
@@ -175,26 +175,26 @@ def test_mixed_cohort_marks_exactly_the_recognized_parentless_siblings(
     assert {
         name_id
         for name_id, state in states.items()
-        if state["quarantine_reason"] == _ORPHAN_REASON
+        if state["validation_issues"] == [_ORPHAN_REASON]
     } == {
         "lower_uncertainty_of_missing_temperature",
         "uncertainty_index_of_missing_pressure",
     }
     assert states["upper_uncertainty_of_plasma_current"] == {
         "validation_status": "valid",
-        "quarantine_reason": None,
+        "validation_issues": None,
     }
     assert states["median_uncertainty_of_missing_density"] == {
         "validation_status": "valid",
-        "quarantine_reason": None,
+        "validation_issues": None,
     }
     assert states["upper_uncertainty_of_missing_flux"] == {
         "validation_status": "valid",
-        "quarantine_reason": None,
+        "validation_issues": None,
     }
     assert states["lower_uncertainty_of_missing_current"] == {
         "validation_status": "quarantined",
-        "quarantine_reason": "manual quarantine remains authoritative",
+        "validation_issues": ["manual quarantine remains authoritative"],
     }
 
 
@@ -212,7 +212,7 @@ def test_upper_uncertainty_orphan_gets_the_exact_live_reason(
     assert _run_reconcile(disposable_neo4j) == {"stale_marked": 1}
     assert _states(graph)[name_id] == {
         "validation_status": "quarantined",
-        "quarantine_reason": "orphaned error sibling (parent name deleted)",
+        "validation_issues": ["orphaned error sibling (parent name deleted)"],
     }
 
 
@@ -230,7 +230,7 @@ def test_lower_uncertainty_orphan_gets_the_exact_live_reason(
     assert _run_reconcile(disposable_neo4j) == {"stale_marked": 1}
     assert _states(graph)[name_id] == {
         "validation_status": "quarantined",
-        "quarantine_reason": "orphaned error sibling (parent name deleted)",
+        "validation_issues": ["orphaned error sibling (parent name deleted)"],
     }
 
 
@@ -246,7 +246,7 @@ def test_any_existing_parent_identity_refuses_orphan_quarantine(
             {
                 "id": "quarantined_parent",
                 "validation_status": "quarantined",
-                "quarantine_reason": "parent is retained for separate review",
+                "validation_issues": ["parent is retained for separate review"],
             },
             {"id": name_id, "model": _ERROR_MODEL, "validation_status": "valid"},
         ],
@@ -254,8 +254,8 @@ def test_any_existing_parent_identity_refuses_orphan_quarantine(
 
     assert _run_reconcile(disposable_neo4j) == {"stale_marked": 0}
     state = _states(graph)[name_id]
-    assert state == {"validation_status": "valid", "quarantine_reason": None}
-    assert state["quarantine_reason"] != _ORPHAN_REASON
+    assert state == {"validation_status": "valid", "validation_issues": None}
+    assert state["validation_issues"] != [_ORPHAN_REASON]
 
 
 @pytest.mark.graph
@@ -271,12 +271,12 @@ def test_unknown_operator_prefix_refuses_orphan_quarantine(
 
     assert _run_reconcile(disposable_neo4j) == {"stale_marked": 0}
     state = _states(graph)[name_id]
-    assert state == {"validation_status": "valid", "quarantine_reason": None}
-    assert state["quarantine_reason"] != _ORPHAN_REASON
+    assert state == {"validation_status": "valid", "validation_issues": None}
+    assert state["validation_issues"] != [_ORPHAN_REASON]
 
 
 @pytest.mark.graph
-def test_existing_quarantine_reason_is_not_rewritten(
+def test_existing_quarantine_explanation_is_not_rewritten(
     graph: GraphClient,
     disposable_neo4j: tuple[str, str],
 ) -> None:
@@ -289,7 +289,7 @@ def test_existing_quarantine_reason_is_not_rewritten(
                 "id": name_id,
                 "model": _ERROR_MODEL,
                 "validation_status": "quarantined",
-                "quarantine_reason": existing_reason,
+                "validation_issues": [existing_reason],
             }
         ],
     )
@@ -297,7 +297,7 @@ def test_existing_quarantine_reason_is_not_rewritten(
     assert _run_reconcile(disposable_neo4j) == {"stale_marked": 0}
     assert _states(graph)[name_id] == {
         "validation_status": "quarantined",
-        "quarantine_reason": "manual quarantine remains authoritative",
+        "validation_issues": ["manual quarantine remains authoritative"],
     }
 
 

@@ -274,9 +274,13 @@ def match_target(row: dict[str, Any], spec: CampaignSpec) -> CampaignTarget | No
 
     # Quarantine predicate — selects on its own.
     if spec.include_quarantined and quarantined:
+        reasons = [str(issue) for issue in (row.get("validation_issues") or [])]
         matched.setdefault(
-            "quarantined", [str(row.get("quarantine_reason") or "quarantined")]
+            "quarantined",
+            reasons or ["reason missing: validation_issues is null"],
         )
+        if not reasons:
+            matched["quarantined:reason_missing"] = ["validation_issues is null"]
 
     if not matched:
         return None
@@ -299,7 +303,6 @@ RETURN sn.id AS id,
        sn.documentation AS documentation,
        sn.validation_issues AS validation_issues,
        sn.validation_status AS validation_status,
-       sn.quarantine_reason AS quarantine_reason,
        sn.physics_domain AS physics_domain,
        sn.docs_stage AS docs_stage
 ORDER BY sn.id
@@ -664,7 +667,7 @@ def default_clear_quarantine(gc: Any, ids: Sequence[str]) -> int:
         WHERE sn.name_stage = 'accepted'
           AND coalesce(sn.validation_status, '') = 'quarantined'
         SET sn.validation_status = 'pending',
-            sn.quarantine_reason = null,
+            sn.validation_issues = null,
             sn.validated_at = null,
             sn.updated_at = datetime()
         RETURN count(sn) AS n
@@ -713,11 +716,12 @@ def default_revalidate(
             UNWIND $ids AS sid
             MATCH (sn:StandardName {id: sid})
             SET sn.validation_status = 'quarantined',
-                sn.quarantine_reason = 'campaign: banned prose persisted after refine',
+                sn.validation_issues = [$reason],
                 sn.updated_at = datetime()
             RETURN count(sn) AS n
             """,
             ids=list(reintroduced_ids),
+            reason="campaign: banned prose persisted after refine",
         )
         requarantined = int(rows[0]["n"]) if rows else 0
     if clean_ids:
