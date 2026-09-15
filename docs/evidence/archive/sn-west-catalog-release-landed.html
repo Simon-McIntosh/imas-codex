@@ -534,6 +534,54 @@
       grammar-invalid cohort evidence</a>, committed as
       <code>dae717738</code>.</p>
   </section>
+  <section id="mid-pipeline-flush">
+    <h2>The eligible downstream queues drained without composing a name</h2>
+    <p>An unscoped <code>sn run --flush -c 40 -t 35</code> completed at exit 0
+      with receipt <code>5027c365-ba86-44e2-9f92-7e13753ab71a</code> and
+      <code>stop_reason=no_eligible_work</code>. It spent
+      <strong>$1.197691 of the $40.00 cap</strong> over 870.811 seconds,
+      reviewed 7 names, enriched 5 parents, regenerated 0 names, and composed
+      <strong>0</strong> names.</p>
+    <table>
+      <thead><tr><th>Population</th><th>Before</th><th>After</th><th>Delta</th></tr></thead>
+      <tbody>
+        <tr><td>all <code>StandardName</code> nodes</td><td>5,125</td><td>5,130</td><td>+5</td></tr>
+        <tr><td><code>name_stage=drafted</code></td><td>21</td><td>22</td><td>+1</td></tr>
+        <tr><td><code>name_stage=reviewed</code></td><td>113</td><td>113</td><td>0</td></tr>
+        <tr><td><code>name_stage=pending</code></td><td>11</td><td>11</td><td>0</td></tr>
+        <tr><td>accepted, documentation not accepted</td><td>25</td><td>25</td><td>0</td></tr>
+        <tr><td>&emsp;documentation reviewed</td><td>23</td><td>23</td><td>0</td></tr>
+        <tr><td>&emsp;documentation pending</td><td>1</td><td>1</td><td>0</td></tr>
+        <tr><td>&emsp;documentation exhausted</td><td>1</td><td>1</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>The property positive control saw <code>name_stage</code> on all 5,125
+      starting nodes and <code>docs_stage</code> on 5,123, so the census was
+      aimed at populated fields. The five-node increase is accounted for by
+      two identities entering from a concurrent focused compose cohort and
+      three derived parents materialised by this drain. The raw stage totals
+      therefore mix arrivals and departures; they do not replace the run's own
+      throughput receipt. The permitted pending-pool watchdog separately
+      reached zero for name review and refinement, documentation generation,
+      review and refinement, and parent enrichment before the run stopped.</p>
+    <p>The per-run cost ledger accounted for all 28 calls and the full spend:
+      3 parent-enrichment calls at zero cost, 5 documentation-generation calls
+      for $0.027371, 1 name-refinement call for $0.202595, 13 general review
+      calls for $0.618064, and 6 name-review calls for $0.349661. It records
+      <strong>zero <code>generate_name</code> calls</strong>, agreeing with both
+      <code>names_composed=0</code> and the absence of a started generation
+      pool in the complete transcript.</p>
+    <p>Two reviewer calls met provider-capacity refusals. The quorum guard
+      deferred their documentation result rather than accepting one opinion.
+      <code>poloidal_effective_ion_state_momentum_diffusivity</code> also
+      exhausted after refinement returned the identical spelling, reproducing
+      the separately recorded no-op-rotation defect without repairing outside
+      this node's scope.</p>
+    <p>The complete receipt, concurrent-arrival accounting, preserved negative
+      evidence, per-pool ledger and terminal transcript path are in
+      <a href="/imas-codex/evidence/sn-west-catalog-release/the-mid-pipeline-drain">the
+      mid-pipeline flush evidence</a>, committed as <code>4190d6863</code>.</p>
+  </section>
 </main>
 </body>
 </html>
