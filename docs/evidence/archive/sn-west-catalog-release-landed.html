@@ -412,6 +412,38 @@
     <a href="/imas-codex/evidence/sn-west-catalog-release/the-flux-surface-area-derivative">the
     flux-surface area derivative evidence</a>.</p>
   </section>
+  <section id="operator-bare-prefix-classification">
+    <h2>The composer now asks the registry about the operator, not its rendered coordinate form</h2>
+    <p>The failure reproduced at base commit <code>ba946c6df</code>. The helper correctly
+    classified the bare operator <code>derivative_with_respect_to</code> as non-bare, but
+    classified the rendered
+    <code>derivative_with_respect_to_poloidal_magnetic_flux_coordinate</code> form as bare.
+    Passing that value into <code>StandardNameIR</code> produced the refusal
+    “has no bare spelling” before the name could be composed.</p>
+    <table>
+      <thead>
+        <tr><th>Token queried</th><th>Registry unary prefix</th><th>Authoritative bare set</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>normalized</code></td><td>yes</td><td>yes</td><td><code>true</code></td></tr>
+        <tr><td><code>derivative_with_respect_to</code></td><td>yes</td><td>no</td><td><code>false</code></td></tr>
+        <tr><td><code>derivative_with_respect_to_poloidal_magnetic_flux_coordinate</code></td><td>no</td><td>no</td><td><code>false</code></td></tr>
+      </tbody>
+    </table>
+    <p><code>_operator_uses_bare_prefix</code> now intersects the public
+    <code>BARE_PREFIX_OPERATORS</code> set with the public registry's
+    <code>unary_prefix</code> kind, so unknown tokens fail closed. Coordinate-indexed
+    applications pass the bare registry token to that check and retain the glued token only
+    as the rendered operator application. The previously failing example now composes as
+    <code>derivative_of_electron_temperature_with_respect_to_poloidal_magnetic_flux_coordinate</code>
+    and survives the public parse-compose round trip.</p>
+    <p>Tests landed in <code>348b6a5fa</code> and the implementation in
+    <code>76a4e706c</code>. The exact three-file gate moved from
+    <strong>130 passed, 1 warning</strong> at the base revision to
+    <strong>134 passed, 1 warning</strong> after the repair, both at exit 0: four additive
+    cases and zero added failures. The focused pre-fix receipt held two failures and two
+    passes; the same selection after the repair held four passes.</p>
+  </section>
 </main>
 </body>
 </html>
