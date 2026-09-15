@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T14:13:16",
+  "updated": "2026-09-15T15:17:54",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -284,6 +284,24 @@
       },
       {
         "id": "codex-swcr-areaderiv",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "codex-swcr-drain",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "codex-swcr-four",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -133221,6 +133239,308 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T123716488637-n-swcr-the-mid-pipeline-backlog-is-drained",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-mid-pipeline-backlog-is-drained",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1542,
+                "cached_input_tokens": 551885,
+                "input_tokens": 553429,
+                "output_tokens": 712,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 554141,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "imas-codex sn run --flush runs with a cost limit of 40 USD and a time limit that fits inside this node's fence, the before and after counts are reported for name_stage drafted reviewed and pending and for accepted names whose docs_stage is not accepted, the manifest states actual spend against the 40 USD cap, the full run output is captured to a log file named in the manifest, and the generate_name pool is confirmed untouched; the starting backlog is 21 drafted, 113 reviewed, 11 pending and 23 accepted names at docs_stage reviewed, and a partial drain is an acceptable outcome provided the manifest says how far it got and what remains rather than presenting a truncated run as a completed one",
+          "estimated_hours": null,
+          "goal": "Drain the mid-pipeline standard-name backlog with a flush run that composes no new names",
+          "id": "n-swcr-the-mid-pipeline-backlog-is-drained",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T12:37:18Z",
+            "read_at": "2026-09-15T12:37:20Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 36.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T123716488637-n-swcr-the-mid-pipeline-backlog-is-drained/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-mid-pipeline-drain.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "codex-swcr-drain",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T12:38:06Z",
+        "completed_at": "2026-09-15T13:11:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2009,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2009,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6f88d29e31ba07b99906a1860ac17774dcfea0c7",
+        "commits": [
+          "4190d6863b7427b8e5bca8c28effd3843f42acfa",
+          "b56a6b75d8f9f778c383e2b6c63b567c5354016c"
+        ],
+        "changed_lines": {
+          "added": 168,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync imas-codex sn run --flush -c 40 -t 35",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T123716488637-n-swcr-the-mid-pipeline-backlog-is-drained/flush-output.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T123716488637-n-swcr-the-mid-pipeline-backlog-is-drained/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a513-1970-70c0-9410-2f58530e8539",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3180288,
+            "cached_input_tokens_cumulative": 3180288,
+            "input_tokens": 3213469,
+            "input_tokens_cumulative": 3213469,
+            "output_tokens": 7915,
+            "output_tokens_cumulative": 7915,
+            "reasoning_output_tokens": 1678,
+            "reasoning_output_tokens_cumulative": 1678
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T13:11:35Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 38.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T13:11:35Z"
+            }
+          ],
+          "notional_cost_usd": 77.4422,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1230,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 3030,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 12894,
+              "log_fresh": false,
+              "manifest_commits": [
+                "dc7214c53dbd444a1ad8225f7f281b9b14bca7fb"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "7b26485bf36e9fe3fb1fa2924e227205db96f14103e224d50eac0bd4669fd94a",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-west-catalog-release --section '' --role review --spec-level exact --node review-of-n-swcr-the-catalog-pin-reaches-the-published-grammar --goal 'attach an independent review to run r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar' --done-when 'the review for r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar.json --time-budget 30m --session ship-s10-20260908 --local",
+              "node": "n-swcr-the-catalog-pin-reaches-the-published-grammar",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar",
+              "session": "ship-s10-20260908",
+              "terminal_age_seconds": 12671,
+              "terminal_at": "2026-09-15T09:06:45Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-catalog-18d2b0d8fabc/ship-s10-20260908/n-swcr-the-catalog-pin-reaches-the-published-grammar"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1270,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1785,
+              "log_fresh": false,
+              "manifest_commits": [
+                "dae71773801f8a560f1cfb6a63eff0af5f9a819c",
+                "62d87e0178f58d6c2a63201457aa1d869eab8641",
+                "856345a9c6d7744485f5960428d106470fe58dc3"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "240aec2c78e10f35ec73cfd91c25c230fe6c7e3c7e8d21cbb8d16bc4bdd6dfd7",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-west-catalog-release --section '' --role review --spec-level exact --node review-of-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair --goal 'attach an independent review to run r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair' --done-when 'the review for r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair.json --time-budget 45m --session ship-s10-20260908 --local",
+              "node": "n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+              "phase": "working",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+              "session": "ship-s10-20260908",
+              "terminal_age_seconds": 1837,
+              "terminal_at": "2026-09-15T12:07:19Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3180288,
+          "cumulative_input_tokens": 6393757,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 9593
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-mid-pipeline-backlog-is-drained",
+          "session_id": "01a0a513-1970-70c0-9410-2f58530e8539",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T13:11:35Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 55.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -133491,6 +133811,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2166
+    "_version": 2169
   }
 }
