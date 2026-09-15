@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.98">
-<meta name="plan-version" content="274">
+<meta name="plan-version" content="275">
 <meta name="plan-commits" content="72b7760c60ac307f641e7e8490b7f15e532d2104">
 <meta name="plan-artifacts" content="docs/evidence/sn-west-catalog-release/residue-currency.md,tests/standard_names/test_review_body_ledger_link.py">
 </head>
@@ -402,6 +402,11 @@ physical_base or geometry_carrier; nearest candidates: (none)</code></pre><p>The
 <article class="r-fu" data-id="f-wcr-domain-stage-coverage" data-status="open" data-written-by="ship-s10-20260908" data-written-at="2026-09-15T07:55:00Z" data-recommends-skill="/reckon-ship sn-west-catalog-release" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Decide whether the physics-domain routes cover superseded and exhausted names or deliberately skip them</h4>
     <div class="r-fu-body"><p>Sixteen of the twenty names whose physics domain was recovered are superseded or exhausted, so the recovery spent work on rows no published cut can carry. The question is whether <code>reclassify_standard_name_domain</code> and the signed-manifest domain writer should admit non-live stages at all. Skipping them keeps the domain label meaningful as a property of the live catalog and makes the recovery cheaper; admitting them keeps a tombstone readable when a reviewer follows a supersede chain backwards, which is the case the ledger's <code>LIVE_NAME</code> predicate deliberately excludes elsewhere. This is a semantics decision with no defect behind it — nothing is broken either way — and it does not gate the WEST cut, because neither stage is exportable. It needs an explicit ruling before the next domain recovery runs, so the same twenty rows are not re-decided by whoever touches it next.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-west-catalog-release</pre>
+    </article>
+<article class="r-fu" data-id="f-wcr-area-derivative-seat-escalation" data-status="open" data-written-by="ship-s10-20260908" data-written-at="2026-09-15T08:35:00Z" data-recommends-skill="/reckon-ship sn-west-catalog-release" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Compose the flux-surface area derivative on a vendor-diverse seat instead of the one that failed it five times</h4>
+    <div class="r-fu-body"><p>The diagnosis node established that the grammar is not the barrier and the composer is, but it ran entirely on the local seat and never tested another. The lever it did not pull is <code>sn run --compose-model</code>. The target spelling is mechanical rather than a judgement call: <code>dvolume_dpsi</code> already carries <code>derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate</code> at name and docs accepted, so the whole tail this source needs is demonstrably nameable and only <code>volume</code> has to become <code>area</code>. Two of the other three family members are likewise accepted.</p><p><code>sn edit</code> cannot reach this source, and the reason is worth recording because it is not a stage refusal: <code>_RENAME_ELIGIBLE_STAGES</code> admits accepted, reviewed, exhausted and drafted, every one of which presupposes an identity, and this source has none at all — <code>produced_sn_id</code> null, zero <code>PRODUCED_NAME</code> edges, both stages null. The route is therefore <code>sn retry --failed</code> to clear the five-attempt cap, then a focused compose on a seat from a different vendor family, with <code>sn attach</code> as the deterministic fallback once any identity exists, since it writes the same edges and scalars compose writes. The project already designates <code>openrouter/anthropic/claude-fable-5</code> for exactly this shape under <code>sn-escalation</code>: vendor-diverse from the compose model so an escalation breaks a failure loop rather than re-running the family that already failed the item.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-catalog-release</pre>
     </article>
 </section>
