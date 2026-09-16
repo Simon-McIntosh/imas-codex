@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-15T15:17:54",
+  "updated": "2026-09-16T16:16:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -272,6 +272,42 @@
         "created": "2026-09-08"
       },
       {
+        "id": "codex-rev-1",
+        "harness": "codex",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "codex-rev-2",
+        "harness": "codex",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "codex-rev-3",
+        "harness": "codex",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "codex-rev-4",
+        "harness": "codex",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
         "id": "codex-spark-a",
         "harness": "codex-spark",
         "role": "implement",
@@ -302,6 +338,24 @@
       },
       {
         "id": "codex-swcr-four",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "codex-swcr-orphans",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-15"
+      },
+      {
+        "id": "codex-swcr-west3",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -133541,6 +133595,271 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+        "plan": "sn-west-catalog-release",
+        "section": "",
+        "node": "n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1612,
+                "cached_input_tokens": 463403,
+                "input_tokens": 465017,
+                "output_tokens": 1396,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 466413,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "9a2a0944-44ee-4d69-8147-14071cf6a5e9",
+            "session_id": "ship-s10-20260908"
+          },
+          "done_when": "the 109 StandardName nodes carrying refine_stop_reason grammar_invalid are enumerated with their producing sources, a sample of at most 12 of those sources is released with imas-codex sn retry --failed and re-composed through a focused imas-codex sn run, the manifest reports how many of the sampled sources produced a grammar-valid name against how many were tried, every sampled source is listed by path with its before and after name_stage, the full run output is captured to a log file named in the manifest, and no source outside the sample is touched; if the recovery rate is zero the manifest quotes the exact refusal for at least three of the sampled sources rather than concluding from the count alone",
+          "estimated_hours": null,
+          "goal": "Measure how much of the grammar_invalid cohort the repaired bare-prefix classifier recovers, using a bounded sample rather than the whole set",
+          "id": "n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-15T11:21:01Z",
+            "read_at": "2026-09-15T11:21:05Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 33.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/the-grammar-invalid-cohort.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "codex-swcr-areaderiv",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-15T11:21:57Z",
+        "completed_at": "2026-09-15T12:08:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2774,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2774,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c2912941c153629dfc2ec8eccce87c6d353da3be",
+        "commits": [
+          "dae71773801f8a560f1cfb6a63eff0af5f9a819c",
+          "62d87e0178f58d6c2a63201457aa1d869eab8641",
+          "856345a9c6d7744485f5960428d106470fe58dc3"
+        ],
+        "changed_lines": {
+          "added": 235,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "imas-codex sn run --focus <12 exact paths> --skip-global-maintenance --only compose --names-only",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair/focused-sn-run-resumed.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T112100248211-n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0a4cd-641d-7521-a99b-9616934941d4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13008768,
+            "cached_input_tokens_cumulative": 13008768,
+            "input_tokens": 13324474,
+            "input_tokens_cumulative": 13324474,
+            "output_tokens": 24185,
+            "output_tokens_cumulative": 24185,
+            "reasoning_output_tokens": 5052,
+            "reasoning_output_tokens_cumulative": 5052
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-15T12:08:11Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 35.0,
+              "resets_at": 1789970251,
+              "observed_at": "2026-09-15T12:08:11Z"
+            }
+          ],
+          "notional_cost_usd": 127.0161,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 1230,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 3030,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 8324,
+              "log_fresh": false,
+              "manifest_commits": [
+                "dc7214c53dbd444a1ad8225f7f281b9b14bca7fb"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "7b26485bf36e9fe3fb1fa2924e227205db96f14103e224d50eac0bd4669fd94a",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-west-catalog-release --section '' --role review --spec-level exact --node review-of-n-swcr-the-catalog-pin-reaches-the-published-grammar --goal 'attach an independent review to run r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar' --done-when 'the review for r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar.json --time-budget 30m --session ship-s10-20260908 --local",
+              "node": "n-swcr-the-catalog-pin-reaches-the-published-grammar",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260915T081211090585-n-swcr-the-catalog-pin-reaches-the-published-grammar",
+              "session": "ship-s10-20260908",
+              "terminal_age_seconds": 8101,
+              "terminal_at": "2026-09-15T09:06:45Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-standard-names-catalog-18d2b0d8fabc/ship-s10-20260908/n-swcr-the-catalog-pin-reaches-the-published-grammar"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 5,
+            "evidence": 14,
+            "fit": 19,
+            "goal_fidelity": 15,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 73
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 13008768,
+          "cumulative_input_tokens": 26333242,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 29237
+        },
+        "follow_on_paths": [
+          "worker-failure/orphan-claim"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260908/n-swcr-the-grammar-invalid-cohort-is-resized-after-the-classifier-repair",
+          "session_id": "01a0a4cd-641d-7521-a99b-9616934941d4",
+          "session_source": "stream",
+          "retained_at": "2026-09-15T12:08:11Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 125.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -133811,6 +134130,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2169
+    "_version": 2176
   }
 }
