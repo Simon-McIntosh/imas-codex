@@ -123,6 +123,12 @@
     </article>
 </section>
 
+    <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260915T190723000709-n-usb-source-trace" data-who="worker-source-trace" data-when="2026-09-15T21:30:00Z">
+    <div class="r-comment-body"><p>The live count reproduces exactly: <strong>9 accepted names without an incoming <code>PRODUCED_NAME</code></strong>, against the bound of 9 at 2026-09-15T18:20Z, with 5,130/5,130 identity-key coverage and 2,519 accepted producer-bound positive controls. The historical writer trace is mixed rather than one guessed mechanism: five edit-driven renames predate the current producer-carry postcondition, one automated refine predates the empty-cohort refusal, one attachment-consistency receipt and one stale-source receipt explicitly name their detachments, and one structural parent has its canonical derived source bound to another live identity. <code>reconcile_source_status_liveness</code> cannot select an accepted target because its terminal set contains only superseded, exhausted and contested. The export dry run reports 2,497 candidates, <strong>0 exported</strong>, 180 accounted exclusions and 2,317 residue: five of the nine have named exclusions, while four reached the candidate set before an independent <code>halo_current</code> identity-token collision blocked the whole cut. Missing producer provenance is therefore not itself an export predicate, but this invocation emitted none. No graph mutation was performed. Full record: <a href="/imas-codex/evidence/archive/unbound-source-backlog-landed#accepted-names-without-producers">accepted names without producers</a>.</p></div>
+</div>
+</section>
+
   </main>
 </body>
 </html>
