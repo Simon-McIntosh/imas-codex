@@ -6646,7 +6646,8 @@ def _docs_review_winner_query_body(name_variable: str = "sn") -> str:
              [item IN collect({
                  review_id: review.id,
                  reviewed_at: review.reviewed_at,
-                 resolution_method: review.resolution_method
+                 resolution_method: review.resolution_method,
+                 score: review.score
              }) WHERE item.resolution_method IN $docs_review_winning_methods]
                  AS winning_records
         WHERE size(winning_records) > 0
@@ -6658,7 +6659,8 @@ def _docs_review_winner_query_body(name_variable: str = "sn") -> str:
         WITH collect({
             review_group_id: review_group_id,
             review_id: winning_record.review_id,
-            resolution_method: winning_record.resolution_method
+            resolution_method: winning_record.resolution_method,
+            score: winning_record.score
         })[0] AS winner
         RETURN winner
     """
@@ -12551,6 +12553,141 @@ def promote_stranded_reviewed(
             min_score,
         )
     return promoted
+
+
+DOCS_AXIS_REDERIVE_NAME_WHERE = (
+    "sn.name_stage = 'accepted' AND coalesce(sn.validation_status, '') <> 'quarantined'"
+)
+"""Scope for a docs-axis re-derivation: the name axis is already accepted."""
+
+_DOCS_AXIS_MIRROR_AGREES = (
+    "sn.docs_stage = 'accepted' "
+    "AND sn.reviewer_score_docs IS NOT NULL "
+    "AND abs(sn.reviewer_score_docs - winner.score) <= 0.000000001"
+)
+
+_DOCS_AXIS_MIRROR_DISAGREES = (
+    "sn.docs_stage <> 'accepted' "
+    "OR sn.reviewer_score_docs IS NULL "
+    "OR abs(sn.reviewer_score_docs - winner.score) > 0.000000001"
+)
+
+
+def _docs_axis_rederive_query(*, dry_run: bool, ids: list[str] | None) -> str:
+    """Build the docs-axis re-derivation statement.
+
+    The statement reuses :func:`_docs_review_winner_query_body` so the selection
+    rule has exactly one definition; a second traversal here would be a second
+    source of truth for which surviving review is authoritative.
+    """
+    scope = (
+        "UNWIND $ids AS sid\nMATCH (sn:StandardName {id: sid})\n"
+        if ids is not None
+        else "MATCH (sn:StandardName)\n"
+    )
+    if dry_run:
+        tail = (
+            f"RETURN count(sn) AS with_winner,\n"
+            f"       sum(CASE WHEN {_DOCS_AXIS_MIRROR_DISAGREES} THEN 1 ELSE 0 END)"
+            f" AS repair,\n"
+            f"       sum(CASE WHEN {_DOCS_AXIS_MIRROR_AGREES} THEN 1 ELSE 0 END)"
+            f" AS agree"
+        )
+    else:
+        tail = (
+            "SET sn.updated_at = datetime(), sn.docs_stage = 'accepted',\n"
+            "    sn.reviewer_score_docs = winner.score\n"
+            "RETURN count(sn) AS repair"
+        )
+    return (
+        f"{scope}"
+        f"WHERE {DOCS_AXIS_REDERIVE_NAME_WHERE}\n"
+        f"CALL {{\n  WITH sn\n{_docs_review_winner_query_body()}\n}}\n"
+        f"WITH sn, winner\n"
+        + (f"WHERE {_DOCS_AXIS_MIRROR_DISAGREES}\n" if not dry_run else "")
+        + tail
+    )
+
+
+def reconcile_docs_axis_from_reviews(
+    *,
+    dry_run: bool = True,
+    ids: list[str] | None = None,
+    gc: Any | None = None,
+) -> dict[str, int]:
+    """Re-derive ``docs_stage`` and ``reviewer_score_docs`` from surviving docs reviews.
+
+    **Selection rule:** a name's docs axis is taken from its winning docs-axis
+    review — the highest-ranked surviving docs review group (a canonical group
+    ahead of a non-canonical one, then the newest group, then the newest
+    winning record inside it), as defined once by
+    :func:`_docs_review_winner_query_body`.
+
+    A name is repaired only when its name axis is already ``'accepted'``, it is
+    not quarantined, and its stored mirror disagrees with that winner — its
+    ``docs_stage`` is not ``'accepted'``, its stored score is null, or it
+    carries a different score. **A name with no surviving docs-axis review at
+    all is refused:** the winner traversal matches nothing for it, so it cannot
+    reach the update, and it is left exactly as it is. That refusal is
+    load-bearing — a pass that inferred acceptance from the absence of a review
+    would manufacture the false-acceptance projections this catalog already
+    contains, where a permissive scalar points at documentation no reviewer
+    ever scored.
+
+    This is the repeatable mechanism the release path is missing: a lifecycle
+    scalar regressed by unrelated work is restored from the review edges that
+    survived, instead of being repaired by hand against the same evidence.
+
+    Idempotent: a repaired row now agrees with its winner and a second run
+    matches nothing.
+
+    Parameters
+    ----------
+    dry_run:
+        When true (the default) nothing is written and the counts describe
+        what a real run would do. ``agree`` counts rows whose stored mirror
+        already equals the winner, ``repair`` those that would be re-derived,
+        and ``with_winner`` every row in scope carrying a surviving docs-axis
+        review.
+    ids:
+        Restrict the pass to these StandardName ids. Used to measure the rule
+        against a named cohort; omitted, the pass covers the whole label.
+    gc:
+        Optional ``GraphClient``. One is opened when omitted.
+
+    Returns
+    -------
+    dict[str, int]
+        ``{"agree", "repair", "with_winner", "refused_no_review"}`` in
+        ``dry_run``, or ``{"repaired"}`` after a real run.
+    """
+    eligibility = docs_review_eligibility_params()
+    params: dict[str, Any] = dict(eligibility)
+    if ids is not None:
+        params["ids"] = list(ids)
+    if gc is None:
+        with GraphClient() as graph:
+            rows = graph.query(
+                _docs_axis_rederive_query(dry_run=dry_run, ids=ids), **params
+            )
+    else:
+        rows = gc.query(_docs_axis_rederive_query(dry_run=dry_run, ids=ids), **params)
+    if dry_run:
+        row = dict(rows[0]) if rows else {}
+        with_winner = int(row.get("with_winner") or 0)
+        repair = int(row.get("repair") or 0)
+        agree = int(row.get("agree") or 0)
+        refused = len(ids) - with_winner if ids is not None else 0
+        return {
+            "agree": agree,
+            "repair": repair,
+            "with_winner": with_winner,
+            "refused_no_review": refused,
+        }
+    repaired = int(rows[0]["repair"]) if rows else 0
+    if repaired:
+        logger.info("reconcile_docs_axis_from_reviews: repaired %d name(s)", repaired)
+    return {"repaired": repaired}
 
 
 def _standard_name_source_upstream_present_cypher(source_variable: str) -> str:
