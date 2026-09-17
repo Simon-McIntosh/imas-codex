@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"      content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="imas-codex">
+  <meta name="reckon-type"   content="evidence">
+  <meta name="plan-slug"     content="sn-release-readiness-landed">
+  <meta name="plan-title"    content="SN Release Readiness: What Landed">
+  <meta name="plan-summary"  content="The plan's own headline figures re-measured read-only against the live graph, with the verdict rule, the live unscored partition, the first unstarted beat and the restated remaining effort.">
+  <meta name="plan-status"   content="active">
+  <meta name="plan-owner"    content="Simon McIntosh">
+  <meta name="plan-tags"     content="standard-names,graph,release-readiness">
+  <meta name="plan-evidence-for" content="sn-release-readiness">
+  <title>SN Release Readiness: What Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="outcome">Outcome</h2>
+
+    <p>
+      The plan's spine figures were taken on 2026-08-23 and carried forward
+      since, so they are eight days stale against a graph that has moved
+      substantially. Every quantity below was taken <strong>verbatim</strong>
+      from <code>docs/plans/sn-release-readiness.html</code> and re-measured
+      against the live graph through
+      <code>imas_codex.graph.client.GraphClient</code>. Nine asserted
+      quantities were re-measured: <strong>0 current, 7 drifted, 0 stale, 2
+      unmeasured</strong>, the two unmeasured recorded with their reason rather
+      than estimated. The four counts sum to the nine rows. Read-only
+      throughout: no graph mutation and no code change. Per-query detail, with
+      the verbatim source of each assertion and the query behind each value, is
+      in the
+      <a href="/imas-codex/evidence/sn-release-readiness/plan-figure-audit.html">plan
+      figure audit</a>.
+    </p>
+
+    <h2 id="plan-figure-audit">The headline figures, re-measured</h2>
+
+    <p>
+      The released universe has grown, and the drain has also worked. The
+      plan's total <code>StandardName</code> count has risen from
+      <strong>4,408</strong> to <strong>5,130</strong>, and
+      <code>name_stage = 'accepted'</code> stands at <strong>2,528</strong>
+      against the plan's asserted 2,261 and the 2,535 in the section 2
+      alt-text. The export funnel falls from accepted 2,528, to
+      <strong>2,482</strong> after the validity gate, to
+      <strong>2,458</strong> after the docs gate. The largest single movement
+      sits in the cohort the plan's rescope turns on. The plan asserts
+      that <strong>1,469</strong> of the export-eligible names carry no
+      <code>reviewer_score_name</code> at all. Measured live that figure is
+      <strong>330</strong>: the scoring drain has run since the ledger entry,
+      so <strong>2,118</strong> of the 2,458 eligible names now score at or
+      above 0.85 and <strong>10</strong> score below it.
+    </p>
+
+    <p>
+      The chain-cap cohort has moved the other way. Section 12 asserts
+      <strong>78</strong> unsourced chain-cap identities of which
+      <strong>72</strong> have no sourced ancestor at any depth. Live,
+      <code>chain_length &gt;= 3</code> is <strong>174</strong> identities of
+      which <strong>102</strong> are unsourced. That cohort is 31 percent
+      larger than when the beat was written, not drained.
+    </p>
+
+    <table>
+      <caption>Asserted quantity, re-measured 2026-09-17</caption>
+      <thead>
+        <tr><th>Asserted quantity</th><th>Asserted</th><th>Live</th><th>Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>StandardName total</td><td>4,408</td><td><strong>5,130</strong></td><td>drifted</td></tr>
+        <tr><td><code>name_stage</code> accepted</td><td>2,261 / 2,535</td><td><strong>2,528</strong></td><td>drifted</td></tr>
+        <tr><td>export-eligible after the docs gate</td><td>2,296</td><td><strong>2,458</strong></td><td>drifted</td></tr>
+        <tr><td>export-eligible carrying no name score</td><td>1,469</td><td><strong>330</strong></td><td>drifted</td></tr>
+        <tr><td>would-emit at the section 3 ledger</td><td>534</td><td><strong>2,118</strong></td><td>drifted</td></tr>
+        <tr><td>unsourced chain-cap identities</td><td>78, of which 72</td><td><strong>102, of 174</strong></td><td>drifted</td></tr>
+        <tr><td>section 2 unscored row (<code>catalog_edit</code>, reviewer recorded)</td><td>2</td><td><strong>27 + 218</strong></td><td>drifted</td></tr>
+        <tr><td>84 graph-wide, none carrying <code>parent_enriched_at</code></td><td>84</td><td>unmeasured</td><td>unmeasured</td></tr>
+        <tr><td>every superseded name carries a null <code>catalog_approved_at</code></td><td>all superseded</td><td>unmeasured</td><td>unmeasured</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      Two of the plan's discriminators no longer exist in the graph.
+      <code>origin</code> now takes only <code>derived</code> and
+      <code>pipeline</code>, since the plan's <code>catalog_edit</code> is gone,
+      and <code>source_types</code> reads only <code>catalog</code> and
+      <code>dd</code>, with no <code>structural-inheritance</code>. The
+      section 2 partition table therefore cannot be restated from the graph
+      without re-deriving its dimensions, which is why that row is reported as
+      two live counts rather than one. The two unmeasured rows are measurable,
+      the property <code>catalog_approved_at</code> having been confirmed
+      present in the graph's property keys, but they were not reached inside
+      the node budget.
+    </p>
+
+    <h2 id="unscored-partition">The unscored partition, live</h2>
+
+    <p>
+      The plan's five-row partition of the unscored cohort no longer matches
+      the graph's vocabulary. The live partition of the 330 unscored,
+      export-eligible names, by <code>origin</code> and reviewer presence,
+      measured directly rather than restated:
+    </p>
+
+    <table>
+      <thead>
+        <tr><th><code>origin</code></th><th>reviewer</th><th>count</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>derived</code></td><td>recorded</td><td>218</td></tr>
+        <tr><td><code>derived</code></td><td>none</td><td>81</td></tr>
+        <tr><td><code>pipeline</code></td><td>recorded</td><td>27</td></tr>
+        <tr><td><code>pipeline</code></td><td>none</td><td>4</td></tr>
+        <tr><td colspan="2"><strong>total</strong></td><td><strong>330</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="first-unstarted-beat">The plan's first unstarted beat</h2>
+
+    <p>
+      The plan's next followup is <code>f-srr-unsourced</code>, to rebuild the
+      72 never-grounded chain-cap identities and settle the ISN
+      measurement-direction gap, and it is the first beat with no landing
+      record. <strong>Classification: still-required.</strong> The cohort it
+      exists to drain is larger than when the beat was written, not emptied,
+      at 102 unsourced of 174, so its headline is drifted while its remaining
+      work is real. The companion half of the beat, the six strain-gauge
+      measurement-direction identities blocked on an ISN vocabulary decision,
+      is not measurable in this repository and remains authority-blocked
+      whatever the count.
+    </p>
+
+    <h2 id="remaining-effort">Remaining effort, restated</h2>
+
+    <p>
+      The plan records <code>spent_hours 11.4</code> against
+      <code>estimated_hours 12.0</code>, leaving 0.6 worker-hours. That
+      estimate cannot survive this audit: the beat it covers is still-required,
+      its cohort grew 31 percent from 78 to 102 unsourced chain-cap identities,
+      and the ledger's own headline numbers it would report against are
+      themselves drifted by more than an order of magnitude in one bucket,
+      1,469 to 330 unscored. <strong>Restated remaining effort is 8 to 12
+      worker-hours</strong> for the unsourced beat alone: a rebuild of 102
+      identities at the measured per-identity rebuild cost, plus the 4
+      immediate-predecessor repairs and 2 adjudications the ancestry census
+      already partitioned. The rescope should not carry the 0.6 figure forward.
+    </p>
+
+    <h2 id="what-a-release-would-publish">What a release would publish today</h2>
+
+    <p>
+      The live export predicate, requiring an accepted name stage, a valid
+      validation status and an accepted docs stage, yields <strong>2,458
+      export-eligible</strong> names, of which <strong>2,118</strong> carry a
+      name score at or above 0.85 and <strong>330</strong> carry none. Every
+      figure in this plan that asserts a would-emit number is
+      <strong>pre-drain history</strong>: what a release would publish today is
+      about <strong>2,118 names, not the 534</strong> the section 3 ledger
+      recorded. The plan's spine claim, that exclusion must be visible before
+      the first release, is unaffected by the drift; the magnitude of what a
+      release emits has roughly quadrupled since the ledger was written, which
+      is the drain working. Nothing here re-measures the export path itself,
+      and the <strong>authoritative instrument remains
+      <code>run_export</code></strong>, not a hand-rolled predicate.
+    </p>
+
+    <h2 id="scope-note">Scope note</h2>
+
+    <p>
+      This is the cumulative landed evidence record for this plan. It is a
+      re-measurement only: it changed no code, mutated no graph state, and
+      does not verify the merged result of any other node. The full audit,
+      carrying every asserted quantity with its verbatim source and its
+      verdict, is in
+      <code>docs/evidence/sn-release-readiness/plan-figure-audit.md</code>.
+    </p>
+
+  </main>
+</body>
+</html>
