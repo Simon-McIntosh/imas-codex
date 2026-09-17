@@ -217,6 +217,50 @@
       The derive beat for this pair is unblocked by this and remains unperformed.
     </p>
 
+  <section>
+    <h2 id="derive-boundary-cases">The two derive boundary populations are measured, and the definition decides the population</h2>
+
+    <p>
+      The derive beat for the <code>links</code> pair was left with two design questions
+      and no measurement behind either. Measured read-only at
+      <code>2026-09-17T19:12Z</code> against 6,913 resolvable entries and 6,913
+      <code>REFERENCES</code> edges:
+    </p>
+
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Entries whose target resolves to no live node</td><td><strong>965</strong></td></tr>
+        <tr><td>&mdash; target id matches no node at all</td><td>123 (110 source rows, 88 ids)</td></tr>
+        <tr><td>&mdash; target is superseded</td><td>842 (470 source rows, 437 target rows)</td></tr>
+        <tr><td>Edges whose target is superseded</td><td><strong>842</strong></td></tr>
+        <tr><td>Of those, chain reaches a live node</td><td><strong>663</strong> in four hops, 506 in one; 179 do not</td></tr>
+        <tr><td>Distinct <code>StandardName</code> rows affected</td><td>470 source, 437 target, <strong>966</strong> in union</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      A superseded target is 120 times larger under the state the graph populates
+      (<code>name_stage = 'superseded'</code>: 2,163 names, 1,850 refinement edges) than
+      under the <code>superseded_by</code> scalar the plan names (18 names, 7 edges), so
+      which one the derive consults decides the size of the question.
+    </p>
+
+    <p>
+      Following the successor resolves 663 of the 842 at the cost of rewriting 842 edge
+      targets across 470 source rows, cannot reach the 179 whose chain ends at a
+      superseded node, and has no mechanism for the 123 absent ids: none of the 88 is
+      recorded as any node's predecessor or <code>deprecates</code>, against a control of
+      18 names carrying <code>superseded_by</code>. Leaving them in place rewrites nothing
+      and keeps 965 of 6,913 entries, 14.0 percent, naming a retired or absent identity.
+    </p>
+
+    <p>
+      Evidence, with the query behind each count and a non-zero control beside every zero:
+      <a href="/imas-codex/evidence/scalar-edge-authority/derive-boundary-cases.md">the derive boundary cases record</a>.
+    </p>
+  </section>
+
   </main>
 </body>
 </html>
