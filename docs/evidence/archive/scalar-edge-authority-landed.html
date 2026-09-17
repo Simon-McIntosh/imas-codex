@@ -154,6 +154,69 @@
       here is reported with the query that produced it.
     </p>
 
+    <h2 id="links-parity-refresh">Parity closed in both directions</h2>
+
+    <p>
+      The <code>links</code> pair is the pair the first-beat table above leaves open,
+      and its two non-zero directions were closed at
+      <code>2026-09-17T15:53:35Z</code>. A refresh materialised the <strong>439</strong>
+      resolvable entries that carried no edge and removed the <strong>83</strong> edges
+      that carried no scalar entry. The edge count now reads <strong>6,913</strong>
+      against 6,913 resolvable entries, and <strong>both directions return zero</strong>
+      under the same instrument that returned 439 and 83 before it.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Direction</th><th>Before</th><th>After</th><th>What moved</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>edges present, no scalar entry</td><td><strong>83</strong></td><td><strong>0</strong></td><td>all 83 adjudicated as fossils, then deleted</td></tr>
+        <tr><td>resolvable entries, no edge</td><td><strong>439</strong></td><td><strong>0</strong></td><td>439 <code>REFERENCES</code> edges materialised</td></tr>
+        <tr><td>entries still unresolvable</td><td><strong>123</strong></td><td><strong>123</strong></td><td>unchanged cohort, each row still carries its reason</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      <strong>The 356 above is an arithmetic remainder and the measured gap was 439.</strong>
+      It is <code>6,913 &minus; 6,557</code>, which counts the shortfall only if every
+      edge must be backed by a distinct scalar entry &mdash; and 83 of the 6,557 are
+      not. Read per row the entry set matches the edge set on <strong>6,474</strong>
+      members and the two discrepancies are <code>6,474 + 439</code> and
+      <code>6,474 + 83</code>. Both figures are kept here rather than the table being
+      corrected in place, because a later reader comparing a 356 against a 439 should
+      see which instrument moved, not read a drift of 83 as two independent changes.
+    </p>
+
+    <p>
+      <strong>The 83 were adjudicated before removal.</strong> Re-running the committed
+      scalar producer over each source's current documentation returned 0 stale scalars
+      and 83 fossils, and the recomputed scalar equalled the stored one on all 65
+      sources &mdash; the entries are absent from the documentation text the producer
+      reads, not stale in the node. Restoring them could not hold, because the scalar is
+      rewritten from that documentation on every regeneration while nothing recreates a
+      deleted edge; the rows are carried as a ledger in the evidence record instead. No
+      scalar value was written, and the ordered scalar is byte-identical before and
+      after, which is the negative half of the control: a pass that blanked the scalar
+      would otherwise produce a plausible edge count and identical-looking figures.
+    </p>
+
+    <p>
+      <strong>The 123 unresolvable entries were recounted and no row moved.</strong> The
+      cohort is identical before and after, each row's stated reason re-verified against
+      the graph. This also settles the materialisation ledger's <strong>127</strong>,
+      which decomposes as 4 moved and 123 still unresolvable; the 2 movers that now
+      resolve already carry an edge from this refresh and the 2 that left the scalar have
+      no target, so both sides are silent for those two rows and parity is unaffected.
+    </p>
+
+    <p>
+      Evidence, with the full 83-row and 123-row ledgers, the row-level instrument and
+      the record of a first auditor invocation that compared a census against itself:
+      <a href="/imas-codex/evidence/scalar-edge-authority/links-parity-refresh.md">the links and REFERENCES parity refresh record</a>.
+      The derive beat for this pair is unblocked by this and remains unperformed.
+    </p>
+
   </main>
 </body>
 </html>

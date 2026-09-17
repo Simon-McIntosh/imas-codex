@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="392" viewBox="0 0 920 392" role="img" aria-labelledby="title desc">
+  <title id="title">links scalar entries against REFERENCES edges, before and after the refresh</title>
+  <desc id="desc">Before the refresh, 6,913 unresolvable-free scalar entries met 6,557 REFERENCES edges: 6,474 matched, 439 resolvable entries carried no edge, and 83 edges carried no scalar entry. After the refresh both directions measure zero on a 6,913-entry axis, with the 123 unresolvable entries unchanged and the scalar byte-identical.</desc>
+  <style>
+    text { font-family: Inter, Arial, sans-serif; fill: #18212f; }
+    .title { font-size: 21px; font-weight: 700; }
+    .subtitle { font-size: 13px; fill: #56657a; }
+    .panel { font-size: 15px; font-weight: 700; }
+    .stamp { font-size: 12px; fill: #56657a; }
+    .label { font-size: 12.5px; }
+    .num { font-size: 12.5px; font-weight: 700; fill: #334155; }
+    .legend { font-size: 12.5px; }
+    .note { font-size: 12px; fill: #56657a; }
+  </style>
+  <rect width="920" height="392" fill="#f8fafc"/>
+
+  <text class="title" x="42" y="40">links scalar entries against REFERENCES edges</text>
+  <text class="subtitle" x="42" y="64">Both directions measured on one 6,913-entry axis. The zero on the after panel is a measured set equality, not an arithmetic remainder.</text>
+
+  <text class="panel" x="42" y="104">BEFORE the refresh</text>
+  <text class="stamp" x="42" y="122">census 2026-09-17T15:29:09Z</text>
+
+  <text class="label" x="42" y="148">links scalar entries</text>
+  <rect x="42" y="156" width="300" height="20" rx="3" fill="#eef2f7"/>
+  <rect x="42" y="156" width="281" height="20" rx="3" fill="#16a34a"/>
+  <rect x="323" y="156" width="19.1" height="20" rx="3" fill="#d97706"/>
+  <text class="num" x="352" y="171">6,913</text>
+  <text class="note" x="42" y="192">6,474 matching the edge set, 439 resolvable with no edge</text>
+
+  <text class="label" x="42" y="222">REFERENCES edges</text>
+  <rect x="42" y="230" width="284.6" height="20" rx="3" fill="#eef2f7"/>
+  <rect x="42" y="230" width="281" height="20" rx="3" fill="#16a34a"/>
+  <rect x="323" y="230" width="3.6" height="20" rx="1" fill="#dc2626"/>
+  <text class="num" x="352" y="245">6,557</text>
+  <text class="note" x="42" y="266">6,474 matching, 83 carrying no scalar entry</text>
+
+  <text class="panel" x="490" y="104">AFTER the refresh</text>
+  <text class="stamp" x="490" y="122">census 2026-09-17T15:54:09Z</text>
+
+  <text class="label" x="490" y="148">links scalar entries</text>
+  <rect x="490" y="156" width="300" height="20" rx="3" fill="#eef2f7"/>
+  <rect x="490" y="156" width="300" height="20" rx="3" fill="#16a34a"/>
+  <text class="num" x="800" y="171">6,913</text>
+  <text class="note" x="490" y="192">every resolvable entry carries an edge</text>
+
+  <text class="label" x="490" y="222">REFERENCES edges</text>
+  <rect x="490" y="230" width="300" height="20" rx="3" fill="#eef2f7"/>
+  <rect x="490" y="230" width="300" height="20" rx="3" fill="#16a34a"/>
+  <text class="num" x="800" y="245">6,913</text>
+  <text class="note" x="490" y="266">every edge carries a scalar entry</text>
+
+  <rect x="42" y="288" width="14" height="14" rx="2" fill="#16a34a"/>
+  <text class="legend" x="64" y="300">matched on both sides</text>
+  <rect x="228" y="288" width="14" height="14" rx="2" fill="#d97706"/>
+  <text class="legend" x="250" y="300">resolvable entry, no edge (439 materialised)</text>
+  <rect x="560" y="288" width="14" height="14" rx="2" fill="#dc2626"/>
+  <text class="legend" x="582" y="300">edge with no scalar entry (83 removed)</text>
+
+  <text class="note" x="42" y="336">123 unresolvable entries in both censuses, the same 123 rows, each still carrying no edge on either side.</text>
+  <text class="note" x="42" y="356">The scalar snapshot digest is identical before and after (52cffd6f…d968b): no scalar value was written by this refresh.</text>
+  <text class="note" x="42" y="376">Removing the 83 edges leaves 0 edges lacking an entry; re-adding those 83 as scalar entries could not survive the next documentation regeneration.</text>
+</svg>
