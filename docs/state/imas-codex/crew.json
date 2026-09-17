@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T19:23:10",
+  "updated": "2026-09-17T19:30:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -144978,6 +144978,184 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T145858945282-n-every-unnamed-roster-row-ends-with-a-stated-cause",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a79",
+        "node": "n-every-unnamed-roster-row-ends-with-a-stated-cause",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1081,
+                "cached_input_tokens": 575528,
+                "input_tokens": 576611,
+                "output_tokens": 1453,
+                "reasoning_output_tokens": 519,
+                "total_tokens": 578064,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a named census command is run before and after the change and its output captured to a log with its exit status recorded in the manifest; the command reports the number of manifest source rows carrying no name and an empty non_nameable_reason, and the after figure is 0 against a before figure stated from the same command; any row that cannot be given a cause is listed individually with its path and the reason it cannot; a companion breakdown command returns the rows themselves and is required to return a non-zero count on the before run, so a zero after is distinguishable from an unaimed query; the four fit-constraint weights are asserted by that same command output to carry one verdict rather than two for the same concept; the only graph write is the reason field and the written rows are enumerated in the evidence file",
+          "estimated_hours": null,
+          "goal": "Give every unnamed manifest row either a name or a recorded cause, so no row ends silently",
+          "id": "n-every-unnamed-roster-row-ends-with-a-stated-cause",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T14:59:02Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145858945282-n-every-unnamed-roster-row-ends-with-a-stated-cause/manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a79",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-cohort-treatment/roster-reason-repair.md",
+            "docs/evidence/archive/sn-west-cohort-treatment-landed.html",
+            "docs/plans/sn-west-cohort-treatment.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-drain",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T14:59:25Z",
+        "completed_at": "2026-09-17T16:52:07.645Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6750,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6762,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "2aa09aeccdbd64056590e794e97f5cfe91272214",
+        "commits": [
+          "043a2e24a40e4993041567d953e73d7cdc8eb96d",
+          "f02815a7091464ab89eb50f7dcfbe299a4751211"
+        ],
+        "changed_lines": {
+          "added": 175,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "before/after roster census with the five guarded reason writes logged",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145858945282-n-every-unnamed-roster-row-ends-with-a-stated-cause/census_after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Five guarded reason writes applied, verified read-back from the live graph: one time axis relabelled from compose_model_skipped to the coordinate rule, four fit-artifact rows given one verdict where two competed for one concept. The worker disclosed that the headline empty-reason count was already 0 before it ran, so its contribution is verdict consistency rather than closing a hole.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145858945282-n-every-unnamed-roster-row-ends-with-a-stated-cause/manifest.md",
+        "scope_changed": false,
+        "session_id": "83361f83-6235-4cc7-8cb6-e1a6a153946d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no rate-limit event in the stream yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T16:52:07.645Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "follow_on_paths": [
+          "contour_tree/node/z"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-every-unnamed-roster-row-ends-with-a-stated-cause",
+          "session_id": "83361f83-6235-4cc7-8cb6-e1a6a153946d",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T16:52:07.645Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 108.0,
+        "orientation_input_tokens": 5511054.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -145248,6 +145426,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2246
+    "_version": 2247
   }
 }
