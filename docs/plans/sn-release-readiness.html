@@ -607,6 +607,68 @@
   instruction.
 </p>
 
+<h2 id="s12c">&#167;12c &mdash; The empty-cohort no-op is a governed-edit route, and nothing else</h2>
+<p>
+  <strong>Measured 2026-09-17.</strong> This section's open question &mdash; whether the
+  deliberate empty-cohort no-op should refuse instead &mdash; is answered as far as it can be
+  without making the decision, and the answer narrows both sides of it. The no-op is not a
+  general tolerance for empty cohorts: it is reachable through exactly one disjunct,
+  <code>_allow_empty_noop = not authoritative_cohort_observed or bool(edit_mode)</code> at
+  <code>persist_refined_name</code> (<code>graph_ops.py:18952</code>). The first disjunct is dead,
+  because the preflight always projects <code>source_ids</code>, so
+  <code>authoritative_cohort_observed</code> is true whenever a row returns. What remains is
+  <code>edit_mode</code>, and only a governed edit sets it.
+</p>
+<p>
+  <strong>Observed, not inferred:</strong> driven with an empty preflight cohort and a governed
+  edit, the function returns normally &mdash; the same dict, one commit, no rollback, no
+  exception &mdash; and commits a successor carrying zero source edges; the migration is asked
+  to move an empty list and the post-migration check is satisfied by <code>0 == 0</code>. The
+  automated route on the same empty cohort raises
+  <code>AUTHORITATIVE_SOURCE_COHORT_EMPTY</code> and rolls back. A caller cannot tell a
+  grounded refine from an ungrounded one by anything it observes. Two tests now pin one branch
+  each; <code>2 passed, 1 warning in 6.25s</code>, exit 0.
+</p>
+<p>
+  <strong>The cost of a refusal is one call site, which is also the good news.</strong>
+  Production call sites of <code>persist_refined_name</code> number two:
+  <code>workers.py:7191</code>, which passes no <code>edit_mode</code> and therefore already
+  refuses, and <code>edit.py:3252</code>, the governed rename, which is the only caller the
+  no-op serves. Replacing the no-op with a refusal would change exactly one site's behaviour,
+  and it would <em>raise</em> there: nothing on the path catches
+  <code>RefinedNamePersistenceRefusal</code>, so it would propagate out of
+  <code>_apply_rename</code> through <code>apply_edit</code>, whose only <code>try</code>
+  carries a bare <code>finally</code>, and the <code>sn edit</code> command would fail rather
+  than return an <code>EditPlan</code>. Of the seven direct callers of
+  <code>retarget_standard_name_sources</code>, only <code>graph_ops.py:18952</code> ever passes
+  the waiver; the other six already refuse.
+</p>
+<p>
+  <strong>Live population, with controls that fire.</strong> Of 1,752 refined successors, 991
+  carry no source; 241 of those carry an <code>edit_mode</code> (148 <code>rename</code>, 93
+  <code>hint</code>), which is the route this section's question governs. The counting
+  predicate returns non-zero elsewhere on both axes: 761 refined successors <em>with</em> a
+  source, 1,350 non-refined identities without one, against 10,019 <code>StandardNameSource</code>
+  rows in a 5,130-name graph. Post-dating the guard merged at <code>5c6c015fb</code>
+  (09-01T19:17:55Z) the unsourced population is 131 &mdash; 94 <code>rename</code>, 1
+  <code>hint</code>, 36 with no <code>edit_mode</code> &mdash; and the governed bucket is the
+  one that grows by design, from 36 at the 2026-09-07 measurement to 94 today, against a
+  remainder that grew smaller over the same period (45 to 36) under a predicate that splits
+  <code>refine_reason</code> as well, so the two figures are the same axis measured twice
+  rather than a subtraction. The <code>edit_mode</code>-null remainder after that merge is
+  already explained: the runtime executed pre-fix code for three days (see
+  <code>unsourced-origin-verification.md</code>), so the window is a merge date and not an
+  effective date.
+</p>
+<p>
+  <strong>Recorded, not decided.</strong> No behaviour changed. The two live readings this
+  leaves for the coordinator are that refusing would make <code>sn edit</code> fail on a
+  successor the operator asked for when the predecessor happens to hold no source, and that
+  keeping it means a governed rename can keep minting ungrounded identities with nothing in
+  the returned value distinguishing them &mdash; 94 since 2026-09-07. Evidence:
+  <code>docs/evidence/sn-release-readiness/empty-cohort-no-op.md</code>.
+</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="unreviewed-in-first-release" data-choice="include-structural-only" data-by="Simon McIntosh" data-when="2026-08-23T08:42:13+00:00">
