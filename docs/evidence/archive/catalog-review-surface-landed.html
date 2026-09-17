@@ -135,6 +135,50 @@
       Full re-measurement of every asserted quantity, with verdicts and instruments:
       <a href="/imas-codex/evidence/catalog-review-surface/plan-figure-audit">plan figure audit</a>.
     </p>
+
+    <h2 id="traceability-of-the-writer">The traceability writer: a complete receipt, reachable, and never fired</h2>
+    <p>
+      Deliverable five was measured one layer below the question the plan asked. Not "does the
+      graph hold a receipt" but "does the writer that produces one set every field a reviewer
+      receipt needs, and does any production path reach it". Both halves are now answered, and
+      the second answer is the load-bearing one: <strong>the path exists and has never been
+      taken.</strong>
+    </p>
+    <p>
+      <code>mark_catalog_name_approved</code>
+      (<code>imas_codex/standard_names/promote.py:1627</code>) stamps
+      <code>catalog_pr_number</code>, <code>catalog_pr_url</code>,
+      <code>catalog_merge_commit_sha</code>, <code>catalog_reviewer_actor</code> and
+      <code>catalog_approved_at</code> in one <code>SET</code> on one <code>MATCH</code>, so no
+      reader can observe a request number without its URL, or an actor without its request. The
+      same statement carries the writer's gate &mdash; <code>name_stage IN
+      ['accepted','approved']</code>, <code>docs_stage = 'accepted'</code>,
+      <code>status</code> unset-or-<code>draft</code>, and not quarantined &mdash; so the write
+      and the condition it depends on cannot disagree, and a name failing the gate is refused
+      rather than silently reported approved.
+    </p>
+    <p>
+      <strong>Production reaches it, and that reachability has a silent branch worth stating.</strong>
+      <code>sn approve</code> (<code>imas_codex/cli/sn.py:5101</code>) calls
+      <code>run_approval</code> (<code>imas_codex/cli/sn.py:5262</code>), which is the only
+      caller of the writer's two call sites (<code>promote.py:1306</code> for an accepted
+      content edit, <code>promote.py:1388</code> for untouched-batch auto-ratification). But
+      when an <code>sn approve</code> invocation carries no merged-request metadata, all three
+      request fields are absent and the writer is skipped: the identity is reported accepted
+      with no catalog receipt at all. The actor is deliberately not part of that guard.
+    </p>
+    <p>
+      <strong>The single row naming an actor.</strong> The live census (5,130 rows,
+      2026-09-17) finds <code>catalog_reviewer_actor</code> on exactly one identity,
+      <code>net_power_due_to_ion_cyclotron_heating</code>, and <code>catalog_pr_number</code> on
+      none &mdash; a shape the writer's own tuple cannot produce, because it stamps the actor
+      and the request number together. That row carries <code>contested_at</code> and a null
+      <code>catalog_approved_at</code>, so its actor arrived through the contest writer and
+      outlives the contest that wrote it. Full record with every call site,
+      the four-line Cypher of the gate, and the census:
+      <a href="/imas-codex/evidence/catalog-review-surface/traceability-writer-reachability">the
+      traceability writer's receipt and reachability</a>.
+    </p>
   </main>
 </body>
 </html>

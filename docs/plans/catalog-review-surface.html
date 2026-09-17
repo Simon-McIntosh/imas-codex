@@ -163,6 +163,35 @@
     visibly shut until both land and a current export exists. Full record:
     <a href="/imas-codex/evidence/catalog-review-surface/rehearsal-aiming-check">aiming check</a>.</p>
 
+    <h2 id="s4c">§4c — The traceability writer, measured 2026-09-17</h2>
+    <p>
+      <strong>Deliverable five's writer is complete and reachable, and has never fired.</strong>
+      <code>mark_catalog_name_approved</code> (<code>standard_names/promote.py:1627</code>) sets
+      <code>catalog_pr_number</code>, <code>catalog_pr_url</code>,
+      <code>catalog_merge_commit_sha</code>, <code>catalog_reviewer_actor</code> and
+      <code>catalog_approved_at</code> in one <code>SET</code> on one <code>MATCH</code>, and the
+      same statement carries its gate (<code>name_stage IN ['accepted','approved']</code>,
+      <code>docs_stage = 'accepted'</code>, <code>status</code> unset-or-draft, not quarantined),
+      so an identity failing a precondition is refused rather than reported approved.
+    </p>
+    <p>
+      Production does reach it: <code>sn approve</code> (<code>cli/sn.py:5101</code>) calls
+      <code>run_approval</code> (<code>cli/sn.py:5262</code>), the sole caller of the writer's
+      two call sites (<code>promote.py:1306</code>, <code>promote.py:1388</code>). One silent
+      branch bounds the claim: an <code>sn approve</code> with no merged-request metadata skips
+      the writer entirely, so an accepted identity can carry no receipt.
+    </p>
+    <p>
+      Against the live graph on 2026-09-17 the census is 5,130 <code>StandardName</code> rows
+      with <code>catalog_pr_number</code> null on <strong>all</strong> of them and
+      <code>catalog_reviewer_actor</code> on exactly <strong>one</strong>
+      (<code>net_power_due_to_ion_cyclotron_heating</code>). That actor/number shape cannot be
+      this writer's product; it arrived through the contest writer and outlived the contest that
+      wrote it. Both halves of the writer's contract are now gated by tests. Record and call
+      sites: <a href="/imas-codex/evidence/catalog-review-surface/traceability-writer-reachability">traceability
+      writer — receipt and reachability</a>.
+    </p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="guard-posture" data-choice="report-never-rewrite" data-by="Simon McIntosh" data-when="2026-09-01T10:50:00+00:00">
