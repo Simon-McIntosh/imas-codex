@@ -28,7 +28,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.98">
-<meta name="plan-version" content="282">
+<meta name="plan-version" content="283">
 <meta name="plan-commits" content="72b7760c60ac307f641e7e8490b7f15e532d2104">
 <meta name="plan-artifacts" content="docs/evidence/sn-west-catalog-release/residue-currency.md,tests/standard_names/test_review_body_ledger_link.py">
 </head>
@@ -609,6 +609,9 @@ rows: 20   foldable-remaining: 0   unreconciled-runs: 0</pre><p><strong>Live poi
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260915T192606624558-review-of-n-swcr-four-grammar-invalid-sources-measure-the-recovery-rate" data-who="codex-rev-3" data-when="2026-09-15T19:34:29Z">
     <div class="r-comment-body"><p>Independent review re-verified: 5/5 dimensions, 84/100, 3 findings; records a wrong commit SHA in the source manifest and a 1580s compose run on the login node</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260915T192759891899-review-of-n-swcr-the-three-withheld-west-sources-are-resolved" data-who="codex-rev-4" data-when="2026-09-15T19:35:04Z">
+    <div class="r-comment-body"><p>Independent review re-verified: 5/5 dimensions, 85/100, 3 findings; one accepted binding, two guarded exclusions, calorimetry causality inferred</p></div>
 </div>
 <div class="r-comment" data-section="entry-gate" data-id="c-20260902T0822-review-pr-authority" data-who="Simon McIntosh" data-when="2026-09-02T08:22:00Z">
     <div class="r-comment-body">Authorized 2026-09-02: the rehearsal (sn-west-review-rehearsal, shipped) merged fork PR 3 as the reviewer stand-in, so fork main holds 409 unreviewed entries including a deliberately false pulse_duration description; before the rehearsal main held zero catalog entries. Restore the blank-main baseline by reverting the PR 3 merge on the fork (git revert -m 1, history kept), then cut a fresh RC from the clean graph with sn release --batch and open the review PR on the fork for the physicist. Upstream stays untouched. This PR is the entry to this plan's human disposition.</div>
