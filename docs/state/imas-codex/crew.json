@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T23:37:31",
+  "updated": "2026-09-17T23:39:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -149607,6 +149607,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T203408967542-sli-the-successor-survives-without-the-scalar",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "sli-the-successor-survives-without-the-scalar",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1696,
+                "cached_input_tokens": 683561,
+                "input_tokens": 685259,
+                "output_tokens": 1907,
+                "reasoning_output_tokens": 1240,
+                "total_tokens": 687166,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "ceb4c66b-622b-4e72-83de-68acdb6fae2e",
+            "session_id": "ship-s10-20260917"
+          },
+          "done_when": "a captured log enumerates every source location that reads superseded_by and reports for the 2163 superseded names how many have a successor derivable from the change ledger or a REFINED_FROM edge without consulting the scalar and how many have none by any route, the two summing to 2163, measured against the 2145 null-scalar and 517 no-successor figures recorded on 2026-09-17, with a positive control returning non-zero beside any zero",
+          "estimated_hours": null,
+          "goal": "prove the successor of a superseded name is derivable without the superseded_by scalar before that scalar is removed",
+          "id": "sli-the-successor-survives-without-the-scalar",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T20:34:09Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T203408967542-sli-the-successor-survives-without-the-scalar/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-lifecycle-integrity/successor-without-the-scalar.md",
+            "docs/figures/sn-lifecycle-integrity/successor-without-the-scalar.svg",
+            "docs/plans/sn-lifecycle-integrity.html",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s10c-local",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T20:34:14Z",
+        "completed_at": "2026-09-17T21:33:39.870Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3470,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3565,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "b662e21654e42d4ce5f1d255eb987621707f3a2d",
+        "commits": [
+          "8069b543a27a674f2c43ce798dcf8b2e9efa5a71",
+          "8962770fcd35f7bceaac4edb3df0f83db43d21ce"
+        ],
+        "changed_lines": {
+          "added": 148,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "coordinator re-derivation of every population figure against the live graph, independent of the worker",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "superseded=2163 has_refined_from=1641 no_refined_from=522 scalar_set=18 scalar_only=3 refined_from=1850 has_successor=48; no-route resolves 519 lacking edge+scalar of which 2 carry HAS_SUCCESSOR leaving 517 \u2014 all reproduced"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "The prerequisite for retiring the superseded_by scalar is measured and met: the successor is reachable without it for all but three of the 2,163 superseded names, and those three are nameable in advance rather than discovered afterwards. The finding that reframes the beat is that the mirror was lossy in the opposite direction to the one assumed - the scalar is cardinality-one while the lineage edge is cardinality-many, so 1,641 names the scalar never described are described by the edge. Retiring it loses three pointers and recovers a fuller record. All seven figures re-derived independently and reproduced; one apparent discrepancy in the no-route count was my own incomplete query rather than the worker's error.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T203408967542-sli-the-successor-survives-without-the-scalar/manifest.md",
+        "scope_changed": false,
+        "session_id": "1cf4033c-198b-43d4-8a37-6e4cdf84bffd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6885882,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 39871,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T21:33:39.870Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7048321,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3560.229,
+          "generated_tokens": 50665,
+          "generation_seconds": 3462.824,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 33.0,
+          "machine_seconds": 97.405,
+          "peak_input_tokens": 158435,
+          "tokens_per_second": 14.63,
+          "wall_tokens_per_second": 14.23
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260917/sli-the-successor-survives-without-the-scalar",
+          "session_id": "1cf4033c-198b-43d4-8a37-6e4cdf84bffd",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T21:33:39.870Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 55.0,
+        "orientation_input_tokens": 3987570.0,
+        "store_write": {
+          "status": "failed",
+          "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
+        }
       }
     ],
     "holds": [
@@ -149877,6 +150080,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2272
+    "_version": 2273
   }
 }
