@@ -740,6 +740,40 @@
       node owned, nothing merged or pushed, and nothing calls the function
       automatically.</p>
   </section>
+  <section id="unchanged-resubmission-rotation">
+    <h2>An unchanged resubmission returns the rotation it did not spend</h2>
+    <p>The rotation budget exists to buy improvement attempts, and the refine pool
+    charges one when it <em>claims</em> a name — before any model call. A pinned
+    rename (<code>edit_mode='rename'</code>) carries an operator-chosen string that
+    the pool never rewrites; it routes the same name back to a fresh review quorum
+    and produces no candidate. Left alone, that charge walks
+    <code>refine_attempts</code> to the rotation cap, and the cap is also the
+    eligibility gate, so a name whose only consumer is the re-review loop stops
+    being claimed at 3 of 3 on resubmissions alone.</p>
+    <p>The pinned-rename branch of <code>process_refine_name_batch</code> now returns
+    the rotation, fenced on the same claim token and <code>'refining'</code> stage the
+    resubmission checks, so it is given back only while the claim that charged it is
+    still live. The ordinary identical-spelling path is deliberately untouched: its
+    terminal handling exists to stop a paid loop, and returning the rotation there
+    would make the stop query read a zero counter and re-open that loop.</p>
+    <table>
+      <thead>
+        <tr><th>Measure</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Reproduction, return disabled</td><td>1 failed, exit 1 — <code>assert graph.rotation_returns == 1</code> reads <code>assert 0 == 1</code></td></tr>
+        <tr><td>Reproduction, return enabled</td><td>1 passed, exit 0; the same selection across the new file and three adjacent refine suites is 80 passed at exit 0</td></tr>
+        <tr><td>Identities at the 3-rotation cap</td><td>293, using the eligibility gate's own predicate</td></tr>
+        <tr><td>…carrying at least one unchanged resubmission</td><td>11, every one a pinned rename at 3 of 3</td></tr>
+        <tr><td>Controls</td><td>The same counters read 1284, 396, 31 and 493 on populations known present, and 0 on a deliberately unsatisfiable filter</td></tr>
+      </tbody>
+    </table>
+    <p>Full census, the reproduction receipts and the named test are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/unchanged-refine-attempt">the
+    unchanged-resubmission evidence record</a>, committed as <strong>5e8e7bfd6</strong>
+    (<code>imas_codex/standard_names/workers.py</code> and
+    <code>tests/standard_names/test_unchanged_refine_attempt.py</code>).</p>
+  </section>
 </main>
 </body>
 </html>
