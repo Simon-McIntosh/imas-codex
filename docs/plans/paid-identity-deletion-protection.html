@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-commits" content="ec9ffff58e52af06b454987705ee4f88bfa14358,33361a5354b03e1f3a56f0cb626157cb1139dca0,2e0c1b534ac98f490780f7d9b2de7e5d8a24eb7f,f11e43096b10f2a5f55466e3f82e03b1ff080688,b22d348610f58b624ef9b8448b9c721279600e54,057a04786654db8ce7a5b79b77d3b53d110fa9f6,7a89fca35428cd1e2cd4fb9524bb991ff632209f,992f0a09a3beb0bc1c12f75df0e5581a6d542055,a7dc412751a84950bc06badb6d0cbf2b5db86457,07b06c04c68a2470f36e5176dbc5995949c345dc,b324ff33a41feee9f21c5e16efb2f57b87d7a587">
 <meta name="plan-artifacts" content="docs/evidence/sn-lifecycle-integrity/delete-path-protections.md,docs/evidence/sn-lifecycle-integrity/unshielded-identity-deletions.md,docs/evidence/sn-lifecycle-integrity/mirrored-state-review.md,docs/evidence/paid-identity-deletion-protection/removed-cohort.md,docs/evidence/paid-identity-deletion-protection/restore-reuse-map.md,docs/evidence/paid-identity-deletion-protection/undispositioned-deletions.md,docs/evidence/paid-identity-deletion-protection/origin-label-audit.md,docs/evidence/paid-identity-deletion-protection/false-origin-relabel.md">
 <meta name="plan-impl" content="0.95">
@@ -939,6 +939,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260917T103407462401-review-of-n-audit-paid-identity-deletion-protection-headline-figures-are-remeasured" data-who="reckon-ship" data-when="2026-09-17T12:07:53.462Z">
     <div class="r-comment-body"><p>Independent review stored and re-verified: 5/5 dimensions, absent none, stored scores match reparse.</p></div>
+</div>
+<div class="r-comment" data-section="§4" data-id="c-run-r-20260917T151101285508-restore-receipt-records-roles-per-identity" data-who="restore-receipt-roles" data-when="2026-09-17">
+    <div class="r-comment-body"><p><strong>The restore receipt now says which roles came back, per identity, and names the roles no reconstruction route exists for.</strong> The parity guard already <strong>tallied per identity</strong> and then threw the tally away, so a successful restore recorded only how many rows moved. The receipt now carries <code>identity_roles</code> on both the preview and the applied path, with a <code>reinstated</code> per-type tally and an <code>unreinstatable</code> one.</p><table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody><tr><td>gate <code>test_archive_reconstruction.py</code></td><td><strong>13 passed</strong> (10 pre-existing + 3 added)</td></tr><tr><td>reproduction at the base revision</td><td><strong>2 failed</strong>, both <code>KeyError: 'identity_roles'</code></td></tr><tr><td>registry coverage of the 35 incident roles</td><td><strong>34 routable</strong>; <code>EVIDENCED_BY</code> has no route and is now named unreinstatable</td></tr><tr><td>spend</td><td><strong>$0</strong></td></tr></tbody></table><p><strong>The archived counts enter through an optional authority field because an unroutable role cannot be an edge.</strong> The loader refuses any edge outside the registry and an existing test asserts that refusal must stand, so asking for parity over the registry alone would have made a real loss invisible — the shape of exactly the failure this plan exists to name.</p><p>Anchored landing: <a href="/imas-codex/evidence/archive/paid-identity-deletion-protection-landed.html#restore-receipt-records-roles-per-identity">the cumulative execution record</a>. Full evidence: <a href="/imas-codex/evidence/paid-identity-deletion-protection/restore-receipt-roles.md">the restore receipt evidence</a>.</p></div>
 </div>
 </section>
 </main>

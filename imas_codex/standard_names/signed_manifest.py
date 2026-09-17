@@ -322,6 +322,7 @@ class _ArchiveReconstructionAuthority:
     nodes: tuple[dict[str, Any], ...]
     counterparts: tuple[dict[str, Any], ...]
     edges: tuple[dict[str, Any], ...]
+    archive_roles: dict[str, dict[str, int]]
     file_sha256: str
     payload_sha256: str
 
@@ -6892,6 +6893,55 @@ def _apply_lifecycleless_stub_reconcile(
             client.close()
 
 
+def _load_archive_role_counts(
+    raw: Any,
+    *,
+    node_ids: list[str],
+    edge_counts: dict[tuple[str, str], int],
+) -> dict[str, dict[str, int]]:
+    """Read the archive record's per-identity incident role counts.
+
+    Every role the archive record names survives into the receipt: a role the
+    registry has no route for is reported as unreinstatable rather than dropped,
+    and a registry role the reconstruction edges do not cover is refused because
+    the archive held more of it than this restore can put back.
+    """
+    if not isinstance(raw, dict):
+        raise SignedManifestAuthorityError(
+            "archive reconstruction archive_roles must be an object"
+        )
+    roles_by_identity: dict[str, dict[str, int]] = {}
+    for identity, roles in raw.items():
+        if identity not in node_ids:
+            raise SignedManifestAuthorityError(
+                "archive_roles must name a reconstruction identity"
+            )
+        if not isinstance(roles, dict):
+            raise SignedManifestAuthorityError(
+                "archive reconstruction archive identity roles must be an object"
+            )
+        counts: dict[str, int] = {}
+        for role, count in roles.items():
+            if not isinstance(role, str) or not role:
+                raise SignedManifestAuthorityError(
+                    "archive reconstruction archived role must be a non-empty name"
+                )
+            if isinstance(count, bool) or not isinstance(count, int) or count < 0:
+                raise SignedManifestAuthorityError(
+                    f"archive reconstruction archived role count must be a non-negative integer: {role}"
+                )
+            reconstructable = edge_counts.get((identity, role), 0)
+            if role in _ARCHIVE_EDGE_COUNTERPARTS and reconstructable < count:
+                raise SignedManifestAuthorityError(
+                    "archive reconstruction cannot reinstate an archived role the "
+                    f"edges do not cover: {role} holds {count} in the archive and "
+                    f"{reconstructable} in the reconstruction edges"
+                )
+            counts[role] = count
+        roles_by_identity[identity] = counts
+    return roles_by_identity
+
+
 def _load_archive_reconstruction_authority(
     path: str | Path,
     *,
@@ -7038,6 +7088,13 @@ def _load_archive_reconstruction_authority(
         raise SignedManifestAuthorityError(
             "archive reconstruction counterpart must occur in an allowlisted edge"
         )
+    edge_counts: dict[tuple[str, str], int] = {}
+    for edge in normalized_edges:
+        key = (edge["owner_id"], edge["relationship_type"])
+        edge_counts[key] = edge_counts.get(key, 0) + 1
+    archive_roles = _load_archive_role_counts(
+        data.get("archive_roles", {}), node_ids=node_ids, edge_counts=edge_counts
+    )
     operation_id = str(data.get("operation_id") or "")
     if not operation_id:
         raise SignedManifestAuthorityError(
@@ -7048,6 +7105,7 @@ def _load_archive_reconstruction_authority(
         nodes=tuple(sorted(normalized_nodes, key=lambda node: node["id"])),
         counterparts=tuple(sorted(normalized_counterparts, key=_canonical_bytes)),
         edges=tuple(sorted(normalized_edges, key=_canonical_bytes)),
+        archive_roles=archive_roles,
         file_sha256=file_sha256,
         payload_sha256=payload_sha256,
     )
@@ -7139,6 +7197,41 @@ def _archive_edge_counts(query: _Query, node_id: str) -> dict[str, int]:
     return {str(row["relationship_type"]): int(row["count"]) for row in rows}
 
 
+def _archive_role_outcomes(
+    authority: _ArchiveReconstructionAuthority,
+    reinstated: dict[str, dict[str, int]],
+) -> dict[str, dict[str, dict[str, int]]]:
+    """Per-identity role tally for the reconstruction receipt.
+
+    ``reinstated`` holds the live per-type count the parity guard read, keyed by
+    identity, and is empty on a preview where no role came back. Every role the
+    archive record names is accounted for: one the registry has no
+    reconstruction route for is reported as unreinstatable rather than dropped.
+    """
+    outcomes: dict[str, dict[str, dict[str, int]]] = {}
+    for node in authority.nodes:
+        identity = node["id"]
+        live = {
+            role: count for role, count in reinstated.get(identity, {}).items() if count
+        }
+        archived = authority.archive_roles.get(identity)
+        if archived is None:
+            reinstated_roles = live
+            unreinstatable: dict[str, int] = {}
+        else:
+            reinstated_roles = {role: live[role] for role in archived if role in live}
+            unreinstatable = {
+                role: count
+                for role, count in archived.items()
+                if role not in _ARCHIVE_EDGE_COUNTERPARTS
+            }
+        outcomes[identity] = {
+            "reinstated": reinstated_roles,
+            "unreinstatable": unreinstatable,
+        }
+    return outcomes
+
+
 def _apply_archive_reconstruction(
     authority_path: str | Path,
     *,
@@ -7202,6 +7295,7 @@ def _apply_archive_reconstruction(
                         "changed": 0,
                         "would_change": 0 if refusals else len(authority.nodes),
                         "counts": counts,
+                        "identity_roles": _archive_role_outcomes(authority, {}),
                         "refusals": refusals,
                         "manifest": manifest,
                         "manifest_sha256": digest,
@@ -7266,15 +7360,18 @@ def _apply_archive_reconstruction(
                         raise SignedManifestConflict(
                             "archive relationship counterpart changed before reconstruction"
                         )
+                reinstated: dict[str, dict[str, int]] = {}
                 for node in authority.nodes:
                     expected = dict.fromkeys(_ARCHIVE_EDGE_COUNTERPARTS, 0)
                     for edge in authority.edges:
                         if edge["owner_id"] == node["id"]:
                             expected[edge["relationship_type"]] += 1
-                    if _archive_edge_counts(query, node["id"]) != expected:
+                    live = _archive_edge_counts(query, node["id"])
+                    if live != expected:
                         raise SignedManifestConflict(
                             "archive-versus-live relationship counts differ"
                         )
+                    reinstated[node["id"]] = live
                 transaction.commit()
                 return {
                     "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
@@ -7286,6 +7383,7 @@ def _apply_archive_reconstruction(
                         + len(authority.edges)
                     ),
                     "counts": counts,
+                    "identity_roles": _archive_role_outcomes(authority, reinstated),
                     "refusals": [],
                     "manifest_sha256": digest,
                 }

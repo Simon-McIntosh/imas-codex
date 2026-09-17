@@ -121,6 +121,7 @@ class _ArchiveGraph:
 def _authority(
     edges: list[dict[str, Any]] | None = None,
     counterparts: list[dict[str, Any]] | None = None,
+    archive_roles: dict[str, dict[str, int]] | None = None,
 ) -> dict[str, Any]:
     authority = {
         "schema": "imas-codex.archive-reconstruction.v1",
@@ -151,6 +152,8 @@ def _authority(
     }
     if counterparts is not None:
         authority["counterparts"] = counterparts
+    if archive_roles is not None:
+        authority["archive_roles"] = archive_roles
     authority["signature"] = {
         "canonicalization": "json-sort-keys-v1",
         "sha256": signed_payload_sha256(authority),
@@ -510,3 +513,65 @@ def test_archive_reconstruction_refuses_archive_live_edge_count_mismatch(
 
     with pytest.raises(SignedManifestConflict, match="relationship counts differ"):
         _apply(graph, path, file_hash, payload_hash, preview["manifest_sha256"])
+
+
+def test_archive_reconstruction_receipt_records_reinstated_roles_per_identity(
+    tmp_path: Path,
+) -> None:
+    graph = _ArchiveGraph()
+    path = tmp_path / "authority.json"
+    file_hash, payload_hash = _write_authority(
+        path, _authority(archive_roles={"archived_temperature": {"HAS_UNIT": 1}})
+    )
+
+    preview = _preview(graph, path, file_hash, payload_hash)
+    applied = _apply(graph, path, file_hash, payload_hash, preview["manifest_sha256"])
+
+    assert preview["identity_roles"] == {
+        "archived_temperature": {"reinstated": {}, "unreinstatable": {}}
+    }
+    assert applied["identity_roles"] == {
+        "archived_temperature": {"reinstated": {"HAS_UNIT": 1}, "unreinstatable": {}}
+    }
+
+
+def test_archive_reconstruction_receipt_names_unreinstatable_archived_roles(
+    tmp_path: Path,
+) -> None:
+    """A role with no reconstruction route is reported, not silently dropped."""
+    graph = _ArchiveGraph()
+    path = tmp_path / "authority.json"
+    file_hash, payload_hash = _write_authority(
+        path,
+        _authority(
+            archive_roles={"archived_temperature": {"HAS_UNIT": 1, "EVIDENCED_BY": 2}}
+        ),
+    )
+
+    preview = _preview(graph, path, file_hash, payload_hash)
+    applied = _apply(graph, path, file_hash, payload_hash, preview["manifest_sha256"])
+
+    roles = applied["identity_roles"]["archived_temperature"]
+    assert roles["unreinstatable"] == {"EVIDENCED_BY": 2}
+    assert roles["reinstated"] == {"HAS_UNIT": 1}
+    assert preview["identity_roles"]["archived_temperature"]["unreinstatable"] == {
+        "EVIDENCED_BY": 2
+    }
+    assert all(
+        relationship_type != "EVIDENCED_BY"
+        for _, relationship_type, _, _ in graph.edges
+    )
+
+
+def test_archive_reconstruction_refuses_archived_role_beyond_reconstruction_edges(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "authority.json"
+    file_hash, payload_hash = _write_authority(
+        path, _authority(archive_roles={"archived_temperature": {"HAS_UNIT": 2}})
+    )
+
+    with pytest.raises(
+        SignedManifestAuthorityError, match="cannot reinstate an archived role"
+    ):
+        _preview(_ArchiveGraph(), path, file_hash, payload_hash)
