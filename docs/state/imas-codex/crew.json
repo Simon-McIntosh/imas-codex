@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T23:08:56",
+  "updated": "2026-09-17T23:11:50",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -148823,6 +148823,183 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T200819277089-n-the-architecture-doc-names-the-command-that-owns-deployment",
+        "plan": "sn-release-readiness",
+        "section": "\u00a71",
+        "node": "n-the-architecture-doc-names-the-command-that-owns-deployment",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 890,
+                "cached_input_tokens": 323533,
+                "input_tokens": 324425,
+                "output_tokens": 647,
+                "reasoning_output_tokens": 323,
+                "total_tokens": 325072,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "docs/architecture/services.md no longer instructs a reader to submit the temporary file that its own submission path deletes; the replacement names the command established by reading the code, with that command's usage line quoted verbatim from the source that defines it; the evidence records every other path the document asserts together with whether each one exists on disk today, so the document is checked as a whole rather than at one line",
+          "estimated_hours": 0.5,
+          "goal": "Point the architecture document's compute-node deployment instruction at the command that now owns it",
+          "id": "n-the-architecture-doc-names-the-command-that-owns-deployment",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T20:08:20Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/manifests/archdoc.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/architecture/services.md",
+            "docs/evidence/sn-release-readiness/architecture-doc-paths.md",
+            "docs/evidence/archive/sn-release-readiness-landed.html",
+            "docs/plans/sn-release-readiness.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T20:08:28Z",
+        "completed_at": "2026-09-17T21:08:26.684Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3569,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3598,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "4ba57a134b15849389a85ae5e9e115423b81c728",
+        "commits": [
+          "10c431329bfad269344b42ab0b514e9fc2de8a88",
+          "5c4f1278772e3b13fc726ba2ec995398b61aa44d"
+        ],
+        "changed_lines": {
+          "added": 378,
+          "removed": 6,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "19 path and source assertions, 13 command invocations and 5 external tools checked against the repository; each usage line captured by running the command",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/manifests/archdoc.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/manifests/archdoc.md",
+        "scope_changed": false,
+        "session_id": "0037a193-399c-4458-966d-ed8c34855a65",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T21:08:26.684Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-architecture-doc-names-the-command-that-owns-deployment",
+          "session_id": "0037a193-399c-4458-966d-ed8c34855a65",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T21:08:26.684Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 120.0,
+        "orientation_input_tokens": 4712248.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -149093,6 +149270,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2268
+    "_version": 2269
   }
 }
