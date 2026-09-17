@@ -93,6 +93,37 @@
     <a href="/imas-codex/paid-identity-deletion-protection">the deletion-protection plan</a>; this
     plan owns the sources that never had a name in the first place.</p>
 
+    <h2 id="s5">&sect;5 &mdash; The headline figures re-measured, and the reason-less skip backlog is already closed</h2>
+
+    <p>Re-measured read-only on 2026-09-17 at
+    <code>5ea0d73b441b6991fc29b9dbb03e13bc5b63b43c</code>. Sixteen asserted quantities
+    were re-read from the live graph: <strong>4 current, 11 drifted, 1 stale</strong>.
+    The census is no longer 9,900 sources but <strong>10,019</strong>, of which
+    <strong>5,393</strong> are bound through <code>PRODUCED_NAME</code> and
+    <strong>4,626</strong> are not. The plan's central framing survives: 1,737
+    <code>stale</code> and 10 <code>not_physical_quantity</code> rows are mechanism, not
+    backlog, so the work proper is <strong>2,879</strong> rows rather than the 4,626 the
+    unbound total suggests &mdash; still an overstatement of roughly a third.</p>
+
+    <p><strong>The first beat is already complete.</strong> The 398 reason-less skipped
+    sources are frozen &mdash; their <code>skipped_at</code> spans 2026-06-17 to
+    2026-07-28 and <strong>zero</strong> were added after this plan's write date &mdash;
+    and the roster mechanism &sect;3 names was replaced the same day by
+    <code>e20817e41</code>, which reads <code>last_error</code> and emits the explicit
+    sentinel <code>&quot;cause not recorded&quot;</code> instead of a blank field. The
+    line reference <code>graph_ops.py:12324</code> has moved to lines 12441&ndash;12462.
+    What remains of &sect;3 is not work: 397 of the 398 rows have no surviving evidence on
+    any of <code>skip_reason</code>, <code>skip_reason_detail</code> or
+    <code>last_error</code>, so the read-time sentinel already carries the honest
+    unknown.</p>
+
+    <p>Two figures moved enough to change sequencing. The <code>extracted</code>-unbound
+    cohort grew from 1,283 to <strong>1,359</strong>, which is the &sect;2 composition
+    ceiling; and the export-side producer predicate and manifest-generability invariant
+    are now the live risk, not the skip write path. Remaining engineering is restated at
+    <strong>7 worker-hours</strong>, down from 10.0. Full row set, queries and code reads:
+    <a href="/imas-codex/evidence/unbound-source-backlog/plan-figure-audit">plan-figure-audit.md</a>.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="skip-reason-enforcement" data-choice="" data-by="" data-when="">
