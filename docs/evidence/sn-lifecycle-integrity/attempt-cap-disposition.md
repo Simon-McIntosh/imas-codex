@@ -70,6 +70,53 @@ RETURN sns.id AS id, sns.parked_disposition AS disposition
 ORDER BY sns.id
 ```
 
+## The writer records it as it parks
+
+The operation that parks a source now writes the disposition for it, so the
+cohort does not depend on a later pass. `record_parked_dispositions` is the one
+classify-and-write step; the reconcile pass and the sweep tick both call it, so
+the precedence above exists once. When the sweep's park statement parks at least
+one row, the tick follows it with a read scoped by the reason the writer itself
+writes and by the absence of the disposition:
+
+```cypher
+MATCH (sns:StandardNameSource)
+WHERE sns.status = 'failed'
+  AND sns.last_error = $cap_reason
+  AND sns.parked_disposition IS NULL
+OPTIONAL MATCH (node:IMASNode {id: sns.source_id})
+RETURN sns.id AS id, sns.last_error AS last_error,
+       node.lifecycle_status AS lifecycle_status,
+       size([(sns)-[:PRODUCED_NAME]->(:StandardName) | 1]) AS produced,
+       node.node_category AS node_category
+ORDER BY sns.id
+```
+
+The tick stamps every row that read returns. A tick that parks nothing issues
+neither the read nor a write, so the pairing costs one query only on a tick that
+parks something.
+
+![The parking writer's disposition path, before and after the change](/imas-codex/figures/attempt-cap-disposition/writer-path.svg)
+
+### The live check
+
+Measured against the live graph on 2026-09-17. One row
+(`dd:camera_x_rays/camera/camera_dimensions`) was picked out of the cohort and
+its disposition removed, which is what a freshly parked row looks like. The
+writer's own read then returned exactly that row with the evidence it holds —
+the cap sentence as its reason, no lifecycle removal, `produced` 0 and
+`node_category` quantity — the stamp path wrote one row, and the property read
+back off the graph as `cause_not_recorded`. The census before and after the
+strip are identical: 234 parked, 0 unclassified, 0 unexpected, distribution
+unchanged at `name_produced` 164, `cause_not_recorded` 30,
+`compose_not_applicable` 21, `upstream_quantity_removed` 18, `vocabulary_gap` 1.
+
+The strip is the instrument: with the property removed, the census reports the
+row unclassified and the writer's own read sees it. The function exercised live
+is the same one the tick calls with the same predicate; the tick's wiring of it
+is what the stubbed tests cover, and no live parking event was synthesized to
+drive the tick end to end.
+
 ## The refusal
 
 `disposition_parked_sources` raises before writing anything when a row has no
@@ -77,7 +124,7 @@ place in the closed set, and `census_parked_dispositions` reads the stored
 property back rather than the values this process just computed, so the census
 is a statement about the write and not about the classifier that produced it.
 
-Five tests live in `tests/standard_names/test_attempt_cap_disposition.py`. The
+Eight tests live in `tests/standard_names/test_attempt_cap_disposition.py`. The
 one that fails when the classification is removed is
 `test_pass_refuses_a_row_the_classifier_cannot_place`: it replaces
 `classify_parked_source` with a classifier that returns the empty string and
@@ -86,23 +133,38 @@ the test instead of parking an unclassified row, and
 `test_each_class_is_a_member_and_is_reached` fails if the closed set and the
 cases it asserts ever disagree.
 
+Three tests drive the sweep's own park path:
+`test_parking_writer_stamps_a_disposition_as_it_parks` parks two rows with
+different evidence and asserts each arrives with a member of the closed set
+classified from its own row, `test_parking_writer_writes_nothing_when_it_parks_nothing`
+asserts the read and the write are both skipped on a tick that parks nothing,
+and `test_parking_writer_refuses_a_row_it_cannot_place` asserts the tick raises
+with no write when a row has no place in the set. The first fails against the
+writer as it was, which issued no disposition write at all, so it measures the
+new write path and not the classifier alone.
+
 ## What this does not establish
 
-The pass classifies the cohort as found and nothing more: it does not raise the
-cap, revive a source or delete a row. `orphan_sweep.py` still writes the bare
-sentence when it parks a source, and that file is outside this node's scope, so
-a row parked after this run carries no disposition until the pass runs again.
-The 30 `cause_not_recorded` rows measure that gap today: 25 carry only the cap
-sentence and 5 carry nothing at all, and neither can be triaged further from
-evidence the row itself holds. `attempt_budget_exhausted` is the one class with
-no members in this cohort, so no parked source is a revival candidate on the
-evidence stored, and no row was revived.
+The disposition states the row's triage class and nothing more: no pass here
+raises the cap, revives a source or deletes a row, and no row was revived. The
+30 `cause_not_recorded` rows are the standing gap that remains: 25 carry only
+the cap sentence and 5 carry nothing at all, so no evidence the row itself holds
+can place them further, and the only repair is a write path that records a cause
+where one exists. `attempt_budget_exhausted` is the one class with no members in
+this cohort, so no parked source is a revival candidate on the evidence stored.
+
+The refusal in the writer's path is unreachable today, because the classifier is
+total over the evidence shape the park statement produces. If it ever fired,
+the row would already be parked and the failing tick would leave it undisposed
+until the reconcile pass runs; the sweep loop logs the exception and continues.
 
 ## Artifacts
 
 | item | value |
 |---|---|
-| code | `imas_codex/standard_names/graph_ops.py` at commit ffa0c9359 |
-| tests | `tests/standard_names/test_attempt_cap_disposition.py`, 5 passed |
+| code | `imas_codex/standard_names/graph_ops.py` and `imas_codex/standard_names/orphan_sweep.py` |
+| tests | `tests/standard_names/test_attempt_cap_disposition.py`, 8 passed; `tests/standard_names/test_orphan_sweep.py`, 13 passed |
+| writer path figure | `docs/figures/attempt-cap-disposition/writer-path.svg` |
 | pass and census output | run directory `scratch/disposition2.log` |
+| live writer check | run directory `scratch/writer_proof.log` |
 | reason breakdown | run directory `scratch/breakdown.log` |
