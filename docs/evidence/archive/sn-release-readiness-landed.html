@@ -245,6 +245,102 @@
       <figcaption class="cap">Partition of the unsourced chain-cap cohort by recoverability.</figcaption>
     </figure>
 
+    <h2 id="endpoint-drop-distinguishable">An endpoint drop is not distinguishable from a model refusal</h2>
+
+    <p>
+      Benchmark composition calls the LLM layer once per batch with
+      <code>benchmark.py:1647 max_retries=2</code>, which the loop at
+      <code>llm.py:2393</code> reads as two provider attempts at most, gated on
+      whether the error message matches a retryable token
+      (<code>llm.py:2473</code>, tokens at <code>llm.py:645-672</code>). Measured
+      along that path (<code>/tmp/endpoint-drop/probe.log</code>, exit 0):
+      a connection refusal is <strong>not retried</strong> and reports after one
+      attempt; a timeout is retried once and reports after two; a model refusal
+      - a provider response that arrives and cannot be parsed - also reports
+      after two. The three terminal exceptions <em>drops</em> differ - from each
+      other and by type, since <code>LLMStructuredCallError</code> carries
+      <code>response_count</code> - and the distinction survives only as log
+      prose. Every one of them reaches
+      <code>benchmark.py:1688</code>, which catches <code>Exception</code> and
+      keeps <code>result.batch_errors += 1</code>.
+    </p>
+
+    <p>
+      A test drives composition against a simulated endpoint drop and against a
+      simulated model refusal and asserts the recorded outcome names which
+      occurred: <strong>3 failed, exit 1</strong> before the change
+      (<code>/tmp/endpoint-drop/test_before.log</code>) and
+      <strong>3 passed, exit 0</strong> after it
+      (<code>/tmp/endpoint-drop/test_after.log</code>), with the existing
+      benchmark suite at 82 passed on both sides. The change that makes them
+      distinguishable is a candidate patch, reproduced in
+      <a href="/imas-codex/evidence/sn-release-readiness/endpoint-drop-distinguishable.md">the
+      evidence document</a> and <strong>not landed here</strong>: this node's
+      write fence is documentation only, so <code>benchmark.py</code> and the
+      test file fall outside it and a follow-on implementation node owns them.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 760 330" role="img"
+           alt="Three failure sequences - a connection refusal with one attempt, a timeout with two attempts, and a model refusal with two responses - converging on one identical recorded ModelResult row.">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(136,136,136)"/>
+          </marker>
+        </defs>
+        <text class="cap" x="0" y="12">Provider attempts along the compose path, and what the artifact keeps</text>
+        <line class="rule" x1="0" y1="22" x2="760" y2="22"/>
+
+        <text x="0" y="46" font-size="13">endpoint drop</text>
+        <text x="0" y="60" font-size="11">connection refused: not retried</text>
+        <rect x="196" y="34" width="96" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="204" y="51" font-size="11">attempt 1</text>
+        <line x1="292" y1="47" x2="352" y2="47" stroke="rgb(136,136,136)" marker-end="url(#arrow)"/>
+        <rect x="352" y="34" width="150" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="360" y="51" font-size="11">ConnectionError</text>
+        <text x="512" y="51" font-size="11">1 attempt</text>
+
+        <text x="0" y="96" font-size="13">endpoint drop</text>
+        <text x="0" y="110" font-size="11">timeout: retried once</text>
+        <rect x="196" y="84" width="96" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="204" y="101" font-size="11">attempt 1</text>
+        <line x1="292" y1="97" x2="326" y2="97" stroke="rgb(136,136,136)" marker-end="url(#arrow)"/>
+        <text x="298" y="90" font-size="10">backoff</text>
+        <rect x="326" y="84" width="96" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="334" y="101" font-size="11">attempt 2</text>
+        <line x1="422" y1="97" x2="452" y2="97" stroke="rgb(136,136,136)" marker-end="url(#arrow)"/>
+        <rect x="452" y="84" width="160" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="460" y="101" font-size="11">ValueError, 0 responses</text>
+        <text x="622" y="101" font-size="11">2 attempts</text>
+
+        <text x="0" y="146" font-size="13">model refusal</text>
+        <text x="0" y="160" font-size="11">response arrives, unusable</text>
+        <rect x="196" y="134" width="96" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="204" y="151" font-size="11">attempt 1</text>
+        <line x1="292" y1="147" x2="326" y2="147" stroke="rgb(136,136,136)" marker-end="url(#arrow)"/>
+        <rect x="326" y="134" width="96" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="334" y="151" font-size="11">attempt 2</text>
+        <line x1="422" y1="147" x2="452" y2="147" stroke="rgb(136,136,136)" marker-end="url(#arrow)"/>
+        <rect x="452" y="134" width="200" height="26" fill="none" stroke="rgb(136,136,136)"/>
+        <text x="460" y="151" font-size="11">StructuredCallError, 2 responses</text>
+        <text x="662" y="151" font-size="11">2 attempts</text>
+
+        <line class="rule" x1="0" y1="182" x2="760" y2="182"/>
+        <text x="0" y="204" font-size="12">All three reach benchmark.py:1688, which catches Exception and keeps the count alone.</text>
+
+        <rect x="196" y="218" width="456" height="52" fill="none" stroke="rgb(68,68,68)"/>
+        <text x="206" y="240" font-size="12">ModelResult</text>
+        <text x="206" y="258" font-size="12">batch_errors = 1, and no field naming the cause</text>
+        <text x="0" y="240" font-size="12">recorded</text>
+        <text x="0" y="258" font-size="12">outcome</text>
+
+        <text class="cap" x="0" y="296">Measured 2026-09-17 at b7da33157 by driving the real retry loop and the real per-batch handler with a stubbed transport.</text>
+        <text class="cap" x="0" y="314">No provider call was made and no source file was modified in the worktree.</text>
+      </svg>
+      <figcaption class="cap">Three distinguishable failures, one indistinguishable recorded outcome.</figcaption>
+    </figure>
+
     <h2 id="scope-note">Scope note</h2>
 
     <p>
