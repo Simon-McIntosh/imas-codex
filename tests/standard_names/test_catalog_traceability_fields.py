@@ -153,3 +153,95 @@ def test_accepted_edit_readback_contains_author_request_and_export_receipt(
     assert row["catalog_approved_at"] == "2026-09-08T10:00:00Z"
     assert row["catalog_merge_commit_sha"] == "abc123"
     assert row["exported_at"] == "2026-09-08T10:00:00Z"
+
+
+class _StageGuardedGraph:
+    """Enforce the approval writer's declared stage preconditions.
+
+    :class:`RecordingGraph` applies whatever write it is handed, so it cannot
+    show that the write is refused when an identity is in neither an accepted
+    name stage nor an accepted docs stage. This double refuses where the
+    Cypher ``WHERE`` clause refuses, so a guard that stopped guarding would
+    fail the test rather than pass it silently.
+    """
+
+    def __init__(self, *, name_stage: str, docs_stage: str) -> None:
+        self.properties: dict[str, Any] = {
+            "name_stage": name_stage,
+            "docs_stage": docs_stage,
+            "status": "draft",
+            "validation_status": "valid",
+        }
+
+    def query(self, statement: str, **parameters: Any) -> list[dict[str, Any]]:
+        if "catalog_pr_number = $pr_number" not in statement:
+            raise AssertionError(f"unexpected graph query: {statement}")
+        if self.properties["name_stage"] not in {"accepted", "approved"}:
+            return []
+        if self.properties["docs_stage"] != "accepted":
+            return []
+        if self.properties["validation_status"] == "quarantined":
+            return []
+        self.properties.update(
+            catalog_pr_number=parameters["pr_number"],
+            catalog_pr_url=parameters["pr_url"],
+            catalog_merge_commit_sha=parameters["merge_commit"],
+            catalog_reviewer_actor=parameters["reviewer_actor"],
+            catalog_approved_at="2026-09-08T10:00:00Z",
+            name_stage="approved",
+            status="active",
+        )
+        return [{"id": parameters["name"]}]
+
+    def close(self) -> None:
+        return None
+
+
+_RECEIPT_FIELDS = (
+    "catalog_pr_number",
+    "catalog_pr_url",
+    "catalog_merge_commit_sha",
+    "catalog_reviewer_actor",
+    "catalog_approved_at",
+)
+
+
+def _approve(graph: Any, name: str = "electron_temperature") -> bool:
+    return mark_catalog_name_approved(
+        name,
+        catalog_pr_number=12,
+        catalog_pr_url="https://github.com/o/r/pull/12",
+        catalog_merge_commit_sha="abc123",
+        catalog_reviewer_actor="physics-reviewer",
+        editorial_outcome="content_edit",
+        gc=graph,
+    )
+
+
+def test_the_receipt_tuple_is_written_together_on_one_identity() -> None:
+    graph = _StageGuardedGraph(name_stage="accepted", docs_stage="accepted")
+
+    assert _approve(graph)
+
+    written = {field for field in _RECEIPT_FIELDS if field in graph.properties}
+    assert written == set(_RECEIPT_FIELDS)
+    assert graph.properties["catalog_pr_number"] == 12
+    assert graph.properties["catalog_pr_url"] == "https://github.com/o/r/pull/12"
+    assert graph.properties["catalog_merge_commit_sha"] == "abc123"
+    assert graph.properties["catalog_reviewer_actor"] == "physics-reviewer"
+
+
+def test_the_write_is_refused_when_a_stage_precondition_is_unmet() -> None:
+    for name_stage, docs_stage in (
+        ("drafted", "accepted"),
+        ("contested", "accepted"),
+        ("accepted", "drafted"),
+        ("accepted", "pending"),
+    ):
+        graph = _StageGuardedGraph(name_stage=name_stage, docs_stage=docs_stage)
+
+        assert _approve(graph) is False
+
+        assert graph.properties["name_stage"] == name_stage
+        assert graph.properties["docs_stage"] == docs_stage
+        assert not [field for field in _RECEIPT_FIELDS if field in graph.properties]
