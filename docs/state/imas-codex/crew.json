@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T17:52:50",
+  "updated": "2026-09-17T18:14:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -279,7 +279,8 @@
         "session_id": "de7acb29-7a85-41cb-b92d-5cc2b44f7d55",
         "session_model": "deepseek-v4-flash",
         "sessions": {
-          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "de7acb29-7a85-41cb-b92d-5cc2b44f7d55"
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "de7acb29-7a85-41cb-b92d-5cc2b44f7d55",
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "c9e780be-47d0-41b4-88ad-6c83db47e09e"
         },
         "created": "2026-09-05"
       },
@@ -144158,6 +144159,206 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T150203660131-n-the-unsourced-chain-cap-cohort-is-partitioned-by-recoverability",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712",
+        "node": "n-the-unsourced-chain-cap-cohort-is-partitioned-by-recoverability",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1260,
+                "cached_input_tokens": 582322,
+                "input_tokens": 583584,
+                "output_tokens": 508,
+                "reasoning_output_tokens": 252,
+                "total_tokens": 584092,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a named query run is captured to a log with its exit status and reports the live size of the chain_length>=3 cohort and how many of those carry no producing source, stated against the plan's asserted 78 unsourced and 72 unrebuildable and the audit's re-measured 174 and 102 with a verdict of current, drifted or stale; the unsourced set is partitioned into those with a sourced ancestor at any depth and those without, and the two parts sum to the whole with the sum asserted; a positive control shows the same producer predicate returning a non-zero count over a cohort known to be sourced; every identity in the smaller partition is listed by id; no graph mutation is performed",
+          "estimated_hours": null,
+          "goal": "Partition the unsourced chain-cap identities by whether a producing source can be recovered, so the beat can be scoped",
+          "id": "n-the-unsourced-chain-cap-cohort-is-partitioned-by-recoverability",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T15:02:06Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T150203660131-n-the-unsourced-chain-cap-cohort-is-partitioned-by-recoverability/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-release-readiness/unsourced-cohort-partition.md",
+            "docs/evidence/archive/sn-release-readiness-landed.html",
+            "docs/plans/sn-release-readiness.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-units",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T15:02:21Z",
+        "completed_at": "2026-09-17T15:53:35.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3055,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3074,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "fce6de22430a985e670e75ea04ad8c7d44b4b8b0",
+        "commits": [
+          "7061707ba56dca2c4ca82e90c13989b1742f8cf8"
+        ],
+        "changed_lines": {
+          "added": 260,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "coordinator re-run of the partition census; the worker kept no gate log",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/coordinator-gate-recheck.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T150203660131-n-the-unsourced-chain-cap-cohort-is-partitioned-by-recoverability/manifest.md",
+        "scope_changed": false,
+        "session_id": "ee460f6a-c38a-4917-b384-e6194005c95e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7541248,
+            "input_tokens_cumulative": 7541248,
+            "output_tokens": 38919,
+            "output_tokens_cumulative": 38919,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T15:53:35.245Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7541248,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3068.075,
+          "generated_tokens": 38919,
+          "generation_seconds": 3005.418,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 29.0,
+          "machine_seconds": 62.657,
+          "peak_input_tokens": 139433,
+          "tokens_per_second": 12.95,
+          "wall_tokens_per_second": 12.69
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-unsourced-chain-cap-cohort-is-partitioned-by-recoverability",
+          "session_id": "ee460f6a-c38a-4917-b384-e6194005c95e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T15:53:35.245Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 85.0,
+        "orientation_input_tokens": 2658506.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -144428,6 +144629,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2238
+    "_version": 2240
   }
 }
