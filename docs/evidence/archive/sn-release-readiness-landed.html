@@ -180,6 +180,35 @@
       <code>docs/evidence/sn-release-readiness/plan-figure-audit.md</code>.
     </p>
 
+    <h2 id="unmeasured-figures-taken">The two unmeasured figures, taken</h2>
+
+    <p>
+      The figure audit left two of its nine asserted quantities unmeasured. Both
+      are now taken read-only against the live graph at the same baseline
+      (<code>StandardName</code> 5,130). <strong>Names carrying
+      <code>parent_enriched_at</code>: 183</strong> graph-wide, against the
+      plan's asserted 84, with a non-empty breakdown (derived/accepted 159,
+      pipeline/accepted 16, and four smaller cells). The plan's actual cohort
+      &mdash; derived parents on the placeholder description with a live child
+      &mdash; is <strong>empty</strong>: one name in the whole graph still
+      carries the placeholder and it has no live child, so the "84" hole has
+      closed. <strong>Null <code>catalog_approved_at</code>: 5,130 of
+      5,130</strong> graph-wide and <strong>2,163 of 2,163</strong> within the
+      superseded subset, so the plan's claim that every superseded name is null
+      is <strong>current</strong>. Each zero is paired with a positive control
+      on the same nodes (<code>created_at</code> 4,944 non-null;
+      <code>created_at &gt; datetime('...')</code> 4,943; the
+      <code>HAS_PARENT</code> pattern 414/707), so an unaimed query is
+      distinguishable from a real zero.
+    </p>
+
+    <p>
+      Per-query detail with each query's text, its log and the reproduction is in
+      <a href="/imas-codex/evidence/sn-release-readiness/unmeasured-figures-taken.html">the
+      unmeasured-figures evidence file</a>. Read-only throughout: no graph
+      mutation, no code change.
+    </p>
+
   </main>
 </body>
 </html>
