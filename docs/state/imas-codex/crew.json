@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T21:31:48",
+  "updated": "2026-09-17T21:37:52",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -146996,6 +146996,206 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T185218284145-n-the-drafted-successors-are-counted-before-any-cut",
+        "plan": "sn-west-catalog-release",
+        "section": "release-run-residues",
+        "node": "n-the-drafted-successors-are-counted-before-any-cut",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1797,
+                "cached_input_tokens": 769913,
+                "input_tokens": 771712,
+                "output_tokens": 212,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 771924,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "the evidence states the live count of identities superseded by the 2026-09-05 canonical migration whose successor is not accepted on both axes, against the 137 the followup asserts, with a verdict of current drifted or stale; it states how many of those fall inside the committed WEST manifest, which is the number a cut would silently lose, against the eighteen asserted; a positive control shows the same successor predicate returning a non-zero count over identities whose successor did land; every figure carries the query that produced it captured to a named log with its exit status; no graph mutation",
+          "estimated_hours": null,
+          "goal": "Measure how many renamed successors would be lost from a cut today because they sit at drafted rather than accepted",
+          "id": "n-the-drafted-successors-are-counted-before-any-cut",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:52:19Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185218284145-n-the-drafted-successors-are-counted-before-any-cut/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-run-residues",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/drafted-successor-exposure.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-drain",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:52:25Z",
+        "completed_at": "2026-09-17T19:36:12.257Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2544,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2627,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "6fbba5305b0f675be238ce21cb21956696071c08",
+        "commits": [
+          "e440839d95ac3999d7b948f30d9ad826000416aa"
+        ],
+        "changed_lines": {
+          "added": 252,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "two bounded Cypher censuses over StandardNameChange rows dated 2026-09-05, resolved against the committed and withdrawn rosters, with positive controls in both directions",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185218284145-n-the-drafted-successors-are-counted-before-any-cut/recovered-census-137.txt",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185218284145-n-the-drafted-successors-are-counted-before-any-cut/manifest.md",
+        "scope_changed": false,
+        "session_id": "83361f83-6235-4cc7-8cb6-e1a6a153946d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2994180,
+            "input_tokens_cumulative": 2994180,
+            "output_tokens": 14901,
+            "output_tokens_cumulative": 14901,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T19:36:12.257Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 2994180,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 530.728,
+          "generated_tokens": 14901,
+          "generation_seconds": 527.725,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 22.9,
+          "machine_seconds": 3.003,
+          "peak_input_tokens": 109849,
+          "tokens_per_second": 28.24,
+          "wall_tokens_per_second": 28.08
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-drafted-successors-are-counted-before-any-cut",
+          "session_id": "83361f83-6235-4cc7-8cb6-e1a6a153946d",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T19:36:12.257Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 26.0,
+        "orientation_input_tokens": 4077605.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -147266,6 +147466,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2258
+    "_version": 2259
   }
 }
