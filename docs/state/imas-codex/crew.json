@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T22:30:56",
+  "updated": "2026-09-17T23:08:56",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -148619,6 +148619,210 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T200914300858-n-the-batch-failure-cause-reaches-the-recorded-outcome",
+        "plan": "sn-release-readiness",
+        "section": "\u00a71",
+        "node": "n-the-batch-failure-cause-reaches-the-recorded-outcome",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 890,
+                "cached_input_tokens": 323533,
+                "input_tokens": 324425,
+                "output_tokens": 647,
+                "reasoning_output_tokens": 323,
+                "total_tokens": 325072,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "the candidate patch preserved at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185454259985-n-an-endpoint-drop-is-distinguishable-from-a-model-refusal/artifacts-endpoint-drop/candidate.patch is applied together with its test from the same directory; the test distinguishes an endpoint drop from a model refusal in the recorded outcome and its exit status is recorded; the evidence states whether the applied result differs from the preserved patch, naming each difference, because the patch was written against an earlier revision",
+          "estimated_hours": 0.75,
+          "goal": "Carry the already-computed batch failure cause into the recorded benchmark outcome by applying the preserved candidate patch with its test",
+          "id": "n-the-batch-failure-cause-reaches-the-recorded-outcome",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T20:09:15Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/manifests/batchcause.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/benchmark.py",
+            "tests/standard_names/test_batch_failure_causes.py",
+            "docs/evidence/sn-release-readiness/batch-failure-cause.md",
+            "docs/evidence/archive/sn-release-readiness-landed.html",
+            "docs/plans/sn-release-readiness.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T20:09:23Z",
+        "completed_at": "2026-09-17T20:43:11.461Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1989,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2028,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "4ba57a134b15849389a85ae5e9e115423b81c728",
+        "commits": [
+          "3c7574dc64059ae9e0069743f024613b23266f25",
+          "ffabd2beeb274bca004ed10a29b24e813955e1d7",
+          "dfc7ad12ccf69a13a812eec7ddea167a9fe70305"
+        ],
+        "changed_lines": {
+          "added": 362,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_batch_failure_causes.py tests/standard_names/test_benchmark.py at the merged head",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/gate-batchcause.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/manifests/batchcause.md",
+        "scope_changed": false,
+        "session_id": "a4232f8a-5839-4378-bf89-2d8a67ae5415",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 6984814,
+            "output_tokens": 202,
+            "output_tokens_cumulative": 33831,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T20:43:11.461Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7138758,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2021.388,
+          "generated_tokens": 43117,
+          "generation_seconds": 1889.721,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.8,
+          "machine_seconds": 131.667,
+          "peak_input_tokens": 152644,
+          "tokens_per_second": 22.82,
+          "wall_tokens_per_second": 21.33
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-batch-failure-cause-reaches-the-recorded-outcome",
+          "session_id": "a4232f8a-5839-4378-bf89-2d8a67ae5415",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T20:43:11.461Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 64.0,
+        "orientation_input_tokens": 3380176.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -148889,6 +149093,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2267
+    "_version": 2268
   }
 }
