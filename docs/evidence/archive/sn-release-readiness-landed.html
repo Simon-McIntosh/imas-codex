@@ -617,6 +617,58 @@
       which had not run for that row in 48 hours.
     </p>
 
+  <h2 id="restage-arm-scope-probe">The restage arm works, and it was never armed</h2>
+
+    <p>
+      The review restage arm moves a reviewed row at or above the threshold to
+      <code>drafted</code> at claim time. It is armed in exactly one place:
+      <code>claim_review_name_batch</code> passes <code>restage_review_axis</code>
+      only when a drain scope is passed.
+    </p>
+
+    <p>
+      Measured on 2026-09-17 over a ten-row sample drawn from the thirty withheld
+      acceptances. Each arm is one claim call over the same ten rows; the scope
+      shape is the only difference.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>arm</th><th>scope</th><th>moved</th><th>left</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>control</td><td><code>scope_run_id</code></td><td>0</td><td>10</td></tr>
+        <tr><td>treatment</td><td><code>drain_scope_id</code></td><td>2</td><td>8</td></tr>
+        <tr><td>treatment, repeated</td><td><code>drain_scope_id</code></td><td>9</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      So the arm works and was never armed: the exact-name scope moved 0 of 10,
+      the drain scope moved 9 of 10. The repair is scoping, not the terminal
+      transition at the cap. The one row the drain scope left was undetermined,
+      not out of reach: the repeating loop stopped at its own twenty-round cap.
+    </p>
+
+    <p>
+      The control is a live pool rather than a blind zero. The identical call over
+      the same ten rows returns non-empty and writes stages as soon as the scope
+      shape becomes a drain scope, so the zero is aimed, not idle.
+    </p>
+
+    <p>
+      A third mechanism sits under the repair. The sanctioned operator could not
+      open a drain scope over this cohort at all: <code>prepare_manifest_drain_scope</code>
+      refused all 17 DD paths of the sample as ambiguous. The evidence file is
+      <a href="/imas-codex/evidence/sn-release-readiness/restage-arm-scope-probe.html">the probe record</a>.
+    </p>
+
+    <p>
+      All ten rows were read back at <code>reviewed</code> and the lease was
+      cleared, so the graph is as it was found. Spend was zero: every call was a
+      claim and no model call was made.
+    </p>
+
   </main>
 </body>
 </html>
