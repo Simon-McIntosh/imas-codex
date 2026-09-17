@@ -295,6 +295,39 @@
       Full method, the failing assertion and the queries:
       <a href="/imas-codex/evidence/sn-west-cohort-treatment/skip-rule-correction">skip rule correction</a>.
     </p>
+    <h2 id="export-suite-at-the-merged-head">The export suite at the merged head carries no added failure</h2>
+    <p>The export and standard-names surface was run at the merged head and re-run at a
+    named base, each as a single captured command on a compute partition. The selection is
+    <code>tests/standard_names</code> — the only directory holding a test module that imports
+    the export path (44 test files matched a grep for that import, all under it).</p>
+    <table>
+      <thead><tr><th>Revision</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Deselected</th></tr></thead>
+      <tbody>
+        <tr><td>merged head <code>2aa09aecc</code></td><td>7402</td><td>1</td><td>11</td><td>323</td></tr>
+        <tr><td>base <code>fcc65951b</code></td><td>7381</td><td>21</td><td>12</td><td>323</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The headline figure is zero failures added since the base revision.</strong>
+    The one failure at the merged head,
+    <code>test_error_siblings.py::TestReconcileErrorSiblings::test_reconcile_orphans_error_siblings</code>,
+    fails at the base too, on the same assertion at <code>test_error_siblings.py:305</code> and
+    with the same produced statement — it is pre-existing, not introduced. Its test landed at
+    <code>ed888c19b</code> and the module it exercises last changed at <code>bd34e9631</code>.</p>
+    <p><strong>Twenty base-only failures are an artifact of the base tree rather than a
+    revision difference, and they are shown to be so.</strong> The base tree is a
+    <code>git archive</code> extraction, not a checkout, so every export run in it refuses with
+    <code>RuntimeError: export provenance timestamp unavailable</code> — a guard the exporter
+    applies by design. Re-running those same modules at the base with the remedy the error
+    names (<code>SOURCE_DATE_EPOCH=1700000000</code>) leaves <code>1 failed, 65 passed</code>:
+    the twenty provenance refusals disappear and only the pre-existing failure remains.
+    Nothing was repaired between the two revisions — no repository source differs at all
+    across the range, the 33 changed files being docs, evidence, plans, sprints and the crew
+    state.</p>
+    <p>The default marker exclusions removed 323 tests at both ends, so the selection needs
+    no database and no tunnel. The main checkout advanced to <code>9d7e57f85</code> after
+    dispatch; the run is defined at the dispatched head. Full report and logs:
+    <code>export-suite-merged-head.md</code> in the crew run directory for
+    <code>n-the-export-suite-passes-at-the-merged-head</code>.</p>
 
   </main>
 </body>
