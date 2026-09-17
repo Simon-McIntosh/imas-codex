@@ -11347,23 +11347,24 @@ ORDER BY sns.id
 """
 
 
-def disposition_parked_sources(
+def record_parked_dispositions(
+    rows: list[dict[str, Any]],
     *,
     dry_run: bool = False,
     gc: Any | None = None,
 ) -> dict[str, Any]:
-    """Give every source parked at the compose cap a triage disposition.
+    """Classify parked rows and write the disposition onto each source.
 
-    One pass reads the parked cohort with the evidence each row carries,
-    classifies every row through :func:`classify_parked_source` and writes the
-    result onto the source. A classification outside
-    :data:`CAP_PARKED_DISPOSITIONS` refuses the whole pass before any write, so
-    the cohort cannot end the pass carrying an unclassified row.
+    The single classify-and-write path, shared by the reconcile pass that reads
+    the whole cohort and by the writer that parks a source, so the precedence in
+    :func:`classify_parked_source` exists once. ``rows`` carry the evidence
+    aliases returned by the parking statement. A classification outside
+    :data:`CAP_PARKED_DISPOSITIONS` refuses before any write, so no caller can
+    end with a row carrying an unclassified disposition.
     """
     own = gc is None
     client = GraphClient() if own else gc
     try:
-        rows = [dict(r) for r in client.query(_CAP_PARKED_QUERY, cap=_MAX_COMPOSE_CLAIM_ATTEMPTS)]
         written: list[dict[str, str]] = []
         for row in rows:
             disposition = classify_parked_source(row)
@@ -11378,6 +11379,75 @@ def disposition_parked_sources(
             "written": 0 if dry_run else len(written),
             "counts": dict(sorted(counts.items())),
         }
+    finally:
+        if own:
+            client.close()
+
+
+def disposition_parked_sources(
+    *,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Give every source parked at the compose cap a triage disposition.
+
+    Reads the parked cohort with the evidence each row carries and delegates to
+    :func:`record_parked_dispositions`. This is the reconcile net: the parking
+    writer records a disposition as it parks, and this pass heals any row that
+    predates that write path or was parked around it.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = [
+            dict(r)
+            for r in client.query(_CAP_PARKED_QUERY, cap=_MAX_COMPOSE_CLAIM_ATTEMPTS)
+        ]
+        return record_parked_dispositions(rows, dry_run=dry_run, gc=client)
+    finally:
+        if own:
+            client.close()
+
+
+#: The rows the parking writer has already parked under the cap reason and left
+#: without a disposition. Scoped by the reason the writer itself writes, so the
+#: read can only see rows a parking event produced, and by the absence of the
+#: disposition, so it is empty once the writer has recorded one.
+_CAP_UNDISPOSED_QUERY = """
+MATCH (sns:StandardNameSource)
+WHERE sns.status = 'failed'
+  AND sns.last_error = $cap_reason
+  AND sns.parked_disposition IS NULL
+OPTIONAL MATCH (node:IMASNode {id: sns.source_id})
+RETURN sns.id AS id, sns.last_error AS last_error,
+       node.lifecycle_status AS lifecycle_status,
+       size([(sns)-[:PRODUCED_NAME]->(:StandardName) | 1]) AS produced,
+       node.node_category AS node_category
+ORDER BY sns.id
+"""
+
+
+def record_dispositions_for_undisposed_parks(
+    *,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Stamp a disposition on the rows a parking event left undisposed.
+
+    The parking writer calls this in the same tick as the write that parks, so
+    a source arrives at ``failed`` already carrying a member of
+    :data:`CAP_PARKED_DISPOSITIONS` and no later classification pass is needed
+    for it. Rows already carrying a disposition are not in scope, so a tick that
+    parks nothing and a tick that parks an already-disposed row both do nothing.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = [
+            dict(r)
+            for r in client.query(_CAP_UNDISPOSED_QUERY, cap_reason=_COMPOSE_CAP_REASON)
+        ]
+        return record_parked_dispositions(rows, dry_run=dry_run, gc=client)
     finally:
         if own:
             client.close()
@@ -11412,7 +11482,12 @@ def census_parked_dispositions(*, gc: Any | None = None) -> dict[str, Any]:
     own = gc is None
     client = GraphClient() if own else gc
     try:
-        rows = [dict(r) for r in client.query(_CAP_DISPOSITION_READBACK, cap=_MAX_COMPOSE_CLAIM_ATTEMPTS)]
+        rows = [
+            dict(r)
+            for r in client.query(
+                _CAP_DISPOSITION_READBACK, cap=_MAX_COMPOSE_CLAIM_ATTEMPTS
+            )
+        ]
     finally:
         if own:
             client.close()

@@ -24,6 +24,11 @@ from imas_codex.graph.client import GraphClient
 
 logger = logging.getLogger(__name__)
 
+#: Label of the sweep statement that parks a source at the compose claim-attempt
+#: cap. Named once because the tick pairs it with the disposition write, so the
+#: parked row and its disposition are one event.
+_PARKING_LABEL: Final = "compose_attempt_cap"
+
 
 # ---------------------------------------------------------------------------
 # Sweep queries — (label, cypher) pairs. Each RETURN alias is ``n``.
@@ -97,7 +102,11 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
         # ``extracted``, so every pending/idle counter drops it) lets the idle
         # watchdog exit cleanly instead of the stall-guard.  Revived by
         # ``--reset-to extracted`` (clears attempt_count) once compose improves.
-        "compose_attempt_cap",
+        # The tick follows this statement with ``_CAP_UNDISPOSED_QUERY``, which
+        # stamps a triage disposition on the rows it just parked — the reason
+        # above says only that the budget ran out, and a cohort carrying only
+        # that string cannot be triaged from it.
+        _PARKING_LABEL,
         """
         MATCH (s:StandardNameSource)
         WHERE s.status = 'extracted'
@@ -121,8 +130,11 @@ _SWEEP_QUERIES: Final[list[tuple[str, str]]] = [
 def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
     """Run one full orphan-sweep pass (synchronous).
 
-    Executes all four sweep queries in separate transactions and returns
-    a mapping of sweep label → number of nodes reverted/cleared.
+    Executes each sweep query in its own transaction and returns a mapping of
+    sweep label → number of nodes reverted/cleared. The parking statement is
+    paired with a disposition write: whatever this tick parks arrives already
+    classified, so the parked cohort never holds a row the writer left
+    unclassified.
 
     Args:
         timeout_s: Age threshold in seconds.  Nodes whose ``claimed_at``
@@ -130,9 +142,12 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
 
     Returns:
         ``{"name_refining": n, "docs_refining": n, "stale_token_sn": n,
-        "stale_token_source": n}``
+        "stale_token_source": n, "compose_attempt_cap": n}``
     """
-    from imas_codex.standard_names.graph_ops import _MAX_COMPOSE_CLAIM_ATTEMPTS
+    from imas_codex.standard_names.graph_ops import (
+        _MAX_COMPOSE_CLAIM_ATTEMPTS,
+        record_dispositions_for_undisposed_parks,
+    )
 
     counts: dict[str, int] = {}
     with GraphClient() as gc:
@@ -143,6 +158,14 @@ def _orphan_sweep_tick(*, timeout_s: int) -> dict[str, int]:
                 max_compose_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
             )
             counts[label] = rows[0]["n"] if rows else 0
+
+        if counts.get(_PARKING_LABEL):
+            recorded = record_dispositions_for_undisposed_parks(gc=gc)
+            logger.info(
+                "Recorded %d dispositions for sources parked at the compose cap: %s",
+                recorded["written"],
+                recorded["counts"],
+            )
     return counts
 
 
