@@ -656,6 +656,52 @@
       <a href="/imas-codex/evidence/sn-west-catalog-release/the-three-withheld-sources">the
       three-source evidence record</a>, committed as <code>51607b3ea</code>.</p>
   </section>
+  <section id="drafted-successor-exposure">
+    <h2>The drafted-successor exposure is zero inside the committed roster, and the 137 reproduces as a rename count, not a state</h2>
+    <p>The followup asserted that the 2026-09-05 whole-cohort canonical migration
+      left 137 identities whose successors "sit at <code>drafted</code>", that the
+      withdrawn candidate carried eighteen such names, and that the successor
+      candidate must be measured against 431. The rename lineage is read from
+      <code>StandardNameChange</code>, not from <code>HAS_SUCCESSOR</code> (which
+      carries 48 edges graph-wide and is not the migration's record): the cohort is
+      the 2026-09-05 change rows with operation <code>human_edit</code> and a
+      <code>from_name</code> differing from its <code>to_name</code>.</p>
+    <table>
+      <thead>
+        <tr><th>Measure</th><th>Count</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>rename cohort rows</td><td><strong>137</strong> (corroboration: <code>realign_grammar_segments</code> the same day = 137)</td></tr>
+        <tr><td>successor identity present / absent</td><td>137 / 0</td></tr>
+        <tr><td>successor accepted on both axes</td><td><strong>51</strong></td></tr>
+        <tr><td>successor not accepted on both axes</td><td><strong>86</strong></td></tr>
+        <tr><td>of those, superseded on the name axis</td><td>56 (a second rename followed the first)</td></tr>
+        <tr><td>successors at <code>drafted</code> on the name axis / docs axis</td><td>2 / 0</td></tr>
+        <tr><td>not-accepted successors whose spelling is in the <strong>committed</strong> roster</td><td><strong>0</strong></td></tr>
+        <tr><td>cohort names appearing in the <strong>withdrawn</strong> 431-name roster</td><td><strong>18</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Verdict: drifted.</strong> The asserted 137 reproduces exactly as the
+      count of renames, and the asserted eighteen reproduces exactly against the
+      withdrawn candidate — but <em>not</em> against the committed roster, where the
+      exposure is zero. The asserted state is what fails: only 2 of the 137 successors
+      sit at <code>drafted</code>, against 137 asserted. Graph-wide the claim is
+      untenable independently — 22 identities carry <code>name_stage=drafted</code>
+      and 10 carry <code>docs_stage=drafted</code>. The precondition the followup
+      derives from its figure (run <code>sn --only review --edits</code> so the 137
+      move off <code>drafted</code>) would find at most two rows to move.</p>
+    <p>The zero is aimed, not blind: the same successor predicate returns 51
+      accepted-on-both against 86 not within one cohort, and over the whole 15,548-row
+      change log returns 7211 accepted / 4109 present-not-accepted / 4228 absent. The
+      roster reader is likewise known to fire: the same predicate finds 18 names in
+      the withdrawn roster and 8 in the committed one.</p>
+    <p>Read-only over the live graph from the login node, the sanctioned exception for
+      a login-local endpoint; indexed reads over a named day range and the change log,
+      none over ten seconds. No graph mutation. Figures, the eight withdrawn-roster
+      rows and the instrument qualifications are in
+      <a href="/imas-codex/evidence/sn-west-catalog-release/drafted-successor-exposure">the
+      drafted-successor exposure record</a>; both captures keep their exit status.</p>
+  </section>
 </main>
 </body>
 </html>
