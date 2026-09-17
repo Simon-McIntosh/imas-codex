@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="paid-identity-deletion-protection-landed">
+  <meta name="plan-title" content="Paid identity deletion protection &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="paid-identity-deletion-protection">
+  <title>Paid identity deletion protection landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Paid identity deletion protection &mdash; cumulative execution evidence</h1>
+  <p>One stable anchor per material landing.</p>
+
+  <section id="headline-figures-remeasured">
+    <h2>Four of sixteen headline figures have drifted, and the ledger figures drifted furthest</h2>
+    <p><strong>Measured read-only on 2026-09-17</strong> at
+    <code>3f8c06fcef82b8a769ee5ec5d81ae83b4fe3c5c5</code>. Sixteen quantities quoted
+    verbatim from the plan were re-measured against the live graph and the current
+    tree. Verdicts: <strong>4 current, 11 drifted, 1 stale</strong>.</p>
+    <p>The pattern is not random. Every quantity that is a <em>ledger sum</em> or a
+    <em>cost row count</em> has grown by a quarter to two fifths, because nothing
+    subtracts from the cost ledger; every quantity that is a <em>population of
+    live names</em> has moved by a few percent, because the name surface is roughly
+    stable. The single <code>stale</code> row is a code pointer that has rotted by
+    64 lines.</p>
+    <table>
+      <thead><tr><th>Quantity</th><th>Asserted</th><th>Re-measured</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>identities removed in the 2026-09-08 pass</td><td>93</td><td>93</td><td>current</td></tr>
+        <tr><td>cost rows over that cohort</td><td>785</td><td>1,003</td><td>drifted</td></tr>
+        <tr><td>spend over that cohort</td><td>$43.12</td><td>$50.761691</td><td>drifted</td></tr>
+        <tr><td>all-time absent identities</td><td>491 of 539</td><td>453 of 539</td><td>drifted</td></tr>
+        <tr><td>all-time cost rows / spend</td><td>1,894 / $100.47</td><td>2,660 / $135.896586</td><td>drifted</td></tr>
+        <tr><td>live <code>origin='derived'</code></td><td>412</td><td>428</td><td>drifted</td></tr>
+        <tr><td>derived at accepted or approved</td><td>397</td><td>401</td><td>drifted</td></tr>
+        <tr><td>derived with accepted non-empty docs</td><td>334</td><td>412</td><td>drifted</td></tr>
+        <tr><td>derived paid work / rows</td><td>$116.91 / 2,339</td><td>$160.710449 / 3,189</td><td>drifted</td></tr>
+        <tr><td>restore-set presence</td><td>0 present</td><td>33 of 93 present</td><td>drifted</td></tr>
+        <tr><td><code>FOR_STANDARD_NAME</code> edges</td><td>32,203</td><td>34,547</td><td>drifted</td></tr>
+        <tr><td>live standard names</td><td>5,078 archive / 5,048 live</td><td>5,130 live</td><td>drifted</td></tr>
+        <tr><td>sources bound / unbound</td><td>5,441 / 4,459</td><td>5,393 / 4,626 of 10,019</td><td>drifted</td></tr>
+        <tr><td>rows at <code>name_stage='approved'</code></td><td>0</td><td>0</td><td>current</td></tr>
+        <tr><td>code paths deleting an <code>LLMCost</code> node</td><td>none</td><td>none</td><td>current</td></tr>
+        <tr><td>guard call site</td><td><code>graph_ops.py:3672</code></td><td><code>graph_ops.py:3736</code></td><td>stale</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The instrument nearly produced a false <code>stale</code>.</strong> The
+    2026-09-08 window queries first compared a native Cypher datetime property
+    against a string literal and returned zero rows for the typed window. Read
+    naively that says the incident produced 93 fewer deletions than the plan
+    claims. With a typed <code>datetime(...)</code> bound the window returns exactly
+    5 rows and 93 distinct names, and the positive control over all time returns
+    2,644 rows and 539 names, matching the plan's all-time figure independently.</p>
+    <p><strong>The first unstarted beat is §7a stage 2, repointing every reader at
+    the source binding.</strong> The test is not whether the field exists &mdash; it
+    does &mdash; but whether any reader has been moved off it. None has: 428 names
+    carry <code>origin='derived'</code> and the readers are still reading it.
+    Remaining effort restates to <strong>11&ndash;16 worker-hours</strong> against
+    the 14.0 declared, with the centre of mass shifted from the restore toward the
+    <code>origin</code> fold.</p>
+    <p>Full audit table, the exact query per row, the per-beat classification and
+    the log paths: <a href="/evidence/paid-identity-deletion-protection/plan-figure-audit.md">the
+    headline-figure audit</a>. Logs captured with exit status at
+    <code>/tmp/pidp-audit/</code> (<code>main.log</code>, <code>diag.log</code>,
+    <code>spend.log</code>, <code>restore.log</code>, <code>code-read.log</code>).</p>
+  </section>
+</main>
+</body>
+</html>
