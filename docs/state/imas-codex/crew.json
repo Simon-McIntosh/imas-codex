@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T12:59:31",
+  "updated": "2026-09-17T15:37:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -178,7 +178,8 @@
         "session_id": "ef833336-cd1e-4ca1-83f6-1fbf8ea7d99f",
         "session_model": "deepseek-v4-flash",
         "sessions": {
-          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "ef833336-cd1e-4ca1-83f6-1fbf8ea7d99f"
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "ef833336-cd1e-4ca1-83f6-1fbf8ea7d99f",
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "e1ceefaa-d30d-42b9-80b6-9249f979a38d"
         },
         "created": "2026-09-05"
       },
@@ -138164,6 +138165,208 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T110637356274-n-the-export-accounts-for-every-name-it-drops",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a79",
+        "node": "n-the-export-accounts-for-every-name-it-drops",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1165,
+                "cached_input_tokens": 412829,
+                "input_tokens": 413996,
+                "output_tokens": 755,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 414751,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "the evidence file states N the candidate count handed to the export, E the emitted count, and the per-reason exclusion counts, and reports whether E plus the sum of per-reason exclusions equals N exactly; any shortfall is named as the count of silently dropped identities with their ids listed; the plan's asserted figure of eighteen names leaving with both declared exclusion counters reading zero is restated as current, drifted or stale against the measured value; every identity in each exclusion reason is recoverable from the recorded output; run_export in dry-run is the instrument and no hand-rolled predicate substitutes for it; each query or command output is captured to a named log with its exit status; and no graph mutation is performed",
+          "estimated_hours": null,
+          "goal": "Re-measure whether the export accounts for every candidate name it does not publish, for the current WEST manifest cohort",
+          "id": "n-the-export-accounts-for-every-name-it-drops",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T11:06:39Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T110637356274-n-the-export-accounts-for-every-name-it-drops/manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a79",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-cohort-treatment/export-accounting-currency.md",
+            "docs/evidence/archive/sn-west-cohort-treatment-landed.html",
+            "docs/plans/sn-west-cohort-treatment.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-census",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T11:06:56Z",
+        "completed_at": "2026-09-17T11:39:04.893Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1907,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1928,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "bebd68a3eee76ae9214c063fbe528928836eb5a7",
+        "commits": [
+          "6197d419064273af812366261c1e1d1168f53dca",
+          "4aa12b26ad52ba8861a2e4098d0b965f553f6d7f"
+        ],
+        "changed_lines": {
+          "added": 216,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "driver.py run_export dry-run at min_score=0.65 over the 342-row WEST manifest cohort",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T110637356274-n-the-export-accounts-for-every-name-it-drops/export-accounting-current-full.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T110637356274-n-the-export-accounts-for-every-name-it-drops/manifest.md",
+        "scope_changed": false,
+        "session_id": "e1ceefaa-d30d-42b9-80b6-9249f979a38d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7277218,
+            "input_tokens_cumulative": 7277218,
+            "output_tokens": 29034,
+            "output_tokens_cumulative": 29034,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T11:39:04.893Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7277218,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1923.143,
+          "generated_tokens": 29034,
+          "generation_seconds": 1832.02,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 29.6,
+          "machine_seconds": 91.123,
+          "peak_input_tokens": 142025,
+          "tokens_per_second": 15.85,
+          "wall_tokens_per_second": 15.1
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-export-accounts-for-every-name-it-drops",
+          "session_id": "e1ceefaa-d30d-42b9-80b6-9249f979a38d",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T11:39:04.893Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 82.0,
+        "orientation_input_tokens": 5629619.0,
+        "store_write": {
+          "status": "failed",
+          "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
+        }
       }
     ],
     "holds": [
@@ -138434,6 +138637,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2203
+    "_version": 2205
   }
 }

@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-impl" content="0.8">
 <meta name="plan-commits" content="2d9d674a">
 </head>
@@ -606,6 +606,9 @@ worth paying for, because only then can its result be seen.</p>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-20260917-export-accounting-re-measured" data-who="reckon-ship-worker" data-when="2026-09-17T14:05:00Z">
     <div class="r-comment-body"><p><strong>The section's "eighteen names" is stale, and the export now accounts for every candidate it is handed.</strong> The one live claim left on this plan's critical path was re-measured at the instrument rather than restated. Ran <code>run_export</code> directly on the current cohort — the committed 342-source manifest resolved through <code>fetch_manifest_source_release_rows</code> to 340 terminal identities and <strong>230 unique candidate names</strong> — handing those in as <code>review_batch</code> with the manifest rows as <code>manifest_sources</code>. The result: <strong>N 230, E 230, per-reason exclusions 0, residue 0</strong>, so E plus the per-reason exclusions equals N exactly. All four gates passed, including <code>exclusion_accounting</code>. No identity left the export uncounted, so there is no silently-dropped list to enumerate. The plan's figure is <strong>stale</strong>: the cohort it described is not the current one (214 candidates then, 230 now; 355 manifest rows then, 342 now) and the accounting defect it described is closed.</p><p><strong>A passing gate with nothing to catch proves nothing, so the ledger was made to fire.</strong> Re-running the same instrument at <code>min_score 0.99</code> forces real exclusions: E 90, <code>below_name_score</code> 52, <code>bound_adjacent</code> 88, accounted 140, residue 0 — 90 + 140 = 230 = N, with all 140 identities enumerated in the ledger. The same instrument produced both readings, so the zero in the primary result is a measurement rather than an instrument that sees nothing.</p><p><strong>The historic eighteen were traced individually rather than restated.</strong> Sixteen are in the current cohort and emitted. The other two, <code>hot_neutral_temperature</code> and <code>inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width</code>, are <code>superseded</code> on both status and name stage, so the terminal projection no longer reaches them — they left by the selection boundary, not by an export exit. A third of this run's time went to establishing that distinction, and it is the difference between "eighteen dropped" and "zero dropped, two retired". The 233 pruned internal doc links and the grammar checkout identity in the report are advisory and count-independent. No graph mutation, no re-cut, no candidate, branch, tag or pull request. Evidence: <a href="/imas-codex/evidence/sn-west-cohort-treatment/export-accounting-currency">export accounting currency</a>.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20260917T110637356274-n-the-export-accounts-for-every-name-it-drops" data-who="reckon-ship" data-when="2026-09-17T11:39:04.893Z">
+    <div class="r-comment-body"><p>Export accounting CLOSED for the current cohort: N=230, E=230, per-reason exclusions 0, residue 0, gate passed, 0 silently dropped. The plan&#x27;s eighteen-name figure is STALE: 16 now emitted, 2 left as superseded via terminal-identity selection, not an export exit. Ledger proven live by a min_score=0.99 probe (140 exclusions, residue 0, all enumerated).</p></div>
 </div>
 </section>
 </main>
