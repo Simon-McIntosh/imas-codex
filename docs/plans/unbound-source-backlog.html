@@ -23,8 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -127,26 +128,24 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="skip-reason-enforcement" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="skip-reason-enforcement" data-choice="refuse-at-write" data-by="reckon-ship" data-when="2026-09-17T15:01:32+00:00">
     <p class="r-dec-q">Should a skip without a reason be refused at the write path, or reported
         by an audit?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="refuse-at-write">Refuse at the write path</button>
+      <button class="r-opt chosen" data-value="refuse-at-write">Refuse at the write path</button>
       <button class="r-opt" data-value="audit-only">Report it in an audit</button>
       </p>
-    <p class="r-dec-rat">Recommendation: refuse at the write path. An audit finds the 399th
-        blank row after it exists; a refusal means there is never one. The 398 already present are a
-        one-time reconstruction either way, and this repository&#x27;s own pattern is to bind a rule to
-        the moment that always happens rather than to a check someone must remember to run.</p>
+    <p class="r-dec-rat">Locked to what the code already does rather than to a preference. The 2026-09-17 figure audit read both skip writers at HEAD: mark_source_skipped takes reason as a required str keyword and write_skipped_sources reads r[&#x27;skip_reason&#x27;] as a required record key, so neither has a blank-reason route. The write path is already refuse-at-write and an audit-only choice would describe the system less accurately than the code does. The 398 reason-less rows are frozen history, not a growing cohort: every one carries a skipped_at between 2026-06-17 and 2026-07-28, zero after the plan&#x27;s own write date, and commit e20817e41 made the roster emit an explicit &#x27;cause not recorded&#x27; sentinel so a reader gets an honest unknown rather than a blank field.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-usb-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-create" data-written-at="2026-09-08" data-recommends-skill="/reckon-ship unbound-source-backlog §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-usb-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-create" data-written-at="2026-09-08" data-recommends-skill="/reckon-ship unbound-source-backlog §3" data-resolved-at="2026-09-17T15:01:32+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the reason-less skip write path first; the 1,283 composition backlog can wait</h4>
     <div class="r-fu-body"><p><strong>Start with §3, not §2.</strong> The 398 reason-less skips are a defect that keeps growing, and the 1,283 uncomposed sources are throughput that does not. Make the write path unable to record a skip without a reason, then reconstruct what survives for the 398 and mark the rest as an honest unknown — a blank field is not a finding, an explicit unknown is.</p><p>The mechanism is narrow and already located: <code>non_nameable_reason</code> is written only when <code>source_status == 'skipped'</code> at <code>imas_codex/standard_names/graph_ops.py:12324</code>, and it never reads <code>last_error</code>, so a source that failed with a diagnostic and was later marked skipped loses it. Verify that line still says this before acting — it was read on 2026-09-08.</p><p><strong>Do not treat the 1,652 stale rows as backlog.</strong> A source rebinds when its name is superseded, so residue there is the mechanism working; counting them makes the problem look a third larger than it is.</p><p>For §2, establish eligibility before composing: a source extracted before an admission rule tightened may now be correctly inadmissible, and composing it mints a name the review pool then rejects, which costs money and produces churn. Report the eligible count first and size the <code>sn run</code> pass to it.</p></div>
     <pre class="r-fu-prompt">/reckon-ship unbound-source-backlog §3</pre>
+    <p class="r-fu-outcome">Both halves answered, and the first by measurement rather than by work. Its section 3 instruction - make the write path unable to record a skip without a reason - was already satisfied when it was written: both writers require a reason by signature, and the cited mechanism at graph_ops.py:12324 has moved to :12441-12462 where it now reads last_error. Its section 2 instruction, report the eligible count before sizing a composition pass, is now delivered: of 1,359 extracted-unbound sources, 1,268 are admissible and 91 refused, and 65 of those refusals are test scaffolding rather than physics, leaving a rule-driven residue of 26. The ordering this followup argued for is therefore reversed by the evidence: section 3 needed nothing, and section 2 is where the remaining work is. The composition pass it defers to is carried by the followup appended in its place.</p>
     </article>
 <article class="r-fu" data-id="f-usb-accepted-names-carry-no-provenance" data-status="open" data-written-by="ship-s10-20260908" data-written-at="2026-09-15T19:20:00Z" data-recommends-skill="/reckon-ship unbound-source-backlog" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Nine accepted names carry no producing source, and unlike the other orphan classes they are exportable</h4>
@@ -162,6 +161,11 @@
     <h4 class="r-fu-title">The exporter has no producer-edge predicate, so a name with no data-dictionary justification can reach a catalog</h4>
     <div class="r-fu-body"><p>Measured 2026-09-16 and traced to code. Export selects identities on <code>accepted</code> or <code>approved</code> at <code>imas_codex/standard_names/export.py:607</code> and applies no producing-source eligibility predicate anywhere in the candidate construction at lines 798-836. Nine accepted names currently carry no <code>PRODUCED_NAME</code> edge; <strong>four of them entered a candidate set</strong>, and nothing published only because an unrelated <code>halo_current</code> token-collision gate failed the run first and left <code>emitted</code> at zero.</p><p>This is the exposure that matters most for human review, because it is the one a reviewer cannot detect. A name reads as well-formed whether or not anything in the data dictionary justifies it; the missing provenance is invisible in the artifact under review. Every other integrity defect in this sprint degrades a name a reviewer could in principle question.</p><p>The predicate has one carve-out it must respect. A structural parent with live children is legitimately source-free — <code>graph_ops.py:26233-26238</code> classifies exactly that case as <code>source_free</code> when <code>live_child_count</code> is at least one and no producer exists — and <code>beta</code> is a live instance. So the rule is not simply that every exported name carries a producer: it is that a name with no producer and no <code>source_free</code> origin is not exportable.</p><p>The detach routes that could create such a name are separately audited, and the rename path that produced five of the nine is already closed at <code>imas_codex/standard_names/edit.py:1931-1938</code>. This followup is the export-side half, and it is worth landing independently of that audit because it converts the accident into an invariant regardless of which route produced the orphan.</p></div>
     <pre class="r-fu-prompt">/reckon-ship unbound-source-backlog</pre>
+    </article>
+<article class="r-fu" data-id="f-usb-compose-the-admissible-cohort-not-the-backlog" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-17T15:05:00Z" data-recommends-skill="/reckon-ship unbound-source-backlog §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Size the composition pass at 1,268, and decide the 65 placeholders before the 26</h4>
+    <div class="r-fu-body"><p><strong>The cohort to compose is 1,268, not 1,359 and not 4,459.</strong> The eligibility census measured the extracted-unbound set against the admission gates as they stand: 1,268 admissible, 91 refused. Take the size from a fresh measurement at the moment of the cut rather than from this number, because the gates have moved under this plan once already.</p><p><strong>913 of the 1,268 were never attempted at all</strong>, and the cohort's highest <code>attempt_count</code> is 4 against a cap of 5. So this is new work rather than a stalled re-run, and nothing here is waiting on the attempt-cap disposition that the lifecycle plan owns.</p><p><strong>Two dispositions are owed before the pass, and they are different in kind.</strong> The 65 placeholder identities are <code>test/path</code> and <code>__revreltest__/leaf1</code> - test scaffolding that reached the graph as sources and was never cleaned up. They are graph hygiene, not backlog, and composing them would mint names for things that are not physical quantities. The 26 rule-driven refusals are the real question: 62 fail on <code>derived_parent_inadmissible</code>, which is a rule about the parent rather than about the row, so a parent repair may return some of them. That was not measured.</p><p><strong>A third finding sits outside the cohort and is the one most likely to be acted on wrongly.</strong> 51 rows among the 4,767 already-processed sources would be refused by today's gates. Whether a rule that tightened beneath landed work should re-open it is a plan decision, not a measurement, and it should be taken deliberately rather than inherited by a pass that happens to re-read them.</p><p>Full record, with every named query and the five-population control that pins the classifier at both ends: <a href="/imas-codex/evidence/unbound-source-backlog/eligibility-census">the eligibility census</a>.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship unbound-source-backlog §2</pre>
     </article>
 </section>
 
