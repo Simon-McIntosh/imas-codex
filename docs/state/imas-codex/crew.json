@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T21:50:06",
+  "updated": "2026-09-17T21:51:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -148210,6 +148210,206 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T185454259985-n-an-endpoint-drop-is-distinguishable-from-a-model-refusal",
+        "plan": "sn-release-readiness",
+        "section": "\u00a71",
+        "node": "n-an-endpoint-drop-is-distinguishable-from-a-model-refusal",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1503,
+                "cached_input_tokens": 785738,
+                "input_tokens": 787243,
+                "output_tokens": 824,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 788067,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a test drives benchmark composition against a simulated endpoint drop and against a simulated model refusal and asserts the two produce distinguishable recorded outcomes, failing before the change and passing after; the recorded outcome names which of the two occurred rather than a single generic failure; the test command and exit status are named in the manifest with its log; the evidence states how many retry attempts the current path makes before reporting, measured from the code with file and line, and what an operator sees today for each of the two cases",
+          "estimated_hours": null,
+          "goal": "Make a provider endpoint drop distinguishable from a model refusal in benchmark composition, which retries hide today",
+          "id": "n-an-endpoint-drop-is-distinguishable-from-a-model-refusal",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:54:57Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185454259985-n-an-endpoint-drop-is-distinguishable-from-a-model-refusal/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-release-readiness/endpoint-drop-distinguishable.md",
+            "docs/evidence/archive/sn-release-readiness-landed.html",
+            "docs/plans/sn-release-readiness.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-units",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:55:16Z",
+        "completed_at": "2026-09-17T19:41:46.656Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2744,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2790,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b7da331577b56ae3ba59dc3c79ce26ac76b1d4f5",
+        "commits": [
+          "a993531032e991cd9cf70bef7975bbff97bc7359"
+        ],
+        "changed_lines": {
+          "added": 353,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "probe.py distinguishing an endpoint drop from a model refusal, with before/after benchmark logs",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185454259985-n-an-endpoint-drop-is-distinguishable-from-a-model-refusal/artifacts-endpoint-drop/probe.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185454259985-n-an-endpoint-drop-is-distinguishable-from-a-model-refusal/manifest.md",
+        "scope_changed": false,
+        "session_id": "ee460f6a-c38a-4917-b384-e6194005c95e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1860578,
+            "input_tokens_cumulative": 9401826,
+            "output_tokens": 7392,
+            "output_tokens_cumulative": 46311,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T19:41:46.656Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9711961,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2782.193,
+          "generated_tokens": 61603,
+          "generation_seconds": 2616.808,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 32.3,
+          "machine_seconds": 165.385,
+          "peak_input_tokens": 155245,
+          "tokens_per_second": 23.54,
+          "wall_tokens_per_second": 22.14
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-an-endpoint-drop-is-distinguishable-from-a-model-refusal",
+          "session_id": "ee460f6a-c38a-4917-b384-e6194005c95e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T19:41:46.656Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 97.0,
+        "orientation_input_tokens": 6115857.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -148480,6 +148680,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2264
+    "_version": 2265
   }
 }
