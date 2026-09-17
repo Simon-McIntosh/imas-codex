@@ -617,6 +617,22 @@ worth paying for, because only then can its result be seen.</p>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20260917T110637356274-n-the-export-accounts-for-every-name-it-drops" data-who="reckon-ship" data-when="2026-09-17T11:39:04.893Z">
     <div class="r-comment-body"><p>Export accounting CLOSED for the current cohort: N=230, E=230, per-reason exclusions 0, residue 0, gate passed, 0 silently dropped. The plan's eighteen-name figure is STALE: 16 now emitted, 2 left as superseded via terminal-identity selection, not an export exit. Ledger proven live by a min_score=0.99 probe (140 exclusions, residue 0, all enumerated).</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260917T145355344948-n-the-skip-rule-stops-excluding-a-named-quantity" data-who="reckon-ship-worker" data-when="2026-09-17T17:10:00Z">
+    <div class="r-comment-body"><p><strong>The confirmed direction holds and the negative half holds for five of the six rows the brief names; the sixth is a factual error in the brief and the failing assertion is what proves it.</strong> The rule refuses nothing it should refuse and admitted nothing it should not, because <em>no rule text changed</em>. The correction this section specified was made by reclassifying the backing nodes under the one authority, and that reclassification had already landed before this node ran — so this node verifies it rather than re-implementing it.</p>
+    <p>Measured against the live graph, read-only, each query bounded to the named paths.</p>
+    <table>
+      <thead><tr><th>Row</th><th><code>node_category</code></th><th>rule verdict</th></tr></thead>
+      <tbody>
+        <tr><td><code>camera_x_rays/detector_humidity</code></td><td><strong>quantity</strong></td><td>admitted — and composed as <code>relative_humidity_of_detector</code></td></tr>
+        <tr><td>four <code>equilibrium/time_slice/constraints/*/weight</code></td><td><code>fit_artifact</code> (all four)</td><td>refused</td></tr>
+        <tr><td><code>equilibrium/time_slice/convergence/iterations_n</code></td><td><code>fit_artifact</code></td><td>refused</td></tr>
+        <tr><td><code>equilibrium/time_slice/contour_tree/node/z</code></td><td><strong>quantity</strong> (unit m)</td><td><strong>admitted</strong> — the one row where the brief expects refusal</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The count of sources the rule refuses, before and after: 10 <code>dd_node_category_ineligible</code> sources, unchanged,</strong> with <code>camera_x_rays/detector_humidity</code> absent from that set (its row reads <code>composed</code>). The figure is identical before and after this node's work because no rule text changed. Over the DD population the rule refuses 51,132 <code>IMASNode</code> nodes, of which 21,101 carry both a non-dimensionless unit and documentation — the population a broader audit would sweep, counted by a different instrument than the source count.</p>
+    <p><strong>The residual, reported rather than repaired.</strong> <code>equilibrium/time_slice/contour_tree/node/z</code> is a quantity carrying unit <code>m</code>, so the classifier admits it, and it carries no name because the <em>compose model</em> declined it (<code>compose_model_skipped</code>). A classifier rule covering a critical-point coordinate is what would exclude it, and it is not this node's to land: this node leaves the driving followup open and its checklist required.</p>
+    <p>Evidence: <a href="/imas-codex/evidence/sn-west-cohort-treatment/skip-rule-correction">the node-category skip rule, before and after</a>; the elapsed harness and its log are recorded there. No graph mutation, no catalog write and no release action was performed.</p></div>
+</div>
 </section>
 </main>
 </body>

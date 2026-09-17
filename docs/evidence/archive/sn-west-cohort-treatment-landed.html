@@ -160,6 +160,42 @@
       <a href="/imas-codex/evidence/sn-west-cohort-treatment/export-accounting-currency">export accounting currency</a>.
     </p>
 
+    <h2 id="skip-rule-currency-20260917">Skip-rule currency: the rule refuses nothing it should refuse</h2>
+    <p>
+      The section asked for one outcome in each direction. A documented physical quantity
+      carrying a unit must not be refused by the node-category rule, and the
+      fit-constraint weights and solver rows must stay refused. Measured against the live
+      graph on 2026-09-17, <strong>the first outcome holds and the second holds for five
+      of the six rows the brief names.</strong>
+    </p>
+    <table>
+      <thead><tr><th>Row</th><th><code>node_category</code></th><th>Rule verdict</th></tr></thead>
+      <tbody>
+        <tr><td><code>camera_x_rays/detector_humidity</code></td><td><strong>quantity</strong></td><td>admitted, and composed as
+      <code>relative_humidity_of_detector</code></td></tr>
+        <tr><td>the four <code>equilibrium/time_slice/constraints/*/weight</code></td><td><code>fit_artifact</code> (all four)</td><td>refused</td></tr>
+        <tr><td><code>equilibrium/time_slice/convergence/iterations_n</code></td><td><code>fit_artifact</code></td><td>refused</td></tr>
+        <tr><td><code>equilibrium/time_slice/contour_tree/node/z</code></td><td><strong>quantity</strong></td><td><strong>admitted</strong> — the one row where the brief expects refusal and the classifier admits it</td></tr>
+      </tbody>
+    </table>
+    <p>
+      The rule refuses 10 sources by its own reason code (<code>dd_node_category_ineligible</code>),
+      and none of them is <code>camera_x_rays/detector_humidity</code>. The figure is
+      unchanged before and after this node because <strong>no rule text changed</strong>:
+      the correction the section specified was made by reclassifying the backing nodes
+      under the one authority, and it had already landed.
+    </p>
+    <p>
+      <strong>The sixth row is reported rather than repaired.</strong>
+      <code>contour_tree/node/z</code> is a quantity carrying unit m, so the rule admits it,
+      and it carries no name because the <em>compose model</em> declined it — the free-form
+      refusal mechanism the section's own audit identified. A classifier rule covering a
+      critical-point coordinate is what would exclude this row, and the section's "classification
+      repair" landed for the weights and counters but not for it.
+      Full method, the failing assertion and the queries:
+      <a href="/imas-codex/evidence/sn-west-cohort-treatment/skip-rule-correction">skip rule correction</a>.
+    </p>
+
   </main>
 </body>
 </html>
