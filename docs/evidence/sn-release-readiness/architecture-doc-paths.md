@@ -61,9 +61,13 @@ verbatim form is obtained by asking the command rather than by reading it out
 of a docstring:
 
 ```
-Usage: imas-codex embed start [OPTIONS]      # embedding server
-Usage: imas-codex graph start [OPTIONS]      # Neo4j
+Usage: imas-codex embed start [OPTIONS]
+Usage: imas-codex graph start [OPTIONS]
 ```
+
+The document reproduces the two lines with no trailing annotation, so the
+quotation is exactly what the command prints, and names which line is which
+in the sentence that follows the fence.
 
 Captured to `logs/usage_embed_start.log` and `logs/usage_graph_start.log`, both
 exit 0. The document now quotes these lines, states that the command owns

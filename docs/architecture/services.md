@@ -51,9 +51,13 @@ The command owns deployment — there is no separate submission step to
 perform by hand:
 
 ```
-Usage: imas-codex embed start [OPTIONS]      # embedding server
-Usage: imas-codex graph start [OPTIONS]      # Neo4j
+Usage: imas-codex embed start [OPTIONS]
+Usage: imas-codex graph start [OPTIONS]
 ```
+
+The first line is the embedding server; the second is Neo4j. Both usage
+lines are quoted from `imas-codex embed start --help` and `imas-codex graph
+start --help`.
 
 ```
 User: imas-codex embed start
