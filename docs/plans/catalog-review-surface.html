@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-commits" content="f39508320a56db9599efc04b32c05d64a0598569,8862a65f37bd49011cbec319ccb95638acefd98e">
 <meta name="plan-artifacts" content="tests/graph/test_backup_currency_contents.py,tests/graph/test_backup_currency.py,tests/core/test_backup_currency.py">
 <meta name="plan-impl" content="0.88">
@@ -298,6 +298,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260908T053735165564-n-crs-the-repl-bounds-its-own-output" data-who="cx-betatangle" data-when="2026-09-08T06:24:00Z">
     <div class="r-comment-body"><p>repl output is bounded at one million characters, below the client's 16 MB transport guard even if every non-BMP character expands to a 12-byte JSON surrogate pair, with truncation appending the exact produced and dropped counts and the exception return bounded through the same helper. This is the MCP failure of 2026-09-08: capture was always correct, the return of stdout_capture.getvalue() was not. The node needed four attempts — three sol sessions died from harness faults that spliced stray words and a truncated worktree path into command text, then failed write_stdin with an unknown process id. Its work and gate were complete after the first; only the commit was missing, and terra landed it in two minutes.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260917T110212462704-n-reuse-map-for-the-remaining-release-surface-work" data-who="reckon-ship" data-when="2026-09-17T11:36:40.309Z">
+    <div class="r-comment-body"><p>Reuse map: 13 capability rows, 12 with a concrete provider path:symbol:line, 1 NO EXISTING PROVIDER; 44/44 citations verified at base.</p></div>
 </div>
 </section>
 </main>
