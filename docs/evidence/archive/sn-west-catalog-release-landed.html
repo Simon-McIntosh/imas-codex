@@ -740,6 +740,27 @@
       node owned, nothing merged or pushed, and nothing calls the function
       automatically.</p>
   </section>
+<section id="cypher-matcher-brittleness">
+    <h2>Cypher matcher brittleness in the mint-path tests</h2>
+    <p>The mint path issues two statements: a base join over DD paths, and an
+    immediate-family closure over the base ids. Its unit-test stub chose which
+    rows to return by searching the statement for two tokens,
+    <code>PRODUCED_NAME</code> and <code>HAS_PARENT</code>. That is a test of
+    the string rather than of the behaviour. An unrelated field landing in the
+    base join under a name carrying the closure's token reroutes the call, the
+    base join is served the family rows, which carry no <code>ids</code> key,
+    and every input path is then reported unmatched. The stub now routes on the
+    parameters the mint path declares, <code>paths</code> for the base join and
+    <code>base_ids</code> for the closure, so no branch reads the statement. A
+    committed case drives the same mint with both statements rewritten to carry
+    an unrelated field and requires an identical batch and unmatched list.</p>
+    <p>Gate: <code>pytest</code> with <code>-m graph</code> over
+    <code>tests/standard_names/test_minting.py</code> together with
+    <code>tests/standard_names/test_exact_reset_parent_cleanup_graph.py</code>:
+    exit 0, 4 passed of 11 collected, 7 deselected, 37.81s. Per-query detail:
+    <a href="/imas-codex/evidence/sn-west-catalog-release/cypher-matcher-brittleness">cypher
+    matcher brittleness</a>.</p>
+  </section>
 </main>
 </body>
 </html>
