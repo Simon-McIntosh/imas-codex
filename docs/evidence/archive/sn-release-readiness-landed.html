@@ -285,6 +285,64 @@
       mutation, no code change.
     </p>
 
+    <h2 id="empty-cohort-no-op">The empty-cohort no-op, characterised rather than decided</h2>
+
+    <p>
+      The plan's open question &mdash; whether <code>persist_refined_name</code>'s
+      empty-cohort no-op should refuse instead &mdash; is bounded on both sides,
+      with no behaviour changed. The no-op is not a general tolerance for an empty
+      cohort: of the two disjuncts in
+      <code>_allow_empty_noop</code> (<code>graph_ops.py:18952</code>) the first is
+      dead, because the preflight always projects <code>source_ids</code>, so the
+      only live route is a governed <code>edit_mode</code>. Driven with an empty
+      cohort and a governed edit the function returns normally &mdash; the same
+      dict, one commit, no rollback, no exception &mdash; and commits a successor
+      with zero source edges, while the automated route on the same cohort raises
+      <code>AUTHORITATIVE_SOURCE_COHORT_EMPTY</code> and rolls back. Two tests now
+      pin one branch each: <code>2 passed, 1 warning in 6.25s</code>, exit 0.
+    </p>
+
+    <p>
+      <strong>What a refusal would cost is one call site, and it is the only one
+      the no-op serves.</strong> Production call sites of
+      <code>persist_refined_name</code> number two: <code>workers.py:7191</code>,
+      which passes no <code>edit_mode</code> and already refuses with its refusal
+      caught locally, and <code>edit.py:3252</code>, the governed rename, where a
+      refusal would propagate &mdash; nothing on the path catches
+      <code>RefinedNamePersistenceRefusal</code>, so it would propagate out of
+      <code>_apply_rename</code> through <code>apply_edit</code> (a bare
+      <code>finally</code>, no <code>except</code>) and fail the
+      <code>sn edit</code> command rather than return an <code>EditPlan</code>. Of
+      seven direct callers of <code>retarget_standard_name_sources</code>, only
+      <code>graph_ops.py:18952</code> ever passes the waiver.
+    </p>
+
+    <p>
+      <strong>Live population, with firing controls.</strong> Of 1,752 refined
+      successors, <strong>991 carry no source</strong>; <strong>241 of those carry
+      an <code>edit_mode</code></strong> (148 <code>rename</code>, 93
+      <code>hint</code>), which is the route the question governs. The counting
+      predicate returns non-zero on both axes elsewhere: 761 refined successors
+      <em>with</em> a source, 1,350 non-refined identities without one, against
+      10,019 <code>StandardNameSource</code> rows in a 5,130-name graph. Post-dating
+      the guard merged at <code>5c6c015fb</code> (2026-09-01T19:17:55Z) the
+      unsourced population is <strong>131</strong> &mdash; 94 <code>rename</code>,
+      1 <code>hint</code>, 36 with no <code>edit_mode</code> &mdash; and the
+      governed bucket is the one that grew, 36 at the two records' shared
+      2026-09-07 baseline to 94 today, under predicates that are the same axis
+      measured twice rather than a subtraction.
+    </p>
+
+    <p>
+      The full record, with the mechanism table, the call-site table, the control
+      table and the two census logs, is in
+      <code>docs/evidence/sn-release-readiness/empty-cohort-no-op.md</code>. The
+      implementation decision is the coordinator's and was not taken here; no
+      behaviour changed, no graph mutation was made, and the test file this node
+      touched is outside its declared write scope and is recorded as a scope
+      deviation rather than treated as licensed.
+    </p>
+
   </main>
 </body>
 </html>
