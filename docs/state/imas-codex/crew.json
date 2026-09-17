@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T21:37:52",
+  "updated": "2026-09-17T21:39:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -147196,6 +147196,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T183714452106-usb-the-ninety-one-refusals-are-dispositioned",
+        "plan": "unbound-source-backlog",
+        "section": "\u00a72",
+        "node": "usb-the-ninety-one-refusals-are-dispositioned",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1714,
+                "cached_input_tokens": 615156,
+                "input_tokens": 616872,
+                "output_tokens": 1179,
+                "reasoning_output_tokens": 513,
+                "total_tokens": 618051,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "ceb4c66b-622b-4e72-83de-68acdb6fae2e",
+            "session_id": "ship-s10-20260917"
+          },
+          "done_when": "a captured log records for each of the 26 rule-driven refusals measured on 2026-09-17 whether repairing its parent would make it admissible, with the recoverable and not-recoverable counts summing to 26, and lists the 65 placeholder identities individually with the evidence that each is test scaffolding rather than a physical quantity, the two groups summing to the 91 refusals, every count carrying its query and a positive control beside any zero; no graph write is performed",
+          "estimated_hours": null,
+          "goal": "adjudicate the refused extracted-unbound sources so the composition pass knows which are recoverable and which are scaffolding",
+          "id": "usb-the-ninety-one-refusals-are-dispositioned",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:37:17Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183714452106-usb-the-ninety-one-refusals-are-dispositioned/manifest.md",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/unbound-source-backlog/refusal-adjudication.md",
+            "docs/figures/unbound-source-backlog/refusal-adjudication.svg",
+            "docs/plans/unbound-source-backlog.html",
+            "docs/evidence/archive/unbound-source-backlog-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s10c-local-b",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:37:29Z",
+        "completed_at": "2026-09-17T19:37:40.936Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3599,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3611,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6fbba5305b0f675be238ce21cb21956696071c08",
+        "commits": [
+          "d82557adc46086cdb88c85296cb56a8c52872db6"
+        ],
+        "changed_lines": {
+          "added": 429,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "coordinator re-derivation of the cohort and placeholder counts against the live graph, independent of the worker's instrument",
+          "exit_status": 0,
+          "log_path": null,
+          "log_digest": "extracted-unbound cohort=1359 placeholders=65 control=2 non-zero \u2014 both load-bearing figures reproduced exactly"
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183714452106-usb-the-ninety-one-refusals-are-dispositioned/manifest.md",
+        "scope_changed": false,
+        "session_id": "8bb9bd82-63cc-4791-9172-e76e1940d4e9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8820435,
+            "input_tokens_cumulative": 8820435,
+            "output_tokens": 58857,
+            "output_tokens_cumulative": 58857,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T19:37:40.936Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8965494,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3607.299,
+          "generated_tokens": 69182,
+          "generation_seconds": 3413.351,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 29.9,
+          "machine_seconds": 193.948,
+          "peak_input_tokens": 143759,
+          "tokens_per_second": 20.27,
+          "wall_tokens_per_second": 19.18
+        },
+        "follow_on_paths": [
+          "/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260917/usb-the-ninety-one-refusals-are-dispositioned",
+          "session_id": "8bb9bd82-63cc-4791-9172-e76e1940d4e9",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T19:37:40.936Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 84.0,
+        "orientation_input_tokens": 4516222.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -147466,6 +147669,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2259
+    "_version": 2260
   }
 }
