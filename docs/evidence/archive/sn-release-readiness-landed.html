@@ -737,6 +737,175 @@
     dispatched test node's question. Full method and limits:
     <a href="/imas-codex/evidence/sn-release-readiness/batch-failure-cause">batch failure cause</a>.
   </p>
+<h2 id="architecture-doc-deployment-command">The architecture document names the command that owns deployment</h2>
+
+    <p>
+      The services document told a reader that compute-node deployment runs
+      <code>sbatch /tmp/codex-embed.sh</code>. That path is absent from disk, and
+      it was never a reader-runnable artifact: the submission code wrote the
+      temporary script and removed it inside a single remote command, so the file
+      was gone before the document's own next step could be followed. The tracked
+      <code>slurm/codex-embed.sh</code> launcher was deleted in the same change
+      that made the generated script durable, so the old instruction had nothing
+      left to point at.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 780 290" width="100%" role="img"
+           aria-label="Two submission paths compared. The documented one writes the sbatch script to a temporary path and removes it with rm -f in the same remote command. The one the code runs has embed start generate the script, write it beside the service log under the user's services directory, and submit that durable path.">
+        <defs>
+          <marker id="ar-doc-wrong" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#b04a4a"/>
+          </marker>
+          <marker id="ar-doc-right" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" aria-hidden="true"
+                  orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#444444"/>
+          </marker>
+        </defs>
+
+        <text x="4" y="14" font-family="system-ui, sans-serif" font-size="12"
+              font-weight="600" fill="#b04a4a">What the document described</text>
+
+        <rect x="4" y="24" width="216" height="44" rx="6" fill="#fdf3f3"
+              stroke="#b04a4a" stroke-width="2" stroke-dasharray="5 3"/>
+        <text x="16" y="52" font-family="ui-monospace, monospace" font-size="13"
+              fill="#7a2f2f">/tmp/codex-embed.sh</text>
+        <line x1="14" y1="47" x2="210" y2="47" stroke="#b04a4a" stroke-width="2"/>
+
+        <line x1="224" y1="46" x2="288" y2="46" stroke="#b04a4a"
+              stroke-width="1.5" marker-end="url(#ar-doc-wrong)"/>
+        <text x="296" y="34" font-family="system-ui, sans-serif" font-size="12"
+              fill="#7a2f2f">written, then removed by
+          <tspan font-family="ui-monospace, monospace">rm -f</tspan></text>
+        <text x="296" y="54" font-family="system-ui, sans-serif" font-size="12"
+              fill="#7a2f2f">in the same remote command, so it is</text>
+        <text x="296" y="74" font-family="system-ui, sans-serif" font-size="12"
+              fill="#b04a4a">gone before the reader's next step.</text>
+
+        <text x="4" y="132" font-family="system-ui, sans-serif" font-size="12"
+              font-weight="600" fill="#1a7f5a">What the code runs</text>
+
+        <rect x="4" y="142" width="180" height="58" rx="6" fill="#ffffff"
+              stroke="#444444" stroke-width="1.5"/>
+        <text x="16" y="168" font-family="ui-monospace, monospace" font-size="12"
+              fill="#222222">imas-codex</text>
+        <text x="16" y="186" font-family="ui-monospace, monospace" font-size="12"
+              font-weight="700" fill="#222222">embed start</text>
+
+        <line x1="188" y1="171" x2="226" y2="171" stroke="#444444"
+              stroke-width="1.5" marker-end="url(#ar-doc-right)"/>
+
+        <rect x="230" y="142" width="168" height="58" rx="6" fill="#ffffff"
+              stroke="#444444" stroke-width="1.5"/>
+        <text x="242" y="168" font-family="system-ui, sans-serif" font-size="12"
+              fill="#222222">generates the</text>
+        <text x="242" y="186" font-family="system-ui, sans-serif" font-size="12"
+              fill="#222222">sbatch script</text>
+
+        <line x1="402" y1="171" x2="440" y2="171" stroke="#444444"
+              stroke-width="1.5" marker-end="url(#ar-doc-right)"/>
+
+        <rect x="444" y="136" width="190" height="70" rx="6" fill="#eefaf4"
+              stroke="#1a7f5a" stroke-width="2"/>
+        <text x="456" y="158" font-family="ui-monospace, monospace" font-size="11"
+              fill="#145c42">~/.local/share/</text>
+        <text x="456" y="174" font-family="ui-monospace, monospace" font-size="11"
+              fill="#145c42">imas-codex/services/</text>
+        <text x="456" y="194" font-family="ui-monospace, monospace" font-size="12"
+              font-weight="700" fill="#145c42">codex-embed.sh</text>
+
+        <line x1="638" y1="171" x2="676" y2="171" stroke="#444444"
+              stroke-width="1.5" marker-end="url(#ar-doc-right)"/>
+
+        <rect x="680" y="142" width="96" height="58" rx="6" fill="#ffffff"
+              stroke="#444444" stroke-width="1.5"/>
+        <text x="692" y="168" font-family="ui-monospace, monospace" font-size="12"
+              fill="#222222">sbatch</text>
+        <text x="692" y="186" font-family="system-ui, sans-serif" font-size="11"
+              fill="#222222">that path</text>
+
+        <text x="4" y="234" font-family="system-ui, sans-serif" font-size="12"
+              fill="#333333">The script is written beside the service log, so it survives the submission and can be submitted again unchanged:</text>
+        <text x="4" y="254" font-family="ui-monospace, monospace" font-size="12"
+              fill="#145c42">sbatch ~/.local/share/imas-codex/services/codex-embed.sh</text>
+        <text x="4" y="276" font-family="system-ui, sans-serif" font-size="12"
+              fill="#666666">the same path holds codex-neo4j.sh for imas-codex graph start</text>
+      </svg>
+      <figcaption>
+        The documented submission path against the path the code runs. The
+        temporary script was removed within the same remote command, so no reader
+        could submit it; the durable script now sits beside the log of the job it
+        launches.
+      </figcaption>
+    </figure>
+
+    <p>
+      The document now names the command that owns deployment. The command is
+      established from the code rather than assumed &mdash;
+      <code>imas_codex/cli/embed.py:37</code> defines
+      <code>embed&nbsp;start</code> and <code>imas_codex/cli/graph.py</code>
+      defines <code>graph&nbsp;start</code> &mdash; and each usage line is quoted
+      as Click generates it, captured by running the command rather than read out
+      of a docstring:
+    </p>
+
+    <pre><code>Usage: imas-codex embed start [OPTIONS]      # embedding server
+Usage: imas-codex graph start [OPTIONS]      # Neo4j</code></pre>
+
+    <p>
+      The diagram follows the current submission path, which writes the generated
+      script to the user's services directory beside the service log
+      (<code>imas_codex/cli/services.py:556</code>, <code>:557</code>,
+      <code>:591</code>), and the document says the script survives the
+      submission, so a reader can inspect what was launched and submit it again
+      verbatim.
+    </p>
+
+    <p>
+      The whole document was checked rather than the one line, because a file
+      inaccurate about the path it hands a reader is weak evidence that the rest
+      of it is right. Nineteen path-and-source assertions, thirteen command
+      invocations and the five external tools the troubleshooting steps use were
+      each probed against disk and source today: exactly one path is absent, and
+      it is the one the document instructed a reader to submit. The check found a
+      second inaccuracy that had nothing to do with submission paths.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Line</th><th>The document said</th><th>What is true today</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>56</td>
+          <td><code>sbatch /tmp/codex-embed.sh</code></td>
+          <td>absent, and removed by its own submission path; the generated
+              script is durable at
+              <code>~/.local/share/imas-codex/services/codex-embed.sh</code></td>
+        </tr>
+        <tr>
+          <td>208</td>
+          <td>LLM Proxy default port <code>18790</code></td>
+          <td><code>18400</code> &mdash; <code>LLM_BASE_PORT</code> plus the
+              facility index (<code>imas_codex/settings.py:711</code>,
+              <code>:840</code>), stated as the convention at
+              <code>pyproject.toml:764</code> and printed by the group's own help
+              at <code>imas_codex/cli/llm_cli.py:296</code>. The string
+              <code>18790</code> occurred in exactly one place in the repository:
+              that line.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Per-path table, the CLI surface it was checked against, the verbatim usage
+      captures, and the method's limits are in
+      <a href="/imas-codex/evidence/sn-release-readiness/architecture-doc-paths.html">the
+      document-path evidence file</a>. Read-only throughout: no graph query, no
+      file outside the document and its evidence touched.
+    </p>
 
   </main>
 </body>

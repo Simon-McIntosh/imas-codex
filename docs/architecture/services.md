@@ -46,19 +46,35 @@ only the YAML configuration differs.
 
 ### SLURM Services (Neo4j, Embed)
 
-When the location maps to a SLURM partition, `start` submits a batch job:
+When the location maps to a SLURM partition, `start` submits a batch job.
+The command owns deployment — there is no separate submission step to
+perform by hand:
+
+```
+Usage: imas-codex embed start [OPTIONS]      # embedding server
+Usage: imas-codex graph start [OPTIONS]      # Neo4j
+```
 
 ```
 User: imas-codex embed start
   → _is_compute_target() → True (scheduler=slurm)
   → _submit_service_job("codex-embed", ...)
-    → generates sbatch script
-    → sbatch /tmp/codex-embed.sh
+    → generates the sbatch script
+    → writes it to ~/.local/share/imas-codex/services/codex-embed.sh
+    → sbatch ~/.local/share/imas-codex/services/codex-embed.sh
   → _wait_for_job("codex-embed")  ← rich spinner + countdown
     → polls squeue until RUNNING
     → health check: curl /health
   → ✓ codex-embed healthy
 ```
+
+The generated script is written beside the service's log rather than to a
+temporary path, so it survives the submission. Read it to see exactly what
+was submitted, and re-submit it verbatim (`sbatch
+~/.local/share/imas-codex/services/codex-embed.sh`) to reproduce a launch
+without going through `start` again. Re-running `start` overwrites it under
+the same job name. `imas-codex graph start` works the same way, writing
+`codex-neo4j.sh` beside `codex-neo4j.log`.
 
 Inside the SLURM batch script, the process is the last command (`exec`),
 so SLURM manages it directly — `scancel` stops it, cgroup enforcement
@@ -198,14 +214,15 @@ imas-codex llm service status
 
 ### Port conflicts
 
-Default ports (configurable in `pyproject.toml`):
+Default ports (configurable in `pyproject.toml`). These are the base ports; a
+facility with a non-zero index in `locations` is offset by that index.
 
 | Service | Port |
 |---------|------|
 | Neo4j Bolt | 7687 |
 | Neo4j HTTP | 7474 |
 | Embed | 18765 |
-| LLM Proxy | 18790 |
+| LLM Proxy | 18400 |
 
 ### Rich output disabled
 
