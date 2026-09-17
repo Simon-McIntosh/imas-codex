@@ -213,11 +213,14 @@
     </table>
     <p>Of the 91 refused rows, <strong>65 are test scaffolding left in the graph as sources</strong>
     &mdash; <code>test/path</code> 64 times and <code>__revreltest__/leaf1</code> once &mdash; which
-    no admission rule decided. The rule-driven residue is <strong>26 rows</strong>:
-    <code>node_category_ineligible</code> 18 (nine <code>structural</code>, eight
-    <code>fit_artifact</code>, one <code>representation</code>),
-    <code>container_node_no_signal_signature</code> 3, <code>dd_lifecycle_removed</code> 1 and
-    <code>duplicate_ids</code> 1. The cohort's highest <code>attempt_count</code> is 4 against a cap
+    no admission rule decided, 59 failing <code>derived_parent_inadmissible</code> and 6
+    <code>missing_dd_authority</code>. The rule-driven residue is <strong>26 rows</strong> &mdash;
+    23 <code>dd</code> and 3 <code>derived</code>: <code>node_category_ineligible</code> 18 (nine
+    <code>structural</code>, eight <code>fit_artifact</code>, one <code>representation</code>),
+    <code>container_node_no_signal_signature</code> 3, <code>dd_lifecycle_removed</code> 1,
+    <code>duplicate_ids</code> 1, and 3 derived rows excluded by
+    <code>derived_parent_inadmissible</code> (two bare bases, one name that lost a projection
+    token). The cohort's highest <code>attempt_count</code> is 4 against a cap
     of five, so no row has exhausted its search.</p>
     <p>Positive controls on the classifier, which re-implements the gates rather than calling the
     pipeline: it refuses <strong>1,820 of 1,820 <code>stale</code> rows</strong> and
