@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="430" viewBox="0 0 1180 430" font-family="DejaVu Sans, Helvetica, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#444444"/>
+    </marker>
+  </defs>
+
+  <text x="24" y="30" font-size="15" font-weight="bold">Before: a parked row depended on a later pass</text>
+
+  <rect x="24" y="52" width="300" height="72" rx="10" fill="#f6d5d5" stroke="#9a4a4a" stroke-width="1.4"/>
+  <text x="174" y="80" font-size="12" text-anchor="middle">sweep parks the source</text>
+  <text x="174" y="100" font-size="12" text-anchor="middle">status = failed, reason = cap sentence</text>
+
+  <line x1="330" y1="88" x2="382" y2="88" stroke="#444444" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="388" y="52" width="300" height="72" rx="10" fill="#f6d5d5" stroke="#9a4a4a" stroke-width="1.4"/>
+  <text x="538" y="80" font-size="12" text-anchor="middle">nothing records a cause or a class</text>
+  <text x="538" y="100" font-size="12" text-anchor="middle">the row carries one error string</text>
+
+  <line x1="694" y1="88" x2="746" y2="88" stroke="#444444" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="752" y="52" width="330" height="72" rx="10" fill="#f6d5d5" stroke="#9a4a4a" stroke-width="1.4"/>
+  <text x="917" y="80" font-size="12" text-anchor="middle">a later pass reads the whole cohort</text>
+  <text x="917" y="100" font-size="12" text-anchor="middle">and classifies it</text>
+
+  <text x="24" y="152" font-size="11" fill="#333333">A row parked between two passes carries no disposition, so a census taken then reports it unclassified.</text>
+
+  <text x="24" y="212" font-size="15" font-weight="bold">After: the writer records the disposition in the same tick</text>
+
+  <rect x="24" y="234" width="300" height="72" rx="10" fill="#d5e8d5" stroke="#3f7a3f" stroke-width="1.4"/>
+  <text x="174" y="262" font-size="12" text-anchor="middle">sweep parks the source</text>
+  <text x="174" y="282" font-size="12" text-anchor="middle">status = failed, reason = cap sentence</text>
+
+  <line x1="330" y1="270" x2="382" y2="270" stroke="#444444" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="388" y="234" width="330" height="72" rx="10" fill="#dae8fc" stroke="#2f5d9a" stroke-width="1.4"/>
+  <text x="553" y="262" font-size="12" text-anchor="middle">read the rows this park left undisposed</text>
+  <text x="553" y="282" font-size="12" text-anchor="middle">reason = cap sentence and no class yet</text>
+
+  <line x1="724" y1="270" x2="776" y2="270" stroke="#444444" stroke-width="1.4" marker-end="url(#arrow)"/>
+
+  <rect x="782" y="234" width="330" height="72" rx="10" fill="#dae8fc" stroke="#2f5d9a" stroke-width="1.4"/>
+  <text x="947" y="262" font-size="12" text-anchor="middle">classify each row, then stamp</text>
+  <text x="947" y="282" font-size="12" text-anchor="middle">one member of the closed set</text>
+
+  <text x="24" y="336" font-size="11" text-anchor="start" fill="#333333">The classify-and-write step is one function, shared with the reconcile pass, so the precedence exists once.</text>
+  <text x="24" y="356" font-size="11" text-anchor="start" fill="#333333">A tick that parks nothing issues neither the read nor a write.</text>
+  <text x="24" y="376" font-size="11" text-anchor="start" fill="#333333">A row the classifier cannot place is refused before any write, so no parked row ends unclassified.</text>
+</svg>

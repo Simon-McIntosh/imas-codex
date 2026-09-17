@@ -432,14 +432,35 @@
     <a href="/imas-codex/evidence/sn-lifecycle-integrity/attempt-cap-disposition"
        title="The cap cohort carries a triage disposition: cohort, closed set with counts, the two Cypher operations, the refusal, and the limits of the measurement">the
     disposition census</a>.</p>
-    <p>What it does not establish is the reason the class
+    <p>What that beat did not establish is the reason the class
     <code>cause_not_recorded</code> is worth reading: the pass classifies the cohort
     as found and does nothing else. It does not raise the cap, revive a source or
     delete a row, and no row was revived. The writer that parks a source
-    (<code>orphan_sweep.py</code>) is outside this beat's scope, so a row parked
-    after this run carries no disposition until the pass runs again — which is why
+    (<code>orphan_sweep.py</code>) was outside that beat's scope, so a row parked
+    after it ran carried no disposition until the pass ran again — which is why
     <strong>30</strong> rows are themselves the measurement of that gap: 25 carry
     only the cap sentence and 5 carry nothing at all.</p>
+
+    <p><strong>Closed later the same day.</strong> The writer that parks a source
+    now records the disposition itself. When the sweep's park statement parks at
+    least one row, the tick follows it with a read scoped to the rows that park
+    left undisposed, and stamps a member of the closed set on each through the same
+    classify-and-write function the pass calls, so the precedence above exists
+    once; a tick that parks nothing issues neither the read nor a write. Because
+    the stamp runs in the same tick as the park, the reconcile pass is now only the
+    net for rows parked before that write path existed, and a repeat census taken
+    after a parking event returns no unclassified row without a pass running.
+    Measured live: one row was stripped of its disposition — the shape a freshly
+    parked row has — the writer's own read returned exactly that row, the stamp
+    path wrote it back as <code>cause_not_recorded</code>, and the census reads
+    <strong>234</strong> parked with <strong>0</strong> unclassified both before
+    and after. The limits above still stand unchanged, and the 30
+    <code>cause_not_recorded</code> rows are untouched: recording a cause where one
+    exists is a separate repair. Full record, including the path diagram and the
+    live check:
+    <a href="/imas-codex/evidence/sn-lifecycle-integrity/attempt-cap-disposition"
+       title="The cap cohort carries a triage disposition, including the writer that now records it as it parks">the
+    disposition census</a>.</p>
 
   </main>
 </body>
