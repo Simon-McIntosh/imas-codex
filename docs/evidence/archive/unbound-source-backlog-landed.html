@@ -49,6 +49,46 @@
     Full record:
     <a href="/imas-codex/evidence/unbound-source-backlog/accepted-names-without-producers">accepted-names-without-producers.md</a>.</p>
   </section>
+
+  <section id="plan-figure-audit">
+    <h2>The plan's headline figures re-measured: four current, eleven drifted, one stale</h2>
+    <p><strong>Measured read-only on 2026-09-17</strong> at
+    <code>5ea0d73b441b6991fc29b9dbb03e13bc5b63b43c</code>. Sixteen asserted quantities
+    were re-read from the live graph against the plan text: <strong>4 current, 11
+    drifted, 1 stale</strong>. No graph mutation was performed.</p>
+    <table>
+      <caption>Where the plan's numbers stand, with the quantities that moved most</caption>
+      <thead><tr><th>Asserted quantity</th><th>Plan</th><th>Re-measured</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>standard name sources, total</td><td>9,900</td><td><strong>10,019</strong></td><td>drifted</td></tr>
+        <tr><td>bound through <code>PRODUCED_NAME</code></td><td>5,441</td><td><strong>5,393 sources</strong> (5,493 edges)</td><td>drifted</td></tr>
+        <tr><td>unbound</td><td>4,459</td><td><strong>4,626</strong></td><td>drifted</td></tr>
+        <tr><td><code>stale</code> bound (expected residue)</td><td>93</td><td><strong>93</strong></td><td>current</td></tr>
+        <tr><td><code>stale</code> unbound</td><td>1,652</td><td><strong>1,737</strong></td><td>drifted</td></tr>
+        <tr><td><code>extracted</code> unbound (&ldquo;real work not done&rdquo;)</td><td>1,283</td><td><strong>1,359</strong></td><td>drifted</td></tr>
+        <tr><td><code>skipped</code> unbound</td><td>1,413</td><td><strong>1,411</strong></td><td>drifted</td></tr>
+        <tr><td><code>failed</code> bound</td><td>2</td><td><strong>2</strong></td><td>current</td></tr>
+        <tr><td><code>not_physical_quantity</code> unbound</td><td>10</td><td><strong>10</strong></td><td>current</td></tr>
+        <tr><td>&ldquo;398 rows carry no recorded reason at all&rdquo;</td><td>398</td><td><strong>398</strong></td><td>current (exact)</td></tr>
+        <tr><td><code>IMASNode</code> paths carrying a name / total</td><td>5,072 / 61,366</td><td><strong>4,992 distinct</strong> (5,092 edges) / <strong>61,366</strong></td><td>drifted</td></tr>
+        <tr><td><code>non_nameable_reason</code> never reads <code>last_error</code></td><td>mechanism</td><td>roster now reads <code>last_error</code> and emits <code>&quot;cause not recorded&quot;</code> (see evidence file)</td><td>stale</td></tr>
+        <tr><td colspan="4">Full row set, queries and code reads:
+        <a href="/imas-codex/evidence/unbound-source-backlog/plan-figure-audit">plan-figure-audit.md</a>.</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The plan's first beat is already-complete.</strong> The 398 reason-less
+    skips are <strong>frozen</strong>: their <code>skipped_at</code> runs from
+    <code>2026-06-17T17:21:35Z</code> to <code>2026-07-28T07:43:24Z</code>, with
+    <strong>zero</strong> added after the plan's 2026-09-08 write
+    date, and the roster mechanism the plan cites was replaced the same day
+    (<code>e20817e41</code>), so a skip that lost its diagnostic now reports an explicit
+    unknown instead of a blank field.</p>
+    <p>Rescoped, the backlog proper is <strong>2,879</strong> rows (1,359 extracted,
+    1,411 skipped, 109 failed) against 1,737 stale and 10 non-physical that are mechanism
+    rather than work. Remaining engineering was restated at <strong>7 worker-hours</strong>,
+    down from the plan's 10.0 because the skipped-reason guard and the reconstruction are
+    both now accounted for.</p>
+  </section>
 </main>
 </body>
 </html>
