@@ -181,5 +181,41 @@
     </p>
   </main>
   <h2 id="unwind-proof">Deliverable four: the unwind reverses every field the approval wrote</h2>
-  <p>A named test drives <code>mark_catalog_name_approved</code> (<code>promote.py:1627</code>) and then <code>undo_approval</code> (<code>promote.py:1549</code>) against a purpose-made identity on a real Cypher engine. Both functions' statements run inside one transaction that is rolled back and never committed, so the demonstration leaves nothing behind, while a dropped <code>SET</code> would fail the test. After the unwind all five catalog fields are null, the identity reads <code>accepted</code> / <code>draft</code> again, and its property map equals the pre-approval map with <code>updated_at</code> the only differing key. The same test carries a negative control asserting the comparison can fail, so a pass cannot be vacuous. Full record: <a href="/imas-codex/evidence/catalog-review-surface/approval-unwind-proof">approval unwind proof</a>.</body>
+  <p>A named test drives <code>mark_catalog_name_approved</code> (<code>promote.py:1627</code>) and then <code>undo_approval</code> (<code>promote.py:1549</code>) against a purpose-made identity on a real Cypher engine. Both functions' statements run inside one transaction that is rolled back and never committed, so the demonstration leaves nothing behind, while a dropped <code>SET</code> would fail the test. After the unwind all five catalog fields are null, the identity reads <code>accepted</code> / <code>draft</code> again, and its property map equals the pre-approval map with <code>updated_at</code> the only differing key. The same test carries a negative control asserting the comparison can fail, so a pass cannot be vacuous. Full record: <a href="/imas-codex/evidence/catalog-review-surface/approval-unwind-proof">approval unwind proof</a>.
+  <h2 id="fold-back-rehearsal">Deliverable three: the fold-back rehearsed on a throwaway request</h2>
+  <p>
+    <strong>Both halves of the fold-back on one purpose-made request.</strong> Fork request
+    <code>Simon-McIntosh/imas-standard-names-catalog#20</code>, opened against base
+    <code>review/v0.4.0rc7+west-task-2e</code> from head <code>rehearsal/fold-back-20260917</code>,
+    carried exactly two catalog-entry renames. The production <code>read_pr_changes</code>
+    saw both, <code>changes_seen = 2</code>: a rename the lifecycle guard promotes, and a rename
+    to a name containing spaces that it refuses, because the name fails the naming grammar.
+    This is a fresh purpose-made request, not the open WEST request.
+  </p>
+  <p>
+    <strong>The accepted edit receives its receipt.</strong> The production
+    <code>mark_catalog_name_approved</code> promotes it and the graph reads back
+    <code>catalog_pr_number = 20</code> and <code>catalog_reviewer_actor = Simon-McIntosh</code>,
+    both non-null, with <code>catalog_approved_at</code>, <code>catalog_pr_url</code> and
+    <code>catalog_merge_commit_sha</code> stamped alongside them.
+  </p>
+  <p>
+    <strong>The refused edit reaches the reviewer as a refusal.</strong> The gate matches
+    nothing, the writer returns false, and the refusal is printed on the command output that
+    exits 1, verbatim:
+    <code>&#10007; 1 catalog promotion(s) refused: &#8226; limiter tile outline: catalog
+    lifecycle promotion preconditions were not met</code>. The refusal is per-edit: the request
+    still succeeds for the other edit.
+  </p>
+  <p>
+    <strong>The unwind returns the property map.</strong> The production
+    <code>undo_approval</code> clears all five catalog fields; over a named list of seven
+    properties measured across the unwind, zero differ, and the identity reads
+    <code>accepted</code> / <code>draft</code> again. The request is afterwards CLOSED and its
+    head branch is absent from the fork. Every statement ran on a real Cypher engine inside one
+    transaction that was rolled back, so the rehearsal costs no graph state. Full record:
+    <a href="/imas-codex/evidence/catalog-review-surface/fold-back-rehearsal">the fold-back
+    rehearsal</a>.
+  </p>
+</body>
 </html>
