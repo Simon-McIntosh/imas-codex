@@ -88,6 +88,108 @@
     rather than work. Remaining engineering was restated at <strong>7 worker-hours</strong>,
     down from the plan's 10.0 because the skipped-reason guard and the reconstruction are
     both now accounted for.</p>
+  <section id="detach-route-audit">
+    <h2>Twenty-four routes delete a producer edge; fourteen can leave an accepted name with none</h2>
+    <p><strong>Read-only on 2026-09-17</strong> at
+    <code>fcc65951bc52d083b74461f10ffbfe39b97c2624</code>. A
+    <code>PRODUCED_NAME</code> edge is the only record of which source justifies
+    a standard name, so every code path that deletes a <code>PRODUCED_NAME</code>
+    edge was enumerated and classified by whether it can take an accepted name's
+    last producer. <strong>19 routes delete the edge and leave the name standing
+    &#8212; the orphaning-capable class, of which thirteen can take an accepted
+    name's last producer &#8212; and 5 delete a node. Of the node deletions only
+    one matters here: deleting a <em>name</em> deletes the name, but deleting a
+    <em>source</em> detaches every edge it carried, and the derived-parent
+    cleanup does exactly that with no read of the stages it strands. The other
+    four either delete the name itself, delete a source that by definition has
+    no producer, or carry an explicit <code>NOT (target)--()</code>
+    precondition. No graph mutation was performed.</strong></p>
+
+    <figure>
+      <svg viewBox="0 0 760 330" width="760" height="330" role="img"
+           aria-label="Decision path of the attachment detach refusal and its terminal-recovery branch"
+           style="max-width:100%;font:12px/1.4 system-ui,sans-serif" fill="currentColor">
+        <rect x="14" y="18" width="300" height="46" rx="6" fill="none" stroke="currentColor"/>
+        <text x="24" y="38">preflight counts</text>
+        <text x="24" y="54">COUNT { (IMASNode)-[:HAS_STANDARD_NAME]-&gt;(sn) }</text>
+
+        <path d="M314 41 H360" stroke="currentColor" fill="none"/>
+        <path d="M352 36 l10 5 -10 5 z" fill="currentColor"/>
+
+        <rect x="368" y="14" width="230" height="54" rx="6" fill="none" stroke="currentColor"/>
+        <text x="378" y="34">count &lt;= 1 AND NOT</text>
+        <text x="378" y="50">structural_parent ?</text>
+
+        <path d="M598 41 H660" stroke="currentColor" fill="none"/>
+        <path d="M652 36 l10 5 -10 5 z" fill="none" stroke="currentColor"/>
+        <text x="612" y="32">no</text>
+        <rect x="660" y="18" width="90" height="46" rx="6" fill="none" stroke="currentColor"/>
+        <text x="668" y="38">_DETACH_QUERY</text>
+        <text x="668" y="54">deletes pn + hsn</text>
+
+        <path d="M483 68 V104" stroke="currentColor" fill="none"/>
+        <path d="M478 96 l5 10 5 -10 z" fill="none" stroke="currentColor"/>
+        <text x="492" y="92">yes</text>
+        <rect x="368" y="104" width="230" height="46" rx="6" fill="none" stroke="currentColor"/>
+        <text x="378" y="124">refuse: "only this one attachment &#8212;</text>
+        <text x="378" y="140">repair with sn edit --rename</text>
+
+        <rect x="14" y="176" width="300" height="46" rx="6" fill="none" stroke="currentColor"/>
+        <text x="24" y="196">terminal_recovery=True</text>
+        <text x="24" y="212">delegates to recover_terminal_attachment</text>
+
+        <rect x="368" y="176" width="230" height="66" rx="6" fill="none" stroke="currentColor"/>
+        <text x="378" y="196">sn.name_stage IN</text>
+        <text x="378" y="212">{superseded, exhausted, contested}</text>
+        <text x="378" y="232">and single PRODUCED_NAME edge</text>
+
+        <path d="M598 209 H660" stroke="currentColor" fill="none"/>
+        <path d="M652 204 l10 5 -10 5 z" fill="none" stroke="currentColor"/>
+        <rect x="660" y="186" width="90" height="46" rx="6" fill="none" stroke="currentColor"/>
+        <text x="668" y="206">accepted:</text>
+        <text x="668" y="222">no rows, no delete</text>
+
+        <rect x="368" y="270" width="382" height="46" rx="6" fill="none" stroke="currentColor" stroke-dasharray="4 3"/>
+        <text x="378" y="290">two holes: the count is realizations, not producers &#8212; and</text>
+        <text x="378" y="306">a derived parent with a live child bypasses the refusal</text>
+      </svg>
+      <figcaption>Both branches of the detach refusal. The terminal-recovery mutation
+      is fenced on the target's stage; the preflight counter is not a count of
+      producers, and the structural-parent condition bypasses the refusal
+      altogether.</figcaption>
+    </figure>
+
+    <p>Five attributes of the negative result belong in the record. The
+    <a href="/imas-codex/evidence/unbound-source-backlog/detach-route-audit">full audit</a>
+    lists every route with its file, line and refusal predicate.</p>
+    <ul>
+      <li><strong>The signed-manifest family is the largest class and the only
+      one that is fenced on identity rather than stage.</strong> Five signed-manifest
+      routes delete the exact edge a manifest names, with no predicate on the
+      target's stage. That is correct for the route's purpose and it means a
+      manifest naming a name's only producer will orphan it silently; the guard
+      belongs at manifest construction and is not in the apply path.</li>
+      <li><strong>A rename can still orphan today.</strong>
+      <code>persist_refined_name</code>'s empty-cohort refusal is exempted by
+      <code>edit_mode</code>, and the caller guard in <code>edit.py</code>
+      returns early when the observed cohort is empty &#8212; so the identity that is
+      later accepted carries no producer while the predecessor is simply
+      superseded and looks unremarkable.</li>
+      <li><strong>The liveness reconcile is confirmed innocent.</strong>
+      <code>_TERMINAL_BINDING_NAME_STAGES</code> is exactly
+      <code>superseded</code>, <code>exhausted</code>, <code>contested</code>,
+      and the cleanup supplies that set as its terminal stages, so an accepted
+      target is a live binding and cannot reach the deletion.</li>
+      <li><strong>A second, wider predicate disagrees with it.</strong> The
+      semantic-source repair excludes only <code>superseded</code> and
+      <code>exhausted</code>, so <code>accepted</code> is inside its reach. Two
+      predicates both meaning "this name is no longer live" and they do not agree;
+      that divergence wants a single definition rather than two call sites.</li>
+      <li><strong>The live count is unchanged.</strong> Nine accepted names carry
+      no producer, exactly the bound of 9 at <code>2026-09-15T18:20Z</code>.
+      Positive controls saw 5,130 of 5,130 identities carrying <code>id</code>
+      and 5,493 <code>PRODUCED_NAME</code> edges across 5,393 distinct sources.</li>
+    </ul>
   </section>
 </main>
 </body>
