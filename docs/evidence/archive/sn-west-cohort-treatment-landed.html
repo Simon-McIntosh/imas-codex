@@ -160,6 +160,48 @@
       <a href="/imas-codex/evidence/sn-west-cohort-treatment/export-accounting-currency">export accounting currency</a>.
     </p>
 
+    <h2 id="lifecycle-status-currency-20260917">Lifecycle status re-measured: the null half is closed</h2>
+    <p>
+      §7's four figures were re-measured live over the 5130 <code>StandardName</code> nodes
+      by two read-only census drivers. The cohort of names accepted on both axes has
+      <strong>drifted</strong> upward, and both null-status figures are now exactly zero.
+      Two overlapping instruments returned the same column.
+    </p>
+    <table>
+      <thead><tr><th>§7 figure</th><th>Asserted</th><th>Measured 2026-09-17</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>names accepted on both axes</td><td>2295</td><td><strong>2503</strong></td><td>drifted</td></tr>
+        <tr><td>of those, <code>status: draft</code></td><td>1377</td><td><strong>2472</strong></td><td>drifted</td></tr>
+        <tr><td>of those, no status at all</td><td>918</td><td><strong>0</strong></td><td><strong>stale</strong></td></tr>
+        <tr><td>graph-wide null <code>status</code></td><td>2533</td><td><strong>0</strong></td><td><strong>stale</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Verdicts close at drifted 2, stale 2 — 4 rows. The graph's <code>status</code> property
+      is now exhaustive: <code>draft</code> 2934 and <code>superseded</code> 2196 partition the
+      5130 nodes with no remainder.
+    </p>
+    <p>
+      <strong>The zeros are aimed, not unaimed.</strong> The same value predicate returns 2934
+      for <code>draft</code> and 0 for a value that does not exist; a separate plan's figure
+      audit independently returned the same <code>draft 2934 / superseded 2196 / null 0</code>
+      column; and the nine identities recorded with a null status on 2026-09-10 were re-read,
+      all nine now carrying <code>draft</code>. So the predicate that once returned nine still
+      fires, and this zero is a change in the data rather than an instrument that sees nothing.
+    </p>
+    <p>
+      <strong>The plan's causal sentence is reported UNCONFIRMED.</strong> The null-origin
+      cohort is 1899 now, not 1091, and carries zero null statuses, so the two are disjoint
+      populations rather than one event's two effects. No change row names an import,
+      <code>StandardNameChange</code> carries no status field, and the recorded mechanism for
+      the historical nulls is a write path that failed to set the field at creation.
+    </p>
+    <p>
+      No graph mutation was issued: both drivers contained only read clauses and each recorded
+      <code>graph_mutations: 0</code>. Full method, controls, receipts and the mis-aims caught:
+      <a href="/imas-codex/evidence/sn-west-cohort-treatment/lifecycle-status-currency">lifecycle status currency</a>.
+    </p>
+
   </main>
 </body>
 </html>
