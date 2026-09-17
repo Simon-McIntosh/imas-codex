@@ -113,6 +113,53 @@
       (evidence commit <code>eaabb7e3d</code>).
     </p>
 
+    <h2 id="export-accounting-current-20260917">Export accounting re-measured: every candidate is accounted for</h2>
+    <p>
+      The one claim the figure audit left unverified was §9b's: that eighteen candidate
+      names left the export with both declared exclusion counters reading zero while the
+      <code>exclusion_accounting</code> gate passed. It was re-measured at the instrument
+      — <code>run_export</code> run directly on the current cohort — rather than restated.
+      The committed 342-source manifest resolves to 340 terminal identities and
+      <strong>230 unique candidate names</strong>.
+    </p>
+    <table>
+      <thead><tr><th>Reading</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>N — candidates handed to the export</td><td><strong>230</strong></td></tr>
+        <tr><td>E — emitted</td><td><strong>230</strong></td></tr>
+        <tr><td>per-reason exclusions</td><td><strong>0</strong></td></tr>
+        <tr><td>accounting residue</td><td><strong>0</strong></td></tr>
+        <tr><td>gate <code>exclusion_accounting</code></td><td>passed</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>E plus the per-reason exclusions equals N exactly: 230 + 0 = 230.</strong> No
+      identity left the export uncounted, so there is no silently-dropped list to enumerate.
+      All four gates passed: <code>catalog_status</code>, <code>exclusion_accounting</code>,
+      <code>identity_token_collision</code> and <code>manifest_source_accounting</code>.
+    </p>
+    <p>
+      <strong>A gate with nothing to catch proves nothing, so the ledger was made to fire.</strong>
+      The same instrument at <code>min_score 0.99</code> forces real exclusions: E 90,
+      <code>below_name_score</code> 52, <code>bound_adjacent</code> 88, accounted 140,
+      residue 0 — 90 + 140 = 230 = N, with all 140 identities enumerated in the ledger.
+      Both readings come from the same instrument, so the primary zero is measured rather
+      than blind.
+    </p>
+    <p>
+      <strong>The historic eighteen were traced individually.</strong> Sixteen are in the
+      current cohort and emitted. The other two are <code>superseded</code> on both status
+      and name stage, so the terminal projection no longer reaches them — they left by the
+      selection boundary, not by an export exit. The plan's figure is therefore
+      <strong>stale</strong> rather than current: it described a cohort of 214 names and an
+      accounting defect that no longer exist.
+    </p>
+    <p>
+      No graph mutation, re-cut or release action was performed. Full method, controls and
+      limits:
+      <a href="/imas-codex/evidence/sn-west-cohort-treatment/export-accounting-currency">export accounting currency</a>.
+    </p>
+
   </main>
 </body>
 </html>
