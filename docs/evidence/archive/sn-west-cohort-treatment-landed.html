@@ -201,6 +201,65 @@
       <code>graph_mutations: 0</code>. Full method, controls, receipts and the mis-aims caught:
       <a href="/imas-codex/evidence/sn-west-cohort-treatment/lifecycle-status-currency">lifecycle status currency</a>.
     </p>
+    <h2 id="roster-reason-repair-20260917">Every unnamed roster row now ends with a name or a recorded cause</h2>
+    <p>The roster's unnamed rows are the ones that vanish silently if their reason field
+    records only a placeholder. The census reads the frozen review batch
+    <code>v0.10.0rc1+west-task-2e</code> <em>and</em> re-projects all 355 of its source paths
+    through the live roster builder, <strong>before and after</strong> the change, each run
+    exiting 0. The axis the change moves is the placeholder count, and there are three
+    figures rather than one:</p>
+    <table>
+      <thead><tr><th>live read</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td>frozen artifact rows, no name and empty <code>non_nameable_reason</code></td><td>18</td><td>18</td></tr>
+        <tr><td>live projected rows, no name and empty <code>non_nameable_reason</code></td><td>0</td><td>0</td></tr>
+        <tr><td>live projected rows, no name and a placeholder reason</td><td>6</td><td><strong>1</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The plan's eighteen did not move, and this record does not claim it did.</strong>
+    The artifact is frozen and outside the same session's write scope, while the live empty
+    count was already zero because the roster builder had been repaired to transcribe
+    <code>last_error</code> in <code>fetch_manifest_source_release_rows</code> &mdash; verified
+    rather than reimplemented. The breakdown command returns 355 live rows resolving 340 to a name, so
+    the zero is aimed rather than an instrument that sees nothing.</p>
+    <p><strong>The only graph write is the reason field, on five rows, each guard-verified and
+    enumerated.</strong> Each write required the source to carry <code>status = skipped</code>,
+    the bare placeholder reason, no claim held and no <code>PRODUCED_NAME</code> edge, plus a
+    backing DD node whose <code>node_category</code> matches the verdict being written; all
+    five guards held and every write returned <code>affected = 1</code>. Two bare time axes
+    (<code>camera_x_rays/detector_humidity/time</code>, <code>camera_x_rays/frame/time</code>,
+    backing category <code>coordinate</code>, unit <code>s</code>) now read
+    <code>non_nameable_coordinate:time</code>; three solver rows
+    (<code>equilibrium/time_slice/constraints/faraday_angle/weight</code>,
+    <code>.../n_e_line/weight</code>,
+    <code>equilibrium/time_slice/convergence/iterations_n</code>), all backing
+    <code>fit_artifact</code> with unit <code>1</code> &mdash; now read
+    <code>dd_node_category_ineligible</code> with the detail <code>Backing DD node category
+    fit_artifact cannot realize a StandardName</code>. The writer is
+    <code>mark_source_skipped</code>, and the prior status was <code>skipped</code> in every
+    case, so no status changed.</p>
+    <p><strong>The four fit-constraint weights now carry one verdict for one concept.</strong>
+    All four are <code>equilibrium/time_slice/constraints/&lt;probe&gt;/weight</code>, all
+    <code>dd_node_category_ineligible</code>. Two rows keep the deterministic
+    <code>not_physical_quantity</code> status and two keep <code>skipped</code>: that is a
+    source-lifecycle status rather than the exclusion verdict, and the write scope counted only
+    the reason field, so it is recorded as a follow-up instead of being silently
+    normalised.</p>
+    <p><strong>One row cannot be given a cause and is listed rather than filled in.</strong>
+    <code>equilibrium/time_slice/contour_tree/node/z</code> still records only
+    <code>compose_model_skipped</code>. Its backing DD node is <code>node_category =
+    quantity</code>, unit <code>m</code>, documentation "Height", so the
+    <code>dd_node_category_ineligible</code> verdict that fits the other solver rows would be
+    false there: the exclusion is by locus, not by category, and stating the cause
+    needs a vocabulary decision this plan does not settle. No row was given a cause its backing
+    evidence contradicts.</p>
+    <p><strong>No figure was produced, and the write fence is why.</strong> The exempt paths for
+    this work are its two evidence documents and the plan; <code>docs/figures/</code> lies
+    outside them. The quantities are three scalars and a five-row write list &mdash; a table
+    rather than a spatial or plotted relationship &mdash; so the census's own printed table is
+    the honest form.</p>
+    <p>Full table, the written rows with their backing category, and the reproduction commands:
+    <a href="/imas-codex/evidence/sn-west-cohort-treatment/roster-reason-repair">roster reason repair</a>.</p>
 
   </main>
 </body>
