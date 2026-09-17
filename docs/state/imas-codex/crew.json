@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T15:54:40",
+  "updated": "2026-09-17T16:52:24",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -142951,6 +142951,220 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T102039045498-s10-figure-audits-carry-an-html-path",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "s10-figure-audits-carry-an-html-path",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1386,
+                "cached_input_tokens": 324127,
+                "input_tokens": 325515,
+                "output_tokens": 795,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 326310,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "ceb4c66b-622b-4e72-83de-68acdb6fae2e",
+            "session_id": "ship-s10-20260917"
+          },
+          "done_when": "reckon audit-doc exits 0 on each of the four renamed plan-figure-audit.html paths, and a grep over docs/ for the four superseded .md paths returns zero hits, both captured to logs",
+          "estimated_hours": null,
+          "goal": "give each S10 figure audit a file extension matching the HTML it actually contains",
+          "id": "s10-figure-audits-carry-an-html-path",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T10:20:42Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T102039045498-s10-figure-audits-carry-an-html-path/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "cleanup",
+          "section": "\u00a75",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-lifecycle-integrity/plan-figure-audit.md",
+            "docs/evidence/sn-lifecycle-integrity/plan-figure-audit.html",
+            "docs/evidence/scalar-edge-authority/plan-figure-audit.md",
+            "docs/evidence/scalar-edge-authority/plan-figure-audit.html",
+            "docs/evidence/paid-identity-deletion-protection/plan-figure-audit.md",
+            "docs/evidence/paid-identity-deletion-protection/plan-figure-audit.html",
+            "docs/evidence/sn-grammar-refinement/plan-figure-audit.md",
+            "docs/evidence/sn-grammar-refinement/plan-figure-audit.html",
+            "docs/plans/scalar-edge-authority.html",
+            "docs/plans/paid-identity-deletion-protection.html",
+            "docs/plans/sn-grammar-refinement.html",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "cleanup",
+        "spec_level": "exact",
+        "member": "s10c-local-b",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T10:21:13Z",
+        "completed_at": "2026-09-17T12:02:11.492Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5999,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6058,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "3d80e116f4c219519ddf5ece66c1bed8c8b23e8e",
+        "commits": [
+          "53455ada4e2b3120da026a06d064c32aa27ef20c"
+        ],
+        "changed_lines": {
+          "added": 12,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "Delivered and merged; the gate failed on a clause my own fence made unsatisfiable. The worker renamed all four audits and audit-doc exited 0 on each. The second clause demanded zero references to the old paths across docs/, but I fenced the worker out of the sprint description and one archive record that both name them, so it reported the residue honestly rather than claiming a pass. The rename was later reverted at c1283cc74: an .html evidence file in a per-plan directory breaks reckon's typed-resource scan and took plan reads down project-wide. Classified malformed-node because the defect is in how I wrote the node, not in how the worker executed it. The finding the node establishes still stands and is worth keeping: these files are HTML written under a markdown name, so audit-doc can never pass on them, and the honest repair is to convert the bodies to markdown rather than to change the extension.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T102039045498-s10-figure-audits-carry-an-html-path/manifest.md",
+        "scope_changed": false,
+        "session_id": "088b9dae-1a0c-4bb6-b525-50a5cdce1953",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6595375,
+            "input_tokens_cumulative": 6595375,
+            "output_tokens": 95866,
+            "output_tokens_cumulative": 95866,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T12:02:11.492Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6747998,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 6051.417,
+          "generated_tokens": 110293,
+          "generation_seconds": 6006.5,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.6,
+          "machine_seconds": 44.917,
+          "peak_input_tokens": 151589,
+          "tokens_per_second": 18.36,
+          "wall_tokens_per_second": 18.23
+        },
+        "follow_on_paths": [
+          "docs/sprints/S10.html:23",
+          "docs/state/imas-codex/crew.json:135483",
+          "docs/evidence/archive/paid-identity-deletion-protection-landed.html:68",
+          "/evidence/paid-identity-deletion-protection/plan-figure-audit.md"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "cleanup",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260917/s10-figure-audits-carry-an-html-path",
+          "session_id": "088b9dae-1a0c-4bb6-b525-50a5cdce1953",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T12:02:11.492Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 99.0,
+        "orientation_input_tokens": 4078474.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -143221,6 +143435,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2229
+    "_version": 2230
   }
 }
