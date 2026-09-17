@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T21:39:02",
+  "updated": "2026-09-17T21:39:56",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -147399,6 +147399,194 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T185313367367-n-a-conflict-refusal-does-not-spend-an-attempt",
+        "plan": "sn-west-catalog-release",
+        "section": "release-run-residues",
+        "node": "n-a-conflict-refusal-does-not-spend-an-attempt",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1216,
+                "cached_input_tokens": 776332,
+                "input_tokens": 777550,
+                "output_tokens": 681,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 778231,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a test drives a source that already binds a different live identity through the migration path and asserts its attempt_count does not move, failing before the change and passing after; the refusal names the identity holding the binding so an operator can adjudicate it; the test command and exit status are named with its log; the evidence reports the live count of sources currently at status failed with attempt_count at the cap, with the query that produced it, and states which of them this change would have spared",
+          "estimated_hours": null,
+          "goal": "Stop the supersede path charging an attempt budget for a state the operator must adjudicate",
+          "id": "n-a-conflict-refusal-does-not-spend-an-attempt",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:53:14Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185313367367-n-a-conflict-refusal-does-not-spend-an-attempt/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-run-residues",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/conflict-refusal-attempt-budget.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-residue",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:53:23Z",
+        "completed_at": "2026-09-17T19:29:09.102Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2048,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2146,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b7da331577b56ae3ba59dc3c79ce26ac76b1d4f5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185313367367-n-a-conflict-refusal-does-not-spend-an-attempt/manifest.md",
+        "scope_changed": false,
+        "session_id": "164001d5-9703-4565-93e1-0e4bf63704c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5795286,
+            "input_tokens_cumulative": 7660107,
+            "output_tokens": 4230,
+            "output_tokens_cumulative": 31397,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T19:29:09.102Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7813655,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2140.03,
+          "generated_tokens": 36826,
+          "generation_seconds": 2111.741,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.7,
+          "machine_seconds": 28.289,
+          "peak_input_tokens": 152248,
+          "tokens_per_second": 17.44,
+          "wall_tokens_per_second": 17.21
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "the node diagnosed the defect completely and landed no code: its done_when required a change to graph_ops.py plus a test, while the dispatch fenced it to docs only. The fence was the coordinator's error, not a worker failure. The worker also declined to land six lines it judged unreliable and reverted them, leaving a clean worktree.",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-a-conflict-refusal-does-not-spend-an-attempt",
+          "session_id": "164001d5-9703-4565-93e1-0e4bf63704c3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T19:29:09.102Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 72.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -147669,6 +147857,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2260
+    "_version": 2261
   }
 }
