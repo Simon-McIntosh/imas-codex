@@ -21,12 +21,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-commits" content="f39508320a56db9599efc04b32c05d64a0598569,8862a65f37bd49011cbec319ccb95638acefd98e">
 <meta name="plan-artifacts" content="tests/graph/test_backup_currency_contents.py,tests/graph/test_backup_currency.py,tests/core/test_backup_currency.py">
-<meta name="plan-impl" content="0.42">
+<meta name="plan-impl" content="0.72">
 <meta name="plan-depends-on" content="graph-destructive-command-safety">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s4a&quot;:&quot;done&quot;,&quot;s4b&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s4a&quot;:&quot;done&quot;,&quot;s4b&quot;:&quot;done&quot;,&quot;s4c&quot;:&quot;done&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -346,6 +346,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260917T155320155643-n-the-approval-unwind-leaves-no-lasting-change" data-who="reckon-ship" data-when="2026-09-17T17:20:44.945Z">
     <div class="r-comment-body"><p>undo_approval restores every field the approval wrote; property maps before and after are equal except one disclosed restamped key, and a negative control asserts the comparison fails when a single field is left set, so the pass is not vacuous.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260917-deliverables-four-and-five-land" data-who="reckon-ship" data-when="2026-09-17T19:50:00Z">
+    <div class="r-comment-body"><p><strong>Deliverables four and five are closed by measurement and test; deliverable three is the sole remainder, and its substance is now exactly one gap.</strong></p><p><strong>Deliverable four — the unwind leaves nothing lasting.</strong> <code>tests/standard_names/test_approval_unwind_restores_approval_properties.py</code> approves a purpose-made identity through <code>mark_catalog_name_approved</code>, unwinds it through <code>undo_approval</code>, and asserts the property maps before and after are equal but for one disclosed restamped key. A <strong>negative control</strong> asserts that comparison fails when a single field is left set, so the pass cannot be vacuous. Re-run by the coordinator at the merged head with the <code>graph</code> marker enabled: 1 passed in 22.3 s.</p><p><strong>Deliverable five — the traceability writer.</strong> <code>tests/standard_names/test_catalog_traceability_fields.py</code> asserts that all five receipt fields are written together on one identity with exact values, and that the write is refused when a stage precondition is unmet. Three tests pass in 25.2 s. The writer is complete and correctly gated; <strong>nothing in production calls it</strong>, which is why <code>catalog_reviewer_actor</code> is non-null on exactly one identity while <code>catalog_approved_at</code> is null on all 5,130. Two independent nodes measuring from opposite ends agree on that.</p><p><strong>Deliverable three is the remainder and it is one gap, not a build.</strong> The refusal is recorded (<code>_record_promotion_refusal</code>) and reaches the operator terminal; a continuous-integration check already fails a request that edits a machine-owned field, proven live on fork requests 4 and 5. What no code does is put a <em>pipeline</em> refusal in front of the reviewer on the request itself. Its fork-side half is a write outside any imas-codex worktree and belongs to a session holding that repository.</p><p><code>impl</code> moves 0.42 to 0.72: of the five deliverables, four are now closed and proven, and the audit's 3 to 4 worker-hour residual reduces to deliverable three alone.</p></div>
 </div>
 </section>
 </main>
