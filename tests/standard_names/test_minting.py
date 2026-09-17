@@ -16,20 +16,32 @@ from imas_codex.standard_names.minting import MintResult, mint_sn_list
 
 
 class _FakeGC:
-    def __init__(self, base_rows, fam_rows):
+    """Graph view keyed on the parameters the mint path declares.
+
+    The mint path issues two statements — the base join over ``paths`` and the
+    immediate-family closure over ``base_ids``. Routing on the statement's own
+    text makes the test read the string instead of the behaviour: a statement
+    that later gains an unrelated field silently reroutes the call.
+    """
+
+    def __init__(self, base_rows, fam_rows, *, rewrite=None):
         self._base = base_rows
         self._fam = fam_rows
         self.calls = 0
         self.base_params = None
+        self.statements: list[str] = []
+        self._rewrite = rewrite or (lambda statement: statement)
 
     def query(self, cypher, **params):
         self.calls += 1
-        if "PRODUCED_NAME" in cypher and "HAS_PARENT" not in cypher:
-            self.base_params = params
-            return self._base
-        if "HAS_PARENT" in cypher:
+        self.statements.append(cypher)
+        cypher = self._rewrite(cypher)
+        # ``base_ids`` is declared only by the family closure; the base join
+        # declares ``paths``. Neither branch reads the statement itself.
+        if "base_ids" in params:
             return self._fam
-        return []
+        self.base_params = params
+        return self._base
 
 
 def test_mint_empty_does_not_touch_graph():
@@ -87,6 +99,35 @@ def test_mint_dedups_input_paths():
     res = mint_sn_list(["ids/p1", "ids/p1"], gc=fake)
     assert res.names == ["n"]
     assert res.unmatched_paths == []
+
+
+def test_mint_routing_holds_when_a_statement_gains_an_unrelated_field():
+    """Both joins are routed by what they declare, never by their text.
+
+    An unrelated field added to either statement leaves the minted batch and
+    the unmatched list untouched.
+    """
+    base = [{"path": "ids/p1", "ids": ["child"]}]
+    fam = [{"fam_ids": ["parent", "sibling"]}]
+
+    def add_unrelated_field(statement: str) -> str:
+        # The added field is unrelated to the join, and its name carries the
+        # token the old text matcher keyed on: text-routing would send the base
+        # join to the family rows and lose every match.
+        return statement.replace(
+            "RETURN", "SET sn.unrelated_field = 'HAS_PARENT'\n        RETURN", 1
+        )
+
+    plain = _FakeGC(base, fam)
+    perturbed = _FakeGC(base, fam, rewrite=add_unrelated_field)
+
+    expected = mint_sn_list(["ids/p1", "ids/p2"], gc=plain)
+    assert expected.names == ["child", "parent", "sibling"]
+    assert expected.unmatched_paths == ["ids/p2"]
+
+    assert mint_sn_list(["ids/p1", "ids/p2"], gc=perturbed) == expected
+    assert perturbed.base_params["paths"] == ["ids/p1", "ids/p2"]
+    assert len(perturbed.statements) == 2
 
 
 # ── Live graph behavior ────────────────────────────────────────────────────
