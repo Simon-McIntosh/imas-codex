@@ -6696,6 +6696,59 @@ def _is_refine_docs_failure(exc: BaseException) -> bool:
     return "validation error for refineddocs" in str(exc).lower()
 
 
+#: Return the rotation an unchanged resubmission did not spend.
+#:
+#: The refine pool charges a rotation when it CLAIMS a name, before any model
+#: call, so the charge buys an improvement attempt. A pinned rename
+#: (``edit_mode = 'rename'``) is never rewritten — the pool routes the same
+#: name back to a fresh review quorum — so that charge buys nothing. Left
+#: alone it walks ``refine_attempts`` to the rotation cap, and the cap is also
+#: the eligibility gate, so a name whose only consumer is the re-review loop
+#: stops being claimed at 3 of 3. Fenced on the same claim token and
+#: ``'refining'`` stage the resubmission checks, so the rotation can only be
+#: returned while the claim that charged it is still live.
+_RETURN_UNSPENT_REFINE_ATTEMPT = """
+MATCH (sn:StandardName {id: $sn_id})
+WHERE sn.claim_token = $token AND sn.name_stage = 'refining'
+SET sn.refine_attempts = CASE WHEN coalesce(sn.refine_attempts, 0) > 0
+                              THEN sn.refine_attempts - 1
+                              ELSE sn.refine_attempts END
+RETURN coalesce(sn.refine_attempts, 0) AS refine_attempts
+"""
+
+
+def _return_unspent_refine_attempt(
+    gc: Any, *, sn_id: str, token: str
+) -> int | None:
+    """Give back the rotation an unchanged resubmission did not spend.
+
+    Returns the counter the name is left holding, or ``None`` when the fence
+    did not match — a concurrent sweep or another worker already moved the
+    row, in which case this pool no longer owns the charge and must not
+    rewrite the counter under its own token.
+    """
+    try:
+        rows = gc.query(
+            _RETURN_UNSPENT_REFINE_ATTEMPT,
+            sn_id=sn_id,
+            token=token,
+        )
+    except Exception:
+        logger.debug(
+            "refine_name: could not return the unspent rotation for %s",
+            sn_id,
+            exc_info=True,
+        )
+    else:
+        try:
+            if rows:
+                return int(rows[0].get("refine_attempts") or 0)
+        except (AttributeError, IndexError, KeyError, TypeError, ValueError):
+            # A best-effort return must never cost the item its resubmission.
+            logger.debug("refine_name: unreadable rotation counter for %s", sn_id)
+    return None
+
+
 async def process_refine_name_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -6810,6 +6863,15 @@ async def process_refine_name_batch(
             # quorum instead (bounded), never spend an LLM rewrite on it.
             if (item.get("edit_mode") or "") == "rename":
                 token = item.get("claim_token") or ""
+                # The claim charged a rotation on the way in. Detect the
+                # unchanged case — this step resubmits the name the item
+                # already carries: no candidate is produced, so the rotation
+                # has bought nothing and must not be spent. Without this a
+                # pinned name walks to the cap on re-review alone, and the cap
+                # is the eligibility gate, so it stops being claimed.
+                attempts_left = _return_unspent_refine_attempt(
+                    gc, sn_id=sn_id, token=token
+                )
                 try:
                     outcome = await _asyncio.to_thread(
                         resubmit_pinned_rename_for_review,
@@ -6823,9 +6885,11 @@ async def process_refine_name_batch(
                     )
                     outcome = ""
                 logger.info(
-                    "refine_name: pinned rename %s not rewritten — %s",
+                    "refine_name: pinned rename %s not rewritten — %s "
+                    "(rotation returned, %s remaining)",
                     sn_id,
                     outcome or "no-op",
+                    attempts_left if attempts_left is not None else "unknown",
                 )
                 if on_event is not None:
                     on_event(
@@ -6836,6 +6900,10 @@ async def process_refine_name_batch(
                             "outcome": f"pinned_rename_{outcome or 'noop'}",
                             "model": "none",
                             "cost": 0.0,
+                            # The rotation this resubmission did not spend.
+                            # A caller that sums ``refine_attempts`` from
+                            # events must not count it.
+                            "refine_attempts": attempts_left,
                         }
                     )
                 continue
