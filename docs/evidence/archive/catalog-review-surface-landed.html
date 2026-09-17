@@ -180,5 +180,6 @@
       traceability writer's receipt and reachability</a>.
     </p>
   </main>
-</body>
+  <h2 id="unwind-proof">Deliverable four: the unwind reverses every field the approval wrote</h2>
+  <p>A named test drives <code>mark_catalog_name_approved</code> (<code>promote.py:1627</code>) and then <code>undo_approval</code> (<code>promote.py:1549</code>) against a purpose-made identity on a real Cypher engine. Both functions' statements run inside one transaction that is rolled back and never committed, so the demonstration leaves nothing behind, while a dropped <code>SET</code> would fail the test. After the unwind all five catalog fields are null, the identity reads <code>accepted</code> / <code>draft</code> again, and its property map equals the pre-approval map with <code>updated_at</code> the only differing key. The same test carries a negative control asserting the comparison can fail, so a pass cannot be vacuous. Full record: <a href="/imas-codex/evidence/catalog-review-surface/approval-unwind-proof">approval unwind proof</a>.</body>
 </html>
