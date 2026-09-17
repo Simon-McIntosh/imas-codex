@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T15:52:33",
+  "updated": "2026-09-17T15:54:40",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -4931,9 +4931,11 @@
         "id": "s10c-local",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "1cf4033c-198b-43d4-8a37-6e4cdf84bffd",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "1cf4033c-198b-43d4-8a37-6e4cdf84bffd"
+        },
         "created": "2026-09-09"
       },
       {
@@ -4951,9 +4953,11 @@
         "id": "s10c-local-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "799ce84e-e56a-4faf-93f9-0155329c0d0d",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "799ce84e-e56a-4faf-93f9-0155329c0d0d"
+        },
         "created": "2026-09-10"
       },
       {
@@ -4994,9 +4998,11 @@
         "id": "session-79322149f80f4c1d1ea8",
         "harness": "clive",
         "role": "investigate",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "cb783971-b0fe-4800-b7d9-9c64982552fb",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "cb783971-b0fe-4800-b7d9-9c64982552fb"
+        },
         "created": "2026-09-17"
       },
       {
@@ -143215,6 +143221,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2226
+    "_version": 2229
   }
 }
