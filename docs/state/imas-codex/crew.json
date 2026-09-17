@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T18:14:31",
+  "updated": "2026-09-17T18:15:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -144359,6 +144359,207 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T145802749407-n-the-lifecycle-status-field-is-measured-across-the-catalog",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a77",
+        "node": "n-the-lifecycle-status-field-is-measured-across-the-catalog",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2549,
+                "cached_input_tokens": 571885,
+                "input_tokens": 574436,
+                "output_tokens": 937,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 575373,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "the evidence file reports the live count of names accepted on both axes, how many carry status draft, how many carry no status at all, and the graph-wide null-status count, each against the plan's asserted 2295, 1377, 918 and 2533 with a verdict of current, drifted or stale; a positive control shows the same predicate returning a non-zero count on a cohort known to have the property, so a zero cannot be an unaimed query; the recorded import that cleared origin and status on 1091 identities is either confirmed as the cause with the change rows that show it or reported as unconfirmed; no graph mutation is performed",
+          "estimated_hours": null,
+          "goal": "Re-measure the missing lifecycle status across the catalog and state whether the plan's figures still hold",
+          "id": "n-the-lifecycle-status-field-is-measured-across-the-catalog",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T14:58:05Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145802749407-n-the-lifecycle-status-field-is-measured-across-the-catalog/manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a77",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-cohort-treatment/lifecycle-status-currency.md",
+            "docs/evidence/archive/sn-west-cohort-treatment-landed.html",
+            "docs/plans/sn-west-cohort-treatment.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-probe",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T14:58:22Z",
+        "completed_at": "2026-09-17T16:10:33.932Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4321,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4331,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "2aa09aeccdbd64056590e794e97f5cfe91272214",
+        "commits": [
+          "22f75e8830e1ba14eeb1816a13311aad04389b30",
+          "f84c4d13f11dff4d59b860de411cd9cc735aaedb"
+        ],
+        "changed_lines": {
+          "added": 224,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "coordinator re-run of the status census with its per-stage breakdown; the worker kept no gate log",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/coordinator-gate-recheck.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145802749407-n-the-lifecycle-status-field-is-measured-across-the-catalog/manifest.md",
+        "scope_changed": false,
+        "session_id": "c9e780be-47d0-41b4-88ad-6c83db47e09e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 11219425,
+            "input_tokens_cumulative": 11219425,
+            "output_tokens": 50365,
+            "output_tokens_cumulative": 50365,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T16:10:33.932Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11372060,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4325.702,
+          "generated_tokens": 57572,
+          "generation_seconds": 4266.078,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.5,
+          "machine_seconds": 59.624,
+          "peak_input_tokens": 151335,
+          "tokens_per_second": 13.5,
+          "wall_tokens_per_second": 13.31
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-lifecycle-status-field-is-measured-across-the-catalog",
+          "session_id": "c9e780be-47d0-41b4-88ad-6c83db47e09e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T16:10:33.932Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 110.0,
+        "orientation_input_tokens": 6471402.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -144629,6 +144830,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2240
+    "_version": 2241
   }
 }
