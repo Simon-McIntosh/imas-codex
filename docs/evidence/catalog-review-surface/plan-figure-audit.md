@@ -152,11 +152,21 @@
           <code>name_stage accepted</code>, no <code>edit_origin</code>, no
           <code>catalog_reviewer_*</code> fields, <code>origin pipeline</code>;
           <code>alfven_transit_time</code> does not exist as a node;</li>
-      <li><strong>no</strong> <code>StandardNameChange</code> row exists after 2026-09-07 (the
-          zero-row result is the measurement, not an empty query); the only post-merge touch on
-          either identity is a <code>reconcile_catalog_edit_origin</code> bookkeeping row at
-          2026-09-08T11:55:49Z and a <code>correct_published_cut_null_origins</code> row at
-          2026-09-09T10:05:42Z, neither of which is a fold-back;</li>
+      <li><strong>no</strong> <code>StandardNameChange</code> row records a fold-back on the
+          rehearsal identities after 2026-09-07. Corrected 2026-09-17 after independent review:
+          this row originally read &ldquo;no <code>StandardNameChange</code> row exists after
+          2026-09-07&rdquo;, which is false graph-wide &mdash; the window holds
+          <strong>2,889</strong> rows, led by <code>reconcile_catalog_edit_origin</code> at 2,096
+          and <code>remove_derived_parent</code> at 284. The original clause compared
+          <code>changed_at</code> against a <em>string</em> literal, and because the property is a
+          <code>DateTime</code> the predicate evaluated to null and filtered every row out, so the
+          zero was an unaimed instrument rather than a measurement. Scoped correctly, exactly
+          <strong>two</strong> post-merge rows touch these identities &mdash; a
+          <code>reconcile_catalog_edit_origin</code> bookkeeping row on <code>alfven_time</code> at
+          2026-09-08T11:55:49Z and a <code>correct_published_cut_null_origins</code> row on
+          <code>atomic_count</code> at 2026-09-09T10:05:42Z &mdash; neither of which is a
+          fold-back, against a positive control of 21 rows naming these identities overall. The
+          section's conclusion is unchanged: the fold-back did not run;</li>
       <li><code>catalog_approved_at</code>, <code>catalog_pr_number</code> and
           <code>catalog_merge_commit_sha</code> are null on <strong>all 5,130 rows</strong>, so no
           accepted edit has ever been recorded with its pull request.</li>
