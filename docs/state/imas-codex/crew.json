@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T20:32:50",
+  "updated": "2026-09-17T21:19:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -146386,6 +146386,209 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T183324282581-n-the-tail-a-residual-is-restated-against-the-live-roster",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a79",
+        "node": "n-the-tail-a-residual-is-restated-against-the-live-roster",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 549,
+                "cached_input_tokens": 733081,
+                "input_tokens": 733632,
+                "output_tokens": 775,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 734407,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "each of the section's Tail A row groups is re-counted live and reported beside its asserted figure with a verdict of current, drifted or stale, and the verdict counts sum to the number of groups; the number of manifest rows still ending without either a name or a stated cause is measured and stated as the headline, with a companion breakdown query required to return rows so a zero is distinguishable from an unaimed query; any group whose remaining work belongs to another plan is named with that plan; no graph mutation",
+          "estimated_hours": null,
+          "goal": "Restate what Tail A still owes after the reason repair, against the live roster rather than the section's frozen table",
+          "id": "n-the-tail-a-residual-is-restated-against-the-live-roster",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:33:25Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183324282581-n-the-tail-a-residual-is-restated-against-the-live-roster/manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a79",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-cohort-treatment/tail-a-residual.md",
+            "docs/evidence/archive/sn-west-cohort-treatment-landed.html",
+            "docs/plans/sn-west-cohort-treatment.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:33:33Z",
+        "completed_at": "2026-09-17T19:17:39.581Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2566,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2646,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "6fbba5305b0f675be238ce21cb21956696071c08",
+        "commits": [
+          "b402ae73f28bc7d0b3171ef0a9bf3d1366956218"
+        ],
+        "changed_lines": {
+          "added": 143,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "coordinator re-run of the Tail A headline over the 342-row manifest; the worker kept no log",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/tail-a-recheck.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Tail A closes: 342 manifest rows, 2 unnamed, 0 unnamed-and-uncaused, against a control of 3,141 uncaused-unnamed sources graph-wide. Nine row groups re-counted: 5 stale, 3 drifted, 1 current. The four fit-constraint weights now carry one verdict where two competed. The two rows that remain unnamed both state a cause and both belong to the integrity sprint.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183324282581-n-the-tail-a-residual-is-restated-against-the-live-roster/manifest.md",
+        "scope_changed": false,
+        "session_id": "a4232f8a-5839-4378-bf89-2d8a67ae5415",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 9355044,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 33629,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T19:17:39.581Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9508098,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2640.297,
+          "generated_tokens": 42475,
+          "generation_seconds": 2584.785,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.6,
+          "machine_seconds": 55.512,
+          "peak_input_tokens": 151754,
+          "tokens_per_second": 16.43,
+          "wall_tokens_per_second": 16.09
+        },
+        "follow_on_paths": [
+          "equilibrium/time_slice/contour_tree/node/z",
+          "vocabulary/locus"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-tail-a-residual-is-restated-against-the-live-roster",
+          "session_id": "a4232f8a-5839-4378-bf89-2d8a67ae5415",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T19:17:39.581Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 82.0,
+        "orientation_input_tokens": 5966507.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -146656,6 +146859,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2255
+    "_version": 2256
   }
 }
