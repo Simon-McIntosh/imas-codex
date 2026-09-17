@@ -3207,6 +3207,34 @@ def _run_role_bench(
     console.print(f"\n[green]Role report saved:[/green] {out_path}")
 
 
+def _benchmark_fixture(physics: bool) -> tuple[str, list[str]]:
+    """The reference fixture the extractor will read, and the paths it holds.
+
+    One population per run: under ``--physics`` the extractor composes the
+    hard-case set, otherwise the curated reference set. Both fixtures are
+    committed, so the banner reports which one produced a run's figures.
+    """
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
+    if physics:
+        from imas_codex.standard_names.physics_judge import load_bench_paths
+
+        fixture = repo_root / "research" / "physics_bench_paths.json"
+        return (
+            str(fixture.relative_to(repo_root)),
+            [entry["path"] for entry in load_bench_paths()],
+        )
+
+    import imas_codex.standard_names.benchmark_reference as benchmark_reference
+
+    fixture = Path(benchmark_reference.__file__).resolve()
+    return (
+        str(fixture.relative_to(repo_root)),
+        list(benchmark_reference.REFERENCE_NAMES),
+    )
+
+
 @sn.command("bench")
 @click.option(
     "--models",
@@ -3219,7 +3247,7 @@ def _run_role_bench(
     "--max-candidates",
     type=int,
     default=None,
-    help="Limit to first N reference paths (default: all 54)",
+    help="Limit to first N reference paths (default: the whole fixture in use)",
 )
 @click.option(
     "--runs",
@@ -3363,8 +3391,9 @@ def sn_bench(
 ) -> None:
     """Benchmark LLM models on standard name generation.
 
-    Uses a fixed reference dataset of 54 curated DD paths for reproducible
-    cross-model comparison. Results include grammar validity, reference
+    Uses a fixed reference fixture for reproducible cross-model comparison:
+    the curated DD paths, or the physics hard-case set under ``--physics``.
+    The banner names the fixture in use. Results include grammar validity, reference
     overlap, reviewer quality scores, cost, and speed.
 
     When --models is omitted, loads the model list from
@@ -3476,10 +3505,10 @@ def sn_bench(
         render_comparison_table,
         run_benchmark,
     )
-    from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
 
     names_only = not include_docs
-    total_ref = len(REFERENCE_NAMES)
+    fixture_label, reference_paths = _benchmark_fixture(physics)
+    total_ref = len(reference_paths)
     effective_max = max_candidates if max_candidates else total_ref
 
     # Resolve output path early so run_benchmark can save incrementally
@@ -3516,7 +3545,10 @@ def sn_bench(
     rev_display = ", ".join(m.split("/")[-1] for m in rev_list)
     console.print("[bold]SN Benchmark[/bold]")
     console.print(f"  Models: {', '.join(model_list)}")
-    console.print(f"  Reference paths: {min(effective_max, total_ref)}/{total_ref}")
+    console.print(
+        f"  Reference paths: {min(effective_max, total_ref)}/{total_ref}"
+        f"  ({fixture_label})"
+    )
     console.print(f"  Runs per model: {runs}")
     console.print(f"  Temperature: {temperature}")
     console.print(f"  Reviewer(s): {rev_display}")

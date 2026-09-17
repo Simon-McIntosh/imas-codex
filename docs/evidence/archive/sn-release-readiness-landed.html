@@ -871,6 +871,13 @@ Usage: imas-codex graph start [OPTIONS]      # Neo4j</code></pre>
       each probed against disk and source today: exactly one path is absent, and
       it is the one the document instructed a reader to submit. The check found a
       second inaccuracy that had nothing to do with submission paths.
+  <h2 id="benchmark-banner-fixture">The benchmark banner names the fixture it reports</h2>
+
+    <p>
+      Two committed fixtures back <code>sn bench</code>, and the banner reported
+      the curated set's size in both modes, so a physics run's header named a
+      population it did not use. The figure and the path printed beside it now
+      come from the branch the extractor takes.
     </p>
 
     <table>
@@ -895,6 +902,27 @@ Usage: imas-codex graph start [OPTIONS]      # Neo4j</code></pre>
               at <code>imas_codex/cli/llm_cli.py:296</code>. The string
               <code>18790</code> occurred in exactly one place in the repository:
               that line.</td>
+        <tr>
+          <th>Mode</th>
+          <th>Banner line printed</th>
+          <th>Paths the extractor was handed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>default</td>
+          <td><code>Reference paths: 47/47  (imas_codex/standard_names/benchmark_reference.py)</code></td>
+          <td>47</td>
+        </tr>
+        <tr>
+          <td>physics</td>
+          <td><code>Reference paths: 15/15  (research/physics_bench_paths.json)</code></td>
+          <td>15</td>
+        </tr>
+        <tr>
+          <td>physics, before this change</td>
+          <td><code>Reference paths: 47/47</code></td>
+          <td>15</td>
         </tr>
       </tbody>
     </table>
@@ -905,6 +933,16 @@ Usage: imas-codex graph start [OPTIONS]      # Neo4j</code></pre>
       <a href="/imas-codex/evidence/sn-release-readiness/architecture-doc-paths.html">the
       document-path evidence file</a>. Read-only throughout: no graph query, no
       file outside the document and its evidence touched.
+      The named test hands the config the banner built to the real extractor and
+      asserts the two figures describe one fixture, in both modes — 83 passed
+      against an 82-passed baseline, zero added failures. One gap is left open
+      on purpose: the saved report still records <code>reference_names</code>
+      from the curated set unconditionally (<code>benchmark.py:999</code>), the
+      same mislabelled population one layer down in the artifact, outside the
+      node's write scope. The reproduction recorded before the change and the
+      gate logs are in the
+      <a href="/imas-codex/evidence/sn-release-readiness/benchmark-banner-fixture.md">benchmark
+      banner fixture record</a>.
     </p>
 
   </main>
