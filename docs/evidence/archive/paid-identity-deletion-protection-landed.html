@@ -112,6 +112,66 @@
     <a href="/imas-codex/evidence/paid-identity-deletion-protection/restore-receipt-roles.md">the
     restore receipt evidence</a>.</p>
   </section>
+
+  <section id="the-unreinstatable-role-covers-none-of-the-restore-set">
+    <h2>The role with no reinstatement route is real, but nothing live shows it touching an identity the restore set contains</h2>
+    <p><strong>Measured read-only 2026-09-17</strong> at
+    <code>6fbba5305b0f675be238ce21cb21956696071c08</code>. The registry gap is
+    confirmed at its source (<code>_ARCHIVE_EDGE_COUNTERPARTS</code> holds 34
+    roles and <code>EVIDENCED_BY</code> is not among them), and the
+    identity-facing <code>EVIDENCED_BY</code> population is empty: the role's
+    only live shape joins <code>DDResolution</code> to <code>DDGap</code> (51
+    conveyances), no <code>StandardName</code> appears at either endpoint of any
+    <code>EVIDENCED_BY</code> edge, and the identity-facing slice
+    <code>(:PromotionCandidate)-[:EVIDENCED_BY]-&gt;(:StandardName)</code> holds
+    <strong>0 edges over 0 distinct targets</strong>, beside non-zero controls of
+    9 candidate nodes, 5,130 standard names and 51 role edges.</p>
+    <p><strong>The question the node was dispatched to settle is coverage, and
+    the live read covers none of the population.</strong> The deletion-record
+    mechanism that would carry the answer exists and distinguished roles
+    correctly (deleted edges: <code>HAS_PARENT</code> 300,
+    <code>HAS_REVIEW</code> 16, <code>EVIDENCED_BY</code> 0). But all 61
+    snapshots and all 316 edge records are <code>__cleartest__</code> fixtures
+    whose identity values are disjoint from both removal cohorts — and the
+    capture window opens two days <em>after</em> the removal pass it would need
+    to cover. So the registry gap can be shown to affect <strong>0 of the 93</strong>
+    and <strong>0 of the 539</strong>, over a covered subset that is itself
+    empty; the number is <em>not</em> established live.</p>
+    <figure>
+      <svg viewBox="0 0 760 210" role="img" aria-labelledby="cov-t">
+        <title id="cov-t">The deletion snapshots postdate the removals and overlap neither cohort</title>
+        <line x1="60" y1="70" x2="700" y2="70" style="stroke:#888;stroke-width:1"/>
+        <line x1="60" y1="58" x2="60" y2="82" style="stroke:#888;stroke-width:1"/>
+        <text x="60" y="96" font-size="11" text-anchor="middle" fill="#555">09-06</text>
+        <text x="240" y="96" font-size="11" text-anchor="middle" fill="#555">09-08</text>
+        <text x="470" y="96" font-size="11" text-anchor="middle" fill="#555">09-10</text>
+        <text x="690" y="96" font-size="11" text-anchor="middle" fill="#555">09-15</text>
+        <circle cx="60" cy="70" r="5" fill="#2a6"/>
+        <rect x="200" y="45" width="80" height="50" fill="#c33" opacity="0.25"/>
+        <text x="240" y="38" font-size="12" text-anchor="middle" fill="#900">removals</text>
+        <text x="240" y="24" font-size="12" text-anchor="middle" fill="#900">93 removed</text>
+        <rect x="430" y="45" width="270" height="50" fill="#36c" opacity="0.20"/>
+        <text x="565" y="38" font-size="12" text-anchor="middle" fill="#036">61 snapshots captured (fixtures)</text>
+        <text x="565" y="24" font-size="12" text-anchor="middle" fill="#036">0 of 93 &#183; 0 of 539</text>
+        <text x="60" y="130" font-size="12" fill="#2a6">archive dump &#8594; the only read that reaches the archive state</text>
+        <text x="60" y="152" font-size="12" fill="#333">gap affects restore-set identities: <tspan font-weight="bold">not established live</tspan></text>
+        <text x="60" y="174" font-size="12" fill="#333">reinstatement routes in the registry: 34 &#183; roles with none: <tspan font-weight="bold">EVIDENCED_BY</tspan></text>
+      </svg>
+      <figcaption>The removal window and the snapshot window do not overlap.
+      The 2026-09-06 dump is the one read taken before the removals, which is
+      what makes it the read that can settle the question.</figcaption>
+    </figure>
+    <p><strong>The zero is a zero over an empty covered subset, and the page says so.</strong>
+    The archive read that would settle it is named rather than run — dump
+    <code>imas-codex-graph-dev-002bf65-20260906T220012Z.tar.gz</code>, loaded
+    read-only through <code>start_temp_neo4j</code> (never
+    <code>graph_load</code>), with the exact per-identity inbound query and its
+    single caveat recorded. Full measurements, each with its query and a
+    non-zero control beside every zero, including the <code>sn.name</code>
+    instrument correction that produced a false zero on the first pass:
+    <a href="/imas-codex/evidence/paid-identity-deletion-protection/unreinstatable-role-gap.md">the
+    unreinstatable-role evidence</a>.</p>
+  </section>
 </main>
 </body>
 </html>
