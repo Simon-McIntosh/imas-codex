@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T19:30:30",
+  "updated": "2026-09-17T19:33:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -180,9 +180,11 @@
         "id": "clive-c",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "a4232f8a-5839-4378-bf89-2d8a67ae5415",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "a4232f8a-5839-4378-bf89-2d8a67ae5415"
+        },
         "created": "2026-09-15"
       },
       {
@@ -145361,6 +145363,208 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T145355344948-n-the-skip-rule-stops-excluding-a-named-quantity",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a74",
+        "node": "n-the-skip-rule-stops-excluding-a-named-quantity",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 878,
+                "cached_input_tokens": 559920,
+                "input_tokens": 560800,
+                "output_tokens": 930,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 561730,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "camera_x_rays/detector_humidity is no longer excluded by the node-category skip rule, demonstrated by a test exercising the classifier on that path and asserting it is eligible; the same test asserts the four fit-constraint weights and the two solver-structure rows remain excluded, so the change is shown not to widen eligibility beyond the one wrongly excluded row; the count of sources the rule skips is stated before and after with the query that produced each",
+          "estimated_hours": null,
+          "goal": "Correct the exclusion rule that skips a documented physical quantity carrying a unit",
+          "id": "n-the-skip-rule-stops-excluding-a-named-quantity",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T14:53:58Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145355344948-n-the-skip-rule-stops-excluding-a-named-quantity/manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-cohort-treatment/skip-rule-correction.md",
+            "docs/evidence/archive/sn-west-cohort-treatment-landed.html",
+            "docs/plans/sn-west-cohort-treatment.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T14:54:26Z",
+        "completed_at": "2026-09-17T17:21:32.202Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8797,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8826,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "105e7234ea8f4c61c65d83e758cdbf8c7a811bee",
+        "commits": [
+          "11611fa92a0bdeb16255ab8296314978acff393a"
+        ],
+        "changed_lines": {
+          "added": 230,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "coordinator re-run of the skip-rule claim against the live graph; the worker kept no log",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/skip-rule-recheck.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "The defect does not reproduce: camera_x_rays/detector_humidity reads composed with skip_reason null, against a control of 1,325 sources still carrying one. The reclassification landed before this node ran, so no rule text changed and the refusal count is identical before and after. Section 4's premise is stale rather than unmet.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145355344948-n-the-skip-rule-stops-excluding-a-named-quantity/manifest.md",
+        "scope_changed": false,
+        "session_id": "a4232f8a-5839-4378-bf89-2d8a67ae5415",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 14501641,
+            "input_tokens_cumulative": 14501641,
+            "output_tokens": 70769,
+            "output_tokens_cumulative": 70769,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T17:21:32.202Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 14807051,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 7242.282,
+          "generated_tokens": 85844,
+          "generation_seconds": 6844.951,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.8,
+          "machine_seconds": 397.331,
+          "peak_input_tokens": 152636,
+          "tokens_per_second": 12.54,
+          "wall_tokens_per_second": 11.85
+        },
+        "follow_on_paths": [
+          "equilibrium/time_slice/contour_tree/node/z"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-skip-rule-stops-excluding-a-named-quantity",
+          "session_id": "a4232f8a-5839-4378-bf89-2d8a67ae5415",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T17:21:32.202Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 36.0,
+        "orientation_input_tokens": 7085890.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -145631,6 +145835,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2248
+    "_version": 2250
   }
 }
