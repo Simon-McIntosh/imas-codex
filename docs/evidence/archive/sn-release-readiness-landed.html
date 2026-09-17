@@ -169,6 +169,82 @@
       <code>run_export</code></strong>, not a hand-rolled predicate.
     </p>
 
+    <h2 id="unsourced-cohort-partition">The unsourced chain-cap cohort, partitioned by recoverability</h2>
+
+    <p>
+      The plan's <code>f-srr-unsourced</code> beat exists to drain the
+      <code>chain_length &gt;= 3</code> identities that carry no producing
+      source, and its remedy turns on how many of them can have a source
+      recovered from their refinement ancestry. Measured read-only against the
+      live graph on <strong>2026-09-17</strong>, the cohort is <strong>174</strong>
+      identities of which <strong>102 are unsourced</strong> — the audit's
+      re-measured figure exactly, and 38 percent above the section's own cohort
+      of 126. Of the 102 unsourced, <strong>10 have a sourced ancestor at any
+      depth</strong> and <strong>92 have none</strong>, so the class is
+      rebuild-dominant and only ten identities are recoverable at all, six of
+      them from an immediate predecessor. The two parts sum to the whole
+      (10 + 92 = 102) and the recoverable part splits exactly (6 + 4 = 10).
+      Every identity in the smaller partition is listed in
+      <a href="/imas-codex/evidence/sn-release-readiness/unsourced-cohort-partition.html">the
+      partition evidence</a>, together with the queries, the positive controls
+      and the verdicts. No graph mutation was performed.
+    </p>
+
+    <figure>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400"
+           font-family="system-ui, -apple-system, Segoe UI, sans-serif" role="img"
+           aria-label="Partition of the chain-cap cohort: 174 identities split into 72 sourced and 102 unsourced; the 102 unsourced split into 10 with a sourced ancestor and 92 without; the 10 split into 6 immediate and 4 deeper.">
+        <style>
+          .lbl  { font-size: 13px; fill: #1a1a1a; }
+          .num  { font-size: 13px; fill: #1a1a1a; font-variant-numeric: tabular-nums; font-weight: 600; }
+          .cap  { font-size: 12px; fill: #444; }
+          .src  { fill: #ffffff; stroke: #1a1a1a; stroke-width: 1; }
+          .uns  { fill: #fdf3e3; stroke: #b8860b; stroke-width: 1; }
+          .rec  { fill: #eaf3ea; stroke: #2e6b3f; stroke-width: 1; }
+          .reb  { fill: #f4f4f4; stroke: #555555; stroke-width: 1; }
+          .rule { stroke: #cccccc; stroke-width: 1; }
+        </style>
+
+        <text class="lbl" x="0" y="14" font-weight="600">The chain-cap cohort, partitioned by recoverability</text>
+
+        <!-- tier 1: the cohort, 174 = 72 sourced + 102 unsourced -->
+        <text class="lbl" x="0" y="44">chain-cap cohort</text>
+        <text class="num" x="750" y="28" text-anchor="end">174</text>
+        <rect class="src" x="170" y="30" width="240" height="20"/>
+        <rect class="uns" x="410" y="30" width="340" height="20"/>
+        <text class="num" x="290" y="44" text-anchor="middle">72</text>
+        <text class="num" x="580" y="44" text-anchor="middle">102</text>
+        <text class="cap" x="290" y="66" text-anchor="middle">carries a producing source</text>
+        <text class="cap" x="580" y="66" text-anchor="middle">no producing source</text>
+
+        <!-- tier 2: the unsourced cohort, 102 = 10 with sourced ancestor + 92 without -->
+        <text class="lbl" x="0" y="110">unsourced</text>
+        <rect class="rec" x="170" y="96" width="57" height="20"/>
+        <rect class="reb" x="227" y="96" width="523" height="20"/>
+        <text class="num" x="198" y="110" text-anchor="middle">10</text>
+        <text class="num" x="488" y="110" text-anchor="middle">92</text>
+        <text class="cap" x="198" y="132" text-anchor="middle">sourced ancestor</text>
+        <text class="cap" x="488" y="132" text-anchor="middle">no sourced ancestor at any depth</text>
+
+        <!-- tier 3: the recoverable ten, magnified, 10 = 6 immediate + 4 deeper -->
+        <line class="rule" x1="198" y1="140" x2="260" y2="172" stroke-dasharray="3 3"/>
+        <text class="lbl" x="0" y="188">recoverable</text>
+        <text class="cap" x="0" y="204">magnified</text>
+        <rect class="src" x="170" y="174" width="180" height="20"/>
+        <rect class="reb" x="350" y="174" width="120" height="20"/>
+        <text class="num" x="260" y="188" text-anchor="middle">6</text>
+        <text class="num" x="410" y="188" text-anchor="middle">4</text>
+        <text class="cap" x="260" y="210" text-anchor="middle">sourced immediate predecessor</text>
+        <text class="cap" x="410" y="210" text-anchor="middle">sourced only at depth 2&#8211;3</text>
+
+        <line class="rule" x1="0" y1="232" x2="760" y2="232"/>
+        <text class="cap" x="0" y="252">Ten of 102 unsourced identities can have a source recovered from ancestry; the other 92 have no authority cohort to replay.</text>
+        <text class="cap" x="0" y="270">Each row is drawn to its own total; the recoverable tier is magnified for legibility. Live counts, 2026-09-17.</text>
+        <text class="cap" x="0" y="288">Read-only: no graph mutation. Every identity in the smaller partition is listed by id in the linked evidence.</text>
+      </svg>
+      <figcaption class="cap">Partition of the unsourced chain-cap cohort by recoverability.</figcaption>
+    </figure>
+
     <h2 id="scope-note">Scope note</h2>
 
     <p>
