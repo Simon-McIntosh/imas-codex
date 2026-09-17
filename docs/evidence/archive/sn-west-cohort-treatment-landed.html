@@ -59,6 +59,60 @@
     current tree. Whether that route is retired or awaits a caller yet to be written is a
     judgement, not a repair.</p>
 
+    <h2 id="headline-figure-audit-20260917">Headline figures re-measured against the committed manifest</h2>
+    <p>
+      The 2026-09-17 read-only census re-took the plan's release-critical quantities against
+      the committed 342-source manifest and the live graph. The recorded bound reproduces
+      exactly: <strong>340 of 342 sources are carried</strong> by a name accepted on both axes.
+      The residual is the same two explicit rows: extracted
+      <code>calorimetry/group/component/energy_total/data</code> and failed
+      <code>camera_x_rays/camera/camera_dimensions</code> at the compose attempt cap.
+    </p>
+    <table>
+      <thead><tr><th>Recorded claim</th><th>Current measurement</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>37 manifest paths untreated</td>
+          <td><strong>2 of 342</strong> not carried</td>
+          <td>stale</td>
+        </tr>
+        <tr>
+          <td>150 names published from outside the manifest</td>
+          <td><strong>0 of 230</strong> prospective candidates bound only outside it</td>
+          <td>stale; defect closed</td>
+        </tr>
+        <tr>
+          <td>355 rows: 324 named, 31 unnamed</td>
+          <td><strong>342 rows: 340 carried, 2 untreated</strong></td>
+          <td>drifted</td>
+        </tr>
+        <tr>
+          <td>340 of 342 carried</td>
+          <td><strong>340 of 342</strong></td>
+          <td>current</td>
+        </tr>
+        <tr>
+          <td>five withheld names held by quarantine</td>
+          <td><strong>0 of 230</strong> prospective candidates quarantined</td>
+          <td>stale</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Verdicts close arithmetically at current 1, drifted 1 and stale 3:
+      <strong>1 + 1 + 3 = 5</strong>. Both zero claims carry firing controls. The outside-binding
+      predicate sees 2,556 names elsewhere in the graph, and the quarantine predicate sees 660
+      names globally. The driving followup's first ordered quarantine beat is therefore
+      <strong>already complete for this release cohort</strong>; the later two-source generation
+      tail remains non-zero and is not hidden by that classification.
+    </p>
+    <p>
+      No graph mutation or release action was performed. Full queries, controls, exact rows and
+      interpretation are in the
+      <a href="/imas-codex/evidence/sn-west-cohort-treatment/plan-figure-audit">headline-figure audit</a>
+      (evidence commit <code>eaabb7e3d</code>).
+    </p>
+
   </main>
 </body>
 </html>
