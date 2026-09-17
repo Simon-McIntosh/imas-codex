@@ -19,6 +19,7 @@ import os
 import re
 import time
 import uuid
+from collections import Counter
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -11223,6 +11224,70 @@ def mark_sources_attached(
         return result[0]["affected"] if result else 0
 
 
+#: Reason recorded when a source spends its claim budget without a name. It
+#: states the budget and nothing about cause, so a parked cohort carrying only
+#: this string cannot be triaged from it.
+_COMPOSE_CAP_REASON = "compose claim-attempt cap reached"
+
+#: Closed set of dispositions a source parked at the compose claim-attempt cap
+#: can carry. Every source at or past ``_MAX_COMPOSE_CLAIM_ATTEMPTS`` lands in
+#: exactly one, so the cohort reads as a triage list rather than as a uniform
+#: failure and each class states the next operation rather than the symptom.
+CAP_PARKED_DISPOSITIONS = frozenset(
+    {
+        # A name already exists, so the cap bounds further claims rather than
+        # the outcome and no composition is owed.
+        "name_produced",
+        # The data-dictionary quantity behind the source is gone, so no name can
+        # ever be composed for it and the parked state is terminal.
+        "upstream_quantity_removed",
+        # The path names a coordinate or geometry component rather than a
+        # physical quantity, so composition is not the applicable operation.
+        "compose_not_applicable",
+        # The recorded reason names a vocabulary gap: the concept is nameable
+        # only once the grammar covers it, which no retry can produce.
+        "vocabulary_gap",
+        # A nameable quantity with a spent budget, a recorded cause and no
+        # structural blocker: a candidate for revival once compose changes.
+        "attempt_budget_exhausted",
+        # The row records nothing about its own failure, so it cannot be triaged
+        # until a reason exists. That absence is the finding, not a classification
+        # in its own right: the class counts rows whose cause was lost, and the
+        # only repair is to make the write path record one.
+        "cause_not_recorded",
+    }
+)
+
+
+def classify_parked_source(evidence: dict[str, Any]) -> str:
+    """Return the triage disposition for one source parked at the cap.
+
+    ``evidence`` carries what the parked row records about itself: ``produced``
+    (the number of live produced names), the backing data-dictionary node's
+    ``lifecycle_status`` and ``node_category``, and ``last_error``.
+
+    Total by construction: every input returns a member of
+    :data:`CAP_PARKED_DISPOSITIONS`, including the row that records nothing, so
+    a census of the cohort has no residue to interpret and the answer cannot be
+    silently wrong through an unhandled shape.
+
+    A recorded cause outranks the node category, and the category outranks
+    silence: it exists to classify the rows whose cause was lost.
+    """
+    if int(evidence.get("produced") or 0) > 0:
+        return "name_produced"
+    if str(evidence.get("lifecycle_status") or "").strip() == "removed":
+        return "upstream_quantity_removed"
+    reason = str(evidence.get("last_error") or "").strip()
+    if reason and reason != _COMPOSE_CAP_REASON:
+        if "vocabulary gap" in reason.lower():
+            return "vocabulary_gap"
+        return "attempt_budget_exhausted"
+    if str(evidence.get("node_category") or "").strip() in {"geometry", "coordinate"}:
+        return "compose_not_applicable"
+    return "cause_not_recorded"
+
+
 def mark_sources_failed(
     token: str,
     source_ids: list[str],
@@ -11268,6 +11333,102 @@ def mark_sources_failed(
             max_attempts=max_attempts,
         )
         return result[0]["affected"] if result else 0
+
+
+_CAP_PARKED_QUERY = """
+MATCH (sns:StandardNameSource)
+WHERE coalesce(sns.attempt_count, 0) >= $cap
+OPTIONAL MATCH (node:IMASNode {id: sns.source_id})
+RETURN sns.id AS id, sns.last_error AS last_error,
+       node.lifecycle_status AS lifecycle_status,
+       size([(sns)-[:PRODUCED_NAME]->(:StandardName) | 1]) AS produced,
+       node.node_category AS node_category
+ORDER BY sns.id
+"""
+
+
+def disposition_parked_sources(
+    *,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Give every source parked at the compose cap a triage disposition.
+
+    One pass reads the parked cohort with the evidence each row carries,
+    classifies every row through :func:`classify_parked_source` and writes the
+    result onto the source. A classification outside
+    :data:`CAP_PARKED_DISPOSITIONS` refuses the whole pass before any write, so
+    the cohort cannot end the pass carrying an unclassified row.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = [dict(r) for r in client.query(_CAP_PARKED_QUERY, cap=_MAX_COMPOSE_CLAIM_ATTEMPTS)]
+        written: list[dict[str, str]] = []
+        for row in rows:
+            disposition = classify_parked_source(row)
+            if disposition not in CAP_PARKED_DISPOSITIONS:
+                raise ValueError(f"row {row['id']!r} has no triage disposition")
+            written.append({"id": row["id"], "disposition": disposition})
+        if not dry_run and written:
+            client.query(_CAP_DISPOSITION_WRITE, rows=written)
+        counts = Counter(row["disposition"] for row in written)
+        return {
+            "parked": len(written),
+            "written": 0 if dry_run else len(written),
+            "counts": dict(sorted(counts.items())),
+        }
+    finally:
+        if own:
+            client.close()
+
+
+_CAP_DISPOSITION_WRITE = """
+UNWIND $rows AS row
+MATCH (sns:StandardNameSource {id: row.id})
+SET sns.parked_disposition = row.disposition
+RETURN count(sns) AS written
+"""
+
+
+_CAP_DISPOSITION_READBACK = """
+MATCH (sns:StandardNameSource)
+WHERE coalesce(sns.attempt_count, 0) >= $cap
+RETURN sns.id AS id, sns.parked_disposition AS disposition
+ORDER BY sns.id
+"""
+
+
+def census_parked_dispositions(*, gc: Any | None = None) -> dict[str, Any]:
+    """Re-read the parked cohort and report the disposition it now carries.
+
+    Reads the stored property back rather than the classification this process
+    just computed, so the census tests the write instead of re-running the
+    classifier that produced the values. It returns the count per class, the
+    rows carrying no disposition and the rows carrying one outside
+    :data:`CAP_PARKED_DISPOSITIONS`; a census reporting zero unclassified is
+    then a statement about the graph and not about the classifier.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = [dict(r) for r in client.query(_CAP_DISPOSITION_READBACK, cap=_MAX_COMPOSE_CLAIM_ATTEMPTS)]
+    finally:
+        if own:
+            client.close()
+    counts = Counter(v for v in (r["disposition"] for r in rows) if v)
+    unclassified = sorted(r["id"] for r in rows if not r["disposition"])
+    unexpected = sorted(
+        r["id"]
+        for r in rows
+        if r["disposition"] and r["disposition"] not in CAP_PARKED_DISPOSITIONS
+    )
+    return {
+        "parked": len(rows),
+        "counts": dict(sorted(counts.items())),
+        "unclassified": unclassified,
+        "unexpected": unexpected,
+    }
 
 
 def retry_failed_sources(
