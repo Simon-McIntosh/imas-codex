@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T19:33:53",
+  "updated": "2026-09-17T19:36:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -342,7 +342,8 @@
         "session_model": "deepseek-v4-flash",
         "sessions": {
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "8575c313-dfa9-457d-a215-99d927934a2d",
-          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "7425ba0b-d38f-41bb-b552-efded5528f33"
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "7425ba0b-d38f-41bb-b552-efded5528f33",
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "72143c4b-3d22-4517-8324-b91c86612a25"
         },
         "created": "2026-09-05"
       },
@@ -145565,6 +145566,200 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T145902870093-n-the-export-suite-passes-at-the-merged-head",
+        "plan": "sn-west-cohort-treatment",
+        "section": "\u00a79",
+        "node": "n-the-export-suite-passes-at-the-merged-head",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1081,
+                "cached_input_tokens": 575528,
+                "input_tokens": 576611,
+                "output_tokens": 1453,
+                "reasoning_output_tokens": 519,
+                "total_tokens": 578064,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "the report states the pass, fail and skip counts for tests/standard_names and any test module importing the export path, run at the current HEAD with the command and exit status recorded; every failure is attributed as pre-existing at a named base revision or introduced since, by re-running the same selection at that base; the added-failure count against the base is stated explicitly and is the headline figure; the run is captured to a single log file named in the manifest",
+          "estimated_hours": null,
+          "goal": "Re-run the export and standard-names test surface at the current merged head and attribute every failure",
+          "id": "n-the-export-suite-passes-at-the-merged-head",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T14:59:06Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145902870093-n-the-export-suite-passes-at-the-merged-head/manifest.md",
+          "plan": "sn-west-cohort-treatment",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a79",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/export-suite-merged-head.md",
+            "docs/evidence/archive/sn-west-cohort-treatment-landed.html",
+            "docs/plans/sn-west-cohort-treatment.html"
+          ]
+        },
+        "role": "test",
+        "spec_level": "exact",
+        "member": "clive-tail",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T14:59:30Z",
+        "completed_at": "2026-09-17T17:27:55.445Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8869,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8905,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "2aa09aeccdbd64056590e794e97f5cfe91272214",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest at merged head 2aa09aecc and at base fcc65951b, same selection, failures attributed",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145902870093-n-the-export-suite-passes-at-the-merged-head/logs/head-2aa09aecc.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145902870093-n-the-export-suite-passes-at-the-merged-head/manifest.md",
+        "scope_changed": true,
+        "session_id": "72143c4b-3d22-4517-8324-b91c86612a25",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 11708061,
+            "input_tokens_cumulative": 11708061,
+            "output_tokens": 75303,
+            "output_tokens_cumulative": 75303,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T17:27:55.445Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11860043,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 7622.874,
+          "generated_tokens": 86115,
+          "generation_seconds": 6885.826,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 737.048,
+          "peak_input_tokens": 150682,
+          "tokens_per_second": 12.51,
+          "wall_tokens_per_second": 11.3
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "role test may not cite a repository commit; the node's deliverable is its report at /home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/export-suite-merged-head.md, and the landing record it also wrote is merged at b6b4de1ab",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-export-suite-passes-at-the-merged-head",
+          "session_id": "72143c4b-3d22-4517-8324-b91c86612a25",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T17:27:55.445Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 15.0,
+        "orientation_input_tokens": 4939338.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -145835,6 +146030,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2250
+    "_version": 2252
   }
 }
