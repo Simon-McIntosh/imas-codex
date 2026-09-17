@@ -656,6 +656,43 @@
       <a href="/imas-codex/evidence/sn-west-catalog-release/the-three-withheld-sources">the
       three-source evidence record</a>, committed as <code>51607b3ea</code>.</p>
   </section>
+  <section id="docs-axis-reconciliation">
+    <h2>The docs-axis reconciliation is named, and it rejects 26 of the 31 hand-patched values</h2>
+    <p>A reset docs scalar could previously only be restored by hand-written Cypher,
+      one value per row. <code>reconcile_docs_axis_from_reviews</code> now re-derives
+      <code>docs_stage</code> and <code>reviewer_score_docs</code> from the winning
+      surviving docs-axis <code>HAS_REVIEW</code> edge under one stated rule — the
+      highest-ranked surviving docs review group, canonical ahead of non-canonical,
+      then newest — and refuses a name carrying no docs-axis review at all. The rule
+      is not restated: the statement calls the existing
+      <code>_docs_review_winner_query_body</code>, so the reconciliation and the
+      review-eligibility predicate cannot drift apart.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>31 hand-patched identities, dry run</td><td><code>agree 5, repair 26, with_winner 31, refused_no_review 0</code> — <strong>the rule reproduces 5 of the 31 and not the other 26</strong></td></tr>
+        <tr><td>Why they differ</td><td>The hand patch mixed criteria per row. For <code>faraday_angle</code> and <code>radial_coordinate_of_strike_point</code> the stored value equals the <em>highest-scoring</em> surviving docs review while the named rule takes the newest or canonical group's winner, which scores lower. Where the criteria coincide, the values agree.</td></tr>
+        <tr><td>Refusal half, shown</td><td>Two names with no docs-axis review (<code>alpha_critical_parameter</code>, <code>alpha_reconstructed_parameter</code>) return <code>with_winner 0</code> and are left at <code>docs_stage='pending'</code> with a null score.</td></tr>
+        <tr><td>Test</td><td>4 passed, exit 0 — restore, refusal, dry-run separation, idempotency</td></tr>
+        <tr><td>Graph data</td><td><code>graph_mutations: 0</code>. Apply mode would change 26 stored scores, which is a release-owner decision, so only the dry run ran.</td></tr>
+      </tbody>
+    </table>
+    <p>An instrument defect was caught before it became a reported number: the first
+      aggregate pass reported <code>refused_no_review 1</code>, apparently one row the
+      rule cannot cover, because a cosmetic string edit in the probe had produced the
+      nonexistent id <code>vertical_coordinate_of_amera</code>. The per-row pass over a
+      clean list finds all 31 present and none refused.</p>
+    <p>Full before/after verdicts, the control, the instrument defect and the exact
+      commands are in
+      <a href="/imas-codex/evidence/sn-west-catalog-release/docs-axis-reconciliation">the
+      docs-axis reconciliation evidence record</a>, committed as <strong>8d3a4e66d</strong>
+      (<code>imas_codex/standard_names/graph_ops.py</code> and
+      <code>tests/standard_names/test_docs_axis_reconciliation.py</code>). The
+      deliverable is code and a test rather than documentation, so it sits outside the
+      docs-only write fence its dispatch declared — an additive change no concurrent
+      node owned, nothing merged or pushed, and nothing calls the function
+      automatically.</p>
+  </section>
 </main>
 </body>
 </html>
