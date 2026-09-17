@@ -285,6 +285,79 @@
       mutation, no code change.
     </p>
 
+  <h2 id="stopped-run-claim-release">A stopped run releases its claim at any age</h2>
+
+    <p>
+      The exact-name scope preflight decided whether a claim was contention by
+      its age against the orphan-sweep cutoff (1800&nbsp;s). It now reads the
+      owning run's status: a claim whose run reached a terminal status is
+      reclaimable at any age, a claim whose run is still executing refuses at any
+      age, and age is retained only as the fallback for a claim whose owning run
+      cannot be resolved. Both halves are asserted by
+      <code>tests/standard_names/test_exact_name_claim_run_release.py</code>
+      (16 tests), which <strong>fails on the pre-change module</strong> (exit 1;
+      three behavioural failures &mdash; a fresh claim owned by a
+      <code>completed</code> run refused as
+      <code>held: current worker claim (live)</code>, and an old claim owned by a
+      <code>started</code> run passed, <code>DID NOT RAISE</code> &mdash; plus 10
+      call sites of the parameter this change adds) and
+      <strong>passes after</strong> (exit 0, 24 passed alongside the predecessor
+      age suite). Detail:
+      <a href="/imas-codex/evidence/sn-release-readiness/stopped-run-claim-release.html">stopped-run-claim-release.md</a>.
+    </p>
+
+    <p>
+      The live census this node was asked to report, taken read-only through the
+      login-local bolt tunnel:
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Reading</th><th>Value</th><th>Bearing</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>StandardName rows currently claimed</td><td>0</td>
+          <td>no run is mid-flight; the empty cohort is the input, not the result</td>
+        </tr>
+        <tr>
+          <td>Claims held by a run that has stopped</td><td>0</td>
+          <td>&mdash; the released population is empty today</td>
+        </tr>
+        <tr>
+          <td>Claims held by a live run</td><td>0</td>
+          <td>the control the fence asked for could not be produced, and is not
+              claimed to have been</td>
+        </tr>
+        <tr>
+          <td>Name rows whose <code>run_id</code> resolves to a terminal run</td>
+          <td>19</td>
+          <td>the resolution arm discriminates, so the zero above is not a blind
+              instrument</td>
+        </tr>
+        <tr>
+          <td>Name rows whose <code>run_id</code> resolves to nothing</td>
+          <td>557</td>
+          <td>the age-fallback cohort, and why the fallback is retained</td>
+        </tr>
+        <tr>
+          <td><code>SNRun</code> rows by status</td>
+          <td>1 <code>started</code> / 620 terminal</td>
+          <td>621 runs total</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      One <code>started</code> run is a 48-hour-old row with a null heartbeat
+      (<code>8c781962</code>, started 2026-09-15T19:19:27Z, observed
+      2026-09-17T19:35:25Z). It is a process that died without finalising, and
+      under the new rule a claim it held would refuse at any age where the age
+      rule released it in 1800&nbsp;s. That is the deliberate half of the rule,
+      and it moves the un-finalised case onto the run-level finalisation path,
+      which had not run for that row in 48 hours.
+    </p>
+
   </main>
 </body>
 </html>

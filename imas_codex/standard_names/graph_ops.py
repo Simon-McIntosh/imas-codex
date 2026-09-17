@@ -28,7 +28,7 @@ from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import NameStage, RefineStopReason
+from imas_codex.graph.models import NameStage, RefineStopReason, SNRunStatus
 from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
@@ -1815,6 +1815,9 @@ RETURN requested_name,
          status: candidate.status,
          claimed_at: candidate.claimed_at,
          claim_token: candidate.claim_token,
+         // Age is the fallback evidence, used only when the owning run cannot
+         // be resolved; the run's own status is read separately and decides
+         // every claim whose run_id resolves.
          claim_stale: candidate.claimed_at IS NOT NULL
                       AND candidate.claimed_at
                           < datetime() - duration({seconds: $claim_timeout_s}),
@@ -1836,6 +1839,7 @@ WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
   AND NOT coalesce(name.status, '') IN $terminal_statuses
   AND (
     (name.claimed_at IS NULL AND name.claim_token IS NULL)
+    OR name.id IN $released_ids
     OR name.claimed_at < datetime() - duration({seconds: $claim_timeout_s})
   )
   AND name.drain_scope_id IS NULL
@@ -1856,12 +1860,95 @@ SET name.run_id = $run_id, name.updated_at = datetime(),
 RETURN collect(name.id) AS stamped_ids
 """
 
+_EXACT_NAME_SCOPE_RUN_STATUS_QUERY = """
+// EXACT_NAME_SCOPE_RUN_STATUS
+UNWIND $run_ids AS run_id
+MATCH (owner:SNRun {id: run_id})
+RETURN run_id, owner.status AS status
+"""
+
 _EXACT_SCOPE_TERMINAL_NAME_STAGES = frozenset({"superseded", "exhausted", "contested"})
 _EXACT_SCOPE_TERMINAL_STATUSES = frozenset({"deprecated", "superseded"})
 
+#: ``SNRunStatus`` values that end a run's ownership of its claims. Every other
+#: status — ``started``, a status written by a future release, or a run row that
+#: cannot be read at all — leaves the claim held, so the reading here fails
+#: closed: only a run known to have stopped releases its claim.
+_TERMINAL_RUN_STATUSES = frozenset(
+    {
+        SNRunStatus.completed.value,
+        SNRunStatus.interrupted.value,
+        SNRunStatus.failed.value,
+        SNRunStatus.degraded.value,
+        SNRunStatus.stale.value,
+    }
+)
 
-def _exact_name_scope_refusals(rows: list[dict[str, Any]]) -> list[str]:
-    """Return deterministic refusal messages for one preflight snapshot."""
+_CLAIM_ABSENT = "absent"
+_CLAIM_HELD = "held"
+_CLAIM_RELEASED = "released"
+
+
+def _claim_disposition(candidate: dict[str, Any], run_statuses: dict[str, str]) -> str:
+    """Decide whether one preflight candidate's claim is held or abandoned.
+
+    A claim is evidence that a worker holds the row. The direct evidence of
+    abandonment is the owning run's terminal status: the claim died with the
+    run, so the row is reclaimable at any age. Age is only a proxy for that,
+    kept as the fallback for a claim whose owning run cannot be resolved — a
+    legacy row with no ``run_id``, or a claim written by a process that never
+    created a run. A token carrying no timestamp is never cleared by the orphan
+    sweep either, so it stays held rather than becoming a row the reaper would
+    leave behind.
+    """
+    claimed_at = candidate.get("claimed_at")
+    if claimed_at is None and candidate.get("claim_token") is None:
+        return _CLAIM_ABSENT
+    if claimed_at is None:
+        return _CLAIM_HELD
+    status = run_statuses.get(str(candidate.get("run_id") or ""))
+    if status is not None:
+        return _CLAIM_RELEASED if status in _TERMINAL_RUN_STATUSES else _CLAIM_HELD
+    return _CLAIM_RELEASED if candidate.get("claim_stale", False) else _CLAIM_HELD
+
+
+def _claimed_run_ids(rows: list[dict[str, Any]]) -> list[str]:
+    """Collect the runs owning a claim in one preflight snapshot, bounded."""
+    return sorted(
+        {
+            str(candidate["run_id"])
+            for row in rows
+            for candidate in (row.get("matches") or [])
+            if candidate.get("claimed_at") is not None and candidate.get("run_id")
+        }
+    )
+
+
+def _collect_run_statuses(run_ids: list[str], *, query: Any) -> dict[str, str]:
+    """Resolve run rows that exist; a run absent from the graph stays unresolved.
+
+    Callers only reach this when a claim is present, so the read is bounded by
+    the size of the requested scope rather than by the claim population.
+    """
+    if not run_ids:
+        return {}
+    return {
+        str(row["run_id"]): row.get("status")
+        for row in query(_EXACT_NAME_SCOPE_RUN_STATUS_QUERY, run_ids=run_ids)
+    }
+
+
+def _exact_name_scope_refusals(
+    rows: list[dict[str, Any]], run_statuses: dict[str, str] | None = None
+) -> list[str]:
+    """Return deterministic refusal messages for one preflight snapshot.
+
+    ``run_statuses`` maps the id of every run owning a claim in these rows to its
+    ``SNRun`` status. A claim's own timestamp and token say a worker took the
+    row; the owning run's status says whether that worker still exists, which is
+    the fact age only approximates.
+    """
+    statuses = run_statuses or {}
     refusals: list[str] = []
     for row in rows:
         requested_name = str(row.get("requested_name") or "")
@@ -1879,12 +1966,15 @@ def _exact_name_scope_refusals(rows: list[dict[str, Any]]) -> list[str]:
             candidate.get("claimed_at") is not None
             or candidate.get("claim_token") is not None
         ):
-            # A claim older than the orphan sweep threshold is abandoned —
-            # reclaimable, not contention. A fresh claim, or a token carrying
-            # no timestamp (which the sweep also never clears), stays a live
-            # refusal. The age flag is computed by the preflight query with
-            # the same cutoff the sweep uses.
-            if not candidate.get("claim_stale", False):
+            # A claim is held while its owning run is unaccounted for: a run
+            # still executing holds it at any age, and a run that reached a
+            # terminal status released it the moment it stopped, so the row is
+            # reclaimable however recently it was claimed. Age against the
+            # orphan-sweep cutoff is the fallback for a claim whose run cannot
+            # be resolved — a legacy row with no run_id, or a claim whose run
+            # row is absent — and a token carrying no timestamp is never
+            # cleared by the sweep either, so it stays held.
+            if _claim_disposition(candidate, statuses) == _CLAIM_HELD:
                 refusals.append(f"{requested_name}: current worker claim (live)")
         if any(
             candidate.get(field) is not None
@@ -1917,7 +2007,12 @@ def scope_exact_standard_names(
     The read covers the complete requested set and both directions of its
     transitive ``HAS_PARENT`` lineage.  Any missing, ambiguous, terminal,
     claimed, drain-scoped, or fixture-lineage identity refuses the whole
-    invocation.  ``run_id`` is durable provenance rather than a live lock, so a
+    invocation.  A claim is refused while its owning run is unaccounted for: a
+    run that is still executing refuses however old the claim is, while a run
+    that reached a terminal status released its claim when it stopped, so the
+    row is reclaimed at any age.  Age is the fallback for a claim whose owning
+    run cannot be resolved, since it is then the only available evidence.
+    ``run_id`` is durable provenance rather than a live lock, so a
     live invocation atomically replaces it on exactly the requested
     ``StandardName`` nodes after every live claim and drain field is clear.  It
     never touches ``StandardNameSource`` nodes.  Dry-run performs only the
@@ -1957,9 +2052,22 @@ def scope_exact_standard_names(
                     raise ExactNameScopeConflict(
                         "exact-name preflight did not return the complete requested set"
                     )
-                refusals = _exact_name_scope_refusals(rows)
+                run_statuses = _collect_run_statuses(
+                    _claimed_run_ids(rows), query=transaction.run
+                )
+                refusals = _exact_name_scope_refusals(rows, run_statuses)
                 if refusals:
                     raise ExactNameScopeConflict("; ".join(refusals))
+
+                released_ids = sorted(
+                    {
+                        str(candidate["id"])
+                        for row in rows
+                        for candidate in (row.get("matches") or [])
+                        if _claim_disposition(candidate, run_statuses)
+                        == _CLAIM_RELEASED
+                    }
+                )
 
                 stamped_ids: list[str] = []
                 if not dry_run:
@@ -1974,6 +2082,7 @@ def scope_exact_standard_names(
                             terminal_statuses=sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
                             fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
                             claim_timeout_s=DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
+                            released_ids=released_ids,
                         )
                     )
                     if len(stamp_rows) != 1:
