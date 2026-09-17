@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T21:43:10",
+  "updated": "2026-09-17T21:49:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -147788,6 +147788,218 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T185550355515-n-a-stopped-run-releases-its-claim-without-waiting-for-age",
+        "plan": "sn-release-readiness",
+        "section": "\u00a71",
+        "node": "n-a-stopped-run-releases-its-claim-without-waiting-for-age",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2412,
+                "cached_input_tokens": 789077,
+                "input_tokens": 791491,
+                "output_tokens": 980,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 792471,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a test asserts that a claim whose owning run is terminal is releasable regardless of its age, and that a claim whose run is still live is not released however old it is, failing before the change and passing after; both halves are asserted, since releasing on age alone is the current behaviour and releasing on liveness alone would strand a claim whose run never recorded a terminal state; the test command and exit status are named with its log; the evidence reports the live count of claims currently held by a run that has stopped, with the query that produced it and a control showing the same predicate returns non-zero over live-run claims",
+          "estimated_hours": null,
+          "goal": "Release a claim whose owning run has stopped, rather than waiting for an age threshold that only proxies for it",
+          "id": "n-a-stopped-run-releases-its-claim-without-waiting-for-age",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:55:51Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185550355515-n-a-stopped-run-releases-its-claim-without-waiting-for-age/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-release-readiness/stopped-run-claim-release.md",
+            "docs/evidence/archive/sn-release-readiness-landed.html",
+            "docs/plans/sn-release-readiness.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-vocab",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:56:07Z",
+        "completed_at": "2026-09-17T19:43:03.445Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2754,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2816,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "b7da331577b56ae3ba59dc3c79ce26ac76b1d4f5",
+        "commits": [
+          "e52cf5fa9464781c00d219fcdc1bd9c12dcab79b"
+        ],
+        "changed_lines": {
+          "added": 628,
+          "removed": 11,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_exact_name_claim_run_release.py test_docs_axis_reconciliation.py test_refine_source_cohort_gate.py at the merged head",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/gate-merged.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185550355515-n-a-stopped-run-releases-its-claim-without-waiting-for-age/manifest.md",
+        "scope_changed": true,
+        "session_id": "12d8d23c-84d5-4797-941a-55755d0a1cbc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 662291,
+            "input_tokens_cumulative": 8870002,
+            "output_tokens": 621,
+            "output_tokens_cumulative": 50353,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T19:43:03.445Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9022380,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2807.089,
+          "generated_tokens": 61631,
+          "generation_seconds": 2638.379,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.5,
+          "machine_seconds": 168.71,
+          "peak_input_tokens": 151078,
+          "tokens_per_second": 23.36,
+          "wall_tokens_per_second": 21.96
+        },
+        "follow_on_paths": [
+          "imas_codex/standard_names/graph_ops.py",
+          "tests/standard_names/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "imas_codex/standard_names/graph_ops.py",
+            "reason": "the node's done-when required the claim-release behaviour change; the dispatch fenced it to docs only and the fence was the coordinator's error. Hunks sit at lines 28-2082, disjoint from the concurrent docs-axis node's 6537-12586, and git auto-merged the file with no conflict"
+          },
+          {
+            "path": "tests/standard_names/test_exact_name_claim_run_release.py",
+            "reason": "new test file pinning the change, uncontested by any concurrent node"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-a-stopped-run-releases-its-claim-without-waiting-for-age",
+          "session_id": "12d8d23c-84d5-4797-941a-55755d0a1cbc",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T19:43:03.445Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 88.0,
+        "orientation_input_tokens": 6261366.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -148058,6 +148270,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2262
+    "_version": 2263
   }
 }
