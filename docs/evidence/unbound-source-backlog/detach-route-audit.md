@@ -24,7 +24,7 @@ first appears to be:
 | Edge-removal: a `PRODUCED_NAME` relationship is deleted, the target name survives | **19** | Yes, unless a stage predicate fences the target |
 | Node-deletion: the node carrying the edge is deleted | **5** | Only when the deleted node is a **source** — deleting a *name* removes the name, and deleting a *source* detaches every edge it carries |
 
-Re-derive with `python3 route_census.py` — log `route-census.log`, EXIT=0.
+Re-derive with `python3 route_census.py` — log `route-census.log`, EXIT=0. Thirteen of the nineteen edge routes and one node route can take an accepted name's last producer, so **fourteen sites** can leave an accepted name with no producing source.
 
 ### The 19 edge-removal routes
 
@@ -49,7 +49,7 @@ is at.
 | `graph_ops.py:13925` `reconcile_descriptionless_composed_names` | `name_stage IN ['','pending','drafted']` | **No.** Accepted is outside the set. |
 | `graph_ops.py:20184` `deduplicate_scalar_selected_sources` | `source.produced_sn_id = expected.keep_target_id` and the keep target must exist | **Yes for the dropped target.** The fence is on the source's keep pointer, so the name that loses the source has its stage unchecked. |
 | `graph_ops.py:22569` `_detach_stale_ancestor_sources` | `source.status = 'stale'` | **Yes.** The fence is on the *source's* status; the stage of the name it was the last producer of is never read. |
-| `graph_ops.py:22852` `supersede_into_ancestor` | `COUNT { PRODUCED_NAME } = 1`… actually `= 2`, and `produced_sn_id = $ancestor_id` | **No.** A producer set of exactly two loses one and keeps one. |
+| `graph_ops.py:22852` `supersede_into_ancestor` | `WHERE source.produced_sn_id = $ancestor_id AND COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } = 2 AND EXISTS { (source)-[:PRODUCED_NAME]->(old) }`, then `MATCH (source)-[redundant:PRODUCED_NAME]->(old) DELETE redundant` | **Yes, unless the caller has already superseded `old`.** The count of two is the *source's* out-degree, not `old`'s producer count: the two edges are to `old` and to `old`'s ancestor, and this deletes the edge to `old`. A source that was `old`'s only producer therefore leaves `old` with none, and no predicate on `old.name_stage` stands in the way — the safety of this route rests entirely on the caller having superseded `old` first. |
 | `signed_manifest.py:4580` unbind | `source.produced_sn_id = $row.scalar_target` | **Yes.** Element/scalar compare-and-set; the target's stage is not in the predicate. |
 | `signed_manifest.py:4624` detach | `elementId(relationship) = $relationship_id AND elementId(start) = $start_id AND elementId(end) = $end_id` | **Yes.** Identity, not stage. |
 | `signed_manifest.py:5258` `_apply_dual_authority_retirement` | `DELETE binding, projection` by element id, keep-target guards | **Yes.** Same shape: identity fence, no stage predicate on the retired target. |
@@ -66,7 +66,7 @@ does not have one.
 
 ### The 5 node-deletion routes
 
-These are divided by a distinction the first draft of this audit got wrong: a
+These are divided by a distinction that decides the answer: a
 node-deletion route removes a producer edge only when the deleted node is a
 **source**.
 

@@ -51,14 +51,14 @@
   </section>
 
   <section id="detach-route-audit">
-    <h2>Twenty-four routes delete a producer edge; thirteen can leave an accepted name with none</h2>
+    <h2>Twenty-four routes delete a producer edge; fourteen can leave an accepted name with none</h2>
     <p><strong>Read-only on 2026-09-17</strong> at
     <code>fcc65951bc52d083b74461f10ffbfe39b97c2624</code>. A
     <code>PRODUCED_NAME</code> edge is the only record of which source justifies
     a standard name, so every code path that deletes a <code>PRODUCED_NAME</code>
     edge was enumerated and classified by whether it can take an accepted name's
     last producer. <strong>19 routes delete the edge and leave the name standing
-    &#8212; the orphaning-capable class, of which twelve can take an accepted
+    &#8212; the orphaning-capable class, of which thirteen can take an accepted
     name's last producer &#8212; and 5 delete a node. Of the node deletions only
     one matters here: deleting a <em>name</em> deletes the name, but deleting a
     <em>source</em> detaches every edge it carried, and the derived-parent
@@ -121,7 +121,7 @@
       altogether.</figcaption>
     </figure>
 
-    <p>Four attributes of the negative result belong in the record. The
+    <p>Five attributes of the negative result belong in the record. The
     <a href="/imas-codex/evidence/unbound-source-backlog/detach-route-audit">full audit</a>
     lists every route with its file, line and refusal predicate.</p>
     <ul>

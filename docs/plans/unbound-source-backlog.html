@@ -129,7 +129,7 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260917T043453648338-n-usb-detach-route-audit" data-who="worker-detach-route-audit" data-when="2026-09-17T07:45:00Z">
     <div class="r-comment-body">
-<p>Every code path that deletes a PRODUCED_NAME edge was enumerated and classified for an accepted target. Twenty-four deletion sites exist. Nineteen delete the edge and leave the name standing, which is the orphaning-capable class. Twelve of the nineteen can take an accepted name's last producer.</p>
+<p>Every code path that deletes a PRODUCED_NAME edge was enumerated and classified for an accepted target. Twenty-four deletion sites exist. Nineteen delete the edge and leave the name standing, which is the orphaning-capable class. Thirteen of the nineteen can take an accepted name's last producer.</p>
 <p>One node-deletion route can also take a producer: deleting a name deletes the name, but deleting a source detaches every edge that source carried. The derived-parent cleanup deletes source nodes without reading the stages it strands.</p>
 <p>The signed-manifest family is the largest class and the only one fenced on edge identity rather than on the target stage, so a manifest naming a name's only producer orphans it by design. That guard belongs at manifest construction; the apply path does not have one.</p>
 <p>A rename can still orphan today. The empty-cohort refusal inside persist_refined_name is exempted by edit_mode, and the caller guard in edit.py returns early when the observed cohort is empty, so the successor identity later reaches accepted with no producer while its superseded predecessor looks unremarkable.</p>
