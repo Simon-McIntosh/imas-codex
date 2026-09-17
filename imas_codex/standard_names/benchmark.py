@@ -100,6 +100,9 @@ class ModelResult:
     attachment_count: int = 0
     vocab_gap_count: int = 0
     batch_errors: int = 0
+    # Why each failed batch failed, counted by cause so a report can be
+    # gated on the mechanism rather than on the bare failure count.
+    batch_error_causes: dict[str, int] = field(default_factory=dict)
     # Quality against reference set
     reference_overlap: int = 0
     reference_total: int = 0
@@ -1573,6 +1576,22 @@ def _rebuild_batches(batches: list[dict], max_items: int) -> list[dict]:
     return result
 
 
+def _classify_batch_error(exc: BaseException) -> str:
+    """Name why a compose batch produced no usable result.
+
+    A structured call reports how many provider responses it received before
+    failing. Zero responses means the transport failed before the provider
+    answered - an endpoint drop - whereas one or more responses means the
+    provider answered and its answer could not be turned into a batch.
+    """
+    response_count = getattr(exc, "response_count", None)
+    if response_count is not None:
+        return "endpoint_drop" if response_count == 0 else "model_refusal"
+    if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
+        return "endpoint_drop"
+    return "provider_error"
+
+
 async def _run_model(
     model: str,
     extraction_batches: list[dict],
@@ -1686,6 +1705,10 @@ async def _run_model(
                     exc,
                 )
                 result.batch_errors += 1
+                cause = _classify_batch_error(exc)
+                result.batch_error_causes[cause] = (
+                    result.batch_error_causes.get(cause, 0) + 1
+                )
 
     elapsed = time.monotonic() - t0
     result.elapsed_seconds = round(elapsed, 2)

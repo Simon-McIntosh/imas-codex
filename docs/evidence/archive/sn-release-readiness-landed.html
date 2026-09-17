@@ -617,6 +617,127 @@
       which had not run for that row in 48 hours.
     </p>
 
+  <h2 id="batch-failure-cause-recorded">The batch failure cause reaches the recorded outcome</h2>
+
+  <p>
+    The predecessor node measured that a dropped endpoint and a refusing model
+    reach the per-batch handler of <code>_run_model</code> as different
+    exceptions and that <code>benchmark.py:1688</code> keeps the bare
+    <code>result.batch_errors += 1</code> and nothing else. This node lands the
+    patch that node preserved, unchanged: 23 added lines in three hunks, the
+    third writing the classified cause beside the count it already computed.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Condition on the terminal exception</th><th>Recorded cause</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>response_count == 0</code> - the transport failed before an answer arrived</td><td><code>endpoint_drop</code></td></tr>
+      <tr><td><code>response_count &gt;= 1</code> - an answer arrived and could not be turned into a batch</td><td><code>model_refusal</code></td></tr>
+      <tr><td>no <code>response_count</code>, and the error is a transport type</td><td><code>endpoint_drop</code></td></tr>
+      <tr><td>no <code>response_count</code>, and the error is anything else</td><td><code>provider_error</code></td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    The classifier reads <code>response_count</code> off the exception - the
+    attribute the structured-call layer already stores (<code>llm.py:588</code>,
+    set at <code>:190</code>, <code>:200</code>, <code>:495</code>,
+    <code>:509</code>, <code>:559</code>, <code>:571</code>, <code>:596</code>,
+    <code>:610</code>) - so the distinction is carried rather than re-derived.
+    The first two rows are the whole signal; the last two only cover errors
+    raised before that layer could attach a count.
+  </p>
+
+  <figure>
+    <svg viewBox="0 0 760 240" role="img"
+         font-family="system-ui, -apple-system, Segoe UI, sans-serif"
+         alt="Before the change three distinct failures converge on one recorded row carrying only a failure count; after the change each failure exits carrying its own named cause.">
+      <defs>
+        <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 10 0 z" fill="rgb(136,136,136)"/>
+        </marker>
+      </defs>
+
+      <text class="cap" x="0" y="12">What the recorded outcome keeps, before and after</text>
+      <line class="rule" x1="0" y1="22" x2="760" y2="22"/>
+      <line x1="376" y1="34" x2="376" y2="212" stroke="rgb(204,204,204)"/>
+
+      <text x="0" y="48" font-size="12" fill="rgb(68,68,68)">before this change</text>
+      <rect x="0" y="58" width="200" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="8" y="74" font-size="11">endpoint drop, 0 responses</text>
+      <rect x="0" y="90" width="200" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="8" y="106" font-size="11">model refusal, 2 responses</text>
+      <rect x="0" y="122" width="200" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="8" y="138" font-size="11">provider error</text>
+
+      <line x1="200" y1="70" x2="238" y2="116" stroke="rgb(136,136,136)" marker-end="url(#arrow2)"/>
+      <line x1="200" y1="102" x2="238" y2="116" stroke="rgb(136,136,136)" marker-end="url(#arrow2)"/>
+      <line x1="200" y1="134" x2="238" y2="118" stroke="rgb(136,136,136)" marker-end="url(#arrow2)"/>
+
+      <rect x="240" y="96" width="124" height="44" fill="none" stroke="rgb(68,68,68)"/>
+      <text x="248" y="114" font-size="11">batch_errors = 1</text>
+      <text x="248" y="130" font-size="11">cause: absent</text>
+
+      <text x="392" y="48" font-size="12" fill="rgb(68,68,68)">after this change</text>
+      <rect x="392" y="58" width="200" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="400" y="74" font-size="11">endpoint drop, 0 responses</text>
+      <rect x="392" y="90" width="200" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="400" y="106" font-size="11">model refusal, 2 responses</text>
+      <rect x="392" y="122" width="200" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="400" y="138" font-size="11">provider error</text>
+
+      <line x1="592" y1="70" x2="606" y2="70" stroke="rgb(136,136,136)" marker-end="url(#arrow2)"/>
+      <line x1="592" y1="102" x2="606" y2="102" stroke="rgb(136,136,136)" marker-end="url(#arrow2)"/>
+      <line x1="592" y1="134" x2="606" y2="134" stroke="rgb(136,136,136)" marker-end="url(#arrow2)"/>
+
+      <rect x="608" y="58" width="148" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="616" y="74" font-size="11">endpoint_drop = 1</text>
+      <rect x="608" y="90" width="148" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="616" y="106" font-size="11">model_refusal = 1</text>
+      <rect x="608" y="122" width="148" height="24" fill="none" stroke="rgb(136,136,136)"/>
+      <text x="616" y="138" font-size="11">provider_error = 1</text>
+    </svg>
+    <figcaption class="cap">Three failures that recorded the same row now record which one occurred.</figcaption>
+  </figure>
+
+  <p>
+    The refusal is shown rather than asserted: with the patch reverse-applied the
+    same suite reports <strong>3 failed, exit 1</strong>
+    (<code>/tmp/batchcause_test_unpatched.log</code>) and with it applied
+    <strong>3 passed, exit 0</strong> (<code>/tmp/batchcause_test.log</code>).
+    The third test asserts only that the two recorded outcomes differ, and it
+    fails on the unpatched code because both sides carry the same
+    <code>batch_errors = 1</code> and no cause at all. The focused gate - this
+    test plus <code>test_benchmark.py</code> and
+    <code>test_benchmark_roles.py</code>, the module the change lives in and its
+    two neighbours - is <code>118 passed, exit 0</code>
+    (<code>/tmp/batchcause_gate.log</code>).
+  </p>
+
+  <p>
+    <strong>The applied result does not differ from the preserved patch.</strong>
+    The patch carries no <code>a/</code>/<code>b/</code> prefixes, so the default
+    strip level refuses it on the path
+    (<code>standard_names/benchmark.py: No such file or directory</code>);
+    at <code>-p0</code> it applies cleanly, three of three hunks, no reject file
+    and no fuzz. The patch's 23 added lines and the committed diff's 23 added
+    lines are identical line for line, so a patch written against the earlier
+    revision still matches this one exactly and needed no adaptation.
+  </p>
+
+  <p>
+    It records the cause; it does not act on it. No retry policy, report gate or
+    run disposition reads <code>batch_error_causes</code> yet, so an endpoint
+    drop still yields a run whose composition contributed nothing - the
+    difference is recorded and available to a reader, not prevented. This node's
+    gate measures its own change only; the merged result is a separately
+    dispatched test node's question. Full method and limits:
+    <a href="/imas-codex/evidence/sn-release-readiness/batch-failure-cause">batch failure cause</a>.
+  </p>
+
   </main>
 </body>
 </html>
