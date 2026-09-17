@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T21:49:31",
+  "updated": "2026-09-17T21:50:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -148000,6 +148000,216 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T185244785112-n-a-named-docs-axis-reconciliation-replaces-the-hand-patch",
+        "plan": "sn-west-catalog-release",
+        "section": "release-run-residues",
+        "node": "n-a-named-docs-axis-reconciliation-replaces-the-hand-patch",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2771,
+                "cached_input_tokens": 771710,
+                "input_tokens": 774483,
+                "output_tokens": 1179,
+                "reasoning_output_tokens": 552,
+                "total_tokens": 775662,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a named function re-derives docs_stage and reviewer_score_docs from the surviving docs-axis HAS_REVIEW edges under one stated selection rule, and a test proves it restores a deliberately regressed row and refuses a row carrying no docs-axis review at all; the refusal half is asserted explicitly, since without it the function becomes a generator of false acceptances; the test command and exit status are named in the manifest with its log; the evidence states the selection rule in one sentence and reports how many of the 31 previously hand-patched rows the rule reproduces, with the count of any it does not",
+          "estimated_hours": null,
+          "goal": "Provide one named docs-axis reconciliation that re-derives the docs stage and score from surviving review edges under a single stated rule",
+          "id": "n-a-named-docs-axis-reconciliation-replaces-the-hand-patch",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T18:52:45Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185244785112-n-a-named-docs-axis-reconciliation-replaces-the-hand-patch/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-run-residues",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/docs-axis-reconciliation.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-probe",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T18:52:53Z",
+        "completed_at": "2026-09-17T19:43:34.652Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2956,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3041,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "6fbba5305b0f675be238ce21cb21956696071c08",
+        "commits": [
+          "8d3a4e66d8e1a3f46c665fac3ca577a4685f2282",
+          "a475f0b354ec37f06682cc83f5c238d594c73f66"
+        ],
+        "changed_lines": {
+          "added": 431,
+          "removed": 2,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest tests/standard_names/test_exact_name_claim_run_release.py test_docs_axis_reconciliation.py test_refine_source_cohort_gate.py at the merged head",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/gate-merged.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T185244785112-n-a-named-docs-axis-reconciliation-replaces-the-hand-patch/manifest.md",
+        "scope_changed": true,
+        "session_id": "c9e780be-47d0-41b4-88ad-6c83db47e09e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 9569963,
+            "output_tokens": 8899,
+            "output_tokens_cumulative": 59264,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T19:43:34.652Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9723042,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3035.376,
+          "generated_tokens": 68340,
+          "generation_seconds": 2911.417,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.6,
+          "machine_seconds": 123.959,
+          "peak_input_tokens": 151779,
+          "tokens_per_second": 23.47,
+          "wall_tokens_per_second": 22.51
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "imas_codex/standard_names/graph_ops.py",
+            "reason": "the node's done-when required reconcile_docs_axis_from_reviews to replace hand-written Cypher; the dispatch fenced it to docs only and the fence was the coordinator's error. The worker disclosed the deviation in its own landing record. Hunks sit at 6537-12586, disjoint from the concurrent claim-release node's 28-2082, and git auto-merged with no conflict"
+          },
+          {
+            "path": "tests/standard_names/test_docs_axis_reconciliation.py",
+            "reason": "new test file pinning the change, uncontested by any concurrent node"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-a-named-docs-axis-reconciliation-replaces-the-hand-patch",
+          "session_id": "c9e780be-47d0-41b4-88ad-6c83db47e09e",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T19:43:34.652Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 86.0,
+        "orientation_input_tokens": 6826195.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -148270,6 +148480,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2263
+    "_version": 2264
   }
 }
