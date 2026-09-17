@@ -99,7 +99,8 @@ Read out:
 these roots carries `generated_at`, carries no `imported_at`, and carries a generation
 model; **zero** of the 54 lack a model, so the model half of the fingerprint holds
 throughout. Their `origin` is null or `pipeline`. Their creation dates run from
-2026-06-17 to 2026-09-03, so this is not solely a pre-ledger class: it also contains
+2026-06-17 to 2026-09-04 (newest root `created_at` 2026-09-04T13:36:34.102Z, section E of
+`logs/classify.log`), so this is not solely a pre-ledger class: it also contains
 roots minted well after the source-gated writer existed, which is why the class is named
 by the privilege it exercised — a root written with no producer edge — rather than as a
 historical artifact.
