@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"       content="imas-codex">
+  <meta name="reckon-type"        content="evidence">
+  <meta name="plan-slug"          content="catalog-review-surface-landed">
+  <meta name="plan-title"         content="Catalog Review Surface: What Has Landed">
+  <meta name="plan-summary"       content="The reviewer surface that is built and proven live, the two instruments repaired under it, and the rehearsal that remains unstarted.">
+  <meta name="plan-status"        content="active">
+  <meta name="plan-owner"         content="Simon McIntosh">
+  <meta name="plan-tags"          content="standard-names,catalog-review,west">
+  <meta name="plan-evidence-for"  content="catalog-review-surface">
+  <title>Catalog Review Surface: What Has Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <p>
+      This plan is <strong>not closed</strong>. Five deliverables were set, two are built and
+      proven live, and three are unstarted. The record below states each one with the figure
+      that proves it, drawn from the committed run ledger and re-measured against the live graph
+      on 2026-09-17. A reader wanting only the current position should take the last section
+      first.
+    </p>
+
+    <h2 id="proven">Deliverables one and two: built and proven live</h2>
+    <p>
+      The reviewer guide states which fields a reviewer may change and which are machine-owned,
+      framed as protecting provenance rather than restricting judgement. The catalog fork is
+      <code>~/Code/imas-standard-names-catalog</code> (<code>origin</code> Simon-McIntosh,
+      <code>upstream</code> iterorganization). The guide is at commit <code>e9d3044</code>
+      ("docs(review): explain reviewer-editable fields") and the guard job at
+      <code>dd70ba6</code> ("ci(catalog): guard machine-owned review fields"), in
+      <code>.github/workflows/validate.yml</code>. All three re-verified present on 2026-09-17.
+    </p>
+    <p>
+      <strong>The guard is proven live in both directions</strong>, which is the part a test
+      cannot show. Fork PR 4 edits the machine-owned <code>unit</code> and its
+      <code>review-edit-guard</code> check <strong>fails</strong>; fork PR 5 carries only a
+      description clarification and the same check <strong>passes</strong>. Re-checked on
+      2026-09-17 with <code>gh pr checks</code>: PR 4 <code>fail</code>, PR 5
+      <code>pass</code>, both requests CLOSED and both branches left unrewritten &mdash; the
+      locked <em>report-never-rewrite</em> posture behaving as specified.
+    </p>
+
+    <h2 id="instruments">The two instruments the rehearsal needed, now aimed</h2>
+    <p>
+      Both were found by the aiming check (2026-09-04, NO-GO) and both have since landed. Each is
+      a case of a check that would have reported a protection it did not provide.
+    </p>
+    <table>
+      <thead><tr><th>Instrument</th><th>Defect as measured</th><th>State 2026-09-17</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>graph pull</code></td>
+          <td>took no destination; its remote path derived a name and its local path omitted the
+              target the now-aimed <code>graph_load</code> requires</td>
+          <td><strong>aimed</strong> &mdash; <code>registry.py:1102</code> declares
+              <code>@click.argument("target")</code>, <code>:1163</code> calls the shared
+              mismatch guard, <code>:1384</code> forwards the target to the local load</td>
+        </tr>
+        <tr>
+          <td>backup currency</td>
+          <td>compared newest-file mtimes, so a 4,748-byte trial dump &mdash; newer by mtime and
+              not a recovery artifact &mdash; made a stale archive read as current</td>
+          <td><strong>structural</strong> &mdash; a candidate must open as a gzip tar containing
+              a non-empty <code>graph.dump</code> member; it scans
+              <code>EXPORTS_DIR</code> as well as <code>BACKUPS_DIR</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      The backup figure that mattered is unchanged and still correct: the verified full
+      checkpoint is <code>imas-codex-graph-dev-5b5faf1-20260905T121249Z.tar.gz</code> at
+      <strong>2,451,894,300 bytes</strong>, sealed 2026-09-05T12:15:36Z. The trial dump is still
+      present at <strong>4,748 bytes</strong>.
+    </p>
+
+    <h2 id="substrate">The reviewer surface that makes the receipt possible</h2>
+    <p>
+      The reuse map established that no reviewer login was persisted anywhere, which made the
+      who-changed-it deliverable <em>unmeasurable</em> rather than merely undone.
+      <code>catalog_reviewer_actor</code> now exists on <code>StandardName</code>, filled from
+      the merged pull-request author in the <em>same</em> authoritative payload that already
+      yields the number, URL and merge commit. An actor that could disagree with its own
+      pull-request number would be worse than none. It is persisted for a content edit only, not
+      for an unchanged ratification, and <code>undo_approval</code> clears it.
+    </p>
+    <p>
+      The catalog-provenance writer also landed: <code>exported_at</code> is now set on
+      <strong>221</strong> of the 5,130 <code>StandardName</code> rows (measured 2026-09-17),
+      where a 2026-09-01 census over 4,666 rows had found it universally zero.
+      <code>catalog_approved_at</code>, <code>catalog_pr_number</code> and
+      <code>catalog_merge_commit_sha</code> remain null on every row, because no approval
+      fold-back has ever been exercised.
+    </p>
+
+    <h2 id="remaining">What remains, and the measurement that says so</h2>
+    <p>
+      Deliverables three, four and five are unstarted: the fold-back carrying an accepted edit
+      and a pipeline-refused edit with the refusal reaching the reviewer, the unwind proof, and
+      the traceability receipt.
+    </p>
+    <p>
+      <strong>A rehearsal request was opened and merged, and the graph shows it left nothing.</strong>
+      Fork PR 17, "Exercise approval name outcomes"
+      (<code>rehearsal/approval-fold-back-20260908</code>), merged 2026-09-08T09:36:05Z, carried
+      <code>alfven_time</code> to <code>alfven_transit_time</code> (to be accepted) and
+      <code>atomic_count</code> to <code>temperature_at_plasma_boundary</code> (to be refused).
+      On the graph, <code>alfven_time</code> is unchanged and
+      <code>alfven_transit_time</code> does not exist as a node; there is <strong>no</strong>
+      <code>StandardNameChange</code> row after 2026-09-07; and no row carries a pull-request
+      number. The fold-back did not run, exactly as the plan records
+      (c-run-r-20260908T092429674063): the isolated substrate would not start from the verified
+      archive.
+    </p>
+    <p>
+      <strong>The one row that names the gap.</strong>
+      <code>net_power_due_to_ion_cyclotron_heating</code> is the only identity carrying
+      <code>catalog_reviewer_actor</code> ("Simon McIntosh"), and its
+      <code>catalog_pr_number</code> is <strong>null</strong>. The actor half of the receipt can
+      be written; the pull-request half cannot yet, so no traceability receipt is readable from
+      the graph today.
+    </p>
+    <p>
+      Remaining effort is restated at <strong>roughly 3.0 to 4.0 worker-hours</strong>.
+      One boundary should not be budgeted as worker time: opening, commenting on and closing a
+      request on the catalog fork is a write outside an <code>imas-codex</code> worktree, so the
+      live-fork half belongs to a session with that repository in scope.
+    </p>
+    <p>
+      Full re-measurement of every asserted quantity, with verdicts and instruments:
+      <a href="/imas-codex/evidence/catalog-review-surface/plan-figure-audit">plan figure audit</a>.
+    </p>
+  </main>
+</body>
+</html>
