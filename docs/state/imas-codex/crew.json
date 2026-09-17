@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T12:08:44",
+  "updated": "2026-09-17T12:58:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -208,7 +208,8 @@
         "session_model": "deepseek-v4-flash",
         "sessions": {
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "aadb3c4d-38dd-434c-a6ad-2ea8998034d7",
-          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "a1870210-c6f2-463e-948b-587570fbbf9d"
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "a1870210-c6f2-463e-948b-587570fbbf9d",
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "1863468e-8cbe-4801-a051-b94079dd57d4"
         },
         "created": "2026-09-05"
       },
@@ -4922,9 +4923,11 @@
         "id": "s10c-local-b",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "088b9dae-1a0c-4bb6-b525-50a5cdce1953",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "088b9dae-1a0c-4bb6-b525-50a5cdce1953"
+        },
         "created": "2026-09-10"
       },
       {
@@ -4969,6 +4972,15 @@
           "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
         },
         "created": "2026-09-01"
+      },
+      {
+        "id": "session-79322149f80f4c1d1ea8",
+        "harness": "clive",
+        "role": "investigate",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-17"
       },
       {
         "id": "son-graphbase",
@@ -137446,6 +137458,197 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T101130757486-review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured",
+        "plan": "catalog-review-surface",
+        "section": "",
+        "node": "review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1540,
+                "cached_input_tokens": 258728,
+                "input_tokens": 260270,
+                "output_tokens": 1277,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 261547,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "the review for r-20260917T045954061339-n-audit-catalog-review-surface-headline-figures-are-remeasured parses all five score dimensions",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260917T045954061339-n-audit-catalog-review-surface-headline-figures-are-remeasured",
+          "id": "review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T10:11:33Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T101130757486-review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured/manifest.md",
+          "plan": "catalog-review-surface",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260917T045954061339-n-audit-catalog-review-surface-headline-figures-are-remeasured.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T10:12:07Z",
+        "completed_at": "2026-09-17T10:51:04.342Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2322,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2337,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "620c3d91051c59396331bdb4793217e01ffcd433",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "verify-review-parse.py over the stored review record",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T101130757486-review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured/logs/verify-review-parse.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T101130757486-review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured/manifest.md",
+        "scope_changed": false,
+        "session_id": "4f649185-1c86-4080-8c66-d95f6adcb32a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 4111252,
+            "input_tokens_cumulative": 4111252,
+            "output_tokens": 33675,
+            "output_tokens_cumulative": 33675,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T10:51:04.342Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 4111252,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2330.885,
+          "generated_tokens": 33675,
+          "generation_seconds": 2208.731,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 28.2,
+          "machine_seconds": 122.154,
+          "peak_input_tokens": 135530,
+          "tokens_per_second": 15.25,
+          "wall_tokens_per_second": 14.45
+        },
+        "dispute_count": "unknown",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role: the deliverable is the stored review JSON outside the repository; worktree head equals its base and carries no commit",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/review-of-n-audit-catalog-review-surface-headline-figures-are-remeasured",
+          "session_id": "4f649185-1c86-4080-8c66-d95f6adcb32a",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T10:51:04.342Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 54.0,
+        "orientation_input_tokens": 2919599.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -137716,6 +137919,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2197
+    "_version": 2201
   }
 }
