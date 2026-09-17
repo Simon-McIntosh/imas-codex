@@ -88,6 +88,8 @@
     rather than work. Remaining engineering was restated at <strong>7 worker-hours</strong>,
     down from the plan's 10.0 because the skipped-reason guard and the reconstruction are
     both now accounted for.</p>
+  </section>
+
   <section id="detach-route-audit">
     <h2>Twenty-four routes delete a producer edge; fourteen can leave an accepted name with none</h2>
     <p><strong>Read-only on 2026-09-17</strong> at
@@ -190,6 +192,39 @@
       Positive controls saw 5,130 of 5,130 identities carrying <code>id</code>
       and 5,493 <code>PRODUCED_NAME</code> edges across 5,393 distinct sources.</li>
     </ul>
+  </section>
+
+  <section id="eligibility-census">
+    <h2>1,268 of the 1,359 extracted-unbound sources are still admissible; 91 are not</h2>
+    <p><strong>Measured read-only on 2026-09-17</strong> at
+    <code>3d80e116f4c219519ddf5ece66c1bed8c8b23e8e</code>. One pass classified every
+    <code>StandardNameSource</code> carrying <code>status = 'extracted'</code> and no
+    <code>PRODUCED_NAME</code> edge against the composition path's admission gates, recording the
+    first gate each row fails. The admitted and refused counts come from that one pass and sum to
+    the cohort size measured in it. No graph mutation was performed.</p>
+    <table>
+      <caption>One pass, 2026-09-17. The two outcome rows sum to the cohort row.</caption>
+      <thead><tr><th>Outcome</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td>Admissible under the current admission rules</td><td><strong>1,268</strong></td></tr>
+        <tr><td>Inadmissible under the current admission rules</td><td><strong>91</strong></td></tr>
+        <tr><td>Cohort measured in the same pass</td><td><strong>1,359</strong></td></tr>
+      </tbody>
+    </table>
+    <p>Of the 91 refused rows, <strong>65 are test scaffolding left in the graph as sources</strong>
+    &mdash; <code>test/path</code> 64 times and <code>__revreltest__/leaf1</code> once &mdash; which
+    no admission rule decided. The rule-driven residue is <strong>26 rows</strong>:
+    <code>node_category_ineligible</code> 18 (nine <code>structural</code>, eight
+    <code>fit_artifact</code>, one <code>representation</code>),
+    <code>container_node_no_signal_signature</code> 3, <code>dd_lifecycle_removed</code> 1 and
+    <code>duplicate_ids</code> 1. The cohort's highest <code>attempt_count</code> is 4 against a cap
+    of five, so no row has exhausted its search.</p>
+    <p>Positive controls on the classifier, which re-implements the gates rather than calling the
+    pipeline: it refuses <strong>1,820 of 1,820 <code>stale</code> rows</strong> and
+    <strong>0 of 111 <code>failed</code> rows</strong>, and where the graph records a skip reason it
+    agrees with the recorded reason on 873 of 1,013 rows. Full record with every named query and the
+    per-row attributions:
+    <a href="/imas-codex/evidence/unbound-source-backlog/eligibility-census">eligibility-census.html</a>.</p>
   </section>
 </main>
 </body>
