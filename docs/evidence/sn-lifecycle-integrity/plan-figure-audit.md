@@ -1,5 +1,4 @@
 <meta name="plan-slug" content="sn-lifecycle-integrity">
-<meta name="plan-modified" content="2026-09-17">
 <meta name="plan-status" content="active">
 <meta name="plan-evidence-for" content="sn-lifecycle-integrity">
 <meta name="docs-project" content="imas-codex">

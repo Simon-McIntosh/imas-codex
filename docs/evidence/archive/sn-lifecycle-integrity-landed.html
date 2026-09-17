@@ -350,6 +350,35 @@
     passed all 174, with 17 graph-marked tests deselected and zero added failures. All four changed
     Cypher statements also passed live <code>EXPLAIN</code> without executing a mutation.</p>
 
+  <h2 id="figure-audit">Are the plan's own figures still true?</h2>
+    <p>Everything above was measured when it landed. A separate pass re-measured
+    the plan's seventeen asserted quantities against the live graph and the code at
+    revision <code>3f8c06fce</code> on 2026-09-17, to decide whether the sprint
+    could be rescoped on current numbers. It was read-only.</p>
+    <table>
+      <thead><tr><th>Verdict</th><th>Rows</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>current</td><td>3</td><td>the figure still measures what the plan says, at the same value</td></tr>
+        <tr><td>drifted</td><td>9</td><td>the figure moved; the mechanism the row describes is unchanged, so the argument survives and only the arithmetic is out of date</td></tr>
+        <tr><td>stale</td><td>5</td><td>the figure no longer describes the live state <em>and</em> the claim it supported is no longer true</td></tr>
+      </tbody>
+    </table>
+    <p>The stale rows are the ones that change what remains to be done, because
+    acting on them would repair something already repaired: the export literal is
+    gone, the import guard exists, and <code>updated_at</code> is declared and
+    stamped. The census moved too — <code>status</code> is no longer 52% null —
+    and the <code>superseded_by</code> scalar retirement is the part of the
+    decision that has not landed.</p>
+    <p>The first unstarted beat in document order is the compose attempt cap, and
+    the measurement that decides it is 217 sources sitting at exactly
+    <code>attempt_count = 5</code> — the cap value itself — of 234 at or above it,
+    with 70 having produced no name. A landed repair would have raised the cap,
+    written a stop reason, or drained the cohort.</p>
+    <p>Full table, per-row query and code read, and the instrument checks that
+    license the zeros: <a href="/imas-codex/evidence/sn-lifecycle-integrity/plan-figure-audit">the
+    figure audit</a>. Query output and exit statuses are in the run's
+    <code>logs/</code> directory alongside the manifest.</p>
+
   </main>
 </body>
 </html>
