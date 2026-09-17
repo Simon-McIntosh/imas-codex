@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Operators render away from their operand and a vector component is not a distinguished family dimension. Fix both while generation is free.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
-  <meta name="plan-effort-hours" content="16.0">
+  <meta name="plan-effort-hours" content="35.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -22,11 +22,12 @@
   <title>Grammar Refinement | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-11">
-<meta name="plan-version" content="87">
-<meta name="plan-impl" content="0.98">
+<meta name="plan-modified" content="2026-09-17">
+<meta name="plan-version" content="88">
+<meta name="plan-impl" content="0.45">
 <meta name="plan-commits" content="a4ab25b0bd2ff0ce521a56f7586e776549e03950,ff7130519ea0df8d88ae9ff4e4362abe8c49106f">
 <meta name="plan-artifacts" content="docs/evidence/sn-grammar-refinement/bare-base-census.md,docs/evidence/sn-grammar-refinement/bare-base-census-verification.md,docs/evidence/sn-grammar-refinement/review-scope-currency.md,docs/evidence/sn-grammar-refinement/review-scope-verification.md">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -337,6 +338,46 @@ equilibrium_weight_of_flux_loop   retired 2026-09-04 (retire_signed_provenance_o
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260910T202749879929-n-sgr-the-edits-scope-reaches-its-successors" data-who="clive-vocab" data-when="2026-09-10T22:28:29.913Z">
     <div class="r-comment-body"><p>The scope is not broken and the briefed premise was stale. The decisive discriminator is that the same dry run WITHOUT --edits also reports review_name pending=0, so the flag is not the mechanism withholding anything. Of 134 live open-edit identities only 10 are drafted, and all 10 are validation-blocked as quarantined or pending with none valid, while review_name claims only drafted-and-valid, so zero is the correct selection in both modes. The claim predicate is threaded correctly through every pool and the dry-run counter, verified in code at named lines. Most important for the cut: prior art measured review_name pending=94 on 2026-09-07 against 105 drafted-open successors, and the fall to 0 is that population draining 105 to 10 because the reviews LANDED. So the 137 stranded successors this node was briefed to unstick are down to 10, and the 18-name loss premise for the WEST cut needs re-measuring rather than repairing. No source was changed and the 203-line test module is the deliverable, pinning both halves on both surfaces. Suite 7355 to 7360, zero failures.</p></div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260917T045808366431-n-audit-sn-grammar-refinement-headline-figures-are-remeasured" data-who="figure-audit" data-when="2026-09-17T05:56:48Z">
+    <div class="r-comment-body"><p><strong>NINE HEADLINE FIGURES RE-MEASURED ON THE SPRINT BASE: ONE CURRENT, SEVEN DRIFTED, ONE STALE.</strong> Every number in the table below was read from the live graph or from the installed grammar at base <code>5ea0d73b</code>, read-only, and every run is logged. The direction is uniform and expected: this plan's numbers were written <em>before</em> its own migration, so where the cohort or the operator surface grew the figure drifted up, and where this plan's own work landed the figure is stale rather than wrong.</p>
+<p><strong>The current verdict is the strongest evidence here, because it is a replication.</strong> The closing census classified its 2,360-name cohort as 2,352 stable, 0 migrating and 2,360 minus 2,352 = <strong>8 refused</strong>. An independent instrument — parse every live name, compose its intermediate representation back to a string, keep the names whose spelling does not survive the round trip — finds <strong>8</strong> accepted live names that render away from their stored spelling, and they are the same eight identities, still unrefused. The graph now holds 2,163 additional retired identities and 607 additional live ones, and the count is unmoved.</p>
+<p><strong>The stale verdict is the one a rescope must read first.</strong> Section 3 sizes a 13-name surface spelled with the index on the operator. That spelling is gone: the live <code>with_respect_to</code> names are the canonical operand-first form, and the retired order survives only as 21 superseded identities. A stale figure needs retiring from the sprint, not resizing — resizing a landed surface is how a sprint pays twice for the same work.</p>
+<div class="chart"><svg aria-label="Re-measured value divided by the same quantity as asserted in the plan, one bar per figure; a reference line marks parity. Four figures moved up by 2 to 29 percent, three moved down by 4 to 14 percent, and the closing refusal count is exactly at parity." role="img" viewbox="0 0 660 320">
+<text fill="#333" font-size="12" x="8" y="14">re-measured ÷ asserted — parity marked at 1.00×</text>
+<line stroke="#555" stroke-dasharray="3 3" stroke-width="1" x1="250" x2="250" y1="24" y2="300"></line>
+<text fill="#555" font-size="10" x="254" y="22">1.00×</text>
+<text fill="#333" font-size="11" x="8" y="48">§1 live names</text>
+<rect fill="#c9820a" height="14" width="152" x="150" y="38"></rect><text fill="#333" font-size="10" x="308" y="49">1.10×  (2,689 → 2,967)</text>
+<text fill="#333" font-size="11" x="8" y="76">§1 defect-bearing</text>
+<rect fill="#c9820a" height="14" width="201" x="150" y="66"></rect><text fill="#333" font-size="10" x="357" y="77">1.20×  (253 → 304)</text>
+<text fill="#333" font-size="11" x="8" y="104">§2 postfix-operator</text>
+<rect fill="#c9820a" height="14" width="112" x="150" y="94"></rect><text fill="#333" font-size="10" x="268" y="105">1.02×  (87 → 89)</text>
+<text fill="#333" font-size="11" x="8" y="132">§2 prefix-operator</text>
+<rect fill="#c9820a" height="14" width="244" x="150" y="122"></rect><text fill="#333" font-size="10" x="400" y="133">1.29×  (149 → 192)</text>
+<text fill="#333" font-size="11" x="8" y="160">§3 indexed-operator</text>
+<rect fill="#8a8f98" height="14" width="62" x="150" y="150"></rect><text fill="#333" font-size="10" x="218" y="161">0.92×  (13 → 12, none in the retired order) — stale</text>
+<text fill="#333" font-size="11" x="8" y="188">§4 names with HAS_PARENT</text>
+<rect fill="#c9820a" height="14" width="81" x="150" y="178"></rect><text fill="#333" font-size="10" x="237" y="189">0.96×  (1,598 → 1,537)</text>
+<text fill="#333" font-size="11" x="8" y="216">§4 component stems</text>
+<rect fill="#c9820a" height="14" width="81" x="150" y="206"></rect><text fill="#333" font-size="10" x="237" y="217">0.96×  (505 → 486)</text>
+<text fill="#333" font-size="11" x="8" y="244">§8 parse failures</text>
+<rect fill="#c9820a" height="14" width="29" x="150" y="234"></rect><text fill="#333" font-size="10" x="185" y="245">0.86×  (7 → 6)</text>
+<text fill="#333" font-size="11" x="8" y="272">§8 closing refusals</text>
+<rect fill="#2f7d4f" height="14" width="100" x="150" y="262"></rect><text fill="#333" font-size="10" x="256" y="273">1.00×  (8 → 8) — current</text>
+<line stroke="#bbb" stroke-width="1" x1="150" x2="150" y1="24" y2="300"></line>
+<text fill="#555" font-size="10" x="118" y="18">0.80×</text>
+</svg></div>
+<p><strong>THE FIRST UNSTARTED BEAT IS THE COMPONENT-FAMILY SIBLING COMPLETION, AND THE MEASUREMENT IS BLUNT: of the 148 live bases carrying a cardinal component token, 2 carry all four and 146 are partial.</strong> The component axis is legible in the schema — the completeness query above is expressible today — and no completion pass has ever been applied against it.</p>
+<div class="chart"><svg aria-label="Of 148 live bases carrying a cardinal component token, 2 carry all four and 146 are partial." role="img" viewbox="0 0 660 60">
+<text fill="#333" font-size="12" x="8" y="16">live bases carrying a cardinal component token, by completeness</text>
+<rect fill="#2f7d4f" height="22" width="9" x="8" y="26"></rect>
+<rect fill="#c9820a" height="22" width="635" x="17" y="26"></rect>
+<text fill="#333" font-size="10" x="8" y="58">2 complete (green, 1.4%)  ·  146 partial, missing 1–3 components (amber, 98.6%)</text>
+</svg></div>
+<p><strong>That figure is an upper bound on the work, not a worklist</strong> — a toroidal rotation quantity has no poloidal sibling and should stay single. Which of the 146 are genuinely incomplete needs the DD geometry-carrier enumeration the family definition already implies, and that enumeration has not been run. What the count does establish is that the axis supports the query and nothing has been applied to it.</p>
+<p><strong>Remaining effort, restated: 16–23 worker-hours</strong> against this plan's 16.0 declared — 10–14 for the component-family adjudication and completion, 2–3 for the eight accepted non-canonical identities, 4–6 for the six parse failures. The paid review lane sits on top and is not in that total: it governs the wall clock of the completion work rather than the composing.</p>
+<p>Report-only: no source file changed; nothing but this record and its evidence file is written. Full table, per-row instrument and the six refused identities: <a href="/imas-codex/evidence/sn-grammar-refinement/plan-figure-audit">plan-figure-audit</a>.</p></div>
+</div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20260904T212509093006-n-sgr-reuse-map" data-who="inv-s10reuse" data-when="2026-09-04T21:39:10Z">
     <div class="r-comment-body"><p>reuse map: 18 candidates, 18 verdicts, 0 unverdicted, 22 segment classes mapped to owning vocabulary files; located the out-of-manifest leak at run_review_release's union with mint_sn_list's deliberate family closure, and verdicted mint_sn_list unfit as a release selector while reusable for review cohorts</p></div>
 </div>
@@ -547,47 +588,8 @@ equilibrium_weight_of_flux_loop   retired 2026-09-04 (retire_signed_provenance_o
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260906T123834785740-n-sgr-a-geometric-object-groups-every-field" data-who="cx-verify" data-when="2026-09-06T12:55:36Z">
     <div class="r-comment-body"><p>A GEOMETRIC OBJECT NOW GROUPS EVERY FIELD THAT DESCRIBES IT, keyed on the DD primitive rather than on axis suffixes - so a rectangle is four fields rather than the two an axis test could see. It records the primitive kind, retains every direct field except the error and uncertainty leaves, suppresses axis-only duplicates so it does not shadow the existing detector, and is deliberately NOT wired into any consumer because the lead is mid-triage on naming. detect_families was not edited and its exact legacy rectangle output is pinned by a regression test, which is the guard that mattered most since two generation-time composers depend on it. THE IMPACT LIST IS THE DELIVERABLE AND IT CONFIRMS THE LEAD READING: many non-axis geometry fields are simply UN-COMPOSED rather than mis-grouped. thickness is composed 0 of 4 and absent 4 of 4; oblique beta 1 of 4 composed with 3 absent; oblique length 1 of 4 with 3 absent; outline closed absent 3 of 3; arcs curvature_radii composed 4 of 6 with 2 absent; rectangle width composed 5 of 6, absent for the antenna strap. Meanwhile annulus radius_inner and radius_outer are composed for all 6 owners and rectangle height for all 6 - so the naming pipeline handles these fields perfectly well when it reaches them, and the gap is reach rather than capability. That is precisely the seed set for a family-driven compose run. IT ALSO CAUGHT AN ARITHMETIC ERROR IN THE CENSUS I HAD QUOTED: the sizing report headline claims 9 distinct leaf-sets while its own enumerated 28-parent population contains 7 - annulus radii, arcs curvature, two oblique variants, outline closed, outline time and rectangle dimensions. It checked rather than inheriting my figure, which is the second time today a worker has corrected a number I passed down. Non-vacuous by git archive export: 8 of 26 failed at base because the detector was absent, 26 passed after. It also reported an excluded first attempt honestly, keeping both logs, where its initial regression expectation misclassified the legacy output. Receipt: 16m17s, 70 tool calls, ONE turn, ZERO api_retry 429 records while eight sibling local lanes ran concurrently</p></div>
 </div>
-<div class="r-comment" data-section="_top" data-id="c-run-r-20260917T045808366431-n-audit-sn-grammar-refinement-headline-figures-are-remeasured" data-who="figure-audit" data-when="2026-09-17T05:56:48Z">
-    <div class="r-comment-body">
-<p><strong>NINE HEADLINE FIGURES RE-MEASURED ON THE SPRINT BASE: ONE CURRENT, SEVEN DRIFTED, ONE STALE.</strong> Every number in the table below was read from the live graph or from the installed grammar at base <code>5ea0d73b</code>, read-only, and every run is logged. The direction is uniform and expected: this plan's numbers were written <em>before</em> its own migration, so where the cohort or the operator surface grew the figure drifted up, and where this plan's own work landed the figure is stale rather than wrong.</p>
-<p><strong>The current verdict is the strongest evidence here, because it is a replication.</strong> The closing census classified its 2,360-name cohort as 2,352 stable, 0 migrating and 2,360 minus 2,352 = <strong>8 refused</strong>. An independent instrument — parse every live name, compose its intermediate representation back to a string, keep the names whose spelling does not survive the round trip — finds <strong>8</strong> accepted live names that render away from their stored spelling, and they are the same eight identities, still unrefused. The graph now holds 2,163 additional retired identities and 607 additional live ones, and the count is unmoved.</p>
-<p><strong>The stale verdict is the one a rescope must read first.</strong> Section 3 sizes a 13-name surface spelled with the index on the operator. That spelling is gone: the live <code>with_respect_to</code> names are the canonical operand-first form, and the retired order survives only as 21 superseded identities. A stale figure needs retiring from the sprint, not resizing — resizing a landed surface is how a sprint pays twice for the same work.</p>
-<div class="chart"><svg viewBox="0 0 660 320" role="img" aria-label="Re-measured value divided by the same quantity as asserted in the plan, one bar per figure; a reference line marks parity. Four figures moved up by 2 to 29 percent, three moved down by 4 to 14 percent, and the closing refusal count is exactly at parity.">
-  <text x="8" y="14" font-size="12" fill="#333">re-measured &#247; asserted &#8212; parity marked at 1.00&#215;</text>
-  <line x1="250" y1="24" x2="250" y2="300" stroke="#555" stroke-width="1" stroke-dasharray="3 3"></line>
-  <text x="254" y="22" font-size="10" fill="#555">1.00&#215;</text>
-  <text x="8" y="48" font-size="11" fill="#333">&#167;1 live names</text>
-  <rect x="150" y="38" width="152" height="14" fill="#c9820a"></rect><text x="308" y="49" font-size="10" fill="#333">1.10&#215; &#160;(2,689 &#8594; 2,967)</text>
-  <text x="8" y="76" font-size="11" fill="#333">&#167;1 defect-bearing</text>
-  <rect x="150" y="66" width="201" height="14" fill="#c9820a"></rect><text x="357" y="77" font-size="10" fill="#333">1.20&#215; &#160;(253 &#8594; 304)</text>
-  <text x="8" y="104" font-size="11" fill="#333">&#167;2 postfix-operator</text>
-  <rect x="150" y="94" width="112" height="14" fill="#c9820a"></rect><text x="268" y="105" font-size="10" fill="#333">1.02&#215; &#160;(87 &#8594; 89)</text>
-  <text x="8" y="132" font-size="11" fill="#333">&#167;2 prefix-operator</text>
-  <rect x="150" y="122" width="244" height="14" fill="#c9820a"></rect><text x="400" y="133" font-size="10" fill="#333">1.29&#215; &#160;(149 &#8594; 192)</text>
-  <text x="8" y="160" font-size="11" fill="#333">&#167;3 indexed-operator</text>
-  <rect x="150" y="150" width="62" height="14" fill="#8a8f98"></rect><text x="218" y="161" font-size="10" fill="#333">0.92&#215; &#160;(13 &#8594; 12, none in the retired order) &#8212; stale</text>
-  <text x="8" y="188" font-size="11" fill="#333">&#167;4 names with HAS_PARENT</text>
-  <rect x="150" y="178" width="81" height="14" fill="#c9820a"></rect><text x="237" y="189" font-size="10" fill="#333">0.96&#215; &#160;(1,598 &#8594; 1,537)</text>
-  <text x="8" y="216" font-size="11" fill="#333">&#167;4 component stems</text>
-  <rect x="150" y="206" width="81" height="14" fill="#c9820a"></rect><text x="237" y="217" font-size="10" fill="#333">0.96&#215; &#160;(505 &#8594; 486)</text>
-  <text x="8" y="244" font-size="11" fill="#333">&#167;8 parse failures</text>
-  <rect x="150" y="234" width="29" height="14" fill="#c9820a"></rect><text x="185" y="245" font-size="10" fill="#333">0.86&#215; &#160;(7 &#8594; 6)</text>
-  <text x="8" y="272" font-size="11" fill="#333">&#167;8 closing refusals</text>
-  <rect x="150" y="262" width="100" height="14" fill="#2f7d4f"></rect><text x="256" y="273" font-size="10" fill="#333">1.00&#215; &#160;(8 &#8594; 8) &#8212; current</text>
-  <line x1="150" y1="24" x2="150" y2="300" stroke="#bbb" stroke-width="1"></line>
-  <text x="118" y="18" font-size="10" fill="#555">0.80&#215;</text>
-</svg></div>
-<p><strong>THE FIRST UNSTARTED BEAT IS THE COMPONENT-FAMILY SIBLING COMPLETION, AND THE MEASUREMENT IS BLUNT: of the 148 live bases carrying a cardinal component token, 2 carry all four and 146 are partial.</strong> The component axis is legible in the schema — the completeness query above is expressible today — and no completion pass has ever been applied against it.</p>
-<div class="chart"><svg viewBox="0 0 660 60" role="img" aria-label="Of 148 live bases carrying a cardinal component token, 2 carry all four and 146 are partial.">
-  <text x="8" y="16" font-size="12" fill="#333">live bases carrying a cardinal component token, by completeness</text>
-  <rect x="8" y="26" width="9" height="22" fill="#2f7d4f"></rect>
-  <rect x="17" y="26" width="635" height="22" fill="#c9820a"></rect>
-  <text x="8" y="58" font-size="10" fill="#333">2 complete (green, 1.4%) &nbsp;·&nbsp; 146 partial, missing 1–3 components (amber, 98.6%)</text>
-</svg></div>
-<p><strong>That figure is an upper bound on the work, not a worklist</strong> — a toroidal rotation quantity has no poloidal sibling and should stay single. Which of the 146 are genuinely incomplete needs the DD geometry-carrier enumeration the family definition already implies, and that enumeration has not been run. What the count does establish is that the axis supports the query and nothing has been applied to it.</p>
-<p><strong>Remaining effort, restated: 16–23 worker-hours</strong> against this plan's 16.0 declared — 10–14 for the component-family adjudication and completion, 2–3 for the eight accepted non-canonical identities, 4–6 for the six parse failures. The paid review lane sits on top and is not in that total: it governs the wall clock of the completion work rather than the composing.</p>
-<p>Report-only: no source file changed; nothing but this record and its evidence file is written. Full table, per-row instrument and the six refused identities: <a href="/imas-codex/evidence/sn-grammar-refinement/plan-figure-audit">plan-figure-audit</a>.</p>
-    </div>
+<div class="r-comment" data-section="s4" data-id="c-20260917T101500-currency-rescope" data-who="reckon-ship" data-when="2026-09-17T10:15:00Z">
+    <div class="r-comment-body">Implementation fraction corrected from 0.98 to 0.45 and declared effort from 16.0 to 35.0 worker-hours, on the 2026-09-17 figure audit (commit e6991732e, evidence at docs/evidence/sn-grammar-refinement/plan-figure-audit.md). The plan reported 0.32 worker-hours remaining while its own re-measurement puts the residual at 16-23. The gap is beat 6, sibling completion across the component families, which is unstarted rather than nearly done: of the 148 live bases carrying at least one cardinal component token, 2 carry all four and 146 are partial, so 98.6 per cent of that surface has had no completion pass. Two smaller residuals sit with it - the 8 accepted identities that still compose away from their stored spelling, and the 6 live names that fail to strict-parse. The 0.45 is taken on the hours basis (15.68 spent against a restated 34.68 total) rather than by counting sections, because the audit restates hours and not nodes. Note that beat 6's wall-clock is governed by the paid review lane rather than by composing, so the worker-hours figure is not a schedule. Section 3's defect is retired rather than outstanding: the indexed-operator spelling the plan describes is absent from the live cohort and survives only as 21 superseded identities.</div>
 </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
@@ -625,7 +627,7 @@ equilibrium_weight_of_flux_loop   retired 2026-09-04 (retire_signed_provenance_o
     </article>
 <article class="r-fu" data-id="f-sgr-an-edits-run-cannot-decline-whole-graph-maintenance" data-status="open" data-written-by="ship-s10-20260908" data-written-at="2026-09-11" data-recommends-skill="/reckon-ship sn-grammar-refinement" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The edits scope is a scope everywhere except where it would spare the graph</h4>
-    <div class="r-fu-body"><p><code>--skip-global-maintenance</code> refuses <code>edits_only</code>, because the guard admits only <code>scope_run_id</code> or <code>drain_scope_id</code> as evidence that a run is bounded. The edits mode <em>is</em> bounded &mdash; its predicate is threaded into every pool claim and into the dry-run counter &mdash; so the refusal rests on the guard not recognising a third bounded scope rather than on the run being unbounded.</p><p>The consequence is that an edits run executes whole-graph maintenance writes it has no need for, which is the exact pairing this sprint already paid for once: a scoped run that cannot decline global work, and a global sweep bundled where a scoped run could not reach it. Admit <code>edits_only</code> to the bounded set, and prove both halves &mdash; an edits run may decline maintenance, and a genuinely unscoped run still may not, or the guard has simply been removed.</p></div>
+    <div class="r-fu-body"><p><code>--skip-global-maintenance</code> refuses <code>edits_only</code>, because the guard admits only <code>scope_run_id</code> or <code>drain_scope_id</code> as evidence that a run is bounded. The edits mode <em>is</em> bounded — its predicate is threaded into every pool claim and into the dry-run counter — so the refusal rests on the guard not recognising a third bounded scope rather than on the run being unbounded.</p><p>The consequence is that an edits run executes whole-graph maintenance writes it has no need for, which is the exact pairing this sprint already paid for once: a scoped run that cannot decline global work, and a global sweep bundled where a scoped run could not reach it. Admit <code>edits_only</code> to the bounded set, and prove both halves — an edits run may decline maintenance, and a genuinely unscoped run still may not, or the guard has simply been removed.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-grammar-refinement</pre>
     </article>
 </section>
