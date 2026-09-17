@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T17:44:26",
+  "updated": "2026-09-17T17:52:50",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -292,7 +292,8 @@
         "sessions": {
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\"}": "7f324b5f-f4ab-4aa6-91d8-f98894db6824",
           "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":492288}": "b7ec48d4-bdba-4d44-b383-aa780d2b457c",
-          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "39ec9ca1-51ae-4c3d-a8a8-e39faabf2900"
+          "{\"alias\":\"dsv4-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":1016576}": "39ec9ca1-51ae-4c3d-a8a8-e39faabf2900",
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "164001d5-9703-4565-93e1-0e4bf63704c3"
         },
         "created": "2026-09-05"
       },
@@ -143968,6 +143969,195 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T150108270234-n-an-approval-can-be-unwound-without-lasting-change",
+        "plan": "catalog-review-surface",
+        "section": "\u00a74",
+        "node": "n-an-approval-can-be-unwound-without-lasting-change",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2014,
+                "cached_input_tokens": 580308,
+                "input_tokens": 582324,
+                "output_tokens": 869,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 583193,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a named test exercises undo_approval and the catalog-correction unwind against a purpose-made identity and asserts that every field the approval wrote is null again afterwards, naming catalog_approved_at, catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha and catalog_reviewer_actor; the test records the identity's full property set before and after and asserts equality; the test is named in the manifest with its exit status and the run captured to a log; a negative control asserts the test would fail if one field were left set, so a pass is not vacuous; the evidence file states whether the unwind runs against an isolated substrate or the live graph and which functions it called with file and line",
+          "estimated_hours": null,
+          "goal": "Demonstrate that an approval fold-back can be unwound leaving no lasting change in the graph",
+          "id": "n-an-approval-can-be-unwound-without-lasting-change",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T15:01:11Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T150108270234-n-an-approval-can-be-unwound-without-lasting-change/manifest.md",
+          "plan": "catalog-review-surface",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/catalog-review-surface/approval-unwind-proof.md",
+            "docs/evidence/archive/catalog-review-surface-landed.html",
+            "docs/plans/catalog-review-surface.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-residue",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T15:01:27Z",
+        "completed_at": "2026-09-17T15:40:49.467Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2350,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2362,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "fce6de22430a985e670e75ea04ad8c7d44b4b8b0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "malformed-node",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T150108270234-n-an-approval-can-be-unwound-without-lasting-change/manifest.md",
+        "scope_changed": false,
+        "session_id": "164001d5-9703-4565-93e1-0e4bf63704c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 1864821,
+            "input_tokens_cumulative": 1864821,
+            "output_tokens": 27167,
+            "output_tokens_cumulative": 27167,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T15:40:49.467Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 1864821,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2356.81,
+          "generated_tokens": 27167,
+          "generation_seconds": 2350.169,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 24.1,
+          "machine_seconds": 6.641,
+          "peak_input_tokens": 115506,
+          "tokens_per_second": 11.56,
+          "wall_tokens_per_second": 11.53
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "the run produced no commit and no file; its worktree is clean at base",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-an-approval-can-be-unwound-without-lasting-change",
+          "session_id": "164001d5-9703-4565-93e1-0e4bf63704c3",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T15:40:49.467Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 28.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -144238,6 +144428,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2236
+    "_version": 2238
   }
 }
