@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T23:18:33",
+  "updated": "2026-09-17T23:37:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -149402,6 +149402,211 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T203646444967-n-the-mint-path-tests-assert-on-behaviour-not-statement-text",
+        "plan": "sn-west-catalog-release",
+        "section": "release-run-residues",
+        "node": "n-the-mint-path-tests-assert-on-behaviour-not-statement-text",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1631,
+                "cached_input_tokens": 367426,
+                "input_tokens": 369059,
+                "output_tokens": 2115,
+                "reasoning_output_tokens": 568,
+                "total_tokens": 371174,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "tests/standard_names/test_minting.py together with tests/standard_names/test_exact_reset_parent_cleanup_graph.py no longer match a Cypher statement by its leading token; a case proves each assertion still holds when the statement gains an unrelated field in its SET clause, so the matcher that previously forced the new assignment to the clause end would now fail; both modules run with the graph marker selected and their exit status together with the passed count is recorded",
+          "estimated_hours": 0.75,
+          "goal": "Replace the two literal-Cypher leading-token matchers with assertions on the behaviour they are meant to hold",
+          "id": "n-the-mint-path-tests-assert-on-behaviour-not-statement-text",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T20:36:49Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/manifests/cyphermatch.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-run-residues",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/standard_names/test_minting.py",
+            "tests/standard_names/test_exact_reset_parent_cleanup_graph.py",
+            "docs/evidence/sn-west-catalog-release/cypher-matcher-brittleness.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-audit-4",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T20:37:05Z",
+        "completed_at": "2026-09-17T21:35:53.866Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3510,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3528,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "b662e21654e42d4ce5f1d255eb987621707f3a2d",
+        "commits": [
+          "798a368814974e333f7d015a2e3e38f3975120ae",
+          "96914e12433c7cb05819c1d61ddd36381ffa8e26"
+        ],
+        "changed_lines": {
+          "added": 117,
+          "removed": 6,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -m graph tests/standard_names/test_minting.py tests/standard_names/test_exact_reset_parent_cleanup_graph.py at the merged head against the live graph",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/gate-cypher.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/3c425733-c198-454e-9e36-681e003069da/scratchpad/manifests/cyphermatch.md",
+        "scope_changed": false,
+        "session_id": "f85be0cf-8d50-45b4-b686-f8f4c0b8e0d2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 7254093,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 40164,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T21:35:53.866Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 7407206,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3522.341,
+          "generated_tokens": 49542,
+          "generation_seconds": 3438.028,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.6,
+          "machine_seconds": 84.313,
+          "peak_input_tokens": 151813,
+          "tokens_per_second": 14.41,
+          "wall_tokens_per_second": 14.07
+        },
+        "follow_on_paths": [
+          "tests/standard_names/test_exact_reset_parent_cleanup_graph.py."
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-mint-path-tests-assert-on-behaviour-not-statement-text",
+          "session_id": "f85be0cf-8d50-45b4-b686-f8f4c0b8e0d2",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T21:35:53.866Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 59.0,
+        "orientation_input_tokens": 2179293.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -149672,6 +149877,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2271
+    "_version": 2272
   }
 }
