@@ -388,6 +388,59 @@
     updated. <code>reckon audit-doc</code> exits 0 on each renamed path, and no
     reference to the four former paths remains in the fence.</p>
 
+  <h2 id="cap-disposition">The parked cohort carries a disposition, not a sentence</h2>
+    <p>The figure audit above found the compose attempt cap unstarted, and the
+    beat it opened asked a narrower question than raising the cap: a source that
+    <em>had already produced a name</em> and a source that can never be named
+    carried the same error string, so the parked cohort could not be triaged from
+    its own state. The pass now classifies every parked row and writes the answer
+    back.</p>
+    <p>The classifier rests only on evidence the row already holds: whether it has
+    at least one <code>PRODUCED_NAME</code> edge, whether its backing
+    <code>IMASNode</code> is <code>removed</code>, whether its backing
+    <code>IMASNode</code> is a geometry or coordinate standing in for a quantity,
+    and whether a specific cause was recorded. A recorded cause outranks the node
+    category, and the category outranks silence, so the branch that exists to sort
+    rows whose cause was lost never overrides a cause that was kept.</p>
+    <table>
+      <thead><tr><th>Disposition</th><th>Rows</th><th>What it states</th></tr></thead>
+      <tbody>
+        <tr><td><code>name_produced</code></td><td>164</td><td>the cap bounds further claims, not the outcome — the name exists</td></tr>
+        <tr><td><code>cause_not_recorded</code></td><td>30</td><td>no reason, or only the cap sentence, and no structural fact either: the row measures the missing write path</td></tr>
+        <tr><td><code>compose_not_applicable</code></td><td>21</td><td>the backing node is a geometry or coordinate, not a quantity to name</td></tr>
+        <tr><td><code>upstream_quantity_removed</code></td><td>18</td><td>the backing node's lifecycle status is <code>removed</code></td></tr>
+        <tr><td><code>vocabulary_gap</code></td><td>1</td><td>the recorded cause names a vocabulary gap, which no retry produces</td></tr>
+        <tr><td><code>attempt_budget_exhausted</code></td><td>0</td><td>a spent budget with a recorded non-vocabulary cause — reachable and empty today</td></tr>
+        <tr><td><strong>unclassified</strong></td><td><strong>0</strong></td><td></td></tr>
+      </tbody>
+    </table>
+    <p>The census read the stored property back rather than the values the process
+    had just computed, so it is a statement about the write and not about the
+    classifier that produced it: <strong>234</strong> rows parked at
+    <code>attempt_count &gt;= 5</code>, <strong>234</strong> carrying a member of
+    the closed set, zero unclassified and zero unexpected. The seven non-producing
+    classes sum to <strong>70</strong>, which is exactly the figure the audit
+    measured independently as parked rows with no produced name — the two
+    instruments agree on the split.</p>
+    <p>The pass refuses rather than guesses. A row the classifier cannot place
+    raises before anything is written, and the test that fails when the
+    classification is removed replaces the classifier with one returning the empty
+    string and asserts the refusal with no write at all — so an unclassified row
+    cannot be silently parked. Commit <code>ffa0c9359</code> carries the
+    classification and the pass; the evidence page records the counts above, both
+    queries, and what the measurement does not establish:
+    <a href="/imas-codex/evidence/sn-lifecycle-integrity/attempt-cap-disposition"
+       title="The cap cohort carries a triage disposition: cohort, closed set with counts, the two Cypher operations, the refusal, and the limits of the measurement">the
+    disposition census</a>.</p>
+    <p>What it does not establish is the reason the class
+    <code>cause_not_recorded</code> is worth reading: the pass classifies the cohort
+    as found and does nothing else. It does not raise the cap, revive a source or
+    delete a row, and no row was revived. The writer that parks a source
+    (<code>orphan_sweep.py</code>) is outside this beat's scope, so a row parked
+    after this run carries no disposition until the pass runs again — which is why
+    <strong>30</strong> rows are themselves the measurement of that gap: 25 carry
+    only the cap sentence and 5 carry nothing at all.</p>
+
   </main>
 </body>
 </html>
