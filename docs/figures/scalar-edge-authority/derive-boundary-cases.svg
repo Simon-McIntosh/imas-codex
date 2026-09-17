@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" width="1080" height="560"
+     font-family="DejaVu Sans, Helvetica, sans-serif">
+  <rect width="1080" height="560" fill="#ffffff"/>
+  <text x="24" y="34" font-size="19" fill="#111">The two derive boundary populations, measured 2026-09-17T19:12Z</text>
+  <text x="24" y="0" font-size="1" fill="#fff">.</text>
+
+  <g>
+    <text x="24" y="72" font-size="14" fill="#333">Resolvable links entries: 6,913 (edges 6,913, all of it a positive control)</text>
+    <rect x="24" y="86" width="840" height="40" fill="#2f6f4f"/>
+    <rect x="864" y="86" width="46" height="40" fill="#b5482f"/>
+    <rect x="910" y="86" width="122" height="40" fill="#e0a33a"/>
+    <text x="200" y="112" font-size="14" fill="#fff">6,913 resolvable entries</text>
+    <text x="150" y="146" font-size="12" fill="#555">entries whose target is a different live name</text>
+    <text x="150" y="162" font-size="12" fill="#555">5,948</text>
+    <text x="866" y="146" font-size="13" fill="#b5482f">superseded</text>
+    <text x="866" y="163" font-size="13" fill="#b5482f">842</text>
+    <text x="866" y="180" font-size="13" fill="#a07817">absent</text>
+    <text x="866" y="197" font-size="13" fill="#a07817">123</text>
+  </g>
+
+  <line x1="24" y1="222" x2="1056" y2="222" stroke="#dddddd" stroke-width="1"/>
+
+  <g>
+    <text x="24" y="252" font-size="14" fill="#333">Edges whose target is superseded: 842 &#8212; does the successor chain reach a live node?</text>
+    <rect x="24" y="268" width="650" height="58" fill="#2f6f4f"/>
+    <rect x="678" y="268" width="176" height="58" fill="#b5482f"/>
+    <text x="40" y="302" font-size="15" fill="#fff">663 reach a live node (506 within one hop)</text>
+    <text x="694" y="296" font-size="14" fill="#fff">179 reach none</text>
+    <text x="694" y="0" font-size="1" fill="#fff">.</text>
+    <text x="694" y="314" font-size="12" fill="#fff">within four hops</text>
+  </g>
+
+  <g>
+    <text x="24" y="372" font-size="14" fill="#333">What each option changes</text>
+    <text x="24" y="398" font-size="13" fill="#333">Follow the successor</text>
+    <rect x="230" y="384" width="650" height="20" fill="#2f6f4f"/>
+    <text x="890" y="399" font-size="12" fill="#2f6f4f">663 entries retargeted to a live name, 470 source rows rewritten</text>
+    <text x="24" y="428" font-size="13" fill="#333">Leave in place</text>
+    <rect x="230" y="414" width="122" height="20" fill="#e0a33a"/>
+    <text x="362" y="429" font-size="12" fill="#8a6a12">965 entries keep naming a retired or absent identity; 0 rows rewritten</text>
+    <text x="230" y="452" font-size="12" fill="#555">the residual under either option: 179 chain-dead + 123 absent &#8212; no live target exists, so only the derive cannot resolve it</text>
+    <text x="24" y="452" font-size="12" fill="#555">Residual</text>
+  </g>
+
+  <line x1="24" y1="470" x2="1056" y2="470" stroke="#dddddd" stroke-width="1"/>
+  <text x="24" y="496" font-size="13" fill="#333">The two legal definitions of a superseded target differ by 120x: name_stage=&#39;superseded&#39; 2,163 names,</text>
+  <text x="24" y="516" font-size="13" fill="#333">the superseded_by scalar 18 names (7 edges), deprecates 0. REFINED_FROM carries 1,850 edges.</text>
+  <text x="24" y="542" font-size="12" fill="#777">Every zero above sits beside a positive control returning non-zero; see derive-boundary-cases.md.</text>
+</svg>
