@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"       content="imas-codex">
+  <meta name="reckon-type"        content="evidence">
+  <meta name="plan-slug"          content="scalar-edge-authority-landed">
+  <meta name="plan-title"         content="Scalar Edge Authority: What Landed">
+  <meta name="plan-summary"       content="The plan's headline figures re-measured read-only against the live graph, with the query behind every value and the beat the sprint resumes at.">
+  <meta name="plan-status"        content="active">
+  <meta name="plan-owner"         content="Simon McIntosh">
+  <meta name="plan-tags"          content="standard-names,graph,scalar-edge">
+  <meta name="plan-evidence-for"  content="scalar-edge-authority">
+  <title>Scalar Edge Authority: What Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="outcome">Outcome</h2>
+
+    <p>
+      The plan's own headline figures were re-measured read-only against the live
+      <code>codex</code> graph at <code>bolt://98dci4-gpu-0002:7687</code> so the
+      sprint can be rescoped on current numbers. Thirteen asserted quantities were
+      re-measured: <strong>0 current, 11 drifted, 2 stale; three further quantities
+      are recorded as unmeasured with their reason rather than estimated.</strong>
+      No graph mutation was performed. Per-query detail is in the
+      <a href="/imas-codex/evidence/scalar-edge-authority/plan-figure-audit.html">plan
+      figure audit</a>.
+    </p>
+
+    <p>
+      The plan's central premise is inverted. It reads
+      &ldquo;<code>REFERENCES</code> &hellip; there are zero such edges&rdquo; while
+      &ldquo;2,948 standard names carry a non-empty <code>links</code> scalar&rdquo;.
+      The relationship now carries <strong>6,557</strong> edges, so the scalar is no
+      longer the only copy for most of the cohort &mdash; the stale-scalar-wins
+      hazard the plan was written to close has been closed for this pair.
+    </p>
+
+    <h2 id="figures">Re-measured figures</h2>
+
+    <p>
+      <strong>current</strong> = equals the plan's value; <strong>drifted</strong> =
+      moved, and the movement is attributable to this repository's own work or a
+      changed denominator; <strong>stale</strong> = the plan's premise no longer
+      describes the graph at all. The audit file carries all thirteen re-measured
+      quantities; the nine that bear on the rescope are repeated here.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>#</th><th>Asserted quantity</th><th>Plan</th><th>Re-measured</th><th>Verdict</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><code>REFERENCES</code> edges</td><td>0</td><td><strong>6,557</strong></td><td><strong>stale</strong></td></tr>
+        <tr><td>2</td><td>names with a non-empty <code>links</code> scalar</td><td>2,948</td><td><strong>3,122</strong></td><td>drifted</td></tr>
+        <tr><td>3</td><td><code>links</code> scalar entries</td><td>6,682</td><td><strong>7,036</strong></td><td>drifted</td></tr>
+        <tr><td>4</td><td>entries naming an absent target</td><td>127</td><td><strong>123</strong></td><td>drifted</td></tr>
+        <tr><td>5</td><td>entries that resolve</td><td>6,557</td><td><strong>6,913</strong></td><td>drifted</td></tr>
+        <tr><td>6</td><td><code>links</code> scalar/edge set disagreements</td><td>2,948</td><td><strong>361</strong></td><td>drifted</td></tr>
+        <tr><td>7</td><td><code>validation_status='valid'</code> with no <code>validated_at</code></td><td>538</td><td><strong>29</strong></td><td><strong>stale</strong></td></tr>
+        <tr><td>8</td><td><code>docs_stage='accepted'</code> with no winning docs review</td><td>27</td><td><strong>296</strong></td><td>drifted</td></tr>
+        <tr><td>9</td><td><code>link_status='resolved'</code> against an absent target</td><td>328</td><td><strong>71</strong></td><td>drifted</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      Rows 1, 6 and 7 are the three that matter for a rescope. Row 6 shows the
+      <code>links</code> divergence column falling from 2,948 to
+      <strong>361</strong> &mdash; the plan counted every populated scalar as
+      divergent while no edges existed, so the residual is the real disagreement rate
+      between the scalar set and the edge set, not a defect count. Row 7 moved from
+      538 to <strong>29</strong>: the stamped-validation backlog the plan ranks first
+      was almost entirely repaired by other work.
+    </p>
+
+    <h2 id="first-beat">The beat the sprint resumes at</h2>
+
+    <p>
+      The plan orders three beats &mdash; <strong>materialise</strong>,
+      <strong>adjudicate</strong>, <strong>derive</strong> &mdash; one mirrored pair
+      per node, largest publishable exposure first. The first pair is
+      <code>links</code>. Its materialise beat landed on 2026-09-09
+      (<strong>6,557</strong> edges); its adjudicate beat is explicitly not required
+      for this pair (<a href="/imas-codex/plans/scalar-edge-authority.html">&sect;2a</a>:
+      the exclusions &ldquo;are named and left, not chased&rdquo;). The first unstarted
+      beat is therefore the <strong>derive beat for the <code>links</code> pair</strong>,
+      and it is <strong>still-required</strong>.
+    </p>
+
+    <p>
+      The deciding measurement is §2a's full-runtime-parity precondition, which the
+      re-measurement does not meet in either direction:
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Direction</th><th>Count</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>edges present, no scalar entry</td><td><strong>83</strong></td><td>the edge set is wider than the scalar</td></tr>
+        <tr><td>resolvable entries, no edge</td><td><strong>356</strong></td><td>the scalar is wider than the edge set</td></tr>
+        <tr><td>entries still unresolvable</td><td><strong>123</strong></td><td>named and carried in the exclusion ledger</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      Both directions are non-zero, so the derive beat stays shut and the subject of
+      the next scalar-edge-authority node is a materialisation refresh, not a derive.
+      Two consequences follow. <code>source_types</code>, the second-ranked pair, is
+      untouched. And <code>chain_length</code>&rsquo;s authoritative relationship
+      <code>REFINED_FROM</code> was measured at <strong>3,700</strong> edges, not zero
+      &mdash; the directed probe returned zero until the undirected control corrected
+      it, recorded here so the artifact is not mistaken for a finding.
+    </p>
+
+    <h2 id="effort">Remaining effort</h2>
+
+    <p>
+      Declared <code>plan-effort-hours</code> is <strong>22.0</strong>. Roughly
+      <strong>&asymp;14.0 worker-hours remain</strong>. Basis: five nodes have landed
+      against this plan, covering the <code>links</code> materialise beat and the
+      produced-name adjudicate beat &mdash; about eight of the declared hours. What
+      remains is seven further ranked pairs, each needing its three beats at roughly
+      two hours each, less whatever a fresh materialisation refresh closes for free.
+    </p>
+
+    <h2 id="controls">Controls</h2>
+
+    <ul>
+      <li><strong>A zero is a measurement only when the instrument is shown to count.</strong>
+        The same run counted <code>PRODUCED_NAME</code> at 5,493, <code>HAS_REVIEW</code>
+        at 28,880, <code>IN_CLUSTER</code> at 18,698, <code>DOCS_REVISION_OF</code> at
+        3,612 and <code>HAS_PHYSICS_DOMAIN</code> at 3,440.</li>
+      <li><strong>A directed query returned zero where an undirected one returned a
+        population.</strong> <code>MATCH ()-[r:REFINED_FROM]->()</code> returned zero
+        while the undirected form returned 3,700, all name to name &mdash; a direction
+        artifact of the probe, not an absent relationship.</li>
+      <li><strong>A deliberately unsatisfiable filter returned zero.</strong> A control
+        with <code>size(n.links) &lt; 0</code> returned 0 against the same 3,122-name
+        population the real filter counted, so the <code>links</code> filters are not
+        silently matching everything.</li>
+    </ul>
+
+    <p>
+      This archive is the audit checkpoint for this node only. Merged verification
+      belongs to a separately dispatched test node. The parity target and the
+      exclusion count are runtime values rather than constants: §2a records the same
+      figure moving three times in one hour on 2026-09-09, which is why every value
+      here is reported with the query that produced it.
+    </p>
+
+  </main>
+</body>
+</html>
