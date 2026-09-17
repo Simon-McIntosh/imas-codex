@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T19:40:40",
+  "updated": "2026-09-17T19:43:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -145966,6 +145966,216 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T150949379612-sea-links-reference-parity-is-closed-in-both-directions",
+        "plan": "scalar-edge-authority",
+        "section": "\u00a73",
+        "node": "sea-links-reference-parity-is-closed-in-both-directions",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 713,
+                "cached_input_tokens": 511586,
+                "input_tokens": 512301,
+                "output_tokens": 597,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 512898,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "ceb4c66b-622b-4e72-83de-68acdb6fae2e",
+            "session_id": "ship-s10-20260917"
+          },
+          "done_when": "a parity census reports zero resolvable links entries carrying no REFERENCES edge and zero REFERENCES edges carrying no links entry, measured against the 356 and 83 recorded on 2026-09-17, with the unresolvable entries recounted against the 123 then recorded and each remaining one carrying a stated reason, and the before and after counts captured to a log",
+          "estimated_hours": null,
+          "goal": "bring the REFERENCES relationship and the links scalar into the runtime parity the derive beat requires",
+          "id": "sea-links-reference-parity-is-closed-in-both-directions",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T15:09:49Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T150949379612-sea-links-reference-parity-is-closed-in-both-directions/manifest.md",
+          "plan": "scalar-edge-authority",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/scalar-edge-authority/links-parity-refresh.md",
+            "docs/plans/scalar-edge-authority.html",
+            "docs/evidence/archive/scalar-edge-authority-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s10c-local-b",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T15:09:54Z",
+        "completed_at": "2026-09-17T17:38:39.245Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 8897,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 8925,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "9d7e57f85d8dad8c5a5564a962e72dd83464eb8d",
+        "commits": [
+          "ab886d7ff8cbfb80e4fee0e5459d0d78ca4362df",
+          "5ea0643c9f31e2d9a4ae3cac9fcae3d6aab0246b"
+        ],
+        "changed_lines": {
+          "added": 517,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pre and post live-graph parity census, independently re-verified by the coordinator at the merged head",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T150949379612-sea-links-reference-parity-is-closed-in-both-directions/logs/post-census.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T150949379612-sea-links-reference-parity-is-closed-in-both-directions/manifest.md",
+        "scope_changed": false,
+        "session_id": "b49241a5-26a9-4dc3-ad2f-c66ed8f91d8f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 18170063,
+            "input_tokens_cumulative": 18170063,
+            "output_tokens": 95763,
+            "output_tokens_cumulative": 95763,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T17:38:39.245Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 18474706,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 8921.18,
+          "generated_tokens": 113146,
+          "generation_seconds": 8283.247,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.7,
+          "machine_seconds": 637.933,
+          "peak_input_tokens": 152028,
+          "tokens_per_second": 13.66,
+          "wall_tokens_per_second": 12.68
+        },
+        "follow_on_paths": [
+          "unresolved-audit.py",
+          "unresolved.py",
+          "logs/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "docs/figures/scalar-edge-authority/links-parity-refresh.svg",
+            "reason": "The two-panel before and after figure belongs to the evidence record this node was asked to write, and the repository's documentation guidance asks for a figure where a comparison is clearer shown than described. My fence named the evidence page but omitted the figures directory, so the path is my scoping omission rather than a scope breach by the worker."
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260917/sea-links-reference-parity-is-closed-in-both-directions",
+          "session_id": "b49241a5-26a9-4dc3-ad2f-c66ed8f91d8f",
+          "session_source": "stream",
+          "retained_at": "2026-09-17T17:38:39.245Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 173.0,
+        "orientation_input_tokens": 11069317.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -146236,6 +146446,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2253
+    "_version": 2254
   }
 }
