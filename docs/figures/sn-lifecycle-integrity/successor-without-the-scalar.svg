@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380">
+<rect width="900" height="380" fill="#fbfbfd"/>
+<text x="30" y="36" font-family="Helvetica, Arial, sans-serif" font-size="17" fill="#111">The 2,163 superseded names: where a successor is found</text>
+<text x="30" y="64" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#555">2,163 names at name_stage = superseded</text>
+<rect x="30" y="84" width="495" height="48" fill="#2b6cb0"/>
+<text x="42" y="114" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#ffffff">1,641 reach a successor through a REFINED_FROM edge</text>
+<rect x="525" y="84" width="158" height="48" fill="#c53030"/>
+<text x="537" y="114" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#ffffff">522 none</text>
+<text x="30" y="176" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#555">Of the 522 with no edge: 517 have no successor by any route, 3 hold their only pointer in the superseded_by scalar, 2 hold it in a derived HAS_SUCCESSOR edge</text>
+<rect x="30" y="200" width="640" height="10" fill="#e2e8f0"/>
+<rect x="30" y="200" width="637" height="10" fill="#718096"/>
+<rect x="667" y="200" width="4" height="10" fill="#c53030"/>
+<rect x="671" y="200" width="4" height="10" fill="#dd6b20"/>
+<text x="30" y="240" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#444">grey 517 no route &#183; red 3 scalar-only &#183; orange 2 edge-only</text>
+<text x="30" y="286" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#111">The change ledger is not a successor route</text>
+<rect x="30" y="304" width="303" height="30" fill="#a0aec0"/>
+<text x="42" y="324" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1a202c">300 of 303 ledger rows name the name itself</text>
+<rect x="341" y="304" width="4" height="30" fill="#2f855a"/>
+<text x="353" y="324" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1a202c">4 name another identity</text>
+</svg>
