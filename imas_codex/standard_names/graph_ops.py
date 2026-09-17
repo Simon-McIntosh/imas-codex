@@ -9085,6 +9085,12 @@ def clear_standard_names(
                         "structural child"
                     ),
                 )
+                # The scaffold receipt is a different operation from the
+                # candidate's, so it namespaces its parameters and shares the
+                # statement rather than writing a bare change row.
+                skeleton_clause = deletion_change_cypher(
+                    "parent", param_prefix="reset_skeleton_"
+                )
                 rows = gc.query(
                     f"""
                     MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
@@ -9127,17 +9133,7 @@ def clear_standard_names(
                         WHERE derived_source.id = 'derived:' + parent.id
                         WITH parent, derived_source
                         WHERE {exact_reset_source_where}
-                        CREATE (:StandardNameChange {{
-                            id: 'sn-change:' + randomUUID(),
-                            from_name: parent.id,
-                            to_name: parent.id,
-                            operation: $reset_skeleton_deletion_operation,
-                            reason: $reset_skeleton_deletion_reason,
-                            origin: $reset_skeleton_deletion_origin,
-                            run_id: $reset_skeleton_deletion_run_id,
-                            changed_at: datetime(),
-                            internal: true
-                        }})
+                        {skeleton_clause}
                         FOREACH (source IN CASE
                             WHEN derived_source IS NULL THEN [] ELSE [derived_source]
                         END | DETACH DELETE source)
