@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-17T18:15:12",
+  "updated": "2026-09-17T18:25:24",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -158,9 +158,11 @@
         "id": "clive-b",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "89f30817-edf1-4ff8-94c4-bd2577105f67",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "89f30817-edf1-4ff8-94c4-bd2577105f67"
+        },
         "created": "2026-09-14"
       },
       {
@@ -144560,6 +144562,212 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T145257765026-n-the-traceability-writer-is-proven-reachable",
+        "plan": "catalog-review-surface",
+        "section": "\u00a74",
+        "node": "n-the-traceability-writer-is-proven-reachable",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 780,
+                "cached_input_tokens": 546059,
+                "input_tokens": 546841,
+                "output_tokens": 1111,
+                "reasoning_output_tokens": 105,
+                "total_tokens": 547952,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "3c425733-c198-454e-9e36-681e003069da",
+            "session_id": "ship-s14-20260917"
+          },
+          "done_when": "a test asserts that mark_catalog_name_approved writes catalog_pr_number, catalog_pr_url, catalog_merge_commit_sha, catalog_reviewer_actor and catalog_approved_at together on one identity, and that the write is refused when its declared name_stage and docs_stage preconditions are unmet; the test is named in the manifest with its exit status; the evidence file lists every call site reaching that writer with file and line and states plainly whether any production path calls it, measured against the graph carrying a non-null catalog_reviewer_actor on exactly one identity and a null catalog_pr_number on all 5130",
+          "estimated_hours": null,
+          "goal": "Prove the catalog traceability writer sets every field a reviewer receipt needs and state whether any production path reaches it",
+          "id": "n-the-traceability-writer-is-proven-reachable",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T14:53:00Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145257765026-n-the-traceability-writer-is-proven-reachable/manifest.md",
+          "plan": "catalog-review-surface",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/catalog-review-surface/traceability-writer-reachability.md",
+            "docs/evidence/archive/catalog-review-surface-landed.html",
+            "docs/plans/catalog-review-surface.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-b",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T14:53:14Z",
+        "completed_at": "2026-09-17T16:24:11.320Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5445,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5457,
+        "stalled": true,
+        "time_budget": "40m",
+        "base_sha": "105e7234ea8f4c61c65d83e758cdbf8c7a811bee",
+        "commits": [
+          "7cbb48fd0cf64399dc57bf438cf371df627fa845",
+          "9809f12d5352d1e34bc65c66e04c731d87ab0a84"
+        ],
+        "changed_lines": {
+          "added": 306,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest tests/standard_names/test_catalog_traceability_fields.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145257765026-n-the-traceability-writer-is-proven-reachable/gate-final.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145257765026-n-the-traceability-writer-is-proven-reachable/manifest.md",
+        "scope_changed": false,
+        "session_id": "89f30817-edf1-4ff8-94c4-bd2577105f67",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9027315,
+            "input_tokens_cumulative": 9027315,
+            "output_tokens": 56865,
+            "output_tokens_cumulative": 56865,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T16:24:11.320Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9181079,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 5451.3,
+          "generated_tokens": 65237,
+          "generation_seconds": 5288.575,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.8,
+          "machine_seconds": 162.725,
+          "peak_input_tokens": 152464,
+          "tokens_per_second": 12.34,
+          "wall_tokens_per_second": 11.97
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "tests/standard_names/test_catalog_traceability_fields.py",
+            "reason": "the node's done-when required a test; the coordinator fenced only the evidence file, so the test path was undeclared by my error rather than the worker's"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260917/n-the-traceability-writer-is-proven-reachable",
+          "session_id": "89f30817-edf1-4ff8-94c4-bd2577105f67",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T16:24:11.320Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 104.0,
+        "orientation_input_tokens": 4486294.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -144830,6 +145038,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2241
+    "_version": 2243
   }
 }
