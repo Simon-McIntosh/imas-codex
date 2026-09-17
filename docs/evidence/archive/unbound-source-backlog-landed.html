@@ -229,6 +229,55 @@
     per-row attributions:
     <a href="/imas-codex/evidence/unbound-source-backlog/eligibility-census">eligibility-census.html</a>.</p>
   </section>
+
+  <section id="refusal-adjudication">
+    <h2>Of the 91 refused rows, 26 are rule-driven and 3 of those a parent repair returns</h2>
+    <p><strong>Measured read-only on 2026-09-17</strong> against the same cohort the
+    eligibility census captured at
+    <code>3d80e116f4c219519ddf5ece66c1bed8c8b23e8e</code>. The adjudication instrument
+    classifies each refused row by <em>which entity its failing gate reads</em>, and probes the
+    parent identity of every <code>derived</code> refusal with
+    <code>is_admissible_parent_name</code> &mdash; the same predicate the gate calls. No graph
+    mutation was performed.</p>
+    <table>
+      <caption>The refused set decomposed twice, each decomposition summing to 91 and to 26
+      respectively</caption>
+      <thead><tr><th>Group</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td>Test-fixture identities (no admission rule decided them)</td><td><strong>65</strong></td></tr>
+        <tr><td>Rule-driven refusals</td><td><strong>26</strong></td></tr>
+        <tr><td>&nbsp;&nbsp;&mdash; of which a parent repair returns them</td><td><strong>3</strong></td></tr>
+        <tr><td>&nbsp;&nbsp;&mdash; of which no parent repair returns them</td><td><strong>23</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The 65 are the declared test-fixture identities carried over from the census:
+    <code>dd:test_review_entry__&hellip;</code> (64) and <code>dd:__revreltest__/leaf1</code> (1),
+    each with <code>source_id</code> <code>test/path</code> or <code>__revreltest__/leaf1</code>,
+    each resolving to no <code>IMASNode</code>, and <strong>each surviving its own test
+    teardown</strong>: both cleanup fixtures delete by <code>n.id STARTS WITH</code> a bare
+    prefix while the seeded source ids carry the <code>dd:</code> prefix, so the name is deleted
+    and the source row is not.</p>
+    <p>The 3 recoverable refusals are exactly the <code>derived_parent_inadmissible</code> rows,
+    whose failing condition is read from the parent identity: <code>power_density</code>,
+    <code>wavelength</code> and
+    <code>root_mean_square_of_spectral_width_of_spectrometer_channel</code>. The first two are
+    bare bases with no child and no parent of their own, so a repair is a grammar decision; the
+    third has a canonical sibling,
+    <code>root_mean_square_spectral_width_of_spectrometer_channel</code>, that exists
+    <strong>accepted</strong> and is admitted by the same probe. The 23 that stay refused are
+    <code>dd</code> rows whose failing attribute lives on their own node
+    (<code>node_category_ineligible</code> 18,
+    <code>container_node_no_signal_signature</code> 3, <code>dd_lifecycle_removed</code> 1,
+    <code>duplicate_ids</code> 1), and no dd gate in the list has an ancestor in its
+    predicate, so no parent repair can clear one.</p>
+    <p>Positive controls: the fixture predicate flags <strong>0 of 1,236</strong> cohort rows
+    that do resolve to an <code>IMASNode</code> while flagging 65 that do not, so it
+    discriminates; and the parent-repair probe returns <code>admit=True</code> on
+    <code>electron_temperature</code> and on the canonical sibling above, so the count of 3 is a
+    measured result rather than a probe that cannot say yes. Full record, listing all 65
+    identities and all 26 refusals individually:
+    <a href="/imas-codex/evidence/unbound-source-backlog/refusal-adjudication">refusal-adjudication.html</a>.</p>
+  </section>
 </main>
 </body>
 </html>
