@@ -285,6 +285,110 @@
       mutation, no code change.
     </p>
 
+    <h2 id="ungrounded-origin-classification">How the 92 ungrounded identities arose</h2>
+
+    <p>
+      The partition above leaves 92 identities with no source-bearing ancestor
+      anywhere. The plan asks how they came to exist with no DD binding, given
+      that the composer requires a source. Measured read-only against the live
+      graph on <strong>2026-09-17</strong>, the answer is read from the mint of
+      each chain <em>root</em>: every one of the 92 is itself a refine product,
+      so refinement propagated the ungrounding rather than creating it, and the
+      mechanism that created it is whatever wrote the head of the chain.
+      <strong>55 identities (54 distinct roots) sit under a generated root with
+      no producing source</strong> &mdash; the root carries
+      <code>generated_at</code>, carries no <code>imported_at</code> and carries
+      a generation model &mdash; and <strong>37 (33 distinct roots) sit under a
+      bulk catalog-import fold root</strong> carrying the single write stamp
+      <code>created_at = 2026-07-04T21:20:38.632Z</code> with
+      <code>imported_at = 2026-07-04T21:21:17.079Z</code>. The two buckets are
+      disjoint and exhaustive: <strong>55 + 37 = 92</strong>, overlap zero,
+      residual <strong>zero</strong>, so no identity is listed as unexplained
+      and none is forced into a bucket. The generated-root class is not
+      historical only &mdash; its roots run from 2026-06-17 to 2026-09-03, so
+      it contains roots minted after the source-gated writer existed.
+    </p>
+
+    <p>
+      Each of the four candidate mechanisms the beat names was adjudicated with
+      its own positive control over the whole label, so a zero is
+      distinguishable from an unaimed query: the <strong>dedup fold</strong>
+      fires <strong>0</strong> in the cohort and <strong>0</strong> over the
+      label, so it has no live footprint and no identity is assigned to it;
+      the <strong>derived-parent path</strong> fires 0 in the cohort against
+      <strong>428</strong> over the label, live as a root in the ancestry of
+      exactly one identity; the <strong>refine successor</strong> route is true
+      for <strong>all 92</strong> (against 1,648 over the label), so it is the
+      propagation route and cannot discriminate among them; and
+      <strong>migration</strong> touches 31 identities via
+      <code>edit_mode</code> (21 of them <code>rename</code>) without minting
+      any root. One identity,
+      <code>normalized_toroidal_plasma_beta</code>, carries a root with a
+      derived origin as well; it is assigned to the generated-root bucket and
+      the overlap is disclosed rather than hidden. No graph mutation was
+      performed.
+    </p>
+
+    <figure>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" width="760" height="400"
+           font-family="system-ui, -apple-system, Segoe UI, sans-serif" role="img"
+           aria-label="The 92 identities with no source-bearing ancestor split by the mint of their chain root: 55 identities from 54 generated roots with no producing source, and 37 identities from 33 bulk catalog-import fold roots; the buckets are disjoint and sum to 92 with zero residual.">
+        <style>
+          .lbl  { font-size: 13px; fill: #1a1a1a; }
+          .num  { font-size: 13px; fill: #1a1a1a; font-variant-numeric: tabular-nums; font-weight: 600; }
+          .cap  { font-size: 12px; fill: #444; }
+          .gen  { fill: #e8eef7; stroke: #2f4f7f; stroke-width: 1; }
+          .fold { fill: #f1e9f7; stroke: #6b3f8f; stroke-width: 1; }
+          .rule { stroke: #cccccc; stroke-width: 1; }
+        </style>
+
+        <text class="lbl" x="0" y="14" font-weight="600">What minted each chain root</text>
+
+        <text class="lbl" x="0" y="28">identities with no sourced ancestor</text>
+        <text class="num" x="750" y="28" text-anchor="end">92</text>
+        <rect class="gen"  x="180" y="30" width="341" height="20"/>
+        <rect class="fold" x="521" y="30" width="229" height="20"/>
+        <text class="num" x="350" y="44" text-anchor="middle">55</text>
+        <text class="num" x="635" y="44" text-anchor="middle">37</text>
+
+        <text class="lbl" x="0" y="58">distinct roots behind them</text>
+        <text class="num" x="750" y="58" text-anchor="end">87</text>
+        <rect class="gen"  x="180" y="60" width="354" height="20"/>
+        <rect class="fold" x="534" y="60" width="216" height="20"/>
+        <text class="num" x="357" y="74" text-anchor="middle">54</text>
+        <text class="num" x="642" y="74" text-anchor="middle">33</text>
+
+        <rect class="gen"  x="0" y="94" width="12" height="12"/>
+        <text class="lbl" x="18" y="104">generated root with no producing source (generated_at set, no imported_at)</text>
+        <rect class="fold" x="0" y="114" width="12" height="12"/>
+        <text class="lbl" x="18" y="124">bulk catalog-import fold root (one write stamp, 2026-07-04T21:20:38.632Z)</text>
+
+        <line class="rule" x1="0" y1="146" x2="760" y2="146"/>
+
+        <text class="lbl" x="0" y="168" font-weight="600">The beat&#8217;s other candidates, adjudicated with a control but not the origin</text>
+        <text class="lbl" x="0" y="190">dedup fold &#8212; 0 in cohort / 0 over the label: no live footprint, so unassignable</text>
+        <text class="lbl" x="0" y="208">derived-parent path &#8212; 0 / 428: live, and a root for exactly one identity&#8217;s chain</text>
+        <text class="lbl" x="0" y="226">refine successor &#8212; 92 / 1,648: true for all 92, so non-discriminating by construction</text>
+        <text class="lbl" x="0" y="244">migration &#8212; edit_mode 31 / 1,099 (21 rename): identity-level, mints no root</text>
+        <text class="lbl" x="0" y="262">residual &#8212; 0 identities fit none; overlap between the two buckets is 0</text>
+
+        <line class="rule" x1="0" y1="286" x2="760" y2="286"/>
+        <text class="cap" x="0" y="306">The buckets are disjoint and sum to the cohort: 55 + 37 = 92, with zero residual.</text>
+        <text class="cap" x="0" y="324">Read-only against the live graph, 2026-09-17; four logs with exit status in the evidence file.</text>
+        <text class="cap" x="0" y="342">One identity also carries a derived root; assigned to the generated-root bucket and disclosed.</text>
+      </svg>
+      <figcaption class="cap">Origin mechanism of every ungrounded chain-cap identity.</figcaption>
+    </figure>
+
+    <p>
+      The queries behind each assignment, the per-mechanism counts, the
+      adjudication of every candidate mechanism with its control, the identity
+      lists and the four named logs with their exit status are in
+      <a href="/imas-codex/evidence/sn-release-readiness/ungrounded-origin-classification.html">the
+      origin-classification evidence file</a>. Read-only throughout: no graph
+      mutation, no code change.
+    </p>
+
   </main>
 </body>
 </html>
