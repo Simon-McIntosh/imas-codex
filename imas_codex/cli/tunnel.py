@@ -493,6 +493,39 @@ def _is_remote_clipboard_active(host: str, port: int) -> bool:
     return result.returncode == 0 and result.stdout.strip() == "ok"
 
 
+def _probe_reverse_ssh_forward(host: str, port: int) -> str:
+    """Classify the reverse ssh forward on ``host`` as up, stale or down.
+
+    A bound port is not evidence of a working tunnel. When a client drops, its
+    sshd keeps holding the forwarded port until kernel TCP keepalive expires,
+    which is over two hours; throughout that window the port is bound and
+    nothing traverses it, and the next tunnel silently fails to rebind. So the
+    question worth asking the remote is not whether a port is bound but whether
+    anything answers through it.
+    """
+    probe = (
+        f"ss -tlnH 'sport = :{port}' 2>/dev/null | grep -q . || exit 3; "
+        f"timeout 6 ssh -p {port} -o BatchMode=yes -o ConnectTimeout=5 "
+        f"-o StrictHostKeyChecking=no localhost true >/dev/null 2>&1 || exit 4"
+    )
+    try:
+        result = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", host, probe],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return "down"
+    # 255 is ssh's own failure to reach the host, which says nothing about the
+    # forward. Reporting it as "down" would be the same false certainty this
+    # probe exists to remove.
+    return {0: "up", 3: "down", 4: "stale", 255: "unreachable"}.get(
+        result.returncode, "unknown"
+    )
+
+
 def _run_service_supervisor(
     host: str,
     neo4j_only: bool,
@@ -1201,6 +1234,25 @@ def tunnel_status() -> None:
             click.echo(f"  :{port}  {label}{marker}")
     else:
         click.echo("No active tunnels on known service ports")
+
+    # Reverse forwards bind on the remote, so the local listen check above can
+    # never see them — it prints nothing while the tunnel is healthy and
+    # equally nothing when it is dead. Ask the far side instead.
+    try:
+        reverse_host = _resolve_host(None)
+    except Exception:
+        reverse_host = ""
+    if reverse_host:
+        state = _probe_reverse_ssh_forward(reverse_host, wsl_ssh_port)
+        detail = {
+            "up": "reachable",
+            "stale": "PORT BOUND BUT NOTHING ANSWERS - reclaim it",
+            "down": "not bound",
+            "unreachable": f"could not reach {reverse_host} to check",
+            "unknown": "probe failed",
+        }[state]
+        click.echo(f"\nReverse ssh forward on {reverse_host}:")
+        click.echo(f"  :{wsl_ssh_port}  wsl-ssh  {detail}")
 
     # Check D-Bus keyring forwarding
     dbus_sock = _get_dbus_forward_status()
