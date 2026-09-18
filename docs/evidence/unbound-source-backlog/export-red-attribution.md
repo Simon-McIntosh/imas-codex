@@ -1,3 +1,38 @@
+> **Coordinator correction, measured 2026-09-18 after this record was written.**
+> The headline below does not reproduce, and the true answer is different from
+> both this record's and the one it corrects. Measured at two revisions on two
+> host classes, `git archive` into `/dev/shm` with the five generated files
+> copied in, over the same two files:
+>
+> | revision | all_debug | login node |
+> |---|---|---|
+> | `b468bfb5c` (parent of the fail-closed commit) | 6 failed, 9 passed | **10 failed**, 5 passed |
+> | `b161235bb` (the fail-closed producer guard) | 6 failed, 9 passed | **11 failed**, 4 passed |
+>
+> Three conclusions, none of which was held before this run.
+>
+> 1. **This record's claim is wrong.** Fifteen tests do not pass at
+>    `b468bfb5c` on either class; six fail there on `all_debug` and ten on the
+>    login node. Repeated with the generated models regenerated in-tree rather
+>    than copied, in case that was the confound: unchanged, 6 failed.
+> 2. **The coordinator's earlier claim was wrong too, and in the other
+>    direction.** "Neither of today's export merges added a failure" was
+>    measured on `all_debug` alone, where the delta is genuinely zero. On the
+>    login node the delta is **plus one**:
+>    `test_explicitly_included_identities_remain_eligible` passes at the parent
+>    and fails at the fail-closed commit. So the guard did expose one test, and
+>    a single-host delta could not see it.
+> 3. **The absolute count on this surface is host-dependent** — 6 against 10 at
+>    one revision — so no absolute figure here is a statement about the
+>    revision. That is this sprint's own determinism finding arriving inside the
+>    attempt to attribute, and it is why the per-id table below is worth keeping
+>    while its framing is not.
+>
+> What survives from this record: the per-id `file:line` inventory, the
+> two-host-class method, and the `--no-sync` SLURM trap it recorded. What does
+> not: the claim that the six start at `b161235bb`, and the claim that the two
+> classes agree.
+
 # The six red export tests start at one revision, and it is not before the work they were said to predate
 
 Attribution for the six ids in followup `f-usb-six-export-tests-are-red-and-predate-this-work`.
