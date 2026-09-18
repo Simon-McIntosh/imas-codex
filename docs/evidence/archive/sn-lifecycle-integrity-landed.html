@@ -682,6 +682,56 @@
     thirteen as well, which is a weaker falsification than the byte-exact revert because the empty module
     removes the code rather than restoring the previous code. The gate covers this node's own change;
     verifying the merged result belongs to a separately dispatched test node.</p>
+  <h2 id="quarantine-instruments-state-their-question">The two quarantine instruments state which question each answers</h2>
+    <p>Two surfaces were read as answering "is this name quarantined?". One is the audit-set walk in
+    <code>imas_codex/standard_names/review/audits.py</code>, which reports which deterministic checks fire for the
+    fields a caller supplies, holds no verdict state and writes nothing. The other is the validation worker
+    <code>validate_name_candidate</code> in <code>imas_codex/standard_names/workers.py</code>, whose predicate reads
+    strictly more — the ISN layer summary, <code>grammar:ambiguity</code>, pydantic validity and
+    <code>grammar_retry_exhausted</code> on top of the caller's fields — and which is the single writer of
+    <code>validation_status</code>, <code>validation_issues</code> and <code>validated_at</code>. A clean audit report
+    was therefore readable as "not quarantined" when it was never evidence of that at all.</p>
+    <figure>
+      <svg viewBox="0 0 660 210" role="img" aria-label="Two instruments and the signals each reads">
+        <rect fill="#eef4fb" height="62" rx="6" stroke="#5b86b5" width="290" x="10" y="20"></rect>
+        <text fill="#333" font-size="12" stroke="none" text-anchor="start" x="24" y="42">audit-set walk — reviews, no write</text>
+        <text fill="#666" font-size="11" stroke="none" text-anchor="start" x="24" y="60">reads: the fields the caller supplies</text>
+        <text fill="#666" font-size="11" stroke="none" text-anchor="start" x="24" y="76">answers: which deterministic checks fire</text>
+        <rect fill="#e8f5ec" height="62" rx="6" stroke="#5f9e74" width="330" x="320" y="20"></rect>
+        <text fill="#333" font-size="12" stroke="none" text-anchor="start" x="334" y="42">validation worker — writes the verdict</text>
+        <text fill="#666" font-size="11" stroke="none" text-anchor="start" x="334" y="60">reads: caller fields + ISN layer summary,</text>
+        <text fill="#666" font-size="11" stroke="none" text-anchor="start" x="334" y="76">grammar ambiguity, pydantic, retry exhaustion</text>
+        <line stroke="#888" x1="10" x2="650" y1="104" y2="104"></line>
+        <text fill="#333" font-size="12" stroke="none" text-anchor="start" x="10" y="128">An ISN ERROR-level semantic issue quarantines in the worker and never reaches the walk:</text>
+        <rect fill="#fff4e5" height="40" rx="6" stroke="#d8a24a" width="640" x="10" y="140"></rect>
+        <text fill="#333" font-size="11" stroke="none" text-anchor="start" x="24" y="158">[semantic] ERROR - 'outline' does not name the represented entity</text>
+        <text fill="#666" font-size="11" stroke="none" text-anchor="start" x="24" y="174">worker predicate: quarantined.  Walk: no field carries it, so it refuses the question.</text>
+      </svg>
+      <figcaption>The worker reads a strict superset of the walk's inputs, so the walk's report can never settle
+      the worker's question — the declaration is what closes that gap rather than a shared predicate.</figcaption>
+    </figure>
+    <p><strong>The change.</strong> Every <code>AuditReport</code> now carries <code>answers_question</code> and
+    <code>refuses_question</code>, so the declaration travels with the report a reader holds instead of living in a
+    docstring they never open, and <code>answer_quarantine_question(name_id)</code> raises
+    <code>QuarantineVerdictNotAnswered</code> whose message names the refused question, the answered one and the
+    authority that owns the verdict. Commit <code>0ba05e980</code>, two paths:
+    <code>imas_codex/standard_names/review/audits.py</code> (703 lines, was 660; all seven original functions intact,
+    verified by <code>ast.parse</code> and a per-function count) and
+    <code>tests/standard_names/test_quarantine_instrument_agreement.py</code> (3 tests).</p>
+    <p><strong>Gate, with the change and with it reverted.</strong> At base <code>d170a6ec2</code> on the login node
+    (host class login, <code>98dci4-srv-1006.iter.org</code>) the new file returns <strong>3 passed, exit 0</strong>;
+    with the declaration backed out at the same revision the same command returns <strong>exit 2</strong>, a
+    collection <code>ImportError: cannot import name 'AUDIT_WALK_QUESTION'</code>. The revert direction is the one
+    that matters here: a test that only passes cannot show the declaration is what it measures, and an import fault
+    cannot be mistaken for a pass. Logs: <code>gate_after.log</code> and <code>gate_reverted.log</code> in
+    <code>r-20260918T144458165808-n-sli-the-quarantine-instruments-answer-one-question</code>.</p>
+    <p><strong>What this does not establish.</strong> The gate measures this node's change only; the merged result
+    belongs to a separately dispatched test node. The five names withheld from the published candidate were not
+    re-read from the live graph inside the time budget, and the instrument for them is unchanged by this change: the
+    worker's verdict with its <code>validated_at</code> stamp, not the walk's findings. And the registry walk a sweep
+    actually misread is <code>imas_codex/standard_names/audits.py</code> — <code>run_audits</code>,
+    <code>has_critical_audit_failure</code> and the 32-check <code>CRITICAL_CHECKS</code> set — which lies outside
+    this node's fence and therefore still declares nothing; the two files share the basename <code>audits.py</code>.</p>
   </section>
   </main>
 </body>
