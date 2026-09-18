@@ -10,6 +10,17 @@ Anchors are taken from the release-contract tree at `4c9d1dabb` — the revision
 this worktree was dispatched on. Line numbers are those the symbols occupied at
 that revision.
 
+**Anchor audit: every line citation below was opened at `4c9d1dabb`.** 68
+citations were checked — 64 of the form `file:line` or `:line`, plus the four
+bare line numbers in entry 1's method table — and in the reviewed revision six
+did not resolve as written. Each is corrected in place: four were mis-pointed
+anchors (entry 1's seam-test line, entry 2's `exclusion_ledger`, the charge's
+`WHERE` clause, and the sibling invocation in entry 5), and two were further
+imprecisions the sweep found (a range whose start pointed at an unrelated error
+class, and an occurrence census that omitted the symbol's own log line). Every
+other citation resolves to the symbol it names, and entry 5 carries the
+caller-inputs line the tally above promises — the fifth reviewed defect.
+
 ## 1. The pull-request REST transport — located
 
 `_GitHubClient` — `imas_codex/standard_names/catalog_release.py:57`.
@@ -44,7 +55,11 @@ so no length or quoting limit applies.
 **Instantiations:** `catalog_release.py:1243` and `:1763`. The module-level
 reader `_closed_pr_heads` (`:411`) wraps the client and takes an injectable
 `github_client` (its partial at `:477`), which is the seam the REST failure
-coverage at `tests/standard_names/test_catalog_release.py:300` injects through.
+coverage injects through at `tests/standard_names/test_catalog_release.py:715`,
+where `test_an_unreachable_api_yields_no_heads_instead_of_raising` (`:703`)
+passes a client whose `closed_pull_request_heads` raises `GitHubRestError`;
+`:737` is the recording sibling. (`:300` is a `sanitize_build_metadata` case and
+injects nothing.)
 
 **A caller must supply:** `repo` as `owner/name`, `head_owner` (the fork), the
 branch, base, title and body; a token if the default resolution is not wanted.
@@ -63,12 +78,13 @@ class ExportReport:                                    # export.py:335
 ```
 
 The manifest payload the report emits carries `exclusion_ledger` (one row per
-record), `exclusion_records`, `exclusion_by_reason`, `accounted_exclusions` and
+record, `:417`), `exclusion_records` (`:418`), `exclusion_by_reason`,
+`accounted_exclusions` and
 `accounting_residue` (`:453`–`:458`). The gate is
 `GATE_EXCLUSION_ACCOUNTING = "exclusion_accounting"` (`export.py:181`), checked
 at `:1277`. Two link guards make the published body honest about that
-accounting: `ExclusionLedgerLinkError` and `ExportReportLinkError`
-(`catalog_release.py:45`–`53`).
+accounting: `ExclusionLedgerLinkError` (`catalog_release.py:49`) and
+`ExportReportLinkError` (`:53`).
 
 Entry point: `run_export(staging_dir: str | Path, *, min_score: float = 0.65,
 bound_adjacent_half_width=…, include_unreviewed=False, min_description_score=None,
@@ -94,7 +110,7 @@ def claim_explicit_standard_name_sources(source_ids: list[str], *,
 ```
 
 The charge is inside the claim's `SET` at `:10471`:
-`sns.attempt_count = coalesce(sns.attempt_count, 0) + 1`. The `WHERE` at `:10456`
+`sns.attempt_count = coalesce(sns.attempt_count, 0) + 1`. The `WHERE` at `:10463`
 admits `status = 'extracted'` with no live claim — it does not look at existing
 `PRODUCED_NAME` bindings, which is the open defect
 (`f-wcr-the-claim-charges-for-a-refusal-it-can-predict`: 51 sources at the cap of
@@ -199,14 +215,21 @@ Returns `{"agree", "repair", "with_winner", "refused_no_review"}` in dry-run
 mode and `{"repaired"}` after a real run; idempotent. Test:
 `tests/standard_names/test_docs_axis_reconciliation.py:77`.
 
+**A caller must supply:** a call site, not machinery. The function takes no
+required argument — `dry_run`, `ids` and `gc` are all optional — and refuses a
+name with no surviving docs-axis review rather than inventing one, so wiring the
+caller is the whole contribution. The natural site is the `sn run`
+global-maintenance step below.
+
 **The gap, named rather than declared absent.** The only occurrences of the symbol
-in the repository are its own definition and its test — a grep of
-`imas_codex/` and `tests/` for the symbol returns `graph_ops.py:12608` and
+in the repository are its own definition (`graph_ops.py:12608`), the log line
+inside it (`:12685`), and its test — a grep of `imas_codex/` and `tests/` for the
+symbol returns those two lines and
 `tests/standard_names/test_docs_axis_reconciliation.py`. So the machinery exists and the
 release path does not call it; a node that would build a docs-axis
 reconciliation should instead wire a caller (the natural one being the
 `sn run` global-maintenance step that already calls its name-axis sibling
-`reconcile_reviewable_name_stage`, `graph_ops.py:14275, invoked at loop.py:1783`)
+`reconcile_reviewable_name_stage`, `graph_ops.py:14275`, invoked at `loop.py:1799`)
 and re-derive through it. Nearest existing
 things that are *not* it: `orphan_sweep.py` (repairs `docs_stage='refining'`
 stranded by a dead worker — a sweep, not a review-edge reconciliation) and the

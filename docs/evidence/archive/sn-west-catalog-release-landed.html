@@ -836,6 +836,19 @@
       </tbody>
     </table>
     <p>Full map with quoted signatures: <a href="/imas-codex/evidence/sn-west-catalog-release/reuse-map">the release-surface reuse map</a>, committed as <strong>0adb2dbaa</strong>.</p>
+    <p><strong>Every line citation in the map was then re-opened at <code>4c9d1dabb</code>: 68 checked, 6 wrong as written.</strong> Four are the mis-pointings the review reported and two are imprecisions the sweep found; the fifth reviewed defect was a missing line rather than a wrong one. Each cell below quotes what the cited line actually holds at that revision.</p>
+    <table>
+      <thead><tr><th>Cited</th><th>What that line actually holds</th><th>Corrected to</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_catalog_release.py:300</code></td><td><code>def test_empty_input_is_an_error</code> — a metadata-sanitize case</td><td><code>:715</code>, passing <code>github_client=Refusing()</code> (<code>:703</code>)</td></tr>
+        <tr><td><code>export.py:453</code>–<code>:458</code></td><td>the payload tail: <code>"exclusion_by_reason"</code> at <code>:453</code></td><td><code>exclusion_ledger</code> at <code>:417</code>; <code>exclusion_records</code> at <code>:418</code></td></tr>
+        <tr><td><code>graph_ops.py:10456</code></td><td><code>token = str(uuid.uuid4())</code></td><td><code>:10463</code>, <code>WHERE sns.status = 'extracted'</code></td></tr>
+        <tr><td><code>loop.py:1783</code></td><td>a line inside the import block at <code>:1781</code>-<code>:1784</code></td><td><code>:1799</code>, the call site of <code>reconcile_reviewable_name_stage</code></td></tr>
+        <tr><td><code>catalog_release.py:45</code></td><td><code>ReviewPreviewLinkInvariantError</code>, an unrelated class</td><td><code>:49</code> / <code>:53</code>, the two link guards</td></tr>
+        <tr><td>the census for <code>reconcile_docs_axis_from_reviews</code></td><td>the symbol's own log line omitted</td><td>includes <code>graph_ops.py:12685</code></td></tr>
+        <tr><td>entry 5's caller-inputs line</td><td>absent - the map carried four against five entries</td><td>added; <code>grep -c 'A caller must supply'</code> returns <code>5</code></td></tr>
+      </tbody>
+    </table>
   </section>
   <section id="verdict-field-disagreement">
     <h2>One field is the verdict; the other disagrees on 62 identities</h2>
