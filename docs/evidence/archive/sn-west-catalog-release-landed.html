@@ -903,15 +903,23 @@
     <code>reviewed_name_at</code>: the cause is a true record of an earlier refine
     stop that the accept path deliberately carries forward
     (<code>graph_ops.py:17273</code>), so that arm is legitimate history rather than
-    corruption. The 42 <code>exhausted</code> rows carry no
-    <code>refine_stopped_at</code>, and 40 of them no charged attempt, so the stage
-    was written without the diagnosis that <code>stop_refine_name_attempt</code>
-    (<code>graph_ops.py:24560</code>) writes in the same statement — a stage without
-    its cause. Authority: <code>name_stage</code> gates
+    corruption. The 42 <code>exhausted</code> rows carry no <code>refine_stopped_at</code> and
+    none of the write stamps a current writer leaves (<code>updated_at</code>,
+    <code>claim_token</code>, <code>run_id</code>, <code>claimed_at</code> — all
+    0/42, against an instrument that sees <code>updated_at</code> on 3,279 of
+    5,130 rows), and 40 of them no charged attempt. Every current writer that can
+    leave a row <code>exhausted</code> stamps <code>updated_at</code> in the same
+    statement that writes the stage, so that arm is <strong>legacy state, not a
+    live write-ordering fault; its remedy is a cleanup of the rows rather than a
+    code fix</strong>. Authority: <code>name_stage</code> gates
     <code>promote.py:1053</code>, <code>graph_ops.py:12555</code>,
     <code>enrichment.py:419</code> and <code>campaign.py:299</code>, while
-    <code>refine_stop_reason</code> has exactly one read path, and it is a report
-    (<code>workers.py:6924</code>). Longest query 0.078 s. Full method, predicate
+    <code>refine_stop_reason</code> has two read paths — the projection at
+    <code>graph_ops.py:18144</code> and the report at
+    <code>workers.py:6924</code> — and neither gates on it. Longest query
+    0.078 s; the correction pass re-measured the arm and the read paths, longest
+    query 0.049 s. Corrected 2026-09-18; the count and the four-bucket split are
+    unchanged. Full method, predicate
     text, writer map with file and line, and the plan's named example re-read live:
     <a href="/imas-codex/evidence/sn-west-catalog-release/verdict-field-disagreement">the
     verdict-field-disagreement record</a>.</p>

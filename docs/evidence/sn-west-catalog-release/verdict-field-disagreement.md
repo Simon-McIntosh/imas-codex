@@ -2,11 +2,15 @@
 
 **Answer in one line.** `name_stage` is the verdict and `refine_stop_reason` is a
 cause label, not a second verdict; **62** live identities carry a disagreeing
-pair, split **20 legitimate history / 42 written without a cause**, and the two
-shapes need different treatment.
+pair, split **20 legitimate history / 42 legacy stage writes with no recorded
+cause**, and the two shapes need different treatment.
 
 Measured live on 2026-09-18 against the login-node graph (DD-pinned graph client,
-`GraphClient()`), over a population of **5,130** `StandardName` nodes.
+`GraphClient()`), over a population of **5,130** `StandardName` nodes, corrected
+the same day against a review of the first pass: which function performs the
+clear at `graph_ops.py:10721`, how many read paths `refine_stop_reason` has, and
+whether the 42-row arm is a live fault or legacy state. The **62** count and the
+**42 / 11 / 7 / 2** breakdown are unchanged by the correction.
 
 ## The named predicate
 
@@ -89,21 +93,33 @@ Writers of `refine_stop_reason`:
 | `graph_ops.py:17273` | `persist_reviewed_name` | `CASE WHEN $target_stage <> 'exhausted' THEN sn.refine_stop_reason ...` — **carries the cause forward unchanged** on any non-exhausting outcome, including `accepted` |
 | `edit.py:860` | name-steering edit stamp | **clears** it (a name hint refunds the refine budget and its diagnosis) |
 | `graph_ops.py:24453` | `stage_name_for_rescore` (`:24401`) | **clears** it (a rescore buys a fresh quorum draw on the same name, not a fresh rewrite budget) |
-| `graph_ops.py:10721` | `reconcile_reviewable_name_stage` (`:14275`) | **clears** it when reviving a dead-end identity |
+| `graph_ops.py:10721` | `_lock_claimed_name_bindings` (`:10589`) | **clears** it when reviving a dead-end identity |
+
+Both lines were opened and re-checked: `graph_ops.py:10589` reads
+`def _lock_claimed_name_bindings(` — the clear sits in that body, inside the
+`revive_dead_end_identity` `FOREACH` that re-stages the name — while
+`graph_ops.py:14275` reads
+`def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:`
+and never writes the field: the only `refine_stop_reason` sites of any kind in
+`graph_ops.py` are `:10721`, `:17273`, `:18144`, `:24453`, `:24611`.
 
 Consumers that gate on `name_stage`: `promote.py:1053`, `graph_ops.py:12555`,
-`enrichment.py:419`, `campaign.py:299`. `refine_stop_reason` has exactly one
-read path, and it is a *report*: `workers.py:6924` prints the previous stop so
-the next attempt can say what the last one hit.
+`enrichment.py:419`, `campaign.py:299`. `refine_stop_reason` has exactly **two**
+read paths, and neither gates on it: the projection at `graph_ops.py:18144`
+(`", sn.refine_stop_reason AS refine_stop_reason"`, inside
+`claim_refine_name_batch`, `:18109`) carries the field out with the claimed batch,
+and the report at `workers.py:6924` prints the previous stop so the next attempt
+can say what the last one hit. Both read a note about a past attempt; neither
+branches a verdict on it.
 
 **So the asymmetry is in the code, not just in the data.** `name_stage` decides
 what may be published, enriched or exported; `refine_stop_reason` is a note left
 for the next refinement attempt. A reader that treats them as two verdicts is
 reading one verdict and one diagnostic.
 
-## Legitimate state or write-ordering defect — both, and the split is measurable
+## Legitimate history or legacy state — the split is measurable
 
-The predicate's two arms are two different defects and must not be reported as
+The predicate's two arms are two different shapes and must not be reported as
 one number. A second probe separates them:
 
 | Shape | rows | `refine_stopped_at` present | `refine_attempts > 0` | `reviewed_name_at` present |
@@ -122,16 +138,36 @@ it. Nothing is corrupt; the row is a stale diagnosis attached to a committed
 name. The remedy, if wanted, is a clear on the accept path, not a repair of
 these 20 rows.
 
-**`exhausted` + null — 42 rows, WRITE-ORDERING DEFECT.** Not one of the 42
-carries a `refine_stopped_at`, and 40 of 42 carry `refine_attempts` 0 or absent.
-A row cannot honestly reach `'exhausted'` through `stop_refine_name_attempt`
-(`graph_ops.py:24560`, which writes stage and diagnosis in one statement) without
-also getting a timestamp, so these 42 were staged `'exhausted'` by a route that
-wrote `name_stage` and never wrote the diagnosis. The remaining **2** are the
-sharpest case: `refine_attempts > 0` alongside a null reason *and* a null
-timestamp — attempts were charged, the closing diagnosis is gone, and the stage
-stayed `exhausted`. That is a partial write, and it is the arm with a live
-write-ordering fault rather than a missing clear.
+**`exhausted` + null — 42 rows, LEGACY STATE.** Not one of the 42 carries a
+`refine_stopped_at`, and 40 of 42 carry `refine_attempts` 0 or absent; the
+remaining **2**, `flux_surface_normal_momentum_convection_velocity` and
+`flux_surface_normal_neutral_energy_diffusion_coefficient`, carry
+`refine_attempts = 3` with the reason and every stamp gone. The first pass read
+this arm as a live write-ordering fault — a stage reached by a route that wrote
+`name_stage` and skipped the diagnosis. A second measurement over the same arm
+refutes that reading: none of the 42 carries any write stamp a current writer
+leaves.
+
+| stamp | in the 42-row arm | over the label (5,130 rows) |
+|---|---|---|
+| `updated_at` | **0 / 42** | 3,279 |
+| `run_id` | **0 / 42** | 576 |
+| `claim_token` | **0 / 42** | 0 — unused label-wide, so this column discriminates nothing |
+| `claimed_at` | **0 / 42** | — |
+| `refine_stopped_at` | **0 / 42** | — |
+
+The `updated_at` zero is decisive, because **every current statement that writes
+`name_stage` — including one that leaves the row `exhausted` — stamps
+`updated_at` in the same statement**: `stop_refine_name_attempt`
+(`graph_ops.py:24598`), `persist_reviewed_name` (`:17249`), the atomic supersede
+fold (`edit.py:1533`–`:1534`), and `cancel_staged_rename`
+(`provenance_lifecycle.py:300`–`:312`). A live write-ordering fault in the
+current code would have committed the stage and its stamp together, so these 42
+predate those writers: **legacy state, not a live defect** — the two
+attempt-carrying rows included, an earlier charge whose stamp is likewise gone
+rather than a partial write of the current path. **The remedy is a data cleanup
+that re-derives their stage through a current writer, not a code fix**, because
+no current path can produce the state.
 
 ## What a read should do
 
@@ -145,9 +181,12 @@ as stopped.
 
 ## Login-node graph exception
 
-This node used the standing login-node exception: `NEO4J_URI` resolves through a
-login-node-local tunnel (`bolt://localhost:17687`) that a compute node cannot
-establish for itself, so the census ran on the login node. It was bounded as the
-exception requires — three indexed reads over a named predicate and a
-whole-label grouped count over 5,130 rows, longest query 0.078 s, every query
-under the 10 s per-query ceiling. No other login-node compute was paired with it.
+This node used the standing login-node exception: `NEO4J_URI` is unset here, and
+`GraphClient()` answers on the login node; inside a SLURM step the same client
+resolves a loopback endpoint (`bolt://localhost:17687`) it never establishes, so
+the call that answers here fails there. The census, and this correction pass, ran
+on the login node. The census took three indexed reads and a whole-label grouped
+count over 5,130 rows (longest 0.078 s); the correction pass took two indexed
+reads over the 42-row arm and a whole-label grouped count (longest 0.049 s). Every
+query stayed under the 10 s per-query ceiling, and no other login-node compute was
+paired with either.
