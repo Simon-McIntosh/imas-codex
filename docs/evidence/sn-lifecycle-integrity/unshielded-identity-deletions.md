@@ -2,13 +2,13 @@
 
 ## Result
 
-The archive-backed census does not support a uniform restoration verdict. Of the 78 identities deleted after origin reconciliation:
+The 78 identities deleted after origin reconciliation carry one authoritative disposition, reached in two stages: the archive-backed census in the per-identity table below, then the locked recorded-spend ruling, which supersedes the archive verdict wherever the two differ.
 
-- **32 are RESTORE**: 28 have direct DD bindings whose 30 source rows all survive live, `density_at_pedestal_top` is a 19-child family whose 21 DD bindings survive, and three additional source-less identities carry catalog `unchanged_ratification`. The fourth ratified identity, `safety_factor_at_pedestal_top`, is already in the direct-DD class.
-- **24 are CORRECTLY REMOVED**: 13 are source-equivalent single-child shadows, one is the source-less parent of one of those shadows, and 10 were archived as `superseded` or `exhausted` without an independent DD binding. These are structural or terminal nodes, not active independently sourced quantities.
-- **22 are UNDETERMINED**: the archive has only a derived source and either no child or only a source-less derived child. The archive predates the deletion by two days, while `StandardNameChange` did not snapshot the deletion-time child/source topology. A RESTORE or CORRECTLY REMOVED verdict for these rows would therefore be conjectural.
+- **67 are RESTORE**: 28 have direct DD bindings whose 30 source rows all survive live, `density_at_pedestal_top` is a 19-child family whose 21 DD bindings survive, and three additional source-less identities carry catalog `unchanged_ratification`. The fourth ratified identity, `safety_factor_at_pedestal_top`, is already in the direct-DD class.
+- **11 are CORRECTLY REMOVED**: nine carry no recorded spend, no founded source and no catalog authority, and two further identities the archive left undetermined carry none either. The archive's shadow, superseded and exhausted classes are recorded per identity in the tables below.
+- **0 are UNDETERMINED**: for the rows the archive could not settle, it holds only a derived source and either no child or only a source-less derived child, because the archive predates the deletion by two days and `StandardNameChange` did not snapshot the deletion-time child/source topology. Recorded spend settles their disposition; it does not recover that topology, and the limit stays recorded below.
 
-This is the actionable boundary: 32 restorations can be routed now, 24 removals should stand, and 22 must not be published or restored until deletion-time source authority or a catalog receipt is recovered.
+The actionable boundary is therefore: 67 restorations can be routed now, 11 removals should stand, and no identity is withheld pending a combination of source authority and a catalog receipt.
 
 ## Causal chain and information loss
 
@@ -135,13 +135,13 @@ None of the 78 identities appears in the 208-name WEST review cut. One additiona
 - `etendue_of_spectrometer_channel` was already `origin=derived` in the archive, so it had no origin-reconcile event.
 - The archive shows an accepted scalar with four reviews, mean score 0.975, a direct DD binding to `soft_x_rays/channel/etendue`, and child `spectral_etendue_of_spectrometer_channel`.
 - Its DD source survives live with the DD edge intact and no produced name. It attempted recomposition after deletion and stopped at the compose-attempt cap.
-- Verdict: **RESTORE**. Reset the surviving DD source through the governed source lifecycle, recompose the parent, then reconstruct or reattach the ratified spectral child. This is separate from the 32 members of the 78-row cohort.
+- Verdict: **RESTORE**. Reset the surviving DD source through the governed source lifecycle, recompose the parent, then reconstruct or reattach the ratified spectral child. This identity is separate from the 78-row cohort.
 
 ## Code defects and evidence limit
 
-- `imas_codex/standard_names/graph_ops.py:3608`: origin is used as the safety boundary even though independently DD-backed names can carry `origin=derived`. The WEST parent and 28 direct-DD targets prove that this property is not a sufficient authorship guard.
-- `imas_codex/standard_names/graph_ops.py:3633`: deletion destroys source links, reviews, documentation revisions, and node properties while its change record keeps no reconstructive snapshot.
-- The archive is from `2026-09-06`, not the deletion instant. For the 22 UNDETERMINED rows, the exact missing fact is the incoming `HAS_PARENT` child set and non-derived source ownership immediately before deletion, or an explicit catalog receipt. Neither the live graph, the archive, nor `StandardNameChange` contains that state. Their verdicts must remain UNDETERMINED until another durable record supplies it.
+- The defects this census reported, on the tree it was written against: `imas_codex/standard_names/graph_ops.py:3608` (pre-guard tree) used origin as the safety boundary even though independently DD-backed names can carry `origin=derived` — the WEST parent and 28 direct-DD targets prove that property is not a sufficient authorship guard; and `imas_codex/standard_names/graph_ops.py:3633` (pre-guard tree) deleted source links, reviews, documentation revisions, and node properties while its change record kept no reconstructive snapshot. Both pointers were read on that earlier tree and no longer resolve to those defects: the recorded-spend guard has since landed, and the deletion snapshot now lives in the shared `deletion_change_cypher` builder.
+- Guard call sites, read at HEAD `2e15b38605e17db98617e67c39ec6537cb122f12` (2026-09-18): `refuse_protected_automatic_deletion` is called at `imas_codex/standard_names/graph_ops.py:3846`, after the candidate set is assembled and after the identity ceiling is applied, and at `imas_codex/standard_names/graph_ops.py:5956`, after `_query_skeleton_placeholders_for_cleanup` has applied the positive placeholder predicate. Two guarded call sites, not one, so auditing "the" call site audits half the surface. The candidate selector buys protection earlier still, at `graph_ops.py:3817` and `graph_ops.py:4809`, through `filter_automatic_deletion_candidates`.
+- The archive is from `2026-09-06`, not the deletion instant. For the rows it could not settle, the exact missing fact is the incoming `HAS_PARENT` child set and non-derived source ownership immediately before deletion. Neither the live graph, the archive, nor `StandardNameChange` contains that state. Recorded spend settles their disposition without recovering that topology, so the limit survives the disposition.
 
 ## Recorded-spend ruling
 
@@ -151,7 +151,7 @@ The canonical ledger measure is `sum(LLMCost.llm_cost / size(LLMCost.standard_na
 
 ### Formerly undetermined identities
 
-Twenty of the 22 identities carry spend. Their unrounded apportioned total is **$9.401273**; summing the displayed per-identity amounts at cent precision gives the lead's **$9.42** census. Those 20 move to RESTORE. The two zero-spend identities move to CORRECTLY REMOVED.
+Of the identities the archive left undetermined, twenty carry spend. Their unrounded apportioned total is **$9.401273**; summing the displayed per-identity amounts at cent precision gives the lead's **$9.42** census. Those twenty move to RESTORE; the two zero-spend identities move to CORRECTLY REMOVED.
 
 | identity | cost rows | apportioned spend USD | final verdict | basis |
 |---|---:|---:|---|---|
@@ -180,9 +180,9 @@ Twenty of the 22 identities carry spend. Their unrounded apportioned total is **
 
 The largest protected amounts are `perturbed_gyrocenter_pressure` at $1.580814 across 17 rows, `perturbed_pressure` at $1.227714 across 13, `gyrocenter_pressure` at $0.837723 across 10, `deuterium_tritium_neutron_flux_due_to_beam_thermal_fusion` at $0.798974 across 12, `absorbed_power_of_plant_system` at $0.748731 across 9, `power_due_to_radiation` at $0.633191 across 9, `plasma_current_due_to_ohmic_induction` at $0.577351 across 9, and `power_due_to_fusion` at $0.477672 across 9.
 
-### Spend override of the 24 structural or terminal removals
+### Spend override of the archive's structural or terminal removals
 
-Fifteen of the 24 identities previously classified CORRECTLY REMOVED carry recorded spend totaling **$5.552639** and therefore move to RESTORE. This is an intentional override: the paid-only boundary does not depend on whether the admission gate considered the identity a shadow, or whether the archived lifecycle was terminal. Nine carry no spend and remain CORRECTLY REMOVED.
+Fifteen identities the archive classified CORRECTLY REMOVED carry recorded spend totaling **$5.552639** and therefore move to RESTORE. This is an intentional override: the paid-only boundary does not depend on whether the admission gate considered the identity a shadow, or whether the archived lifecycle was terminal. Nine carry no spend and remain CORRECTLY REMOVED, so with the two zero-spend rows from the formerly undetermined set the corrected CORRECTLY REMOVED column holds 11.
 
 | identity | earlier archive classification | cost rows | apportioned spend USD | final verdict |
 |---|---|---:|---:|---|
