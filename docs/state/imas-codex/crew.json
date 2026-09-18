@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T16:23:56",
+  "updated": "2026-09-18T16:33:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -155119,6 +155119,219 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T131900408822-n-usb-the-producer-predicate-fails-closed",
+        "plan": "unbound-source-backlog",
+        "section": "\u00a72",
+        "node": "n-usb-the-producer-predicate-fails-closed",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 639,
+                "cached_input_tokens": 544697,
+                "input_tokens": 545338,
+                "output_tokens": 478,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 545816,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "a new regression covering the missing-key case fails when the guard is reverted and passes with it, proving a candidate carrying neither producing-source key is refused rather than admitted; the whole tests/standard_names export surface is run and its added-failure count against a stated base revision and host class is recorded, and the gate command, exit status and log path are in the manifest",
+          "estimated_hours": null,
+          "goal": "make the producer predicate refuse a candidate that carries none of its own evidence keys",
+          "id": "n-usb-the-producer-predicate-fails-closed",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T13:19:01Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T131900408822-n-usb-the-producer-predicate-fails-closed/manifest.md",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_producer_predicate.py",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T13:19:09Z",
+        "completed_at": "2026-09-18T14:28:38.484Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4114,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4169,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "b468bfb5c1b86131ec16262149e778e9ea5e3dff",
+        "commits": [
+          "dff35acdcb2233be3eceaadaf43812ce09c9c2b8"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest test_export_producer_predicate + test_export_eligibility + test_export_exclusion_ledger + test_export_release_holds, run by the coordinator at the merged head AND at the pre-merge base on the same partition",
+          "exit_status": 1,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gates/failclosed-merged.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the key-presence fail-open is closed: a candidate carrying none of the producing-source flags is now withheld exactly as an explicit absence is, and the docstring states the rule rather than the instance. Tests 5 to 7. ADDED FAILURES ZERO, measured rather than asserted: the merged head shows 6 failures over four export files and the pre-merge base shows the IDENTICAL six ids on the same debug partition, so this change adds none. I also measured the commit before the producer predicate itself landed and found the same six, so neither of today's two export merges put them there - they are pre-existing and are recorded as their own finding. The worker had reported zero added against a login-node base; my debug-partition figure disagreed in absolute terms and agreed in delta, which is this sprint's own host-class lesson arriving in its own work",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T131900408822-n-usb-the-producer-predicate-fails-closed/manifest.md",
+        "scope_changed": false,
+        "session_id": "0037a193-399c-4458-966d-ed8c34855a65",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2749024,
+            "input_tokens_cumulative": 10526270,
+            "output_tokens": 15928,
+            "output_tokens_cumulative": 51295,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T14:28:38.484Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 10678458,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4164.882,
+          "generated_tokens": 60579,
+          "generation_seconds": 3907.873,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 257.009,
+          "peak_input_tokens": 150888,
+          "tokens_per_second": 15.5,
+          "wall_tokens_per_second": 14.55
+        },
+        "follow_on_paths": [
+          "tests/standard_names/test_catalog_layout_hierarchy.py",
+          "tests/standard_names/test_catalog_status_reconcile.py",
+          "tests/standard_names/test_docs_review_eligibility.py",
+          "tests/standard_names/test_export_bound_adjacent.py",
+          "tests/standard_names/test_export_domain_resolution.py",
+          "tests/standard_names/test_export_exclusion_ledger.py",
+          "tests/standard_names/test_export_exit_accounting.py",
+          "tests/standard_names/test_export_producer_predicate.py",
+          "tests/standard_names/test_export_release_holds.py",
+          "tests/standard_names/test_export_sidecar_surface.py",
+          "tests/standard_names/test_export_status_authority.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-usb-the-producer-predicate-fails-closed",
+          "session_id": "0037a193-399c-4458-966d-ed8c34855a65",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T14:28:38.484Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 85.0,
+        "orientation_input_tokens": 2006288.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -155393,16 +155606,16 @@
         "backend": "codex",
         "purpose": "dispatch",
         "opened_at": "2026-09-18T09:01:03Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-18T14:25:20Z",
+        "held_seconds": 19457,
         "utilisation_pct": 92.0,
         "resets_at": "2026-09-21T05:57:32Z",
         "effective_ceiling_pct": 92.0,
         "reason": "utilisation 92% with burn multiple 1.6x and projected exhaustion 2026-09-20T05:12:07Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-18T09:01:01Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 2332
+    "_version": 2334
   }
 }
