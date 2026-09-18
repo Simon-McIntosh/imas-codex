@@ -378,6 +378,25 @@ enums:
           quantity. Filtered at extract time by attribute predicates (data_type,
           units, doc). Distinct from 'skipped' which signals upstream defect.
 
+  ParkedSourceDisposition:
+    description: >-
+      Stored triage result for a source parked after spending its composition
+      claim-attempt budget. The current writer assigns one value and the census
+      reads it; no transition presently clears or recomputes a stored value.
+    permissible_values:
+      name_produced:
+        description: A live StandardName was already produced from the source.
+      upstream_quantity_removed:
+        description: The backing Data Dictionary quantity no longer exists.
+      compose_not_applicable:
+        description: The source is structural rather than a composable quantity.
+      vocabulary_gap:
+        description: Missing grammar vocabulary prevents composition.
+      attempt_budget_exhausted:
+        description: A composable quantity spent its attempt budget with a recorded cause.
+      cause_not_recorded:
+        description: The parked source carries no cause that permits narrower triage.
+
   ComposeHintStatus:
     description: >-
       Lifecycle of exact-source operator steering for DD name composition.
@@ -2996,6 +3015,13 @@ classes:
           relationship_type: HAS_AUTHORITY_RETIREMENT
       last_error:
         description: Error message from most recent failed attempt
+      parked_disposition:
+        description: >-
+          Durable triage classification written when this source is parked at
+          the composition claim-attempt cap. A non-null value currently causes
+          the classifier to skip the row; no implemented path clears or
+          refreshes a value when its supporting evidence changes.
+        range: ParkedSourceDisposition
       failed_at:
         description: Timestamp of terminal failure
         range: datetime

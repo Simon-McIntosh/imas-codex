@@ -171,14 +171,12 @@ imas_codex/ingestion/pipeline.py|FacilityPath|last_ingested_at|447
 imas_codex/llm/server.py|FacilityPath|triage_composite|2265,2267,2287,2290
 imas_codex/mdsplus/batch_discovery.py|SignalEpoch|boundary_refined|791
 imas_codex/mdsplus/extraction.py|SignalNode|tags|127,944
-imas_codex/standard_names/campaign.py|StandardName|quarantine_reason|302,665,712
 imas_codex/standard_names/edit.py|StandardName|edit_refine|667
 imas_codex/standard_names/graph_ops.py|StandardName|_drain_scope_lock|1448,1449
 imas_codex/standard_names/graph_ops.py|StandardName|_lifecycleless_reconcile_lock|5021,5021
 imas_codex/standard_names/graph_ops.py|StandardName|_refine_claim_release_lock|23021,23022
 imas_codex/standard_names/graph_ops.py|StandardName|_structural_authority_lock|25597,25598
 imas_codex/standard_names/graph_ops.py|StandardName|needs_composition|3083,4094,5822
-imas_codex/standard_names/graph_ops.py|StandardName|quarantine_reason|23584
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_seq|10221
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_claim_token|10220
 imas_codex/standard_names/graph_ops.py|StandardName|reservation_source_id|10219
@@ -186,7 +184,6 @@ imas_codex/standard_names/graph_ops.py|StandardNameSource|_claim_lock|14557,1455
 imas_codex/standard_names/graph_ops.py|StandardNameSource|_drain_scope_lock|1379,1380
 imas_codex/standard_names/graph_ops.py|StandardNameSource|skipped_at|10461,10462,11106
 imas_codex/standard_names/provenance_lifecycle.py|StandardNameSource|standard_name_id|176
-imas_codex/standard_names/signed_manifest.py|StandardName|quarantine_reason|1786
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|authority_rows_sha256|3556,4181
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|detached_target_ids|4179
 imas_codex/standard_names/signed_manifest.py|StandardNameChange|source_id|4178

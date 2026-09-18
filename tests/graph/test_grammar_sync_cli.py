@@ -45,13 +45,19 @@ def _fake_spec() -> dict[str, Any]:
     }
 
 
-def _mock_gc(active_version: str | None) -> MagicMock:
-    """A context-manager GraphClient whose active-version query returns ``active_version``."""
+def _mock_gc(
+    active_version: str | None,
+    *,
+    content_digest: str | None = None,
+) -> MagicMock:
+    """Build a GraphClient returning the active grammar identity."""
     gc = MagicMock()
     gc.__enter__.return_value = gc
     gc.__exit__.return_value = None
     gc.query = MagicMock(
-        return_value=[{"version": active_version}] if active_version else []
+        return_value=[{"version": active_version, "content_digest": content_digest}]
+        if active_version
+        else []
     )
     return gc
 
@@ -60,7 +66,9 @@ def test_auto_sync_skips_when_in_sync():
     """When the graph's active grammar matches the installed ISN, sync is a no-op."""
     from imas_standard_names import __version__ as isn_version
 
-    gc = _mock_gc(isn_version)
+    from imas_codex.standard_names.grammar_sync import grammar_content_digest
+
+    gc = _mock_gc(isn_version, content_digest=grammar_content_digest())
     with (
         patch("imas_codex.graph.client.GraphClient", return_value=gc),
         patch(
@@ -72,9 +80,11 @@ def test_auto_sync_skips_when_in_sync():
     mock_sync.assert_not_called()
 
 
-def test_auto_sync_runs_when_version_differs():
-    """A version mismatch triggers sync_isn_grammar_to_graph with the open client."""
-    gc = _mock_gc("0.0.1-stale")
+def test_auto_sync_runs_when_digest_is_missing():
+    """A missing digest refreshes an existing version once."""
+    from imas_standard_names import __version__ as isn_version
+
+    gc = _mock_gc(isn_version)
     with (
         patch("imas_codex.graph.client.GraphClient", return_value=gc),
         patch(
@@ -86,6 +96,22 @@ def test_auto_sync_runs_when_version_differs():
     mock_sync.assert_called_once()
     _, kwargs = mock_sync.call_args
     assert kwargs.get("gc") is gc  # reuses the open client
+
+
+def test_auto_sync_runs_when_content_differs():
+    """A digest mismatch refreshes the graph even when the version matches."""
+    from imas_standard_names import __version__ as isn_version
+
+    gc = _mock_gc(isn_version, content_digest="sha256:stale")
+    with (
+        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch(
+            "imas_codex.standard_names.grammar_sync.sync_isn_grammar_to_graph"
+        ) as mock_sync,
+    ):
+        _auto_sync_grammar(quiet=True)
+
+    mock_sync.assert_called_once_with(gc=gc)
 
 
 def test_auto_sync_degrades_gracefully_on_failure():

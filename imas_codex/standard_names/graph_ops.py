@@ -5555,7 +5555,7 @@ def write_standard_names(
             """
             UNWIND $batch AS b
             MERGE (sn:StandardName {id: b.id})
-            ON CREATE SET sn.status = 'draft'
+            ON CREATE SET sn.status = 'draft', sn.updated_at = datetime()
             SET sn.updated_at = datetime(),
                 // A null catalog status is outside the enumerated vocabulary
                 // for a pipeline-minted identity; only fill the gap, never
