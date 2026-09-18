@@ -472,6 +472,24 @@
     <p>Read at revision <code>9705954c2</code>, every <code>SET</code> clause in <code>orphan_sweep.py</code> is placed by line and exactly one of them parks a source: the compose attempt-cap statement at <code>orphan_sweep.py:114-118</code>, whose tick is paired with the disposition write at <code>:162-168</code>. The followup that described the writer as parking "with the bare cap sentence alone" therefore no longer reproduces — the pairing landed in <code>73242777f</code> — so a node dispatched to repair it would re-implement a working guard. The path is one classifier (<code>classify_parked_source</code>, <code>graph_ops.py:11369</code>), one closed set of six declared members of which five hold rows (<code>CAP_PARKED_DISPOSITIONS</code>, <code>:11343</code>: <code>name_produced</code> 164, <code>cause_not_recorded</code> 30, <code>compose_not_applicable</code> 21, <code>upstream_quantity_removed</code> 18, <code>vocabulary_gap</code> 1; <code>attempt_budget_exhausted</code> reachable and empty), one classify-and-write step (<code>record_parked_dispositions</code>, <code>:11457</code>) and one write statement (<code>:11563</code>).</p>
     <p>What the map leaves open is a wiring gap rather than a missing write: the reconcile net and the census (<code>:11494</code>, <code>:11579</code>) have no callers anywhere in <code>imas_codex/</code>, so a row parked under any reason other than the cap sentence stays undisposed until the pass is run by hand, and <code>parked_disposition</code> is never cleared, so the park → revive → park round trip would carry a stale value the writer's read then skips. The focused gate passes at that revision — 21 passed, 12 deselected, exit 0 — and the map names the one-owner write chain plus the file set a residual node would need. Full record: <a href="/imas-codex/evidence/sn-lifecycle-integrity/parking-writer-reuse-map" title="Every parking write site at file:line, the closed set and its classifier, the ALREADY-FIXED verdict, the residual wiring gap and the proposed exclusive write-path set">the parking-writer reuse map</a>.</p>
   </section>
+
+  <section>
+    <h2 id="scoped-edit-reuse-map">The scoped-edit surface carries every hop but the bypass</h2>
+    <p>An <code>sn edit</code> review is scoped by identity and launches the normal pool
+    orchestrator with no maintenance bypass: the call at <code>edit.py:3740-3747</code> passes
+    <code>scope_run_id</code> and five other keywords, and <code>skip_global_maintenance</code> is
+    not among them, while <code>loop.py:1303</code> defaults the flag to <code>False</code>. No
+    upstream frame accepts it either — <code>sn_edit</code>, <code>run_inline_review</code> and
+    <code>_run_scoped_pipeline</code> all lack the parameter — so the escalation the followup
+    recorded is reproduced by the code as read at <code>9705954c2</code>, not inferred from a
+    default. The loop needs no change, because the edit path already satisfies the flag's scope
+    guard by passing <code>plan.run_id</code>.</p>
+    <p>Every hop from the CLI entry point to <code>run_sn_pools</code>, the reuse inventory for a
+    repair, the mocked test seams that keep the omission invisible, and the proposed write-path
+    set are in <a href="/imas-codex/evidence/sn-lifecycle-integrity/scoped-edit-reuse-map">the
+    scoped-edit reuse map</a>. It is a scout record: no source was changed and no graph write was
+    made.</p>
+  </section>
   </main>
 </body>
 </html>
