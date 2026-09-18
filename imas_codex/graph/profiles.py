@@ -303,8 +303,14 @@ def _resolve_uri_uncached(host: str | None, bolt_port: int) -> str:
     if local and info.scheduler != "slurm":
         return f"bolt://localhost:{bolt_port}"
 
-    # ── Mode 2: local + SLURM ──────────────────────────────────────────
-    if local and info.scheduler == "slurm":
+    # ── Mode 2: SLURM-scheduled service ────────────────────────────────
+    # Discovery decides reachability here, not the hostname. ``squeue`` only
+    # answers from inside the cluster, and every node inside it reaches the
+    # service node directly, so a compute node is served here even though it
+    # matches no ``login_nodes`` pattern. Gating this on ``local`` sent compute
+    # nodes down the remote branch, where the tunnel they cannot open left them
+    # holding a loopback address that never answers.
+    if info.scheduler == "slurm":
         import socket
 
         from imas_codex.remote.tunnel import discover_compute_node_local
@@ -332,9 +338,14 @@ def _resolve_uri_uncached(host: str | None, bolt_port: int) -> str:
                 "SLURM: Neo4j on peer node %s → direct connection", compute_node
             )
             return f"bolt://{compute_node}:{bolt_port}"
-        # squeue failed and no configured compute host — fall back to localhost
-        logger.debug("SLURM: no service job found → localhost:%d", bolt_port)
-        return f"bolt://localhost:{bolt_port}"
+        if local:
+            # squeue failed and no configured compute host — fall back to
+            # localhost, where a local service may still be listening.
+            logger.debug("SLURM: no service job found → localhost:%d", bolt_port)
+            return f"bolt://localhost:{bolt_port}"
+        # Undiscoverable from outside the cluster: fall through to the remote
+        # branch, which tunnels rather than guessing an address.
+        logger.debug("SLURM: no service job discoverable from here → remote")
 
     # ── Mode 3: remote ─────────────────────────────────────────────────
     # Check tunnel port override
