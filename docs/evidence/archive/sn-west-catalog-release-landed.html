@@ -796,6 +796,32 @@
     (<code>imas_codex/standard_names/workers.py</code> and
     <code>tests/standard_names/test_unchanged_refine_attempt.py</code>).</p>
   </section>
+  <section>
+    <h2>A source already bound to a live identity is adjudicable, and does not spend an attempt</h2>
+    <p><code>retarget_standard_name_sources</code> refused every ineligible preflight row
+    with the same anonymous <code>RuntimeError</code>, so a source that already binds a live
+    identity other than the migration's predecessor — an ordinary supersede-path state an
+    operator has to settle — was indistinguishable from a transient fault. It now raises
+    <code>SourceBindingConflictError</code> carrying a <code>SourceBindingConflict</code> per
+    holder, naming the holding identity and its stage; a concurrent claim, a stale row, a
+    lost binding and a scalar mismatch still raise the anonymous fault.</p>
+    <table>
+      <thead>
+        <tr><th>Measure</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Same row at <code>a15768122</code></td><td><code>RuntimeError</code>, no named payload</td></tr>
+        <tr><td>Same row in the worktree</td><td><code>SourceBindingConflictError</code> naming <code>live_holder</code> at stage <code>reviewed</code></td></tr>
+        <tr><td>Attempt budget, before / after the conflict</td><td>3 / 3, with zero write statements issued</td></tr>
+        <tr><td>Control on the same instrument</td><td>5 → 6 when one attempt is charged</td></tr>
+      </tbody>
+    </table>
+    <p>The charge itself is written at claim time in <code>graph_ops.py</code>, outside this
+    node's scope; this node supplies the named outcome a caller uses to distinguish the two,
+    and the live population still owes a governed reset. Full receipt:
+    <a href="/imas-codex/evidence/sn-west-catalog-release/migration-conflict-handling">the
+    binding-conflict handling record</a>.</p>
+  </section>
 </main>
 </body>
 </html>
