@@ -67,6 +67,12 @@ _TERMINAL_BINDING_NAME_STAGES: frozenset[str] = frozenset(
         NameStage.contested.value,
     }
 )
+_SETTLED_SOURCE_BINDING_STAGES: frozenset[str] = frozenset(
+    {
+        NameStage.superseded.value,
+        NameStage.exhausted.value,
+    }
+)
 _CLAIM_TIMEOUT_SECONDS = 300
 
 # The lowest observed daily structural-reaper total is 74.  Eighty allows a
@@ -10440,50 +10446,106 @@ def claim_standard_name_source_batch(
     return token, claimed
 
 
+class SourceClaimResult(list[dict[str, Any]]):
+    """Claim winners plus conflicts withheld before an attempt is charged."""
+
+    def __init__(
+        self,
+        claimed: list[dict[str, Any]],
+        *,
+        withheld: list[dict[str, Any]],
+    ) -> None:
+        super().__init__(claimed)
+        self.withheld = withheld
+
+
+_EXPLICIT_SOURCE_CLAIM_QUERY = """
+UNWIND $ids AS sns_id
+MATCH (sns:StandardNameSource {id: sns_id})
+OPTIONAL MATCH (sns)-[:PRODUCED_NAME]->(holder:StandardName)
+WHERE NOT coalesce(holder.name_stage, '') IN $settled_stages
+WITH sns,
+     collect(DISTINCT holder {.id, stage: holder.name_stage}) AS holding
+WHERE sns.status = 'extracted'
+  AND (
+    sns.claimed_at IS NULL
+    OR sns.claimed_at < datetime() - duration({minutes: $timeout})
+  )
+FOREACH (_ IN CASE WHEN size(holding) = 0 THEN [1] ELSE [] END |
+    SET sns.claimed_at = datetime(),
+        sns.claim_token = $token,
+        sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
+        sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
+)
+RETURN sns.id AS id,
+       sns.source_id AS source_id,
+       sns.source_type AS source_type,
+       sns.batch_key AS batch_key,
+       sns.description AS description,
+       sns.status AS status,
+       sns.claim_token AS claim_token,
+       sns.claim_seq AS claim_seq,
+       sns.attempt_count AS attempt_count,
+       size(holding) = 0 AS claimed,
+       holding
+"""
+
+
 @retry_on_deadlock()
 def claim_explicit_standard_name_sources(
     source_ids: list[str],
     *,
     timeout_minutes: int = 30,
-) -> list[dict[str, Any]]:
+) -> SourceClaimResult:
     """Atomically claim the exact DD sources requested by a focused run.
 
     Every returned row carries the committed token and incremented sequence;
-    missing, ineligible, or already-claimed sources are omitted.
+    missing, ineligible, or already-claimed sources are omitted. Sources bound
+    to a non-settled identity are returned through ``result.withheld`` with the
+    holding identity and stage, without consuming an attempt. Bindings only to
+    superseded or exhausted identities remain claimable.
     """
     if not source_ids:
-        return []
+        return SourceClaimResult([], withheld=[])
     token = str(uuid.uuid4())
     sns_ids = [f"dd:{source_id}" for source_id in dict.fromkeys(source_ids)]
     with GraphClient() as gc:
         rows = gc.query(
-            """
-            UNWIND $ids AS sns_id
-            MATCH (sns:StandardNameSource {id: sns_id})
-            WHERE sns.status = 'extracted'
-              AND (
-                sns.claimed_at IS NULL
-                OR sns.claimed_at < datetime() - duration({minutes: $timeout})
-              )
-            SET sns.claimed_at = datetime(),
-                sns.claim_token = $token,
-                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
-                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
-            RETURN sns.id AS id,
-                   sns.source_id AS source_id,
-                   sns.source_type AS source_type,
-                   sns.batch_key AS batch_key,
-                   sns.description AS description,
-                   sns.status AS status,
-                   sns.claim_token AS claim_token,
-                   sns.claim_seq AS claim_seq,
-                   sns.attempt_count AS attempt_count
-            """,
+            _EXPLICIT_SOURCE_CLAIM_QUERY,
             ids=sns_ids,
             token=token,
             timeout=timeout_minutes,
+            settled_stages=sorted(_SETTLED_SOURCE_BINDING_STAGES),
         )
-    return [dict(row) for row in rows]
+    claimed: list[dict[str, Any]] = []
+    withheld: list[dict[str, Any]] = []
+    for raw_row in rows:
+        row = dict(raw_row)
+        is_claimed = bool(row.pop("claimed"))
+        holding = row.pop("holding") or []
+        if is_claimed:
+            claimed.append(row)
+            continue
+        for holder in holding:
+            withheld.append(
+                {
+                    "id": row["id"],
+                    "source_id": row["source_id"],
+                    "holding_identity": holder["id"],
+                    "holding_stage": holder["stage"],
+                }
+            )
+    if withheld:
+        logger.warning(
+            "Withheld %d explicit source claim conflict(s): %s",
+            len(withheld),
+            ", ".join(
+                f"{entry['id']} held by "
+                f"{entry['holding_identity']}@{entry['holding_stage']}"
+                for entry in withheld
+            ),
+        )
+    return SourceClaimResult(claimed, withheld=withheld)
 
 
 def _complete_source_fences(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
