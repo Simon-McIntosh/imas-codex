@@ -172,6 +172,90 @@
     <a href="/imas-codex/evidence/paid-identity-deletion-protection/unreinstatable-role-gap.md">the
     unreinstatable-role evidence</a>.</p>
   </section>
+  <section id="the-disposition-record-agrees-with-itself">
+    <h2>One disposition triple and one guard pointer: the census and the plan no longer disagree</h2>
+    <p><strong>Corrected 2026-09-18 at
+    <code>2e15b38605e17db98617e67c39ec6537cb122f12</code>.</strong> The census
+    record <code>docs/evidence/sn-lifecycle-integrity/unshielded-identity-deletions.md</code>
+    stated two different disposition triples: its <code>## Result</code> summary
+    block carried the archive's raw census counts while its own per-identity
+    tables and closing section already held the recorded-spend ruling,
+    <strong>67 RESTORE / 11 CORRECTLY REMOVED / 0 UNDETERMINED</strong>. The
+    summary block was the stale half. It now states the table-backed triple, and
+    every restatement of the superseded counts elsewhere in the record — a
+    heading, a sentence, and the plan's audit comment — was brought into line.
+    The superseded counts survive only as a labelled before-state: the archive
+    column the figure below starts from, and one quoted line in the
+    reconciliation record.</p>
+    <figure>
+      <svg viewBox="0 0 760 250" role="img" aria-labelledby="rec-t">
+        <title id="rec-t">Archive verdicts and the recorded-spend ruling meet at one disposition per identity</title>
+        <defs>
+          <marker id="rec-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#888"/>
+          </marker>
+          <marker id="rec-ar-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#2a6"/>
+          </marker>
+        </defs>
+        <text x="110" y="22" font-size="11" text-anchor="middle" fill="#555">archive verdicts &#183; 2026-09-06 read</text>
+        <text x="650" y="22" font-size="11" text-anchor="middle" fill="#555">final disposition &#183; recorded-spend ruling</text>
+        <rect x="20" y="40" width="180" height="40" fill="#fff" stroke="#888"/>
+        <text x="110" y="64" font-size="13" text-anchor="middle">RESTORE 32</text>
+        <rect x="20" y="105" width="180" height="40" fill="#fff" stroke="#888"/>
+        <text x="110" y="129" font-size="13" text-anchor="middle">CORRECTLY REMOVED 24</text>
+        <rect x="20" y="170" width="180" height="40" fill="#fff" stroke="#888"/>
+        <text x="110" y="194" font-size="13" text-anchor="middle">UNDETERMINED 22</text>
+        <rect x="560" y="40" width="180" height="40" fill="#fff" stroke="#888"/>
+        <text x="650" y="64" font-size="13" text-anchor="middle">RESTORE 67</text>
+        <rect x="560" y="105" width="180" height="40" fill="#fff" stroke="#888"/>
+        <text x="650" y="129" font-size="13" text-anchor="middle">CORRECTLY REMOVED 11</text>
+        <rect x="560" y="170" width="180" height="40" fill="#fff" stroke="#888" stroke-dasharray="5 3"/>
+        <text x="650" y="194" font-size="13" text-anchor="middle">UNDETERMINED 0</text>
+        <line x1="200" y1="60" x2="554" y2="60" stroke="#888" marker-end="url(#rec-ar)"/>
+        <text x="377" y="52" font-size="12" text-anchor="middle" fill="#666">32</text>
+        <line x1="200" y1="132" x2="554" y2="132" stroke="#888" marker-end="url(#rec-ar)"/>
+        <text x="377" y="124" font-size="12" text-anchor="middle" fill="#666">9</text>
+        <line x1="200" y1="112" x2="554" y2="68" stroke="#2a6" marker-end="url(#rec-ar-g)"/>
+        <text x="395" y="84" font-size="12" text-anchor="middle" fill="#2a6">+15 spend</text>
+        <line x1="200" y1="182" x2="554" y2="80" stroke="#2a6" marker-end="url(#rec-ar-g)"/>
+        <text x="340" y="148" font-size="12" text-anchor="middle" fill="#2a6">+20 spend</text>
+        <line x1="200" y1="196" x2="554" y2="134" stroke="#2a6" marker-end="url(#rec-ar-g)"/>
+        <text x="460" y="172" font-size="12" text-anchor="middle" fill="#2a6">+2 zero-spend</text>
+        <text x="110" y="228" font-size="11" text-anchor="middle" fill="#666">78 identities, one verdict each</text>
+        <text x="650" y="228" font-size="11" text-anchor="middle" fill="#666">78 identities, one disposition each</text>
+      </svg>
+      <figcaption>The archive's three columns do not survive as three columns.
+      Every move is decided by recorded spend: twenty undetermined rows and
+      fifteen rows the archive called correctly removed carry it and restore,
+      two zero-spend undetermined rows join the removals, and nothing leaves
+      RESTORE. 32 + 20 + 15 = 67 and 24 &#8722; 15 + 2 = 11.</figcaption>
+    </figure>
+    <p><strong>The guard pointer is read at HEAD, and there are two of
+    them.</strong> <code>refuse_protected_automatic_deletion</code> is called at
+    <code>imas_codex/standard_names/graph_ops.py:3846</code>, after the
+    candidate set is assembled and after the identity ceiling is applied, and at
+    <code>imas_codex/standard_names/graph_ops.py:5956</code>, after the
+    skeleton-placeholder sweep has applied its positive placeholder predicate.
+    The candidate selector buys protection earlier still, at <code>:3817</code>
+    and <code>:4809</code>, through
+    <code>filter_automatic_deletion_candidates</code>. The figure audit's
+    <code>:3736</code> was exact on its own tree and 110 lines stale the next
+    day; the census's <code>:3608</code>/<code>:3633</code> were pre-guard
+    readings and are now labelled as such.</p>
+    <p><strong>The checks that were run, and their scope.</strong> Both files
+    carry zero hits for the superseded counts in either rendering &mdash; the
+    count-adjacent-to-verdict pattern, and the <code>32 / 24 / 22</code> form
+    the figure audit used. The census's remaining bare-numeral hits are a review
+    count, an unrelated live-match figure, and a recovery-route size; the exact
+    patterns, the two zero results, and each residual are itemised in
+    <a href="/imas-codex/evidence/paid-identity-deletion-protection/disposition-reconciliation.md">the
+    reconciliation record</a>. Left open there rather than fixed here: the plan's
+    nine-of-fifteen prose against the census tables' eleven for the
+    recorded-spend rows, and the plan's two strings for one all-time spend
+    figure &mdash; both need a re-derivation against the ledger and the census,
+    which sits outside this change.</p>
+  </section>
 </main>
 </body>
 </html>
