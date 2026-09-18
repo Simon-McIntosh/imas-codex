@@ -2,6 +2,16 @@
 
 Provides embedding preflight, lexical lint, link integrity checks,
 and near-duplicate detection — all runnable without LLM access.
+
+This module answers one question and refuses another.  It reports which
+deterministic checks fire for the fields a caller supplies; it holds no verdict
+state and writes nothing.  Whether a name is *quarantined* is a stored verdict
+carrying an observation time, owned by the validation worker
+(``imas_codex.standard_names.workers.validate_name_candidate``, the single
+writer of ``validation_status`` / ``validation_issues`` / ``validated_at``).
+The two questions differ in width: the worker additionally reads the ISN layer
+summary, grammar ambiguity, pydantic validity and retry exhaustion, so a clean
+audit report is not evidence that a name is not quarantined.
 """
 
 from __future__ import annotations
@@ -9,13 +19,39 @@ from __future__ import annotations
 import hashlib
 import logging
 from collections import defaultdict
-from typing import Any
+from typing import Any, NoReturn
 
 from pydantic import BaseModel, Field
 
 from imas_codex.standard_names.domain_priority import domain_key
 
 logger = logging.getLogger(__name__)
+
+AUDIT_WALK_QUESTION = (
+    "Which deterministic checks fire for the fields the caller supplied?"
+)
+QUARANTINE_QUESTION = "Is this name quarantined?"
+QUARANTINE_AUTHORITY = "imas_codex.standard_names.workers.validate_name_candidate"
+
+
+class QuarantineVerdictNotAnswered(RuntimeError):
+    """The audit walk does not decide whether a name is quarantined."""
+
+
+def answer_quarantine_question(name_id: str) -> NoReturn:
+    """Refuse the quarantine question, naming the instrument that answers it.
+
+    The walk reads only the fields a caller hands it, so it cannot see the ISN
+    layer summary, grammar ambiguity, pydantic validity or retry exhaustion
+    that decide a quarantine.  A bare ``False`` here was never evidence of a
+    live name, and returning one silently is how a clean audit report gets read
+    as "not quarantined".
+    """
+    raise QuarantineVerdictNotAnswered(
+        f"the audit walk does not answer {QUARANTINE_QUESTION!r} for "
+        f"{name_id!r}: it answers {AUDIT_WALK_QUESTION!r}. "
+        f"Ask {QUARANTINE_AUTHORITY} for the verdict."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -61,12 +97,19 @@ class DuplicateComponent(BaseModel):
 
 
 class AuditReport(BaseModel):
-    """Combined output of all Layer 1 audits."""
+    """Combined output of all Layer 1 audits.
+
+    The two question fields travel with every report so a reader holding one
+    can tell which question it settles and which it does not, without reading
+    this module.
+    """
 
     embedding: EmbeddingReport = Field(default_factory=EmbeddingReport)
     lint_findings: list[LintFinding] = Field(default_factory=list)
     link_findings: list[LinkFinding] = Field(default_factory=list)
     duplicate_components: list[DuplicateComponent] = Field(default_factory=list)
+    answers_question: str = AUDIT_WALK_QUESTION
+    refuses_question: str = QUARANTINE_QUESTION
 
 
 # ---------------------------------------------------------------------------
