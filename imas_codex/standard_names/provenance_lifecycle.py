@@ -39,6 +39,7 @@ DELETION_OPERATIONS = frozenset(
         "remove_provenance_orphan",
         "remove_derived_parent",
         "remove_skeleton_placeholder",
+        "purge_quarantined_name",
         "reconcile_structural_closure",
     }
 )
@@ -86,10 +87,17 @@ def _guard_comparison_binding_cypher(binding_alias: str) -> str:
     """
 
 
-def deletion_change_cypher(name_alias: str) -> str:
-    """Return an atomic deletion receipt containing its complete graph state."""
+def deletion_change_cypher(name_alias: str, param_prefix: str = "") -> str:
+    """Return an atomic deletion receipt containing its complete graph state.
+
+    ``param_prefix`` namespaces the receipt's four parameters so that two
+    receipts with different operations can share one statement, which a branch
+    that removes a name and then retires its scaffold must do.
+    """
     if not name_alias.isidentifier():
         raise ValueError(f"invalid Cypher name alias: {name_alias!r}")
+    if param_prefix and not param_prefix.isidentifier():
+        raise ValueError(f"invalid Cypher parameter prefix: {param_prefix!r}")
     return f"""
         CALL ({name_alias}) {{
           OPTIONAL MATCH ({name_alias})-[edge]-(neighbor)
@@ -106,10 +114,10 @@ def deletion_change_cypher(name_alias: str) -> str:
           id: 'sn-change:' + randomUUID(),
           from_name: {name_alias}.id,
           to_name: {name_alias}.id,
-          operation: $deletion_operation,
-          reason: $deletion_reason,
-          origin: $deletion_origin,
-          run_id: $deletion_run_id,
+          operation: ${param_prefix}deletion_operation,
+          reason: ${param_prefix}deletion_reason,
+          origin: ${param_prefix}deletion_origin,
+          run_id: ${param_prefix}deletion_run_id,
           changed_at: datetime(),
           internal: true
         }})

@@ -24,6 +24,11 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from imas_codex.standard_names.provenance_lifecycle import (
+    deletion_change_cypher,
+    deletion_change_params,
+)
+
 if TYPE_CHECKING:
     from imas_codex.graph.client import GraphClient
 
@@ -90,17 +95,30 @@ def collect_purge_candidates(client: GraphClient) -> list[PurgeCandidate]:
 
 
 def purge_standard_names(client: GraphClient, ids: list[str]) -> int:
-    """Detach-delete StandardName nodes by id. Returns count deleted."""
+    """Detach-delete StandardName nodes by id, recording each removal.
+
+    The receipt carries the node's properties and its whole edge inventory, so
+    a purge leaves the same recoverable state a lifecycle delete does. Returns
+    count deleted.
+    """
     if not ids:
         return 0
+    deletion_clause = deletion_change_cypher("sn")
+    deletion_params = deletion_change_params(
+        "purge_quarantined_name",
+        reason="quarantined name whose sources cannot be named",
+    )
     res = client.query(
-        """
+        f"""
         UNWIND $ids AS nid
-        MATCH (sn:StandardName {id: nid})
+        MATCH (sn:StandardName {{id: nid}})
+        {deletion_clause}
+        WITH sn, change
         DETACH DELETE sn
         RETURN count(*) AS deleted
         """,
         ids=ids,
+        **deletion_params,
     )
     return int(res[0]["deleted"]) if res else 0
 
