@@ -497,6 +497,15 @@
     <p>Only <strong>four lines read the value</strong>, and three read the graph property: <code>graph_ops.py:3193</code> (which feeds <code>HAS_SUCCESSOR</code> — 48 edges derived from that one line, so the edge cannot replace the field it comes from), <code>signed_manifest.py:4090</code> (a receipt postcondition), and <code>edit.py:2104</code> (a fold refusal consulted only after the lineage walk). <code>catalog_import.py:332</code> reads the catalog model's attribute of the same name, not the graph property.</p>
     <p>Six sites are decisions rather than substitutions, and the sharpest is the signed <code>supersede</code> mutation at <code>signed_manifest.py:4712</code>: it sets <code>name_stage</code>, <code>status</code> and <code>superseded_by</code> and mints no edge at all, so deleting the clause loses the successor outright unless the mutation mints the lineage edge, and the postcondition that proves it landed is the same field being removed. Every line carries its replacement expression and a mechanical-or-decision verdict: <a href="/imas-codex/evidence/sn-lifecycle-integrity/successor-scalar-readers" title="All 42 lines across 20 files, each with the lineage-edge expression that replaces it and a mechanical-or-decision verdict">the reader enumeration</a>.</p>
   </section>
+
+  <section>
+    <h2 id="suite-base-determinism">The six-file base is reproducible at one revision, and the couplings that would break it are named</h2>
+    <p>Three runs over the six files the suite-base followup names — one invocation forward, one reversed, one process per file — returned the <strong>same failure-id set, and it is empty</strong>: 38 passed, 2 skipped, exit 0, three times at <code>4c9d1dabb</code>. The empty set is shown to be a measurement rather than a blind instrument by a control: the identical invocation form carrying one planted failing test reported its FAILED id and exited 1.</p>
+    <p>What makes that base a property of the run is named with its mechanism and location: the graph route is decided at collection by a module-level probe in <code>test_seed_live_graph.py</code> (False on the debug partition, True with 61,366 rows on the login node — so the two gated tests skip in one environment and run in the other); the credential verdict follows a cwd-relative <code>.env</code> load; an editable checkout outside the repository supplies the grammar context and fails open into per-test failures; and regenerated models make two trees two different instruments. Ordering within the six files was controlled directly and does not change the outcome. Full record, including the control run and the log paths:
+    <a href="/imas-codex/evidence/sn-lifecycle-integrity/suite-base-determinism"
+       title="Three runs at one revision, a planted-failure control, and each coupling with its file and line">the
+    six-file base measurement</a>.</p>
+  </section>
   </main>
 </body>
 </html>

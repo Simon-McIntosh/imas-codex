@@ -731,6 +731,30 @@ A repair that survives one round trip is a repair; one that does not was a readi
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260918T090342097911-n-sli-scout-scoped-edit-surface" data-who="n-sli-scout-scoped-edit-surface" data-when="2026-09-18T10:44:54Z">
     <div class="r-comment-body"><p><strong>The missing forwarding reproduces, and the map is at <a href="/imas-codex/evidence/sn-lifecycle-integrity/scoped-edit-reuse-map">the scoped-edit reuse map</a>.</strong> Read at <code>9705954c2</code>: the edit path's only launch of <code>run_sn_pools</code> (<code>edit.py:3740-3747</code>) passes six keywords and <code>skip_global_maintenance</code> is not among them, while the loop declares it <code>False</code> by default at <code>loop.py:1303</code> — and no frame upstream accepts the flag at all, so the omission is structural rather than a default. The signature probe was shown to see the two known-present seams (<code>run_sn_pools</code>, <code>_run_sn_cmd</code>) before it reported the three absent frames (<code>sn_edit</code>, <code>run_inline_review</code>, <code>_run_scoped_pipeline</code>). The loop side needs no change: the edit path already satisfies <code>loop.py:1412-1414</code> by passing <code>scope_run_id=plan.run_id</code>. The reuse inventory and an exact write-path set (<code>cli/sn.py</code>, <code>standard_names/edit.py</code>, the scoped-maintenance wiring tests) are in the map, together with the reason the defect is invisible today — the tests patch <code>run_inline_review</code> and <code>_run_scoped_pipeline</code>, so a forwarded kwarg never reaches an assertion. The fork between forwarding the flag and defaulting the edit scope to the bypass is the followup's own and is left to the lead; the second caller of the same seam, <code>rescore_name</code> at <code>edit.py:3893</code>, is covered by a repair placed once on <code>_run_scoped_pipeline</code>. No source was changed and no graph write was made.</p></div>
+<div class="r-comment" data-section="s6" data-id="c-20260918-suite-base-measured" data-who="reckon-ship" data-when="2026-09-18T10:55:00Z">
+    <div class="r-comment-body">
+      <p><strong>Measured: the six-file base is reproducible at one revision, and the couplings that would break it are named with their location.</strong> Three independent runs at <code>4c9d1dabb</code> — one invocation forward, one with the argument order reversed, one process per file — each collected 40 items and returned <code>38 passed, 2 skipped, 0 failed</code>, all with exit 0. The three failure-id sets are <strong>identical and empty</strong>. A fourth run through the identical invocation form, carrying one planted failing test outside the tree, collected 41 and reported exactly one FAILED id with exit 1 — so the empty sets are clean runs, not a blind instrument. The 5/19/27 spread the followup records is not reproducible at this revision in this environment.</p>
+      <figure>
+      <svg viewBox="0 0 660 170" width="660" height="170" role="img" aria-label="Graph reachability at collection time decides whether two of the six files skip or run">
+        <rect x="10" y="62" width="184" height="50" rx="6" fill="#eef2ff" stroke="#8a93c8"/>
+        <text x="102" y="82" text-anchor="middle" font-size="12" fill="#333">collection: _has_dd_content()</text>
+        <text x="102" y="98" text-anchor="middle" font-size="12" fill="#333">one graph query, uncapped</text>
+        <line x1="194" y1="87" x2="252" y2="40" stroke="#888"/>
+        <line x1="194" y1="87" x2="252" y2="132" stroke="#888"/>
+        <text x="216" y="52" font-size="11" fill="#555">False</text>
+        <text x="216" y="126" font-size="11" fill="#555">True</text>
+        <rect x="252" y="16" width="398" height="48" rx="6" fill="#fff4e5" stroke="#d8a24a"/>
+        <text x="266" y="36" font-size="12" fill="#333">no route here (debug partition) &#8594; both tests SKIP</text>
+        <text x="266" y="54" font-size="11" fill="#666">reason: "DD-loaded graph not available" — runs A, B, C</text>
+        <rect x="252" y="108" width="398" height="48" rx="6" fill="#e8f5ec" stroke="#5f9e74"/>
+        <text x="266" y="128" font-size="12" fill="#333">route up (login node) &#8594; both tests RUN</text>
+        <text x="266" y="146" font-size="11" fill="#666">receipt: 61,366 IMASNode rows, 205.22 s</text>
+      </svg>
+      <figcaption>The same revision and the same files: the base is a host property before it is a revision property.</figcaption>
+      </figure>
+      <p>The couplings that make it one, each verified rather than inferred: the graph route is decided at collection by <code>tests/standard_names/test_seed_live_graph.py:20,23-34,37,64</code> and measured differently on the two hosts (False on the debug partition, True with 61,366 rows on the login node, where the gated tests were not run because they seed live state); the credential verdict follows a cwd-relative <code>.env</code> load at <code>tests/conftest.py:15-24,96-121,201-229</code>; an editable checkout outside this repository supplies the grammar context at <code>tests/standard_names/conftest.py:128-172</code>, failing open into per-test failures; and regenerated models make two trees two different instruments — the last recorded as a candidate, not reproduced here. Ordering within the six files was controlled directly: reversed argument order, identical outcome.</p>
+      <p>Full record, including the control run and the log paths: <a href="/imas-codex/evidence/sn-lifecycle-integrity/suite-base-determinism">the six-file base measurement</a>.</p>
+    </div>
 </div>
 </section>
 </main>
