@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T12:21:54",
+  "updated": "2026-09-18T12:37:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -4969,7 +4969,8 @@
         "session_id": "799ce84e-e56a-4faf-93f9-0155329c0d0d",
         "session_model": "deepseek-v4.1-flash",
         "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "799ce84e-e56a-4faf-93f9-0155329c0d0d"
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "799ce84e-e56a-4faf-93f9-0155329c0d0d",
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "70138821-79a9-484c-b44a-882048fe2e0a"
         },
         "created": "2026-09-10"
       },
@@ -151280,6 +151281,218 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T090405201486-n-sli-scout-parking-writer",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-scout-parking-writer",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 707,
+                "cached_input_tokens": 260834,
+                "input_tokens": 261543,
+                "output_tokens": 2411,
+                "reasoning_output_tokens": 805,
+                "total_tokens": 263954,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-lifecycle-integrity/parking-writer-reuse-map.md exists, names every write site in imas_codex/standard_names/orphan_sweep.py that parks a source with file:line read at HEAD, states DOES-REPRODUCE or ALREADY-FIXED for the missing disposition described in followup f-sli-the-parking-writer-records-a-disposition-itself, names the five-member closed disposition set and the existing classifier symbol that produced it with its file:line, and proposes an exclusive write-path set",
+          "estimated_hours": null,
+          "goal": "produce the parking-writer reuse map named in the done-when",
+          "id": "n-sli-scout-parking-writer",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T09:04:05Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090405201486-n-sli-scout-parking-writer/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-lifecycle-integrity/parking-writer-reuse-map.md",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "s10c-local-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T09:04:10Z",
+        "completed_at": "2026-09-18T10:26:51.845Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 4923,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 4961,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "9705954c264bd4c51c78d68d9be23be54178c2ac",
+        "commits": [
+          "ecce4d2ebd5d9b686f2b544f328f2be5496bae9c"
+        ],
+        "changed_lines": {
+          "added": 8,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_attempt_core_disposition.py tests/standard_names/test_orphan_sweep.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090405201486-n-sli-scout-parking-writer/focused-tests.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "verdict ALREADY-FIXED: the sweep tick pairs the parking statement with record_dispositions_for_undisposed_parks at 73242777f, so the followup's demanded measure is already met - verified independently by the coordinator. The residual is new: disposition_parked_sources and census_parked_dispositions have zero production callers (only three test call sites), so the reconcile net never runs, and parked_disposition is never cleared",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090405201486-n-sli-scout-parking-writer/manifest.md",
+        "scope_changed": false,
+        "session_id": "70138821-79a9-484c-b44a-882048fe2e0a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3805755,
+            "input_tokens_cumulative": 3805755,
+            "output_tokens": 36757,
+            "output_tokens_cumulative": 36757,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T10:26:51.845Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3956011,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4200.101,
+          "generated_tokens": 43393,
+          "generation_seconds": 4161.467,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.0,
+          "machine_seconds": 38.634,
+          "peak_input_tokens": 148956,
+          "tokens_per_second": 10.43,
+          "wall_tokens_per_second": 10.33
+        },
+        "follow_on_paths": [
+          "/",
+          "graph_ops.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-sli-scout-parking-writer",
+          "session_id": "70138821-79a9-484c-b44a-882048fe2e0a",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T10:26:51.845Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 2,
+          "missing": [
+            "22c0407769f463fdfaf1f14220c818ea0f2b8b24"
+          ],
+          "message": "run 'r-20260918T090405201486-n-sli-scout-parking-writer' has a passing gate presenting 1 commit(s) of the 2 its manifest declares; missing: 22c0407769f463fdfaf1f14220c818ea0f2b8b24. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 10.0,
+        "orientation_input_tokens": 1777506.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -151564,6 +151777,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2291
+    "_version": 2293
   }
 }
