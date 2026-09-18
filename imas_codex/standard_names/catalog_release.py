@@ -15,6 +15,7 @@ import logging
 import re
 import shlex
 import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from functools import partial, wraps
 from pathlib import Path
@@ -1514,11 +1515,24 @@ class ReviewReleaseReport:
     pr_number: int | None = None
     pr_url: str | None = None
     dd_gap_summary: dict[str, Any] = field(default_factory=dict)
+    # What the export leg reported for this batch. A rehearsal fills these so
+    # the operator can read what a cut would carry, publish and drop without
+    # running the release; a real run fills them from the leg it exports with.
+    candidate_count: int = 0
+    published_count: int = 0
+    exclusion_counts: dict[str, int] = field(default_factory=dict)
+    accounting_residue: int = 0
+    accounting_error: str = ""
     errors: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "dry_run": self.dry_run,
+            "candidate_count": self.candidate_count,
+            "published_count": self.published_count,
+            "exclusion_counts": dict(sorted(self.exclusion_counts.items())),
+            "accounting_residue": self.accounting_residue,
+            "accounting_error": self.accounting_error,
             "rc_version": self.rc_version,
             "batch_label": self.batch_label,
             "batch_size": self.batch_size,
@@ -1665,6 +1679,91 @@ def _assert_approved_entries_unchanged(
         raise ValueError(
             "approved catalog baseline changed during additive review export: "
             + "; ".join(details)
+        )
+
+
+def _record_export_accounting(report: ReviewReleaseReport, export_report: Any) -> None:
+    """Read the export leg's own counts onto the release report and log them.
+
+    The three figures an operator asks a rehearsal for — how many identities
+    the cut carries, how many it publishes, and what it drops with its
+    mechanism — are produced inside the export leg, so they are read from its
+    own report rather than re-derived here. ``accounting_residue`` is the
+    arithmetic the export gates refuse on: candidates minus published minus
+    every accounted exclusion.
+    """
+    report.candidate_count = int(getattr(export_report, "total_candidates", 0) or 0)
+    report.published_count = int(getattr(export_report, "exported_count", 0) or 0)
+    counts = getattr(export_report, "exclusion_counts", None) or {}
+    report.exclusion_counts = {
+        str(reason): int(count) for reason, count in counts.items()
+    }
+    accounted = getattr(export_report, "exclusion_records", None)
+    if accounted is not None:
+        report.accounting_residue = (
+            report.candidate_count - report.published_count - len(accounted)
+        )
+    else:
+        report.accounting_residue = (
+            report.candidate_count
+            - report.published_count
+            - sum(report.exclusion_counts.values())
+        )
+    logger.info(
+        "Release accounting: %d candidate(s), %d published, %d exclusion "
+        "mechanism(s), accounting residue %d",
+        report.candidate_count,
+        report.published_count,
+        len(report.exclusion_counts),
+        report.accounting_residue,
+    )
+    for reason, count in sorted(report.exclusion_counts.items()):
+        logger.info("Release accounting: excluded under %s: %d", reason, count)
+    if report.accounting_residue:
+        logger.warning(
+            "Release accounting residue is %d: %d candidate(s) were neither "
+            "published nor excluded under a named mechanism",
+            report.accounting_residue,
+            report.accounting_residue,
+        )
+
+
+def _rehearse_export_accounting(
+    report: ReviewReleaseReport,
+    exporter: Any,
+    *,
+    export_kwargs: dict[str, Any] | None,
+    manifest_sources: list[dict[str, Any]] | None,
+) -> None:
+    """Measure what the cut would publish, without leaving a cut behind.
+
+    The accounting lives in the export leg, so the leg is driven here with the
+    same arguments the cut would use and into a scratch tree that is removed
+    before this returns: the release staging directory is never created, no
+    roster is frozen and the candidate counter does not move. An unreachable
+    or failing leg leaves the rehearsal's own guarantees intact and is
+    reported on ``accounting_error`` rather than raised, so a rehearsal still
+    answers where the accounting cannot be measured.
+    """
+    try:
+        with tempfile.TemporaryDirectory(prefix="sn-release-rehearsal-") as scratch:
+            export_report = exporter(
+                staging_dir=scratch,
+                force=True,
+                review_batch=list(report.names),
+                manifest_sources=manifest_sources,
+                **(export_kwargs or {}),
+            )
+    except Exception as exc:
+        report.accounting_error = f"{type(exc).__name__}: {exc}"
+        logger.warning(
+            "Rehearsal accounting could not be measured: %s", exc, exc_info=True
+        )
+        return
+    _record_export_accounting(report, export_report)
+    if manifest_sources is not None and hasattr(export_report, "to_dict"):
+        report.source_reconciliation = export_report.to_dict().get(
+            "source_reconciliation", {}
         )
 
 
@@ -1868,6 +1967,17 @@ def run_review_release(
         # no roster is frozen, and the RC counter does not move for a release
         # that never happens.
         report.artifact_path = str(reviews_dir / f"{git_tag}.sn_names.yaml")
+        # The counts the rehearsal exists to show come out of the export leg,
+        # so the leg is measured here in a scratch tree — the production leg
+        # only, since a caller that installs its own exporter owns what that
+        # leg reports and there is nothing here to measure on its behalf.
+        if exporter is _default_exporter:
+            _rehearse_export_accounting(
+                report,
+                exporter,
+                export_kwargs=export_kwargs,
+                manifest_sources=manifest_sources,
+            )
         logger.info(
             "[dry-run] would export into %s, freeze %s (not written), branch "
             "%s, publish and tag on %s%s",
@@ -1889,6 +1999,7 @@ def run_review_release(
             manifest_sources=manifest_sources,
             **(export_kwargs or {}),
         )
+        _record_export_accounting(report, export_report)
         if manifest_sources is not None and hasattr(export_report, "to_dict"):
             report.source_reconciliation = export_report.to_dict().get(
                 "source_reconciliation", {}
