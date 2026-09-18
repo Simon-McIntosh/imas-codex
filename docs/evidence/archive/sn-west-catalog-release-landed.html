@@ -796,6 +796,42 @@
     (<code>imas_codex/standard_names/workers.py</code> and
     <code>tests/standard_names/test_unchanged_refine_attempt.py</code>).</p>
   </section>
+  <section id="verdict-field-disagreement">
+    <h2>One field is the verdict; the other disagrees on 62 identities</h2>
+    <p><code>name_stage</code> is what every consumer
+    gates on and <em>refine_stop_reason</em> is a cause label, so a reader that
+    treats them as two verdicts is reading one verdict and one diagnostic. The
+    named predicate <code>DISAGREEING_VERDICT_PAIR</code>, run through
+    <code>GraphClient</code> against the login-node graph over 5,130
+    <code>StandardName</code> nodes, returns <strong>62</strong> identities
+    carrying a disagreeing pair, in four buckets that sum exactly to it:</p>
+    <table>
+      <thead><tr><th><code>name_stage</code></th><th><code>refine_stop_reason</code></th><th>count</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>exhausted</code></td><td><em>null</em></td><td>42</td><td><code>toroidal_particle_current</code></td></tr>
+        <tr><td><code>accepted</code></td><td><code>successor_collision</code></td><td>11</td><td><code>power_of_lower_hybrid_antenna</code></td></tr>
+        <tr><td><code>accepted</code></td><td><code>grammar_invalid</code></td><td>7</td><td><code>magnetic_field_magnitude</code></td></tr>
+        <tr><td><code>accepted</code></td><td><code>attempts_exhausted</code></td><td>2</td><td><code>diamagnetic_current_density</code></td></tr>
+      </tbody>
+    </table>
+    <p>The predicate's two arms are two different findings. The 20 <code>accepted</code>
+    rows all carry <code>refine_stopped_at</code>, a charged attempt and a
+    <code>reviewed_name_at</code>: the cause is a true record of an earlier refine
+    stop that the accept path deliberately carries forward
+    (<code>graph_ops.py:17273</code>), so that arm is legitimate history rather than
+    corruption. The 42 <code>exhausted</code> rows carry no
+    <code>refine_stopped_at</code>, and 40 of them no charged attempt, so the stage
+    was written without the diagnosis that <code>stop_refine_name_attempt</code>
+    (<code>graph_ops.py:24560</code>) writes in the same statement — a stage without
+    its cause. Authority: <code>name_stage</code> gates
+    <code>promote.py:1053</code>, <code>graph_ops.py:12555</code>,
+    <code>enrichment.py:419</code> and <code>campaign.py:299</code>, while
+    <code>refine_stop_reason</code> has exactly one read path, and it is a report
+    (<code>workers.py:6924</code>). Longest query 0.078 s. Full method, predicate
+    text, writer map with file and line, and the plan's named example re-read live:
+    <a href="/imas-codex/evidence/sn-west-catalog-release/verdict-field-disagreement">the
+    verdict-field-disagreement record</a>.</p>
+  </section>
 </main>
 </body>
 </html>
