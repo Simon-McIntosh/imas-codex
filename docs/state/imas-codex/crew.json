@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T18:03:18",
+  "updated": "2026-09-18T18:26:33",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5053,6 +5053,15 @@
         "sessions": {
           "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "8f5514fc-8935-493d-8ed1-76fe0fc34a1e"
         },
+        "created": "2026-09-18"
+      },
+      {
+        "id": "s14-greenmain",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-18"
       },
       {
@@ -157091,6 +157100,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2345
+    "_version": 2346
   }
 }
