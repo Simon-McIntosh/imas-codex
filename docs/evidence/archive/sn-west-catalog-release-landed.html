@@ -873,6 +873,41 @@
     <a href="/imas-codex/evidence/sn-west-catalog-release/verdict-field-disagreement">the
     verdict-field-disagreement record</a>.</p>
   </section>
+  <section id="rehearsal-accounting">
+    <h2>A rehearsal reports what a cut would publish, and still cuts nothing</h2>
+    <p>The dry-run branch returned before the export leg, which is what makes a
+    rehearsal inert and also what left it unable to say what a cut would carry. The
+    candidate count, the published count and the per-mechanism exclusions are all
+    produced by that leg, so the leg is now driven on a rehearsal into a
+    <code>tempfile</code> scratch tree removed before the return, while the release
+    staging directory, the frozen roster, the review branch and the candidate
+    counter stay untouched. One recorder fills the report on both paths, reading the
+    leg's own returned report rather than recomputing a tally.</p>
+    <p>The invocation was run once and refused at pre-flight — the catalog checkout
+    is on a peer's branch — so no figure is recorded; the three tree checks were
+    taken afterwards. The test holds both halves: four of five pass, and the fifth
+    cannot reach its body because the shared autouse fixture's import exceeds the
+    repository's per-test timeout under current filesystem load, on a module this
+    node never touched.</p>
+    <table>
+      <thead>
+        <tr><th>Measure</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Recorded rehearsal invocation</td><td>One run, <code>sn release --batch west_production_dd_paths --dry-run</code>, exit 1 at pre-flight: <code>ISNC not on main branch (current: rehearsal/fold-back-20260917)</code>. No figure produced.</td></tr>
+        <tr><td><code>git status --porcelain</code>, worktree</td><td>0 lines</td></tr>
+        <tr><td>Staging directory after the run</td><td>Newest content 2026-09-15, three days older than the run; 0 files matching <code>*.sn_names.yaml</code></td></tr>
+        <tr><td>Newest release tag after the run</td><td><code>v0.4.0rc7+west-task-2e</code> at <code>2026-09-11T10:56:22+02:00</code>, unchanged; more than thirty tags present, so the catalog is the instrument's populated control</td></tr>
+        <tr><td>Test run</td><td>9 passed, 1 error — the fourth and fifth of the module's tests covering the recorder and the inert half pass; the error is in setup, in <code>tests/standard_names/conftest.py:54</code></td></tr>
+        <tr><td>Import cost of that fixture</td><td>84.2 s against 3.3 s user CPU, and it errors identically on an untouched rehearsal module</td></tr>
+      </tbody>
+    </table>
+    <p>Full reading, the invocation transcript and the three checks as run are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/rehearsal-accounting">the
+    rehearsal-accounting evidence record</a>, committed as <strong>c65404628</strong>
+    (<code>imas_codex/standard_names/catalog_release.py</code> and
+    <code>tests/standard_names/test_release_rehearsal_accounting.py</code>).</p>
+  </section>
 </main>
 </body>
 </html>
