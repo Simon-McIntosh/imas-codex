@@ -1093,6 +1093,63 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       reads both changed files, <strong>2 passed</strong> at <code>ecbc35967</code>.
     </p>
 
+  <h2 id="the-slurm-address-repair-is-pinned">The SLURM address repair is pinned by a test that fails without it</h2>
+
+    <p>
+      The client-side repair that resolves the graph directly instead of the
+      loopback tunnel endpoint inside a SLURM step is now pinned by a test that
+      fails when the repair is reverted, and the documented <code>NEO4J_URI</code>
+      escape hatch is reachable again. Landed at <code>b0ea71b58</code>, suite
+      <strong>9 passed, exit 0</strong>. Full record:
+      <a href="/imas-codex/evidence/sn-release-readiness/graph-client-slurm-resolution">graph
+      client address resolution inside a SLURM step</a>.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>defect</th><th>measurement</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>the dataclass default was unpinned, so the repair was inert for a
+              default <code>GraphClient()</code></td>
+          <td>reverting <code>field(default_factory=_resolve_graph_uri)</code> to
+              <code>get_graph_uri</code> in a scratch copy fails one test &mdash;
+              <strong>1 failed, 8 passed</strong> &mdash; naming the reverted
+              factory (<code>assert get_graph_uri is _resolve_graph_uri</code>);
+              all five original tests passed under that reversion</td>
+        </tr>
+        <tr>
+          <td>an explicit <code>NEO4J_URI</code> lost to the discovered address</td>
+          <td>before: <code>assert 'bolt://98dci4-gpu-0002:7687' ==
+              'bolt://example.invalid:1'</code>. After, inside a real step (job
+              1273665): <code>_resolve_graph_uri() == bolt://example.invalid:1</code>
+              with discovery still answering the gpu address as control</td>
+        </tr>
+        <tr>
+          <td>a failed location read silently restored the loopback endpoint</td>
+          <td>before: <code>Failed: DID NOT RAISE RuntimeError</code>. It is now
+              uncaught and raises, which is the state the added test pins</td>
+        </tr>
+        <tr>
+          <td>an inert monkeypatch on <code>client_module._resolve_compute_host</code></td>
+          <td>removed as dead &mdash; the name binds inside the function body from
+              the module it is imported from; a new test answers from
+              <code>imas_codex.remote.locations</code> and sees the answer arrive</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      <strong>Re-measured after both repairs, so the repair is shown intact.</strong>
+      Compute node <code>98dci4-clu-3141</code> resolves
+      <code>bolt://98dci4-gpu-0002:7687</code> with
+      <code>count(StandardName)</code> = <strong>5130</strong>; the login-node
+      reading is unchanged at the same address and count; the profile layer still
+      reports its loopback URI inside the step, unmodified. Reading logs and the
+      scratch reversion run: <code>/home/ITER/mcintos/gcprobe/s14pinned/</code>.
+    </p>
+
   </main>
 </body>
 </html>
