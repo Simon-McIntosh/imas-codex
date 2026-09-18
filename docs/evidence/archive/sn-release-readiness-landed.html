@@ -1150,6 +1150,51 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       scratch reversion run: <code>/home/ITER/mcintos/gcprobe/s14pinned/</code>.
     </p>
 
+    <h2 id="graph-tier-green">The graph test tier is green at the worker revision</h2>
+
+    <p>
+      The graph tier was reproduced before repair at
+      <strong>4 failed / 517 passed</strong> on
+      <code>e9a4e7c0035aa64358a7f32318710af0b715ddf2</code>, then re-run with the
+      same command on <code>all_debug</code> at implementation commit
+      <code>ac35b9455f15ea81771604c0590d08d3be0745bc</code> and completed at
+      <strong>0 failed / 522 passed</strong>, with 355 deselected. The added pass
+      is a regression showing that a changed content digest triggers grammar
+      synchronization even when the package version is unchanged.
+    </p>
+
+    <table>
+      <caption>Four failures, four established causes</caption>
+      <thead><tr><th>surface</th><th>cause and disposition</th></tr></thead>
+      <tbody>
+        <tr><td>Cypher property audit</td><td>Declared
+          <code>ISNGrammarVersion.content_digest</code> and the durable,
+          lifecycle-incomplete <code>StandardNameSource.parked_disposition</code>;
+          removed only five obsolete <code>quarantine_reason</code> runtime
+          registrations after exact-boundary absence checks fired controls in
+          all three source files.</td></tr>
+        <tr><td>grammar auto-sync</td><td>The stale fixture supplied only a
+          version after freshness moved to content digest; matching, missing,
+          and mismatched digests now exercise their named branches.</td></tr>
+        <tr><td>timestamp debt</td><td>The create clause now stamps
+          <code>updated_at</code>; the package ledger names the exact four
+          surviving provenance, lease, delivery, and retry-accounting writes.</td></tr>
+        <tr><td>parked disposition vocabulary</td><td>The schema declaration and
+          <code>CAP_PARKED_DISPOSITIONS</code> compare equal at six values,
+          including the currently empty <code>attempt_budget_exhausted</code>.
+          No clear path was invented.</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      Focused verification was <strong>22 passed</strong>; generated models were
+      rebuilt locally and remained gitignored. No test was widened, disabled,
+      skipped, or marked expected-to-fail. Full causes, the five retired
+      adjudication locations, commands, and log paths:
+      <a href="/imas-codex/evidence/sn-release-readiness/graph-tier-green">graph
+      tier green evidence</a>.
+    </p>
+
   </main>
 </body>
 </html>
