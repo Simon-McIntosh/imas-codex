@@ -638,6 +638,11 @@ def _fetch_export_population(
          EXISTS {{
              MATCH (:StandardName)-[:HAS_PARENT]->(sn)
          }} AS is_parent,
+         EXISTS {{
+             MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
+             WHERE NOT coalesce(child.name_stage, '') IN
+               ['superseded', 'exhausted', 'contested']
+         }} AS has_live_child,
          {docs_review_eligibility_where()} AS strict_docs_review_eligibility,
          COLLECT {{
              MATCH (sn)-[:HAS_REVIEW]->(accepting_review:StandardNameReview)
@@ -666,6 +671,7 @@ def _fetch_export_population(
          }} AS accepting_docs_reviews
     WITH sn, has_dd_source_binding, has_derived_producer,
          has_non_derived_producer, has_docs_review, is_parent,
+         has_live_child,
          strict_docs_review_eligibility,
          accepting_docs_reviews[0] AS accepting_docs_review
     OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
@@ -679,6 +685,7 @@ def _fetch_export_population(
         _has_derived_producer: has_derived_producer,
         _has_non_derived_producer: has_non_derived_producer,
         _is_parent: is_parent,
+        _has_live_child: has_live_child,
         _has_docs_review: has_docs_review,
         _has_winning_docs_review:
             accepting_docs_review IS NOT NULL OR strict_docs_review_eligibility,
@@ -753,6 +760,30 @@ def _fetch_graph_name_ids() -> set[str]:
     return {str(name) for name in row.get("ids") or [] if name}
 
 
+_PRODUCER_EVIDENCE_KEYS = ("_has_derived_producer", "_has_non_derived_producer")
+
+
+def _has_producing_source(candidate: dict[str, Any]) -> bool:
+    """Whether a source is reachable that the name is entailed by.
+
+    A name is entailed either by a producing source edge -- a Data Dictionary
+    extraction that reached it or a derived producer that folded other evidence
+    into it -- or, with no producer at all, by a structural child still live
+    under it, since the child is what carries the evidence for a parent whose
+    own source edge is the hierarchy. A candidate carrying no producing-source
+    key at all comes from a caller's own pre-filtered projection rather than
+    from the population query, and is admitted here instead of being refused
+    for a flag that query never asked for.
+    """
+    if not any(key in candidate for key in _PRODUCER_EVIDENCE_KEYS):
+        return True
+    return bool(
+        candidate.get("_has_derived_producer")
+        or candidate.get("_has_non_derived_producer")
+        or candidate.get("_has_live_child")
+    )
+
+
 def _classify_export_population(
     population: list[dict[str, Any]],
     *,
@@ -818,6 +849,12 @@ def _classify_export_population(
         elif candidate.get("review_quorum_shortfall") is not None:
             reason = "name_review_quorum_shortfall"
             detail = "name review quorum shortfall remains recorded"
+        elif not _has_producing_source(candidate):
+            reason = "no_producing_source"
+            detail = (
+                "no PRODUCED_NAME edge reaches the name and no live structural "
+                "child carries the evidence for it"
+            )
         elif not names_only and candidate.get("_has_docs_review", True) is False:
             reason = "never_reviewed"
             detail = "no docs-axis review is reachable"

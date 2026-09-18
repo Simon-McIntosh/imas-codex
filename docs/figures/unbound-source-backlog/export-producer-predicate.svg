@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" font-family="DejaVu Sans, Helvetica, sans-serif">
+  <rect width="960" height="360" fill="#ffffff"/>
+  <text x="24" y="30" font-size="19" font-weight="bold" fill="#111">Export admission: which candidate the cut carries</text>
+  <text x="24" y="54" font-size="13" fill="#444">three candidate topologies, as the population query projects them</text>
+
+  <!-- panel 1: refused -->
+  <g>
+    <rect x="24" y="76" width="288" height="252" rx="8" fill="#fdf4f4" stroke="#c94b4b" stroke-width="1.5"/>
+    <text x="168" y="102" font-size="14" font-weight="bold" fill="#8c2b2b" text-anchor="middle">no producer, no live child</text>
+    <rect x="108" y="140" width="120" height="44" rx="6" fill="#ffffff" stroke="#8c2b2b" stroke-width="1.5"/>
+    <text x="168" y="167" font-size="13" fill="#111" text-anchor="middle">StandardName</text>
+    <text x="168" y="212" font-size="12" fill="#8c2b2b" text-anchor="middle">no PRODUCED_NAME edge</text>
+    <text x="168" y="231" font-size="12" fill="#8c2b2b" text-anchor="middle">no live child</text>
+    <text x="168" y="258" font-size="12" fill="#666" text-anchor="middle">entailed by nothing</text>
+    <rect x="24" y="278" width="288" height="34" rx="0" fill="#c94b4b" opacity="0.14"/>
+    <text x="168" y="300" font-size="13" font-weight="bold" text-anchor="middle" fill="#8c2b2b">REFUSED &#8212; no_producing_source</text>
+  </g>
+
+  <!-- panel 2: admitted on a producer -->
+  <g>
+    <rect x="336" y="76" width="288" height="252" rx="8" fill="#f3f8f3" stroke="#3d7a3d" stroke-width="1.5"/>
+    <text x="480" y="102" font-size="14" font-weight="bold" fill="#2c5c2c" text-anchor="middle">a producer reaches the name</text>
+    <rect x="420" y="146" width="120" height="44" rx="6" fill="#ffffff" stroke="#2c5c2c" stroke-width="1.5"/>
+    <text x="480" y="173" font-size="13" fill="#111" text-anchor="middle">StandardName</text>
+    <rect x="385" y="196" width="190" height="34" rx="6" fill="#ffffff" stroke="#2c5c2c" stroke-width="1.5"/>
+    <text x="480" y="218" font-size="12" fill="#111" text-anchor="middle">StandardNameSource</text>
+    <line x1="480" y1="196" x2="480" y2="192" stroke="#2c5c2c" stroke-width="2"/>
+    <polygon points="480,186 476,193 484,193" fill="#2c5c2c"/>
+    <text x="480" y="246" font-size="12" fill="#2c5c2c" text-anchor="middle">dd extraction or derived fold</text>
+    <text x="480" y="264" font-size="12" fill="#666" text-anchor="middle">the source is the evidence</text>
+    <rect x="336" y="278" width="288" height="34" rx="0" fill="#3d7a3d" opacity="0.14"/>
+    <text x="480" y="300" font-size="13" font-weight="bold" text-anchor="middle" fill="#2c5c2c">ADMITTED</text>
+  </g>
+
+  <!-- panel 3: admitted as source-free parent -->
+  <g>
+    <rect x="648" y="76" width="288" height="252" rx="8" fill="#f3f8f3" stroke="#3d7a3d" stroke-width="1.5"/>
+    <text x="792" y="102" font-size="14" font-weight="bold" fill="#2c5c2c" text-anchor="middle">no producer, a live child</text>
+    <rect x="732" y="140" width="120" height="40" rx="6" fill="#ffffff" stroke="#2c5c2c" stroke-width="1.5"/>
+    <text x="792" y="165" font-size="13" fill="#111" text-anchor="middle">parent name</text>
+    <rect x="732" y="204" width="120" height="40" rx="6" fill="#ffffff" stroke="#2c5c2c" stroke-width="1.5"/>
+    <text x="792" y="222" font-size="12" fill="#111" text-anchor="middle">child, name_stage</text>
+    <text x="792" y="238" font-size="12" fill="#111" text-anchor="middle">not retired</text>
+    <line x1="792" y1="204" x2="792" y2="188" stroke="#2c5c2c" stroke-width="2"/>
+    <polygon points="792,182 788,190 796,190" fill="#2c5c2c"/>
+    <text x="792" y="262" font-size="12" fill="#2c5c2c" text-anchor="middle">HAS_PARENT &#8212; the child carries it</text>
+    <rect x="648" y="278" width="288" height="34" rx="0" fill="#3d7a3d" opacity="0.14"/>
+    <text x="792" y="300" font-size="13" font-weight="bold" text-anchor="middle" fill="#2c5c2c">ADMITTED &#8212; source_free</text>
+  </g>
+</svg>
