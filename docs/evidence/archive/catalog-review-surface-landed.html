@@ -228,5 +228,18 @@
     including the base-revision reproduction and the two sibling tests the change
     newly breaks: <a href="/imas-codex/evidence/catalog-review-surface/refusal-transport">the
     refusal transport</a>.
+  </p>
+  <h2 id="fold-back-harness-transport">The sibling harness mocks the write direction</h2>
+  <p>
+    The two tests the refusal transport newly broke — its own harness reached for
+    the network, and the file's autouse refusal said so in the traceback — are green
+    again. <code>_fold_additive_batch</code> now routes the refusal notice through a
+    mocked write client, reusing the routed-client pattern the same file already
+    carried for reads; the autouse refusal that catches a real connection and would
+    otherwise degrade to an empty read is unchanged and is shown still to fire. The
+    measure is stated against a base revision: 2 failed / 31 passed before, 35
+    passed / 0 failed after, both logs on disk. Full record:
+    <a href="/imas-codex/evidence/catalog-review-surface/fold-back-harness-transport">fold-back
+    harness write transport</a>.
 </body>
 </html>
