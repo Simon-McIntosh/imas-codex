@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T15:36:08",
+  "updated": "2026-09-18T15:38:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5003,9 +5003,11 @@
         "id": "s14-census",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "8aec8b1a-f7df-4ff8-a46b-9afce5dc7022",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "8aec8b1a-f7df-4ff8-a46b-9afce5dc7022"
+        },
         "created": "2026-09-18"
       },
       {
@@ -153991,6 +153993,212 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-the-two-verdict-fields-are-censused-for-disagreement",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2941,
+                "cached_input_tokens": 260739,
+                "input_tokens": 263682,
+                "output_tokens": 2272,
+                "reasoning_output_tokens": 289,
+                "total_tokens": 265954,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "ship-s14-20260918"
+          },
+          "done_when": "one named Cypher predicate run through GraphClient on the login node returns the integer count of StandardName identities carrying a disagreeing pair, the per-pair breakdown is listed with a count and one example identity per pair, and the breakdown counts are shown to sum exactly to that integer; the query text is recorded verbatim with its measured wall time, which must be under 10 seconds; the evidence names which field the code treats as authoritative, citing the writer of each with file and line, and states whether the disagreement is a legitimate state or a write-ordering defect; the manifest records that the login-node graph exception was used",
+          "estimated_hours": null,
+          "goal": "Count the identities whose name_stage and refine_stop_reason disagree and establish which field is authoritative",
+          "id": "n-the-two-verdict-fields-are-censused-for-disagreement",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T09:10:43Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement/manifest.md",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/verdict-field-disagreement.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "s14-census",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T09:10:48Z",
+        "completed_at": "2026-09-18T10:39:55.640Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5292,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5347,
+        "stalled": true,
+        "time_budget": "35m",
+        "base_sha": "a157681223a8ceb8a009859fa692dc8b5a14978e",
+        "commits": [
+          "e6c43eac4d56d62c562e73bcdca357daf00b53c0"
+        ],
+        "changed_lines": {
+          "added": 192,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "work-rejected",
+        "outcome": "The measurement half is confirmed and the interpretation half is not. The reviewer re-derived every count in its own live GraphClient run and reproduced all of them exactly: 62 disagreeing identities of 5130, the 42/11/7/2 per-pair breakdown, the separation table and the 2508 and 251 discovery rows. So the census figures stand independently. The gate fails on two done-when clauses the review measured wrong. First, the node was required to state whether the disagreement is a legitimate state or a write-ordering defect, and called the 42-row arm a live write-ordering fault; the reviewer measured all 42 carrying no updated_at, no claim_token and no run_id, while every current writer of exhausted stamps updated_at in the same statement, so no current route is implicated and the state is legacy rather than live. That changes the remedy from a code fix to a cleanup, which is why it is not a wording quibble. Second, the node was required to cite the writer of each field with file and line: the writer map pairs the clear at graph_ops.py:10721 with reconcile_reviewable_name_stage at :14275, but :10721 sits inside _lock_claimed_name_bindings and the function named never touches refine_stop_reason, so a reader tracing the clearer lands in the wrong function. A third finding notes the single-read-path claim omits the projection at graph_ops.py:18144, though its conclusion that nothing gates on the field still holds. Work is merged and not discarded; a correction node is folded for the interpretation and the writer map.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement/manifest.md",
+        "scope_changed": false,
+        "session_id": "8aec8b1a-f7df-4ff8-a46b-9afce5dc7022",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9659716,
+            "input_tokens_cumulative": 9659716,
+            "output_tokens": 51475,
+            "output_tokens_cumulative": 51475,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T10:39:55.640Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 12,
+            "evidence": 16,
+            "fit": 18,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 85
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9809324,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 5344.194,
+          "generated_tokens": 60649,
+          "generation_seconds": 5262.044,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 30.9,
+          "machine_seconds": 82.15,
+          "peak_input_tokens": 148308,
+          "tokens_per_second": 11.53,
+          "wall_tokens_per_second": 11.35
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260918/n-the-two-verdict-fields-are-censused-for-disagreement",
+          "session_id": "8aec8b1a-f7df-4ff8-a46b-9afce5dc7022",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T10:39:55.640Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 101.0,
+        "orientation_input_tokens": 2826372.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -154275,6 +154483,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2320
+    "_version": 2322
   }
 }
