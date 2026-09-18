@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T11:08:54",
+  "updated": "2026-09-18T11:08:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5001,6 +5001,15 @@
       },
       {
         "id": "s14-rehearsal",
+        "harness": "clive",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
+      },
+      {
+        "id": "s14-seat",
         "harness": "clive",
         "role": "implement",
         "session_id": null,
@@ -150910,6 +150919,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2282
+    "_version": 2283
   }
 }
