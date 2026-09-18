@@ -403,7 +403,157 @@
     base revision <code>b468bfb5c1b86131ec16262149e778e9ea5e3dff</code> &middot; commit
     <code>b161235bb</code>.</p>
   </section>
-</section>
+  </section>
+  <section id="manifest-generability-instrument">
+    <h2>A manifest cut refuses on its own generability, and names the mechanism per source</h2>
+    <p><strong>The defect reproduced before it was repaired, and the reproduction is one
+    assertion.</strong> The export already recorded a disposition per manifest source, and the
+    <code>manifest_source_accounting</code> gate already closed on the count of those rows &mdash; so
+    a source recorded as <code>excluded</code> satisfied it, and the exclusion list survived as a
+    report rather than as a refusal. Removing the block that computes the generability verdict and
+    appends the gate leaves a four-source manifest carrying <strong>one</strong> source with
+    <code>all_gates_passed is True</code>: the control assertion fails as <code>assert True is
+    False</code> against an <code>ExportReport</code> whose <code>manifest_generability</code> is
+    <code>None</code>. A cut could therefore publish with three of its four sources unnameable and
+    every gate green. With the block in place the same fixture refuses and names all three. The
+    source was restored byte-identical afterwards, verified by sha256.</p>
+    <p><strong>The instrument is a resolution ladder over facts the row already establishes.</strong>
+    <code>describe_manifest_generability</code> walks the export's disposition rows in a fixed order,
+    so each mechanism is read from the row rather than guessed about it, and every uncarried entry
+    carries the evidence that established it. The order matters: a spent search is a terminal stage
+    on the successor chain, a refusal is the reason the pipeline recorded, and only the residue is
+    read as a composition nothing scheduled.</p>
+    <figure>
+      <svg viewBox="0 0 780 430" width="780" height="430" role="img"
+           aria-label="The per-source mechanism resolution ladder: each disposition row reaches carried or one of six named mechanisms, the uncarried rows feed the generability verdict, the verdict is appended as the manifest_generability gate before all_gates_passed is computed, and the release paths already refuse on that flag."
+           style="max-width:100%;font:11px/1.35 system-ui,sans-serif" fill="currentColor">
+        <rect x="12" y="14" width="548" height="32" rx="6" fill="none" stroke="currentColor"/>
+        <text x="22" y="34">one disposition row per manifest source &#183; disposition &#183; terminal_stage &#183; reason &#183; standard_name_id</text>
+
+        <rect x="64" y="66" width="266" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="72" y="84">disposition == "emitted"</text>
+        <rect x="340" y="66" width="250" height="28" rx="4" fill="none" stroke="currentColor" stroke-dasharray="4 3"/>
+        <text x="348" y="84">carried &#8212; the source reaches a name</text>
+
+        <rect x="64" y="104" width="266" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="72" y="122">terminal_stage == "exhausted"</text>
+        <rect x="340" y="104" width="250" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="348" y="122">attempt_budget_exhausted</text>
+
+        <rect x="64" y="142" width="266" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="72" y="160">terminal_stage set, not exhausted</text>
+        <rect x="340" y="142" width="250" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="348" y="160">terminal_identity_unusable</text>
+
+        <rect x="64" y="180" width="266" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="72" y="198">documented_non_nameable, reason is the sentinel</text>
+        <rect x="340" y="180" width="250" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="348" y="198">composition_not_scheduled</text>
+
+        <rect x="64" y="218" width="266" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="72" y="236">documented_non_nameable, reason recorded</text>
+        <rect x="340" y="218" width="250" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="348" y="236">recorded_refusal</text>
+
+        <rect x="64" y="256" width="266" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="72" y="274">standard_name_id resolved</text>
+        <rect x="340" y="256" width="250" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="348" y="274">identity_not_carried</text>
+
+        <rect x="64" y="294" width="266" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="72" y="312">otherwise &#8212; nothing attempted</text>
+        <rect x="340" y="294" width="250" height="28" rx="4" fill="none" stroke="currentColor"/>
+        <text x="348" y="312">composition_not_scheduled</text>
+
+        <path d="M52 80 V308" stroke="currentColor" fill="none" stroke-dasharray="3 3"/>
+        <text x="30" y="200" transform="rotate(-90 30 200)">else &#8595;</text>
+
+        <path d="M332 80 H340" stroke="currentColor" fill="none"/>
+        <path d="M332 118 H340" stroke="currentColor" fill="none"/>
+        <path d="M332 156 H340" stroke="currentColor" fill="none"/>
+        <path d="M332 194 H340" stroke="currentColor" fill="none"/>
+        <path d="M332 232 H340" stroke="currentColor" fill="none"/>
+        <path d="M332 270 H340" stroke="currentColor" fill="none"/>
+        <path d="M332 308 H340" stroke="currentColor" fill="none"/>
+
+        <path d="M590 118 H600 M590 156 H600 M590 194 H600 M590 232 H600 M590 270 H600 M590 308 H600" stroke="currentColor" fill="none"/>
+        <path d="M600 118 V336 H127 V348" stroke="currentColor" fill="none"/>
+        <path d="M122 340 l5 10 5 -10 z" fill="currentColor"/>
+        <text x="612" y="205">the uncarried rows</text>
+        <text x="612" y="220">each name one mechanism</text>
+
+        <rect x="12" y="356" width="238" height="60" rx="6" fill="none" stroke="currentColor"/>
+        <text x="22" y="376">describe_manifest_generability</text>
+        <text x="22" y="392">carried + uncarried == manifest_size</text>
+        <text x="22" y="408">generable == (uncarried == 0)</text>
+
+        <path d="M250 386 H268" stroke="currentColor" fill="none"/>
+        <path d="M262 381 l10 5 -10 5 z" fill="currentColor"/>
+        <rect x="270" y="356" width="238" height="60" rx="6" fill="none" stroke="currentColor"/>
+        <text x="280" y="376">gate manifest_generability</text>
+        <text x="280" y="392">appended to gate_results BEFORE</text>
+        <text x="280" y="408">all_gates_passed is computed</text>
+
+        <path d="M508 386 H526" stroke="currentColor" fill="none"/>
+        <path d="M520 381 l10 5 -10 5 z" fill="currentColor"/>
+        <rect x="528" y="356" width="240" height="60" rx="6" fill="none" stroke="currentColor"/>
+        <text x="538" y="376">all_gates_passed == false</text>
+        <text x="538" y="392">catalog_release.py :1323 and :2007</text>
+        <text x="538" y="408">refuse the cut, unedited</text>
+      </svg>
+      <figcaption>The ladder and what its verdict becomes. Each branch is read from the disposition
+      row alone, so the mechanism is established rather than guessed, and the ordering is what keeps
+      a spent search, a recorded refusal and an unscheduled composition distinguishable &mdash; only
+      the first two are reasons a cut waits on another repository. The gate is appended to
+      <code>report.gate_results</code> before <code>report.all_gates_passed</code> is computed, which
+      is why the two release refusal sites need no change to refuse here. The fail-open default on
+      an absent key at site <code>:2007</code> is noted below and is not repaired by this
+      instrument.</figcaption>
+    </figure>
+    <table>
+      <caption>What the ladder distinguishes, and whether a cut waits on it</caption>
+      <thead><tr><th>Mechanism</th><th>Read from</th><th>Waits on</th></tr></thead>
+      <tbody>
+        <tr><td><code>attempt_budget_exhausted</code></td><td>the successor chain's terminal stage</td><td>a re-composition or a grammar decision</td></tr>
+        <tr><td><code>terminal_identity_unusable</code></td><td>a terminal stage that is not <code>exhausted</code></td><td>a supersede or a re-source</td></tr>
+        <tr><td><code>recorded_refusal</code></td><td>the reason the pipeline recorded</td><td>the grammar repository, if it is a locus or vocabulary gap</td></tr>
+        <tr><td><code>refusal_cause_not_recorded</code></td><td>the sentinel the roster writes for a lost cause</td><td>nothing &mdash; the cause is unrecoverable, so this is a finding</td></tr>
+        <tr><td><code>identity_not_carried</code></td><td>an identity resolved but excluded from the cut</td><td>the cut's own eligibility rules</td></tr>
+        <tr><td><code>composition_not_scheduled</code></td><td>the residue after every test above</td><td>nothing but scheduling</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Measured in both directions, on a debug partition.</strong> With the instrument in
+    place the new test file's three tests pass (exit 0): the verdict accounts for every source
+    exactly once, the three blocking classes come out as three different mechanisms with their
+    evidence attached, the gate is the only failed gate and <code>all_gates_passed</code> is false,
+    and the control &mdash; a manifest whose one source is carried &mdash; passes the same gate with
+    empty issues rather than passing because the gate is absent. Removing the block that computes
+    the verdict and appends it makes all three fail, the refusal control among them; the source was
+    then restored byte-identical, verified by sha256.</p>
+    <p><strong>The exposure is measured against the whole export surface, base and head, same host
+    class.</strong> Base revision <code>d170a6ec2</code> with <code>export.py</code> at that revision
+    over the 45 files under <code>tests/standard_names</code> that reach the export path: 19 failed,
+    412 passed, 3 errors. This node's head over the same 45 plus the new file: 19 failed, 415 passed,
+    3 errors. <strong>Added failures: zero.</strong> The 22 failure ids are identical between the two
+    lists &mdash; the single differing line is a captured <code>ERROR</code> log line whose
+    <code>file:line</code> moved from 3130 to 3281 because the instrument shifted line numbers, not a
+    test outcome. All six ids the adjacent followup records as pre-existing reds are present in the
+    base list and unchanged here.</p>
+    <p><strong>One caveat this instrument does not close.</strong> <code>catalog_release.py:2007</code>
+    reads <code>getattr(export_report, "all_gates_passed", True) is False</code>, so a report that
+    omitted the attribute entirely would not refuse at that site, while <code>:1323</code> reads it
+    directly and would raise. The instrument always sets it, so no cut reaches either site without
+    it, but the default there is fail-open on an absent key &mdash; the same shape the export
+    classifier has now closed three times. It lies outside this node's write fence and is recorded
+    here rather than repaired.</p>
+    <p>The gate command, exit status and log path for each run are recorded in the node's manifest.
+    This gate measures this node's own change only: verifying the merged result belongs to a
+    separately dispatched node. No graph read was performed and no identity was mutated.</p>
+    <p>Full record: <a href="/imas-codex/evidence/archive/unbound-source-backlog-landed#manifest-generability-instrument">this anchor</a>.</p>
+    <p class="r-meta">Worker: n-usb-a-manifest-is-fully-generable &middot; 2026-09-18 &middot;
+    base revision <code>d170a6ec29331dbe6a2247d42b845c3f44f8ec32</code> &middot; host class
+    <code>all_debug</code> &middot; commit <code>e0c2d5ef3</code>.</p>
+  </section>
 </main>
 
 </body>
