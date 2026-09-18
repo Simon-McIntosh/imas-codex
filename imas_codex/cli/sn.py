@@ -8307,6 +8307,7 @@ def sn_restore_apply(
         _ARCHIVE_RECONSTRUCTION_ADAPTER,
         _ARCHIVE_RECONSTRUCTION_GUARDS,
         _ARCHIVE_RECONSTRUCTION_MUTATION,
+        SignedManifestAuthorityError,
         apply_signed_manifest,
         signed_payload_sha256,
     )
@@ -8327,18 +8328,21 @@ def sn_restore_apply(
     if not isinstance(data, dict):
         raise click.UsageError("signed authority must be a JSON object")
 
-    receipt = apply_signed_manifest(
-        path,
-        authority_adapter=_ARCHIVE_RECONSTRUCTION_ADAPTER,
-        authority_file_sha256=hashlib.sha256(raw).hexdigest(),
-        authority_payload_sha256=signed_payload_sha256(data),
-        mutation_kind=_ARCHIVE_RECONSTRUCTION_MUTATION,
-        guard_set=_ARCHIVE_RECONSTRUCTION_GUARDS,
-        reason=reason,
-        apply=apply_changes,
-        manifest_sha256=manifest_sha256,
-        client_factory=_archive_reconstruction_graph_client,
-    )
+    try:
+        receipt = apply_signed_manifest(
+            path,
+            authority_adapter=_ARCHIVE_RECONSTRUCTION_ADAPTER,
+            authority_file_sha256=hashlib.sha256(raw).hexdigest(),
+            authority_payload_sha256=signed_payload_sha256(data),
+            mutation_kind=_ARCHIVE_RECONSTRUCTION_MUTATION,
+            guard_set=_ARCHIVE_RECONSTRUCTION_GUARDS,
+            reason=reason,
+            apply=apply_changes,
+            manifest_sha256=manifest_sha256,
+            client_factory=_archive_reconstruction_graph_client,
+        )
+    except SignedManifestAuthorityError as exc:
+        raise click.UsageError(f"the signed authority was not accepted: {exc}") from exc
     outcome = str(receipt.get("outcome") or "")
     tally = receipt.get("counts") or {}
     click.echo(
