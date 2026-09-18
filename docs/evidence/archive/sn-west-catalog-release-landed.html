@@ -796,6 +796,21 @@
     (<code>imas_codex/standard_names/workers.py</code> and
     <code>tests/standard_names/test_unchanged_refine_attempt.py</code>).</p>
   </section>
+  <section id="release-surface-reuse-map">
+    <h2>Five release surfaces already exist under the open nodes; the map names each and its gap</h2>
+    <p>Scouted in the release-contract tree at <code>4c9d1dabb</code>: <strong>5 of 5 located</strong>, each entry carrying the symbol, the quoted signature, the file and line, and the caller-side facts. The one surface no production route reaches is the docs-axis reconciler, which exists beside its test but has no caller.</p>
+    <table>
+      <thead><tr><th>Surface</th><th>Symbol (file:line)</th><th>What a caller must supply</th></tr></thead>
+      <tbody>
+        <tr><td>Pull-request REST transport</td><td><code>_GitHubClient</code> (<code>catalog_release.py:57</code>) over <code>github_api_call</code> (<code>graph/ghcr.py:502</code>)</td><td>repo, branch, base, head owner, title, body; token only if the default is unwanted</td></tr>
+        <tr><td>Exporter exclusion accounting</td><td><code>ExportReport.record_exclusions</code> (<code>export.py:370</code>), gate <code>exclusion_accounting</code> (:181), entry <code>run_export</code> (:2459)</td><td>staging dir and selectors; the records are produced inside <code>run_export</code></td></tr>
+        <tr><td>Attempt-budget charge and reset routes</td><td><code>claim_explicit_standard_name_sources</code> (<code>graph_ops.py:10444</code>), <code>mark_sources_failed</code> (:11398), cap (:15914)</td><td>bare source ids and a claim timeout; the refusal that charge pays for is already correct in <code>retarget_standard_name_sources</code></td></tr>
+        <tr><td>Governed source-status reset</td><td><code>reset_standard_name_sources</code> (<code>provenance_lifecycle.py:701</code>) and <code>retry_failed_sources</code> (<code>graph_ops.py:11616</code>)</td><td>manifest id, reason, and per row <code>source_id</code>, <code>expected_status</code>, <code>expected_scalar</code>, <code>expected_bindings</code></td></tr>
+        <tr><td>Docs-axis reconciliation</td><td><code>reconcile_docs_axis_from_reviews</code> (<code>graph_ops.py:12608</code>)</td><td>nothing new to build — a caller wiring, since only its test invokes it</td></tr>
+      </tbody>
+    </table>
+    <p>Full map with quoted signatures: <a href="/imas-codex/evidence/sn-west-catalog-release/reuse-map">the release-surface reuse map</a>, committed as <strong>0adb2dbaa</strong>.</p>
+  </section>
 </main>
 </body>
 </html>
