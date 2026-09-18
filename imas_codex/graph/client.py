@@ -99,15 +99,14 @@ def _slurm_service_uri() -> str | None:
     resolve its address instead of a tunnel to nowhere.
 
     Returns ``None`` when the active location is not SLURM-scheduled or no
-    service node can be discovered, leaving the profile URI in place.
+    service node can be discovered, leaving the scheduled address in place.
+    An unreadable location is not among those cases: it is raised, because
+    returning ``None`` here would restore the loopback tunnel endpoint.
     """
     from imas_codex.graph.profiles import get_graph_location
     from imas_codex.remote.locations import resolve_location
 
-    try:
-        info = resolve_location(get_graph_location())
-    except Exception:
-        return None
+    info = resolve_location(get_graph_location())
 
     if info.scheduler != "slurm":
         return None
@@ -135,7 +134,13 @@ def _resolve_graph_uri() -> str:
     the profile layer's fallback to a loopback tunnel endpoint is replaced by
     the reachable address of the node running the service -- see
     :func:`_slurm_service_uri`.
+
+    An explicit ``NEO4J_URI`` outranks both: it is the documented escape
+    hatch, and the operator who sets it has named an address that the
+    discovery below is not entitled to replace.
     """
+    if explicit := os.environ.get("NEO4J_URI"):
+        return explicit
     uri = get_graph_uri()
     if not os.environ.get("SLURM_JOB_ID"):
         return uri

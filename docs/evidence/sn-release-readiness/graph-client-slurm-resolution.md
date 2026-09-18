@@ -88,23 +88,126 @@ count(StandardName): [{'c': 5130}]
 CAPTURE_EXIT=0
 ```
 
-Same address and same count as before the change: 5130 on both sides, with
-the login-node reading taken through the same script that produced the
-pre-change baseline.
+Same address and same count as before the change: 5130 on both sides, and the
+login-node reading taken through the same script that produced the pre-change
+baseline.
+
+## The four defects that left the repair unpinned
+
+The first repair resolved the right address, but four things about it were
+wrong or unwatched. Each was measured before it was closed. All readings are
+in `/home/ITER/mcintos/gcprobe/s14pinned/`.
+
+### An explicit `NEO4J_URI` lost to the address the repair discovered
+
+`resolve_neo4j` applies `NEO4J_URI` last, documented in
+`imas_codex/graph/profiles.py` as "Env var escape hatches (always win)". The
+URI the client started from was therefore already the explicit one, and
+`_resolve_graph_uri` replaced it with the address it had discovered — the
+escape hatch was unreachable exactly inside the step that needed it.
+
+Before, from `unit_before.log`, in-process with a SLURM step simulated:
+
+```
+tests/graph/test_client_address_resolution.py:101: in test_explicit_neo4j_uri_wins_inside_a_slurm_step
+    assert _resolve_graph_uri() == EXPLICIT_URI
+E   AssertionError: assert 'bolt://98dci4-gpu-0002:7687' == 'bolt://example.invalid:1'
+```
+
+After, inside a real SLURM step (`step_explicit_uri.log`):
+
+```
+host=98dci4-clu-3141.iter.org SLURM_JOB_ID=1273665
+NEO4J_URI=bolt://example.invalid:1
+profile uri: bolt://example.invalid:1
+service-node discovery: bolt://98dci4-gpu-0002:7687
+_resolve_graph_uri(): bolt://example.invalid:1
+```
+
+The discovery line is the control: the gpu address is still resolvable from
+that step, so the explicit URI beats a live candidate rather than an empty
+one. The precedence is now read from the environment before the profile or
+the discovery runs, and pinned by
+`test_explicit_neo4j_uri_wins_inside_a_slurm_step`.
+
+### A failed location read restored the very address being repaired
+
+The location read sat inside `_slurm_service_uri` behind a bare
+`except Exception: return None`. `None` leaves the profile URI in place,
+which inside a step is the loopback tunnel endpoint this module exists to
+replace — so any fault in the read put the broken address back, silently.
+The branch had no test at all, which is why nothing saw it.
+
+Reproduction, `test_an_unreadable_location_is_not_swallowed`, before:
+
+```
+with pytest.raises(RuntimeError):
+E   Failed: DID NOT RAISE <class 'RuntimeError'>
+```
+
+The branch is now uncaught and the same call raises. Letting it surface rather
+than narrowing what is caught was the call because `resolve_location` has no
+legitimate raise for a location it cannot find — an unknown or unconfigured
+location answers a `scheduler="none"` `LocationInfo` — so an exception there is
+a fault, and the caller's fallback address is the one known not to work.
+
+### The dataclass default was unpinned
+
+Reverting `field(default_factory=_resolve_graph_uri)` to `get_graph_uri` in a
+scratch copy of the package (hard-linked, that one line reverted) fails one
+test — `revert_run.log`:
+
+```
+1 failed, 8 passed
+
+FAILED ...::test_the_client_default_uri_is_the_slurm_aware_resolver
+E   assert <function get_graph_uri at 0x7f2227f4a340> is _resolve_graph_uri
+```
+
+The failure text names the reverted factory, which is the positive control
+that the scratch module was the one loaded. Against the worktree the same 9
+tests pass. With the profile URI as the factory the repair is inert for a
+default `GraphClient()` — which is how the loopback endpoint reached the step
+in the first place, so this is the line the suite exists to pin.
+
+### The inert monkeypatch
+
+The suite patched `client_module._resolve_compute_host`, an attribute the
+function never reads: the name is bound inside the function body from
+`imas_codex.remote.locations`. Removed as dead. The live target is pinned by
+`test_the_fallback_is_read_from_the_module_it_is_imported_from`, which answers
+from that module and sees the answer arrive.
+
+## Re-measurement after both repairs
+
+One SLURM step and one login-node reading, each through
+`/home/ITER/mcintos/gcprobe/s14pinned/probe.py` with this worktree on
+`PYTHONPATH`.
+
+| reading | host | profile URI | client URI | count |
+|---|---|---|---|---|
+| compute node, default env | `98dci4-clu-3141` | `bolt://localhost:17687` | `bolt://98dci4-gpu-0002:7687` | 5130 |
+| compute node, `NEO4J_URI` set | `98dci4-clu-3141` | `bolt://example.invalid:1` | `bolt://example.invalid:1` | not attempted |
+| login node, default env | `98dci4-srv-1006` | `bolt://98dci4-gpu-0002:7687` | `bolt://98dci4-gpu-0002:7687` | 5130 |
+
+The repair is intact: the compute step still resolves the gpu node and still
+returns 5130, and the login-node reading is unchanged from the baseline above.
+The profile layer still reports its loopback URI in the step, unmodified — the
+client resolves past it.
 
 ## Tests
 
-`tests/graph/test_client_address_resolution.py`, 5 tests, run under the
+`tests/graph/test_client_address_resolution.py`, 9 tests, run under the
 default marker selection (not `-m graph`), exit 0:
 
 ```
-5 passed, 1 warning in 0.20s
+9 passed, 1 warning in 0.19s
 ```
 
-They cover the peer-node branch, the on-node localhost branch, and the two
-branches that must not change: no discovery outside a step, and `None` rather
-than an invented address when no service node is found or the location is not
-SLURM-scheduled.
+They cover the peer-node branch, the on-node localhost branch, the explicit
+`NEO4J_URI` precedence, the raised unreadable-location fault, the dataclass
+default, and the branch that must not change: `None` rather than an invented
+address when no service node is found or the location is not SLURM-scheduled.
 
 ## Scope
 
@@ -112,3 +215,4 @@ The profile layer's own resolution is untouched, so workstation users who
 reach a remote graph through an explicit SSH tunnel are unaffected. Nothing
 was changed in the facility host pattern lists; the client resolves the
 service address directly rather than widening the definition of a local host.
+An explicit `NEO4J_URI` continues to win over everything, as it did before.
