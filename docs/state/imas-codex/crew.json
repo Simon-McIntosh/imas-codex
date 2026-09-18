@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T00:21:54",
+  "updated": "2026-09-18T05:44:13",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -150420,6 +150420,185 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260917T220729858749-pidp-every-delete-route-records-what-it-removed",
+        "plan": "paid-identity-deletion-protection",
+        "section": "\u00a74",
+        "node": "pidp-every-delete-route-records-what-it-removed",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1652,
+                "cached_input_tokens": 726320,
+                "input_tokens": 727974,
+                "output_tokens": 689,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 728663,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "ceb4c66b-622b-4e72-83de-68acdb6fae2e",
+            "session_id": "ship-s10-20260917"
+          },
+          "done_when": "every statement that can terminate a StandardName reaches the snapshot writer, proven by a test per previously-bypassing route that removes a name and asserts a StandardNameDeletionSnapshot exists whose original_id equals the removed node id, each test failing when the writer call is taken out, and the existing archive-reconstruction tests still pass at 13",
+          "estimated_hours": null,
+          "goal": "make the two delete routes that bypass the snapshot writer record what they remove",
+          "id": "pidp-every-delete-route-records-what-it-removed",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-17T22:07:30Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T220729858749-pidp-every-delete-route-records-what-it-removed/manifest.md",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/provenance_lifecycle.py",
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/graph/sn_cleanup.py",
+            "tests/standard_names/test_deletion_snapshot_routes.py",
+            "docs/evidence/paid-identity-deletion-protection/deletion-record-writer-trace.md",
+            "docs/plans/paid-identity-deletion-protection.html",
+            "docs/evidence/archive/paid-identity-deletion-protection-landed.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "s10c-local",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-17T22:07:38Z",
+        "completed_at": "2026-09-17T22:56:15.349Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2488,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2917,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "82dfea360f73b10bec0d6b4498e55be5d16e7877",
+        "commits": [
+          "a5a32e405bac092d513f796d625de96c4dd639ce"
+        ],
+        "changed_lines": {
+          "added": 246,
+          "removed": 20,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "pytest -m graph tests/standard_names/test_deletion_snapshot_routes.py against the live database, plus a falsifier run with the writer calls removed",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/ceb4c66b-622b-4e72-83de-68acdb6fae2e/scratchpad/pidp-routes-graph.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T220729858749-pidp-every-delete-route-records-what-it-removed/manifest.md",
+        "scope_changed": false,
+        "session_id": "1cf4033c-198b-43d4-8a37-6e4cdf84bffd",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-17T22:56:15.349Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260917/pidp-every-delete-route-records-what-it-removed",
+          "session_id": "1cf4033c-198b-43d4-8a37-6e4cdf84bffd",
+          "session_source": "pointer",
+          "retained_at": "2026-09-17T22:56:15.349Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 59.0,
+        "orientation_input_tokens": 2256705.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -150690,6 +150869,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2277
+    "_version": 2278
   }
 }

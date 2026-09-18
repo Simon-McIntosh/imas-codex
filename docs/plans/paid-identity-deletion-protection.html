@@ -23,8 +23,8 @@
   <title>Work That Cost Money Must Not Be Deletable By A Cleanup Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-17">
-<meta name="plan-version" content="63">
+<meta name="plan-modified" content="2026-09-18">
+<meta name="plan-version" content="64">
 <meta name="plan-commits" content="ec9ffff58e52af06b454987705ee4f88bfa14358,33361a5354b03e1f3a56f0cb626157cb1139dca0,2e0c1b534ac98f490780f7d9b2de7e5d8a24eb7f,f11e43096b10f2a5f55466e3f82e03b1ff080688,b22d348610f58b624ef9b8448b9c721279600e54,057a04786654db8ce7a5b79b77d3b53d110fa9f6,7a89fca35428cd1e2cd4fb9524bb991ff632209f,992f0a09a3beb0bc1c12f75df0e5581a6d542055,a7dc412751a84950bc06badb6d0cbf2b5db86457,07b06c04c68a2470f36e5176dbc5995949c345dc,b324ff33a41feee9f21c5e16efb2f57b87d7a587">
 <meta name="plan-artifacts" content="docs/evidence/sn-lifecycle-integrity/delete-path-protections.md,docs/evidence/sn-lifecycle-integrity/unshielded-identity-deletions.md,docs/evidence/sn-lifecycle-integrity/mirrored-state-review.md,docs/evidence/paid-identity-deletion-protection/removed-cohort.md,docs/evidence/paid-identity-deletion-protection/restore-reuse-map.md,docs/evidence/paid-identity-deletion-protection/undispositioned-deletions.md,docs/evidence/paid-identity-deletion-protection/origin-label-audit.md,docs/evidence/paid-identity-deletion-protection/false-origin-relabel.md">
 <meta name="plan-impl" content="0.95">
@@ -887,6 +887,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260917T203443895225-pidp-the-deletion-record-is-traced-to-its-writer" data-who="reckon-ship" data-when="2026-09-17T21:40:48.954Z">
     <div class="r-comment-body"><p>Settles why the deletion record holds no production removal: the writer landed nearly five hours after the last removal it was asked about, so the record is younger than the incident rather than defective. That retires the alarming reading of the earlier zero. The gap that survives is narrower and real - ten statements can terminate a standard name, eight reach the writer through a call site and two do not, so a removal down either still leaves nothing behind. The run ended before committing; the file was complete and staged in its worktree and I committed it from there, so the manifest was repaired to terminal and the commit recorded by me rather than by the worker.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260917T220729858749-pidp-every-delete-route-records-what-it-removed" data-who="reckon-ship" data-when="2026-09-17T22:56:15.349Z">
+    <div class="r-comment-body"><p>Both delete routes that bypassed the snapshot writer now call it, so every statement that can terminate a standard name records what it removed. The gate needed correcting before it meant anything: both new tests carry the graph marker, which the default markers exclude, so the run the worker would have been promoted on deselected them and passed on thirteen unrelated pre-existing tests. Run against the live database they pass, and with the two writer calls removed again they both fail, so the tests can fail and are not merely green. The worker died mid-probe with its sources reverted to base - a deliberate delta check that found two CLI failures pre-existing at base 82dfea360 - and its own last words were that it was restoring them; I restored them as it intended and preserved the probe diff first.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260908T192134671323-n-pidp-undispositioned-fifteen" data-who="s10b-fifteen" data-when="2026-09-08T19:41:10Z">
     <div class="r-comment-body"><p>15 rows dispositioned: 11 RESTORE, 4 CORRECTLY REMOVED, 0 without verdict; reconciles 78+15=93 on the whole-minute bound; 2.269733 USD apportioned; found only 3 of the 15 present in the archive, so 8 RESTORE identities have no archive material</p></div>
