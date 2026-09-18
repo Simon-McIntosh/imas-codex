@@ -18,6 +18,8 @@ Example:
 """
 
 import logging
+import os
+import socket
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -87,6 +89,63 @@ except (ImportError, SyntaxError):
     EXPECTED_RELATIONSHIP_TYPES = set()
 
 
+def _slurm_service_uri() -> str | None:
+    """Return the bolt URI of the graph service running on this cluster.
+
+    Inside a SLURM step the profile layer does not recognise a compute node
+    as local, so it takes the remote branch of the resolution and returns a
+    workstation-style loopback tunnel endpoint that nothing is listening on.
+    The service node itself is directly reachable from a compute step, so
+    resolve its address instead of a tunnel to nowhere.
+
+    Returns ``None`` when the active location is not SLURM-scheduled or no
+    service node can be discovered, leaving the profile URI in place.
+    """
+    from imas_codex.graph.profiles import get_graph_location
+    from imas_codex.remote.locations import resolve_location
+
+    try:
+        info = resolve_location(get_graph_location())
+    except Exception:
+        return None
+
+    if info.scheduler != "slurm":
+        return None
+
+    from imas_codex.remote.tunnel import discover_compute_node_local
+
+    node = discover_compute_node_local(service_job_name=info.service_job_name)
+    if not node:
+        from imas_codex.remote.locations import _resolve_compute_host
+
+        node = _resolve_compute_host(info)
+    if not node:
+        return None
+
+    bolt_port = resolve_neo4j(auto_tunnel=False).bolt_port
+    if node.split(".")[0] == socket.gethostname().split(".")[0]:
+        return f"bolt://localhost:{bolt_port}"
+    return f"bolt://{node}:{bolt_port}"
+
+
+def _resolve_graph_uri() -> str:
+    """Resolve the bolt URI for the active graph.
+
+    Outside a SLURM step this is the profile's own resolution.  Inside one,
+    the profile layer's fallback to a loopback tunnel endpoint is replaced by
+    the reachable address of the node running the service -- see
+    :func:`_slurm_service_uri`.
+    """
+    uri = get_graph_uri()
+    if not os.environ.get("SLURM_JOB_ID"):
+        return uri
+    direct = _slurm_service_uri()
+    if direct:
+        logger.info("SLURM step: resolving graph directly at %s", direct)
+        return direct
+    return uri
+
+
 @dataclass
 class GraphClient:
     """Client for Neo4j knowledge graph operations.
@@ -112,7 +171,7 @@ class GraphClient:
         graph_name: Name of the resolved graph (data identity)
     """
 
-    uri: str = field(default_factory=get_graph_uri)
+    uri: str = field(default_factory=_resolve_graph_uri)
     username: str = field(default_factory=get_graph_username)
     password: str = field(default_factory=get_graph_password)
     graph_name: str = field(default="")
