@@ -92,35 +92,33 @@ Greenfield project, no backwards compatibility. Remove deprecated code decisivel
 
 Compute-node discipline follows `~/.agents/AGENTS.md`. Repo-specific: check `~/.agents/skills/` for site-specific SLURM partition names, modules, and resource templates. Use `-march=x86-64-v3` for portable binaries.
 
-### Login-node exception: work whose connection SLURM cannot serve
+### Live graph work runs on a compute partition like any other heavy job
 
-**The login-node ban does not apply to work that cannot reach its dependency from a
-compute node.** The graph is the standing case, and the exception holds for a
-different reason than it used to state. Measured 2026-09-18:
+**There is no longer a graph exception to the login-node ban.** `GraphClient()`
+resolves a SLURM-scheduled service by discovery rather than by hostname, so it
+connects from inside a SLURM step exactly as it does on a login node. Measured
+2026-09-18 through the same environment, one probe on each:
 
-- `NEO4J_URI` is **unset** — absent from the process environment and from `.env` — so
-  nothing resolves "through" it.
-- On the login node `GraphClient()` resolves `bolt://98dci4-gpu-0002:7687` and answers
-  `count(StandardName)` = 5130. No tunnel is in the path.
-- From a SLURM compute node the bolt port on the graph's host is **directly
-  reachable**, so a tunnel is not needed and "a compute node cannot reach the graph
-  host" is false.
-- Yet `GraphClient()` *inside* that same SLURM step resolves `bolt://localhost:17687`
-  and raises `ServiceUnavailable`: the client takes its remote auto-tunnel branch
-  there, `ssh iter` is refused on port 22, and it returns a loopback tunnel endpoint it
-  never established.
+| Host | Resolved URI | `count(StandardName)` |
+|---|---|---|
+| login `98dci4-srv-1006` | `bolt://98dci4-gpu-0002:7687` | 5130 |
+| compute `98dci4-clu-3141` | `bolt://98dci4-gpu-0002:7687` | 5130 |
 
-So *any* live-graph command still fails on a SLURM partition before it does any work,
-and the failure reads as a credential or connection fault rather than as a placement
-error — measured 2026-09-08: a census node's `all_debug` launch exited 1 having never
-reached the graph. The cause is that resolution fallback rather than an obstacle in the
-path: repairing it would let heavy graph work return to a debug partition instead of
-loading a shared login node. Until `GraphClient()` connects from inside a SLURM step,
-this exception stands.
+Before that repair the client took its remote auto-tunnel branch inside a SLURM
+step — `ssh iter` is refused on port 22 there — and returned a loopback address it
+had never established. Every live-graph command failed before doing any work, and
+the failure read as a credential or connection fault rather than as a placement
+error. **That is fixed, so a graph failure inside a SLURM step is now a real
+failure**: investigate it, rather than working around it by moving to the login
+node. `NEO4J_URI`, when set, still overrides resolution everywhere.
 
-A task that must reach the live graph, or any other login-local endpoint, **runs
-on the login node** — and it carries the burden the ban was protecting against
-instead:
+**An exception still exists for a genuinely login-local endpoint** — one with no
+discovery path from inside the cluster. It is no longer a standing category with a
+known member, and the graph is the reason to be sceptical of any new claim to it:
+it looked unreachable for months while the cause was a resolution bug. Measure a
+dependency from a compute node before admitting work under this exception, and say
+in the manifest that you used it and why. Work admitted under it carries the burden
+the ban protects against:
 
 - **Bound it before you run it.** Name the row set. An indexed read over a named
   cohort is in scope; a whole-graph scan, an unbounded traversal, or a cartesian
@@ -128,10 +126,8 @@ instead:
 - **Ten seconds per query is the ceiling.** If a single query exceeds it, stop and
   report rather than pressing on. Splitting a scan into a hundred fast queries is not
   a way around this — the ceiling is on the work, not the statement.
-- **Never pair it with heavy local compute.** Read the graph on the login node, then
-  do the analysis wherever it belongs. The exception buys connectivity, not CPU.
-- **Say in the manifest that you used it and why**, so a reader can tell a legitimate
-  exception from a node that skipped its partition.
+- **Never pair it with heavy local compute.** Read the endpoint on the login node,
+  then do the analysis wherever it belongs. The exception buys connectivity, not CPU.
 
 **A `repl()` or Cypher result must also be bounded at the caller.** An unbounded
 result killed the MCP transport on 2026-09-08: the client disconnects a stdio server
@@ -139,9 +135,9 @@ that writes more than 16 MB without a JSON-RPC message boundary, and one query's
 output was enough. That 16 MB is the *client's* guard, not a server-side limit — do
 not look for a server check that does not exist.
 
-**The test suites are not covered by this exception.** The default markers exclude
-`graph`, so `pytest` needs no tunnel and belongs on a debug partition like any other
-heavy job. Only `-m graph` runs and live-graph CLI commands qualify.
+**Bounding a result is not about placement.** The two paragraphs above apply
+wherever the query runs — a login node, a debug partition, or a worker. `-m graph`
+runs and live-graph CLI commands are ordinary heavy jobs and belong on a partition.
 
 ## Command Execution
 

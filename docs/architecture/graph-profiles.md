@@ -79,16 +79,27 @@ the SSH alias differs from the location name:
 
 ## URI Resolution
 
+Resolution tries three modes in order; the first that applies wins. `NEO4J_URI`,
+when set, overrides all of them.
+
 ```
-Location → is_local_host(location) → URI
-                    ↓ (remote)
-              auto-tunnel → bolt://localhost:{port+10000}
+NEO4J_URI set ──────────────────────────────────→ that URI
+     ↓ unset
+1. local, no scheduler ─────────────────────────→ bolt://localhost:{port}
+2. SLURM-scheduled service (squeue discovery) ──→ bolt://{service-node}:{port}
+3. remote ──────────── auto-tunnel ─────────────→ bolt://localhost:{port+10000}
 ```
 
 1. A facility or compute location resolves to its facility's port slot.
-2. `is_local_host("iter")` checks facility private YAML:
-   - On ITER login node: True → `bolt://localhost:7687`
-   - Elsewhere: False → auto-tunnel → `bolt://localhost:17687`
+2. **Mode 2 is decided by discovery, not by hostname.** `squeue` answers only from
+   inside the cluster, and every node inside it reaches the service node directly,
+   so a login node and a compute node are both served here and resolve the same
+   address. When `squeue` finds no service job and the host is local, resolution
+   falls back to `localhost`; when it finds none and the host is outside the
+   cluster, it falls through to mode 3 rather than guessing an address.
+3. Mode 3 applies off-facility, where `is_local_host` is false and no scheduler is
+   reachable: the resolver tunnels rather than returning an address it cannot
+   reach.
 
 ## Auto-Tunneling
 

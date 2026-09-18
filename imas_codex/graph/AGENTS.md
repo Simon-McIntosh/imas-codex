@@ -417,13 +417,18 @@ from imas_codex.graph.client import GraphClient
 gc = GraphClient()    # handles SLURM, tunnels, env overrides
 ```
 
-**Inside a SLURM step the same call does not connect**, which is why live-graph work
-belongs on the login node under the exception in the root `AGENTS.md`. Measured
-2026-09-18 from compute node `98dci4-clu-3141`: the graph host's bolt port opens
-directly from there, `ssh iter` is refused on port 22, and `GraphClient()` resolves
-`bolt://localhost:17687` — the remote auto-tunnel branch — then raises
-`ServiceUnavailable`. So a SLURM step is for work that does not touch the graph, and a
-graph failure there is placement first: see "Probe through a real client, never through
-the profile alone" above before recording it as an outage.
+**The same call connects from inside a SLURM step**, because a SLURM-scheduled
+service is resolved by discovery rather than by hostname. Measured 2026-09-18 from
+compute node `98dci4-clu-3141` and login node `98dci4-srv-1006`: both resolve
+`bolt://98dci4-gpu-0002:7687` and answer `count(StandardName)` = 5130. Live-graph
+work is therefore an ordinary heavy job and belongs on a compute partition.
+
+That same node previously resolved `bolt://localhost:17687` — the remote
+auto-tunnel branch, whose tunnel it could not open because `ssh iter` is refused on
+port 22 there — and raised `ServiceUnavailable`. The branch was gated on the
+hostname matching a configured login pattern, which no compute node does. **A graph
+failure inside a SLURM step is now a real failure**, not a placement artifact:
+see "Probe through a real client, never through the profile alone" above before
+recording it as an outage.
 
 From WSL/remote, start a tunnel first: `imas-codex tunnel start iter` then `tunnel status`. The profile system auto-tunnels for remote hosts. Override with `export IMAS_CODEX_TUNNEL_BOLT_ITER=17687` if needed.
