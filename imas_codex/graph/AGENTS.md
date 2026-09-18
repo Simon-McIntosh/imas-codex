@@ -409,11 +409,21 @@ query('''
 
 ### Neo4j connection
 
-On ITER login/compute nodes, `GraphClient()` (no args) discovers the SLURM compute node and connects directly — never hardcode `bolt://localhost:7687`:
+On an ITER login node, `GraphClient()` (no args) discovers the SLURM node running the
+graph and connects to it directly — never hardcode `bolt://localhost:7687`:
 
 ```python
 from imas_codex.graph.client import GraphClient
 gc = GraphClient()    # handles SLURM, tunnels, env overrides
 ```
+
+**Inside a SLURM step the same call does not connect**, which is why live-graph work
+belongs on the login node under the exception in the root `AGENTS.md`. Measured
+2026-09-18 from compute node `98dci4-clu-3141`: the graph host's bolt port opens
+directly from there, `ssh iter` is refused on port 22, and `GraphClient()` resolves
+`bolt://localhost:17687` — the remote auto-tunnel branch — then raises
+`ServiceUnavailable`. So a SLURM step is for work that does not touch the graph, and a
+graph failure there is placement first: see "Probe through a real client, never through
+the profile alone" above before recording it as an outage.
 
 From WSL/remote, start a tunnel first: `imas-codex tunnel start iter` then `tunnel status`. The profile system auto-tunnels for remote hosts. Override with `export IMAS_CODEX_TUNNEL_BOLT_ITER=17687` if needed.
