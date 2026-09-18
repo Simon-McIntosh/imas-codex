@@ -506,6 +506,46 @@
        title="Three runs at one revision, a planted-failure control, and each coupling with its file and line">the
     six-file base measurement</a>.</p>
   </section>
+
+  <section>
+    <h2 id="scoped-edit-keeps-its-scope">A scoped edit no longer escalates into a graph-wide maintenance pass</h2>
+    <p>A correctly fenced <code>sn edit</code> reviews exactly the identity it staged, and it launches the same pool orchestrator an ordinary run uses. That orchestrator runs graph-wide startup and post-drain maintenance unless <code>skip_global_maintenance</code> is set, and it declares that flag <code>False</code> by default — so the escalation was decided at the edit path's launch, not by the loop. The launch at <code>edit.py:3740-3747</code> passed <code>scope_run_id</code> and five other keywords and never set the flag, and no frame on the edit side accepted it either, which is what made the omission structural rather than a default. An operator running a fenced single-identity edit therefore paid for a graph-wide pass they did not ask for, and it refused on protected identities outside their fence; the followup recorded it twice on 2026-09-09, both times recovered by interrupting and re-running <code>sn run --scope-run-id &lt;id&gt; --docs-only --skip-global-maintenance</code> against the staged edit.</p>
+    <p>The repair places the bypass once, on <code>_run_scoped_pipeline</code>, beside the scope that frame already carries: <code>run_id</code> is a required keyword there, it is always forwarded as <code>scope_run_id</code>, and the launch now also passes <code>skip_global_maintenance=True</code>. The shape is <strong>default-to-scope</strong> rather than forward-a-caller-supplied-flag, because the frame cannot be called without a scope, and pairing the two in one place means no caller can separate them by forgetting a flag. The loop is unchanged: its guard against an unbounded bypass is already satisfied by the <code>scope_run_id</code> this frame passes, and the maintenance-only modes that guard refuses are not reachable from here. Both callers reach the orchestrator through this frame — the inline review and the rescore path — so one placement covers both. The chain is enumerated in <a href="/imas-codex/evidence/sn-lifecycle-integrity/scoped-edit-reuse-map">the scoped-edit reuse map</a>: <code>sn edit</code> → <code>apply_edit</code> → <code>run_inline_review</code> / <code>rescore_name</code> → <code>_run_scoped_pipeline</code> (the one frame changed) → <code>run_sn_pools</code> (unchanged).</p>
+    <figure>
+      <svg aria-label="Both edit-side callers reach run_sn_pools through _run_scoped_pipeline, which now passes the scope and the maintenance bypass together; the graph-wide reconcile writers are not called while the claim reaper still starts" height="250" role="img" viewbox="0 0 660 250" width="660">
+        <rect fill="#eef2ff" height="44" rx="6" stroke="#8a93c8" width="120" x="8" y="24"></rect>
+        <text fill="#333" font-size="12" text-anchor="middle" x="68" y="43">sn edit</text>
+        <text fill="#666" font-size="11" text-anchor="middle" x="68" y="59">one identity staged</text>
+        <line stroke="#888" x1="128" x2="156" y1="46" y2="46"></line>
+        <polygon fill="#888" points="156,46 147,42 147,50"></polygon>
+        <rect fill="#eef2ff" height="44" rx="6" stroke="#8a93c8" width="160" x="156" y="24"></rect>
+        <text fill="#333" font-size="12" text-anchor="middle" x="236" y="43">apply_edit</text>
+        <text fill="#666" font-size="11" text-anchor="middle" x="236" y="59">+ inline review / rescore</text>
+        <line stroke="#888" x1="316" x2="344" y1="46" y2="46"></line>
+        <polygon fill="#888" points="344,46 335,42 335,50"></polygon>
+        <rect fill="#e8f5ec" height="44" rx="6" stroke="#5f9e74" stroke-width="2" width="290" x="344" y="24"></rect>
+        <text fill="#333" font-size="12" text-anchor="middle" x="489" y="43">_run_scoped_pipeline</text>
+        <text fill="#666" font-size="11" text-anchor="middle" x="489" y="59">run_id required → scope_run_id</text>
+        <line stroke="#888" x1="489" x2="489" y1="68" y2="104"></line>
+        <polygon fill="#888" points="489,104 485,95 493,95"></polygon>
+        <text fill="#0b6e4f" font-size="11" x="496" y="90">now pairs the bypass with it</text>
+        <rect fill="#eef2ff" height="44" rx="6" stroke="#8a93c8" width="420" x="120" y="104"></rect>
+        <text fill="#333" font-size="12" text-anchor="middle" x="330" y="123">run_sn_pools( scope_run_id=… , skip_global_maintenance=True )</text>
+        <text fill="#666" font-size="11" text-anchor="middle" x="330" y="139">previously: the flag was omitted and defaulted to False</text>
+        <line stroke="#888" x1="330" x2="170" y1="148" y2="184"></line>
+        <line stroke="#888" x1="330" x2="490" y1="148" y2="184"></line>
+        <rect fill="#e8f5ec" height="48" rx="6" stroke="#5f9e74" width="300" x="10" y="184"></rect>
+        <text fill="#333" font-size="12" x="24" y="204">graph-wide reconcile writers — not called</text>
+        <text fill="#666" font-size="11" x="24" y="221">sourceless-name · attachment · ledger · parent</text>
+        <rect fill="#fff4e5" height="48" rx="6" stroke="#d8a24a" width="300" x="350" y="184"></rect>
+        <text fill="#333" font-size="12" x="364" y="204">claim reaper (orphan sweep) — still starts</text>
+        <text fill="#666" font-size="11" x="364" y="221">releases claims abandoned by dead workers</text>
+      </svg>
+      <figcaption>One placement on the shared frame covers both callers; the mutating reconcile set goes silent while the claim reaper deliberately does not.</figcaption>
+    </figure>
+    <p><strong>Gate.</strong> The change is <code>dd88d0d3f435628565eab4d2af1a6bbbbe226dcd</code>, two paths: <code>imas_codex/standard_names/edit.py</code> (+10) and <code>tests/standard_names/test_scoped_edit_keeps_its_scope.py</code> (+121). Focused gate: <strong>55 passed, 2 deselected, exit 0</strong> over the new file plus <code>test_*</code> for the inline review, the pinned rename/refine path and the scoped maintenance wiring. With the launch line reverted at the same revision the gate returns <strong>2 failed, exit 1</strong>, both failures landing on <code>assert kwargs.get("skip_global_maintenance") is True</code> → <code>AssertionError: assert None is True</code> — and in both, the <code>scope_run_id</code> and <code>cost_limit</code> assertions had already passed, so the recorders did reach the seam under test and the failure is the subject keyword rather than an unreached mock. The tests pin the launch at the boundary where <code>run_sn_pools</code> is called, from the CLI entry point and from the shared frame; the existing tests could not see the defect because they patch <code>run_inline_review</code> and <code>_run_scoped_pipeline</code>, so a forwarded keyword never reached an assertion.</p>
+    <p><strong>What this does not establish.</strong> The gate measures this change only; the merged result belongs to a separately dispatched test node. It also does not repair the edits already escalated — the recovery for a staged edit that met the pass remains the scoped <code>sn run</code> above — and it does not decide the other three refusals in the same followup, whose preconditions are untouched. Logs: <code>gate-focused.log</code> and <code>gate-reverted.log</code> in <code>r-20260918T124756030814-n-sli-a-scoped-edit-keeps-its-scope</code>.</p>
+  </section>
   </main>
 </body>
 </html>

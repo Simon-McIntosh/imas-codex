@@ -3731,6 +3731,15 @@ def _run_scoped_pipeline(
     pool too).  The clear-gate footgun does not apply: it is a CLI-level guard
     on the ``sn run`` command, not part of ``run_sn_pools``, so an inline
     review — which calls ``run_sn_pools`` directly — never trips it.
+
+    The launch also bypasses graph-wide maintenance.  A call to this function
+    is scoped to one ``run_id`` by construction (``run_id`` is required and is
+    always forwarded as ``scope_run_id``), so the global reconcile writers —
+    sourceless names, attachment consistency, the derived-parent lifecycle —
+    would rewrite identities outside the fence the caller asked for.  This
+    mirrors the ``drain_scope_id`` auto-imply in :func:`run_sn_pools`, which
+    silences the same writers for a bounded drain; the scope guard that pairing
+    requires is already satisfied here by ``scope_run_id``.
     """
     import asyncio
 
@@ -3743,6 +3752,7 @@ def _run_scoped_pipeline(
             rotation_cap=rotation_cap,
             scope_run_id=run_id,
             skip_generate=skip_generate,
+            skip_global_maintenance=True,
             pending_fn=pending_fn,
         )
 
