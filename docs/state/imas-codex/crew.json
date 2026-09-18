@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T11:55:20",
+  "updated": "2026-09-18T12:02:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -150867,6 +150867,210 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T090312248779-n-usb-scout-export-surface",
+        "plan": "unbound-source-backlog",
+        "section": "\u00a72",
+        "node": "n-usb-scout-export-surface",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 707,
+                "cached_input_tokens": 260834,
+                "input_tokens": 261543,
+                "output_tokens": 2411,
+                "reasoning_output_tokens": 805,
+                "total_tokens": 263954,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/unbound-source-backlog/export-surface-reuse-map.md exists, is at least 60 lines, and for each of the open followups f-usb-export-refuses-a-name-with-no-producer and f-usb-a-manifest-must-be-fully-generable states DOES-REPRODUCE or ALREADY-FIXED with a file:line read at HEAD, lists every existing symbol a repair would reuse with its file:line, and proposes an exclusive write-path set",
+          "estimated_hours": null,
+          "goal": "produce the export-surface reuse map named in the done-when",
+          "id": "n-usb-scout-export-surface",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T09:03:13Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090312248779-n-usb-scout-export-surface/manifest.md",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a72",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/unbound-source-backlog/export-surface-reuse-map.md",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "s10c-local",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T09:03:22Z",
+        "completed_at": "2026-09-18T10:00:44.581Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3419,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3442,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "9705954c264bd4c51c78d68d9be23be54178c2ac",
+        "commits": [
+          "ff902fa9d309cd99e21372a7e76f8d4d17f4ad6b"
+        ],
+        "changed_lines": {
+          "added": 49,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reuse-map fence: exists, >=60 lines, a DOES-REPRODUCE/ALREADY-FIXED verdict per followup, >=10 file:line reads, a write-path proposal",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gate-usb-export-surface.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "both open export followups verified DOES-REPRODUCE at HEAD; 222-line reuse map, 17 reuse symbols, 50 file:line reads; corrected the source_free carve-out from graph_ops.py:26233-26238 to _structural_accept_route at 26690-26717, and found the four predicate inputs are already fetched at export.py:621,628 with no gate reading them - both verified independently by the coordinator; gate re-run at the merged head",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090312248779-n-usb-scout-export-surface/manifest.md",
+        "scope_changed": false,
+        "session_id": "86dbfeac-cc5f-4f35-af82-b3cc4c73e046",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 361841,
+            "input_tokens_cumulative": 361841,
+            "output_tokens": 2299,
+            "output_tokens_cumulative": 2299,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T10:00:44.581Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 361841,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 200.337,
+          "generated_tokens": 2299,
+          "generation_seconds": 199.305,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 16.9,
+          "machine_seconds": 1.032,
+          "peak_input_tokens": 81197,
+          "tokens_per_second": 11.54,
+          "wall_tokens_per_second": 11.48
+        },
+        "follow_on_paths": [
+          "calorimetry/group/component/energy_total/data",
+          "camera_x_rays/camera/camera_dimensions",
+          "docs/evidence/unbound-source-backlog/plan-figure-audit.md;"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-usb-scout-export-surface",
+          "session_id": "86dbfeac-cc5f-4f35-af82-b3cc4c73e046",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T10:00:44.581Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 6.0,
+        "orientation_input_tokens": 2207823.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -151151,6 +151355,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2288
+    "_version": 2289
   }
 }
