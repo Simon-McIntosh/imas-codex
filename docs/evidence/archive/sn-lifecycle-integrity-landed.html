@@ -545,6 +545,143 @@
     </figure>
     <p><strong>Gate.</strong> The change is <code>dd88d0d3f435628565eab4d2af1a6bbbbe226dcd</code>, two paths: <code>imas_codex/standard_names/edit.py</code> (+10) and <code>tests/standard_names/test_scoped_edit_keeps_its_scope.py</code> (+121). Focused gate: <strong>55 passed, 2 deselected, exit 0</strong> over the new file plus <code>test_*</code> for the inline review, the pinned rename/refine path and the scoped maintenance wiring. With the launch line reverted at the same revision the gate returns <strong>2 failed, exit 1</strong>, both failures landing on <code>assert kwargs.get("skip_global_maintenance") is True</code> → <code>AssertionError: assert None is True</code> — and in both, the <code>scope_run_id</code> and <code>cost_limit</code> assertions had already passed, so the recorders did reach the seam under test and the failure is the subject keyword rather than an unreached mock. The tests pin the launch at the boundary where <code>run_sn_pools</code> is called, from the CLI entry point and from the shared frame; the existing tests could not see the defect because they patch <code>run_inline_review</code> and <code>_run_scoped_pipeline</code>, so a forwarded keyword never reached an assertion.</p>
     <p><strong>What this does not establish.</strong> The gate measures this change only; the merged result belongs to a separately dispatched test node. It also does not repair the edits already escalated — the recovery for a staged edit that met the pass remains the scoped <code>sn run</code> above — and it does not decide the other three refusals in the same followup, whose preconditions are untouched. Logs: <code>gate-focused.log</code> and <code>gate-reverted.log</code> in <code>r-20260918T124756030814-n-sli-a-scoped-edit-keeps-its-scope</code>.</p>
+    <h2 id="collection-probe-is-bounded-and-names-its-cause">The collection-time probe is bounded, and its skip now names which fault it met</h2>
+    <p>The determinism measurement found that the failure base over six files was decided at collection by
+    one module-level probe. That measurement also named the three properties of the probe that made the
+    receipt unreadable, and all three are now repaired rather than explained.</p>
+    <p><strong>It was uncapped.</strong> No timeout surrounded a graph connection attempted at import, and the
+    login-node route took <strong>205.22 s</strong> for the single query. The read now runs on a daemon worker
+    with a bounded join against <code>PROBE_TIMEOUT_SECONDS = 10.0</code> (the repository's own ceiling for a
+    live-graph read), so an unreachable host costs the bound instead of the session: the caller stops
+    waiting, and the abandoned worker cannot hold interpreter shutdown open because it is a daemon. The
+    content question is also now an existence check (<code>LIMIT 1</code>) rather than a <code>count</code>
+    over the same predicate, which is what the 205 s was spent on.</p>
+    <p><strong>One string covered three faults.</strong> <code>DD-loaded graph not available</code> was emitted for
+    no route, no credential, and a reachable-but-empty graph alike, so a run's receipt could not say which
+    applied. The probe now returns a verdict — <code>ready</code>, <code>no-route</code>,
+    <code>no-credential</code>, <code>empty</code>, or <code>probe-failed</code> — whose reason text names the
+    condition and, when the graph answered, the host it measured:
+    <code>reachable-but-empty: the live graph at bolt://…:7687 answered but holds no DD content</code>.</p>
+    <p><strong>The route question was asked twice, and the second asking was the dangerous one.</strong> The
+    root conftest already answers whether a credential is configured and whether the host responds, once per
+    session — and it answers the credential question <em>without constructing a client</em>, because
+    authenticating with the packaged placeholder against the project graph is a failed login that trips the
+    server's own failed-attempt limiter. The probe now consults that session verdict for the route and
+    credential cases and only asks for content once the route is known good, so the classification has one
+    source of truth and a checkout with no credential never reaches a login attempt. A test asserts exactly
+    that: with the gate reporting no credential, the stand-in client is never constructed.</p>
+    <p>One probe per collection replaces one per decorated test: both gated tests now bind a single marker
+    built from the single verdict.</p>
+
+    <figure>
+      <svg viewBox="0 0 760 300" width="100%" role="img"
+           aria-label="Collection-time probe flow: the session gate is asked first; no credential ends at a skip that names the credential; unreachable ends at a skip that names the route; a reachable graph is then asked for DD content, which either skips as reachable-but-empty or lets the two tests run.">
+        <g font-family="system-ui, sans-serif" font-size="13" fill="#1a1a1a">
+
+          <rect x="24" y="126" width="132" height="46" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+                    <text x="90" y="145" text-anchor="middle" font-size="14" font-weight="600">collection</text>
+          <text x="90" y="162" text-anchor="middle" fill="#444">import of the test module</text>
+
+          <line x1="156" y1="149" x2="228" y2="149" stroke="#1a1a1a" stroke-width="1"/>
+          <polygon points="228,149 220,145 220,153" fill="#1a1a1a"/>
+
+          <rect x="228" y="126" width="150" height="46" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+          <text x="303" y="145" text-anchor="middle" font-size="13" font-weight="600">session gate</text>
+          <text x="303" y="162" text-anchor="middle" fill="#444">credential? route?</text>
+
+          <line x1="378" y1="140" x2="470" y2="60" stroke="#1a1a1a" stroke-width="1"/>
+          <polygon points="470,60 461,60 465,68" fill="#1a1a1a"/>
+          <text x="424" y="92" text-anchor="middle" fill="#8a1c1c" font-weight="600">unreachable</text>
+
+          <line x1="378" y1="149" x2="470" y2="149" stroke="#1a1a1a" stroke-width="1"/>
+          <polygon points="470,149 462,145 462,153" fill="#1a1a1a"/>
+          
+          <line x1="378" y1="158" x2="470" y2="238" stroke="#1a1a1a" stroke-width="1"/>
+          <polygon points="470,238 461,238 465,230" fill="#1a1a1a"/>
+          <text x="424" y="216" text-anchor="middle" fill="#8a1c1c" font-weight="600">no credential</text>
+
+          <rect x="470" y="26" width="266" height="68" fill="#ffffff" stroke="#8a1c1c" stroke-width="1.5"/>
+          <text x="486" y="48" font-weight="600" fill="#8a1c1c">no-route</text>
+          <text x="486" y="66" fill="#444">the host did not answer within</text>
+                    <text x="486" y="84" fill="#444">the session's own probe bound</text>
+
+          <rect x="470" y="115" width="266" height="68" fill="#ffffff" stroke="#8a1c1c" stroke-width="1.5"/>
+          <text x="486" y="137" font-weight="600" fill="#8a1c1c">empty</text>
+          <text x="486" y="155" fill="#444">reachable, answers, holds no</text>
+          <text x="486" y="173" fill="#444">DD content (LIMIT 1)</text>
+
+          <rect x="470" y="204" width="266" height="68" fill="#ffffff" stroke="#8a1c1c" stroke-width="1.5"/>
+          <text x="486" y="226" font-weight="600" fill="#8a1c1c">no-credential</text>
+          <text x="486" y="244" fill="#444">named without constructing a</text>
+          <text x="486" y="262" fill="#444">client, so no login is attempted</text>
+
+          <line x1="303" y1="172" x2="303" y2="286" stroke="#0b6e4f" stroke-width="1"/>
+          <polygon points="303,286 299,278 307,278" fill="#0b6e4f"/>
+          <rect x="228" y="238" width="150" height="48" fill="#ffffff" stroke="#0b6e4f" stroke-width="2"/>
+          <text x="303" y="258" text-anchor="middle" font-weight="600" fill="#0b6e4f">ready</text>
+          <text x="303" y="276" text-anchor="middle" fill="#444">both tests run</text>
+          <text x="318" y="216" fill="#0b6e4f" font-weight="600">route is up</text>
+        </g>
+      </svg>
+      <figcaption>Three faults, three verdicts, one bound. Each skip reason is built from the verdict the
+      probe reached, so the receipt names the condition rather than the fact that some condition applied.
+      Only <code>ready</code> lets the two gated tests run, and the host is named in the reason.</figcaption>
+    </figure>
+
+    <table>
+      <thead><tr><th>Condition</th><th>Verdict</th><th>Reason names</th><th>Asserted by</th></tr></thead>
+      <tbody>
+        <tr><td>host does not answer</td><td><code>no-route</code></td>
+            <td>the route, with the bound that expired</td>
+            <td><code>test_no_route_is_named_when_the_host_does_not_answer</code></td></tr>
+        <tr><td>no credential</td><td><code>no-credential</code></td>
+            <td>the credential, and that no login was attempted</td>
+            <td><code>test_no_credential_is_named_and_no_connection_is_attempted</code></td></tr>
+        <tr><td>reachable, no DD content</td><td><code>empty</code></td>
+            <td>the host that answered</td>
+            <td><code>test_reachable_but_empty_is_named_when_the_graph_holds_no_dd_content</code></td></tr>
+        <tr><td>content present</td><td><code>ready</code></td>
+            <td>the host and the content</td>
+            <td><code>test_ready_is_reported_when_dd_content_is_present</code></td></tr>
+        <tr><td>any other failure</td><td><code>probe-failed</code></td>
+            <td>the exception's own class</td>
+            <td><code>test_an_unclassified_failure_names_its_own_exception</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>The measure, and the half of it that could have failed</h3>
+    <p>A test that only ever passes is not evidence about a bound, so the same gate was run twice: once
+    against the changed probe at <code>82300dc33</code>, and once with the probe file restored
+    byte-for-byte to the pre-change revision (its blob hash <code>781442ff</code> was checked against
+    <code>HEAD</code> before the run, and the changed file was put back afterwards). Reverted, all
+    thirteen fail; with the change, all thirteen pass.</p>
+
+    <table>
+      <thead><tr><th>Run</th><th>Form</th><th>Result</th><th>Exit</th></tr></thead>
+      <tbody>
+        <tr><td>with the change</td>
+            <td><code>uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_seed_live_graph_probe.py</code></td>
+            <td>13 passed, 1 warning in 13.31s</td><td>0, captured</td></tr>
+        <tr><td>probe reverted to <code>781442ff</code></td>
+            <td>same command; the probe file written from that blob, its hash re-checked on disk
+            before the run and the changed revision restored and re-checked afterwards</td>
+            <td>13 failed, 1 warning in 10.16s</td><td>1, captured</td></tr>
+        <tr><td>the live route, measured</td>
+            <td>one probe against the login-node endpoint, through the module's own entry point</td>
+            <td><code>ready</code> at <code>bolt://98dci4-gpu-0002:7687</code>, 9.24 s wall clock</td>
+            <td>n/a</td></tr>
+      </tbody>
+    </table>
+
+    <p>The behaviour being changed is the one measured in
+    <a href="/imas-codex/evidence/sn-lifecycle-integrity/suite-base-determinism"
+       title="Three runs at one revision, a planted-failure control, and each coupling with its file and line">the six-file base measurement</a>: uncapped, slow, and one reason string for three conditions.
+    What this measure does not establish is that the bound is soon enough, or what the remaining cost is made
+    of: the 9.24 s is the whole probe on a route that was up, and it does not separate connection setup from
+    the read. A third form was run as a control - the probe module present but empty - and it failed all
+    thirteen as well, which is a weaker falsification than the byte-exact revert because the empty module
+    removes the code rather than restoring the previous code. The gate covers this node's own change;
+    verifying the merged result belongs to a separately dispatched test node.</p>
   </section>
   </main>
 </body>
