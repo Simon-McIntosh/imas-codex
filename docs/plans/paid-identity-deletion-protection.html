@@ -998,6 +998,17 @@
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260917T103407462401-review-of-n-audit-paid-identity-deletion-protection-headline-figures-are-remeasured" data-who="reckon-ship" data-when="2026-09-17T12:07:53.462Z">
     <div class="r-comment-body"><p>Independent review stored and re-verified: 5/5 dimensions, absent none, stored scores match reparse.</p></div>
 </div>
+<div class="r-comment" data-section="§4" data-id="c-run-r-20260918T124828432918-n-pidp-the-restore-reuse-map-stops-misleading" data-who="n-pidp-the-restore-reuse-map-stops-misleading" data-when="2026-09-18">
+    <div class="r-comment-body"><p><strong>The reuse map's central verdict is corrected: the archive-reconstruction row now reads REUSE, because the adapter it said had to be built has landed.</strong> The row names <code>_apply_archive_reconstruction</code> at <code>imas_codex/standard_names/signed_manifest.py:7235</code>, dispatched from <code>apply_signed_manifest</code> at <code>:7400</code> (<code>:7427</code>), and the machinery that makes it closed: the 34 relationship roles of <code>_ARCHIVE_EDGE_COUNTERPARTS</code> at <code>:205</code>, the per-type parity expectation seeded from that registry at <code>:7365</code>, and the exact mutation and guard set an apply must present at <code>:179</code>&ndash;<code>:180</code>. Archive-created nodes take <code>origin = 'pipeline'</code> at authority load (<code>:7015</code>), so the adapter itself carries the locked origin the map's invariants require.</p><table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody><tr><td>archive-reconstruction verdict</td><td><strong>CANNOT REUSE &rarr; REUSE</strong></td></tr>
+<tr><td>superseded recommendation to build the adapter</td><td><strong>0</strong> matches</td></tr>
+<tr><td>file:line references re-anchored and verified at <code>3e830a05</code></td><td><strong>53</strong>, each resolving to the symbol it names</td></tr>
+<tr><td>verdicts left standing</td><td>row 3 <strong>CANNOT REUSE UNCHANGED</strong> (the materializer's <code>parent.origin = 'derived'</code> write is still unconditional in both materializers); row 4 <strong>CANNOT REUSE AS THE COMPLETE RESTORE WRITER</strong></td></tr>
+<tr><td>new machinery the restore still must add</td><td>the restore-authorised <code>origin = 'pipeline'</code> postcondition at the existing persistence boundaries</td></tr>
+<tr><td>spend</td><td><strong>$0</strong></td></tr>
+</tbody></table>
+<p><strong>One claim was narrowed rather than copied forward.</strong> The catalog-edit reconcile now states its verified behaviour: it matches only <code>origin='catalog_edit'</code> (<code>graph_ops.py:13840</code>) and mirrors the computed <code>target_origin</code> (<code>:13892</code>). The materializer's origin writes were re-read at HEAD (<code>graph_ops.py:4013</code> with <code>:4215</code>; <code>:4369</code> with <code>:4404</code>). Anchored landing: <a href="/imas-codex/evidence/archive/paid-identity-deletion-protection-landed.html#restore-reuse-map-reanchored">the cumulative execution record</a>. Full map: <a href="/imas-codex/evidence/paid-identity-deletion-protection/restore-reuse-map.md">the restore reuse map</a>.</p>
+</div>
+</div>
 </section>
 </main>
 </body>
