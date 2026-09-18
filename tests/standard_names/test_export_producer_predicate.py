@@ -195,10 +195,60 @@ def test_refusal_disappears_when_the_predicate_is_reverted(tmp_path: Path) -> No
     assert "unentailed_leaf" in report.exported_names
 
 
+def test_candidate_carrying_no_evidence_keys_is_refused(tmp_path: Path) -> None:
+    """A candidate carrying none of the producing-source flags is withheld.
+
+    Those flags are what the population query projects, so a candidate carrying
+    none of them states nothing about whether any source entails it. An absent
+    flag is not a licence: a guard that catches only the explicit half of an
+    absent key is as open as no guard, which is the matter the catalog-status
+    and validation-observation branches were each repaired for.
+    """
+    report = _run_fixture_export(tmp_path, [_candidate("keyless_candidate")])
+    rows = {row["reason"]: row for row in report.to_dict()["exclusion_ledger"]}
+
+    assert rows["no_producing_source"]["identities"] == ["keyless_candidate"]
+    assert report.exported_names == []
+    assert report.exported_count == 0
+
+
+def test_keyless_refusal_disappears_with_the_key_presence_form(
+    tmp_path: Path,
+) -> None:
+    """The counterfactual is measured rather than argued.
+
+    Restoring the key-presence form -- a candidate carrying none of the keys is
+    admitted -- must let the keyless candidate back into the cut. If it does
+    not, the guard is not what refuses the keyless candidate and this
+    regression covers nothing.
+    """
+
+    def key_presence_form(candidate: dict) -> bool:
+        if not any(
+            key in candidate
+            for key in ("_has_derived_producer", "_has_non_derived_producer")
+        ):
+            return True
+        return bool(
+            candidate.get("_has_derived_producer")
+            or candidate.get("_has_non_derived_producer")
+            or candidate.get("_has_live_child")
+        )
+
+    with patch(
+        "imas_codex.standard_names.export._has_producing_source",
+        side_effect=key_presence_form,
+    ):
+        report = _run_fixture_export(tmp_path, [_candidate("keyless_candidate")])
+    rows = {row["reason"]: row for row in report.to_dict()["exclusion_ledger"]}
+    assert "no_producing_source" not in rows
+    assert "keyless_candidate" in report.exported_names
+
+
 def test_producer_predicate_reads_the_topology_flags() -> None:
     """The predicate is a read of the three flags the query already projects."""
-    # A caller's own pre-filtered projection carries no flag and is left alone.
-    assert _has_producing_source({"id": "projection_only"}) is True
+    # A projection carrying no flag at all is withheld, not admitted.
+    assert _has_producing_source({"id": "no_evidence_keys"}) is False
     # Producers of either kind entail a name; so does a live child.
     assert (
         _has_producing_source(

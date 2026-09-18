@@ -370,7 +370,40 @@
     <p class="r-meta">Worker: n-usb-export-refuses-a-name-with-no-producer &middot; 2026-09-18 &middot;
     revision <code>3e830a05a5f4b4700df25881baa2774bca2ff7de</code> &middot; commit
     <code>617fdaca9</code>.</p>
+    <section id="export-producer-fails-closed">
+    <h3>The producer predicate withholds a candidate carrying none of its evidence keys</h3>
+    <p>The producing-source predicate read its three topology flags through a key-presence test:
+    a candidate carrying none of the producing-source keys returned <code>True</code> before any
+    flag was examined. A candidate that states nothing about whether a source entails it was
+    therefore <strong>admitted</strong>, rather than withheld. The predicate now withholds it,
+    which is the form two other branches of this same classifier already read &mdash; the
+    catalog-status branch on <code>candidate.get("status") is None</code> and the
+    validation-observation branch on <code>candidate.get("_validation_observed_at") is None</code>
+    &mdash; each landed after a key-presence test let an omitted key pass a gate.</p>
+    <p><strong>The counterfactual is measured, not argued.</strong> With the fail-closed predicate
+    in place the file's seven tests pass (exit 0). Restoring the key-presence form in the source
+    makes exactly two fail &mdash; the new regression covering the missing-key case, and the unit
+    test that reads the flags &mdash; while the four tests already covering this predicate still
+    pass, because every one of their fixtures supplies all three flags explicitly (exit 1). That
+    asymmetry is the finding: the earlier five tests could not see this fail-open at all. The
+    source was then restored byte-identical, verified by sha256.</p>
+    <p><strong>The exposure is measured against the whole export surface.</strong> Every test file
+    under <code>tests/standard_names</code> that reaches the export classifier &mdash; 45 files,
+    432 collected tests &mdash; was run at the base revision and at this node's head, both on the
+    login node, from the same file list. Added failures: <strong>zero</strong>. The base carries 20
+    failures and the head 19, and the single set difference is this node's own flag-reading unit
+    test, which failed at the base precisely because the base predicate admitted a keyless
+    projection. No other fixture across the 45 files builds a candidate carrying none of these flags,
+    so the fail-open had no test reach anywhere in the surface, which is how it survived.
+    The 19 remaining failures are identical at both revisions and pre-existing; they sit outside
+    this node's write scope and are reported rather than triaged.</p>
+    <p>The gate command, exit status and log path for each run are recorded in the node's manifest.
+    No graph read was performed and no identity was mutated.</p>
+    <p class="r-meta">Worker: n-usb-the-producer-predicate-fails-closed &middot; 2026-09-18 &middot;
+    base revision <code>b468bfb5c1b86131ec16262149e778e9ea5e3dff</code> &middot; commit
+    <code>b161235bb</code>.</p>
   </section>
+</section>
 </main>
 
 </body>

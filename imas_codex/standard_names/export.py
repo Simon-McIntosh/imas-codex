@@ -760,9 +760,6 @@ def _fetch_graph_name_ids() -> set[str]:
     return {str(name) for name in row.get("ids") or [] if name}
 
 
-_PRODUCER_EVIDENCE_KEYS = ("_has_derived_producer", "_has_non_derived_producer")
-
-
 def _has_producing_source(candidate: dict[str, Any]) -> bool:
     """Whether a source is reachable that the name is entailed by.
 
@@ -770,13 +767,12 @@ def _has_producing_source(candidate: dict[str, Any]) -> bool:
     extraction that reached it or a derived producer that folded other evidence
     into it -- or, with no producer at all, by a structural child still live
     under it, since the child is what carries the evidence for a parent whose
-    own source edge is the hierarchy. A candidate carrying no producing-source
-    key at all comes from a caller's own pre-filtered projection rather than
-    from the population query, and is admitted here instead of being refused
-    for a flag that query never asked for.
+    own source edge is the hierarchy. A candidate carrying none of these flags
+    is withheld exactly as one carrying an explicit absence is: a guard that
+    catches only the explicit half of an absent key is as open as no guard, so
+    an absent flag is no more a licence here than an absent validation
+    observation is elsewhere in this classifier.
     """
-    if not any(key in candidate for key in _PRODUCER_EVIDENCE_KEYS):
-        return True
     return bool(
         candidate.get("_has_derived_producer")
         or candidate.get("_has_non_derived_producer")
