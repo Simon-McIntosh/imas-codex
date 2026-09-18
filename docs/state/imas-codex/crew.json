@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T14:34:18",
+  "updated": "2026-09-18T14:34:44",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -152107,6 +152107,19 @@
         "orientation_input_tokens": 382085.0,
         "store_write": {
           "status": "written"
+        },
+        "integrated_gate_check": {
+          "base_verdict": "passed",
+          "integrated_verdict": "passed",
+          "integrated_revision": "408c75da5778c1df7065cd07b3b75e4e04d8a488",
+          "checkout_revision": "408c75da5778c1df7065cd07b3b75e4e04d8a488",
+          "checkout_on_integrated_revision": true,
+          "gate_command": "uv run --no-sync pytest -p no:cacheprovider --no-header tests/standard_names/test_sn_approve_tag.py",
+          "ran": true,
+          "exit_status": 0,
+          "timed_out": false,
+          "reason": null,
+          "finding": null
         }
       },
       {
@@ -153211,6 +153224,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2306
+    "_version": 2307
   }
 }
