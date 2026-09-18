@@ -95,14 +95,30 @@ Compute-node discipline follows `~/.agents/AGENTS.md`. Repo-specific: check `~/.
 ### Login-node exception: work whose connection SLURM cannot serve
 
 **The login-node ban does not apply to work that cannot reach its dependency from a
-compute node.** The graph is the standing case: `NEO4J_URI` resolves through a
-**login-node-local tunnel** (`bolt://localhost:17687`), and a compute node cannot SSH
-out to establish its own, so *any* live-graph command fails on a SLURM partition
-before it does any work. Measured 2026-09-08: a census node's `all_debug` launch
-exited 1 having never reached the graph, and the failure reads as a credential or
-connection fault rather than as a placement error.
+compute node.** The graph is the standing case, and the exception holds for a
+different reason than it used to state. Measured 2026-09-18:
 
-So a task that must reach the live graph, or any other login-local endpoint, **runs
+- `NEO4J_URI` is **unset** — absent from the process environment and from `.env` — so
+  nothing resolves "through" it.
+- On the login node `GraphClient()` resolves `bolt://98dci4-gpu-0002:7687` and answers
+  `count(StandardName)` = 5130. No tunnel is in the path.
+- From a SLURM compute node the bolt port on the graph's host is **directly
+  reachable**, so a tunnel is not needed and "a compute node cannot reach the graph
+  host" is false.
+- Yet `GraphClient()` *inside* that same SLURM step resolves `bolt://localhost:17687`
+  and raises `ServiceUnavailable`: the client takes its remote auto-tunnel branch
+  there, `ssh iter` is refused on port 22, and it returns a loopback tunnel endpoint it
+  never established.
+
+So *any* live-graph command still fails on a SLURM partition before it does any work,
+and the failure reads as a credential or connection fault rather than as a placement
+error — measured 2026-09-08: a census node's `all_debug` launch exited 1 having never
+reached the graph. The cause is that resolution fallback rather than an obstacle in the
+path: repairing it would let heavy graph work return to a debug partition instead of
+loading a shared login node. Until `GraphClient()` connects from inside a SLURM step,
+this exception stands.
+
+A task that must reach the live graph, or any other login-local endpoint, **runs
 on the login node** — and it carries the burden the ban was protecting against
 instead:
 

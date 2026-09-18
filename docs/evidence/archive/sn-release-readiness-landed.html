@@ -1016,6 +1016,82 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       5130, against 5130 on the login node in the same evidence. Recorded in
       <a href="/imas-codex/evidence/sn-release-readiness/graph-client-slurm-resolution">the resolution record</a>.
     </p>
+    <h2 id="graph-access-guidance">The graph access guidance states what the client measurably does</h2>
+
+    <p>
+      The root <code>AGENTS.md</code> login-node exception explained itself wrongly:
+      it asserted that <code>NEO4J_URI</code> resolves through a login-node-local
+      tunnel at <code>bolt://localhost:17687</code>, and that a compute node cannot
+      reach the graph host. Four readings taken 2026-09-18, and reproduced in this
+      node's own worktree the same day, show that neither half holds while the
+      operational rule the exception states was re-measured true. Both files now
+      say so: the root file keeps the exception with its mechanism corrected and a
+      clause retiring it once <code>GraphClient()</code> connects from inside a SLURM
+      step, and <code>imas_codex/graph/AGENTS.md</code> scopes the direct connect to
+      the login node and records what a SLURM step actually resolves.
+    </p>
+
+    <table>
+      <caption>The four readings, with the instrument that took each</caption>
+      <thead>
+        <tr><th>Reading</th><th>Measured</th><th>Where and how</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>NEO4J_URI</code></td>
+          <td><strong>unset</strong> &mdash; absent from the process environment and
+              from <code>.env</code>, so nothing resolves "through" it</td>
+          <td><code>env | grep -c '^NEO4J_URI='</code> returns 0; the resolved URI is
+              the profile endpoint, not an escape-hatch override
+              (<code>profiles.py:433</code>)</td>
+        </tr>
+        <tr>
+          <td>Login-node resolution</td>
+          <td><code>bolt://98dci4-gpu-0002:7687</code>, <code>count(StandardName)</code>
+              = <strong>5130</strong>, no tunnel in the path</td>
+          <td><code>GraphClient()</code> on <code>98dci4-srv-1006</code>, one bounded
+              aggregate query</td>
+        </tr>
+        <tr>
+          <td>Compute-node reachability</td>
+          <td>the graph host's bolt port <strong>opens directly</strong> from a SLURM
+              step; <code>ssh iter</code> on port 22 is refused, so no tunnel is
+              needed and none can be built</td>
+          <td><code>/dev/tcp/98dci4-gpu-0002/7687</code> and an ssh attempt from
+              <code>all_debug</code> on <code>98dci4-clu-3141</code></td>
+        </tr>
+        <tr>
+          <td>Client inside that step</td>
+          <td>resolves <code>bolt://localhost:17687</code> and raises
+              <code>ServiceUnavailable</code></td>
+          <td>same step: the retry log names the branch &mdash;
+              <code>Auto-tunnel to iter:7687 failed. Returning tunnel URI
+              bolt://localhost:17687 (connection will fail until tunnel recovers)</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      So the exception stays in force and its stated mechanism does not: the cause is
+      a resolution fallback in the client that takes the remote auto-tunnel branch
+      inside a SLURM step, not an obstacle in the path. Repairing that fallback is a
+      separate node; until it lands, the guidance carries the measurement with its
+      date rather than a rule a reader has to re-derive. Every changed sentence in
+      both files cites one of these readings.
+    </p>
+
+    <p>
+      <strong>Measure.</strong> <code>grep -n 17687</code> across both files returns
+      <strong>3 hits</strong>, all inside the corrected passages: one in the root
+      file's SLURM bullet, and two in the graph file's corrected connection block
+      (the second is the pre-existing
+      <code>IMAS_CODEX_TUNNEL_BOLT_ITER=17687</code> override for remote hosts, which
+      the corrected block retains as correct). Changed lines: <code>AGENTS.md</code>
+      +24/&minus;8, <code>imas_codex/graph/AGENTS.md</code> +11/&minus;1 &mdash; 35
+      insertions and 9 deletions across the two files. Gate:
+      <code>tests/graph/test_guidance_matches_schema.py</code>, the one test that
+      reads both changed files, <strong>2 passed</strong> at <code>ecbc35967</code>.
+    </p>
 
   </main>
 </body>
