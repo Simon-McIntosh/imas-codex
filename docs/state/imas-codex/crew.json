@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T16:40:31",
+  "updated": "2026-09-18T16:41:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -156071,6 +156071,206 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T124828432918-n-pidp-the-restore-reuse-map-stops-misleading",
+        "plan": "paid-identity-deletion-protection",
+        "section": "\u00a74",
+        "node": "n-pidp-the-restore-reuse-map-stops-misleading",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 645,
+                "cached_input_tokens": 495712,
+                "input_tokens": 496359,
+                "output_tokens": 1549,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 497908,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/paid-identity-deletion-protection/restore-reuse-map.md no longer reads CANNOT REUSE on the archive-reconstruction question, every line reference in it resolves to the symbol it names at HEAD with the file:line stated, and a grep for the superseded recommendation to build the adapter returns 0; write the corrections into the file as each is established rather than holding them to the end",
+          "estimated_hours": null,
+          "goal": "correct the restore reuse map so it stops recommending machinery that has landed",
+          "id": "n-pidp-the-restore-reuse-map-stops-misleading",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T12:48:28Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T124828432918-n-pidp-the-restore-reuse-map-stops-misleading/manifest.md",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/paid-identity-deletion-protection/restore-reuse-map.md",
+            "docs/evidence/archive/paid-identity-deletion-protection-landed.html",
+            "docs/plans/paid-identity-deletion-protection.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "clive-c",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T12:48:35Z",
+        "completed_at": "2026-09-18T14:37:15.456Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6492,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6520,
+        "stalled": true,
+        "time_budget": "30m",
+        "base_sha": "3e830a05a5f4b4700df25881baa2774bca2ff7de",
+        "commits": [
+          "d3f3573a9b90e06a200f6ce4c4156f8bbd9cfdfa"
+        ],
+        "changed_lines": {
+          "added": 66,
+          "removed": 14,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reuse-map fence at the merged head: the archive-reconstruction row names the landed adapter, remaining cannot-reuse rows enumerated, file:line refs counted",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gates/reuse-map-merged.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the map no longer sends a reader to rebuild machinery that has landed: its archive-reconstruction row now names _apply_archive_reconstruction at signed_manifest.py:7235 instead of reading CANNOT REUSE, and its references are re-anchored against HEAD. Two cannot-reuse verdicts remain and are correct - they answer different questions, deriving a structural parent and writing origin under signed authority - which I verified rather than treating a nonzero grep as a miss. The node disclosed a time-fence overrun rather than hiding it",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T124828432918-n-pidp-the-restore-reuse-map-stops-misleading/manifest.md",
+        "scope_changed": false,
+        "session_id": "c84598fa-5b08-433b-b08d-e5d49d4bab78",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 7396750,
+            "input_tokens_cumulative": 14511530,
+            "output_tokens": 54621,
+            "output_tokens_cumulative": 115348,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T14:37:15.456Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 14815925,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 6515.584,
+          "generated_tokens": 132586,
+          "generation_seconds": 6488.311,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.6,
+          "machine_seconds": 27.273,
+          "peak_input_tokens": 151736,
+          "tokens_per_second": 20.43,
+          "wall_tokens_per_second": 20.35
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-pidp-the-restore-reuse-map-stops-misleading",
+          "session_id": "c84598fa-5b08-433b-b08d-e5d49d4bab78",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T14:37:15.456Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 168.0,
+        "orientation_input_tokens": 2568575.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -156355,6 +156555,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2338
+    "_version": 2339
   }
 }
