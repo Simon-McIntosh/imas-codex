@@ -13,6 +13,7 @@ import functools
 import json
 from collections.abc import Mapping, Sequence
 from contextlib import suppress
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
 from typing import Any
@@ -49,6 +50,63 @@ DELETION_OPERATIONS = frozenset(
 # migration nor be detached, so compare-and-set preflights count only the
 # bindings that could be the source's current realisation.
 _RETIRED_NAME_STAGES = frozenset({"superseded", "exhausted"})
+
+
+@dataclass(frozen=True)
+class SourceBindingConflict:
+    """A source a migration cannot move, and the live identity holding it."""
+
+    source_id: str
+    holding_identity: str
+    holding_stage: str | None
+    source_status: str | None
+    detail: str
+
+
+class SourceBindingConflictError(RuntimeError):
+    """Named outcome for a source already bound to a different live identity.
+
+    A source that binds a live identity other than the migration's predecessor
+    is an ordinary state on a supersede path: the operator must decide whether
+    the existing binding or the requested one is correct, and repeating the
+    migration changes nothing.  It is therefore reported through this named
+    type, carrying the holding identity and its stage, so a caller can withhold
+    a retry budget instead of treating a decision as a transient fault.
+
+    Deriving from ``RuntimeError`` keeps callers that do not yet distinguish
+    the two branches working unchanged; the type is the signal, not the
+    inheritance.
+    """
+
+    def __init__(self, conflicts: Sequence[SourceBindingConflict]) -> None:
+        self.conflicts: tuple[SourceBindingConflict, ...] = tuple(conflicts)
+        detail = "; ".join(item.detail for item in self.conflicts)
+        super().__init__(
+            "source migration compare-and-set failed: "
+            f"{len(self.conflicts)} source(s) already bound to a different live "
+            f"identity await adjudication — {detail}"
+        )
+
+
+def _live_foreign_bindings(
+    binding_state: Sequence[Mapping[str, Any]],
+    *,
+    expected: frozenset[str],
+) -> list[tuple[str, str | None]]:
+    """Live bindings of a source that the migration's own names do not hold.
+
+    Retired bindings are generations of a surviving name rather than a
+    competing claim, so only non-retired bindings outside ``expected`` block a
+    migration in a way an operator has to settle.
+    """
+    holders = {
+        (entry["id"], entry.get("name_stage"))
+        for entry in binding_state
+        if entry.get("id") is not None
+        and entry["id"] not in expected
+        and entry.get("name_stage") not in _RETIRED_NAME_STAGES
+    }
+    return sorted(holders, key=lambda item: (item[0], item[1] or ""))
 
 
 def guard_comparison_bindings(
@@ -411,6 +469,13 @@ def retarget_standard_name_sources(
     its expected current target are mandatory; implicit predecessor-wide
     migration is forbidden. The same completed manifest is idempotent, while a
     different manifest encountering its postcondition fails compare-and-set.
+
+    A source already bound to a different live identity is reported as an
+    adjudicable :class:`SourceBindingConflictError` naming the holding identity
+    and its stage, rather than as an anonymous fault: nothing about the source
+    changes between attempts, so it is a decision for an operator and must not
+    be answered by spending a retry budget. Any other ineligible preflight
+    state is a transient or malformed fault and raises ``RuntimeError``.
     """
     if not old_name or not new_name or old_name == new_name:
         raise ValueError("source migration requires two distinct name ids")
@@ -523,6 +588,7 @@ def retarget_standard_name_sources(
     pending: list[str] = []
     completed: list[str] = []
     conflicts: list[str] = []
+    binding_conflicts: list[SourceBindingConflict] = []
     for row in preflight_rows:
         source_id = row["source_id"]
         binding_state = row.get("binding_state")
@@ -550,6 +616,32 @@ def retarget_standard_name_sources(
             and row.get("manifest_recorded")
         ):
             completed.append(source_id)
+        elif (
+            row.get("source_exists")
+            and row.get("source_status") != "stale"
+            and not row.get("actively_claimed")
+            and (
+                holders := _live_foreign_bindings(
+                    binding_state or (),
+                    expected=comparison_expected_names,
+                )
+            )
+        ):
+            binding_conflicts.extend(
+                SourceBindingConflict(
+                    source_id=source_id,
+                    holding_identity=holder_id,
+                    holding_stage=holder_stage,
+                    source_status=row.get("source_status"),
+                    detail=(
+                        f"{source_id} is bound to {holder_id!r} at stage "
+                        f"{holder_stage!r} (source status="
+                        f"{row.get('source_status')!r}, bindings={bindings!r}, "
+                        f"scalar={scalar!r})"
+                    ),
+                )
+                for holder_id, holder_stage in holders
+            )
         else:
             conflicts.append(
                 f"{source_id}(exists={bool(row.get('source_exists'))}, "
@@ -560,6 +652,8 @@ def retarget_standard_name_sources(
     if conflicts or (pending and completed):
         details = ", ".join(conflicts) or "manifest is only partially applied"
         raise RuntimeError(f"source migration compare-and-set failed: {details}")
+    if binding_conflicts:
+        raise SourceBindingConflictError(binding_conflicts)
     if completed:
         return 0
 

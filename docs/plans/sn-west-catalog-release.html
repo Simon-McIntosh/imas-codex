@@ -52,6 +52,9 @@
   </ul>
 </section>
 <section id="release-contract">
+<div class="r-comment" data-section="release-contract" data-id="c-run-r-20260918T090919833112-n-a-binding-conflict" data-who="s14-conflict" data-when="2026-09-18T10:07:08Z">
+    <div class="r-comment-body"><p>A source already bound to a different live identity is now reported as a named conflict rather than an anonymous fault, and the retry budget is untouched by it. <code>retarget_standard_name_sources</code> raises <code>SourceBindingConflictError</code> carrying a <code>SourceBindingConflict</code> per holder, so the operator is told which identity holds the source and at what stage. The reproduction is paired on one row: at HEAD it raises a plain <code>RuntimeError</code> with no payload, in the worktree it names <code>live_holder</code> at stage <code>reviewed</code> and issues one statement (the preflight) before refusing. A concurrent claim, a stale row, a lost binding and a scalar mismatch still raise the anonymous fault — a live foreign binding is what distinguishes a decision from a transient fault. The budget instrument was controlled in both directions: 3 before and 3 after through the conflict, with zero write statements, against the same fake moving 5 to 6 when an attempt is charged.</p></div>
+</div>
   <h2>Release and fold-back contract</h2>
   <table>
     <thead><tr><th>Step</th><th>Authority</th><th>Receipt</th></tr></thead>
