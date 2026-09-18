@@ -239,6 +239,16 @@ _ARCHIVE_EDGE_COUNTERPARTS: dict[str, dict[str, str]] = {
     "HAS_DOCS_REVIEW_ADMISSION": {"outgoing": "DocsReviewAdmission"},
 }
 
+# Every role the reconstruction receipt accounts for, per archived identity.
+# Wider than the reconstruction registry above on purpose: ``EVIDENCED_BY`` is
+# held inbound from ``PromotionCandidate`` and has no reconstruction route, so
+# an edge can never carry it and the closure comparison can never see it. A role
+# absent from this set would leave the receipt silent about a loss it holds the
+# archive census for, which is the one shape this receipt exists to prevent.
+_ARCHIVE_PARITY_ROLES: frozenset[str] = frozenset(
+    set(_ARCHIVE_EDGE_COUNTERPARTS) | {"EVIDENCED_BY"}
+)
+
 _DD_RESIDUE_RELEASE_OPERATION = "release_legacy_dd_source_lifecycle"
 _DD_RESIDUE_SOURCE_IDS = frozenset(
     {
@@ -7182,8 +7192,10 @@ def _archive_reconstruction_preview(
     return manifest, sorted(refusals, key=lambda item: (item["row_id"], item["reason"]))
 
 
-def _archive_edge_counts(query: _Query, node_id: str) -> dict[str, int]:
-    types = sorted(_ARCHIVE_EDGE_COUNTERPARTS)
+def _archive_edge_counts(
+    query: _Query, node_id: str, *, roles: frozenset[str] | None = None
+) -> dict[str, int]:
+    types = sorted(_ARCHIVE_EDGE_COUNTERPARTS if roles is None else roles)
     rows = query.query(
         """// archive-reconstruction-edge-counts
         UNWIND $types AS relationship_type
@@ -7230,6 +7242,39 @@ def _archive_role_outcomes(
             "unreinstatable": unreinstatable,
         }
     return outcomes
+
+
+def _archive_role_parity(
+    authority: _ArchiveReconstructionAuthority,
+    observed: dict[str, dict[str, int]],
+) -> dict[str, dict[str, dict[str, int]]]:
+    """Per-identity expected-versus-observed count for every parity role.
+
+    ``expected`` is the count the identity must come back with: the archived
+    census where the archive record names the role, otherwise the count the
+    reconstruction closure itself carries. ``observed`` is the live count read
+    inside the transaction. A role that did not come back is a name carrying a
+    count rather than an omission, and a role neither side mentions is present
+    at zero, so the receipt shows the whole registry role set every time.
+    """
+    parity: dict[str, dict[str, dict[str, int]]] = {}
+    for node in authority.nodes:
+        identity = node["id"]
+        closure: dict[str, int] = {}
+        for edge in authority.edges:
+            if edge["owner_id"] == identity:
+                role = edge["relationship_type"]
+                closure[role] = closure.get(role, 0) + 1
+        archived = authority.archive_roles.get(identity, {})
+        live = observed.get(identity, {})
+        parity[identity] = {
+            role: {
+                "expected": archived.get(role, closure.get(role, 0)),
+                "observed": live.get(role, 0),
+            }
+            for role in sorted(_ARCHIVE_PARITY_ROLES | set(archived))
+        }
+    return parity
 
 
 def _apply_archive_reconstruction(
@@ -7366,8 +7411,12 @@ def _apply_archive_reconstruction(
                     for edge in authority.edges:
                         if edge["owner_id"] == node["id"]:
                             expected[edge["relationship_type"]] += 1
-                    live = _archive_edge_counts(query, node["id"])
-                    if live != expected:
+                    live = _archive_edge_counts(
+                        query, node["id"], roles=_ARCHIVE_PARITY_ROLES
+                    )
+                    if any(
+                        live.get(role, 0) != count for role, count in expected.items()
+                    ):
                         raise SignedManifestConflict(
                             "archive-versus-live relationship counts differ"
                         )
@@ -7384,6 +7433,7 @@ def _apply_archive_reconstruction(
                     ),
                     "counts": counts,
                     "identity_roles": _archive_role_outcomes(authority, reinstated),
+                    "identity_role_parity": _archive_role_parity(authority, reinstated),
                     "refusals": [],
                     "manifest_sha256": digest,
                 }

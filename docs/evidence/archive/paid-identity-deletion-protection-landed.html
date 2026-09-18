@@ -389,6 +389,104 @@
     figure &mdash; both need a re-derivation against the ledger and the census,
     which sits outside this change.</p>
   </section>
+
+  <section id="the-receipt-records-the-parity-it-proves">
+    <h2>The applied receipt records the per-role parity the guard proves</h2>
+    <p><strong>Landed 2026-09-18</strong> at
+    <code>da2b5619e7a8b76e692ce6fe661b166c9e16c146</code>, on the base
+    <code>3e830a05a5f4b4700df25881baa2774bca2ff7de</code>.</p>
+    <p>The archive reconstruction transaction already built, per archived
+    identity, an expected count for every reconstruction registry role, read the
+    live count inside the same transaction, and raised on any difference. The
+    comparison was a local variable, so an applied receipt named which roles
+    came back but never the role set they were measured against, and a role with
+    no reconstruction route appeared only in the <code>unreinstatable</code>
+    bucket rather than counted against the archive census that holds its loss.
+    Nothing recorded the parity the transaction had just proved.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>gate</td><td><code>tests/standard_names/test_restore_receipt_parity.py</code> together with <code>tests/standard_names/test_archive_reconstruction.py</code>: <strong>17 passed</strong> (13 pre-existing + 4 added)</td></tr>
+        <tr><td>reproduction at the base revision</td><td><strong>2 failed</strong> &mdash; <code>KeyError: 'identity_role_parity'</code> and <code>AttributeError: module ... has no attribute '_ARCHIVE_PARITY_ROLES'</code>; the two guard tests passed there, as they must</td></tr>
+        <tr><td>roles the receipt counts per identity</td><td><strong>35</strong> &mdash; the 34 reconstruction registry roles plus <code>EVIDENCED_BY</code></td></tr>
+        <tr><td>explicit zeros</td><td>present: a role neither the archive census nor the closure mentions is reported at <code>0</code>/<code>0</code> rather than omitted</td></tr>
+        <tr><td>refusals preserved</td><td>a consolidation of the guard, unchanged in effect: a live count differing from the archive census still raises, and a registry-external relationship is still refused as an edge</td></tr>
+        <tr><td>spend</td><td><strong>$0</strong> &mdash; no LLM call on this node</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The applied receipt carries <code>identity_role_parity</code>: one
+    entry per archived identity, and one entry per parity role carrying
+    <code>expected</code> and <code>observed</code>.</strong> <code>expected</code>
+    is the count the identity must come back with &mdash; the archive census where
+    the archive record names the role, otherwise the count the reconstruction
+    closure carries &mdash; and <code>observed</code> is the live count read
+    inside the transaction. Where the two differ for a role no closure can carry,
+    the difference <em>is</em> the loss, printed as a number rather than left to a reader.</p>
+    <figure>
+      <svg viewBox="0 0 760 260" role="img" aria-labelledby="par-t">
+        <title id="par-t">Expected and observed counts meet at one parity comparison per archived identity</title>
+        <defs>
+          <marker id="par-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#888"/>
+          </marker>
+          <marker id="par-ar-w" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#c60"/>
+          </marker>
+        </defs>
+        <text x="120" y="20" font-size="11" text-anchor="middle" fill="#555">expected &#183; where it comes from</text>
+        <text x="380" y="20" font-size="11" text-anchor="middle" fill="#555">parity, per identity, inside the transaction</text>
+        <text x="640" y="20" font-size="11" text-anchor="middle" fill="#555">observed &#183; live graph</text>
+        <rect x="20" y="34" width="200" height="42" fill="#fff" stroke="#888"/>
+        <text x="120" y="52" font-size="12" text-anchor="middle">archive census</text>
+        <text x="120" y="68" font-size="11" text-anchor="middle" fill="#666">per archived identity</text>
+        <rect x="20" y="96" width="200" height="42" fill="#fff" stroke="#888"/>
+        <text x="120" y="114" font-size="12" text-anchor="middle">reconstruction closure</text>
+        <text x="120" y="130" font-size="11" text-anchor="middle" fill="#666">the routes that can carry a role</text>
+        <rect x="20" y="158" width="200" height="42" fill="#fff" stroke="#c60" stroke-dasharray="5 3"/>
+        <text x="120" y="176" font-size="12" text-anchor="middle" fill="#c60">no route &#183; EVIDENCED_BY</text>
+        <text x="120" y="192" font-size="11" text-anchor="middle" fill="#666">inbound, never closure-counted</text>
+        <rect x="285" y="76" width="190" height="100" fill="#fff" stroke="#2a6"/>
+        <text x="380" y="106" font-size="12" text-anchor="middle">expected = archive census</text>
+        <text x="380" y="126" font-size="12" text-anchor="middle">else closure count</text>
+        <text x="380" y="152" font-size="11" text-anchor="middle" fill="#666">any difference raises</text>
+        <rect x="560" y="76" width="180" height="100" fill="#fff" stroke="#888"/>
+        <text x="650" y="106" font-size="12" text-anchor="middle">live edge counts</text>
+        <text x="650" y="126" font-size="12" text-anchor="middle">over the parity roles</text>
+        <text x="650" y="152" font-size="11" text-anchor="middle" fill="#666">read in the same transaction</text>
+        <line x1="220" y1="55" x2="279" y2="96" stroke="#888" marker-end="url(#par-ar)"/>
+        <line x1="220" y1="117" x2="279" y2="122" stroke="#888" marker-end="url(#par-ar)"/>
+        <line x1="220" y1="179" x2="279" y2="152" stroke="#c60" marker-end="url(#par-ar-w)"/>
+        <line x1="554" y1="126" x2="481" y2="126" stroke="#888" marker-end="url(#par-ar)"/>
+        <rect x="285" y="204" width="455" height="42" fill="#fff" stroke="#888"/>
+        <text x="512" y="222" font-size="12" text-anchor="middle">receipt &#183; identity_role_parity</text>
+        <text x="512" y="238" font-size="11" text-anchor="middle" fill="#666">{expected, observed} per role, zeros included</text>
+        <line x1="380" y1="176" x2="400" y2="200" stroke="#888" marker-end="url(#par-ar)"/>
+        <text x="120" y="226" font-size="11" text-anchor="middle" fill="#666">one archived identity</text>
+        <text x="120" y="242" font-size="11" text-anchor="middle" fill="#666">repeat the row above per identity</text>
+      </svg>
+      <figcaption>Two expected sources meet one observed read. The archive census
+      supplies the expected count for a role the archive record names; the
+      reconstruction closure supplies it otherwise, and for a role no closure can
+      carry the expected count comes only from the census &mdash; which is how
+      <code>EVIDENCED_BY</code> reaches the receipt although no edge can carry it.
+      The comparison is unchanged and still raises on any difference; what is new
+      is that its two sides are written to the receipt.</figcaption>
+    </figure>
+    <p><strong>Every reused symbol is cited in
+    <a href="/imas-codex/evidence/paid-identity-deletion-protection/restore-receipt-reuse-map.md">the
+    reuse map</a></strong>: the transaction entry
+    <code>_apply_archive_reconstruction</code> and its public caller
+    <code>apply_signed_manifest</code>; the read the parity reuses,
+    <code>_archive_edge_counts</code>; the reinstated-role builder
+    <code>_archive_role_outcomes</code> whose <code>identity_roles</code> receipt
+    field this change sits beside; and the registry the guard was already defined
+    over, <code>_ARCHIVE_EDGE_COUNTERPARTS</code>. Added by this change and named
+    there too: <code>_ARCHIVE_PARITY_ROLES</code>, the wider role set the receipt
+    counts; <code>_archive_role_parity</code>, the builder that produces the
+    receipt field; and <code>identity_role_parity</code>, the field itself. The
+    map records, for each, where it was, what it does, and what stayed the same;
+    no symbol it names was renamed or re-scoped.</p>
+  </section>
 </main>
 </body>
 </html>
