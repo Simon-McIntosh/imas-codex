@@ -114,6 +114,39 @@ not reproduce it: doing so needs a second provisioned tree, which is outside its
 scope. It is reported as a candidate, and the number it would explain (the extra 14) is
 not reproducible at this revision in this environment.
 
+## A second host property, reported by a peer after this was written
+
+This result establishes that the base is reproducible **at one revision, on one host
+class, under the load condition these runs saw**. A peer coordinator measured a second
+property of the same tier that the three runs above could not have seen, and it is
+recorded here rather than left in a message.
+
+`tests/standard_names/conftest.py:54`, the autouse fixture `_bound_synthetic_model_exposure`,
+imports `imas_codex.discovery.base.llm` and through it litellm, openai and a pydantic model
+build. Every test in the tier pays that import in **setup**. Under filesystem contention it
+exceeds the repository's own 30 s per-test timeout and raises
+`Failed: Timeout (>30.0s) from pytest-timeout` before any test body runs. Measured the same
+day: `import imas_codex.discovery.base.facility` took **84.2 s wall against 3.3 s user CPU**
+— I/O wait on a loaded GPFS, not compute. The attribution control is what makes it
+environmental rather than a change: the same fixture errored identically on a module the
+measuring node did not touch. At `--timeout=600` four of five tests passed and only the
+expensive-import setup still failed, and in that same run an unmodified test failed on
+`subprocess.TimeoutExpired` for `git branch --show-current`.
+
+So there are now **two** host properties in this tier with different signatures. The one
+measured above changes which tests *skip*; this one changes which tests *error in setup*.
+Neither is flakiness and both are invisible in a bare failure count.
+
+**The consequence is one line longer than this record originally carried.** A suite figure
+from this tier needs its **load condition** stated alongside its host class, or the delta it
+supports is not attributable. The three runs above were taken on `all_debug` in one window
+and agreed; that agreement is evidence about that window, and a base taken during contention
+is not the same base. The reproducibility established here is real and it is conditional,
+and the condition is now named.
+
+An autouse fixture doing a heavyweight import is a design question rather than a timeout to
+raise, and it is not repaired here.
+
 ## Provenance
 
 Revision `4c9d1dabb4ab0afb679ccf15b85eb552e585169c`, worktree
