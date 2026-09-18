@@ -321,6 +321,57 @@
     <code>9705954c264bd4c51c78d68d9be23be54178c2ac</code> &middot; commit
     <code>8d3d0b3</code>.</p>
   </section>
+  <section id="export-producer-predicate">
+    <h2>The export gate refuses a candidate no source is reachable for</h2>
+    <p><strong>The defect reproduced before it was repaired.</strong> The scout's read at
+    revision <code>9705954c</code> is the reproduction, and it is a single sentence: the producer
+    evidence is already fetched onto every candidate record and then never read by the gate that
+    decides eligibility, because the population query computes the producer and topology flags and
+    the eligibility classifier reads none of them, so a name nothing in the data dictionary
+    justifies can still reach a catalog. The repair is therefore an addition onto code already on
+    the path, not a new mechanism.</p>
+    <p>The population query now also projects the live-child flag, using the same retired-stage set
+    the graph's own structural acceptance excludes, and the classifier refuses a candidate that
+    carries producing-source evidence and shows neither a <code>PRODUCED_NAME</code> edge of either
+    kind nor a live child. Such a name is entailed by nothing, so a cut must not carry it.  The
+    refusal is recorded on the existing eligibility ledger as <code>no_producing_source</code>,
+    which keeps the identity accounted for rather than silently dropped.</p>
+    <p><strong>The carve-out the predicate must respect.</strong> A structural parent with live
+    children is legitimately source-free — its own source edge <em>is</em> the hierarchy and the
+    child carries the evidence — so admitting it is the same rule the graph's structural acceptance
+    applies, applied now to the cut. A candidate carrying none of the producing-source keys at all
+    comes from a caller's own pre-filtered projection rather than from the population query, and is
+    left to the clauses that own it: this follows the compatibility convention the classifier was
+    already written to, rather than refusing a row over a flag its query never asked for.</p>
+    <figure>
+      <img src="/imas-codex/figures/unbound-source-backlog/export-producer-predicate.svg"
+           alt="Three candidate topologies and the admission verdict for each: no producer and no live child is refused; a producer edge or a live child under a source-free parent is admitted."/>
+      <figcaption>The three candidate classes the predicate separates, and why the third is not a
+      fault. Reused symbols, cited per the map below: the identity universe query
+      <code>_fetch_export_population</code> with its producer and topology projections, the
+      eligibility partition <code>_classify_export_population</code>, the cut entry point
+      <code>run_export</code>, and the canonical live-child stage set in
+      <code>imas_codex/standard_names/pools.py</code>; the source-free definition is the one
+      <code>_structural_accept_route</code> already applies in <code>graph_ops.py</code>.</figcaption>
+    </figure>
+    <p><strong>What was measured, and in which direction.</strong> The new test file passes with the
+    predicate in place (5 passed, exit 0). Reverting the predicate to its permissive form — every
+    candidate entailed — fails three of those five, the end-to-end refusal among them (exit 1), so
+    the refusal is attributable to the predicate rather than to the fixture; the file was then
+    restored byte-identical by digest. The adjacent export surface, which exercises the same
+    classifier, is unchanged: 108 tests across the eligibility, exclusion-ledger, bound-adjacent,
+    release-hold, docs-review, tombstone, sidecar, resolution-method, exit-accounting and
+    domain-resolution files all pass.</p>
+    <p>The gate measures this node's own change only. Verifying the merged result, and the census of
+    how many live identities the new clause excludes, belong to a separately dispatched node; no
+    graph read was performed here and no identity was mutated.</p>
+    <p>Full map of the surface, with the per-symbol <code>file:line</code> inventory this repair
+    drew on: <a href="/imas-codex/evidence/unbound-source-backlog/export-surface-reuse-map">export-surface-reuse-map.html</a>.</p>
+    <p class="r-meta">Worker: n-usb-export-refuses-a-name-with-no-producer &middot; 2026-09-18 &middot;
+    revision <code>3e830a05a5f4b4700df25881baa2774bca2ff7de</code> &middot; commit
+    <code>617fdaca9</code>.</p>
+  </section>
 </main>
+
 </body>
 </html>
