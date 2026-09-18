@@ -487,6 +487,41 @@
     map records, for each, where it was, what it does, and what stayed the same;
     no symbol it names was renamed or re-scoped.</p>
   </section>
+  <section id="restore-reuse-map-reanchored">
+    <h2>The restore reuse map's central verdict is corrected: the reconstruction adapter it said had to be built has landed</h2>
+    <p><strong>Measured 2026-09-18</strong> at
+    <code>3e830a05a5f4b4700df25881baa2774bca2ff7de</code>, the map's original
+    authority revision <code>271536947e417ddb36a3091c1559fc606f62c475</code> was
+    re-anchored line by line at HEAD by exact line-text matching. Every
+    <code>file:line</code> reference was then printed beside its HEAD source line
+    and accepted only where it named the symbol the map claims.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>archive-reconstruction verdict</td><td><strong>CANNOT REUSE &rarr; REUSE</strong></td></tr>
+        <tr><td>the route that now supplies it</td><td><code>_apply_archive_reconstruction</code> — <code>signed_manifest.py:7235</code>, reached through <code>apply_signed_manifest</code> (<code>:7400</code>, dispatch <code>:7427</code>)</td></tr>
+        <tr><td>what makes the adapter closed</td><td>34 relationship roles at <code>:205</code>; per-type parity seeded from that registry at <code>:7365</code>; the mutation and guard set at <code>:179</code>&ndash;<code>:180</code></td></tr>
+        <tr><td>the restored origin the map's invariants require</td><td>nodes normalise to <code>origin = 'pipeline'</code> at authority load, <code>:7015</code></td></tr>
+        <tr><td>superseded recommendation to build the adapter</td><td><strong>0</strong> matches</td></tr>
+        <tr><td><code>file:line</code> refs verified</td><td><strong>53</strong>, each resolving to the symbol it names</td></tr>
+        <tr><td>verdicts left standing</td><td>rows 3 and 4 only: the structural-parent materializer, and the signed writer as a complete restore writer</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Rows 3 and 4 keep their CANNOT REUSE verdicts, and both were
+    re-derived rather than carried forward.</strong> The canonical materializer
+    writes <strong>parent.origin='derived'</strong> unconditionally in both
+    materializers (<code>graph_ops.py:4013</code> with <code>:4215</code>;
+    <code>:4369</code> with <code>:4404</code>), contradicting the locked
+    <code>origin='pipeline'</code> decision; and the generic signed writer still
+    refuses a missing participant at <code>signed_manifest.py:3523</code>. One
+    claim was narrowed rather than repeated: the catalog-edit reconcile matches
+    only <code>origin='catalog_edit'</code> (<code>graph_ops.py:13840</code>) and
+    mirrors its computed <code>target_origin</code> (<code>:13892</code>). So the
+    only machinery the restore implementation is still justified in adding is the
+    restore-authorised <code>origin='pipeline'</code> postcondition at the map's
+    existing persistence boundaries.</p>
+    <p>Full map, with every anchor: <a href="/imas-codex/evidence/paid-identity-deletion-protection/restore-reuse-map.md">the restore reuse map</a>.</p>
+  </section>
 </main>
 </body>
 </html>
