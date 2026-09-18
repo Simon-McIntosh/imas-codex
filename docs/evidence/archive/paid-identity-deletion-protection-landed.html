@@ -172,6 +172,44 @@
     <a href="/imas-codex/evidence/paid-identity-deletion-protection/unreinstatable-role-gap.md">the
     unreinstatable-role evidence</a>.</p>
   </section>
+
+  <section id="derived-origin-readers-at-head">
+    <h2>Every reader of <code>origin</code> is enumerated at HEAD, and the plan's 75-line figure is a two-word grep rather than a read count</h2>
+    <p><strong>Measured 2026-09-18</strong> at
+    <code>4c9d1dabb4ab0afb679ccf15b85eb552e585169c</code>. The 2026-09-08 census
+    (<code>origin-label-audit.md</code>, revision
+    <code>271536947e417ddb36a3091c1559fc606f62c475</code>),
+    was re-anchored line by line at HEAD by exact line-text matching, because its
+    pointers had drifted by up to 571 lines. Each row was then classified by
+    whether the decision it feeds is a deletion or something else.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>figure audit's proxy, verbatim</td><td><strong>75</strong>, reproduces at HEAD</td></tr>
+        <tr><td>distinct <code>origin</code> read lines</td><td><strong>54</strong></td></tr>
+        <tr><td>non-deletion decisions</td><td><strong>52</strong> across 34 decision paths</td></tr>
+        <tr><td>deletion predicate reads (the §7a target)</td><td><strong>2</strong> — <code>graph_ops.py:3810</code>, <code>4160</code></td></tr>
+        <tr><td>read sites the prior census missed</td><td><strong>2</strong> — <code>workers.py:9973</code>, <code>signed_manifest.py:371</code></td></tr>
+        <tr><td>writes / comments / computed targets excluded</td><td><strong>6</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The proxy and the census answer different questions, and the gap runs both ways.</strong>
+    <code>grep -rnE 'origin.*derived|derived.*origin' imas_codex/standard_names/ --include=*.py</code>
+    counts lines carrying two words, so it includes writes, comments, docstrings
+    and cross-node <code>origin</code> fields, while missing reads that compare
+    against a bound parameter instead of the literal <code>'derived'</code>. A
+    repoint cannot be planned from it in either direction.</p>
+    <p><strong>Two readers change safety posture once the label can be false.</strong>
+    <code>attachment_audit.py:2446</code> treats a childful derived row as
+    structurally anchored and can detach a DD realization's last source without
+    the ordinary orphan refusal; <code>graph_ops.py:26713</code> can structurally
+    accept a DD-produced identity. Both consult the scalar where the topology it
+    stands for is the fact in question.</p>
+    <p>Reader table with one clause per decision, the exclusion list, and the
+    proxy reproduction:
+    <a href="/imas-codex/evidence/paid-identity-deletion-protection/derived-origin-readers.md">the
+    derived-origin reader census</a>.</p>
+  </section>
 </main>
 </body>
 </html>
