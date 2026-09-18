@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T12:37:11",
+  "updated": "2026-09-18T14:31:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -151493,6 +151493,210 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T090342097911-n-sli-scout-scoped-edit-surface",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-scout-scoped-edit-surface",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 707,
+                "cached_input_tokens": 260834,
+                "input_tokens": 261543,
+                "output_tokens": 2411,
+                "reasoning_output_tokens": 805,
+                "total_tokens": 263954,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-lifecycle-integrity/scoped-edit-reuse-map.md exists, names every hop of the call chain from the sn edit CLI entry point to run_sn_pools with file:line read at HEAD, states DOES-REPRODUCE or ALREADY-FIXED for the missing skip-global-maintenance forwarding described in followup f-sli-the-sanctioned-surface-has-four-holes, lists every existing flag-forwarding symbol a repair would reuse with its file:line, and proposes an exclusive write-path set",
+          "estimated_hours": null,
+          "goal": "produce the scoped-edit reuse map named in the done-when",
+          "id": "n-sli-scout-scoped-edit-surface",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T09:03:42Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090342097911-n-sli-scout-scoped-edit-surface/manifest.md",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a75",
+          "spec_level": "guided",
+          "time_budget": "25m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-lifecycle-integrity/scoped-edit-reuse-map.md",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "s10c-local-b",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T09:03:48Z",
+        "completed_at": "2026-09-18T10:57:54.547Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5613,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6846,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "9705954c264bd4c51c78d68d9be23be54178c2ac",
+        "commits": [
+          "891a8a0e5c23519c97adf7d0f3133791cb849d66"
+        ],
+        "changed_lines": {
+          "added": 21,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "evidence fence re-run at the merged head: file exists, >=60 lines, required marker present, file:line reads counted",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gates/scoped-edit.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "DOES-REPRODUCE: edit.py:3740-3747 passes scope_run_id and five other keywords but not skip_global_maintenance, and no upstream frame accepts the parameter, so a scoped edit still escalates into an unscoped maintenance pass; 160-line map with the full call chain and a proposed write-path set",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090342097911-n-sli-scout-scoped-edit-surface/manifest.md",
+        "scope_changed": false,
+        "session_id": "088b9dae-1a0c-4bb6-b525-50a5cdce1953",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 2716451,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 45421,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T10:57:54.547Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3006519,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 6842.09,
+          "generated_tokens": 66863,
+          "generation_seconds": 6357.881,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 28.3,
+          "machine_seconds": 484.209,
+          "peak_input_tokens": 135879,
+          "tokens_per_second": 10.52,
+          "wall_tokens_per_second": 9.77
+        },
+        "follow_on_paths": [
+          "imas_codex/cli/sn.py",
+          "imas_codex/standard_names/edit.py",
+          "tests/standard_names/test_scoped_global_maintenance.py."
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-sli-scout-scoped-edit-surface",
+          "session_id": "088b9dae-1a0c-4bb6-b525-50a5cdce1953",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T10:57:54.547Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 45.0,
+        "orientation_input_tokens": 1760635.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -151777,6 +151981,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2293
+    "_version": 2294
   }
 }
