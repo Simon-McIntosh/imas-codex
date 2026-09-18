@@ -257,6 +257,16 @@ def _get_tunnel_ports(
         # paste-img on iter POSTs the path back via /copy to return it to Windows clipboard.
         ports.append((clip_port, clip_port, "wsl-clip", "localhost", "R"))
 
+    if all_services:
+        from imas_codex.settings import get_wsl_ssh_port
+
+        ssh_port = get_wsl_ssh_port()
+        # Reverse forward to the client's own sshd, so a session on the login
+        # node can inspect the client when diagnosing a connection fault. Part
+        # of the default set rather than a flag of its own: it is wanted
+        # whenever the full tunnel set is, and never on its own.
+        ports.append((ssh_port, ssh_port, "wsl-ssh", "localhost", "R"))
+
     return ports
 
 
@@ -290,7 +300,7 @@ def _requested_services(
         and not ink_only
         and not clipboard_only
     ):
-        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "wsl-clip"}
+        return {"neo4j", "embed", "llm", "vllm", "docs", "ink", "wsl-clip", "wsl-ssh"}
     selected: set[str] = set()
     if neo4j_only:
         selected.add("neo4j")
@@ -1100,6 +1110,7 @@ def tunnel_status() -> None:
         get_llm_proxy_port,
         get_vllm_port,
         get_wsl_clip_port,
+        get_wsl_ssh_port,
     )
 
     embed_port = get_embed_server_port()
@@ -1108,6 +1119,7 @@ def tunnel_status() -> None:
     docs_port = get_docs_server_port()
     ink_port = get_ink_display_port()
     wsl_clip_port = get_wsl_clip_port()
+    wsl_ssh_port = get_wsl_ssh_port()
 
     # Build port→label map using the same resolution as tunnel_start
     # so that labels match (graph name "codex", not location "iter").
@@ -1139,6 +1151,7 @@ def tunnel_status() -> None:
     known_ports[ink_port] = "ink"
     # wsl-clip-server is a reverse tunnel — bound on the remote (iter) side.
     known_ports[wsl_clip_port] = "wsl-clip (reverse)"
+    known_ports[wsl_ssh_port] = "wsl-ssh (reverse)"
 
     # Build port→location map for SSH-forwarded ports so we can show
     # "iter" (or whichever host) instead of a generic "(ssh)" marker.
@@ -1151,7 +1164,15 @@ def tunnel_status() -> None:
         # Same-port forwards (no TUNNEL_OFFSET offset) — embed, llm, vllm
         # already land above TUNNEL_OFFSET (e.g. 18765, 18400), but docs
         # and ink live at 8765/8766 by default and would fall through to "(ssh)".
-        for p in (embed_port, llm_port, vllm_port, docs_port, ink_port, wsl_clip_port):
+        for p in (
+            embed_port,
+            llm_port,
+            vllm_port,
+            docs_port,
+            ink_port,
+            wsl_clip_port,
+            wsl_ssh_port,
+        ):
             port_host[p] = host
     except Exception:
         pass

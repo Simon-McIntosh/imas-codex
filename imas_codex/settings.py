@@ -785,6 +785,28 @@ def get_wsl_clip_port() -> int:
     return WSL_CLIP_BASE_PORT
 
 
+# ─── ssh-back reverse tunnel settings ──────────────────────────────────────
+# The client runs an sshd that the login node reaches through a reverse
+# forward, so work on the login node can read the client's own configuration
+# and logs when diagnosing a connection fault from the side that sees it.
+# Bound on the remote loopback only, never routable from another host.
+
+WSL_SSH_BASE_PORT = 2222
+
+
+def get_wsl_ssh_port() -> int:
+    """Get the port the login node uses to reach the client's sshd.
+
+    Priority: IMAS_CODEX_WSL_SSH_PORT env → [wsl-ssh].port → 2222.
+    """
+    if env := os.getenv("IMAS_CODEX_WSL_SSH_PORT"):
+        return int(env)
+    port = _get_section("wsl-ssh").get("port")
+    if port:
+        return int(port)
+    return WSL_SSH_BASE_PORT
+
+
 # ─── ink display server settings ───────────────────────────────────────────
 
 INK_DISPLAY_BASE_PORT = 8766
