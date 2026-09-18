@@ -181,6 +181,7 @@ GATE_D = "divergence_detection"
 GATE_EXCLUSION_ACCOUNTING = "exclusion_accounting"
 GATE_IDENTITY_TOKEN_COLLISION = "identity_token_collision"
 GATE_CATALOG_STATUS = "catalog_status"
+GATE_MANIFEST_GENERABILITY = "manifest_generability"
 
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
@@ -313,13 +314,21 @@ class ExclusionRecord:
 
 @dataclass(frozen=True)
 class SourceDispositionRecord:
-    """One manifest source accounted by the review export."""
+    """One manifest source accounted by the review export.
+
+    ``source_status`` is the source's own lifecycle status, which is what
+    separates a refusal the pipeline recorded from a composition that was never
+    attempted. It is not part of the reconciliation row schema because that
+    schema is read as a stable contract; the status reaches the report through
+    the generability verdict, which names it beside the mechanism it implies.
+    """
 
     source_path: str
     disposition: str
     standard_name_id: str | None = None
     terminal_stage: str | None = None
     reason: str = ""
+    source_status: str | None = None
 
     def to_dict(self) -> dict[str, str | None]:
         return {
@@ -366,6 +375,10 @@ class ExportReport:
     source_disposition_records: list[SourceDispositionRecord] = field(
         default_factory=list
     )
+    # Generability verdict for a manifest-driven cut, or None when the export
+    # was not given a manifest at all. A cut with no manifest carries no source
+    # obligation and is not asserted generable.
+    manifest_generability: dict[str, Any] | None = None
 
     def record_exclusions(self, records: list[ExclusionRecord]) -> None:
         """Append identity-bearing exclusions and refresh compatibility counts."""
@@ -434,6 +447,7 @@ class ExportReport:
                     )
                 ],
             },
+            "manifest_generability": self.manifest_generability,
             "role_metadata": {
                 "entries": self.role_entry_count,
                 "counts": dict(sorted(self.role_counts.items())),
@@ -2373,6 +2387,112 @@ def _write_manifest(
     return filepath
 
 
+# =============================================================================
+# Manifest generability
+# =============================================================================
+
+# The closed set of mechanisms a source can be blocked by, and the exact
+# evidence in the disposition row that establishes each. A source reaching a
+# name is not a mechanism; it is what the set exists to account for.
+#
+#   recorded_refusal            the pipeline refused and wrote down why
+#   refusal_cause_not_recorded  refused, and the cause did not survive
+#   attempt_budget_exhausted    the successor chain ended in an exhausted name
+#   terminal_identity_unusable  the chain ended in a name this cut cannot carry
+#   identity_not_carried        an identity resolved but was excluded from the cut
+#   composition_not_scheduled   no composition was ever attempted for the source
+#
+# The first two are where a vocabulary the grammar must close shows up, and the
+# third is a search genuinely spent -- the two reasons a cut may have to wait on
+# another repository. The last is scheduling, which waits on nothing.
+_MANIFEST_GENERABILITY_MECHANISMS = (
+    "recorded_refusal",
+    "refusal_cause_not_recorded",
+    "attempt_budget_exhausted",
+    "terminal_identity_unusable",
+    "identity_not_carried",
+    "composition_not_scheduled",
+)
+
+# The sentinel the source's own projection writes when a refusal left no
+# surviving cause, so it is a recorded absence rather than a blank field.
+_UNRECORDED_REFUSAL_CAUSE = "cause not recorded"
+
+
+def _manifest_source_mechanism(
+    record: SourceDispositionRecord,
+) -> str | None:
+    """Name what blocks a source from reaching a name, or None if it did.
+
+    Ordered so each test is establishing rather than guessing: the terminal
+    stages are read from the successor chain, then the refusal the source
+    carries, and only the residue is read as unscheduled.
+    """
+    if record.disposition == "emitted":
+        return None
+    if record.terminal_stage == "exhausted":
+        return "attempt_budget_exhausted"
+    if record.terminal_stage:
+        return "terminal_identity_unusable"
+    if record.disposition == "documented_non_nameable":
+        if record.reason == _UNRECORDED_REFUSAL_CAUSE:
+            return "composition_not_scheduled"
+        return "recorded_refusal"
+    if record.standard_name_id:
+        return "identity_not_carried"
+    return "composition_not_scheduled"
+
+
+def describe_manifest_generability(
+    records: list[SourceDispositionRecord],
+) -> dict[str, Any]:
+    """Account for every manifest source as carried or blocked by a mechanism.
+
+    The invariant this reports is that every source in a manifest reaches a
+    name, so an uncarried source is a pipeline defect rather than a reporting
+    line: the mechanism named for it is the finding, and the uncarried list is
+    the defect count. A cut can refuse on ``generable`` instead of publishing a
+    count of exclusions it cannot act on.
+
+    Mechanisms are derived from the disposition row alone -- the successor
+    chain's terminal stage, the source's own status, and the refusal the
+    pipeline recorded -- so the verdict never asserts a cause the row does not
+    establish. Each uncarried entry carries the evidence, and the entries are
+    exhaustive: every input record appears exactly once as carried or blocked.
+    """
+    carried: list[str] = []
+    uncarried: list[dict[str, Any]] = []
+    for record in sorted(records, key=lambda row: row.source_path):
+        mechanism = _manifest_source_mechanism(record)
+        if mechanism is None:
+            carried.append(record.source_path)
+            continue
+        uncarried.append(
+            {
+                "source_path": record.source_path,
+                "mechanism": mechanism,
+                "source_status": record.source_status,
+                "standard_name_id": record.standard_name_id,
+                "terminal_stage": record.terminal_stage,
+                "detail": record.reason,
+            }
+        )
+    counts = {
+        mechanism: sum(entry["mechanism"] == mechanism for entry in uncarried)
+        for mechanism in _MANIFEST_GENERABILITY_MECHANISMS
+        if any(entry["mechanism"] == mechanism for entry in uncarried)
+    }
+    return {
+        "manifest_size": len(records),
+        "carried": len(carried),
+        "uncarried": len(uncarried),
+        "generable": not uncarried,
+        "mechanism_counts": counts,
+        "carried_sources": carried,
+        "uncarried_sources": uncarried,
+    }
+
+
 def _write_export_report(staging_dir: Path, report: ExportReport) -> Path:
     """Write .export_report.json to the staging directory."""
     filepath = staging_dir / ".export_report.json"
@@ -3072,6 +3192,7 @@ def run_export(
             seen_paths.add(source_path)
             standard_name_id = source.get("standard_name_id")
             terminal_stage = source.get("terminal_stage")
+            source_status = source.get("source_status")
             non_nameable_reason = str(source.get("non_nameable_reason") or "")
             if non_nameable_reason:
                 disposition = "documented_non_nameable"
@@ -3098,6 +3219,7 @@ def run_export(
                     ),
                     terminal_stage=(str(terminal_stage) if terminal_stage else None),
                     reason=reason,
+                    source_status=(str(source_status) if source_status else None),
                 )
             )
         source_issues: list[dict[str, Any]] = []
@@ -3118,6 +3240,35 @@ def run_export(
                 gate="manifest_source_accounting",
                 passed=not source_issues,
                 issues=source_issues,
+            )
+        )
+        # A manifest cut owes every source a name, so an uncarried source is a
+        # pipeline defect and the gate refuses the cut. The verdict carries the
+        # per-source mechanism; the gate carries it into the same refusal the
+        # release paths already read, so a release stops here rather than
+        # publishing a count of exclusions.
+        verdict = describe_manifest_generability(report.source_disposition_records)
+        report.manifest_generability = verdict
+        generability_issues: list[dict[str, Any]] = []
+        if not verdict["generable"]:
+            generability_issues.append(
+                {
+                    "type": "manifest_not_generable",
+                    "manifest_size": verdict["manifest_size"],
+                    "carried": verdict["carried"],
+                    "uncarried": verdict["uncarried"],
+                    "mechanism_counts": verdict["mechanism_counts"],
+                }
+            )
+            generability_issues.extend(
+                {"type": "source_not_carried", **entry}
+                for entry in verdict["uncarried_sources"]
+            )
+        report.gate_results.append(
+            GateResult(
+                gate=GATE_MANIFEST_GENERABILITY,
+                passed=verdict["generable"],
+                issues=generability_issues,
             )
         )
     report.all_gates_passed = all(
