@@ -217,5 +217,16 @@
     <a href="/imas-codex/evidence/catalog-review-surface/fold-back-rehearsal">the fold-back
     rehearsal</a>.
   </p>
+  <h2 id="refusal-transport">Carrying the refusal onto the request</h2>
+  <p>
+    The one gap in the reviewer surface that this plan's own record left open — the
+    fold-back refusal that reaches the operator command but not the request — is
+    closed. <code>run_approval</code> now posts one comment to the pull request
+    through the same client the fold-back already reads with, so the reviewer reads
+    the refusal reason and the refused identity where they were already looking. A
+    dry run posts nothing, and a promotion that succeeds posts nothing. Full record,
+    including the base-revision reproduction and the two sibling tests the change
+    newly breaks: <a href="/imas-codex/evidence/catalog-review-surface/refusal-transport">the
+    refusal transport</a>.
 </body>
 </html>
