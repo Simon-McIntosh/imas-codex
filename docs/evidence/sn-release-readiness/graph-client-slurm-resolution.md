@@ -216,3 +216,87 @@ reach a remote graph through an explicit SSH tunnel are unaffected. Nothing
 was changed in the facility host pattern lists; the client resolves the
 service address directly rather than widening the definition of a local host.
 An explicit `NEO4J_URI` continues to win over everything, as it did before.
+
+## The suite no longer reads the ambient environment
+
+The cases above pin the repair, but they asked the process environment two
+questions first. `_resolve_graph_uri` consults `NEO4J_URI` and `SLURM_JOB_ID`
+from `os.environ` before it reaches anything the tests patch, so a shell that
+exported either decided what the cases observed. `NEO4J_URI` is exactly the
+documented escape hatch this repair restores, so any machine or CI using the
+hatch ran the pinning suite red on correct code.
+
+Reproduced 2026-09-18 in the worktree at `d9634c141`, both readings from the
+same command:
+
+```
+NEO4J_URI=bolt://example.invalid:1 \
+UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+uv run --no-sync pytest -p no:cacheprovider \
+  tests/graph/test_client_address_resolution.py
+```
+
+| `NEO4J_URI` in the environment | result | exit |
+|---|---|---|
+| `bolt://example.invalid:1` | **2 failed, 7 passed** | 1 |
+| unset | 9 passed | 0 |
+
+The two failures are the cases that do not set the variable themselves:
+
+```
+FAILED ...::test_direct_address_outside_a_slurm_step
+E   AssertionError: assert 'bolt://example.invalid:1' == 'bolt://localhost:17687'
+
+FAILED ...::test_the_client_default_uri_is_the_slurm_aware_resolver
+E   AssertionError: assert 'bolt://example.invalid:1' == 'bolt://98dci4-gpu-0002:7687'
+```
+
+**The repair is in the tests, not in the assertions.** An autouse fixture
+clears `NEO4J_URI` and `SLURM_JOB_ID` before every case; a case that exercises
+one of them sets it. The explicit-URI precedence case still sets its own value
+explicitly and still passes, and no case was deleted or relaxed. Landing commit
+`8b76caacb`.
+
+Measured after, same command, both environments:
+
+| `NEO4J_URI` in the environment | result | exit |
+|---|---|---|
+| `bolt://example.invalid:1` | 9 passed | 0 |
+| unset | 9 passed | 0 |
+
+## The pins still fire
+
+A green suite does not show that a pin fires, so each of the four reversions
+in the scratch tree had to fail a named test. The scratch tree at `/dev/shm`
+was a full copy of the worktree source with the pristine `client.py` restored
+between runs; it passed 9 in its own right first, which is the load control
+that shows the runs below were reading the reverted module rather than a stale
+scratch copy.
+
+| reversion | test that failed | result |
+|---|---|---|
+| default factory set back to `get_graph_uri` | `test_the_client_default_uri_is_the_slurm_aware_resolver` | 1 failed, 8 passed |
+| explicit-`NEO4J_URI` early return removed | `test_explicit_neo4j_uri_wins_inside_a_slurm_step` (`assert 'bolt://98dci4-gpu-0002:7687' == 'bolt://example.invalid:1'`) | 1 failed, 8 passed |
+| swallowed `resolve_location` exception restored | `test_an_unreadable_location_is_not_swallowed` | 1 failed, 8 passed |
+| fallback import hoisted to module level | `test_the_fallback_is_read_from_the_module_it_is_imported_from` | 2 failed, 7 passed |
+
+The second row shows the mechanism rather than a preference: with the early
+return removed, the resolver returns the address it *discovered*, which is the
+address the case exists to show losing.
+
+## Logs
+
+One log per reading, in the run directory
+`~/.config/reckon/crew/runs/r-20260918T170835079529-n-the-address-resolution-tests-do-not-read-the-ambient-environment/logs/`:
+
+| log | reading |
+|---|---|
+| `repro-B-default.log` | before, `NEO4J_URI` exported — 2 failed, 7 passed |
+| `repro-C-unset.log` | before, unset — 9 passed |
+| `after-A-exported.log` | after, exported — 9 passed |
+| `after-B-unset.log` | after, unset — 9 passed |
+| `rev-0-scratch-baseline.log` | scratch load control — 9 passed |
+| `rev-1-factory.log` | reversion 1 — 1 failed, 8 passed |
+| `rev-2-explicit.log` | reversion 2 — 1 failed, 8 passed |
+| `rev-3-swallow.log` | reversion 3 — 1 failed, 8 passed |
+| `rev-4-fallback-import.log` | reversion 4 — 2 failed, 7 passed |
