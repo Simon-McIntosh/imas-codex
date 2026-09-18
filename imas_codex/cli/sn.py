@@ -75,14 +75,23 @@ def _check_local_llm() -> tuple[bool, str]:
     probe must carry the key from ``api-key-env`` or a healthy server is
     misreported as unreachable.
 
+    A reachable server is not a usable one: the endpoint serves a fixed set
+    of model names, and a request naming one it does not serve is refused
+    with a 404 at generation time. So the probe compares the configured
+    seat against the ``/models`` listing and reports a mismatch as
+    unhealthy, naming both sides.
+
     Returns ``(healthy, detail)``:
       - healthy   → detail is the served model's short name (e.g.
         ``"deepseek-v4-flash"``)
       - unhealthy → detail is a concise reason: ``"down"`` (connection
         refused), ``"timeout"``, ``"unreachable"``, ``"auth error"``
         (server up, key rejected), ``"key missing"`` (server up, no key
-        in the environment), or ``"HTTP <code>"``.
+        in the environment), ``"HTTP <code>"``, or ``"serves <a, b>, not
+        <configured>"`` when the seat names a model the server does not
+        offer.
     """
+    import json
     import os
     import urllib.error
     import urllib.request
@@ -103,9 +112,9 @@ def _check_local_llm() -> tuple[bool, str]:
     try:
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=5) as resp:
-            if resp.status == 200:
-                return True, model_label
-            return False, f"HTTP {resp.status}"
+            if resp.status != 200:
+                return False, f"HTTP {resp.status}"
+            body = resp.read()
     except urllib.error.HTTPError as exc:
         # The server responded — it is up.  4xx here is a key problem,
         # not an availability problem.
@@ -121,6 +130,25 @@ def _check_local_llm() -> tuple[bool, str]:
         return False, "unreachable"
     except Exception:
         return False, "unreachable"
+
+    # The server answered. Whether it can serve THIS seat is a separate
+    # question, and the one that decides whether generation can run.
+    try:
+        served = [
+            str(entry.get("id", ""))
+            for entry in json.loads(body).get("data", [])
+            if entry.get("id")
+        ]
+    except (ValueError, AttributeError, TypeError):
+        # A 200 whose body we cannot parse tells us nothing about the seat;
+        # treat the endpoint as usable rather than inventing a mismatch.
+        return True, model_label
+
+    if not served:
+        return True, model_label
+    if model_label in served:
+        return True, model_label
+    return False, f"serves {', '.join(sorted(served)[:3])}, not {model_label}"
 
 
 def _run_can_generate_names(
@@ -160,6 +188,15 @@ def _require_local_compose_ready(compose_model: str | None = None) -> None:
     healthy, detail = _check_local_llm()
     if healthy:
         return
+    if detail.startswith("serves "):
+        # The service is up; the seat names a model it does not offer, so
+        # restarting it changes nothing — the configuration is what moved.
+        raise click.ClickException(
+            "The local Standard Names compose endpoint is reachable but "
+            f"{detail}. Point [tool.imas-codex.sn-compose] at a served model, "
+            "or serve the configured one; no paid provider fallback will be "
+            "used."
+        )
     raise click.ClickException(
         "The configured local Standard Names compose endpoint is required for "
         f"generation but is unavailable ({detail or 'unknown error'}). "

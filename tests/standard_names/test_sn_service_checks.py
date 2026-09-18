@@ -121,6 +121,31 @@ class TestCheckLocalLLM:
         assert healthy is False
         assert detail == "not configured"
 
+    def test_served_model_matching_the_seat_is_healthy(self) -> None:
+        body = b'{"data": [{"id": "deepseek-v4-flash"}]}'
+        (healthy, detail), _ = self._run(_ok_response(body))
+        assert healthy is True
+        assert detail == "deepseek-v4-flash"
+
+    def test_seat_the_server_does_not_serve_is_unhealthy(self) -> None:
+        """A reachable server that does not offer the configured seat
+        refuses every generation request with a 404, so the probe must
+        report it rather than passing on liveness alone."""
+        body = b'{"data": [{"id": "deepseek-v4.1-flash"}]}'
+        (healthy, detail), _ = self._run(_ok_response(body))
+        assert healthy is False
+        assert detail == "serves deepseek-v4.1-flash, not deepseek-v4-flash"
+
+    def test_unparsable_body_does_not_invent_a_mismatch(self) -> None:
+        (healthy, detail), _ = self._run(_ok_response(b"not json"))
+        assert healthy is True
+        assert detail == "deepseek-v4-flash"
+
+    def test_empty_model_listing_does_not_invent_a_mismatch(self) -> None:
+        (healthy, detail), _ = self._run(_ok_response(b'{"data": []}'))
+        assert healthy is True
+        assert detail == "deepseek-v4-flash"
+
 
 class TestCheckOpenRouter:
     """OpenRouter key probe classification."""
