@@ -1407,6 +1407,11 @@ def run_approval(
                         target_id=nid,
                         axis="name",
                     )
+        # A refusal the reviewer never sees reads as an accepted edit: the
+        # request is merged, the catalog carries the change, and only the graph
+        # knows otherwise. Dry runs write nothing, so they post nothing.
+        if not dry_run:
+            notify_refusal_on_pull_request(report, catalog_pr_url=catalog_pr_url)
         if catalog_delta is not None:
             approved_additions = set(report.accepted) | set(report.auto_approved)
             unapproved_additions = set(catalog_delta.added_names) - approved_additions
@@ -1456,6 +1461,97 @@ def _pull_request_call(repo: str, path: str) -> tuple[int, Any]:
     from imas_codex.graph.ghcr import github_api_call
 
     return github_api_call("GET", f"/repos/{repo}{path}")
+
+
+def _pull_request_comment(repo: str, number: int, body: str) -> tuple[int, Any]:
+    """One REST write onto a pull request's conversation, shared transport.
+
+    The reviewer reads the pull request, not the fold-back log, so a refusal
+    that never reaches this endpoint is indistinguishable from a fold-back
+    that never ran.
+    """
+    from imas_codex.graph.ghcr import github_api_call
+
+    return github_api_call(
+        "POST",
+        f"/repos/{repo}/issues/{number}/comments",
+        payload={"body": body},
+    )
+
+
+def _refusal_lines(report: ApprovalReport) -> list[ApprovalOutcome]:
+    """The outcomes a reviewer must be told about: refusals, not deferrals."""
+    return [
+        outcome
+        for outcome in report.outcomes
+        if outcome.decision in ("promotion_refused", "contested")
+    ]
+
+
+def refusal_notice_body(report: ApprovalReport) -> str | None:
+    """Render the fold-back refusals for a reviewer, or ``None`` if none.
+
+    A name the graph refused and a name the re-review contested are both
+    outcomes the reviewer asked for but did not get, so they share one
+    notice. Deferrals (``staged_for_review``) are omitted: the pipeline will
+    still act on those without the reviewer doing anything.
+    """
+    refusals = _refusal_lines(report)
+    if not refusals:
+        return None
+    rows = [
+        "| identity | edit | outcome | reason |",
+        "| --- | --- | --- | --- |",
+    ]
+    for outcome in refusals:
+        identity = outcome.target_id or outcome.sn_id
+        reason = (outcome.reason or "").replace("|", "\\|")
+        rows.append(
+            f"| `{identity}` | {outcome.axis} | {outcome.decision} | {reason} |"
+        )
+    plural = "s" if len(refusals) != 1 else ""
+    return (
+        f"### Fold-back refused {len(refusals)} edit{plural}\n\n"
+        + "\n".join(rows)
+        + "\n\n"
+        + "These edits merged into the catalog but were not absorbed into the "
+        "graph, so the catalog and the graph now disagree about them. Nothing "
+        "here is a transient state: a refused identity needs a human decision "
+        "before the next batch can treat it as settled.\n"
+    )
+
+
+def notify_refusal_on_pull_request(
+    report: ApprovalReport,
+    *,
+    catalog_pr_url: str | None,
+) -> bool:
+    """Carry a fold-back refusal onto the pull request the reviewer reads.
+
+    Returns whether a notice reached the request. A missing or unparseable URL
+    and a rejected write are both reported rather than raised: the fold-back
+    itself has already committed its decisions, and losing them to a transport
+    failure would be the worse outcome.
+    """
+    body = refusal_notice_body(report)
+    if body is None:
+        return False
+    try:
+        repo, number = parse_pull_request_url(catalog_pr_url or "")
+    except ValueError as exc:
+        logger.warning("fold-back refusal not posted: %s", exc)
+        return False
+    status, response = _pull_request_comment(repo, number, body)
+    if status not in (200, 201):
+        from imas_codex.graph.ghcr import github_error_detail
+
+        logger.warning(
+            "fold-back refusal not posted to %s: %s",
+            catalog_pr_url,
+            github_error_detail(status, response),
+        )
+        return False
+    return True
 
 
 def _pull_request_state(payload: dict[str, Any]) -> str:
