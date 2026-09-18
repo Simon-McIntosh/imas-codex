@@ -278,6 +278,49 @@
     identities and all 26 refusals individually:
     <a href="/imas-codex/evidence/unbound-source-backlog/refusal-adjudication">refusal-adjudication.html</a>.</p>
   </section>
+
+  <section id="export-surface-reuse-map">
+    <h2>Both export-surface followups still reproduce; each repair reuses code already on the path</h2>
+    <p><strong>Read at HEAD <code>9705954c264bd4c51c78d68d9be23be54178c2ac</code>, no graph write.</strong>
+    The two open followups the plan names as the live risk were verified against the source rather
+    than against their own citations, and both <strong>reproduce</strong>.</p>
+    <p>The export producer predicate is missing in a specific and cheap-to-close way: the population
+    fetch computes four producer and topology flags on every candidate
+    (<code>_has_dd_source_binding</code>, <code>_has_derived_producer</code>,
+    <code>_has_non_derived_producer</code>, <code>_is_parent</code>,
+    <code>export.py:617-633,638-640,678-681</code>) and the eligibility classifier's ten clauses
+    (<code>export.py:798-836</code>) read none of them. Their only consumer is
+    <code>_published_identity_roles</code> (<code>export.py:1588-1600</code>), which decorates the
+    published entry with reviewer-facing roles &mdash; a name with no producer and no children gets
+    an empty role list and stays eligible. No gate in the export inventory
+    (<code>export.py:177-183,3085</code>) is a producer predicate. The carve-out the rule must
+    respect has moved: <code>source_free</code> is now classified by
+    <code>_structural_accept_route</code> at <code>graph_ops.py:26690,26715-26716</code>, not at the
+    cited <code>graph_ops.py:26233-26238</code>.</p>
+    <p>The manifest-generability invariant is unenforced in the reporting-not-defect shape the
+    followup names. The resolver already exists
+    (<code>fetch_manifest_source_release_rows</code>, <code>graph_ops.py:12831-12945</code>, which
+    classifies every path to a terminal identity and refuses an ambiguous binding with
+    <code>ValueError</code>) and export already records a per-source disposition
+    (<code>emitted</code> / <code>excluded</code> / <code>documented_non_nameable</code>,
+    <code>export.py:3040-3068</code>). What is absent is a refusal: the
+    <code>manifest_source_accounting</code> gate (<code>export.py:3075-3089</code>) asserts only
+    that every source got a record, so a source recorded <code>excluded</code> passes; the residue
+    rides the artifact and the PR notes as a <em>count</em>
+    (<code>catalog_release.py:1933-1941,2079</code>) and prints yellow at the CLI
+    (<code>sn.py:4901-4903</code>). The mechanism vocabulary a check would report already exists in
+    miniature at <code>_source_compose_hint_decision</code>
+    (<code>graph_ops.py:9929-9967</code>, emitting <code>attempt_cap_reached</code> and
+    <code>eligible</code>), but it is per-source and never called over a manifest.</p>
+    <p><strong>A reusable map, not a repair request:</strong> the record lists every symbol either
+    repair draws on with its <code>file:line</code> and proposes two disjoint exclusive write-path
+    sets, including placing the manifest classifier in a new module rather than in the oversized
+    <code>graph_ops.py</code>. Full record:
+    <a href="/imas-codex/evidence/unbound-source-backlog/export-surface-reuse-map">export-surface-reuse-map.html</a>.</p>
+    <p class="r-meta">Worker: n-usb-scout-export-surface &middot; 2026-09-18 &middot; revision
+    <code>9705954c264bd4c51c78d68d9be23be54178c2ac</code> &middot; commit
+    <code>8d3d0b3</code>.</p>
+  </section>
 </main>
 </body>
 </html>
