@@ -1001,6 +1001,22 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       compose seat variant record</a>.
     </p>
 
+    <h2 id="graph-client-slurm-resolution">The graph client reaches the graph from a SLURM step</h2>
+
+    <p>
+      A <code>GraphClient()</code> built inside a SLURM step resolved
+      <code>bolt://localhost:17687</code> and raised <code>ServiceUnavailable</code>,
+      while the same call on the login node resolved the graph node directly. The
+      facility's login-node hostname patterns do not match a compute node, so
+      resolution took its remote branch and returned a tunnel endpoint that nothing
+      listens on. The client now resolves the reachable service address inside a
+      step and leaves the profile layer untouched. Measured on
+      <code>98dci4-clu-3141</code> at job 1273478: resolved
+      <code>bolt://98dci4-gpu-0002:7687</code> and <code>count(StandardName)</code> =
+      5130, against 5130 on the login node in the same evidence. Recorded in
+      <a href="/imas-codex/evidence/sn-release-readiness/graph-client-slurm-resolution">the resolution record</a>.
+    </p>
+
   </main>
 </body>
 </html>
