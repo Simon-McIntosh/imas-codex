@@ -726,9 +726,15 @@
     cannot be mistaken for a pass. Logs: <code>gate_after.log</code> and <code>gate_reverted.log</code> in
     <code>r-20260918T144458165808-n-sli-the-quarantine-instruments-answer-one-question</code>.</p>
     <p><strong>What this does not establish.</strong> The gate measures this node's change only; the merged result
-    belongs to a separately dispatched test node. The five names withheld from the published candidate were not
-    re-read from the live graph inside the time budget, and the instrument for them is unchanged by this change: the
-    worker's verdict with its <code>validated_at</code> stamp, not the walk's findings. And the registry walk a sweep
+    belongs to a separately dispatched test node. The five names withheld from the published candidate WERE re-read live on 2026-09-18 under
+    the settled instrument, all five found and bounded to one query: <code>inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width</code>
+    reads quarantined and dated on a <code>superseded</code> identity (1 issue), while
+    <code>radial_outline_of_plasma_boundary</code>, <code>radial_outline_of_wall</code>,
+    <code>vertical_coordinate_of_line_of_sight</code> and <code>vertical_outline_of_plasma_boundary</code> all
+    read <code>valid</code> with a <code>validated_at</code> stamp (the last carrying one advisory issue). So the
+    instrument has moved since the 2026-09-08 measure that recorded four of them quarantined and one valid: under a
+    dated verdict, four are released and the single quarantine sits on a superseded name rather than on a live one,
+    and the walk's findings would have said nothing about any of it. The registry walk a sweep
     actually misread is <code>imas_codex/standard_names/audits.py</code> — <code>run_audits</code>,
     <code>has_critical_audit_failure</code> and the 32-check <code>CRITICAL_CHECKS</code> set — which lies outside
     this node's fence and therefore still declares nothing; the two files share the basename <code>audits.py</code>.</p>
