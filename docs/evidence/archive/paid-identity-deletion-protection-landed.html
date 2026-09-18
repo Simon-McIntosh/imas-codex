@@ -172,6 +172,101 @@
     <a href="/imas-codex/evidence/paid-identity-deletion-protection/unreinstatable-role-gap.md">the
     unreinstatable-role evidence</a>.</p>
   </section>
+  <section id="restore-receipt-reuse-map">
+    <h2>The restore receipt is reusable as it stands; one archived role cannot be put back</h2>
+    <p><strong>Mapped read-only on 2026-09-18</strong> at
+    <code>4c9d1dabb4ab0afb679ccf15b85eb552e585169c</code>. Every field the
+    archive-reconstruction receipt carries was read at that revision, on both
+    of its return paths, and every entry point the followup might have reused
+    was either located or ruled out. No graph write, no restore, and no source
+    change were made.</p>
+    <figure>
+      <svg viewBox="0 0 760 212" role="img" aria-labelledby="rrm-t">
+        <title id="rrm-t">An archive role reaches the receipt only if the reconstruction registry has a route for it</title>
+        <rect x="20" y="20" width="180" height="64" rx="5" fill="#f4f6fb" stroke="#557"/>
+        <text x="110" y="38" font-size="12" font-weight="bold" text-anchor="middle" fill="#223">authority artifact</text>
+        <text x="110" y="56" font-size="11" text-anchor="middle" fill="#555">archive_roles: every role</text>
+        <text x="110" y="71" font-size="11" text-anchor="middle" fill="#555">the archive record named</text>
+        <line x1="202" y1="52" x2="244" y2="52" style="stroke:#557;stroke-width:1"/>
+        <polygon points="244,48 254,52 244,56" fill="#557"/>
+        <rect x="250" y="20" width="180" height="64" rx="5" fill="#f4f6fb" stroke="#557"/>
+        <text x="340" y="38" font-size="12" font-weight="bold" text-anchor="middle" fill="#223">reconstruction registry</text>
+        <text x="340" y="56" font-size="11" text-anchor="middle" fill="#555">34 roles, one per edge</text>
+        <text x="340" y="71" font-size="11" font-weight="bold" text-anchor="middle" fill="#900">EVIDENCED_BY absent</text>
+        <line x1="432" y1="52" x2="474" y2="52" style="stroke:#557;stroke-width:1"/>
+        <polygon points="474,48 484,52 474,56" fill="#557"/>
+        <rect x="480" y="20" width="120" height="64" rx="5" fill="#f4f6fb" stroke="#557"/>
+        <text x="540" y="38" font-size="12" font-weight="bold" text-anchor="middle" fill="#223">parity guard</text>
+        <text x="540" y="56" font-size="11" text-anchor="middle" fill="#555">per identity,</text>
+        <text x="540" y="71" font-size="11" text-anchor="middle" fill="#555">per role</text>
+        <line x1="602" y1="52" x2="644" y2="52" style="stroke:#557;stroke-width:1"/>
+        <polygon points="644,48 654,52 644,56" fill="#557"/>
+        <rect x="650" y="20" width="90" height="64" rx="5" fill="#f4f6fb" stroke="#557"/>
+        <text x="695" y="38" font-size="12" font-weight="bold" text-anchor="middle" fill="#223">receipt</text>
+        <text x="695" y="56" font-size="11" text-anchor="middle" fill="#555">identity_roles</text>
+        <text x="695" y="71" font-size="11" text-anchor="middle" fill="#555">on both paths</text>
+        <line x1="340" y1="84" x2="340" y2="136" style="stroke:#900;stroke-width:1"/>
+        <polygon points="336,136 340,146 344,136" fill="#900"/>
+        <rect x="180" y="146" width="320" height="52" rx="5" fill="#fdf3f3" stroke="#900"/>
+        <text x="340" y="166" font-size="11" text-anchor="middle" fill="#900">EVIDENCED_BY &#8212; named by the archive record,</text>
+        <text x="340" y="184" font-size="11" text-anchor="middle" fill="#900">no route in the registry, so the guard cannot see it</text>
+        <line x1="502" y1="172" x2="636" y2="172" style="stroke:#900;stroke-width:1"/>
+        <polygon points="636,168 646,172 636,176" fill="#900"/>
+        <rect x="642" y="146" width="98" height="52" rx="5" fill="#fdf3f3" stroke="#900"/>
+        <text x="691" y="166" font-size="12" font-weight="bold" text-anchor="middle" fill="#900">receipt</text>
+        <text x="691" y="184" font-size="11" text-anchor="middle" fill="#900">unreinstatable</text>
+      </svg>
+      <figcaption>A role travels from the archive record through the
+      reconstruction registry and the parity guard to the receipt. The tally
+      is the guard's own measurement, returned instead of discarded. A role the
+      registry has no route for leaves the path at the registry and is reported
+      as <code>unreinstatable</code> rather than dropped &#8212; which is what
+      keeps a real loss visible instead of invisible.</figcaption>
+    </figure>
+    <table>
+      <thead><tr><th>Question</th><th>Answer at this revision</th></tr></thead>
+      <tbody>
+        <tr><td>where the receipt is built</td><td>preview path <code>signed_manifest.py:7292</code>&#8211;<code>:7302</code>; applied path <code>:7376</code>&#8211;<code>:7389</code>; the <code>counts</code> aggregate at <code>:7283</code>&#8211;<code>:7289</code>. The two paths are <strong>not field-symmetric</strong> &#8212; the preview carries <code>manifest</code> and <code>would_change</code>, the applied path carries <code>mutations</code> and no <code>manifest</code> &#8212; so a caller must branch on <code>outcome</code></td></tr>
+        <tr><td>is <code>EVIDENCED_BY</code> still absent from the relationship registry</td><td><strong>yes, from the reconstruction registry</strong>: <code>_ARCHIVE_EDGE_COUNTERPARTS</code> at <code>signed_manifest.py:205</code> holds <strong>34 roles</strong> (<code>:206</code>&#8211;<code>:239</code>) and no <code>EVIDENCED_BY</code>. The role is present in the graph schema registry <code>RELATIONSHIPS</code> (<code>schema_context_data.py:2075</code>, <code>:2146</code>), so this is a missing reconstruction <em>route</em>, not a missing schema relationship</td></tr>
+        <tr><td>does a CLI entry point for the adapter exist</td><td><strong>no</strong>: the string occurs in exactly two files in the tree, every in-package <code>apply_signed_manifest</code> call site names another adapter, and <code>tests/standard_names/test_archive_reconstruction.py</code> is the only committed caller</td></tr>
+        <tr><td>does a committed composer for <code>imas-codex.archive-reconstruction.v1</code> exist</td><td><strong>no</strong>: nothing in the tree writes that artifact, so an archive-based restore depends on a driver that was never committed</td></tr>
+        <tr><td>the per-identity role tally</td><td><strong>already landed</strong>: <code>identity_roles</code> on both receipt paths (<code>signed_manifest.py:7298</code>, <code>:7386</code>), fed by the parity guard's own tally (<code>:7363</code>&#8211;<code>:7374</code>) through <code>_archive_role_outcomes</code> (<code>:7200</code>)</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Half the followup's premise is closed and must not be re-derived.</strong>
+    The claim was that the parity guard proves a complete restore and then throws
+    the proof away. It no longer throws it away: the guard's own per-identity
+    tally is returned on the receipt, with <code>reinstated</code> and
+    <code>unreinstatable</code> alongside each other. What remains is the
+    durability question &#8212; the receipt is a return value, not a persisted
+    row, so a landing that needs the account to survive the process is a new
+    durable write with its own fence and its own test.</p>
+    <p><strong>The half that is <em>not</em> closed is sized only by the archive
+    read, and this map does not assert it.</strong> The registry has no route for
+    <code>EVIDENCED_BY</code>, which is settled by reading the registry; whether
+    any archived identity in the restore set ever held one is not, and live reads
+    cannot settle it. That read is the 2026-09-06 dump loaded read-only through
+    <code>start_temp_neo4j</code> (<code>imas_codex/graph/temp_neo4j.py:207</code>),
+    never <code>graph_load</code>, and it is
+    <a href="/imas-codex/evidence/paid-identity-deletion-protection/unreinstatable-role-gap.md">named
+    rather than run in the role-gap evidence</a>. Adding a route is a registry
+    widening the plan does not settle, and it must not be taken unilaterally: it
+    touches two dict families in the same module, because an edge cannot exist
+    without both endpoints.</p>
+    <p><strong>The proposed exclusive write-path set is four beats, and three of
+    them write the same module.</strong> The receipt's home module and its test,
+    the composer for the signed artifact, and the CLI surface all write
+    <code>signed_manifest.py</code> &#8212; a single 7,878-line module holding the
+    whole adapter transaction &#8212; so those beats must not run concurrently. The
+    fourth, a read-only archive sizing, is independent and may run beside one of
+    them. The stale sibling <code>restore-reuse-map.md</code>, which still reads
+    CANNOT REUSE on reconstruction that has since landed and whose line
+    references no longer match, is given its own one-file node rather than folded
+    into a beat. The full map, each beat's paths, and the seven-entry verdict
+    table:
+    <a href="/imas-codex/evidence/paid-identity-deletion-protection/restore-receipt-reuse-map.md">the
+    restore receipt reuse map</a>.</p>
+  </section>
 </main>
 </body>
 </html>
