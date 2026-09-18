@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T19:36:44",
+  "updated": "2026-09-18T19:51:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5158,9 +5158,11 @@
         "id": "s14-testiso",
         "harness": "clive",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "86651252-ea35-47c5-93ac-d8f4fd3feca1",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "86651252-ea35-47c5-93ac-d8f4fd3feca1"
+        },
         "created": "2026-09-18"
       },
       {
@@ -158446,6 +158448,221 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T170835079529-n-the-address-resolution-tests-do-not-read-the-ambient-environment",
+        "plan": "sn-release-readiness",
+        "section": "\u00a71",
+        "node": "n-the-address-resolution-tests-do-not-read-the-ambient-environment",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1601,
+                "cached_input_tokens": 785836,
+                "input_tokens": 787439,
+                "output_tokens": 1020,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 788459,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "ship-s14-20260918"
+          },
+          "done_when": "with NEO4J_URI exported to bolt://example.invalid:1 in the environment, tests/graph/test_client_address_resolution.py runs 9 passed exit 0, where it currently reports 2 failed / 7 passed; record both readings with the exact command and the exported value. The two failing cases are test_direct_address_outside_a_slurm_step at line 55, which asserts the profile URI with SLURM_JOB_ID cleared but NEO4J_URI left ambient, and the default-factory pin at line 134, where factory() is invoked with the ambient environment. Fix by isolating the environment in the tests - monkeypatch.delenv for the variables each case does not itself set - NOT by weakening any assertion and NOT by deleting a case. The case that deliberately exercises NEO4J_URI precedence must keep setting it explicitly and must still pass. Prove the isolation holds both ways: run the file once with NEO4J_URI exported and once with it unset, and show 9 passed in both, so the suite no longer depends on the shell it is launched from. Then confirm the four reversion pins still fire: reverting the default factory, removing the explicit-URI early return, and restoring the swallowed exception must each still fail at least one named test, and state which. Capture every run to one log whose path you record, and write the evidence incrementally as each reading lands",
+          "estimated_hours": null,
+          "goal": "Isolate the graph address-resolution tests from the ambient environment so they pin the repair rather than the shell",
+          "id": "n-the-address-resolution-tests-do-not-read-the-ambient-environment",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T17:08:36Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T170835079529-n-the-address-resolution-tests-do-not-read-the-ambient-environment/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/graph/test_client_address_resolution.py",
+            "docs/evidence/sn-release-readiness/graph-client-slurm-resolution.md",
+            "docs/evidence/archive/sn-release-readiness-landed.html",
+            "docs/plans/sn-release-readiness.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "s14-testiso",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T17:08:45Z",
+        "completed_at": "2026-09-18T17:48:58.476Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2399,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2413,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "d9634c1419c564bd5fd97f30c86aa2f57128ce58",
+        "commits": [
+          "8b76caacb4d20496a01f29ff87c530445d6524a5",
+          "87a52b8803ae432d4911163e9591a920bc0106ad"
+        ],
+        "changed_lines": {
+          "added": 162,
+          "removed": 3,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "NEO4J_URI=bolt://example.invalid:1 uv run --no-sync pytest -p no:cacheprovider tests/graph/test_client_address_resolution.py",
+          "exit_status": 0,
+          "log_path": "docs/evidence/sn-release-readiness/graph-client-slurm-resolution.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Proved both ways and I re-verified both at the merged head: 9 passed with NEO4J_URI exported and 9 passed with it unset, against 2 failed / 7 passed before. The file no longer depends on the shell it is launched from. Cause was that _resolve_graph_uri reads NEO4J_URI and SLURM_JOB_ID from os.environ before the tests' own patches apply; the fix is an autouse fixture that delenvs both while each case sets what it exercises. No assertion weakened and no case deleted - the explicit-precedence case still sets its own value and passes. It also re-confirmed all four reversion pins in a scratch copy that passed 9 unmodified FIRST as the load control, so the pins are shown to fire rather than assumed: restoring the default factory, removing the explicit-URI early return, restoring the swallowed resolve_location exception, and hoisting the fallback import each fail exactly the named test. Honest follow-on reported rather than hidden: its landing comment anchored to _top rather than s1 because it passed the section key inside the item object; the key is a SIBLING of item in the append op, which is why the coordinator's own comments anchored correctly. The record is present and readable, one section higher than intended.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T170835079529-n-the-address-resolution-tests-do-not-read-the-ambient-environment/manifest.md",
+        "scope_changed": false,
+        "session_id": "86651252-ea35-47c5-93ac-d8f4fd3feca1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9071688,
+            "input_tokens_cumulative": 9071688,
+            "output_tokens": 48074,
+            "output_tokens_cumulative": 48074,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T17:48:58.476Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9071688,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2408.607,
+          "generated_tokens": 48074,
+          "generation_seconds": 2203.269,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 30.4,
+          "machine_seconds": 205.338,
+          "peak_input_tokens": 145744,
+          "tokens_per_second": 21.82,
+          "wall_tokens_per_second": 19.96
+        },
+        "follow_on_paths": [
+          "move/re-anchor"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260918/n-the-address-resolution-tests-do-not-read-the-ambient-environment",
+          "session_id": "86651252-ea35-47c5-93ac-d8f4fd3feca1",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T17:48:58.476Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-release-readiness",
+          "at_dispatch": null,
+          "at_complete": 0.9,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "tool_steps": 85.0,
+        "orientation_input_tokens": 1728966.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -158744,6 +158961,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2359
+    "_version": 2361
   }
 }
