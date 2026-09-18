@@ -31,6 +31,7 @@ import pytest
 from imas_codex.standard_names.promote import (
     CONTRACT_MARKER,
     ApprovalChange,
+    ApprovalOutcome,
     ApprovalReport,
     FoldBackTagReport,
     approval_tag_name,
@@ -40,6 +41,7 @@ from imas_codex.standard_names.promote import (
     delete_fold_back_tag,
     fetch_pr_evidence,
     has_contract_tag,
+    notify_refusal_on_pull_request,
     resolve_tag_remote,
     review_delta_diff,
     run_approval,
@@ -182,6 +184,25 @@ def _report(accepted=1, staged=0, auto=3, contested=0) -> ApprovalReport:
     return r
 
 
+def _fold_back_write_transport(responses):
+    """Route the fold-back's GitHub writes, as ``_transport`` routes its reads.
+
+    A refused edit is carried onto the pull request's conversation, so a
+    fold-back that refuses anything posts to the API unless the write is
+    routed. Each response is keyed on an unrouted-404 fallback for the same
+    reason the read transport has one: an unhandled endpoint should show up as
+    a failed post rather than as silence.
+    """
+
+    def fake_call(method, path, *, payload=None, token=None):
+        for fragment, status, body in responses:
+            if fragment in path:
+                return status, body
+        return 404, {"message": f"unrouted {path}"}
+
+    return patch("imas_codex.graph.ghcr.github_api_call", fake_call)
+
+
 def _fold_additive_batch(repo: dict, *, contest_refused: bool) -> ApprovalReport:
     changes = (
         [
@@ -206,6 +227,7 @@ def _fold_additive_batch(repo: dict, *, contest_refused: bool) -> ApprovalReport
         patch(f"{APPROVAL}._score_proposal", return_value=0.2),
         patch(f"{APPROVAL}._contest"),
         patch(f"{APPROVAL}.mark_catalog_name_approved", side_effect=approve),
+        _fold_back_write_transport([("/issues/7/comments", 201, {"id": 1})]),
     ):
         return run_approval(
             isnc_dir=repo["work"],
@@ -217,6 +239,45 @@ def _fold_additive_batch(repo: dict, *, contest_refused: bool) -> ApprovalReport
             batch=["approved_name", "refused_name"],
             gc=MagicMock(),
         )
+
+
+class TestRefusalNoticeTransportGuard:
+    """The write-transport mock must not have disarmed the real guard.
+
+    ``_fold_additive_batch`` now routes the refusal notice, so the two
+    materialization tests would pass even if the autouse refusal had been
+    relaxed. This drives the notice with no write mock and requires the guard
+    to fire, which is what proves the mock is doing the intercepting.
+    """
+
+    def test_an_unrouted_refusal_still_reaches_the_real_transport_guard(self):
+        report = ApprovalReport(
+            outcomes=[
+                ApprovalOutcome(
+                    sn_id="refused_name",
+                    axis="docs",
+                    decision="promotion_refused",
+                    reason="catalog promotion preconditions were not met",
+                )
+            ]
+        )
+        with pytest.raises(RealTransportAttempted):
+            notify_refusal_on_pull_request(
+                report,
+                catalog_pr_url="https://github.com/fork/catalog/pull/7",
+            )
+
+    def test_the_write_mock_intercepts_that_same_call(self):
+        """A positive receipt: the routed endpoint answers instead of escaping."""
+        with _fold_back_write_transport([("/issues/7/comments", 201, {"id": 1})]):
+            # Resolved inside the patch, as the refusal path resolves it.
+            from imas_codex.graph.ghcr import github_api_call
+
+            assert github_api_call(
+                "POST",
+                "/repos/fork/catalog/issues/7/comments",
+                payload={"body": "..."},
+            ) == (201, {"id": 1})
 
 
 class TestApprovedCatalogMaterialization:
