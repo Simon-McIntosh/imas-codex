@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T16:33:06",
+  "updated": "2026-09-18T16:33:49",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5099,9 +5099,11 @@
         "id": "s14-rev-client",
         "harness": "clive",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "3a75b4ec-9b30-4e50-a6c4-32cbe8809792",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "3a75b4ec-9b30-4e50-a6c4-32cbe8809792"
+        },
         "created": "2026-09-18"
       },
       {
@@ -155332,6 +155334,337 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260918T125949273384-review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+        "plan": "sn-release-readiness",
+        "section": "\u00a71",
+        "node": "review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1679,
+                "cached_input_tokens": 497190,
+                "input_tokens": 498871,
+                "output_tokens": 1633,
+                "reasoning_output_tokens": 70,
+                "total_tokens": 500504,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "ship-s14-20260918"
+          },
+          "done_when": "the review for r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step parses all five score dimensions",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+          "id": "review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-18T12:59:49Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T125949273384-review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step/manifest.md",
+          "plan": "sn-release-readiness",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a71",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "s14-rev-client",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-18T12:59:57Z",
+        "completed_at": "2026-09-18T14:32:01.553Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 5492,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 5524,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "ff5924c6e9526377e41454dc0c52d2719f288ec7",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review artifact written and parsed",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T125949273384-review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step/manifest.md",
+        "scope_changed": false,
+        "session_id": "3a75b4ec-9b30-4e50-a6c4-32cbe8809792",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no rate-limit event in the stream yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-18T14:32:01.553Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3571,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 5371,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 8586,
+              "log_fresh": false,
+              "manifest_commits": [
+                "0adb2dbaa",
+                "5dc40b55e"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "01193bba68e51d0ef3b6b45a750ae54bf3c406efd097ca04c699aa45e165dfae",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T090709479230-n-the-reuse-map-for-the-release-and-claim-surfaces/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-west-catalog-release --section release-contract --role review --spec-level exact --node review-of-n-the-reuse-map-for-the-release-and-claim-surfaces --goal 'attach an independent review to run r-20260918T090709479230-n-the-reuse-map-for-the-release-and-claim-surfaces' --done-when 'the review for r-20260918T090709479230-n-the-reuse-map-for-the-release-and-claim-surfaces parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260918T090709479230-n-the-reuse-map-for-the-release-and-claim-surfaces.json --time-budget 30m --session ship-s14-20260918 --local",
+              "node": "n-the-reuse-map-for-the-release-and-claim-surfaces",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260918T090709479230-n-the-reuse-map-for-the-release-and-claim-surfaces",
+              "session": "ship-s14-20260918",
+              "terminal_age_seconds": 9724,
+              "terminal_at": "2026-09-18T10:17:49Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260918/n-the-reuse-map-for-the-release-and-claim-surfaces"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 3247,
+              "budget_seconds": 2100,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 5347,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 8398,
+              "log_fresh": false,
+              "manifest_commits": [
+                "e6c43eac4d56d62c562e73bcdca357daf00b53c0"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "bff44c5d399e40bbfa36d3615d4fbf284cb64410f9a944c663ddf160e0de5473",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-west-catalog-release --section release-contract --role review --spec-level exact --node review-of-n-the-two-verdict-fields-are-censused-for-disagreement --goal 'attach an independent review to run r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement' --done-when 'the review for r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement.json --time-budget 35m --session ship-s14-20260918 --local",
+              "node": "n-the-two-verdict-fields-are-censused-for-disagreement",
+              "phase": "starting",
+              "plan": "sn-west-catalog-release",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260918T091042347055-n-the-two-verdict-fields-are-censused-for-disagreement",
+              "session": "ship-s14-20260918",
+              "terminal_age_seconds": 8459,
+              "terminal_at": "2026-09-18T10:38:54Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260918/n-the-two-verdict-fields-are-censused-for-disagreement"
+            },
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2597,
+              "budget_seconds": 3000,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 5597,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 8104,
+              "log_fresh": false,
+              "manifest_commits": [
+                "c12b50cae fix(graph): resolve the reachable graph address inside a SLURM step",
+                "bb3d3eb54 test(graph): pin the client's address resolution inside a SLURM step",
+                "82fe00ac6 docs(evidence): record the graph client's SLURM-step address resolution"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "45f05eddbab6cea5c0af8d41772ba9fcc57b6db0606c8faceeae0f08ff50345b",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-release-readiness --section '\u00a71' --role review --spec-level exact --node review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step --goal 'attach an independent review to run r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step' --done-when 'the review for r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step parses all five score dimensions' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step.json --time-budget 50m --session ship-s14-20260918 --local",
+              "node": "n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+              "phase": "starting",
+              "plan": "sn-release-readiness",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260918T091109489876-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+              "session": "ship-s14-20260918",
+              "terminal_age_seconds": 8182,
+              "terminal_at": "2026-09-18T10:43:31Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260918/n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step"
+            }
+          ]
+        },
+        "review": null,
+        "follow_on_paths": [
+          "imas_codex/graph/client.py:139-145",
+          "imas_codex/graph/profiles.py:433",
+          "imas_codex/graph/client.py:174",
+          "imas_codex/graph/client.py:109",
+          "tests/graph/test_client_address_resolution.py:69",
+          "imas_codex/graph/client.py:119",
+          "AGENTS.md",
+          "GraphClient.uri"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "a review node's deliverable is the review JSON in the crew reviews store, not a repository commit",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s14-20260918/review-of-n-the-graph-client-resolves-the-reachable-address-inside-a-slurm-step",
+          "session_id": "3a75b4ec-9b30-4e50-a6c4-32cbe8809792",
+          "session_source": "pointer",
+          "retained_at": "2026-09-18T14:32:01.553Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "tool_steps": 117.0,
+        "orientation_input_tokens": 7616008.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -155616,6 +155949,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2334
+    "_version": 2336
   }
 }
