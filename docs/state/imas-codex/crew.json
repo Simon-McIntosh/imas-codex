@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T14:34:44",
+  "updated": "2026-09-18T14:47:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5080,17 +5080,6 @@
           "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
         },
         "created": "2026-09-01"
-      },
-      {
-        "id": "session-79322149f80f4c1d1ea8",
-        "harness": "clive",
-        "role": "investigate",
-        "session_id": "cb783971-b0fe-4800-b7d9-9c64982552fb",
-        "session_model": "deepseek-v4.1-flash",
-        "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "cb783971-b0fe-4800-b7d9-9c64982552fb"
-        },
-        "created": "2026-09-17"
       },
       {
         "id": "session-e7007bcf7b2657baa55d",
@@ -153224,6 +153213,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2307
+    "_version": 2308
   }
 }
