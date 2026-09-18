@@ -522,6 +522,102 @@
     existing persistence boundaries.</p>
     <p>Full map, with every anchor: <a href="/imas-codex/evidence/paid-identity-deletion-protection/restore-reuse-map.md">the restore reuse map</a>.</p>
   </section>
+<section id="archive-reconstruction-entry-point">
+    <h2>The archive reconstruction adapter is reachable from a committed command, and removing that command fails the test that claims it</h2>
+    <p><strong>Measured 2026-09-18</strong> from base
+    <code>d170a6ec29331dbe6a2247d42b845c3f44f8ec32</code>. The first pass over the
+    gate was taken on a login node, which is stated because it is the weaker
+    placement; the recorded run was taken on the <code>all_debug</code>
+    partition, since a gate costing twelve seconds of CPU does not belong on a
+    shared login node.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>committed commands that carry the adapter</td><td>2 &mdash; <code>sn restore compose</code>, <code>sn restore apply</code>, <code>imas_codex/cli/sn.py</code></td></tr>
+        <tr><td>programmatic entry point</td><td><code>compose_archive_reconstruction_authority</code>, same module</td></tr>
+        <tr><td>artifact validated against</td><td>the adapter's own loader, <code>_load_archive_reconstruction_authority</code>, given recomputed digests &mdash; not a restatement of its rules</td></tr>
+        <tr><td>role with no reconstruction route</td><td><code>EVIDENCED_BY</code> counted in <code>archive_roles</code> and absent from the routed edges, asserted both ways</td></tr>
+        <tr><td>the driver's hardcoded counterpart rekey</td><td>now <code>--rename-counterpart ARCHIVED=RESTORED</code>, refused when it names no archived counterpart</td></tr>
+        <tr><td>gate</td><td><code>python -m pytest -p no:cacheprovider tests/standard_names/test_archive_reconstruction_entry_point.py</code> &mdash; exit <code>0</code>, <strong>13 passed</strong>, 7.23s, <code>~/.cache/pidp-entrypoint-gate.log</code></td></tr>
+        <tr><td>live graph read</td><td><strong>none</strong> &mdash; the CLI is driven through a patched graph factory, so no concurrent writer has to be quiet for this gate</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The reachability claim is proved by removing the thing it names.</strong>
+    </p>
+    <svg viewBox="0 0 780 244" role="img" aria-label="The path the commit adds, above; the two-run instrument that proves it, below" style="max-width:100%;height:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px">
+      <defs>
+        <marker id="are-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+        </marker>
+      </defs>
+      <text x="8" y="14" fill="#555" font-size="11">THE PATH THE COMMIT ADDS</text>
+      <rect x="8" y="24" width="168" height="46" fill="#f4f4f4" stroke="#999"/>
+      <text x="20" y="44" fill="#222">archive extraction</text>
+      <text x="20" y="60" fill="#666" font-size="11">record JSON</text>
+      <line x1="176" y1="47" x2="206" y2="47" stroke="#555" marker-end="url(#are-arrow)"/>
+      <rect x="208" y="24" width="168" height="46" fill="#eef4fd" stroke="#3b6ea5"/>
+      <text x="220" y="44" fill="#222">sn restore compose</text>
+      <text x="220" y="60" fill="#666" font-size="11">+ signature, + role census</text>
+      <line x1="376" y1="47" x2="406" y2="47" stroke="#555" marker-end="url(#are-arrow)"/>
+      <rect x="408" y="24" width="150" height="46" fill="#f4f4f4" stroke="#999"/>
+      <text x="420" y="44" fill="#222">signed authority</text>
+      <text x="420" y="60" fill="#666" font-size="11">json-sort-keys-v1</text>
+      <line x1="558" y1="47" x2="588" y2="47" stroke="#555" marker-end="url(#are-arrow)"/>
+      <rect x="590" y="24" width="182" height="46" fill="#eef4fd" stroke="#3b6ea5"/>
+      <text x="600" y="44" fill="#222">sn restore apply</text>
+      <text x="600" y="60" fill="#666" font-size="11">loader &rarr; _apply_archive_reconstruction</text>
+      <text x="8" y="102" fill="#555" font-size="11">THE INSTRUMENT, RUN TWICE &mdash; ONLY EXIT 1 IS A TEST FAILURE</text>
+      <rect x="8" y="112" width="392" height="48" fill="#f4f4f4" stroke="#999"/>
+      <text x="20" y="132" fill="#222">phase A: restore registered</text>
+      <text x="20" y="148" fill="#666" font-size="11">CliRunner().invoke(sn, [restore, apply, ...])</text>
+      <line x1="400" y1="136" x2="424" y2="136" stroke="#555" marker-end="url(#are-arrow)"/>
+      <rect x="426" y="112" width="346" height="48" fill="#eaf7ee" stroke="#2f7d4f"/>
+      <text x="438" y="132" fill="#222">PASS &mdash; exit 0</text>
+      <text x="438" y="148" fill="#2f7d4f" font-size="11">isinstance(exception, AdapterReached)</text>
+      <rect x="8" y="172" width="392" height="48" fill="#f4f4f4" stroke="#999"/>
+      <text x="20" y="192" fill="#222">phase B: sn.commands.pop(&quot;restore&quot;)</text>
+      <text x="20" y="208" fill="#666" font-size="11">same test, same argv, fresh process</text>
+      <line x1="400" y1="196" x2="424" y2="196" stroke="#555" marker-end="url(#are-arrow)"/>
+      <rect x="426" y="172" width="346" height="48" fill="#fdeceb" stroke="#b3261e"/>
+      <text x="438" y="192" fill="#b3261e">FAIL &mdash; exit 1, not 2/4/5</text>
+      <text x="438" y="208" fill="#b3261e" font-size="11">SystemExit(2) where AdapterReached was asserted</text>
+    </svg>
+    <p>Running the same test twice, as two processes, distinguishes a test failure
+    from any other nonzero exit: <code>4</code> is a usage error, <code>5</code> is
+    nothing collected, <code>2</code> is interrupted, and only <code>1</code> is a
+    test failure. Phase A passes through the committed command; phase B deletes the
+    <code>restore</code> group from the CLI registry and fails, and the recorded
+    failure is the claimed one rather than a configuration error:</p>
+    <table>
+      <thead><tr><th>Phase</th><th>Exit</th><th>Observed</th></tr></thead>
+      <tbody>
+        <tr><td>A &mdash; <code>restore</code> registered</td><td><strong>0</strong></td><td>1 passed; the sentinel the adapter raises where the transaction would open</td></tr>
+        <tr><td>B &mdash; <code>sn.commands.pop("restore")</code></td><td><strong>1</strong></td><td><code>assert False where False = isinstance(SystemExit(2), AdapterReached)</code></td></tr>
+        <tr><td>B control 1 &mdash; wrong exit class</td><td>guarded</td><td>the driver refuses to call it reproduced unless the exit is exactly 1</td></tr>
+      </tbody>
+    </table>
+    <p><strong>One product defect was found by the test and fixed with it.</strong>
+    <code>SignedManifestAuthorityError</code>, the loader's integrity refusal
+    &mdash; a digest that does not match, a payload the signature does not cover,
+    a counterpart the restore cannot create &mdash; escaped
+    <code>sn_restore_apply</code> entirely, so an operator holding a tampered or
+    mismatched authority got a traceback while the JSON and shape checks directly
+    above raised usage errors. The command boundary now re-raises that single
+    exception as a usage error carrying the loader's own message; no other
+    exception is caught, nothing is retried, and the test asserts exit
+    <code>2</code> on a tampered payload rather than merely nonzero, so a future
+    regression back to a traceback fails the test instead of passing it.</p>
+    <p><strong>What this does not establish.</strong> The adapter's transaction is
+    not exercised against a live graph: the sentinel raises where the transaction
+    would open, which is what makes the reachability claim true without a database,
+    and the parity semantics inside the transaction remain covered by the adapter's
+    own tests. The reuse map's remaining <code>CANNOT REUSE</code> rows are
+    untouched &mdash; the materializer's unconditional
+    <code>parent.origin = 'derived'</code> write, and the restore-authorised
+    <code>origin = 'pipeline'</code> postcondition at the persistence boundaries
+    &mdash; because those belong to the restore writer rather than to its entry
+    point.</p>
+  </section>
 </main>
 </body>
 </html>

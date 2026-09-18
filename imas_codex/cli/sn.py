@@ -8029,3 +8029,344 @@ def sn_reclassify(standard_name: str, domain: str, reason: str, dry_run: bool) -
         f"{verb} {result['name']} ({result['stage']}): "
         f"{result['from_domain'] or 'null'} → {result['to_domain']}"
     )
+
+
+# ---------------------------------------------------------------------------
+# sn restore — the archive reconstruction adapter's committed entry point
+# ---------------------------------------------------------------------------
+
+
+def _archive_reconstruction_graph_client() -> Any:
+    """Open the graph one archive reconstruction transaction runs against."""
+    from imas_codex.graph.client import GraphClient
+
+    return GraphClient()
+
+
+def compose_archive_reconstruction_authority(
+    record: dict[str, Any],
+    *,
+    identity: str | None = None,
+    counterpart_renames: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Sign one archive extraction into an authority the adapter accepts.
+
+    ``record`` is one identity's extraction: its ``properties`` and one entry per
+    incident relationship carrying ``relationship_type``, ``direction`` and
+    ``counterpart_id``, plus the counterpart's ``counterpart_labels`` and
+    ``counterpart_properties``. Every incident role is counted into the
+    extraction's ``archive_roles`` census, including a role the reconstruction
+    registry has no route for — an archived ``EVIDENCED_BY`` is held inbound from
+    ``PromotionCandidate``, cannot be carried by an edge, and reaches the receipt
+    as a counted and unreinstatable role instead of as a silent loss.
+
+    A registry route whose counterpart label is one the adapter may create must
+    carry that counterpart's archived properties, because the restore rebuilds
+    the node; every other label's counterpart is required to pre-exist live and
+    nothing here invents it.
+
+    ``counterpart_renames`` rekeys an archived ``StandardName`` counterpart that
+    the graph now holds under a different name, and every key must name a
+    counterpart the extraction actually carries: a restore whose parent was
+    renamed composes only when that rekey is stated, and a stated rekey that
+    matches nothing is refused rather than silently ignored.
+    """
+    renames = dict(counterpart_renames or {})
+    from imas_codex.standard_names.signed_manifest import (
+        _ARCHIVE_EDGE_COUNTERPARTS,
+        _ARCHIVE_RECONSTRUCTABLE_COUNTERPART_LABELS,
+        _ARCHIVE_RECONSTRUCTION_SCHEMA,
+        SIGNED_AUTHORITY_CANONICALIZATION,
+        signed_payload_sha256,
+    )
+
+    properties = record.get("properties")
+    edges = record.get("edges")
+    if not isinstance(properties, dict) or not isinstance(edges, list):
+        raise click.UsageError(
+            "an archive extraction carries one identity's properties and its "
+            "incident edges"
+        )
+    archived_id = properties.get("id")
+    if not isinstance(archived_id, str) or not archived_id:
+        raise click.UsageError("archive extraction properties carry no identity")
+    node_id = identity or archived_id
+    node_properties = dict(properties)
+    node_properties["id"] = node_id
+
+    routed: list[dict[str, Any]] = []
+    declared: dict[tuple[str, str | int], dict[str, Any]] = {}
+    census: dict[str, int] = {}
+    for edge in edges:
+        if not isinstance(edge, dict):
+            raise click.UsageError("an archive extraction edge must be an object")
+        relationship_type = str(edge.get("relationship_type") or "")
+        direction = str(edge.get("direction") or "")
+        if not relationship_type or not direction:
+            raise click.UsageError(
+                "an archive extraction edge names its relationship type and direction"
+            )
+        census[relationship_type] = census.get(relationship_type, 0) + 1
+        label = _ARCHIVE_EDGE_COUNTERPARTS.get(relationship_type, {}).get(direction)
+        if label is None:
+            continue
+        labels = edge.get("counterpart_labels")
+        if isinstance(labels, list) and labels and label not in labels:
+            held = "|".join(str(item) for item in labels)
+            raise click.UsageError(
+                f"archive {relationship_type}/{direction} holds a {held} counterpart "
+                f"where the reconstruction registry routes {label}"
+            )
+        counterpart_id = edge.get("counterpart_id")
+        if isinstance(counterpart_id, bool) or not isinstance(
+            counterpart_id, str | int
+        ):
+            raise click.UsageError(
+                f"archive {relationship_type}/{direction} carries no counterpart id"
+            )
+        if label == "StandardName" and str(counterpart_id) in renames:
+            renamed_counterpart = renames.pop(str(counterpart_id))
+            counterpart_id = renamed_counterpart
+        routed.append(
+            {
+                "owner_id": node_id,
+                "relationship_type": relationship_type,
+                "direction": direction,
+                "counterpart_id": counterpart_id,
+                "properties": dict(edge.get("properties") or {}),
+            }
+        )
+        if label not in _ARCHIVE_RECONSTRUCTABLE_COUNTERPART_LABELS:
+            continue
+        counterpart_properties = edge.get("counterpart_properties")
+        if not isinstance(counterpart_properties, dict) or not counterpart_properties:
+            raise click.UsageError(
+                f"archive extraction carries no properties for the {label} "
+                f"counterpart {counterpart_id} of {relationship_type}, and the "
+                "restore creates that node"
+            )
+        counterpart_properties = dict(counterpart_properties)
+        counterpart_properties["id"] = counterpart_id
+        declared[(label, counterpart_id)] = {
+            "label": label,
+            "id": counterpart_id,
+            "properties": counterpart_properties,
+        }
+    if renames:
+        raise click.UsageError(
+            "a counterpart rekey names no archived StandardName counterpart: "
+            f"{', '.join(sorted(renames))}"
+        )
+    if not routed:
+        raise click.UsageError(
+            "archive extraction carries no relationship the reconstruction "
+            "registry routes"
+        )
+    authority: dict[str, Any] = {
+        "schema": _ARCHIVE_RECONSTRUCTION_SCHEMA,
+        "operation_id": "reconstruct-archived-standard-name",
+        "identities": [node_id],
+        "nodes": [{"id": node_id, "properties": node_properties}],
+        "counterparts": [
+            declared[key]
+            for key in sorted(declared, key=lambda item: (item[0], str(item[1])))
+        ],
+        "edges": routed,
+        "archive_roles": {node_id: dict(sorted(census.items()))},
+    }
+    authority["signature"] = {
+        "canonicalization": SIGNED_AUTHORITY_CANONICALIZATION,
+        "sha256": signed_payload_sha256(authority),
+    }
+    return authority
+
+
+@sn.group("restore")
+def sn_restore() -> None:
+    """Restore archived identities through the signed reconstruction adapter."""
+
+
+@sn_restore.command("compose")
+@click.argument("extraction", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--output",
+    required=True,
+    type=click.Path(dir_okay=False),
+    help="Path the signed authority artifact is written to.",
+)
+@click.option(
+    "--identity",
+    default=None,
+    help="Reconstruct the identity under a name other than the archived one.",
+)
+@click.option(
+    "--rename-counterpart",
+    "counterpart_renames",
+    multiple=True,
+    metavar="ARCHIVED=RESTORED",
+    help="Rekey an archived StandardName counterpart the graph renamed.",
+)
+def sn_restore_compose(
+    extraction: str,
+    output: str,
+    identity: str | None,
+    counterpart_renames: tuple[str, ...],
+) -> None:
+    """Sign one archive extraction into an authority the adapter accepts.
+
+    The extraction holds one identity's archived node and its incident
+    relationships as the store dump has them. The artifact this writes is the
+    exact input ``sn restore apply`` consumes, so composing the signed
+    reconstruction input no longer depends on an out-of-tree driver.
+
+    \b
+    Example:
+      imas-codex sn restore compose archive-extraction.json \\
+          --identity spectral_etendue_of_spectrometer_channel \\
+          --output /tmp/reconstruction-authority.json
+    """
+    import json
+    from pathlib import Path
+
+    raw = Path(extraction).read_bytes()
+    try:
+        payload = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise click.UsageError("archive extraction is not JSON") from exc
+    if isinstance(payload, list):
+        if len(payload) != 1:
+            raise click.UsageError(
+                "an archive authority restores one identity; this file holds "
+                f"{len(payload)}"
+            )
+        payload = payload[0]
+    if not isinstance(payload, dict):
+        raise click.UsageError("archive extraction must be a JSON object")
+
+    renames: dict[str, str] = {}
+    for item in counterpart_renames:
+        archived, separator, restored = item.partition("=")
+        if not separator or not archived.strip() or not restored.strip():
+            raise click.UsageError("--rename-counterpart takes ARCHIVED=RESTORED")
+        renames[archived.strip()] = restored.strip()
+
+    authority = compose_archive_reconstruction_authority(
+        payload, identity=identity, counterpart_renames=renames
+    )
+    Path(output).write_text(json.dumps(authority, sort_keys=True))
+    roles = authority["archive_roles"][authority["identities"][0]]
+    click.echo(f"composed {authority['identities'][0]}")
+    click.echo(f"edges {len(authority['edges'])}")
+    click.echo(f"counterparts {len(authority['counterparts'])}")
+    click.echo(f"archived roles {len(roles)}: {', '.join(sorted(roles))}")
+    click.echo(f"signature {authority['signature']['sha256']}")
+
+
+@sn_restore.command("apply")
+@click.argument("authority", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--reason",
+    required=True,
+    help="Mandatory justification recorded in the receipt.",
+)
+@click.option(
+    "--apply",
+    "apply_changes",
+    is_flag=True,
+    help="Commit the reconstruction; without it the action previews and rolls back.",
+)
+@click.option(
+    "--manifest-sha256",
+    default=None,
+    help="Digest a prior preview returned; authorizes exactly that closure.",
+)
+def sn_restore_apply(
+    authority: str,
+    reason: str,
+    apply_changes: bool,
+    manifest_sha256: str | None,
+) -> None:
+    """Preview or apply one signed archive reconstruction.
+
+    A preview reads the live closure inside the transaction and rolls back, and
+    the digest it returns is the only thing ``--apply`` authorizes: the closure
+    is read again rather than trusted, so a graph that moved between the two
+    invocations refuses instead of composing something else.
+
+    \b
+    Example:
+      imas-codex sn restore apply /tmp/reconstruction-authority.json \\
+          --reason "restore the archived identity" \\
+          --apply --manifest-sha256 <digest-from-the-preview>
+    """
+    import hashlib
+    import json
+    from pathlib import Path
+
+    from imas_codex.standard_names.signed_manifest import (
+        _ARCHIVE_RECONSTRUCTION_ADAPTER,
+        _ARCHIVE_RECONSTRUCTION_GUARDS,
+        _ARCHIVE_RECONSTRUCTION_MUTATION,
+        SignedManifestAuthorityError,
+        apply_signed_manifest,
+        signed_payload_sha256,
+    )
+
+    if not reason.strip():
+        raise click.UsageError("--reason must not be blank")
+    if apply_changes and manifest_sha256 is None:
+        raise click.UsageError("--apply requires --manifest-sha256 from a preview")
+    if manifest_sha256 is not None and not apply_changes:
+        raise click.UsageError("--manifest-sha256 authorizes an apply; pass --apply")
+
+    path = Path(authority)
+    raw = path.read_bytes()
+    try:
+        data = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise click.UsageError("signed authority is not JSON") from exc
+    if not isinstance(data, dict):
+        raise click.UsageError("signed authority must be a JSON object")
+
+    try:
+        receipt = apply_signed_manifest(
+            path,
+            authority_adapter=_ARCHIVE_RECONSTRUCTION_ADAPTER,
+            authority_file_sha256=hashlib.sha256(raw).hexdigest(),
+            authority_payload_sha256=signed_payload_sha256(data),
+            mutation_kind=_ARCHIVE_RECONSTRUCTION_MUTATION,
+            guard_set=_ARCHIVE_RECONSTRUCTION_GUARDS,
+            reason=reason,
+            apply=apply_changes,
+            manifest_sha256=manifest_sha256,
+            client_factory=_archive_reconstruction_graph_client,
+        )
+    except SignedManifestAuthorityError as exc:
+        raise click.UsageError(f"the signed authority was not accepted: {exc}") from exc
+    outcome = str(receipt.get("outcome") or "")
+    tally = receipt.get("counts") or {}
+    click.echo(
+        f"{outcome}: nodes {tally.get('authority_rows', 0)} "
+        f"admitted {tally.get('admitted', 0)} refused {tally.get('refused', 0)}"
+    )
+    for refusal in receipt.get("refusals") or []:
+        click.echo(f"  refused {refusal['row_id']}: {refusal['reason']}")
+    parity = receipt.get("identity_role_parity") or {}
+    for identity, identity_roles in sorted(parity.items()):
+        for role, role_counts in sorted(identity_roles.items()):
+            click.echo(
+                f"  parity {identity} {role}: "
+                f"expected {role_counts['expected']} "
+                f"observed {role_counts['observed']}"
+            )
+    click.echo(f"manifest_sha256 {receipt.get('manifest_sha256')}")
+    if outcome == "would_apply":
+        click.echo(
+            "re-run with --apply --manifest-sha256 "
+            f"{receipt.get('manifest_sha256')} to commit"
+        )
+    if outcome == "refused":
+        raise click.UsageError(
+            "the archive reconstruction withheld an identity it could not "
+            "reinstate exactly"
+        )
