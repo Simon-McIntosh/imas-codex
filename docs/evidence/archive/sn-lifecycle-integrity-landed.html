@@ -467,6 +467,24 @@
     <p>Over the 2,163 names in the superseded state, <strong>1,641</strong> carry a successor through a <code>REFINED_FROM</code> edge and <strong>517</strong> have none by any route. The two sum to 2,163, and the recorded baselines of 2,145 null scalars and 517 successor-less names both reproduce exactly. The scalar is the only recorded pointer for three names — <code>flux_due_to_thermal_fusion</code>, <code>area_of_flux_surface</code> and <code>lower_energy</code>.</p>
     <p>The change ledger does not carry the relation: of the 303 superseded names with a supersede row naming a target, 300 name themselves and only 4 name another identity, so a derive reading the row's own target returns a self-reference in 300 of 303 cases. Readers and the three readings: <a href="/imas-codex/evidence/sn-lifecycle-integrity/successor-without-the-scalar" title="The successor-derivation census over the superseded population, the readers of the scalar and the identities it still carries">the successor-derivation census</a>.</p>
   </section>
+
+  <section>
+    <h2 id="scoped-edit-reuse-map">The scoped-edit surface carries every hop but the bypass</h2>
+    <p>An <code>sn edit</code> review is scoped by identity and launches the normal pool
+    orchestrator with no maintenance bypass: the call at <code>edit.py:3740-3747</code> passes
+    <code>scope_run_id</code> and five other keywords, and <code>skip_global_maintenance</code> is
+    not among them, while <code>loop.py:1303</code> defaults the flag to <code>False</code>. No
+    upstream frame accepts it either — <code>sn_edit</code>, <code>run_inline_review</code> and
+    <code>_run_scoped_pipeline</code> all lack the parameter — so the escalation the followup
+    recorded is reproduced by the code as read at <code>9705954c2</code>, not inferred from a
+    default. The loop needs no change, because the edit path already satisfies the flag's scope
+    guard by passing <code>plan.run_id</code>.</p>
+    <p>Every hop from the CLI entry point to <code>run_sn_pools</code>, the reuse inventory for a
+    repair, the mocked test seams that keep the omission invisible, and the proposed write-path
+    set are in <a href="/imas-codex/evidence/sn-lifecycle-integrity/scoped-edit-reuse-map">the
+    scoped-edit reuse map</a>. It is a scout record: no source was changed and no graph write was
+    made.</p>
+  </section>
   </main>
 </body>
 </html>
