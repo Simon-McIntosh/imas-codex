@@ -38,6 +38,15 @@ _SURVIVING_FINDINGS = {
         "ownership it does not change, so a stamp would make updated_at track "
         "heartbeat cadence instead of name modifications."
     ),
+    ("publish.py", ("exported_at",)): (
+        "catalog export receipt: applies the published manifest timestamp only "
+        "after the catalog commit succeeds, recording delivery rather than a "
+        "change to the name content."
+    ),
+    ("workers.py", ("refine_attempts",)): (
+        "claim-accounting correction: returns a charged rotation when a pinned "
+        "rename is resubmitted unchanged, without modifying the name content."
+    ),
 }
 
 _EXPECTED_FINDINGS = Counter(path for path, _properties in _SURVIVING_FINDINGS)
