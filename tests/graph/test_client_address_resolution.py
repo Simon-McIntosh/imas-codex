@@ -45,6 +45,20 @@ def pin(monkeypatch, *, scheduler, node, host=STEP_HOST, port=7687, uri=PROFILE_
     monkeypatch.setattr(socket, "gethostname", lambda: host + ".iter.org")
 
 
+@pytest.fixture(autouse=True)
+def resolver_environment_isolated(monkeypatch):
+    """Start every case from neither environment input the resolver reads.
+
+    ``_resolve_graph_uri`` consults ``NEO4J_URI`` and ``SLURM_JOB_ID`` from
+    the process environment, so a shell that exports either -- CI, or an
+    operator using the documented escape hatch -- would decide what these
+    cases observe instead of the code under test. A case that exercises one
+    of them sets it explicitly; the ambient value never reaches the resolver.
+    """
+    monkeypatch.delenv("NEO4J_URI", raising=False)
+    monkeypatch.delenv("SLURM_JOB_ID", raising=False)
+
+
 def test_direct_address_outside_a_slurm_step(monkeypatch):
     """The profile URI stands, and no node discovery is attempted."""
     monkeypatch.delenv("SLURM_JOB_ID", raising=False)

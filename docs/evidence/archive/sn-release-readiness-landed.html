@@ -1195,6 +1195,64 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       tier green evidence</a>.
     </p>
 
+  <h2 id="graph-address-resolution-tests-are-hermetic">The address-resolution tests pin the repair, not the shell</h2>
+
+    <p>
+      The suite that pins the SLURM address repair read two variables from the
+      process environment before it reached anything it had patched, so a shell
+      exporting either decided what it observed. <code>NEO4J_URI</code> is the
+      documented escape hatch the repair restores, so any machine or CI using
+      the hatch ran the pinning suite red on correct code: with it set to
+      <code>bolt://example.invalid:1</code> the suite reported
+      <strong>2 failed, 7 passed</strong>, exit 1, where the same command with
+      the variable unset reported 9 passed. The two failures were
+      <code>test_direct_address_outside_a_slurm_step</code> and
+      <code>test_the_client_default_uri_is_the_slurm_aware_resolver</code>, the
+      cases that do not set the variable themselves.
+    </p>
+
+    <p>
+      An autouse fixture now clears <code>NEO4J_URI</code> and
+      <code>SLURM_JOB_ID</code> before every case and a case that exercises one
+      sets it. No assertion was weakened and no case was deleted; the
+      explicit-URI precedence case still sets its own value and still passes.
+      Both readings after the change are <strong>9 passed, exit 0</strong>, with
+      the variable exported and with it unset, so the suite no longer depends on
+      the shell it is launched from.
+    </p>
+
+    <p>
+      Because a green suite does not show that a pin fires, four reversions were
+      applied to a scratch copy of the source. Each failed a named case:
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>reverted in the scratch copy</th><th>case that failed</th><th>result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>default factory restored to the profile URI</td>
+          <td><code>test_the_client_default_uri_is_the_slurm_aware_resolver</code></td>
+          <td>1 failed, 8 passed</td></tr>
+        <tr><td>explicit-<code>NEO4J_URI</code> early return removed</td>
+          <td><code>test_explicit_neo4j_uri_wins_inside_a_slurm_step</code></td>
+          <td>1 failed, 8 passed</td></tr>
+        <tr><td>swallowed location exception restored</td>
+          <td><code>test_an_unreadable_location_is_not_swallowed</code></td>
+          <td>1 failed, 8 passed</td></tr>
+        <tr><td>fallback import hoisted to module level</td>
+          <td><code>test_the_fallback_is_read_from_the_module_it_is_imported_from</code></td>
+          <td>2 failed, 7 passed</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      The scratch copy passed 9 on its own before any reversion, which is the
+      load control showing the reverted module was the one under test. Commands,
+      log paths and the before/after readings:
+      <a href="/imas-codex/evidence/sn-release-readiness/graph-client-slurm-resolution">the resolution record</a>.
+    </p>
+
   </main>
 </body>
 </html>
