@@ -467,6 +467,15 @@
     <p>Over the 2,163 names in the superseded state, <strong>1,641</strong> carry a successor through a <code>REFINED_FROM</code> edge and <strong>517</strong> have none by any route. The two sum to 2,163, and the recorded baselines of 2,145 null scalars and 517 successor-less names both reproduce exactly. The scalar is the only recorded pointer for three names — <code>flux_due_to_thermal_fusion</code>, <code>area_of_flux_surface</code> and <code>lower_energy</code>.</p>
     <p>The change ledger does not carry the relation: of the 303 superseded names with a supersede row naming a target, 300 name themselves and only 4 name another identity, so a derive reading the row's own target returns a self-reference in 300 of 303 cases. Readers and the three readings: <a href="/imas-codex/evidence/sn-lifecycle-integrity/successor-without-the-scalar" title="The successor-derivation census over the superseded population, the readers of the scalar and the identities it still carries">the successor-derivation census</a>.</p>
   </section>
+
+  <section>
+    <h2 id="suite-base-determinism">The six-file base is reproducible at one revision, and the couplings that would break it are named</h2>
+    <p>Three runs over the six files the suite-base followup names — one invocation forward, one reversed, one process per file — returned the <strong>same failure-id set, and it is empty</strong>: 38 passed, 2 skipped, exit 0, three times at <code>4c9d1dabb</code>. The empty set is shown to be a measurement rather than a blind instrument by a control: the identical invocation form carrying one planted failing test reported its FAILED id and exited 1.</p>
+    <p>What makes that base a property of the run is named with its mechanism and location: the graph route is decided at collection by a module-level probe in <code>test_seed_live_graph.py</code> (False on the debug partition, True with 61,366 rows on the login node — so the two gated tests skip in one environment and run in the other); the credential verdict follows a cwd-relative <code>.env</code> load; an editable checkout outside the repository supplies the grammar context and fails open into per-test failures; and regenerated models make two trees two different instruments. Ordering within the six files was controlled directly and does not change the outcome. Full record, including the control run and the log paths:
+    <a href="/imas-codex/evidence/sn-lifecycle-integrity/suite-base-determinism"
+       title="Three runs at one revision, a planted-failure control, and each coupling with its file and line">the
+    six-file base measurement</a>.</p>
+  </section>
   </main>
 </body>
 </html>
