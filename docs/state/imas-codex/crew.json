@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T14:56:45",
+  "updated": "2026-09-18T14:56:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5042,6 +5042,15 @@
         "id": "s14-rehearsal",
         "harness": "clive",
         "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-18"
+      },
+      {
+        "id": "s14-rev-census",
+        "harness": "clive",
+        "role": "review",
         "session_id": null,
         "session_model": null,
         "sessions": {},
@@ -153222,6 +153231,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2309
+    "_version": 2310
   }
 }
