@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 </head>
 <body>
   <main class="plan-doc">
@@ -643,7 +643,7 @@
     </article>
 <article class="r-fu" data-id="f-scai-getattr-aperture" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship sn-catalog-audit-instrument §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Annotate llm_out so the declared-attribute check can judge 13 of 18 sites instead of 5</h4>
-    <div class="r-fu-body"><p>The declared-attribute static check judges <strong>5 of 18</strong> three-argument <code>getattr</code> sites in <code>imas_codex/standard_names/review</code> and reports zero undeclared among them. The other <strong>13 are unresolved rather than clean</strong>: no annotation names the object's class, so no check of that shape can judge them. The check says so itself and holds a floor at the measured figure, which is the right behaviour &mdash; but 28 percent coverage must not be allowed to read as a clean tree.</p>
+    <div class="r-fu-body"><p>The declared-attribute static check judges <strong>5 of 18</strong> three-argument <code>getattr</code> sites in <code>imas_codex/standard_names/review</code> and reports zero undeclared among them. The other <strong>13 are unresolved rather than clean</strong>: no annotation names the object's class, so no check of that shape can judge them. The check says so itself and holds a floor at the measured figure, which is the right behaviour — but 28 percent coverage must not be allowed to read as a clean tree.</p>
 <p><strong>Eight of the thirteen are one variable.</strong> They are <code>llm_out</code> in the cost-event block, the result of a structured LLM call carrying no annotation. Annotating it with the model the call returns brings all eight into the check's view in one edit, taking the aperture from 5/18 to 13/18. The remaining five are a loop variable in the review-matching pass (four sites) and one parameter annotated <code>Any</code>.</p>
 <p><strong>Raise the floor in the same commit.</strong> The check asserts at least 5 resolved sites so that a narrowing reddens; a change that widens the aperture must move that number to the new measured figure, or the floor silently stops protecting the sites it just gained.</p>
 <p>This is an aperture repair, not a defect repair: the scan found no undeclared read anywhere it could see. Its value is that the sites it cannot see are the ones a future fail-open would land in unnoticed.</p></div>
@@ -734,6 +734,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T125317030837-review-of-n-the-mutation-classifier-respects-identifier-boundaries" data-who="reckon-ship" data-when="2026-09-21T14:37:06.947Z">
     <div class="r-comment-body"><p>Scored the mutation-classifier boundary repair 98, verdict SOUND: durability 20, evidence 20, goal_fidelity 20, scope_discipline 20, fit 18. One finding, on docstring tense: the docstring described the removed tokeniser in the present tense so a reader could take it for the live implementation. Fixed directly in 7895400ae to state the surviving mechanism instead. It also named two bounded residuals it deliberately did not deduct, neither reachable on this path: a keyword standing alone outside clause position, and a keyword separated by a hyphen rather than an underscore.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260921T151018265340-review-of-n-a-suppressed-write-returns-a-consumable-result" data-who="reckon-ship" data-when="2026-09-21T15:13:41.051Z">
+    <div class="r-comment-body"><p>Worker process ended after 165 seconds with no review record written. Third such death today on member session-db8c4f36c218aafa61a9: the catalog-roster review died at orientation, the mutation-classifier review died mid-generation after 515 stream records, and this one ended early. No other member has died today. Redispatched to a different member.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-coordinator-provenance-correction-and-guard-landing" data-who="reckon-ship" data-when="2026-09-21T12:30:00Z">
     <div class="r-comment-body"><p><strong>Correction to the unit-comparator-budget entry above: the eleven-test base/head gap is a missing <code>.git</code>, not a missing <code>.env</code>.</strong> That entry, and the evidence section it links, both attributed the gap to the base suite running without credentials. Measured: a <code>git archive</code> extraction has no <code>.git</code>, and <code>_manifest_iso_timestamp</code> (<code>export.py:2652</code>) refuses an export whose provenance resolves from neither a checkout nor <code>SOURCE_DATE_EPOCH</code>. All eleven are export and manifest tests driving that path, all eleven pass in a real checkout, and the same eleven fail in an independent extraction at a different revision. The zero-added conclusion is unchanged, since the asymmetry runs in the base's disfavour either way; the absolute base figure of 34 carries eleven failures inflicted by the measurement method. Every archive-based gate must export <code>SOURCE_DATE_EPOCH</code> from the commit date. Corrected in the landing record as <code>dbfc8fa08</code>.</p>
