@@ -6,6 +6,8 @@ import ast
 from dataclasses import dataclass
 from pathlib import Path
 
+import pytest
+
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 # Extend this tuple when another standard-name surface needs the same guard.
@@ -15,23 +17,17 @@ MODULE_ROOTS = (
     Path("imas_codex/standard_names/loop.py"),
 )
 
-REQUIRED_MODULE_ROOTS = frozenset(
-    {
-        Path("imas_codex/standard_names/review"),
-        Path("imas_codex/standard_names/export.py"),
-        Path("imas_codex/standard_names/loop.py"),
-    }
-)
-
 # Module and distribution metadata are intentionally dynamic, not model fields.
 LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES = {
     "__file__": "Module metadata is assigned by Python's import machinery.",
     "__version__": "Distribution metadata is supplied by the installed package.",
 }
 
-# Floors make a scan that sees nothing fail instead of passing silently.
-MINIMUM_SCANNED_MODULES = 8
-MINIMUM_LITERAL_DEFAULTED_GETATTRS = 24
+# Floors make a scan that sees nothing fail instead of passing silently. Each
+# floor is a ratchet set to the count this tree measures: raise it when the tree
+# grows, never lower it to make a failure go away.
+MINIMUM_SCANNED_MODULES = 11
+MINIMUM_LITERAL_DEFAULTED_GETATTRS = 30
 
 
 @dataclass(frozen=True)
@@ -55,13 +51,20 @@ class ModuleRootScan:
 
 
 def _python_modules(source_root: Path, module_root: Path) -> list[Path]:
-    """Return Python modules contributed by one explicit root."""
+    """Return Python modules contributed by one explicit root.
+
+    A root that is neither a directory nor a file is a configuration fault, so
+    it raises naming the path rather than contributing nothing: an unreachable
+    root must fail the scan instead of quietly shrinking its aperture.
+    """
     candidate = source_root / module_root
     if candidate.is_dir():
         return sorted(candidate.rglob("*.py"))
     if candidate.is_file():
         return [candidate]
-    return []
+    raise FileNotFoundError(
+        f"configured module root is neither a directory nor a file: {candidate}"
+    )
 
 
 def _decorator_names(decorators: list[ast.expr]) -> set[str]:
@@ -173,15 +176,19 @@ def _undeclared_defaulted_attributes(source_root: Path) -> list[tuple[Path, int,
 
 def test_configured_module_roots_have_coverage() -> None:
     """Every configured root must contribute both modules and defaulted reads."""
-    missing_roots = REQUIRED_MODULE_ROOTS - set(MODULE_ROOTS)
-    unexpected_roots = set(MODULE_ROOTS) - REQUIRED_MODULE_ROOTS
-    assert not missing_roots, f"required module roots are missing: {missing_roots}"
-    assert not unexpected_roots, (
-        f"unexpected module roots are configured: {unexpected_roots}"
-    )
     scan = _defaulted_attribute_scan(REPOSITORY_ROOT)
-    assert scan.module_count >= MINIMUM_SCANNED_MODULES
-    assert scan.candidate_count >= MINIMUM_LITERAL_DEFAULTED_GETATTRS
+    assert scan.module_count >= MINIMUM_SCANNED_MODULES, (
+        f"scanned {scan.module_count} modules, below the ratchet floor of "
+        f"{MINIMUM_SCANNED_MODULES}: the floor is a ratchet recording the "
+        "aperture this tree measures, so raise it when the tree grows and never "
+        "lower it to make a failure go away"
+    )
+    assert scan.candidate_count >= MINIMUM_LITERAL_DEFAULTED_GETATTRS, (
+        f"scanned {scan.candidate_count} literal defaulted getattr calls, below "
+        f"the ratchet floor of {MINIMUM_LITERAL_DEFAULTED_GETATTRS}: the floor is "
+        "a ratchet recording the aperture this tree measures, so raise it when "
+        "the tree grows and never lower it to make a failure go away"
+    )
     for root in scan.roots:
         assert root.exists, f"configured module root is missing: {root.root}"
         assert root.module_count > 0, (
@@ -214,3 +221,13 @@ def test_defaulted_literal_attribute_fixture_is_reported(tmp_path: Path) -> None
 
     assert scan.candidate_count == 1
     assert scan.violations == [(source_file, 1, "fixture_missing")]
+
+
+def test_misspelled_module_root_raises(tmp_path: Path) -> None:
+    """A configured root that resolves to nothing must fail, not shrink silently."""
+    misspelled = Path("imas_codex/standard_names/reviwe")
+
+    with pytest.raises(FileNotFoundError) as refusal:
+        _defaulted_attribute_scan(tmp_path, (misspelled,))
+
+    assert str(tmp_path / misspelled) in str(refusal.value)
