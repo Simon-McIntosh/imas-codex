@@ -239,3 +239,49 @@ The check that would catch all three at promote time is a stat plus a location
 test: reject a cited path that does not exist, that resolves under `/tmp`,
 `/dev/shm` or `/run/user`, or that is relative to a worktree rather than to the
 run record.
+
+## How narrow the aperture actually was
+
+The three iterations above argued about whether the guarded surface could shrink
+without a test failing. A separate measurement, taken while the fourth attempt was
+in flight, says the more important thing: **the surface was already about a tenth
+of the tree.**
+
+Counted over `imas_codex` with the project interpreter, matching the guard's own
+predicate shape (a three-argument `getattr` whose attribute name is a string
+literal):
+
+| | modules | literal-name candidates |
+|---|---|---|
+| the guard's enumerated surface (its ratchet floors) | 11 | 30 |
+| the package | **55** | **321** |
+
+So the check was inspecting under 10% of the calls it exists to inspect, and the
+ratchet floors — the thing that made a shrink fail — recorded that narrow aperture
+as the standard to hold. A floor set to a measured value protects the measurement;
+it says nothing about whether the measurement covered the right surface. **Both
+facts were true at once: the aperture could not shrink, and it was already small.**
+
+The declaration side was never the problem — `_declared_class_attributes` already
+walks the whole package for fields and properties. Only the *candidate* side was
+narrowed by the root enumeration.
+
+**Deriving the surface from the tree therefore has an exposure, and it should have
+been measured before the node was dispatched rather than discovered by it.** A
+crude package-wide predicate reports on the order of 80 candidates whose attribute
+is declared on no in-package class, concentrated in `standard_names/workers.py`
+(20), `graph/schema.py` (11), `discovery/base/llm.py` (7), `standard_names/audits.py`
+(6) and `standard_names/review/pipeline.py` (6). The sample's character is mostly
+legitimate: attributes on third-party receivers — litellm usage fields
+(`prompt_tokens_details`, `cached_tokens`, `_hidden_params`), rich live-display
+internals (`_live`, `is_started`), logging record attributes (`worker_name`,
+`batch`). The existing exemption mechanism,
+`LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES`, holds **two** entries, each carrying a
+reason.
+
+That figure is an upper bound from a cruder predicate than the guard's and is
+recorded as such. It is enough to establish the shape of the work: widening the
+surface is a fail-open closure whose exposure is the node's scope, not a
+tidying-up. The rule this repository already carries — measure the exposure in a
+scratch copy before writing the change, and put the number in the brief — was not
+followed here.
