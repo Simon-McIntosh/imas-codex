@@ -687,6 +687,56 @@
     <code>all_debug</code>.</p>
   </section>
 
+  <section id="unjudgeable-and-empty-export-populations">
+    <h2>Unjudgeable candidates and empty cuts are refused with named report reasons</h2>
+    <p><strong>Both defects reproduced before repair at
+    <code>95ddb29693f14f0108d5ce40099f4b111f49c0b3</code>.</strong> A synthetic
+    <code>unjudgeable</code> candidate carrying no <code>name_stage</code>, validation,
+    producing-source, or review evidence returned
+    <code>{'eligible_ids': ['unjudgeable'], 'exclusions': []}</code>. At the export
+    boundary, an empty input and a one-row population whose
+    <code>refused_name</code> had <code>validation_status='quarantined'</code> both returned
+    <code>all_gates_passed=True</code>, <code>exported_count=0</code>, no gate issues, and
+    wrote <code>catalog.yml</code>. The latter did record
+    <code>invalid_validation_status</code>, but nothing treated the complete exclusion as
+    a failed cut.</p>
+    <p><strong>No production compatibility caller exists.</strong> The package contains one
+    call to <code>_classify_export_population</code>, from <code>run_export</code>, and that
+    call receives <code>_fetch_export_population</code>'s full projection, which always
+    includes <code>name_stage</code>. Every other direct call is a test. The branch that
+    inferred an explicitly pre-filtered projection from the missing key was therefore
+    deleted rather than preserved behind another implicit permission.</p>
+    <table>
+      <caption>The three inputs and their fail-closed report outcomes</caption>
+      <thead><tr><th>Input</th><th>Named outcome</th><th>Publication effect</th></tr></thead>
+      <tbody>
+        <tr><td>Candidate without <code>name_stage</code></td><td><code>eligibility_input_incomplete</code>, detail names <code>name_stage</code></td><td>identity enters the exclusion ledger, never the eligible list</td></tr>
+        <tr><td>Zero input identities</td><td><code>empty_input_population</code></td><td>report is written; catalog artifact is refused</td></tr>
+        <tr><td>Non-empty population with zero eligible identities</td><td><code>fully_excluded_population</code>, with population and exclusion counts</td><td>report is written; catalog artifact is refused</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The counterfactuals fire.</strong> Mutating the classifier to admit a
+    candidate when <code>name_stage</code> is absent fails the new regression with the
+    candidate left in <code>eligible</code>. Mutating the population gate so export does
+    not stop when it fails makes both empty-cut regressions fail because
+    <code>catalog.yml</code> exists. Restoring the implementation made all three focused
+    regressions pass, and the source digest returned byte-for-byte to the pre-mutation
+    value.</p>
+    <p><strong>Added failures: zero on the same debug host class.</strong> The full
+    <code>tests/standard_names/</code> selection at the base recorded 21 failed, 7,515
+    passed, 8 skipped and 3 errors in 314.44 seconds. At
+    <code>12f028f2bbcf0a9f061f049ee7b18dd995b28692</code>, it recorded the same 21
+    failed and 3 errors, with 7,518 passed and 8 skipped in 294.15 seconds. The
+    <strong>24 failure/error test identifiers are identical</strong>; the delta is zero.
+    Both runs used <code>all_debug</code>. The suite's existing export reds remain visible
+    rather than being weakened to make this guard green.</p>
+    <p>No figure accompanies this record: the decision surface is three exact input-to-
+    reason mappings, which the table communicates directly.</p>
+    <p class="r-meta">Worker:
+    n-an-unjudgeable-candidate-is-refused-not-published &middot; 2026-09-21 &middot;
+    commit <code>12f028f2b</code> &middot; host class <code>all_debug</code>.</p>
+  </section>
+
 </main>
 
 </body>
