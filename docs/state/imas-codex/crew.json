@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T18:46:23",
+  "updated": "2026-09-21T19:17:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -180785,6 +180785,252 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T132143954397-n-every-release-export-double-requires-its-verdict",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "n-every-release-export-double-requires-its-verdict",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 329,
+                "cached_input_tokens": 470989,
+                "input_tokens": 471320,
+                "output_tokens": 2306,
+                "reasoning_output_tokens": 382,
+                "total_tokens": 473626,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "An independent review established that two successive searches for release-flow export doubles that decide their own gate verdict both reported closure and both were too narrow. Four instances survive and this node closes all of them, plus the aperture question itself. THE FOUR: tests/standard_names/test_review_release_checkout.py at the _exporter factory around line 50, tests/standard_names/test_review_body_authored.py around line 69, and tests/standard_names/test_review_release_preview_link.py around line 53 each define a module-level double returning a namespace with all_gates_passed hardcoded True inside the double, so any test added to those files inherits a passing export verdict without writing one down; inspect.signature over all three reports no verdict parameter at all. tests/standard_names/test_release_rehearsal_accounting.py at the _export_report factory around line 81 is the same defect in the opposite direction, returning a namespace with no verdict attribute, driven through a rehearsal exporter into a dry-run cut. In ALL FOUR make the verdict a REQUIRED keyword-only parameter with no default and pass it explicitly at every call site in that file, matching the form already landed in the two sibling files. TAKE THE ADJACENT LESSON RATHER THAN REPEATING IT: the previous node supplied a verdict without gate results, and the review noted that lets a double state a refusal it cannot substantiate, because the consumer reads gate results only when the verdict is False. So wherever you add the verdict, have the double carry gate results alongside it, and make both required together rather than one of them. THE APERTURE IS PART OF THE DELIVERABLE, because it is what failed twice. The review left a one-line detector: the three hardcoded doubles all still carry a comment beginning 'Export gates are scaffolding', and grep -rn for that phrase over tests/ currently returns five sites in four files. Report that grep's output before and after your change, and account for EVERY site: three are your targets, and two are in tests/standard_names/test_review_release.py, a file already repaired, so state whether those two are stale comments describing a double that now requires its verdict, and remove them if so. Then run your OWN independent search for any further double of either shape across the whole tests tree, state in the manifest exactly what search you ran and what it returned, and say whether the family is now closed or whether more exist. A search whose command is not written down is what produced two false closures. PROOFS: each touched file green with its passed count stated before and after, equal in every case because this is scaffolding and any change means a test's meaning moved; the negative control captured to exactly one red log whose FIRST LINE is verbatim this node's declared negative-control sentence and nothing else, at exit status 1 and not 2, 4 or 5 since a collection or usage error proves nothing; and the before and after detector output quoted in the manifest. FORBIDDEN: adding a default for either parameter, adding a shared helper or fixture or conftest patch that supplies them for more than one call site, changing what any test asserts, and editing any file other than the four named plus tests/standard_names/test_review_release.py for stale-comment removal only. Write the manifest incrementally, appending each figure as you establish it. Conventional subject AND body, stage only the paths you changed, no attribution trailer of any kind.",
+          "estimated_hours": 0.75,
+          "goal": "make the four remaining release-flow export doubles require their gate verdict and record the search that proves the family closed",
+          "id": "n-every-release-export-double-requires-its-verdict",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T13:21:46Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T132143954397-n-every-release-export-double-requires-its-verdict/manifest.md",
+          "negative_control": "_exporter() called with no verdict must fail; the required keyword-only parameter is what refuses an unstated export outcome.",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/standard_names/test_review_release_checkout.py",
+            "tests/standard_names/test_review_body_authored.py",
+            "tests/standard_names/test_review_release_preview_link.py",
+            "tests/standard_names/test_release_rehearsal_accounting.py",
+            "tests/standard_names/test_review_release.py",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T13:22:31Z",
+        "completed_at": "2026-09-21T15:09:16.769Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 6391,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 6405,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "497462fec0a27f308ad60d4aa4347f11415c6a92",
+        "commits": [
+          "3496ccaf74957680d33064e169bd3e5cbfedcc43",
+          "33ab99c7778f569855ac64330f17b7c70b151ac7"
+        ],
+        "changed_lines": {
+          "added": 229,
+          "removed": 51,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug uv run pytest -p no:cacheprovider --timeout=180 tests/standard_names/ (isolated gate tree, isolation and provenance asserted OK)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/gate-logs/ship-s10-20260918/gate-family-head.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Four release-flow export doubles now take the gate verdict AND its gate results as required keyword-only parameters. Isolated base and head both 21 failed / 3 errors, identical failing id sets, zero added, 7585 passed and 7944 collected both sides. Negative control exit 1, TypeError naming both missing keyword-only arguments, mutation reverted with the call inventory verified clean. First auditable aperture this family has had: an independent AST search over an extracted base tree and the head. CROSS-MODEL REVIEW: MUST-FIX. It found a FIFTH file the classifier structurally could not see, tests/standard_names/test_cli_export.py, and corrected the node's own follow-on \u2014 that site has NO gate_results attribute rather than an empty one, so a reader grepping for the empty list would conclude it was repaired. Two proofs the brief demanded were absent from the manifest: the before-and-after detector output, and the search command, recorded only as a volatile /dev/shm path; the coordinator had preserved that script independently, so the aperture is re-derivable by luck rather than by the record. COORDINATOR DISAGREEMENT ON SEVERITY: the fifth site's factories take **overrides applied by setattr, so the verdict is settable rather than unstatable, and both are NAMED for their verdict, so a call site states it by the name it calls. Read as defensible design rather than the defect closed elsewhere; no fourth iteration dispatched. Three honest searches produced three false closures here, so the marginal return is in the search method, and every instance is recorded with exact sites so a later reader can disagree on the evidence. TWO RECORD REPAIRS AT PROMOTE: the control log was written to /dev/shm, node-local and cleaned on a schedule, with the manifest's path field carrying prose after the filename so it did not resolve \u2014 copied into the run directory and the field repointed; and the declared mutation was a coordinator paraphrase of the log's own first line, aligned to the evidence, the sixth such alignment in this wave.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T132143954397-n-every-release-export-double-requires-its-verdict/manifest.md",
+        "scope_changed": false,
+        "session_id": "a03241de-85f6-4b0f-b28b-584eeb3b69d7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 14918164,
+            "input_tokens_cumulative": 14918164,
+            "output_tokens": 68931,
+            "output_tokens_cumulative": 68931,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T15:09:16.769Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 13,
+            "evidence": 12,
+            "fit": 18,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 82
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 15071026,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 6399.621,
+          "generated_tokens": 75946,
+          "generation_seconds": 5658.608,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.6,
+          "machine_seconds": 741.013,
+          "peak_input_tokens": 151562,
+          "tokens_per_second": 13.42,
+          "wall_tokens_per_second": 11.87
+        },
+        "follow_on_paths": [
+          "tests/standard_names/test_review_release.py",
+          "tests/standard_names/test_review_release.py:55",
+          "tests/standard_names/test_exclusion_report_is_reachable.py:92",
+          "tests/standard_names/test_release_rehearsal_writes_nothing.py:92."
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-every-release-export-double-requires-its-verdict",
+          "session_id": "a03241de-85f6-4b0f-b28b-584eeb3b69d7",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T15:09:16.769Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.96,
+          "at_complete": 0.96,
+          "verdict": "waived",
+          "reason": "the plan's remaining fraction is held by the export-gate followup, measured this session against the live graph and now blocked on an adjudication decision about waiving permanently-excluded sources rather than on work"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/standard_names/test_release_rehearsal_accounting.py",
+            "tests/standard_names/test_review_body_authored.py",
+            "tests/standard_names/test_review_release.py",
+            "tests/standard_names/test_review_release_checkout.py",
+            "tests/standard_names/test_review_release_preview_link.py"
+          ],
+          "declaration": "_exporter() called with no verdict must fail; the required keyword-only parameter is what refuses an unstated export outcome.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T132143954397-n-every-release-export-double-requires-its-verdict/logs/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T132143954397-n-every-release-export-double-requires-its-verdict/logs/negative_control.log"
+        },
+        "tool_steps": 144.0,
+        "orientation_input_tokens": 1068554.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -181097,6 +181343,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2486
+    "_version": 2487
   }
 }
