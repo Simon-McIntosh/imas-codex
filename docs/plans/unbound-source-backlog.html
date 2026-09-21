@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
-<meta name="plan-impl" content="0.94">
+<meta name="plan-impl" content="0.96">
 <meta name="plan-commits" content="ff902fa9d309cd99e21372a7e76f8d4d17f4ad6b,833c4ae3148e7a253c794df8d1c20a44e33ddf89">
 <meta name="plan-artifacts" content="docs/evidence/unbound-source-backlog/export-surface-reuse-map.md,docs/evidence/unbound-source-backlog/plan-figure-audit.md,docs/evidence/unbound-source-backlog/detach-route-audit.md">
 <meta name="plan-blocks" content="sn-west-catalog-release">
@@ -344,7 +344,7 @@
     <div class="r-comment-body"><p>Review delivered: SOUND, no MUST-FIX. goal_fidelity 18, scope_discipline 20, evidence 19, durability 17, fit 19. Three NITs, one of which was acted on: the file-scope _stub_exporter supplied a passing verdict to 16 of 44 tests, reinstating the permissive default one scope smaller; closed by a follow-on node that made the verdict a required parameter across 22 call sites.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260921T113838453710-review-of-the-release-export-double-verdict" data-who="reckon-ship" data-when="2026-09-21T11:51:51.845Z">
-    <div class="r-comment-body"><p>Review delivered: SOUND, no MUST-FIX. goal_fidelity 19, scope_discipline 20, evidence 18, fit 19, durability 17. Five NITs. It confirms the earlier review&#x27;s finding is genuinely CLOSED at the root rather than moved, since the parameter is required with no default and Python refuses the call. Two are evidence limits worth carrying: one of the 22 call sites sits behind a graph marker the default addopts deselect, so the arity check is proven at 21 of 22 sites by the gate that ran; and seven of the 22 verdicts are inert because their tests pass dry_run and the dry-run branch returns before the verdict is read. One is actionable and dispatched separately: two sibling files define their own verdict-supplying doubles. The fifth is an OBSERVATION the reviewer checked rather than assumed — the production ExportReport default of True is the correct identity for an accumulator the gate evaluators drive to False, not an instance of the defect this wave removes.</p></div>
+    <div class="r-comment-body"><p>Review delivered: SOUND, no MUST-FIX. goal_fidelity 19, scope_discipline 20, evidence 18, fit 19, durability 17. Five NITs. It confirms the earlier review's finding is genuinely CLOSED at the root rather than moved, since the parameter is required with no default and Python refuses the call. Two are evidence limits worth carrying: one of the 22 call sites sits behind a graph marker the default addopts deselect, so the arity check is proven at 21 of 22 sites by the gate that ran; and seven of the 22 verdicts are inert because their tests pass dry_run and the dry-run branch returns before the verdict is read. One is actionable and dispatched separately: two sibling files define their own verdict-supplying doubles. The fifth is an OBSERVATION the reviewer checked rather than assumed — the production ExportReport default of True is the correct identity for an accumulator the gate evaluators drive to False, not an instance of the defect this wave removes.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260918T090312248779-n-usb-scout-export-surface" data-who="worker-usb-scout-export-surface" data-when="2026-09-18T09:35:00Z">
     <div class="r-comment-body"><p>The two export-surface followups this section names as the live risk were verified at HEAD <code>9705954c</code> rather than rested on their citations, and <strong>both reproduce</strong>.</p>
