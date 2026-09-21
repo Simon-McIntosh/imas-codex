@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:41:00",
+  "updated": "2026-09-21T09:42:48",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -165183,6 +165183,263 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T073007172744-review-of-n-every-batch-item-gets-a-comparator-share",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "review-of-n-every-batch-item-gets-a-comparator-share",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1907,
+                "cached_input_tokens": 520540,
+                "input_tokens": 522449,
+                "output_tokens": 1162,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 523611,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "the review for r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share stores a parsed record scoring all 5 dimensions in the range 0..20, read from the landed diff at the integrated head rather than from the worker's report. The change extracts _collect_nearby_name_comparators in imas_codex/standard_names/workers.py and calls it from both compose sites, replacing an inline loop that filled one batch-level list at five results per item and broke the OUTER loop on a cap of 30 -- so with a 25-item batch only 6 items contributed, measured. The new allocation gives each item at most cap divided by batch length and never less than one, then spends remaining capacity in a second pass, keeping the cap at 30 and the dedup by result id. Four questions must each be answered with the evidence. Is the total still bounded by 30 for every batch size including 1, 30, 31 and 200, and can the second pass ever exceed it. Does every item with at least one search result now contribute at least one comparator, and name the batch size at which the per-item allowance floor of one makes the first pass alone exceed the cap. Are the two call sites passing the same thing -- one passes batch.items and the other passes batch -- and is that correct at both, or is one of them passing a container whose iteration yields something other than the item dicts the helper reads description and path from. And does the helper's search call preserve the per-item query the inline code used, the item description falling back to its path, rather than silently changing what is searched for. Give a verdict of SOUND or MUST-FIX with a concrete triggering input for each defect, and say whether the node's own test would catch each one",
+          "estimated_hours": 0.5,
+          "goal": "attach an independent review to run r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share",
+          "id": "review-of-n-every-batch-item-gets-a-comparator-share",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T07:05:16.655Z",
+            "read_at": "2026-09-21T07:30:08Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 82.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073007172744-review-of-n-every-batch-item-gets-a-comparator-share/manifest.md",
+          "negative_control": "",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "claude-opus-rev-3",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-21T07:30:17Z",
+        "completed_at": "2026-09-21T07:39:09.845Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 527,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 532,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "10d2725c09432999b84140725ef4c254a726fa96",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "the review record parses and scores all five dimensions in 0..20",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073007172744-review-of-n-every-batch-item-gets-a-comparator-share/manifest.md",
+        "scope_changed": false,
+        "session_id": "3b724ea4-578d-498f-9f78-841fe5d5906e",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 93.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 120847,
+            "cache_creation_input_tokens_cumulative": 120847,
+            "cache_read_input_tokens": 2105396,
+            "cache_read_input_tokens_cumulative": 2105396,
+            "inference_geo": "not_available",
+            "input_tokens": 44,
+            "input_tokens_cumulative": 44,
+            "output_tokens": 35009,
+            "output_tokens_cumulative": 35009,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.136613,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.136613
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T07:39:09.845Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 399,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 964,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none \u2014 the review record lives outside the repository; no repo file was modified."
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "daca985d6b63a5586adb4df7a02261c67b996f5506750628222c1a179c2c1195",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-lifecycle-integrity --section '' --role review --spec-level exact --node review-of-review-of-n-a-skipped-audit-does-not-look-clean --goal 'attach an independent review to run r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean' --done-when 'the review for r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean.json --time-budget 30m --session ship-s10-20260918 --local",
+              "node": "review-of-n-a-skipped-audit-does-not-look-clean",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 976,
+              "terminal_at": "2026-09-21T07:13:55Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-a-skipped-audit-does-not-look-clean"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2105396,
+          "cumulative_input_tokens": 2226287,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 529.513,
+          "generated_tokens": 35009,
+          "generation_seconds": 458.565,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.4,
+          "machine_seconds": 70.948,
+          "peak_input_tokens": 133879,
+          "tokens_per_second": 76.34,
+          "wall_tokens_per_second": 66.12
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "a review writes its record into the reckon review store, not the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-every-batch-item-gets-a-comparator-share",
+          "session_id": "3b724ea4-578d-498f-9f78-841fe5d5906e",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T07:39:09.845Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.985,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.985,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 31.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165495,6 +165752,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2423
+    "_version": 2424
   }
 }
