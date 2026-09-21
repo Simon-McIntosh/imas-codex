@@ -423,6 +423,66 @@
       catalog.
     </p>
 
+    <h3 id="s3-declared-attribute-reads">Landed: a three-argument getattr must name a declared field</h3>
+    <p>
+      The instance §3 named no longer reproduces on the base revision.
+      <code>review/pipeline.py</code> read
+      <code>getattr(audit_report, "findings", [])</code> against an
+      <code>AuditReport</code> that declared <code>embedding</code>,
+      <code>lint_findings</code>, <code>link_findings</code> and
+      <code>duplicate_components</code>. The reader is now
+      <code>_extract_audit_findings</code>, which walks the three declared lists
+      directly, so the fail-open read is gone and no per-site repair is owed.
+      What §3 asked for in the same breath was the general shape, because a peer session found
+      it at several sites and a per-site fix leaves the rest.
+    </p>
+    <p>
+      <strong>The instrument.</strong> <code>tests/standard_names/test_declared_attribute_access.py</code>
+      walks <code>imas_codex/standard_names/review</code> with <code>ast</code> and resolves each
+      three-argument <code>getattr</code> whose attribute is a string literal to the class its
+      object's annotation names, then compares the literal against the fields that class and its
+      bases declare. The class index is built from package source, so nothing is imported and the
+      check runs on a revision that does not resolve against the installed environment.
+      Resolution is by annotation, the only sound static route to a local name's class; a class
+      whose bases fall outside the package is reported unverifiable rather than violated, and a
+      site whose object no annotation names is reported unresolved.
+    </p>
+    <p>
+      <strong>Evidence.</strong> On the base revision the scan finds
+      <strong>18</strong> three-argument literal-attribute sites, resolves <strong>5</strong>
+      (all on <code>StandardNameReviewState</code>, the parameter annotation of the worker
+      functions), reports <strong>0</strong> violations, and leaves <strong>13</strong>
+      unresolved.
+    </p>
+    <p>
+      <strong>Aperture.</strong> The <strong>13</strong> unresolved sites are the measured
+      boundary of what an annotation-only resolver can see, not a claim that those sites are
+      safe: eight are <code>llm_out</code> in the cost-event block, four are the loop variable
+      in the review-matching pass, and one is a parameter annotated <code>Any</code>. Each is
+      an object whose class no annotation states, so no static check of this shape can judge
+      it &mdash; they are recorded as evidence inputs rather than judged. To keep a narrowing
+      from reading as a clean tree the scan asserts a floor of <strong>5</strong> resolved
+      sites, measured, so a change that drops a resolvable site reddens until the floor moves
+      with it; a fixture scan passes an explicit <code>min_resolved=0</code>.
+    </p>
+    <p>
+      <strong>Negative control.</strong> The declared mutation is one three-argument
+      <code>getattr(state, "no_such_declared_field", None)</code> added to a scratch copy of
+      the review package, which the test scans in place of the repository, so the mutation
+      and the tree the test runs against share no bytes. On the mutated tree the gate test
+      fails naming
+      <code>pipeline.py:1510</code> and the refusal text <code>StandardNameReviewState
+      declares no such field</code>; <strong>1 failed, 7 passed</strong>, exit 1. All eight
+      tests pass on the unmutated tree, and a fixture case shows the floor refusing a scan that
+      resolves nothing.
+    </p>
+    <p>
+      What the measure does not establish: the check judges only cases whose object class an
+      annotation names, so the instrument is a floor on this shape rather than a total
+      account of it. The 13 unresolved sites need annotations or a different instrument,
+      not a stronger reading of this one.
+    </p>
+
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 
     <p>
