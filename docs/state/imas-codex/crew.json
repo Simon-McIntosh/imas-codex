@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T08:36:20",
+  "updated": "2026-09-21T08:48:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -163541,6 +163541,223 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T060034198231-n-a-permanent-exclusion-stops-blocking-generability",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "n-a-permanent-exclusion-stops-blocking-generability",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1159,
+                "cached_input_tokens": 304953,
+                "input_tokens": 306114,
+                "output_tokens": 716,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 306830,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm both defects reproduce before repairing them, and quote each reproduction. describe_manifest_generability in imas_codex/standard_names/export.py returns `generable: not uncarried`, so any uncarried source makes a manifest ungenerable with no way for a permanently and correctly excluded source to stop blocking it -- measured on the WEST cut at manifest_size 355, carried 330, uncarried 25, generable False, mechanism_counts recorded_refusal 21 and composition_not_scheduled 4. A source whose exclusion is correct forever is therefore indistinguishable from outstanding work and the manifest can never become generable. Separately, `refusal_cause_not_recorded` is declared in _MANIFEST_GENERABILITY_MECHANISMS but nothing in _manifest_source_mechanism ever returns it: a documented_non_nameable record whose reason is the _UNRECORDED_REFUSAL_CAUSE sentinel is routed to `composition_not_scheduled` instead, which asserts nothing was ever attempted when in fact a refusal happened and its cause was lost. Show both, then repair both. Add a waived disposition to the closed mechanism set that a source carries only on evidence in its own disposition row, never inferred from the row's absence, and make generability ignore waived sources while still counting and reporting them, so a waived source remains visible in the report rather than disappearing from it. Route the sentinel to `refusal_cause_not_recorded` so the declared mechanism becomes reachable and a lost cause is no longer reported as unscheduled. The done-when is that tests/standard_names/test_manifest_generability.py grows a test per repair -- one proving a waived source leaves generable True while remaining in the uncarried accounting under its own mechanism, and one proving the sentinel reaches refusal_cause_not_recorded -- both failing against the declared negative control, and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. Do not make the WEST cut generable by widening the waiver: a waiver granted without evidence in the row is the fail-open this repair exists to remove, and which of the 25 uncarried WEST sources deserve one is a separate decision this node must not take. State in the manifest how a waiver is evidenced and who grants it. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 1.5,
+          "goal": "let an evidenced permanent exclusion stop blocking manifest generability without hiding it",
+          "id": "n-a-permanent-exclusion-stops-blocking-generability",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T06:00:35Z",
+            "read_at": "2026-09-21T06:00:36Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 0.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060034198231-n-a-permanent-exclusion-stops-blocking-generability/manifest.md",
+          "negative_control": "classify explicit waived rows as recorded_refusal and classify skipped lost-cause sentinel rows as composition_not_scheduled",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_manifest_generability.py",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-waiveddisp",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T06:00:45Z",
+        "completed_at": "2026-09-21T06:27:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1613,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1613,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "80bcb6419deb6038b312320fdd62c45a528c3ada",
+        "commits": [
+          "8c33f20036631c8da4e6f05ef13e28f0a31ef7f1",
+          "1196c07192b960062c2f1b29d03a390c51e4d130",
+          "809d8ed7a52b3a27e647ed94644fb680dbcca677"
+        ],
+        "changed_lines": {
+          "added": 172,
+          "removed": 10,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/ at the merged head, compared id-by-id against the same command at the pre-merge base",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/waived-disposition-gate.log.delta",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "an uncarried manifest source carrying disposition waived no longer blocks generability while staying in the uncarried list and the mechanism counts, so a settled exclusion is visible rather than hidden; the declared refusal_cause_not_recorded mechanism is now reachable, routing a documented_non_nameable row whose reason is the lost-cause sentinel and whose source_status is skipped there instead of reporting it as never scheduled. No WEST waiver was granted and none is inferred from category, reason, missing identity or absent row: only the row's own disposition grants it. Base and head both 20 failed and 3 errors over an identical id set, passed 7497 to 7507, zero added failures",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060034198231-n-a-permanent-exclusion-stops-blocking-generability/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c28d-76fc-7c90-b1e1-2d8639649a07",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13454464,
+            "cached_input_tokens_cumulative": 13454464,
+            "input_tokens": 13670801,
+            "input_tokens_cumulative": 13670801,
+            "output_tokens": 35968,
+            "output_tokens_cumulative": 35968,
+            "reasoning_output_tokens": 12187,
+            "reasoning_output_tokens_cumulative": 12187
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T06:27:38Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 4.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-21T06:27:38Z"
+            }
+          ],
+          "notional_cost_usd": 55.4026,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 13454464,
+          "cumulative_input_tokens": 27125265,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 48155
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-permanent-exclusion-stops-blocking-generability",
+          "session_id": "01a0c28d-76fc-7c90-b1e1-2d8639649a07",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T06:27:38Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.72,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.72,
+          "at_complete": 0.82,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_manifest_generability.py"
+          ],
+          "declaration": "classify explicit waived rows as recorded_refusal and classify skipped lost-cause sentinel rows as composition_not_scheduled",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060034198231-n-a-permanent-exclusion-stops-blocking-generability/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060034198231-n-a-permanent-exclusion-stops-blocking-generability/negative-control.log"
+        },
+        "tool_steps": 73.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -163853,6 +164070,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2409
+    "_version": 2410
   }
 }
