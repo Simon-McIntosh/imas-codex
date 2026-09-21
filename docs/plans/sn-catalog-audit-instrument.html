@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-catalog-audit-instrument">
+  <meta name="plan-title" content="An Instrument That Finds What Independent Review Finds">
+  <meta name="plan-summary" content="Repair and extend sn review into a standalone catalog audit calibrated against a known red cohort, before the WEST cut">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="18.0">
+  <meta name="plan-wall-clock-hours" content="9.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S14">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,review,catalog-release">
+  <meta name="plan-blocks" content="sn-west-catalog-release">
+  <meta name="plan-informs" content="sn-release-readiness">
+  <title>An Instrument That Finds What Independent Review Finds | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-21">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The tool already exists, and two of its three layers are blind</h2>
+
+    <p>
+      The instinct is to build a new <code>sn audit</code>. That would be the wrong
+      move, because <code>sn review</code> already is the tool: it runs
+      independently of <code>sn run</code>, it has a three-layer pipeline
+      (deterministic audits → batched LLM scoring → cross-batch consolidation),
+      and it already accepts <code>--ids</code>, <code>--physics-domain</code>,
+      <code>--stage</code>, <code>--force</code>, <code>--models</code>,
+      <code>--batch-size</code>, <code>--cost-limit</code>,
+      <code>--concurrency</code>, <code>--dry-run</code> and
+      <code>--target names|docs</code>. The local lane is already reachable
+      through <code>--models</code>, and <code>--dry-run</code> already means
+      exactly what it should: run Layer 1, show the batch plan, make no LLM call.
+    </p>
+
+    <p>
+      <strong>What is missing is not the command. It is that the command cannot
+      currently see.</strong> Two independent defects, both measured on
+      2026-09-21, make the review pass structurally incapable of finding the
+      class of defect that independent investigation keeps finding. Both have the
+      same shape as every other fail-open in this repository: a lookup returns
+      empty and the caller proceeds as though it had looked.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 760 210" width="100%" role="img"
+           aria-label="The three review layers, with Layer 1 findings discarded before Layer 2 and Layer 2 comparators exhausted after roughly six items.">
+        <g font-family="system-ui, sans-serif" font-size="13">
+          <rect x="16" y="46" width="176" height="58" fill="#ffffff" stroke="#333" stroke-width="1"/>
+          <text x="104" y="70" text-anchor="middle" fill="#111" font-size="14">Layer 1</text>
+          <text x="104" y="90" text-anchor="middle" fill="#111">deterministic audits</text>
+
+          <rect x="292" y="46" width="176" height="58" fill="#ffffff" stroke="#333" stroke-width="1"/>
+          <text x="380" y="70" text-anchor="middle" fill="#111" font-size="14">Layer 2</text>
+          <text x="380" y="90" text-anchor="middle" fill="#111">LLM scoring</text>
+
+          <rect x="568" y="46" width="176" height="58" fill="#ffffff" stroke="#333" stroke-width="1"/>
+          <text x="656" y="70" text-anchor="middle" fill="#111" font-size="14">Layer 3</text>
+          <text x="656" y="90" text-anchor="middle" fill="#111">consolidation</text>
+
+          <line x1="192" y1="75" x2="292" y2="75" stroke="#333" stroke-width="1"/>
+          <line x1="468" y1="75" x2="568" y2="75" stroke="#333" stroke-width="1"/>
+
+          <line x1="228" y1="58" x2="256" y2="92" stroke="#b00" stroke-width="2"/>
+          <line x1="256" y1="58" x2="228" y2="92" stroke="#b00" stroke-width="2"/>
+          <text x="242" y="126" text-anchor="middle" fill="#b00">every finding dropped</text>
+          <text x="242" y="143" text-anchor="middle" fill="#b00">getattr(report, "findings")</text>
+
+          <text x="380" y="126" text-anchor="middle" fill="#b00">comparators exhausted</text>
+          <text x="380" y="143" text-anchor="middle" fill="#b00">after ~6 of 25 items</text>
+          <line x1="380" y1="104" x2="380" y2="114" stroke="#b00" stroke-width="2"/>
+
+          <text x="656" y="126" text-anchor="middle" fill="#555">reports what reached it</text>
+        </g>
+      </svg>
+      <figcaption>
+        Both breaks are silent. Layer 3 faithfully consolidates a review that
+        was conducted without its deterministic findings and, for most of each
+        batch, without catalog comparators.
+      </figcaption>
+    </figure>
+
+    <p>
+      <strong>Layer 1 findings never reach the reviewer.</strong>
+      <code>review/pipeline.py:1709</code>'s <code>_extract_audit_findings</code>
+      iterates <code>getattr(audit_report, "findings", [])</code>. The
+      <code>AuditReport</code> model declares <code>embedding</code>,
+      <code>lint_findings</code>, <code>link_findings</code> and
+      <code>duplicate_components</code> — <strong>there is no
+      <code>findings</code> field</strong>, verified against the live model, so
+      the expression returns the empty default on every call. Layer 1 runs, and
+      one hundred percent of what it produces is discarded before the reviewer
+      prompt is built. No test anywhere referenced the attribute, so nothing
+      failed.
+    </p>
+
+    <p>
+      <strong>Layer 2's catalog comparators are exhausted part-way through each
+      batch.</strong> In <code>workers.py</code> near line 5608 the name-review
+      path builds <code>nearby_existing_names</code> by embedding search,
+      <code>k=5</code> per item, appending into one batch-level list capped at
+      30 — and on reaching the cap it breaks the <em>outer</em> loop. With
+      <code>sn-compose</code> batch-size 25 (50 for names-only), the first six or
+      so items consume the entire budget and <strong>every later item contributes
+      nothing</strong>. Worse, the list is rendered batch-level, so all 25
+      candidates are judged against comparators drawn from the neighbourhoods of
+      the first six. The reviewer prompt instructs the model to flag a redundant
+      spelling; for most of the batch it has nothing to flag against.
+    </p>
+
+    <p>
+      That is sufficient to explain the measured outcome. An independent opus
+      audit of the WEST cohort judged 341 accepted bindings and found
+      <strong>74 defects, 21.7 percent</strong>, concentrated in exactly the
+      classes these two layers exist to catch: redundant spellings, minority
+      base tokens, and names asserting more than the data dictionary supports.
+      The pipeline's own review had passed all of them.
+    </p>
+
+    <h2 id="s2">§2 — The calibration fixture already exists, and it is the point</h2>
+
+    <p>
+      This plan is test-driven in the graph sense the lead described: write the
+      instrument first, confirm it reproduces a known cohort of reds, only then
+      fix, then re-run and watch the reds clear. That is only possible because
+      the red cohort is already committed and independent of the instrument.
+    </p>
+
+    <p>
+      <code>docs/evidence/sn-west-catalog-release/west-name-repair-worklist.md</code>
+      carries 74 defects over 341 bindings, collapsing to 61 repairs — 51 renames
+      and 10 splits — each row naming the rejected spelling, the proposed
+      spelling, every source path the identity binds, and which audit record
+      produced it. It was produced by a different instrument (opus reading DD
+      text) than the one this plan repairs, so it is a genuine external control
+      rather than a restatement of the tool's own output.
+    </p>
+
+    <p>
+      <strong>Calibration is two-sided and both sides are gates.</strong> Recall
+      below a floor means the instrument is still blind and no amount of green
+      from it licenses a release. Precision below a floor means it will bury a
+      reviewer in false positives and be switched off, which is the same outcome
+      by a slower route. The floors themselves are a decision in §4, not
+      something this plan should assume; what is not negotiable is that both are
+      measured against the fixture before the instrument is trusted.
+    </p>
+
+    <p>
+      Six rows of the worklist are <em>contested</em> between the two audit
+      records — the <code>volume_of_flux_surface</code> family, a vacuum-field
+      spelling, three toroidal-angle loci, and launched-versus-coupled power on
+      two lower-hybrid nodes. Those are deliberately excluded from the recall
+      denominator: an instrument cannot be scored against rows whose correct
+      answer is unsettled. They are adjudication input for
+      <code>sn-west-catalog-release</code>, not calibration input here.
+    </p>
+
+    <h2 id="s3">§3 — What the instrument must gain</h2>
+
+    <p>
+      Four capabilities, in the order they should land. The first two are
+      repairs that make the existing layers functional; the second two are the
+      genuinely new surface.
+    </p>
+
+    <p>
+      <strong>Route Layer 1 findings into the prompt.</strong> Read the three
+      declared lists rather than a field that does not exist, and carry each
+      finding to the candidates it names. This is small, and it is the single
+      highest-value change in the plan because it restores a whole layer that is
+      currently inert. It must land with a test that fails against the
+      <code>getattr</code> form, and with a static check for the general shape —
+      a three-argument <code>getattr</code> whose literal attribute no model on
+      the object declares — because a peer session found the same shape at
+      several sites and a per-site fix leaves the rest.
+    </p>
+
+    <p>
+      <strong>Give every candidate its own comparators.</strong> Replace the
+      shared batch budget with a per-item one so no candidate is starved, and
+      carry comparators per item so the prompt shows each candidate the names it
+      is actually being compared against. Add the unit-anchored comparator the
+      catalog currently has no way to produce: accepted names sharing the
+      candidate's unit but carrying a <em>different</em> <code>physical_base</code>.
+      That is the only signal that catches a split base, and the catalog holds a
+      live example — <code>brightness</code> (2 accepted names) and
+      <code>photon_radiance</code> (4) both at
+      <code>m^-2.s^-1.sr^-1</code>, describing the same quantity.
+      <code>hard_xray_brightness</code> was accepted precisely because same-base
+      comparison showed it a consistent pair.
+    </p>
+
+    <p>
+      <strong>Add grouped review as a first-class target.</strong> Today
+      <code>--target</code> takes <code>names</code> or <code>docs</code>, both
+      per-identity. The defects that per-identity review cannot see are the
+      cohort ones: a base split across two spellings, a family whose members
+      disagree, an identity bound to loci of different kinds. Prior art exists
+      and should be extended rather than duplicated — <code>harmonize.py</code>
+      already assembles sibling families by <code>HAS_PARENT</code> or shared
+      <code>physical_base</code> and computes a deterministic drift metric, but
+      it is docs-only, read-only, and has <strong>no CLI surface at all</strong>
+      (<code>sn harmonize</code> does not exist). The grouped target is that
+      module's detection, widened to the name axis and given the command-line
+      entry point it never had.
+    </p>
+
+    <p>
+      <strong>Scope a run to a release batch.</strong> <code>--ids</code> and
+      <code>--physics-domain</code> cannot express "the cohort this release
+      publishes". A manifest-scoped selector closes that: given
+      <code>west_production_dd_paths.yaml</code> the instrument reviews exactly
+      the 230 distinct identities the cut would publish. Note the denominators,
+      because they have already caused one wrong report — 342 manifest paths
+      resolve to 343 source nodes (one duplicate), 344 producing edges, and
+      <strong>230 distinct identities</strong>. The release unit is 230.
+    </p>
+
+    <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
+
+    <p>
+      The instrument is meant to be run often and over the whole catalog, so its
+      economics decide whether it is used. Reviewing 5,130 identities per-name
+      and per-doc, plus grouped passes, is far beyond what a paid quorum can
+      absorb; on the local lane it is free of marginal cost and bounded only by
+      wall clock. That makes local-lane concurrency the design centre rather
+      than a tuning detail.
+    </p>
+
+    <p>
+      <strong>The concurrency target and the last measurement disagree, and the
+      disagreement must be resolved by measurement rather than assumed either
+      way.</strong> The lead's instruction is that the lane now sustains upwards
+      of 30 concurrent DSv4.1 tasks and the pipeline should lean on it. The most
+      recent recorded probe of this repository's compose path found the knee at
+      roughly 4 on two H200s with real payloads, where exceeding it produced 69
+      API timeouts rather than throughput. Both can be true — that probe predates
+      the current served variant, and <code>deepseek-v4.1-flash</code> reports a
+      512,000-token context under sglang — but the plan must not encode a number
+      neither side has re-measured. The first node re-runs that probe against
+      the current endpoint with review-sized payloads and records the knee; the
+      default concurrency is then set from the result, with the lead's 30 as the
+      value to confirm rather than to assume.
+    </p>
+
+    <p>
+      <strong>The dry run is the safety property, not a convenience.</strong>
+      <code>--dry-run</code> already runs Layer 1 and prints the batch plan
+      without an LLM call. Once Layer 1 findings are routed, a dry run becomes
+      genuinely informative: it reports every deterministic finding over the
+      selected cohort at zero cost. It must state the cohort size, the batch
+      plan, the resolved concurrency, the model that would be used, and the
+      projected spend — and a run whose projected spend exceeds
+      <code>--cost-limit</code> must refuse rather than start and stop partway.
+    </p>
+
+    <h2 id="s5">§5 — Order of work, and what must not happen</h2>
+
+    <p>
+      The order is the method. Repair the instrument, calibrate it against the
+      fixture, and only then repair the catalog. A fix landed before the
+      instrument can see it is a fix nothing verifies, which is the situation
+      this plan exists to end.
+    </p>
+
+    <p>
+      <strong>No catalog repair lands under this plan.</strong> The 61 repairs
+      belong to <code>sn-west-catalog-release</code>, they route through
+      <code>sn edit --hint … --reason …</code> so the review quorum decides the
+      spelling, and they are paid work the lead has not authorised. This plan's
+      deliverable is the instrument and its calibration report. The temptation to
+      fix a name while looking at it is exactly what would destroy the fixture's
+      independence.
+    </p>
+
+    <p>
+      <strong>The re-run is the acceptance test.</strong> When the repairs do
+      land, under their own plan, this instrument re-runs over the same cohort
+      and the reds it previously reported must clear. A repair that clears a red
+      without the instrument agreeing is not finished, and an instrument that
+      reports green over a cohort a human audit still finds defective has failed
+      its own calibration and must be re-opened.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="calibration-floors" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What recall and precision against the 74-row fixture qualify the instrument as calibrated?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="recall-90-precision-50">recall ≥ 90%, precision ≥ 50%</button>
+      <button class="r-opt" data-value="recall-80-precision-70">recall ≥ 80%, precision ≥ 70%</button>
+      <button class="r-opt" data-value="recall-only">recall floor only, precision measured and reported</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="grouped-review-surface" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should grouped review be exposed?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="target-groups">a third --target groups on sn review</button>
+      <button class="r-opt" data-value="sn-harmonize">a separate sn harmonize command over the existing module</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="quarantine-on-red" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">May the instrument write to the graph when it finds a red, or does it stay read-only and emit a worklist?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="read-only">read-only; emits a worklist only</button>
+      <button class="r-opt" data-value="flag-only">writes a review flag, never a name or a stage</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scai-layer-one" data-status="open" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship sn-catalog-audit-instrument §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Route Layer 1 findings into the reviewer prompt, and fail the shape repo-wide</h4>
+    <div class="r-fu-body"><p>The highest-value change in the plan and the smallest. <code>review/pipeline.py:1709</code> reads <code>getattr(audit_report, "findings", [])</code>; <code>AuditReport</code> declares <code>embedding</code>, <code>lint_findings</code>, <code>link_findings</code> and <code>duplicate_components</code> and no <code>findings</code>, so every deterministic finding is discarded before the prompt is built. Read the three declared lists and carry each finding to the candidates it names. Land with a test that fails against the <code>getattr</code> form, and with a static check that refuses any three-argument <code>getattr</code> whose literal attribute the target model does not declare — a peer session found the same shape at several sites, so a per-site fix leaves the rest.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-catalog-audit-instrument §3</pre>
+    </article>
+<article class="r-fu" data-id="f-scai-concurrency-knee" data-status="open" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship sn-catalog-audit-instrument §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-measure the local-lane concurrency knee before any default is written down</h4>
+    <div class="r-fu-body"><p>The lead's instruction is that the local lane now sustains upwards of 30 concurrent DSv4.1 tasks and the instrument should lean on it. The most recent recorded probe of this repository's compose path put the knee near 4 on two H200s with real payloads, where exceeding it produced 69 API timeouts rather than throughput. Both readings may be honest — that probe predates the served variant, which now reports a 512,000-token context under sglang — but no default should encode a number neither side has re-measured. Probe the current endpoint with review-sized payloads, record the knee and the timeout rate against concurrency, and set the default from the measurement with 30 as the value to confirm rather than assume.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-catalog-audit-instrument §4</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>
