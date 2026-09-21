@@ -6054,6 +6054,7 @@ def sn_review(
     Examples:
       imas-codex sn review --unreviewed --cost-limit 5.0
       imas-codex sn review --ids equilibrium --dry-run
+      imas-codex sn review --ids equilibrium --report-only
       imas-codex sn review --force --physics-domain magnetics
       imas-codex sn review --target names --unreviewed
       imas-codex sn review --target docs --physics-domain equilibrium
