@@ -1,6 +1,6 @@
 # WEST batch accepted names — physical-correctness audit, equilibrium profiles to magnetics
 
-provisional: true — verdicts are being appended as they are judged and the result section is not yet closed.
+provisional: false — all 51 rows carry a verdict and the result section is closed.
 
 This is the **second half** of the audit begun in
 [`west-name-audit.md`](west-name-audit.md). That file judged 86 of the 341
@@ -476,3 +476,89 @@ its proposed spelling is that adjudication's, not a new one.
 - name description: Geometric cross-sectional area enclosed by one winding turn of a poloidal magnetic-field probe coil, defining its per-turn magnetic-flux coupling.
 - **rejected spelling** `area_of_poloidal_magnetic_field_probe` → **proposed spelling** `turn_area_of_poloidal_magnetic_field_probe`
 - why: The same defect as row 146 on the poloidal probe. The data dictionary says "area of each turn of the coil" and the name says the area of the probe; the two differ by the turn count, and the quantity that converts a coil voltage to a field is the product, not this factor. The proposal keeps the two probes' spellings parallel, which is why both rows are renamed together rather than one of them.
+
+## Where the defects fall
+
+![Verdict for each of the 51 bindings at cohort indices 103 to 153, plotted against cohort index and banded by IDS, with each rejected spelling labelled and coloured by defect class](/imas-codex/figures/sn-west-catalog-release/west-name-verdicts-equilibrium-profiles-to-magnetics.png)
+
+The figure is the reason the 33.3 % below should not be read as a cohort-wide
+rate. This half is a **contiguous slice** of the path-ordered cohort, not a
+stratified sample, and the slice happens to land on the batch's
+instrument-hardware containers: 12 rows of `hard_x_rays`, 12 of `ic_antennas`
+and 8 of `magnetics` account for 13 of the 17 rejections, while the
+5 `equilibrium` rows yield 1 and the 13 `interferometer` rows yield 3. Every
+rejection in the three dense bands is a locus or qualifier error at a
+diagnostic's own container — which object the name is attached to, or which of
+several sibling signals it denotes — and none is an error about plasma physics.
+The first half's 11.6 % came from a draw spread over 20 IDSs; the two numbers
+measure different populations and only their sum over the whole cohort would
+be an estimate of it.
+
+## Result
+
+| | count |
+| --- | --- |
+| rows judged (cohort indices 103–153, inclusive) | **51** |
+| judged **correct** | 34 |
+| judged **incorrect**, each with a proposed spelling | **17** |
+| correct + incorrect | **51** |
+| incorrect as a percentage of 51 | **33.3 %** |
+| notes recorded on **correct** rows (counted separately, not rejections) | 8 |
+| unit disagreements between `sn_unit` and `dd_unit` | 1 of 51 |
+| rows whose identity is also bound to source paths outside this index range | 22 |
+
+**17 of 51 — 33.3 % — are not publishable as spelled.** Grouped into the five
+classes the first half established, because the classes have different
+remedies:
+
+- **The name asserts more than the data supports** (3): `toroidal_vacuum_magnetic_field` for a 1/R field quoted without its radius (106); `area_of_toroidal_magnetic_field_probe` (146) and `area_of_poloidal_magnetic_field_probe` (153) for per-turn coil areas published as probe areas.
+- **The name is bound to the wrong object** (5): `normalized_toroidal_flux_coordinate_at_measurement_position` on an emissivity-peak location (118); `wave_current_amplitude_of_antenna_strap` on a module current whose voltage sibling uses the antenna locus (121); `capacitance_of_ion_cyclotron_heating_antenna` on a matching element (122); `toroidal_angle_of_measurement_position` (149) and `radial_coordinate_of_measurement_position` (150) on an installed probe's position, whose `z` member already carries the probe locus.
+- **One name covers two physically different quantities** (0 in this half). The two candidates are recorded as wrong-object at the path judged here, with their cross-range halves deferred: `..._at_measurement_position` spans an ECE measurement position and a hard X-ray emissivity peak, and `*_of_measurement_position` spans an ECE channel, an X-ray camera aperture centre and two magnetic probe positions. Both collisions reach outside indices 103–153 and belong to the whole-cohort collision sweep, which is why this class reads zero here rather than absent.
+- **Not self-descriptive** (6): `hard_xray_emissivity` for a photon-rate emissivity (115); `pressure_of_ion_cyclotron_heating_antenna` dropping the `amplitude` both its siblings keep (126); `toroidal_angle_of_antenna_strap` reading as an installation angle where its two sibling coordinates say `outline` (127); `wave_phase_of_ion_cyclotron_heating_antenna` naming none of the four phases in its container (132); `wave_phase_of_wave_beam` omitting the fringe-jump correction (142); `spectral_calibration_factor_at_line_of_sight` for a phase-to-column-density coefficient (143).
+- **Minority spelling of a base the cohort already fixes** (3): `upper_photon_energy` against the settled `lower_bound_photon_energy` (110 and 120, one identity at two paths); `line_integrated_electron_number_density` against the settled `electron_density` base (140).
+
+Eight **notes** sit on rows whose verdict is correct and are counted apart from
+the rejections, because each is a defect in a description, a convention or a
+shared text rather than in a name: the shared-identity question at row 103; the
+three senses of "gas flow" that only the unit resolves (108); a dimensionless
+`half_width` in flux coordinate (116); the shared line-of-sight description
+saying "first reference point" while bound to the third point (138, the first
+half's row-46 defect recurring); the `wave_beam` and `interferometer_beam`
+spellings both in use for a probing beam (144); a field defined along the
+sensor normal published as the toroidal field (147); a "signed" angle whose
+data dictionary gives `[0, 2Pi]` (148); and the one unit disagreement (152).
+
+**The single unit disagreement is row 152**, `turn_count_of_toroidal_magnetic_field_probe`:
+the standard name carries `1` and the data dictionary carries nothing. The
+standard name is the defensible side — a turn count is dimensionless, `1` is
+the catalog's spelling for dimensionless, and an empty data-dictionary unit is
+indistinguishable from an unfilled field. The other 50 rows agree exactly.
+
+### What sums with the first half
+
+| | first half | this half | cohort so far |
+| --- | --- | --- | --- |
+| rows judged | 86 | 51 | 137 of 341 |
+| correct | 76 | 34 | 110 |
+| incorrect | 10 | 17 | 27 |
+
+The two halves are drawn differently — every-fourth across the cohort against a
+contiguous slice — so the 27 is a count of rejections found, not a rate to
+extrapolate from. What does carry across is that no rejection in either half
+turned on a disputed physics claim: all 27 are about which object a name is
+attached to, which of several sibling quantities it denotes, or which of two
+spellings of one base survives.
+
+### Deferred to the whole-cohort collision sweep
+
+22 of the 51 rows carry an identity that is also bound to source paths outside
+indices 103–153. Most are benign reuse of one settled name across equivalent
+leaves — the line-of-sight coordinate family accounts for 10 of them. Four are named in the
+verdicts above as genuine collisions and are deferred rather than judged here:
+rows 106 (`core_profiles` and `summary` vacuum field), 118 (ECE measurement
+position against a hard X-ray emissivity peak), 140 (equilibrium constraint
+against the interferometer channel) and 149/150 (ECE channel, X-ray camera
+aperture centre and two magnetic probe positions under one measurement-position
+name). This node judges only the binding at the path inside its range; the
+choice of which binding keeps a shared identity belongs to the node that owns
+the sweep.
