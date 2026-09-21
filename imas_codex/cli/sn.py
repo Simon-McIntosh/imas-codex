@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from collections.abc import Callable, Iterator
@@ -5947,6 +5948,45 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
         console.print(f"Compacted {len(safe)} unapproved candidates.")
 
 
+def _report_drifting_families(families: list[dict[str, Any]]) -> None:
+    """Render the grouped-review worklist, one line per drifting family.
+
+    The defects per-identity review cannot see are the cohort ones — a base
+    split across two spellings, a family whose members disagree, an identity
+    bound to loci of different kinds. Each line carries the family's parent,
+    member count, deterministic drift and anchor, which are the fields
+    :func:`harmonize.build_worklist` already computes. The worklist follows on
+    one line as JSON so a caller can consume it as data rather than parse the
+    table. Read-only: this never writes to the graph.
+    """
+    console.print(
+        f"\n[bold]Grouped review:[/bold] {len(families)} drifting "
+        f"{'family' if len(families) == 1 else 'families'}"
+    )
+    if not families:
+        console.print(
+            "  No family met the drift and size thresholds (min_drift=0.5, min_size=3)."
+        )
+        return
+
+    for family in families:
+        parent = family.get("parent") or family.get("physical_base")
+        members = family.get("members") or []
+        anchor = family.get("anchor")
+        console.print(
+            f"  parent={parent or '(parentless)'}"
+            f"  members={family.get('n', len(members))}"
+            f"  drift={family.get('drift', 0.0):.3f}"
+            f"  anchor={anchor or '(deferred)'}"
+        )
+
+        for member in members:
+            console.print(f"      - {member}")
+
+    console.print("  [bold]Worklist[/bold]")
+    console.print(json.dumps(families, sort_keys=True), soft_wrap=True, markup=False)
+
+
 @sn.command("review")
 @click.option("--ids", default=None, help="Scope to names linked to specific IDS")
 @click.option(
@@ -6018,15 +6058,18 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
 @click.option(
     "--target",
-    type=click.Choice(["names", "docs"], case_sensitive=False),
+    type=click.Choice(["names", "docs", "groups"], case_sensitive=False),
     default="names",
     show_default=True,
     help=(
         "Which review rubric to apply. 'names' → 4-dim name rubric "
         "(grammar/semantic/convention/completeness, /80). 'docs' → 4-dim "
         "docs rubric (description_quality/documentation_quality/"
-        "completeness/physics_accuracy, /80). A lower-fidelity target will "
-        "not overwrite a higher-fidelity prior review unless --force."
+        "completeness/physics_accuracy, /80). Those two are per-identity. "
+        "'groups' → grouped review: reports each drifting sibling family "
+        "detected by harmonize.build_worklist (parent, member count, drift, "
+        "anchor) and writes nothing to the graph. A lower-fidelity target "
+        "will not overwrite a higher-fidelity prior review unless --force."
     ),
 )
 @click.option(
@@ -6079,6 +6122,7 @@ def sn_review(
       imas-codex sn review --force --physics-domain magnetics
       imas-codex sn review --target names --unreviewed
       imas-codex sn review --target docs --physics-domain equilibrium
+      imas-codex sn review --target groups
       imas-codex sn review --reviewer-profile quality-cost-balanced --unreviewed -c 2.0
     """
     import asyncio
@@ -6103,6 +6147,15 @@ def sn_review(
 
     # Enforce batch-size cap
     batch_size = min(batch_size, 25)
+
+    if target_normalized == "groups":
+        # Grouped review reads sibling families through harmonize's
+        # read-only surface and emits them as a worklist. Nothing here
+        # writes: the four harmonization apply helpers are never imported.
+        from imas_codex.standard_names.harmonize import build_worklist
+
+        _report_drifting_families(build_worklist())
+        return
 
     # Load reviewer list (N>=1). Priority: --models > --reviewer-profile > config.
     from imas_codex.settings import (

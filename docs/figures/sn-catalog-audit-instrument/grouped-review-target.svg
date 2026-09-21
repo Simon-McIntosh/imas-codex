@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="520" viewBox="0 0 980 520" font-family="Helvetica,Arial,sans-serif">
+  <rect width="980" height="520" fill="#ffffff"/>
+  <text x="24" y="34" font-size="18" font-weight="bold" fill="#111">The grouped review target reads the harmonization surface and never the apply half of it</text>
+  <text x="24" y="56" font-size="12.5" fill="#555">sn review --target groups: one line per drifting family, then the worklist as JSON. Four apply helpers sit behind a ban.</text>
+
+  <!-- sn review -->
+  <rect x="24" y="88" width="250" height="196" rx="6" fill="#f4f6f8" stroke="#555"/>
+  <text x="38" y="110" font-size="13" font-weight="bold" fill="#111">imas-codex sn review</text>
+  <text x="38" y="128" font-size="11.5" fill="#555">--target</text>
+
+  <rect x="38" y="138" width="222" height="34" rx="4" fill="#ffffff" stroke="#999"/>
+  <text x="50" y="159" font-size="12" fill="#333">names  (per-identity, /80)</text>
+  <rect x="38" y="178" width="222" height="34" rx="4" fill="#ffffff" stroke="#999"/>
+  <text x="50" y="199" font-size="12" fill="#333">docs  (per-identity, /80)</text>
+  <rect x="38" y="218" width="222" height="34" rx="4" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.6"/>
+  <text x="50" y="239" font-size="12" font-weight="bold" fill="#1b5e20">groups  (cohort, new)</text>
+  <text x="38" y="272" font-size="11" fill="#555">The cohort defects the two per-identity</text>
+  <text x="38" y="286" font-size="11" fill="#555">targets cannot see.</text>
+
+  <g stroke="#2e7d32" stroke-width="1.8" fill="none" marker-end="url(#arrow)">
+    <path d="M274 235 H330"/>
+  </g>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+      <path d="M0,0 L7,3.2 L0,6 z" fill="#2e7d32"/>
+    </marker>
+  </defs>
+
+  <!-- harmonize read-only surface -->
+  <rect x="334" y="88" width="300" height="196" rx="6" fill="#ffffff" stroke="#2e7d32"/>
+  <text x="348" y="110" font-size="13" font-weight="bold" fill="#1b5e20">harmonize.py — read-only surface</text>
+  <text x="348" y="130" font-size="11.5" fill="#333">build_worklist(gc)  — queries only</text>
+  <text x="348" y="150" font-size="11.5" fill="#333">assemble_family   drift   group_signature</text>
+  <text x="348" y="170" font-size="11.5" fill="#333">select_anchor   lint_links</text>
+  <line x1="348" y1="186" x2="620" y2="186" stroke="#ccc"/>
+  <text x="348" y="204" font-size="11" fill="#555">build_worklist returns per family:</text>
+  <text x="348" y="222" font-size="11.5" fill="#333">parent  ·  n  ·  drift  ·  anchor  ·  members</text>
+  <text x="348" y="240" font-size="11.5" fill="#333">grouping  ·  operator_kinds  ·  docs_accepted</text>
+  <text x="348" y="264" font-size="11" fill="#555">A family whose stored signature already</text>
+  <text x="348" y="278" font-size="11" fill="#555">matches is skipped — inert here, since the</text>
+
+  <g stroke="#2e7d32" stroke-width="1.8" fill="none" marker-end="url(#arrow)">
+    <path d="M634 235 H690"/>
+  </g>
+
+  <!-- output -->
+  <rect x="694" y="88" width="262" height="196" rx="6" fill="#ffffff" stroke="#555"/>
+  <text x="708" y="110" font-size="13" font-weight="bold" fill="#111">Report — writes nothing</text>
+  <text x="708" y="132" font-size="11.5" font-family="monospace" fill="#333">parent=alpha_base</text>
+  <text x="708" y="148" font-size="11.5" font-family="monospace" fill="#333">  members=3  drift=0.667</text>
+  <text x="708" y="164" font-size="11.5" font-family="monospace" fill="#333">  anchor=alpha_base</text>
+  <line x1="708" y1="178" x2="942" y2="178" stroke="#ccc"/>
+  <text x="708" y="196" font-size="11.5" font-family="monospace" fill="#333">[{ "parent": …, "n": …,</text>
+  <text x="708" y="212" font-size="11.5" font-family="monospace" fill="#333">   "drift": …, "anchor": … }]</text>
+  <text x="708" y="240" font-size="11" fill="#555">The worklist is the deliverable; applying</text>
+  <text x="708" y="254" font-size="11" fill="#555">it stays a separate authorised act.</text>
+  <text x="708" y="272" font-size="11" fill="#555">Read-only keeps the fixture independent:</text>
+
+  <!-- ban -->
+  <rect x="24" y="312" width="932" height="176" rx="6" fill="#fdecea" stroke="#c0392b"/>
+  <text x="38" y="336" font-size="13" font-weight="bold" stroke="none" fill="#8b2b20">Never imported by --target groups — the harmonization apply helpers</text>
+  <g font-size="11.5" font-family="monospace" fill="#8b2b20">
+    <rect x="38" y="352" width="210" height="30" rx="4" fill="#ffffff" stroke="#c0392b"/>
+    <text x="50" y="372">mark_members_for_regen</text>
+    <rect x="264" y="352" width="150" height="30" rx="4" fill="#ffffff" stroke="#c0392b"/>
+    <text x="276" y="372">stamp_harmonized</text>
+    <rect x="430" y="352" width="196" height="30" rx="4" fill="#ffffff" stroke="#c0392b"/>
+    <text x="442" y="372">mark_families_for_regen</text>
+    <rect x="642" y="352" width="300" height="30" rx="4" fill="#ffffff" stroke="#c0392b"/>
+    <text x="654" y="372">restamp_harmonized_families</text>
+  </g>
+  <g stroke="#c0392b" stroke-width="2.6" stroke-linecap="round">
+    <line x1="50" y1="360" x2="236" y2="376"/>
+    <line x1="276" y1="360" x2="402" y2="376"/>
+    <line x1="442" y1="360" x2="614" y2="376"/>
+    <line x1="654" y1="360" x2="930" y2="376"/>
+  </g>
+  <text x="38" y="410" font-size="12" fill="#333">The test patches all four to raise, proves the ban fires on a direct call, and shows the command still succeeds.</text>
+  <text x="38" y="432" font-size="12" fill="#333">Mutating the implementation to call one of them reddens both tests: 2 failed, and the recorded</text>
+  <text x="38" y="450" font-size="12" font-family="monospace" fill="#8b2b20">AssertionError("grouped review must not mutate the graph")</text>
+  <text x="38" y="472" font-size="12" fill="#333">is the failure the run reports. Nothing else here touches the graph at all.</text>
+</svg>

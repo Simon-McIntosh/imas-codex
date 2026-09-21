@@ -549,6 +549,52 @@
       cumulative landing record</a>.
     </p>
 
+    <h3 id="s3-grouped-review-target">Landed: grouped review reads the harmonization worklist and never the apply half of that module</h3>
+    <p>
+      <code>--target</code> took <code>names</code> or <code>docs</code>, both
+      per-identity, so the cohort defects &mdash; a base split across two
+      spellings, a family whose members disagree, an identity bound to loci of
+      different kinds &mdash; had no surface at all. The detection already
+      existed in <code>harmonize.py</code> and had no command-line entry point:
+      <code>build_worklist</code> assembles sibling families by
+      <code>HAS_PARENT</code> or shared <code>physical_base</code>, computes a
+      deterministic drift over the members' opening signatures, and issues only
+      <code>gc.query</code> reads.
+    </p>
+    <p>
+      <strong>Landed.</strong> Commit <code>04b0794b4</code> adds
+      <code>groups</code> as a third value of <code>--target</code> on
+      <code>sn review</code>. It imports <code>build_worklist</code> from that
+      read-only surface and nothing else from that module, renders one line per
+      family carrying its parent, member count, drift and anchor, then the
+      worklist as JSON, and returns before any reviewer resolution, audit or
+      state construction &mdash; so a grouped review reaches no model and spends
+      nothing. <strong>Evidence.</strong>
+      <code>tests/standard_names/test_grouped_review_target.py</code> patches
+      <code>GraphClient</code> with a stand-in that serves only the family
+      query: one case parses the four fields out of the JSON worklist and
+      re-reads them from the rendered line, so the two forms must agree; the
+      second patches <code>mark_members_for_regen</code>,
+      <code>stamp_harmonized</code>, <code>mark_families_for_regen</code> and
+      <code>restamp_harmonized_families</code> to raise, calls each directly to
+      show the ban is live rather than merely unexercised, and requires the
+      command to succeed (<strong>2 passed</strong>). The negative control adds
+      <code>mark_families_for_regen()</code> to the groups branch, and both
+      tests then fail with the recorded
+      <code>AssertionError("grouped review must not mutate the graph")</code>.
+      Full record and figure:
+      <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#grouped-review-target">the
+      grouped-review anchor</a> in the cumulative landing record.
+    </p>
+    <p>
+      <strong>What the measure does not establish.</strong> The patched client
+      is a stand-in, so this shows the four fields the command prints are the
+      fields <code>build_worklist</code> returns, not that a live graph produces
+      families to print. The stored-signature filter inside that function stays
+      inert only because this target never stamps; observing that compatibility
+      needs the real graph, which belongs to the merged-result test node.
+    </p>
+
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 
     <p>
