@@ -421,7 +421,12 @@ class ExportReport:
                 record.disposition == disposition
                 for record in self.source_disposition_records
             )
-            for disposition in ("emitted", "excluded", "documented_non_nameable")
+            for disposition in (
+                "emitted",
+                "excluded",
+                "documented_non_nameable",
+                "waived",
+            )
         }
         return {
             "gates": [g.to_dict() for g in self.gate_results],

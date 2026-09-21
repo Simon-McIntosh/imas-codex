@@ -24,6 +24,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from imas_codex.standard_names.export import (
+    ExportReport,
     SourceDispositionRecord,
     describe_manifest_generability,
     run_export,
@@ -320,6 +321,14 @@ def test_explicit_waiver_is_generable_and_remains_visible_as_uncarried() -> None
             "detail": reason,
         }
     ]
+    reconciliation = ExportReport(
+        source_disposition_records=[waived],
+        manifest_generability=verdict,
+    ).to_dict()["source_reconciliation"]
+    assert reconciliation["manifest_size"] == 1
+    assert reconciliation["accounted"] == 1
+    assert reconciliation["waived"] == 1
+    assert reconciliation["rows"] == [waived.to_dict()]
 
     # The same permanent refusal without the explicit row disposition remains
     # a blocker: neither its category nor its reason grants a waiver by itself.
