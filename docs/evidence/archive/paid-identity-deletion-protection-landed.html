@@ -771,10 +771,11 @@
   </section>
   <section id="receipt-expectation-precedence-and-cli-output">
     <h2>The archive census wins a receipt disagreement, and the operator sees why</h2>
-    <p><strong>Landed 2026-09-21</strong> at <code>3c47fa002d79947424110199ee119ccfc4ee50a1</code>,
+    <p><strong>Landed 2026-09-21</strong> at <code>3c47fa00277b8c9347efc7031679dc6e23b11ebc</code>,
     from base <code>a0d303ca47357821f4a1f595d8a8089e462b32fa</code>. Both operator-visible
     gaps were reproduced before repair. With one archived <code>HAS_UNIT</code>
-    edge in the census and two in the reconstruction closure, the landed branch
+    edge in the census and two closure edges to the distinct existing
+    counterparts <code>unit:eV</code> and <code>unit:keV</code>, the landed branch
     order returned <code>expected 1</code> from <code>archive_census</code>; reversing
     only that order returned <code>expected 2</code> from
     <code>reconstruction_closure</code>. With an empty archive census, the applied
@@ -788,6 +789,17 @@
         <tr><td>operator receipt</td><td><code>expected None observed 0</code></td><td><code>expected unestablished source neither observed 0</code></td><td>removing the source and word makes the Click-runner test fail on the exact old line</td></tr>
       </tbody>
     </table>
+    <p><strong>The disagreement fixture now describes a graph the writer can
+    produce.</strong> Its first version used two <code>HAS_UNIT</code> rows with the
+    same start, type and end, differing only in a relationship property. The real
+    writer uses <code>MERGE</code> on start, type and end and then sets properties,
+    so the second row matches and updates the first relationship; the test double
+    had incorrectly stored two because it included properties in its edge key.
+    Distinct unit endpoints preserve two relationships under those exact
+    <code>MERGE</code> semantics, so the archive-one-versus-closure-two disagreement
+    is reachable rather than manufactured by the double. Correction commit
+    <code>000f67400</code> also keys the double on start, type and end and adds a
+    refusal proving duplicate same-endpoint rows cannot claim two live edges.</p>
     <p><strong>The review's broader test claim had gone stale, and the record keeps
     the correction.</strong> Before the new disagreement test, reversing the branches
     did not leave the full suite unchanged: two existing tests already asserted
@@ -799,15 +811,20 @@
     assertions. The new test closes the narrower, real gap by making the counts
     differ.</p>
     <p><strong>The measured gate adds no suite-wide failure.</strong> The focused file
-    passed <strong>4 of 4</strong> tests in 5.64 seconds on <code>all_debug</code>.
-    Each repair has its own red control: branch reversal failed the disagreement
-    test once, and restoring the bare Python rendering failed the Click test once.
-    The full Standard Names run moved from <strong>7,515</strong> to
-    <strong>7,517 passed</strong> while retaining the identical 20 failures and 3
-    setup errors, with 8 skipped and 326 deselected in both runs: zero added
-    failures, exactly two added passes. The baseline, after-run, reproductions and
-    both first-line-labelled control logs are preserved under the run directory
-    named in the worker manifest.</p>
+    passed <strong>4 of 4</strong> tests in 5.58 seconds on <code>all_debug</code>.
+    Each repair has its own red control: branch reversal against the reachable
+    distinct-endpoint fixture failed the disagreement test once, and restoring
+    the bare Python rendering failed the Click test once. A runtime
+    <code>MERGE</code>-faithful double probe passed all <strong>21</strong> existing
+    archive/parity tests; after the double and its duplicate-row refusal were
+    committed, that cohort passed <strong>22 of 22</strong>. The full Standard Names
+    run moved from <strong>7,515</strong> to <strong>7,518 passed</strong> while
+    retaining the identical 20 failures and 3 setup errors, with 8 skipped and
+    326 deselected in both runs: zero added failures, exactly three added passes.
+    A direct diff of lines beginning <code>FAILED tests/</code> or
+    <code>ERROR tests/</code> returned no difference. The baseline, after-run,
+    reproductions and both first-line-labelled control logs are preserved under
+    the run directory named in the worker manifest.</p>
   </section>
 </main>
 </body>
