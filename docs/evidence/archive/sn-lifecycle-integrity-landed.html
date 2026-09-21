@@ -914,6 +914,33 @@
     package-wide name set. That is a distinct type-analysis design and is recorded as follow-on work,
     not folded into this narrow static guard.</p>
   </section>
+  <section id="defaulted-attribute-guard-controls">
+    <h2>The guard has permanent inputs that make its own refusals observable</h2>
+    <p><strong>Predicate control.</strong> A second test constructs a one-line module under
+    <code>tmp_path</code> containing a literal three-argument <code>getattr</code> for
+    <code>fixture_missing</code>. The normal scan reports exactly that file, line 1 and attribute.
+    The negative control replaced <code>attribute_name not in declared_attributes</code> with
+    <code>False</code>; the focused all-debug test then failed because the expected fixture finding
+    was absent. This makes an inverted predicate visible even when production code contains no
+    current violation.</p>
+
+    <p><strong>Root contract.</strong> The test retains both the configured tuple and an independent
+    required-root set. It requires every declared surface to remain configured, exist on disk,
+    contribute at least one Python module and contribute at least one literal candidate. In a shared
+    scratch copy outside the repository, removing
+    <code>imas_codex/standard_names/export.py</code> from the configured tuple fails with
+    <code>required module roots are missing: imas_codex/standard_names/export.py</code>. This is
+    the silent three-module-to-two-module shrink that aggregate counts alone did not detect.</p>
+
+    <p><strong>Restored gates.</strong> The focused all-debug file result is <strong>2 passed and
+    1 failed</strong>: the fixture and root contract pass, while the worker-base production read
+    remains the sole expected failure. Full <code>tests/standard_names/</code> is
+    <strong>21 failed, 7499 passed, 8 skipped, 326 deselected and 3 errors</strong> in 312.77 s.
+    Comparing only lines beginning <code>FAILED tests/</code> or <code>ERROR tests/</code> with
+    the base receipt yields exactly one added line,
+    <code>test_defaulted_literal_attributes_are_declared</code>; all 23 base test failure/error
+    identifiers remain unchanged.</p>
+  </section>
   </main>
 </body>
 </html>
