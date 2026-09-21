@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="430" viewBox="0 0 880 430" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <rect width="880" height="430" fill="#ffffff"/>
+  <text x="32" y="38" font-size="19" font-weight="600" fill="#1a1d21">Three coordinate containers whose sibling axes carry different loci</text>
+  <text x="32" y="60" font-size="13" fill="#5a6169">Each container is one point in the data dictionary. All three axes must name the same object; where they do not, the minority axis is the outlier.</text>
+
+  <!-- legend -->
+  <rect x="32" y="78" width="13" height="13" rx="3" fill="#1f7a6d"/>
+  <text x="52" y="89" font-size="12.5" fill="#1a1d21">names the object the container actually is</text>
+  <rect x="330" y="78" width="13" height="13" rx="3" fill="#c2673a"/>
+  <text x="350" y="89" font-size="12.5" fill="#1a1d21">names a measurement position the container is not</text>
+  <text x="700" y="89" font-size="12.5" fill="#5a6169">&#9733; = outlier axis</text>
+
+  <!-- column headers -->
+  <text x="352" y="126" font-size="13" font-weight="600" fill="#5a6169" text-anchor="middle">R</text>
+  <text x="530" y="126" font-size="13" font-weight="600" fill="#5a6169" text-anchor="middle">&#966;</text>
+  <text x="708" y="126" font-size="13" font-weight="600" fill="#5a6169" text-anchor="middle">Z</text>
+
+  <!-- row 1: camera aperture -->
+  <text x="32" y="158" font-size="13.5" fill="#1a1d21" font-weight="600">camera_x_rays/aperture/centre</text>
+  <text x="32" y="176" font-size="12" fill="#5a6169">an instrument aperture</text>
+  <rect x="270" y="138" width="164" height="50" rx="6" fill="#c2673a"/>
+  <text x="352" y="160" font-size="12" fill="#ffffff" text-anchor="middle">radial_coordinate_of</text>
+  <text x="352" y="176" font-size="12" fill="#ffffff" text-anchor="middle">_measurement_position</text>
+  <rect x="448" y="138" width="164" height="50" rx="6" fill="#1f7a6d"/>
+  <text x="530" y="160" font-size="12" fill="#ffffff" text-anchor="middle">toroidal_coordinate</text>
+  <text x="530" y="176" font-size="12" fill="#ffffff" text-anchor="middle">_of_aperture &#9733;</text>
+  <rect x="626" y="138" width="164" height="50" rx="6" fill="#c2673a"/>
+  <text x="708" y="160" font-size="12" fill="#ffffff" text-anchor="middle">vertical_coordinate_of</text>
+  <text x="708" y="176" font-size="12" fill="#ffffff" text-anchor="middle">_measurement_position</text>
+
+  <!-- row 2: b_field_phi_probe -->
+  <text x="32" y="236" font-size="13.5" fill="#1a1d21" font-weight="600">magnetics/b_field_phi_probe/position</text>
+  <text x="32" y="254" font-size="12" fill="#5a6169">a sensor coil bolted to the vessel</text>
+  <rect x="270" y="216" width="164" height="50" rx="6" fill="#c2673a"/>
+  <text x="352" y="238" font-size="12" fill="#ffffff" text-anchor="middle">radial_coordinate_of</text>
+  <text x="352" y="254" font-size="12" fill="#ffffff" text-anchor="middle">_measurement_position</text>
+  <rect x="448" y="216" width="164" height="50" rx="6" fill="#c2673a"/>
+  <text x="530" y="238" font-size="12" fill="#ffffff" text-anchor="middle">toroidal_angle_of</text>
+  <text x="530" y="254" font-size="12" fill="#ffffff" text-anchor="middle">_measurement_position</text>
+  <rect x="626" y="216" width="164" height="50" rx="6" fill="#1f7a6d"/>
+  <text x="708" y="238" font-size="12" fill="#ffffff" text-anchor="middle">vertical_coordinate_of_toroidal</text>
+  <text x="708" y="254" font-size="12" fill="#ffffff" text-anchor="middle">_magnetic_field_probe &#9733;</text>
+
+  <!-- row 3: b_field_pol_probe -->
+  <text x="32" y="314" font-size="13.5" fill="#1a1d21" font-weight="600">magnetics/b_field_pol_probe/position</text>
+  <text x="32" y="332" font-size="12" fill="#5a6169">a second sensor coil, different type</text>
+  <rect x="270" y="294" width="164" height="50" rx="6" fill="#1f7a6d"/>
+  <text x="352" y="316" font-size="12" fill="#ffffff" text-anchor="middle">radial_coordinate_of_poloidal</text>
+  <text x="352" y="332" font-size="12" fill="#ffffff" text-anchor="middle">_magnetic_field_probe</text>
+  <rect x="448" y="294" width="164" height="50" rx="6" fill="#c2673a"/>
+  <text x="530" y="316" font-size="12" fill="#ffffff" text-anchor="middle">toroidal_angle_of</text>
+  <text x="530" y="332" font-size="12" fill="#ffffff" text-anchor="middle">_measurement_position &#9733;</text>
+  <rect x="626" y="294" width="164" height="50" rx="6" fill="#1f7a6d"/>
+  <text x="708" y="316" font-size="12" fill="#ffffff" text-anchor="middle">vertical_coordinate_of_poloidal</text>
+  <text x="708" y="332" font-size="12" fill="#ffffff" text-anchor="middle">_magnetic_field_probe</text>
+
+  <line x1="32" y1="364" x2="848" y2="364" stroke="#d9dde1" stroke-width="1"/>
+  <text x="32" y="388" font-size="12.5" fill="#1a1d21">In the two probe containers the outlier is the surviving correct spelling, so the container moves toward the minority axis.</text>
+  <text x="32" y="408" font-size="12.5" fill="#1a1d21">In the aperture container the outlier is also the correct one: &#966; already says aperture, and R and Z are the two axes that must change.</text>
+</svg>

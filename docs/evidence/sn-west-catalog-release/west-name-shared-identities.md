@@ -1,7 +1,7 @@
 # WEST batch shared identities — one quantity, or several?
 
-provisional: true — verdicts are appended as each group is judged; the closing
-pass rewrites this line and adds the result table.
+provisional: false — all 53 groups carry a verdict, the container-level
+resolutions are recorded and the result table is closed.
 
 53 of the 230 accepted identities in the WEST batch cohort are bound to more
 than one data-dictionary source path, covering 164 of the 341 bindings. Sharing
@@ -742,4 +742,114 @@ provenance. One quantity — and the second precedent group 25 is judged against
 one quantity; which diagnostic launches the beam is the locus. Two instruments
 on WEST use different wavelengths, and that is exactly the case a shared
 identity is meant to cover — one quantity, many instruments.
+
+## Container-level resolutions
+
+Three data-dictionary containers have their coordinate axes named by more than
+one locus. A container is one point in space: all of its axes must name the same
+object, so these are resolved at container level rather than axis by axis.
+
+![Three coordinate containers whose sibling axes carry different loci](/imas-codex/figures/sn-west-catalog-release/coordinate-container-sibling-loci.svg)
+
+**`camera_x_rays/aperture/centre`** — φ reads `toroidal_coordinate_of_aperture`
+while R and Z read `radial_/vertical_coordinate_of_measurement_position`. **φ is
+the outlier and φ is the correct one**: the container is an aperture, so the
+container as a whole should carry the aperture locus and the two axes that move
+are R and Z. R is group 14's second binding; Z
+(`vertical_coordinate_of_measurement_position`) is bound to this one path only
+and so forms no group of its own, which is why the container needs naming here
+rather than being visible in the 53.
+
+> **Confirms the prior reading, and resolves it.** `west-name-audit.md`'s
+> closing finding 2 reports this container and leaves the question open —
+> "whichever spelling wins". Judged here from the container's own evidence, the
+> aperture spelling wins, because the data dictionary calls the container an
+> aperture and nothing in it is a measurement position. The prior finding is
+> confirmed and narrowed, not contradicted; the union counts it once, with the
+> resolution supplied by this record.
+
+**`magnetics/b_field_phi_probe/position`** — R and φ read `*_of_measurement_position`,
+Z reads `vertical_coordinate_of_toroidal_magnetic_field_probe`. **Z is the
+outlier and Z is the correct one**; R and φ move. (Groups 14 and 16.)
+
+**`magnetics/b_field_pol_probe/position`** — R and Z read
+`*_of_poloidal_magnetic_field_probe`, φ reads
+`toroidal_angle_of_measurement_position`. **φ is the outlier and φ is the wrong
+one**; only φ moves. (Group 16.)
+
+In all three containers the correct spelling is the minority one. The count is
+therefore not the instrument: what decides each container is what the data
+dictionary says the container **is**, and in every case it says a piece of
+instrument hardware rather than a place in the plasma.
+
+## Result
+
+| | count |
+| --- | --- |
+| shared identities in the WEST batch cohort | 53 |
+| **groups judged** | **53** |
+| ONE-QUANTITY | 43 |
+| MUST-SPLIT | 10 |
+| ONE-QUANTITY + MUST-SPLIT | **53** |
+| | |
+| bindings involved | 164 |
+| bindings under a ONE-QUANTITY verdict | 140 |
+| bindings under a MUST-SPLIT verdict | 24 |
+| bindings accounted for | **164** |
+
+**10 of 53 shared identities — 18.9 % — spell more than one physical quantity**,
+covering 24 of the 164 shared bindings. Grouped by what the sharing conflates:
+
+- **Instrument geometry named as a plasma measurement position** (2 groups, 6
+  bindings): groups 14 and 16. An aperture centre and two sensor coils are named
+  as though a measurement were made where they sit.
+- **A topological critical point named as the magnetic axis** (1 group, 4
+  bindings): group 4, settled by the batch manifest's own X-point migration map.
+- **Two loci of one structure sharing one name** (2 groups, 4 bindings): the
+  inner and outer strike points, on both axes — groups 42 and 51.
+- **An averaging operator folded onto the field it averages** (1 group, 2
+  bindings): group 25, against a precedent the catalog already sets twice.
+- **Two different physical descriptors of one beam** (1 group, 2 bindings):
+  group 27, ellipticity against polarization state.
+- **Aggregation level conflated** (1 group, 2 bindings): group 28, one launcher
+  against the machine total.
+- **Launched against coupled power** (1 group, 2 bindings): group 34.
+- **An instrument position against a plasma feature's position** (1 group, 2
+  bindings): group 36, a channel's sight position against an emissivity peak.
+
+Counting the two axes of the strike-point pair as one defect and the two axes
+of the measurement-position collision as one defect, these ten groups are
+**eight distinct naming defects**. Two of the eight — the measurement-position
+collision and the strike-point pair — were already pointed at by the
+every-fourth sample; the remaining **six are new to this record**, as is the
+resolution of the aperture container the sample left open.
+
+### Against the prior record
+
+| prior closing finding | this record | outcome |
+| --- | --- | --- |
+| `radial_coordinate_of_measurement_position` across three loci | group 14 | **confirms**, same three loci, same two proposed spellings |
+| `camera_x_rays/aperture/centre` φ against its R and Z siblings | container section | **confirms and resolves** — the aperture spelling wins |
+| `vertical_coordinate_of_strike_point` across both legs | group 51 | **confirms**, plus a description that is false for the outer leg |
+
+Nothing in the prior record is contradicted. Six defects are added that the
+every-fourth sample could not reach: the contour-tree node named as the magnetic
+axis (group 4), and the five quantity-level conflations of groups 25, 27, 28, 34
+and 36. Group 16 is not counted among the six — it is the same defect as group
+14 on a second axis — but it widens that defect by two bindings and by one
+container, `magnetics/b_field_pol_probe/position`, which the sample never
+names.
+
+### Narrower failures, reported as notes on ONE-QUANTITY verdicts
+
+- **Description names fewer loci than the identity is bound to** — 1 case:
+  group 3, `toroidal_coordinate_of_line_of_sight`, whose description names "the
+  first reference point" while 8 of its 14 bindings are second or third points.
+  Confirms the prior record's sample row 46. A second instance, group 51, sits
+  on a MUST-SPLIT verdict rather than a ONE-QUANTITY one and is the more serious
+  form, because the description is false for the bindings it omits rather than
+  merely silent about them.
+- **Unit disagreement between `sn_unit` and `dd_unit`** — **0 cases** across all
+  164 bindings, with the comparator shown above to find 3 in the cohort
+  remainder, so the zero is a measurement and not a blind instrument.
 
