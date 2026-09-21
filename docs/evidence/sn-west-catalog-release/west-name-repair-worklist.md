@@ -1,6 +1,6 @@
 # WEST batch name repairs — one deduplicated worklist
 
-provisional: true — rows are appended as they are compiled; the closing pass rewrites this line.
+provisional: false — every rejected spelling in the seven records carries a row, the contradictions are listed and the result table is closed.
 
 **61 repairs close 74 defective bindings.** This file aggregates and reconciles the seven landed
 records of the WEST cohort; it judges nothing afresh and adds no defect the records do not contain.
@@ -228,3 +228,134 @@ entirely, because neither divertor leg has a better claim to the unqualified nam
 | `summary/boundary/strike_point_outer_z/value` | **needs** `vertical_coordinate_of_outer_strike_point` |
 
 - rejected by: spec-visible→wall row 213 (`summary/boundary/strike_point_inner_z/value`, proposed `vertical_coordinate_of_inner_strike_point`), spec-visible→wall row 214 (`summary/boundary/strike_point_outer_z/value`, proposed `vertical_coordinate_of_outer_strike_point`)
+## Part three — where the records disagree
+
+The fence for this file requires that a contradiction between records be **surfaced rather than
+silently resolved**, so none of the following is decided here. Eight identities are rejected in one
+record and accepted in another. **Six of the eight are explained and are not disagreements**: they
+are the MUST-SPLIT groups, where the identity is genuinely correct on one binding and wrong on
+another, and the split row above is the resolution. The remaining two, plus three spelling
+conflicts and one class conflict, are open.
+
+### Two identities where one record's accepted spelling is another's rejected spelling
+
+Neither is a split group, so the disagreement cannot be explained by the identity being right on
+one binding and wrong on another — both records are judging the same physical quantity.
+
+| identity | accepted at | rejected at | the rejecting record's proposal |
+| --- | --- | --- | --- |
+| `toroidal_vacuum_magnetic_field` | brems→eq-boundary 41 (`core_profiles/vacuum_toroidal_field/b0`), spec-visible→wall 220 | eq-profiles→magnetics 106 (`equilibrium/vacuum_toroidal_field/b0`) | `toroidal_vacuum_magnetic_field_at_reference_major_radius` |
+| `volume_of_flux_surface` | audit 14, audit 36 | eq-boundary→profiles 79 (`equilibrium/time_slice/global_quantities/volume`) | `volume_of_plasma_boundary` |
+
+`volume_of_flux_surface` is the sharper of the two, because the every-fourth audit's treatment of
+the `*_of_flux_surface` family was carried into the later range records as a **settled**
+adjudication not to be relitigated — and the boundary-to-profiles record rejects it anyway, on a
+binding the every-fourth audit did not hold. The shared-identities record independently judges the
+identity **ONE-QUANTITY**. Three instruments, two answers. This needs an adjudication before
+either spelling is published.
+
+### Three conflicts about the same spelling axis: `toroidal_angle_` or `toroidal_coordinate_`
+
+The shared-identities record and three range records disagree about the base for a toroidal angle,
+and the conflict reaches a binding the split table says to **keep**:
+
+| binding | shared-identities group 16 says | the range record says |
+| --- | --- | --- |
+| `ece/channel/position/phi` | **keeps** `toroidal_angle_of_measurement_position` | brems→eq-boundary 44 **rejects** it → `toroidal_coordinate_of_measurement_position` |
+| `magnetics/b_field_phi_probe/position/phi` | needs `toroidal_angle_of_toroidal_magnetic_field_probe` | eq-profiles→magnetics 149 → `toroidal_coordinate_of_toroidal_magnetic_field_probe` |
+| `magnetics/b_field_pol_probe/position/phi` | needs `toroidal_angle_of_poloidal_magnetic_field_probe` | magnetics→spec-visible 156 → `toroidal_coordinate_of_poloidal_magnetic_field_probe` |
+
+The two instruments agree on the **locus** in all three rows and disagree only on the base word.
+The split row in part two adopts the shared-identities spelling because that record is the one that
+judged the group as a group, but the disagreement is real and is recorded here rather than
+absorbed. The same pair also carries a **class conflict**: brems→eq-boundary files it as a minority
+spelling, magnetics→spec-visible files it as bound to the wrong object.
+
+### One coupled-versus-launched disagreement, which is physics rather than spelling
+
+| binding | shared-identities group 28 / 34 says | spec-visible→wall says |
+| --- | --- | --- |
+| `summary/heating_current_drive/lh/power/value` | **keeps** `launched_power_of_lower_hybrid_antenna` | row 236 **rejects** it → `coupled_power_of_lower_hybrid_antenna` |
+| `summary/heating_current_drive/power_lh/value` | needs `total_launched_power_of_lower_hybrid_antennas` | row 238 → `total_coupled_power_due_to_lower_hybrid_heating` |
+| `summary/heating_current_drive/ic/power/value` | needs `coupled_power_of_ion_cyclotron_antenna` | row 235 → `coupled_power_due_to_ion_cyclotron_heating` |
+
+The ion-cyclotron row agrees on **coupled**; the two lower-hybrid rows do not. Launched and coupled
+power are separated by the coupling efficiency — the every-fourth audit's row 80 puts that
+difference at 10–30 % — so this is a disagreement about which physical quantity the `summary`
+node holds, not about how to spell one. It must be settled from the data dictionary before either
+lower-hybrid name is published.
+
+### One proposal that is itself a rejected spelling
+
+`vertical_coordinate_of_ece_channel` (brems→eq-boundary 48) is to be renamed
+**to** `vertical_coordinate_of_measurement_position` — and that same record's row 18 **rejects**
+`vertical_coordinate_of_measurement_position` on `camera_x_rays/aperture/centre/z`, renaming it to
+`vertical_coordinate_of_aperture`. Both are in part one and both are correct as written: the
+aperture binding leaves the identity and the ECE binding joins it. It is recorded because the
+repairs are **order-dependent** — applying the ECE rename before the aperture rename puts a correct
+binding into an identity that is still carrying a wrong one.
+
+## The defect rate, and why the census is not the sample's estimate
+
+| draw | judged | incorrect | rate |
+| --- | --- | --- | --- |
+| every fourth, path-ordered, spread over 20 IDSs | 86 | 10 | 11.6 % |
+| contiguous, remainder 1–51 | 51 | 11 | 21.6 % |
+| contiguous, remainder 52–102 | 51 | 8 | 15.7 % |
+| contiguous, remainder 103–153 | 51 | 17 | 33.3 % |
+| contiguous, remainder 154–204 | 51 | 14 | 27.5 % |
+| contiguous, remainder 205–255 | 51 | 14 | 27.5 % |
+| **whole cohort** | **341** | **74** | **21.7 %** |
+
+**The 21.7 % is a census, not an estimate, and it is nearly double the 11.6 % the sample
+projected.** The records themselves give the structural reason, in two parts, and nothing is added
+here beyond joining them.
+
+**First, the contiguous blocks are not samples of the cohort and never claimed to be.** The
+equilibrium-profiles record states it directly: its slice "happens to land on the batch's
+instrument-hardware containers: 12 rows of `hard_x_rays`, 12 of `ic_antennas` and 8 of `magnetics`
+account for 13 of the 17 rejections, while the 5 `equilibrium` rows yield 1 and the 13
+`interferometer` rows yield 3." The wall record makes the same disclaimer about its own 27.5 %, and
+the boundary-to-profiles record about its 15.7 %. Each block measures its own region. Only the
+census over all six is a statement about the cohort — which is what this file now holds.
+
+**Second, and this is what accounts for the gap rather than merely warning about it: a one-in-four
+draw structurally under-samples the defects that consist of siblings disagreeing with each other.**
+The bremsstrahlung record puts it as a property of the draw: "An every-fourth draw takes at most one
+coordinate of any point, so a set that disagrees with itself reads as a single plausible row." The
+arithmetic follows without any new judgement. **Thirteen of the 74 defective bindings are second or
+third sightings of an identity already defective elsewhere, and ten of those identities are
+MUST-SPLIT groups** — defects that exist only *between* bindings. A draw that takes one binding in
+four sees, on average, one binding of each such group, and one binding of a split group is exactly
+what looks correct in isolation. The every-fourth audit's own closing section is the evidence: it
+reported three such collisions as findings it "points at but does not contain", and all three are
+in part two of this file, found by the blocks that held the whole container.
+
+So the two figures are not in conflict and neither is wrong. **11.6 % was an honest estimate of the
+defects a per-row reading can see; 21.7 % is the count once the defects that live between rows are
+also counted.** The class totals show where the difference sits: 21 rows bound to the wrong object
+and 10 covering two quantities are 31 of the 74, and both classes are overwhelmingly
+container-level — a name that is defensible on its own row and indefensible beside its siblings.
+
+## Result
+
+| | count |
+| --- | --- |
+| accepted bindings judged | 341, over **340** distinct name-and-path pairs |
+| bindings carrying an INCORRECT verdict | **74** — 10 from the every-fourth audit, 64 across the five range records |
+| distinct identities among them | **61** |
+| shared identities in the cohort | 53, of which **10 MUST-SPLIT covering 24 bindings** |
+| **deduplicated repairs** | **61** = 51 renames + 10 splits |
+| repairs a reader cannot compensate for | **10** (the splits) |
+| rows requiring a spelling to be invented here | **0** — every rejection carries an explicit proposal in its source record |
+| identities rejected in more than one record | 9, of which 4 are renames and all 4 carry one agreed proposal |
+| open contradictions between records, surfaced not resolved | **6** — 2 accepted-versus-rejected spellings, 3 on the `toroidal_angle_`/`toroidal_coordinate_` axis, 1 coupled-versus-launched |
+| order-dependent repair pairs | 1 |
+| measured defect rate | **74 of 341 = 21.7 %** against the sample's 11.6 % estimate |
+
+**61 repairs, of which 10 block publication.** The 51 renames are mechanical once adopted. The 10
+splits each mint at least one new identity, and eight of them keep the existing spelling on at
+least one binding, so the catalog gains 12 new names rather than 20. Six contradictions must be
+adjudicated before the names they touch are published; they affect 8 bindings and none of them is
+resolved by this file.
+
