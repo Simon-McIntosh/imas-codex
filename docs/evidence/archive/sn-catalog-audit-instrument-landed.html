@@ -698,6 +698,98 @@
     2026-09-21 &middot; gate <code>tests/standard_names/test_declared_attribute_access.py</code>
     &middot; base revision <code>f15d33851c99c19d464ecb3d225f4e3cdd830383</code>.</p>
   </section>
+  <section id="suppressed-write-consumable-result">
+    <h2>A suppressed write returns a result its caller can consume</h2>
+
+    <p><strong>The recorded defect reproduced before the repair.</strong> The
+    report-only guard dropped a mutating statement by returning a bare empty
+    list. Suppression removes the effect of a statement, not the value of the
+    call, and the in-tree callers <em>read</em> the result rather than discarding
+    it: <code>GraphClient.drop_all</code> reads <code>result.single()</code>
+    (<code>imas_codex/graph/client.py:509</code>, as does
+    <code>get_stats</code>), and the DD resolution port writes read
+    <code>transaction.run(...).consume()</code>
+    (<code>imas_codex/standard_names/dd_resolutions.py:706</code>). A list
+    provides neither, so a suppressed write reaching one of those consumers
+    raised instead of reporting that nothing was written. Driven through the
+    real <code>GraphClient.drop_all</code> against a recording driver, the
+    unguarded call returned the driver's row count and the guarded call raised
+    verbatim:</p>
+
+    <pre><code>unguarded drop_all -&gt; 7
+Traceback (most recent call last):
+  File "imas_codex/graph/client.py", line 509, in drop_all
+    record = result.single()
+AttributeError: 'list' object has no attribute 'single'</code></pre>
+
+    <figure>
+      <svg height="170" role="img" viewBox="0 0 700 170" width="700"
+           xmlns="http://www.w3.org/2000/svg">
+        <rect fill="#fdf1f1" height="40" rx="4" stroke="#c46a6a" width="200" x="10" y="14"></rect>
+        <text fill="#8a3a3a" font-size="11" font-weight="bold" x="18" y="33">suppressed run()</text>
+        <text fill="#8a3a3a" font-size="11" x="18" y="48">returned a bare []</text>
+
+        <line stroke="#999" x1="210" x2="255" y1="34" y2="34" marker-end="url(#a)"></line>
+        <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#999"></path></marker></defs>
+
+        <rect fill="#f7f7f7" height="66" rx="4" stroke="#bbb" width="180" x="255" y="1"></rect>
+        <text fill="#333" font-size="11" x="262" y="18">client.py:509</text>
+        <text fill="#333" font-size="11" x="262" y="33">.single()</text>
+        <text fill="#8a3a3a" font-size="11" x="262" y="49">AttributeError</text>
+        <text fill="#333" font-size="11" x="262" y="62">dd_resolutions.py:706</text>
+
+        <line stroke="#ccc" x1="10" x2="690" y1="86" y2="86"></line>
+
+        <rect fill="#e8f5ec" height="40" rx="4" stroke="#5f9e74" width="200" x="10" y="100"></rect>
+        <text fill="#2f5d44" font-size="11" font-weight="bold" x="18" y="119">suppressed run()</text>
+        <text fill="#2f5d44" font-size="11" x="18" y="134">returns a result object</text>
+
+        <line stroke="#999" x1="210" x2="255" y1="120" y2="120"></line>
+        <rect fill="#f5faf7" height="40" rx="4" stroke="#5f9e74" width="200" x="255" y="100"></rect>
+        <text fill="#2f5d44" font-size="11" x="262" y="119">.single() -&gt; None</text>
+        <text fill="#2f5d44" font-size="11" x="262" y="132">.consume(), iter -&gt; empty</text>
+      </svg>
+      <figcaption>The same suppressed statement, read by the same two consumers:
+      a bare list raises on the receipt, a result object reads as no rows. Inline
+      because <code>docs/figures/</code> lies outside this node's
+      write fence.</figcaption>
+    </figure>
+
+    <p><strong>The repair.</strong> Commit <code>658df1631</code> returns a small
+    result object from both
+    <code>_WriteSuppressingRun.run</code> and its transaction proxy: its
+    <code>single()</code> is <code>None</code>, its <code>consume()</code>
+    returns without raising, and it iterates empty. A dropped write therefore
+    reads as a statement that matched no rows, which is exactly what it is: the
+    mutation did not execute, and no row was produced. The object is returned
+    fresh per call and carries no state beyond the receipt list the guard already
+    owns.</p>
+
+    <p><strong>Evidence that could have failed.</strong>
+    <code>tests/standard_names/test_review_write_suppression.py</code> gains
+    <code>test_suppressed_write_returns_a_consumable_result</code>, which drives
+    the guard through a session and through a transaction opened from that
+    session, and asserts on the returned object both that
+    <code>single()</code> is <code>None</code> and that iteration is empty &mdash;
+    two assertions one object cannot satisfy with a non-empty result &mdash; and
+    that <code>consume()</code> and <code>single()</code> complete on both. The
+    whole file passes (<strong>26 passed</strong>), and with the sibling
+    report-only suites <strong>38 passed</strong>. <strong>Negative control:</strong>
+    restoring the bare-list return fails the new case with
+    <code>AttributeError: 'list' object has no attribute 'single'</code> &mdash;
+    the declared mutation verbatim, so the repaired return is what turns the case
+    green.</p>
+
+    <p><strong>What the measure does not establish.</strong> The gate exercises
+    the guard with a recording driver, not a live Neo4j session, so it shows the
+    shape the callers receive rather than a live suppressed write. It also does
+    not cover the false-negative direction of the mutation classifier, which is
+    the sibling landing above.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-a-suppressed-write-returns-a-consumable-result</code> &middot;
+    2026-09-21 &middot; implementation commit <code>658df1631</code>.</p>
+  </section>
   </main>
 </body>
 </html>

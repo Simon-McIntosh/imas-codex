@@ -228,3 +228,36 @@ def test_review_path_writes_of_each_shape_are_refused() -> None:
 
     assert session.statements == []
     assert suppressed == ["MERGE", "MERGE", "MERGE"]
+
+
+def test_suppressed_write_returns_a_consumable_result() -> None:
+    """A dropped statement still yields a result its caller can read.
+
+    Suppression removes the effect of a mutation, not the value of the call:
+    the in-tree consumers read a dropped statement's result rather than
+    discarding it. The client's count helpers read ``single()``
+    (``GraphClient.drop_all`` and ``GraphClient.get_stats``), and the DD
+    resolution port writes consume the result of a statement run inside a
+    transaction. Both reads have to work with no rows, so a dropped write
+    reports that nothing was written instead of raising on the shape of its
+    result.
+
+    ``single()`` returning ``None`` and the iteration being empty are asserted
+    on the same object, so an implementation returning a non-empty result
+    cannot satisfy both.
+    """
+    client, session = _probe_client()
+
+    with _suppress_review_graph_writes():
+        with client.session() as opened:
+            statement = opened.run("MERGE (n:Probe {id: 'probe:1'})")
+            transaction = opened.begin_transaction()
+            tx_statement = transaction.run("MERGE (n:Probe {id: 'probe:2'})")
+
+    assert session.statements == []
+    assert statement.single() is None
+    assert list(statement) == []
+    statement.consume()
+    assert tx_statement.single() is None
+    assert list(tx_statement) == []
+    tx_statement.consume()

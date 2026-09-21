@@ -1524,8 +1524,14 @@
 
     <h3>Every adjacent pair is covered</h3>
 
-    <p>The classifier has five terminating branches, evaluated in this order: <em>produced</em>,
-    <em>upstream quantity removed</em>, <em>recorded cause</em>, <em>node category</em>, and the fallback that records silence. Four adjacent pairs of branches exist. Produced / removed, removed / recorded cause and recorded cause / node category are pinned by the four cases above, the third from both of its sides; node category / the fallback is pinned by the reachability test the file already carried, and that was measured rather than assumed -- placing the category test below the fallback return makes <code>compose_not_applicable</code> unreachable and reports 1 failed, 5 passed, exit 1.</p>
+    <p>The classifier has <strong>six terminating returns</strong> at <strong>five top-level positions</strong>
+    — four <code>if</code> statements plus the fallback — evaluated in this order: <em>produced</em>,
+    <em>upstream quantity removed</em>, <em>recorded cause</em>, <em>node category</em>, and the fallback that records silence.
+    The recorded-cause position holds two of the six returns, discriminated by a substring test rather than by position.
+    Four adjacent pairs of <em>positions</em> exist, which is what the pair arithmetic needs.
+    <em>Corrected 2026-09-21: this paragraph previously said five terminating branches. An independent
+    cross-model review found the premise wrong and the conclusion right, and the counts above were
+    re-derived from the source rather than from the worker's report.</em> Produced / removed, removed / recorded cause and recorded cause / node category are pinned by the four cases above, the third from both of its sides; node category / the fallback is pinned by the reachability test the file already carried, and that was measured rather than assumed -- placing the category test below the fallback return makes <code>compose_not_applicable</code> unreachable and reports 1 failed, 5 passed, exit 1.</p>
 
     <p><strong>Gate.</strong> 2 passed at exit 0 before the change, 6 passed at exit 0 after it, ruff clean, both runs using the main checkout's environment with <code>--no-sync</code>.</p>
 

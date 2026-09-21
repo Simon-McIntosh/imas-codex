@@ -58,6 +58,27 @@ def _cypher_mutation_clause(cypher: str) -> str | None:
     return match.group(0).upper() if match else None
 
 
+class _SuppressedWriteResult:
+    """The Result-shaped return for a statement the guard dropped.
+
+    A dropped mutation still hands its value to a caller that reads a receipt:
+    ``GraphClient``'s count helpers read ``.single()`` and the DD resolution
+    port writes read ``.consume()``. A bare empty list satisfies neither, so a
+    report-only run reaching such a caller raises ``AttributeError`` instead of
+    reporting that nothing was written. This object reads as a statement that
+    matched no rows.
+    """
+
+    def single(self) -> None:
+        return None
+
+    def consume(self) -> None:
+        return None
+
+    def __iter__(self) -> Iterator[dict[str, Any]]:
+        return iter(())
+
+
 class _WriteSuppressingRun:
     """Drop mutating statements before they reach the driver.
 
@@ -73,7 +94,7 @@ class _WriteSuppressingRun:
         clause = _cypher_mutation_clause(cypher)
         if clause is not None:
             self._suppressed.append(clause)
-            return []
+            return _SuppressedWriteResult()
         return self._target.run(cypher, *args, **params)
 
     def __getattr__(self, name: str) -> Any:
