@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T19:17:30",
+  "updated": "2026-09-21T19:27:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -181031,6 +181031,293 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T153834446238-n-the-audit-report-parameter-names-the-class-it-carries",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-the-audit-report-parameter-names-the-class-it-carries",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 814,
+                "cached_input_tokens": 495129,
+                "input_tokens": 495945,
+                "output_tokens": 1417,
+                "reasoning_output_tokens": 602,
+                "total_tokens": 497362,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "_extract_audit_findings in imas_codex/standard_names/review/pipeline.py declares its audit report parameter as the class it receives rather than Any; the declared-attribute census in tests/standard_names/test_declared_attribute_access.py moves that site from unresolved to declared and its resolved floor is raised to the new measured figure; and reintroducing getattr(audit_report, \"findings\", []) there makes the check fail naming that site, which it does not do today",
+          "estimated_hours": 0.5,
+          "goal": "Annotate the audit report parameter so the declared-attribute check can judge the site it was built for",
+          "id": "n-the-audit-report-parameter-names-the-class-it-carries",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T15:38:38Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/audit-report-annotation/manifest.md",
+          "negative_control": "leave the audit report parameter annotated Any instead of the class it carries; the reintroduced-findings assertion must fail",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/review/pipeline.py",
+            "tests/standard_names/test_declared_attribute_access.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/figures/sn-catalog-audit-instrument",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-audit-7",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T15:39:21Z",
+        "completed_at": "2026-09-21T16:32:32.545Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3180,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3191,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "89d65fddd919508d1ddbff12e457b84acdab7234",
+        "commits": [
+          "339cca5bf6df8a2b0feba89a8dbcd5c442f4e8a2",
+          "38e6ef4757b42e7d758ef05f781123d54e25e180"
+        ],
+        "changed_lines": {
+          "added": 106,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_declared_attribute_access.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/audit-report-annotation/coordinator-negative-control.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/audit-report-annotation/manifest.md",
+        "scope_changed": false,
+        "session_id": "1d777c3f-8008-46b7-81f0-5dd7a2f855f5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5191703,
+            "input_tokens_cumulative": 5191703,
+            "output_tokens": 47796,
+            "output_tokens_cumulative": 47796,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T16:32:32.545Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1064,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1858,
+              "log_fresh": false,
+              "manifest_commits": [
+                "658df1631",
+                "7e3736c30"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "061227a0eaab9efca6fc81720e869ebdef9d76995c5eb0fa1e927a7a25bad624",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/consumable-result/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-catalog-audit-instrument --section '\u00a73' --role review --spec-level exact --node review-of-n-a-suppressed-write-returns-a-consumable-result --goal 'attach an independent review to run r-20260921T135940164504-n-a-suppressed-write-returns-a-consumable-result' --done-when 'the review for r-20260921T135940164504-n-a-suppressed-write-returns-a-consumable-result stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T135940164504-n-a-suppressed-write-returns-a-consumable-result.json --time-budget 35m --session instrument-20260921T0925 --allow-unreconciled-runs --local",
+              "node": "n-a-suppressed-write-returns-a-consumable-result",
+              "phase": "working",
+              "plan": "sn-catalog-audit-instrument",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T135940164504-n-a-suppressed-write-returns-a-consumable-result",
+              "session": "instrument-20260921T0925",
+              "terminal_age_seconds": 1708,
+              "terminal_at": "2026-09-21T15:10:32Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-a-suppressed-write-returns-a-consumable-result"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 19,
+            "evidence": 18,
+            "fit": 19,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 95
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5529790,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2534.871,
+          "generated_tokens": 49277,
+          "generation_seconds": 2350.911,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 29.9,
+          "machine_seconds": 183.96,
+          "peak_input_tokens": 143435,
+          "tokens_per_second": 20.96,
+          "wall_tokens_per_second": 19.44
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-audit-report-parameter-names-the-class-it-carries",
+          "session_id": "1d777c3f-8008-46b7-81f0-5dd7a2f855f5",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T16:32:32.545Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/standard_names/test_declared_attribute_access.py"
+          ],
+          "declaration": "leave the audit report parameter annotated Any instead of the class it carries; the reintroduced-findings assertion must fail",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/audit-report-annotation/coordinator-negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/audit-report-annotation/coordinator-negative-control.log"
+        },
+        "tool_steps": 7.0,
+        "orientation_input_tokens": 2501740.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -181343,6 +181630,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2487
+    "_version": 2488
   }
 }
