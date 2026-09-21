@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"       content="imas-codex">
+  <meta name="reckon-type"        content="evidence">
+  <meta name="plan-slug"          content="sn-catalog-audit-instrument-landed">
+  <meta name="plan-title"         content="Catalog Audit Instrument: What Landed">
+  <meta name="plan-summary"       content="Each capability the audit instrument gained, with the measure that proves it and what the measure does not establish.">
+  <meta name="plan-status"        content="active">
+  <meta name="plan-owner"         content="Simon McIntosh">
+  <meta name="plan-tags"          content="standard-names,review,audit-instrument">
+  <meta name="plan-evidence-for"  content="sn-catalog-audit-instrument">
+  <title>Catalog Audit Instrument: What Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+  <section id="rubric-expressiveness">
+    <h2>Can the rubric express the defects the audit found? Four of six, and the gap is a field rather than a dimension</h2>
+    <p><strong>Question.</strong> The name audit found 74 defective bindings over 61 identities that
+    the review pipeline had already scored and accepted. Before asking why the reviewer missed them:
+    if a correct reviewer had noticed each defect, was there a dimension to score it on and a field
+    to carry the correction? A rubric that cannot express a defect makes a reviewer's correctness
+    irrelevant. Read over the ten reviewer prompt files in
+    <code>imas_codex/llm/prompts/sn/</code> and the structured output models in
+    <code>imas_codex/standard_names/models.py</code> the reviewer must fill.</p>
+
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Scoring dimensions on the path the batch actually ran</td><td><strong>4</strong> &mdash; <code>grammar</code>, <code>semantic</code>, <code>convention</code>, <code>completeness</code>, 0&ndash;20 each over 80</td></tr>
+        <tr><td>Defect classes with both a dimension and a correction field</td><td><strong>4 of 6</strong></td></tr>
+        <tr><td>Classes with <strong>no</strong> dimension and <strong>no</strong> field</td><td><strong>1</strong> &mdash; an identity whose bindings span loci of different kinds</td></tr>
+        <tr><td>Classes with both, but an instruction pointing away</td><td><strong>1</strong> &mdash; documentation contradicting its own bindings</td></tr>
+        <tr><td>Classes expressible but not separable from style after scoring</td><td><strong>1</strong> &mdash; a wrong modifier that is a physics error</td></tr>
+        <tr><td>Correction fields able to carry more than one name</td><td><strong>0</strong></td></tr>
+        <tr><td>Reviewer prompt files carrying the ordinal rule</td><td><strong>3 of 10</strong></td></tr>
+        <tr><td>Dimensions the ordinal rule can be scored on</td><td><strong>0</strong> &mdash; stated HARD, docked nowhere</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <svg viewBox="0 0 700 320" width="700" height="320" role="img"
+           aria-label="Each defect class mapped against whether a scoring dimension expresses it and whether a field can carry its correction">
+        <text fill="#333" font-size="13" font-weight="bold" x="10" y="18">Six defect classes against two independent requirements</text>
+        <text fill="#666" font-size="11" x="10" y="36">A class needs BOTH to be reportable. Losing either one makes a correct reviewer silent.</text>
+
+        <text fill="#555" font-size="11" font-weight="bold" x="330" y="58">dimension?</text>
+        <text fill="#555" font-size="11" font-weight="bold" x="450" y="58">field?</text>
+        <text fill="#555" font-size="11" font-weight="bold" x="560" y="58">reportable?</text>
+
+        <text fill="#333" font-size="11" x="10" y="84">redundant spelling of a standardised base</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="90" x="320" y="70"></rect>
+        <text fill="#2f5d44" font-size="11" x="332" y="84">convention</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="100" x="425" y="70"></rect>
+        <text fill="#2f5d44" font-size="11" x="437" y="84">revised_name</text>
+        <text fill="#2f5d44" font-size="11" x="560" y="84">yes</text>
+
+        <text fill="#333" font-size="11" x="10" y="112">asserts more than the DD supports</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="90" x="320" y="98"></rect>
+        <text fill="#2f5d44" font-size="11" x="332" y="112">semantic</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="100" x="425" y="98"></rect>
+        <text fill="#2f5d44" font-size="11" x="437" y="112">revised_name</text>
+        <text fill="#2f5d44" font-size="11" x="560" y="112">yes</text>
+
+        <text fill="#333" font-size="11" x="10" y="140">bound to the wrong object in its container</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="90" x="320" y="126"></rect>
+        <text fill="#2f5d44" font-size="11" x="332" y="140">semantic</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="100" x="425" y="126"></rect>
+        <text fill="#2f5d44" font-size="11" x="437" y="140">revised_name</text>
+        <text fill="#2f5d44" font-size="11" x="560" y="140">yes</text>
+
+        <text fill="#333" font-size="11" x="10" y="168">wrong modifier that is a physics error</text>
+        <rect fill="#fff4e5" height="20" rx="4" stroke="#d8a24a" width="90" x="320" y="154"></rect>
+        <text fill="#7a5a1e" font-size="11" x="332" y="168">semantic*</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="100" x="425" y="154"></rect>
+        <text fill="#2f5d44" font-size="11" x="437" y="168">revised_name</text>
+        <text fill="#7a5a1e" font-size="11" x="560" y="168">not as physics</text>
+
+        <text fill="#8a3a3a" font-size="11" font-weight="bold" x="10" y="196">bindings span loci of different kinds</text>
+        <rect fill="#fdf1f1" height="20" rx="4" stroke="#c46a6a" width="90" x="320" y="182"></rect>
+        <text fill="#8a3a3a" font-size="11" x="344" y="196">none</text>
+        <rect fill="#fdf1f1" height="20" rx="4" stroke="#c46a6a" width="100" x="425" y="182"></rect>
+        <text fill="#8a3a3a" font-size="11" x="452" y="196">none</text>
+        <text fill="#8a3a3a" font-size="11" font-weight="bold" x="560" y="196">NO</text>
+
+        <text fill="#8a3a3a" font-size="11" font-weight="bold" x="10" y="224">documentation contradicts its bindings</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="90" x="320" y="210"></rect>
+        <text fill="#2f5d44" font-size="11" x="326" y="224">physics_acc.</text>
+        <rect fill="#e8f5ec" height="20" rx="4" stroke="#5f9e74" width="100" x="425" y="210"></rect>
+        <text fill="#2f5d44" font-size="11" x="430" y="224">revised_docs</text>
+        <text fill="#8a3a3a" font-size="11" font-weight="bold" x="560" y="224">NO &mdash; see below</text>
+
+        <line stroke="#ccc" x1="10" x2="690" y1="242" y2="242"></line>
+        <rect fill="#fdf1f1" height="30" rx="5" stroke="#c46a6a" width="680" x="10" y="250"></rect>
+        <text fill="#8a3a3a" font-size="11" x="24" y="269">The repair for row 5 is TWO OR THREE names. The model offers two single-string slots, neither addressed to a binding.</text>
+        <rect fill="#fff4e5" height="30" rx="5" stroke="#d8a24a" width="680" x="10" y="284"></rect>
+        <text fill="#7a5a1e" font-size="11" x="24" y="303">Row 6 has both &mdash; but the docs prompt says &ldquo;dock if cited&rdquo; of the very binding list the check needs.</text>
+      </svg>
+      <figcaption>The two requirements are independent, which is why the table is drawn rather than
+      listed: the two unreportable classes fail for opposite reasons, and the remedies are
+      correspondingly different &mdash; a new field for one, a one-line prompt change for the other.
+      Inline because <code>docs/figures/</code> lies outside this node's write fence.</figcaption>
+    </figure>
+
+    <p><strong>The rubric is mostly not the reason.</strong> For two of the four expressible classes
+    the prompt's language is sharper than the audit's own: it calls source-fidelity "the <strong>#1
+    silent failure</strong>" and its worked example is a strike-point path from this very cohort
+    &mdash; a source path <code>.../strike_point_inner_r</code> substituted by a divertor-target
+    spelling, "MUST be capped &le; 6/20 with the mismatch cited"
+    (<code>review_names_system.md:142</code>). <strong>The rubric names the family the audit later
+    found defective and the cut shipped anyway</strong>, so for most classes the constraint is
+    upstream: in the comparators the reviewer is shown, and in the fact that a per-identity review
+    never holds two members of one container at once.</p>
+
+    <p><strong>The genuine expressiveness gap is one field.</strong> A review model whose only
+    correction slots are <code>revised_name: str | None</code> and
+    <code>suggested_name: str | None</code> (<code>models.py:1406</code>) cannot propose a split
+    &mdash; and a split is the repair for the one class the name audit called unrepairable by a
+    reader, found 10 times over 24 bindings. A reviewer wanting to say "split this into three, here
+    is which binding gets which" can only write prose into <code>issues: list[str]</code>, which
+    nothing downstream reads as a correction. Widening this is not a prompt edit; the natural shape
+    is a per-binding list.</p>
+
+    <p><strong>The second gap is one sentence, and the two prompts contradict each other.</strong>
+    The docs prompt hands the reviewer the binding list under an instruction to penalise its use
+    &mdash; "<code>- **Source paths** (provenance context &mdash; dock if cited in output)</code>"
+    (<code>review_docs_user.md:19</code>, identically <code>review_docs.md:148</code>) &mdash; while
+    the name prompt calls the same field the "<strong>authoritative bound-source cohort</strong>"
+    (<code>review_names_user.md:121</code>). A docs reviewer that asked "does this documentation hold
+    for every path in <code>source_paths</code>?" would find the measured strike-point contradiction
+    immediately, and <code>physics_accuracy</code> plus <code>revised_documentation</code> would
+    carry it. The dimension and the field are both there; the instruction that would make the
+    reviewer look is not, and the instruction that is there points the other way.</p>
+
+    <p><strong>The ordinal convention is encoded, and well.</strong>
+    <code>review_names_system.md:20-38</code> states it under its own HARD heading, names the
+    reviewer verbs ("approve, or refine"), carves out the false positives (<code>first_wall</code>,
+    a <code>start</code> that names a state), says what to emit instead (a <code>vocab_gap</code>),
+    and is backed by a structural recogniser in code rather than asserted only in prose
+    (<code>_is_ordinal_point_sample</code>, <code>imas_codex/standard_names/workers.py:2685</code>).
+    Its two gaps are reach, not content: it appears in <strong>3 of the 10</strong> reviewer prompt
+    files &mdash; absent from every docs and description prompt, where the audit's most-repeated
+    description defect lives &mdash; and it lands on <strong>no dimension</strong>, so a reviewer
+    following it has no told place to dock. The validator that clears an unparseable suggestion
+    (<code>models.py:1445</code>) does not clear an ordinal one, because an ordinal-qualified name
+    parses cleanly.</p>
+
+    <p><strong>What this does not establish.</strong> This node read prompts and models; it changed
+    no prompt, no model and no code, and it did not run the reviewer. Whether a reviewer actually
+    uses the dimensions it has is a different question and belongs to the capability-gaps node. The
+    quantitative claims here are counts over files and model fields, each citation verified against
+    the line it names. Full reading, with every quoted line:
+    <a href="/imas-codex/evidence/sn-catalog-audit-instrument/review-rubric-expressiveness">the
+    review rubric expressiveness record</a>.</p>
+  </section>
+  </main>
+</body>
+</html>
