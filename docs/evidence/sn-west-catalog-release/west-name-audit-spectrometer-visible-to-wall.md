@@ -1,7 +1,8 @@
 # WEST accepted names, cohort rows 205–255 — physical-correctness audit
 
-provisional: true — verdicts are appended as they are judged; the closing pass
-rewrites this line and adds the result section.
+provisional: false — all 51 rows carry a verdict and the result section is
+closed. (This line opened as `provisional: true` and was rewritten by the
+closing pass; the marker is repeated at the foot of the file.)
 
 This file judges the **51 accepted name bindings at indices 205 to 255** of the
 unjudged remainder cohort recorded in
@@ -216,7 +217,10 @@ and 238 — and those are judged here, because both halves are in hand.
 - data-dictionary text: Plasma energy content = 3/2 * integral over the plasma volume of the total kinetic pressure (pressure determined by an equilibrium reconstruction code)
 - name description: Global plasma stored energy obtained from the volume integral of total kinetic pressure, including thermal and fast-particle pressure contributions.
 - **rejected spelling** `mhd_energy` → **proposed spelling** `total_plasma_stored_energy`
-- why: The name is a transliteration of the data-dictionary leaf `energy_mhd` and says nothing a reader can use. "MHD energy" most naturally reads as the energy of magnetohydrodynamic activity, or as magnetic energy — it does not read as the plasma's stored kinetic energy content, which is what the data dictionary and the description both say it is. The quantity is the volume integral of total kinetic pressure, thermal plus fast-particle, so the base is `stored_energy` and the qualifier is `total` against the thermal-only sibling. By the adjudication carried at row 221 the reconstruction provenance does not belong in the name, which is why the proposed spelling drops `mhd` rather than expanding it.
+- why: The name is a transliteration of the data-dictionary leaf `energy_mhd` and says nothing a reader can use. "MHD energy" most naturally reads as the energy of magnetohydrodynamic activity, or as magnetic energy — it does not read as the plasma's stored kinetic energy content, which is what the data dictionary and the description both say it is. The quantity is the volume integral of total kinetic pressure, thermal plus fast-particle, so the base is `stored_energy` and the qualifier is `total` against the thermal-only sibling. By the adjudication carried at row 221 the reconstruction provenance does not belong in the name, which is why the proposed spelling drops `mhd` rather than expanding it. The
+  identity is also bound to `equilibrium/time_slice/global_quantities/energy_mhd`
+  outside this range — the same quantity, so the rejection applies to both
+  bindings; the collision itself is deferred to the whole-cohort sweep.
 
 ### 224. `ratio_of_line_averaged_electron_density_to_greenwald_density` — **correct**
 
@@ -478,3 +482,72 @@ and 238 — and those are judged here, because both halves are in hand.
 - name description: Major-radius coordinate of every point on a wall boundary outline, measured from the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
 - **rejected spelling** `radial_outline_of_wall` → **proposed spelling** `radial_outline_of_plasma_facing_component`
 - why: Its own Z sibling already carries the right base. The first half accepted `vertical_outline_of_plasma_facing_component` at its row 86 for `wall/description_2d/mobile/unit/outline/**z**`, and this is the same container's `r`. One container, one object, and two different loci across its two coordinates — the shape the first half rejected at its row 73 for the X-point. The spelling is wrong on its own terms as well: `description_2d/mobile/unit` is a **single movable plasma-facing unit**, and WEST's mobile units are its movable limiters, so a name that says "the wall" claims the whole vessel contour for one component's outline and collides with the fixed-wall outlines in the neighbouring `limiter` container at row 253. The proposed spelling is the one already accepted for the sibling, so this is a minority spelling of a base the cohort has already fixed, with a wrong-object consequence.
+
+## Result
+
+| | count |
+| --- | --- |
+| rows judged (cohort indices 205–255, inclusive) | **51** |
+| judged **correct** | 37 |
+| judged **INCORRECT**, each with a proposed spelling | **14** |
+| correct + incorrect | **51** |
+| incorrect as a share of the 51 rows | **27.5 %** |
+| notes on correct rows (defect outside the name, or a convention recorded) | 35 note lines over 35 rows |
+| — of those, a defect that lies in the description or the container rather than the name | 9 (rows 220, 226, 227, 228, 233, 237, 242, 248, 252) |
+| rows whose identity also binds outside 205–255, named here and deferred to the collision sweep | 20 |
+| collisions lying wholly inside 205–255 and therefore judged here | 2 (rows 213/214, rows 236/238) |
+
+**14 of 51 — 27.5 % of this block — are not publishable as spelled.** Grouped
+into the five classes the first half established, because the groups have
+different remedies:
+
+- **The name asserts more than the data supports** (3): `radiated_power_over_core_region` for power inside the whole last closed flux surface (229); `launched_power_of_lower_hybrid_antenna` for power the data dictionary says is coupled to the plasma (236); `pulse_duration` for the confined-plasma sub-interval of the pulse (249).
+- **The name is bound to the wrong object** (1): `gap_at_outboard_midplane`, a measurement-position-to-separatrix gap, on the inner-to-outer separatrix distance (206).
+- **One name, two physically different quantities** (6): `radial_coordinate_of_strike_point` on the inner leg, closing the pair the first half opened (212); `vertical_coordinate_of_strike_point` on both legs, with one description that names only the inner one (213, 214); `net_power_due_to_ion_cyclotron_heating` spanning an antenna launched-power node and a summary coupled-power node (235); `launched_power_of_lower_hybrid_antenna` spanning a per-launcher power and the system total (238); `toroidal_angular_width_of_limiter_tile` on an array that packs a zone centre beside its width (254). This remains the class a reader cannot repair — only a split can, and row 254 cannot even be split, because both quantities share one data-dictionary node.
+- **Not self-descriptive** (3): `accumulated_total_gas_count` (219), `mhd_energy` (223), `energy_confinement_enhancement_factor` (225).
+- **Minority spelling of a base the cohort already fixes** (1): `radial_outline_of_wall`, whose own vertical sibling is already `vertical_outline_of_plasma_facing_component` (255).
+
+### What this block adds to the first half
+
+The two halves are written in one shape and are summed, not compared:
+
+| | first half | this block | together |
+| --- | --- | --- | --- |
+| rows judged | 86 | 51 | **137** |
+| correct | 76 | 37 | **113** |
+| incorrect | 10 | 14 | **24** |
+| incorrect share | 11.6 % | 27.5 % | **17.5 %** |
+
+The higher rate here is not a change of standard: it is where the rows sit.
+This block is almost entirely `summary`, the IDS in which one leaf name has to
+carry a locus, an averaging rule and a provenance that the path supplies for
+free — and four of the fourteen rejections (212, 213, 214, 235) are the second
+halves of defects the first half had already opened and could not close,
+because their partner binding lay outside its every-fourth draw. Counting them
+here is correct and is not double counting: each is a distinct binding with its
+own verdict, and the first half's 10 does not contain any of them.
+
+Three of the first half's predictions are confirmed by rows it could not see.
+Its third outside-the-sample finding said `vertical_coordinate_of_strike_point`
+would repeat the row-72 defect on the vertical axis; rows 213 and 214 are that
+pair, and the confirmation is stronger than predicted, because the shared
+identity's single description hard-codes the inner leg and is therefore false
+of one of its two bindings. Its row-80 rejection turned on the data dictionary
+saying **coupled** where the name said **launched**; rows 235, 236 and 238 are
+three more bindings of that same distinction, one of which also spans a
+per-launcher quantity and a system total. And its row-86 acceptance of
+`vertical_outline_of_plasma_facing_component` is what makes row 255's
+`radial_outline_of_wall` a rejection rather than a judgement call.
+
+### The cohort estimate the two halves now support
+
+The first half's sample was every fourth path-ordered row and was drawn before
+any verdict, so its 11.6 % was an unbiased estimate of the cohort. This block
+is a contiguous path-ordered range, not a random sample, so its 27.5 % is a
+measurement **of this range** and not an estimate of the cohort — the summary
+IDS is over-represented in it by construction. The defensible combined
+statement is the count, not a re-extrapolation: **137 of the 341 accepted
+bindings have now been judged one by one, and 24 of them carry a name defect.**
+The remaining 204 bindings are judged by the other blocks of this sweep.
+
+provisional: false — all 51 rows carry a verdict and the result section is closed.
