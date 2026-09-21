@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T23:28:55",
+  "updated": "2026-09-21T23:32:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -184600,6 +184600,244 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T195953375664-n-a-settled-exclusion-can-be-waived",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "n-a-settled-exclusion-can-be-waived",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 376,
+                "cached_input_tokens": 766033,
+                "input_tokens": 766411,
+                "output_tokens": 716,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 767127,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "A catalog manifest is generable only when every uncarried source carries the waived disposition, and nothing in the package can produce one, so a source the pipeline correctly refuses forever renders a manifest permanently ungenerable. The lead has authored the declaration of which sources are settled; this node builds the producer that reads it. The declaration is imas_codex/standard_names/waived_sources.yaml, already committed, and you must not edit it.\n\nWHAT TO BUILD. When a SourceDispositionRecord is constructed at imas_codex/standard_names/export.py line 3297, consult the declaration and set disposition to the string waived when, and only when, the source path is an EXACT member of the declaration's waived list. Read the declaration once per export rather than per row. The mechanism function at export.py line 2465 already returns waived for such a record and the generability fold at line 2541 already requires every uncarried row to carry it, so nothing downstream needs changing; the gap is solely that no code sets it.\n\nMATCH EXACT PATHS ONLY, NEVER A PATTERN. This is the whole point of the declaration and it is stated in the file's own header. A pattern over paths ending in time would waive summary/disruption/time/value, which is the time at which a disruption occurred and should carry a standard name. Use set membership on the full path string. Do not normalise, do not strip prefixes, do not match on any suffix, and do not treat a path as waived because it resembles one that is.\n\nFAIL CLOSED, IN EVERY DIRECTION. A missing declaration file, an unreadable one, or one that does not parse must produce NO waivers, which leaves a cut ungenerable and therefore visible; it must never be treated as waiving nothing silently in a way a caller could mistake for success, and it must never raise so late that a partial export has already been written. Refuse at load, with a message naming the file and what was wrong with it. Additionally refuse the load when any waived entry omits its path, criterion or dd_evidence key, when an entry cites a criterion the file does not define, or when a path appears in both the waived and not_waived lists. Those refusals are what stop an entry being added without stating why.\n\nTHE NOT-WAIVED LIST IS LOAD-BEARING, NOT A COMMENT. The declaration records four sources as deliberately not waived so a later reader does not add them by resemblance. Treat that list as an assertion: a path in it must never be waived, and if it ever also appears in the waived list the load refuses rather than choosing.\n\nTESTS, all of them, in tests/standard_names/test_waived_sources.py. Every one of the eleven declared paths is waived. summary/disruption/time/value is NOT waived even though three declared paths also end in the segment time; name that test for the property it holds rather than for the path. A path absent from the declaration is not waived. A declaration file that is missing produces no waivers and the load refuses with a message naming the file. An entry missing dd_evidence is refused at load. An entry citing an undefined criterion is refused at load. A path listed in both lists is refused at load. State each test's count in the manifest.\n\nPROOFS. The focused file green with its passed count stated. The standard-names suite measured at your base revision and at your head, from your own worktree with PYTHONPATH set to it, comparing only lines matching the FAILED prefix and lines matching ERROR followed by tests slash, and stating both figures; a count that moves between two runs of identical code is a fact to report rather than a number to pick. The negative control captured to exactly one red log whose FIRST LINE is verbatim this node's declared negative-control sentence and nothing else, at exit status 1 and not 2, 4 or 5, since a collection or usage error proves nothing. Write every log into your run directory with an absolute path, never into slash tmp and never into dev slash shm, both of which are cleaned and the second of which is node-local.\n\nFORBIDDEN. Editing imas_codex/standard_names/waived_sources.yaml. Adding a waiver for any path not in its waived list. Matching by pattern, prefix, suffix or normalisation. Making a missing or malformed declaration produce a silent pass. Inferring a waiver from any other disposition or from an absent row, which the export module's own documentation forbids in the comment above its mechanism vocabulary. Write the manifest by appending the fields you are not changing rather than rewriting it, and replace the status field rather than adding a second one. Conventional subject AND body, stage only the paths you changed, no attribution trailer of any kind.",
+          "estimated_hours": 1.0,
+          "goal": "build the producer that sets the waived disposition from the lead's declaration of settled exclusions",
+          "id": "n-a-settled-exclusion-can-be-waived",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T19:59:55Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived/manifest.md",
+          "negative_control": "waiving a source by a shared path segment rather than its full path must fail, because summary/disruption/time/value is a measured event time that wants a standard name.",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_waived_sources.py",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/figures/unbound-source-backlog",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T20:00:09Z",
+        "completed_at": "2026-09-21T20:31:05.765Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1847,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1856,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "cdf7fcaf757915b8bb96c67f78c0cb5bd8e47425",
+        "commits": [
+          "b764cec8e1a850382abd9121b5feee6704fa2ea1",
+          "35e554954ec289dfdd131dfbf51a89d9e7591ad5",
+          "2795d927dea1e2c1a623375d07140071481cb444"
+        ],
+        "changed_lines": {
+          "added": 397,
+          "removed": 16,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug uv run pytest -p no:cacheprovider --timeout=180 tests/standard_names/ (isolated gate trees, isolation and provenance asserted OK, SOURCE_DATE_EPOCH set on BOTH sides)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/gate-logs/ship-s10-20260918/gate-waiver-head.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "THE MISSING PRODUCER IS BUILT: a settled exclusion can now be waived, so a manifest carrying a source the pipeline correctly refuses forever is no longer permanently ungenerable. The waived disposition was read in four places and written in none; that gap is closed. Grant is by EXACT full-path membership of a frozenset loaded from the lead's declaration, never by pattern, prefix, suffix or resemblance, and the docstring says so. Eleven load refusals cover a missing, unreadable or unparseable declaration, an entry omitting its path, criterion or evidence, an entry citing an undefined criterion, and a path in both the waived and not-waived lists; the declaration is read once per export before any staging output, so a bad rule stops the cut before it writes. Neither downstream site changed: the mechanism function already mapped the disposition and the generability fold already required it of every uncarried row. COORDINATOR GATE, both sides identical and both carrying SOURCE_DATE_EPOCH: base 21 failed / 3 errors / 7610 passed / 7969 collected; head 21 failed / 3 errors / 7617 passed / 7976 collected; added and fixed sets both EMPTY; +7 collected and +7 passed are the seven new tests; totals line present in both logs, zero timeouts. THE WORKER'S NEGATIVE CONTROL IS BETTER THAN THE ONE DECLARED: the coordinator declared a trivial mutation, removing a path from the list so the test fails. The worker instead mutated the producer to waive by a shared path SEGMENT and showed that summary/disruption/time/value is then wrongly waived, which is the exact hazard the declaration exists to prevent and the one the lead raised. The declaration was aligned to the worker's log at promote, the seventh such alignment this wave. TWO RECORD DEFECTS IN ITS EVIDENCE, neither affecting the conclusion: its two suite runs were not like-for-like, base carrying SOURCE_DATE_EPOCH and head not, making the one test sensitive to that variable appear fixed by the change; and its baseline failure_ids came from a discarded first measurement while the cited log came from the corrected one. The worker had itself diagnosed the discarded measurement and declared the loss in a follow-on, which is right; the defect is that the bad run's ids stayed beside the good run's log path. The coordinator re-gated with both sides identical rather than accept a comparison whose sides differed. REVIEW: one finding, a real defect its own tests could not reach, owned by the successor n-a-stale-waiver-refuses-instead-of-hiding-a-name.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived/manifest.md",
+        "scope_changed": false,
+        "session_id": "c4dbefa4-d2a4-41be-82b8-75db98b0acf5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8083470,
+            "input_tokens_cumulative": 8083470,
+            "output_tokens": 47605,
+            "output_tokens_cumulative": 47605,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T20:31:05.765Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 18,
+            "evidence": 18,
+            "fit": 17,
+            "goal_fidelity": 19,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 91
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8235597,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1852.108,
+          "generated_tokens": 57397,
+          "generation_seconds": 664.566,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 1187.542,
+          "peak_input_tokens": 150827,
+          "tokens_per_second": 86.37,
+          "wall_tokens_per_second": 30.99
+        },
+        "follow_on_paths": [
+          "logs/base_suite_missing_checkout_failure_ids.txt."
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-settled-exclusion-can-be-waived",
+          "session_id": "c4dbefa4-d2a4-41be-82b8-75db98b0acf5",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T20:31:05.765Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.96,
+          "at_complete": 0.96,
+          "verdict": "waived",
+          "reason": "the plan's remaining fraction is held by the four sources that are neither carried nor waived by design, which the lead directed be disposed on their merits, and by the successor closing the stale-waiver contradiction this node's review found"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/standard_names/test_waived_sources.py"
+          ],
+          "declaration": "waiving a source by a shared path segment rather than its full path must fail, because summary/disruption/time/value is a measured event time that wants a standard name.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived/logs/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived/logs/negative_control.log"
+        },
+        "tool_steps": 74.0,
+        "orientation_input_tokens": 2310042.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -184912,6 +185150,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2502
+    "_version": 2503
   }
 }
