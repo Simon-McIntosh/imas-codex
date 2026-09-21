@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 </head>
 <body>
   <main class="plan-doc">
@@ -720,6 +720,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T121648973965-n-the-mutation-classifier-respects-identifier-boundaries" data-who="reckon-ship" data-when="2026-09-21T12:42:24.246Z">
     <div class="r-comment-body"><p>The report-only mutation classifier now matches keywords on word boundaries instead of tokenising, so an underscore-delimited identifier no longer yields a mutation keyword and the read-only deletion-protection query at protection.py:100 classifies as a read. Independent review scored 98, verdict SOUND, with one finding on docstring tense. Negative control reproduced by the coordinator against base bab2ed240, which carries the old tokenisation as committed history: both identifier-boundary assertions red, all seven genuine-mutation assertions green. Coordinator also ran a differential of old against new over 2246 Cypher-like statements in the package: seven classifications change, every one a correction, nothing moves from write to read and no genuine mutation is newly missed.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260921T121853334425-review-of-n-the-unit-comparator-budget-is-shared-and-bounded" data-who="reckon-ship" data-when="2026-09-21T13:52:03.451Z">
+    <div class="r-comment-body"><p>Scored the unit-comparator budget node 93: scope_discipline 20, evidence 19, fit 19, goal_fidelity 19, durability 16. Its durability finding is the actionable one and the coordinator confirmed it independently: run against base d31f8cb92, where the terminal cap is absent, the allocation test reddens while the bound test stays green, so the terminal cap has no test that fails when it is removed. Carried as n-the-terminal-comparator-cap-has-a-test-that-fails-without-it.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-coordinator-provenance-correction-and-guard-landing" data-who="reckon-ship" data-when="2026-09-21T12:30:00Z">
     <div class="r-comment-body"><p><strong>Correction to the unit-comparator-budget entry above: the eleven-test base/head gap is a missing <code>.git</code>, not a missing <code>.env</code>.</strong> That entry, and the evidence section it links, both attributed the gap to the base suite running without credentials. Measured: a <code>git archive</code> extraction has no <code>.git</code>, and <code>_manifest_iso_timestamp</code> (<code>export.py:2652</code>) refuses an export whose provenance resolves from neither a checkout nor <code>SOURCE_DATE_EPOCH</code>. All eleven are export and manifest tests driving that path, all eleven pass in a real checkout, and the same eleven fail in an independent extraction at a different revision. The zero-added conclusion is unchanged, since the asymmetry runs in the base's disfavour either way; the absolute base figure of 34 carries eleven failures inflicted by the measurement method. Every archive-based gate must export <code>SOURCE_DATE_EPOCH</code> from the commit date. Corrected in the landing record as <code>dbfc8fa08</code>.</p>
