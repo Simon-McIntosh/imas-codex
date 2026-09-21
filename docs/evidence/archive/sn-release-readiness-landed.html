@@ -1416,5 +1416,70 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
   </p>
 
   </main>
+  
+  <section id="graph-ops-diff-review">
+    <h2>The sprint's 591 added graph-write lines carry one confirmed defect; three suspected ones were refuted by measurement</h2>
+    <p>Reviewed statement by statement through <code>git diff</code> only, across 19 hunks.
+    Property existence was checked against the live graph on a debug partition rather than
+    inferred from the code.</p>
+    <table>
+      <caption>Properties and patterns the diff relies on, verified present</caption>
+      <thead><tr><th>Relied on</th><th>Measured</th></tr></thead>
+      <tbody>
+        <tr><td><code>SNRun.id</code> / <code>SNRun.status</code></td><td>733 / 733 rows each</td></tr>
+        <tr><td><code>(:StandardNameSource)-[:PRODUCED_NAME]-&gt;(:StandardName)</code></td><td>5,493 edges; <strong>0</strong> in the reverse direction</td></tr>
+        <tr><td><code>IMASNode.node_category</code></td><td>61,366 rows</td></tr>
+        <tr><td><code>IMASNode {id: sns.source_id}</code> over the parked cohort</td><td>234 / 234 resolve</td></tr>
+      </tbody>
+    </table>
+    <p><strong>CONFIRMED.</strong> <code>_CAP_PARKED_QUERY</code> projects
+    <code>size([(sns)-[:PRODUCED_NAME]-&gt;(:StandardName) | 1]) AS produced</code> with no
+    stage filter, and <code>classify_parked_source</code> documents that field as the count
+    of <em>live</em> produced names and branches on it first. A source whose only producer
+    is retired is classified <code>name_produced</code> and leaves triage permanently. The
+    same diff defines <code>_SETTLED_SOURCE_BINDING_STAGES</code> and applies exactly this
+    filter in its own claim guard, so the file disagrees with itself. Live instance
+    <code>dd:focs/spun</code>: one producer at <code>exhausted</code>, stored disposition
+    <code>name_produced</code>. One of 234 today; the branch decides 164 of 234, and
+    <code>contested</code> producers in the cohort are 0, so the two-stage repair is
+    sufficient.</p>
+    <table>
+      <caption>Stored disposition over the parked cohort, read back from the graph</caption>
+      <thead><tr><th>Disposition</th><th>Rows</th></tr></thead>
+      <tbody>
+        <tr><td><code>name_produced</code></td><td>164</td></tr>
+        <tr><td><code>cause_not_recorded</code></td><td>30</td></tr>
+        <tr><td><code>compose_not_applicable</code></td><td>21</td></tr>
+        <tr><td><code>upstream_quantity_removed</code></td><td>18</td></tr>
+        <tr><td><code>vocabulary_gap</code></td><td>1</td></tr>
+        <tr><td><code>attempt_budget_exhausted</code></td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p><strong>REFUTED, and recorded as such.</strong> Three separate statements looked like
+    the fail-open and zero-row shapes this review was directed to hunt, and the measurement
+    cleared each: the <code>SNRun</code> match resolves on every row, the
+    <code>PRODUCED_NAME</code> traversal is correctly directed and the guard behind it
+    withholds 3 of the 37 extracted sources carrying a producer, and the
+    <code>&quot;vocabulary gap&quot;</code> substring matches what <code>last_error</code>
+    actually carries (0 rows contain the <code>vocab_gap</code> token, 1 contains the
+    phrase). Reporting an absence from an unverified reading would have produced three
+    confident, wrong findings.</p>
+    <p><strong>Sound on inspection:</strong> the new <code>released_ids</code> clause in the
+    scope stamp clears <code>claimed_at</code> and <code>claim_token</code> in the same
+    <code>SET</code>, so a reclaimed row returns to the unclaimed shape instead of holding a
+    dead run's token; <code>_claim_disposition</code> fails closed on a token with no
+    timestamp; <code>_TERMINAL_RUN_STATUSES</code> is exactly <code>SNRunStatus</code> minus
+    <code>started</code>; and the deletion-receipt refactor in <code>clear_standard_names</code>
+    is a strict improvement, since the literal it replaces recorded no edge inventory.</p>
+    <p>Two lower findings and one out-of-scope note (an unbounded whole-label scan in the
+    parked-cohort read) are in the full record:
+    <a href="/imas-codex/evidence/sn-release-readiness/graph-ops-diff-review">the graph-write
+    statement review</a>.</p>
+    <p class="r-meta">Worker: n-the-graph-write-statements-landed-this-sprint-are-sound &middot;
+    2026-09-21 &middot; base revision <code>923daf733d10dfd8591ebeabf688aeab79c36945</code>
+    &middot; host class <code>all_debug</code>.</p>
+  </section>
+
+</main>
 </body>
 </html>

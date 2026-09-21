@@ -706,6 +706,47 @@
   <code>docs/evidence/sn-release-readiness/empty-cohort-no-op.md</code>.
 </p>
 
+<h2 id="s12-graph-write-review">&sect;12a &mdash; The sprint's graph writes, audited: one confirmed defect, three hypotheses refuted</h2>
+
+<p>Every graph-writing change landed in the standard-names graph operations module
+this sprint was reviewed statement by statement &mdash; <strong>591 added lines across
+19 hunks</strong>, read only through <code>git diff</code>. <strong>No statement can
+delete or retarget an existing binding without a guard</strong>, and every
+<code>MATCH</code> property was verified to exist on its target label against the live
+graph rather than assumed.</p>
+
+<p><strong>One confirmed defect.</strong> The parked-source classifier counts
+<em>every</em> <code>PRODUCED_NAME</code> edge as evidence a name exists, while
+documenting that field as the count of <em>live</em> produced names. A source whose
+only producer is <code>superseded</code> or <code>exhausted</code> is therefore
+classified <code>name_produced</code> &mdash; &ldquo;no composition is owed&rdquo; &mdash;
+and drops out of triage for good. <strong>The same diff disagrees with itself</strong>:
+the explicit-claim guard added a few hundred lines earlier defines
+<code>_SETTLED_SOURCE_BINDING_STAGES</code> and filters exactly these stages out of its
+own holder test. Live instance: <code>dd:focs/spun</code>, one producer at
+<code>exhausted</code>, stored disposition <code>name_produced</code>. Blast radius is
+<strong>1 of 234</strong> today, but that branch decides <strong>164 of 234</strong>
+parked rows and the count rises with every supersede, since nothing re-examines a row
+once classified.</p>
+
+<p><strong>Three hypotheses the measurement refuted</strong>, each the exact shape this
+review was directed to hunt. A <code>MATCH</code> on a property <code>SNRun</code> might
+not carry would have made the whole run-status mechanism a silent no-op &mdash; refuted,
+733 of 733 rows carry both <code>id</code> and <code>status</code>. A
+<code>PRODUCED_NAME</code> traversal in the wrong direction would have made the new claim
+guard withhold nothing &mdash; refuted, 5,493 edges in the written direction and
+<strong>0</strong> in the reverse, and the guard withholds 3 of the 37 extracted sources
+carrying a producer. A substring test for <code>vocabulary gap</code> looked wrong against
+this project's <code>vocab_gap</code> token &mdash; refuted for that field, which carries
+the phrase and not the token. Only the instrument settled any of the three.</p>
+
+<p>Two lower findings: a docstring claiming a stronger fail-closed guarantee than the code
+gives (an unreadable run with a stale claim <em>is</em> released, by design), and a write
+that reports the length of its input rather than the count its own statement returns.
+Full record with every statement, count and refutation:
+<a href="/imas-codex/evidence/sn-release-readiness/graph-ops-diff-review">the graph-write
+statement review</a>.</p>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="unreviewed-in-first-release" data-choice="include-structural-only" data-by="Simon McIntosh" data-when="2026-08-23T08:42:13+00:00">
