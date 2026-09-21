@@ -34,9 +34,9 @@ finding below, so the suite is itself the reproduction for both.
 `_has_producing_source` (`imas_codex/standard_names/export.py:777`) admits a
 candidate carrying a derived producer, a non-derived producer, or a live
 structural child, and the classifier refuses the rest with `no_producing_source`
-(`export.py:851`).
+(`export.py:863`).
 
-**Correct.** The live-child projection added at `export.py:641-646` excludes
+**Correct.** The live-child projection added at `export.py:659` excludes
 `['superseded', 'exhausted', 'contested']`, which is the same terminal-stage set
 the rest of the repository uses for structural acceptance — verified identical at
 `graph_ops.py:1876`, `graph_ops.py:8284`, `pools.py:309` and
@@ -53,7 +53,7 @@ short-circuits before reaching any eligibility clause when a candidate carries n
 `name_stage` key:
 
 ```python
-# export.py:822-826
+# export.py:826
 if "name_stage" not in candidate:
     eligible.append(candidate)
     continue
@@ -127,8 +127,8 @@ empty-cut refusal.
 
 ## 3. `e0c2d5ef3` — the manifest generability instrument
 
-`describe_manifest_generability` (`export.py:2444`) accounts every manifest
-source as carried or blocked, and `GATE_MANIFEST_GENERABILITY` (`export.py:3266`)
+`describe_manifest_generability` (`export.py:2446`) accounts every manifest
+source as carried or blocked, and `GATE_MANIFEST_GENERABILITY` (`export.py:3269`)
 carries `generable` into `all_gates_passed`, which is what the release paths
 refuse on.
 
@@ -182,7 +182,7 @@ than admit/refuse:
 
 - **`refusal_cause_not_recorded` is declared and unreachable.** It is listed at
   `export.py:2410` and returned nowhere. `_manifest_source_mechanism`
-  (`export.py:2438-2440`) maps a `documented_non_nameable` row whose reason is the
+  (`export.py:2438`) maps a `documented_non_nameable` row whose reason is the
   `"cause not recorded"` sentinel to **`composition_not_scheduled`** — the
   opposite class. The discriminator is already on the record:
   `SourceDispositionRecord.source_status`, which `e0c2d5ef3` added and carries
@@ -216,7 +216,7 @@ are permanent exclusions that will never close.
 **Can the guard be bypassed?** Only by passing `manifest_sources=None`, which
 `catalog_release.py:1879` does not do for a manifest-driven cut. Not a practical
 bypass. A duplicated `source_path` is dropped from the disposition records
-(`export.py:3189-3191`) and so escapes the generability verdict and shrinks
+(`export.py:3190`) and so escapes the generability verdict and shrinks
 `manifest_size`, but the `manifest_source_accounting` gate catches the duplicate
 independently, so the cut still refuses.
 
@@ -229,11 +229,11 @@ two of the three classes it was built to separate.
 
 | # | Where | Defect | Trigger | Direction |
 |---|---|---|---|---|
-| 1 | `export.py:822-826` | `name_stage`-absent short-circuit skips every eligibility clause including the producer guard | any projection lacking `name_stage` | wrongly ADMITS |
-| 2 | `export.py:777` + `export.py:851` | producer refusal can empty a whole cut with no gate refusing an empty cut | candidate with `name_stage` and no producer keys | wrongly REFUSES |
-| 3 | `export.py:2410`, `2438-2440` | `refusal_cause_not_recorded` unreachable; a lost-cause skip is reported as `composition_not_scheduled`; `source_status` never read | `source_status='skipped'` with no surviving cause (397 live rows) | misattributes |
+| 1 | `export.py:826` | `name_stage`-absent short-circuit skips every eligibility clause including the producer guard | any projection lacking `name_stage` | wrongly ADMITS |
+| 2 | `export.py:777` + `export.py:863` | producer refusal can empty a whole cut with no gate refusing an empty cut | candidate with `name_stage` and no producer keys | wrongly REFUSES |
+| 3 | `export.py:2410`, `2438` | `refusal_cause_not_recorded` unreachable; a lost-cause skip is reported as `composition_not_scheduled`; `source_status` never read | `source_status='skipped'` with no surviving cause (397 live rows) | misattributes |
 | 4 | `export.py:2433` | `attempt_budget_exhausted` fires only on a terminal identity, so a capped search with no identity reads as a refusal | `gas_injection/valve/flow_rate` in the WEST manifest | misattributes |
-| 5 | `export.py:2426-2442` | no waived category, so a correctly-excluded source makes a manifest permanently ungenerable | the two `fit_artifact` rows in the WEST manifest | wrongly REFUSES |
+| 5 | `export.py:2422` | no waived category, so a correctly-excluded source makes a manifest permanently ungenerable | the two `fit_artifact` rows in the WEST manifest | wrongly REFUSES |
 
 Defect 1 is the only wrongly-ADMITS entry and it is latent on the WEST path;
 defects 2 and 5 are live.
