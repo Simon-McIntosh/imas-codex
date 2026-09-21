@@ -48,10 +48,10 @@ def _cypher_mutation_clause(cypher: str) -> str | None:
     The clause is returned in upper case for reporting; ``None`` means the
     statement only reads.
 
-    The keyword is matched on word boundaries, so a keyword appearing as one
-    underscore-delimited part of an identifier -- ``catalog_merge_commit_sha``
-    tokenises to the segment ``merge`` -- does not report a read-only statement
-    as a mutation.
+    The keyword is matched on word boundaries, and an underscore is a word
+    character, so a boundary cannot open part-way through an identifier:
+    ``catalog_merge_commit_sha`` carries no ``MERGE`` clause, and a read-only
+    statement projecting it is not reported as a mutation.
     """
     executable = _CYPHER_LITERAL_OR_COMMENT.sub(" ", cypher)
     match = _CYPHER_MUTATION_CLAUSE.search(executable)
