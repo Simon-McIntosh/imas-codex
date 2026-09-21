@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T21:52:57",
+  "updated": "2026-09-21T22:10:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -183836,6 +183836,290 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T195319834915-n-the-knee-record-agrees-with-its-own-measurements",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a74",
+        "node": "n-the-knee-record-agrees-with-its-own-measurements",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1377,
+                "cached_input_tokens": 673393,
+                "input_tokens": 674772,
+                "output_tokens": 925,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 675697,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "the sweep total stated in the evidence prose equals the sum of n_requests over the rows the raw file actually carries; the c=32 spread is computed over every sample the record assigns to c=32, including the mis-dispatched attempt whose achieved concurrency was 32, with the excluded-from-the-curve reason stated separately from the spread; the figure's caption computes its delta against the same c=32 value the curve plots, so caption and curve agree in direction; and the prose claims only what the raw file contains, dropping the per-request claim or shipping per-request values, and stating that 43 of the 64 requests at c=64 exceeded the starvation deadline beside the statement that none hit the 900 s timeout",
+          "estimated_hours": 0.6,
+          "goal": "Make the concurrency-knee record agree with the raw measurements it publishes",
+          "id": "n-the-knee-record-agrees-with-its-own-measurements",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T19:53:20Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/knee-record-repair/manifest.md",
+          "negative_control": "none: this node corrects a published record against its own raw file and adds no check that a code mutation could redden",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/figures/sn-catalog-audit-instrument/local-lane-concurrency.svg",
+            "docs/figures/sn-catalog-audit-instrument/local-lane-concurrency-raw.json",
+            "docs/figures/sn-catalog-audit-instrument",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-audit-4",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T19:53:32Z",
+        "completed_at": "2026-09-21T19:59:12.666Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 331,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 340,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "8beb1c4ee9ebbdb76e1cf83f6c1e834950ef96ef",
+        "commits": [
+          "c82cae5497407432b908f1999d1db5ea7fbd5b98"
+        ],
+        "changed_lines": {
+          "added": 115,
+          "removed": 31,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "recompute every published figure from local-lane-concurrency-raw.json and require agreement",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/knee-record-repair/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "The concurrency-knee record now agrees with the raw file it publishes. The sweep total is stated as 264 with its breakdown, the c=32 spread is computed over all four samples the record assigns that achieved concurrency and distinguishes held-out-of-the-curve from held-out-of-the-spread, the figure's delta is computed against the same 36.45 the curve plots so caption and curve agree in direction, and the starvation figure of 43 of 64 requests at c=64 is stated beside the claim that none hit the 900 s deadline. The raw file was deliberately left untouched as the authority. Independent review scored 90 and recomputed every figure from the raw rows rather than accepting the node's gate. Its deduction is carried as follow-on work: the consistency check that proves the agreement lives in /tmp, so nothing durable keeps the prose and the raw file in agreement.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/knee-record-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "58c8f2a6-58c5-40a6-89d6-5ca344162134",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 2808356,
+            "input_tokens_cumulative": 2808356,
+            "output_tokens": 39539,
+            "output_tokens_cumulative": 39539,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T19:59:12.666Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 411,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1363,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none \u2014 this node's only deliverable is the review record",
+                "which lives outside the repository tree; no repository file was written"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "1763d88e9b66598eeb084f0ac87257f0beaa062dc61dfb61750e25f6a10461a3",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T192340134396-review-of-the-local-lane-knee-measurement/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "review-of-the-local-lane-knee-measurement",
+              "phase": "starting",
+              "plan": "sn-catalog-audit-instrument",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T192340134396-review-of-the-local-lane-knee-measurement",
+              "session": "instrument-20260921T0925",
+              "terminal_age_seconds": 1374,
+              "terminal_at": "2026-09-21T19:30:31Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/review-of-the-local-lane-knee-measurement"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 17,
+            "evidence": 18,
+            "fit": 18,
+            "goal_fidelity": 17,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 90
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 2808356,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 337.296,
+          "generated_tokens": 39539,
+          "generation_seconds": 330.33,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 25.9,
+          "machine_seconds": 6.966,
+          "peak_input_tokens": 124484,
+          "tokens_per_second": 119.7,
+          "wall_tokens_per_second": 117.22
+        },
+        "follow_on_paths": [
+          "6.42"
+        ],
+        "predecessor_run": "r-20260921T185221747223-n-the-local-lane-concurrency-knee-is-measured-not-assumed",
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-knee-record-agrees-with-its-own-measurements",
+          "session_id": "58c8f2a6-58c5-40a6-89d6-5ca344162134",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T19:59:12.666Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 38.0,
+        "orientation_input_tokens": 648368.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -184148,6 +184432,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2499
+    "_version": 2500
   }
 }
