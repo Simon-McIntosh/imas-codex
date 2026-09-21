@@ -268,3 +268,220 @@ the literal string `Value`, the parent container's documentation is used
 - name description: Grad–Shafranov equilibrium source term formed by multiplying the poloidal current function by its derivative with respect to signed poloidal magnetic flux.
 - note: Long, but every segment is load-bearing and the name is exactly reconstructible from the DD source; length is not a defect where the quantity is a product of a function and its own derivative.
 
+### 31. `flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude` — **correct**
+
+- source path: `equilibrium/time_slice/profiles_1d/gm4`
+- unit: `T^-2` (data dictionary: `T^-2`)
+- data-dictionary text: Flux surface averaged 1/B^2
+- name description: Flux-surface average of the reciprocal square of total magnetic-field strength, a geometric coefficient in neoclassical and flux-surface-averaged transport relations.
+
+### 32. `flux_surface_averaged_major_radius` — **correct**
+
+- source path: `equilibrium/time_slice/profiles_1d/gm8`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Flux surface averaged R
+- name description: Flux-surface-averaged nonnegative perpendicular distance from the toroidal symmetry axis to points on a nested magnetic flux surface, giving the mean major-radius coordinate in the right-handed cylindrical (R, φ, Z) frame.
+
+### 33. `magnetic_shear_at_flux_surface` — **correct**
+
+- source path: `equilibrium/time_slice/profiles_1d/magnetic_shear`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Magnetic shear, defined as rho_tor/q . dq/drho_tor
+- name description: Dimensionless logarithmic radial gradient of the safety factor on a magnetic flux surface, measuring how magnetic-field-line pitch changes across neighboring surfaces.
+
+### 34. `safety_factor` — **correct**
+
+- source path: `equilibrium/time_slice/profiles_1d/q`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Safety factor
+- name description: Signed ratio of toroidal to poloidal field-line winding on a magnetic flux surface, equal to the toroidal turns made during one poloidal circuit.
+
+### 35. `normalized_toroidal_flux_coordinate` — **correct**
+
+- source path: `equilibrium/time_slice/profiles_1d/rho_tor_norm`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Normalised toroidal flux coordinate. The normalizing value for rho_tor_norm, is the toroidal flux coordinate at the equilibrium boundary (LCFS or 99.x % of the LCFS in case of a fixed boundary equilibium calculation)
+- name description: Dimensionless radial label equal to the square root of toroidal magnetic flux normalized between the magnetic axis and equilibrium boundary.
+
+### 36. `volume_of_flux_surface` — **correct**
+
+- source path: `equilibrium/time_slice/profiles_1d/volume`
+- unit: `m^3` (data dictionary: `m^3`)
+- data-dictionary text: Volume enclosed in the flux surface
+- name description: Geometric volume contained within a nested magnetic flux surface, cumulative from the magnetic axis toward the outermost closed surface.
+
+### 37. `area_of_diagnostic_aperture` — **INCORRECT**
+
+- source path: `hard_x_rays/channel/detector/surface`
+- unit: `m^2` (data dictionary: `m^2`)
+- data-dictionary text: Surface of the detector/aperture, derived from the above geometric data
+- name description: Geometric area of the designated diagnostic aperture surface that admits or collects radiation or particles.
+- **rejected spelling** `area_of_diagnostic_aperture` → **proposed spelling** `area_of_diagnostic_detector`
+- why: The bound path is `hard_x_rays/channel/**detector**/surface`, the detector's own collecting surface. Detector area and aperture area are distinct quantities — their product with the separation is what sets the channel etendue, so conflating them corrupts the one relation they both enter. The DD doc string is shared boilerplate ("Surface of the detector/aperture") and does not disambiguate; the path does. The cohort uses `..._of_aperture` for genuine aperture nodes elsewhere (`camera_x_rays/aperture/centre/phi`), so the name claims a locus the batch already spends on something else.
+
+### 38. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `hard_x_rays/channel/line_of_sight/first_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 39. `hard_xray_brightness` — **INCORRECT**
+
+- source path: `hard_x_rays/channel/radiance`
+- unit: `m^-2.s^-1.sr^-1` (data dictionary: `m^-2.s^-1.sr^-1`)
+- data-dictionary text: Photons received by the detector per unit time, per unit solid angle and per unit area (i.e. photon flux divided by the etendue), in multiple energy bands if available from the detector
+- name description: Band-integrated hard X-ray photon radiance received by a channel, normalized by projected collecting area and accepted solid angle.
+- **rejected spelling** `hard_xray_brightness` → **proposed spelling** `hard_xray_photon_radiance`
+- why: The DD path is `radiance`, the DD text defines photon flux per unit time, solid angle and area, the unit is `m^-2.s^-1.sr^-1`, and the name's own description says "photon radiance". Three sibling quantities in this same cohort are spelled with `photon_radiance` — `photon_radiance_at_spectral_line` carries the identical unit. "Brightness" is also the established informal word for *brightness temperature*, a quantity in kelvin, so the spelling collides with a different physical base at the one place it is least affordable.
+
+### 40. `lower_bound_photon_energy` — **correct**
+
+- source path: `hard_x_rays/emissivity_profile_1d/lower_bound`
+- unit: `eV` (data dictionary: `eV`)
+- data-dictionary text: Lower bound of the energy band
+- name description: Lower boundary of an X-ray photon-energy band, specifying the minimum photon energy included in the defined detection or emission band.
+
+### 41. `frequency_of_ion_cyclotron_heating_antenna` — **correct**
+
+- source path: `ic_antennas/antenna/frequency`
+- unit: `Hz` (data dictionary: `Hz`)
+- data-dictionary text: Frequency (average over modules)
+- name description: Radio-frequency drive frequency of an ion-cyclotron heating antenna, averaged over its modules. This non-negative scalar sets the ion-cyclotron resonance layer locations and the ion species and harmonics accessible for wave absorption.
+
+### 42. `reflected_phase_of_ion_cyclotron_heating_antenna` — **correct**
+
+- source path: `ic_antennas/antenna/module/phase_reflected`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Phase of the reflected power with respect to the forward power of this module
+- name description: Relative phase angle of a reflected radio-frequency power-wave phasor at an antenna element in an ion-cyclotron heating launcher, measured relative to the forward power-wave phasor of that same element.
+
+### 43. `back_surface_distance_of_antenna_strap` — **correct**
+
+- source path: `ic_antennas/antenna/module/strap/distance_to_conductor`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Distance to conducting wall or other conductor behind the antenna strap
+- name description: Geometric rear-surface clearance between an ion-cyclotron heating antenna strap and the conducting wall or conductor behind it.
+- note: Already adjudicated through the sanctioned rename route and accepted; not reopened here.
+
+### 44. `wave_phase_of_antenna_strap` — **correct**
+
+- source path: `ic_antennas/antenna/module/strap/phase`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Phase of the strap current
+- name description: Phase angle of the radio-frequency current phasor carried by one ion-cyclotron-heating antenna strap, defined relative to a specified RF phase reference.
+
+### 45. `net_power_due_to_ion_cyclotron_heating` — **correct**
+
+- source path: `ic_antennas/antenna/power_launched`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Power launched from this antenna into the vacuum vessel
+- name description: Net ion-cyclotron radio-frequency power launched into the vacuum vessel by a specified heating launcher before absorption by plasma particles.
+- note: Matches the live successor spelling the plan records for the superseded ICH identity.
+
+### 46. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/second_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+- note: Name correct; its **description is wrong** for this binding — it says "the first reference point" while the bound path is `second_point/phi`. The identity is shared across first/second/third points, so the description must not name one of them.
+
+### 47. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/third_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 48. `length_variation_of_interferometer_beam` — **correct**
+
+- source path: `interferometer/channel/path_length_variation`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Optical path length variation due to the plasma
+- name description: Signed plasma-induced change in the effective optical path accumulated along an interferometer beam relative to its corresponding no-plasma reference path.
+
+### 49. `total_electron_count` — **correct**
+
+- source path: `interferometer/electrons_n`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Total number of electrons in the plasma, estimated from the line densities measured by the various channels
+- name description: Total inventory of free electrons within the plasma, including thermal and fast populations and excluding electrons bound in atoms or molecules.
+
+### 50. `length_of_toroidal_magnetic_field_probe` — **correct**
+
+- source path: `magnetics/b_field_phi_probe/length`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Length of the sensor along it's normal vector (n)
+- name description: Physical length of a toroidal magnetic-field probe is the non-negative axial extent of the probe coil along its local normal sensing axis. It characterizes sensor geometry and effective sensing volume; magnetic-flux sensitivity is associated with enclosed coil area and winding turn count rather than this length alone.
+
+### 51. `vertical_coordinate_of_toroidal_magnetic_field_probe` — **correct**
+
+- source path: `magnetics/b_field_phi_probe/position/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Vertical position of the geometric center of a toroidal magnetic-field probe coil, expressed as the signed Z coordinate in the right-handed cylindrical (R, φ, Z) frame.
+
+### 52. `poloidal_magnetic_field` — **correct**
+
+- source path: `magnetics/b_field_pol_probe/field`
+- unit: `T` (data dictionary: `T`)
+- data-dictionary text: Measured magnetic field
+- name description: Poloidal magnetic-field strength of the local total induction, formed from radial and vertical components in the right-handed cylindrical (R, φ, Z) frame.
+
+### 53. `radial_coordinate_of_poloidal_magnetic_field_probe` — **correct**
+
+- source path: `magnetics/b_field_pol_probe/position/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate locating the center of a poloidal magnetic-field probe in the right-handed cylindrical (R, φ, Z) frame.
+
+### 54. `voltage_of_poloidal_magnetic_field_probe` — **correct**
+
+- source path: `magnetics/b_field_pol_probe/voltage`
+- unit: `V` (data dictionary: `V`)
+- data-dictionary text: Voltage on the coil terminals
+- name description: Terminal voltage at a poloidal magnetic-field probe is the inductive voltage at the coil terminals caused by time variation of the local poloidal magnetic-field component in the R-Z plane of the right-handed cylindrical (R, φ, Z) frame threading the probe windings.
+
+### 55. `vertical_coordinate_of_flux_loop` — **correct**
+
+- source path: `magnetics/flux_loop/position/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Vertical Z coordinate of a position point associated with one flux loop in the right-handed cylindrical (R, φ, Z) frame.
+
+### 56. `radial_coordinate_of_conductor_cross_section` — **correct**
+
+- source path: `pf_active/coil/element/geometry/rectangle/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Geometric centre R
+- name description: Major-radius coordinate of the designated reference point associated with a conductor cross-section, measured from the toroidal symmetry axis.
+
+### 57. `current_of_passive_loop` — **correct**
+
+- source path: `pf_passive/loop/current`
+- unit: `A` (data dictionary: `A`)
+- data-dictionary text: Passive loop current
+- name description: Signed conventional electric current circulating in one axisymmetric passive conducting loop, induced by changing linked magnetic flux and electromagnetic coupling.
+
+### 58. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `polarimeter/channel/line_of_sight/first_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+
+### 59. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `polarimeter/channel/line_of_sight/second_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 60. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `polarimeter/channel/line_of_sight/third_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+
