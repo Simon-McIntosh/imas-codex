@@ -174,7 +174,7 @@ waiver no component writes.
 | # | identity / site | mechanism |
 |---|---|---|
 | 1 | `export.py:3281-3287` | No producer of a `waived` disposition. The vocabulary member and its mapping exist, but the export leg cannot emit one and no other module constructs one, so a correctly-excluded source can never be waived. **A waiver-writing path (or an accepted manifest-level waiver channel) is required before any manifest carrying a by-design exclusion can be generable.** |
-| 2 | `camera_x_rays/camera/camera_dimensions` | Reports `recorded_refusal`; its recorded reason is `compose claim-attempt cap reached` and its terminal stage is absent, so `attempt_budget_exhausted` (`export.py:2482`, fires only on `terminal_stage == "exhausted"`) is never reached. Same misattribution as audit defect 4: a spent search reports as a standing refusal. |
+| 2 | `camera_x_rays/camera/camera_dimensions` | Reports `recorded_refusal`; its recorded reason is `compose claim-attempt cap reached` and its terminal stage is absent, so `attempt_budget_exhausted` (`export.py:2478`, fires only on `terminal_stage == "exhausted"`) is never reached. Same misattribution as audit defect 4: a spent search reports as a standing refusal. |
 | 3 | `calorimetry/group/component/energy_total/data` | `vocab_gap_nonactionable` — a vocabulary gap recorded as non-actionable on this side; ownership of the closing work sits with the ISN grammar, and the row should be corroborated against it before any cut relies on it. |
 
 Item 1 is the one that decides whether the WEST cut can ever clear the gate. It
@@ -195,3 +195,9 @@ Result: `/home/ITER/mcintos/usb-west-gate/verdict.json` (28,486 bytes)
 SLURM job `1275229` on `all_debug`, COMPLETED, exit 0. The instrument is
 deterministic over the live graph, so a re-run at an unchanged graph reproduces
 the counts above.
+
+> **Citation corrected 2026-09-21.** The terminal-stage check that gates
+> `attempt_budget_exhausted` is at `export.py:2478`, returning at `:2479`; `:2482` is the
+> `documented_non_nameable` branch. An independent review caught the four-line slip and
+> confirmed, by reading the whole mechanism function, that the behaviour described here is
+> correct. The coordinator had repeated the wrong citation before checking it.
