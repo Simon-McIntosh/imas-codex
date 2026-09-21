@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T14:40:36",
+  "updated": "2026-09-21T14:46:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -175597,6 +175597,237 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T101256172855-n-the-catalog-roster-reaches-the-rendered-prompt",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-the-catalog-roster-reaches-the-rendered-prompt",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 524,
+                "cached_input_tokens": 775309,
+                "input_tokens": 775835,
+                "output_tokens": 1821,
+                "reasoning_output_tokens": 715,
+                "total_tokens": 777656,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "A catalog id supplied through the existing_names prompt variable APPEARS IN THE RENDERED STRING of sn/review_names and sn/review_docs. Today neither template references existing_names, and Jinja resolves an undefined variable to nothing without raising, so review/pipeline.py:1957 places it in the context and it is discarded: a measured render of sn/review_names with existing_names=['MARKER_CATALOG_ROSTER_ENTRY'] produced 31851 characters not containing that marker, while a nearby_existing_names marker in the same render WAS present. Add a catalog-roster block to both templates, copying the shape of the nearby_existing_names block at review_names.md:266-277. Write ONE new test in tests/standard_names/test_review_prompt_roster.py that calls render_prompt for real and asserts the supplied id is a substring of the returned text - it must NOT monkeypatch render_prompt and must NOT assert on a context dict, because the test it replaces did exactly that and passed while the template ignored the variable. Do not change any Python outside the new test file. Gate with .venv/bin/python -m pytest tests/standard_names/ -p no:cacheprovider on a SLURM debug partition captured to a named on-disk log, reporting ADDED failures against your own base run.",
+          "estimated_hours": 0.5,
+          "goal": "Make the catalog roster appear in the rendered review prompt instead of being discarded silently",
+          "id": "n-the-catalog-roster-reaches-the-rendered-prompt",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T10:12:57Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/roster-rendered-1010/manifest.md",
+          "negative_control": "Delete the roster block from sn/review_names.md; the new test asserting a supplied catalog id appears in the RENDERED string must fail.",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/llm/prompts/sn/review_names.md",
+            "imas_codex/llm/prompts/sn/review_docs.md",
+            "tests/standard_names/test_review_prompt_roster.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-audit-1",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T10:13:08Z",
+        "completed_at": "2026-09-21T10:53:31.477Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2413,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2423,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "d31f8cb92ae868dffc5d16dbb7f06c7ca7992eeb",
+        "commits": [
+          "95366b716fa5b3a762942b325a688de8e375d70d",
+          "c1967143f379e7405e0008f41c14bcb6bee67d8d"
+        ],
+        "changed_lines": {
+          "added": 158,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug uv run pytest tests/standard_names/",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/roster-rendered-1010/after_suite.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/roster-rendered-1010/manifest.md",
+        "scope_changed": false,
+        "session_id": "cec22a85-6b23-407c-aa48-a26c7dc4b2e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 6447117,
+            "input_tokens_cumulative": 6447117,
+            "output_tokens": 30433,
+            "output_tokens_cumulative": 30433,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T10:53:31.477Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 20,
+            "evidence": 19,
+            "fit": 18,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 96
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 6447117,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2418.718,
+          "generated_tokens": 30433,
+          "generation_seconds": 1546.101,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 25.2,
+          "machine_seconds": 872.617,
+          "peak_input_tokens": 121145,
+          "tokens_per_second": 19.68,
+          "wall_tokens_per_second": 12.58
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-catalog-roster-reaches-the-rendered-prompt",
+          "session_id": "cec22a85-6b23-407c-aa48-a26c7dc4b2e7",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T10:53:31.477Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_review_prompt_roster.py"
+          ],
+          "declaration": "Delete the roster block from sn/review_names.md; the new test asserting a supplied catalog id appears in the RENDERED string must fail.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/roster-rendered-1010/coordinator-negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/roster-rendered-1010/coordinator-negative-control.log"
+        },
+        "tool_steps": 75.0,
+        "orientation_input_tokens": 1010363.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -175909,6 +176140,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2466
+    "_version": 2467
   }
 }
