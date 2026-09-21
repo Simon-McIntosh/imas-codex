@@ -52,16 +52,22 @@ def isnc_repo(tmp_path):
     return work
 
 
-def _stub_exporter(record):
+def _stub_exporter(record, all_gates_passed):
+    """An export double whose gate verdict is supplied by each call site.
+
+    The release path refuses an export report that carries no verdict, so the
+    verdict is a required argument rather than a value this double supplies:
+    every call site states the export outcome the test exercises.
+    """
+
     def exporter(*, staging_dir, force, review_batch, **kw):
         record["review_batch"] = review_batch
         sd = Path(staging_dir)
         (sd / "standard_names").mkdir(parents=True, exist_ok=True)
         (sd / "catalog.yml").write_text("catalog_name: t\n")
-        # Export gates are scaffolding; these tests exercise release orchestration.
         return SimpleNamespace(
             exported_count=len(review_batch),
-            all_gates_passed=True,
+            all_gates_passed=all_gates_passed,
             gate_results=[],
         )
 
@@ -189,7 +195,7 @@ def test_review_release_full_flow(isnc_repo, tmp_path):
     reviews = tmp_path / "reviews"
     record: dict = {}
 
-    base_exporter = _stub_exporter(record)
+    base_exporter = _stub_exporter(record, all_gates_passed=True)
 
     def exporter(**kwargs):
         result = base_exporter(**kwargs)
@@ -286,7 +292,7 @@ def test_review_release_reclaims_branch_contained_in_main(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -321,7 +327,7 @@ def test_review_release_reclaims_branch_at_closed_pr_head(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         pr_head_reader=closed_pr_heads,
@@ -348,7 +354,7 @@ def test_review_release_refuses_branch_with_unique_commits(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         pr_head_reader=lambda _path, _branch: set(),
@@ -378,7 +384,7 @@ def test_review_release_can_cut_and_tag_without_opening_pr(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=unexpected_pr,
         open_pr=False,
@@ -410,7 +416,7 @@ def test_review_branch_transport_ignores_upstream_remote(isnc_repo, tmp_path):
         bump="minor",
         remote="upstream",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         pr_target="upstream",
@@ -809,7 +815,7 @@ def test_review_release_dry_run_no_push_no_pr(isnc_repo, tmp_path):
         bump="minor",
         dry_run=True,
         reviews_dir=reviews,
-        exporter=_stub_exporter(record),
+        exporter=_stub_exporter(record, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -852,7 +858,7 @@ def test_dry_run_writes_no_roster_and_moves_no_candidate(isnc_repo, tmp_path):
         bump="minor",
         dry_run=True,
         reviews_dir=reviews,
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -894,7 +900,7 @@ def test_real_run_writes_exactly_one_artifact_and_advances_candidate_once(
         "x",
         staging_dir=tmp_path / "staging",
         reviews_dir=reviews,
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -921,7 +927,7 @@ def test_review_release_empty_focus_errors(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -962,7 +968,7 @@ def test_review_release_source_batch_excludes_unbound_family(
         bump="minor",
         dry_run=True,
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter(record),
+        exporter=_stub_exporter(record, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -999,7 +1005,7 @@ def test_review_release_refuses_ambiguous_manifest_source(isnc_repo, tmp_path):
         bump="minor",
         dry_run=True,
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -1065,7 +1071,7 @@ def test_review_release_projects_terminal_name_from_sources(
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter(record),
+        exporter=_stub_exporter(record, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -1128,7 +1134,7 @@ def test_pr_target_fork_uses_origin_slug(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=pr_creator,
         fork_owner="example-fork",
@@ -1579,7 +1585,7 @@ def test_review_release_uses_injected_notes_builder(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=pr_creator,
         notes_builder=notes_builder,
@@ -1616,7 +1622,7 @@ def test_review_release_explicit_pr_text_wins_verbatim(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=pr_creator,
         notes_builder=notes_builder,
@@ -1764,7 +1770,7 @@ def test_review_release_scopes_dd_caveats_to_batch_names(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=pr_creator,
         dd_gap_reader=gap_reader,
@@ -1822,7 +1828,7 @@ def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=pr_creator,
         dd_gap_reader=gap_reader,
@@ -1864,7 +1870,7 @@ def test_batch_label_falls_back_to_the_manifest_filename_stem(isnc_repo, tmp_pat
         bump="minor",
         dry_run=True,
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -1888,7 +1894,7 @@ def test_dry_run_version_and_artifact_carry_the_label(isnc_repo, tmp_path):
         bump="minor",
         dry_run=True,
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -1910,7 +1916,7 @@ def test_batch_rc_counter_continues_past_a_labelled_tag(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         dry_run=True,
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
@@ -1936,7 +1942,7 @@ def test_frozen_artifact_is_schema_valid_with_the_label(isnc_repo, tmp_path):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_stub_exporter({}),
+        exporter=_stub_exporter({}, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,
