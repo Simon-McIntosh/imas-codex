@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 </head>
 <body>
   <main class="plan-doc">
@@ -598,6 +598,14 @@
     <h4 class="r-fu-title">Re-measure the local-lane concurrency knee before any default is written down</h4>
     <div class="r-fu-body"><p>The lead's instruction is that the local lane now sustains upwards of 30 concurrent DSv4.1 tasks and the instrument should lean on it. The most recent recorded probe of this repository's compose path put the knee near 4 on two H200s with real payloads, where exceeding it produced 69 API timeouts rather than throughput. Both readings may be honest — that probe predates the served variant, which now reports a 512,000-token context under sglang — but no default should encode a number neither side has re-measured. Probe the current endpoint with review-sized payloads, record the knee and the timeout rate against concurrency, and set the default from the measurement with 30 as the value to confirm rather than assume.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-catalog-audit-instrument §4</pre>
+    </article>
+<article class="r-fu" data-id="f-scai-groups-wiring" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship sn-catalog-audit-instrument §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Wire --target groups onto harmonize.py&#x27;s read-only surface, and name the four functions it must not call</h4>
+    <div class="r-fu-body"><p>Both locked decisions constrain this node, and the constraint is already satisfied by the module if the right half of it is used. <code>harmonize.py</code> exposes a read-only surface &mdash; <code>assemble_family</code>, <code>drift</code>, <code>group_signature</code>, <code>select_anchor</code>, <code>lint_links</code> and above all <code>build_worklist</code>, which issues only <code>gc.query</code> reads and returns exactly what a grouped review needs per family: <code>parent</code>, <code>grouping</code>, <code>operator_kinds</code>, <code>n</code>, <code>drift</code>, <code>drift_secondary</code>, <code>docs_accepted</code>, <code>anchor</code>, <code>deferred</code>, <code>top_divergent_member</code>, <code>members</code> and <code>group_signature</code>.</p>
+<p><strong>It must not call the four mutating helpers</strong> &mdash; <code>mark_members_for_regen</code>, <code>stamp_harmonized</code>, <code>mark_families_for_regen</code> and <code>restamp_harmonized_families</code>. That is the <em>read-only</em> decision expressed as a list of names rather than as a principle, which is the form a worker can check itself against.</p>
+<p><strong>The interaction worth stating, because it looks like a problem and is not.</strong> <code>build_worklist</code> skips families whose stored <code>harmonized_group_signature</code> already matches the current one, so it carries state that would ordinarily make a second run measure a different population &mdash; exactly the hazard the read-only decision was locked to avoid. That filter stays inert here <em>because</em> the instrument never stamps, so the property is never written and a missing property is already treated as never harmonized. The two decisions are compatible, and this node should not try to remove or parameterise the filter.</p>
+<p>Scope note: this lands in <code>imas_codex/cli/sn.py</code>, which is the session's serialization bottleneck at roughly 320 KB &mdash; every other open repair on the review surface also writes it, so it cannot run concurrently with them.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-catalog-audit-instrument §3</pre>
     </article>
 </section>
 
