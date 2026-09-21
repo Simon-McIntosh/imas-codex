@@ -11,11 +11,22 @@ does not name and nothing would say so.
 These tests exercise one representative input per branch and require the
 returned value to be a declared member, which fails the moment the function and
 the frozenset drift apart instead of never.
+
+Reaching every branch is not enough. The classifier resolves a row by the FIRST
+branch that matches, so a case carrying one signal says nothing about what
+happens when two branches are simultaneously true: a row at the cap that also
+carries a real cause is classified by whichever test runs first, and reordering
+two conditions silently reclassifies live rows while every single-signal case
+still passes. ``ADJACENT_PAIR_CASES`` therefore supplies both signals of an
+adjacent pair at once and names the precedence it pins, so swapping the two
+conditions in a pair changes the value the case requires.
 """
 
 from __future__ import annotations
 
 from typing import Any
+
+import pytest
 
 from imas_codex.standard_names import graph_ops
 
@@ -57,3 +68,48 @@ def test_the_representative_inputs_cover_the_whole_declared_set() -> None:
         for evidence in BRANCH_CASES.values()
     }
     assert reached == set(graph_ops.CAP_PARKED_DISPOSITIONS)
+
+
+# One case per adjacent pair of branches, keyed by the precedence it pins. Each
+# evidence carries the signals of BOTH branches in the pair at once, so the case
+# is decided by the order of the two conditions and not by either signal alone.
+# Keyed by precedence rather than by branch position: a case named for a branch
+# number would have to be renamed every time a branch is inserted, which is the
+# edit these cases exist to catch.
+ADJACENT_PAIR_CASES: dict[str, tuple[str, dict[str, Any]]] = {
+    "a produced name outranks a removed upstream quantity": (
+        "name_produced",
+        {"produced": 1, "lifecycle_status": "removed"},
+    ),
+    "a removed upstream quantity outranks a recorded cause": (
+        "upstream_quantity_removed",
+        {"lifecycle_status": "removed", "last_error": "compose request timed out"},
+    ),
+    "a recorded cause outranks the node category": (
+        "attempt_budget_exhausted",
+        {"last_error": "compose request timed out", "node_category": "geometry"},
+    ),
+    "a recorded vocabulary gap outranks the node category": (
+        "vocabulary_gap",
+        {
+            "last_error": "no grammar term covers the concept: a vocabulary gap",
+            "node_category": "coordinate",
+        },
+    ),
+}
+
+
+@pytest.mark.parametrize(
+    ("expected", "evidence"),
+    ADJACENT_PAIR_CASES.values(),
+    ids=list(ADJACENT_PAIR_CASES),
+)
+def test_the_earlier_signal_of_an_adjacent_pair_wins(
+    expected: str, evidence: dict[str, Any]
+) -> None:
+    """Two branches are true at once; the classifier resolves the earlier one."""
+    returned = graph_ops.classify_parked_source(dict(evidence))
+    assert returned == expected, (
+        f"combined evidence {evidence} classified as {returned!r}, "
+        f"but the pinned precedence is {expected!r}"
+    )
