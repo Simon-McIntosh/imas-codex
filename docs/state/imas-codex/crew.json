@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T11:46:09",
+  "updated": "2026-09-21T12:03:34",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -170068,6 +170068,232 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T092336965497-n-the-reviewer-sees-the-catalog-it-is-judging-against",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-the-reviewer-sees-the-catalog-it-is-judging-against",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1420,
+                "cached_input_tokens": 714553,
+                "input_tokens": 715975,
+                "output_tokens": 1835,
+                "reasoning_output_tokens": 528,
+                "total_tokens": 717810,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "build_neighborhood_context in imas_codex/standard_names/review/enrichment.py stops issuing ONE query per batch. Today it assembles a single query from the cluster label plus the FIRST THREE descriptions and returns k=10 for the whole batch, so a candidate is judged against a neighbourhood derived from at most three of its peers and is never searched for individually; its all_names parameter, the full catalog, is documented in its own docstring as unused in current impl. Replace with a per-item search so every item contributes, reusing the share-then-spend shape already proven in workers.py _collect_nearby_name_comparators near line 1803 rather than inventing a second one. SECOND, add a unit-anchored comparator: accepted StandardNames sharing a candidate's unit but carrying a DIFFERENT physical_base, which is the only signal that catches a split base. Live example to use as the test fixture: physical_base 'brightness' (2 accepted names) and 'photon_radiance' (4) both carry unit m^-2.s^-1.sr^-1 and mean the same thing. THIRD, imas_codex/standard_names/review/pipeline.py near line 1952 passes existing_names as an empty list with the comment 'not needed for standalone review' while the compose path passes up to 200; supply it on the standalone path too. Tests in tests/standard_names/ must prove every item of a full batch contributes a query, that a candidate whose unit matches an accepted name of a different physical_base receives that name as a comparator, and the stated negative control fails. Gate with .venv/bin/python -m pytest tests/standard_names/ -p no:cacheprovider on a SLURM debug partition captured to a named on-disk log, reporting ADDED failures against your own base run at the dispatch base. Do not run sn review against the live graph.",
+          "estimated_hours": 1.5,
+          "goal": "Give the standalone review path per-item catalog comparators and a unit-anchored one, so a reviewer can see the spellings it is meant to judge a candidate against",
+          "id": "n-the-reviewer-sees-the-catalog-it-is-judging-against",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T09:23:38Z",
+            "read_at": "2026-09-21T09:23:39Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 13.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-comparators-0925/manifest.md",
+          "negative_control": "Restore build_neighborhood_context to a single batch-level query built from the cluster label plus the first three descriptions; the new test asserting every batch item contributes a query must fail.",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/review/enrichment.py",
+            "imas_codex/standard_names/review/pipeline.py",
+            "tests/standard_names/test_review_catalog_comparators.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-audit-cohort",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T09:23:52Z",
+        "completed_at": "2026-09-21T09:47:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1389,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1389,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d50d42d6d95d6bfa6d86966945ad5f40148c15d0",
+        "commits": [
+          "1eb1d82ac4cab280145a9b8f27fcc3ba237a5f66"
+        ],
+        "changed_lines": {
+          "added": 81,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "failed",
+        "gate_check": {
+          "command": ".venv/bin/python -m pytest tests/standard_names/ -p no:cacheprovider",
+          "exit_status": 1,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/4bf5b126-db09-40d9-9efc-41e6a3c8e413/scratchpad/cmp_gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "pre-existing-failure",
+        "outcome": "Semantic channel repaired and merged (5 candidates to 1 query became 25 to 25); 20 failed / 3 errors identical to base, 7536 passed, zero added. Independent opus review scored 66 (durability 9) and returned MUST-FIX on two of three requirements: existing_names is plumbed to the prompt context but NO review template references it so Jinja discards it silently, and the unit-anchored channel reproduces first-come starvation in a new allocator. Repair dispatched as n-the-comparators-reach-the-reviewer-and-are-shared.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-comparators-0925/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c347-6ba5-7a60-800c-ca9ab6a8abeb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14144256,
+            "cached_input_tokens_cumulative": 14144256,
+            "input_tokens": 14354498,
+            "input_tokens_cumulative": 14354498,
+            "output_tokens": 38637,
+            "output_tokens_cumulative": 38637,
+            "reasoning_output_tokens": 10884,
+            "reasoning_output_tokens_cumulative": 10884
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T09:47:01Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 15.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T09:47:01Z"
+            }
+          ],
+          "notional_cost_usd": 58.1907,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "goal_fidelity": 10,
+            "evidence": 13,
+            "scope_discipline": 20,
+            "durability": 9,
+            "fit": 14
+          },
+          "absent": [],
+          "total": 66
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 14144256,
+          "cumulative_input_tokens": 28498754,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 49521
+        },
+        "follow_on_paths": [
+          "export/error-sibling"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-reviewer-sees-the-catalog-it-is-judging-against",
+          "session_id": "01a0c347-6ba5-7a60-800c-ca9ab6a8abeb",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T09:47:01Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "gate-not-passing",
+          "test_paths": [
+            "tests/standard_names/test_review_catalog_comparators.py"
+          ]
+        },
+        "tool_steps": 122.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -170380,6 +170606,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2442
+    "_version": 2443
   }
 }
