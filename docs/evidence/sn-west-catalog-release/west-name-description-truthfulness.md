@@ -145,3 +145,203 @@ picks out fewer than all of the identity's own bindings.
 | 51 | `vertical_coordinate_of_strike_point` | 2 | **FALSE-OF-SOME** | "the inner divertor strike point … the inner separatrix leg" | **yes** |
 | 52 | `volume_averaged_electron_density` | 2 | TRUE-OF-ALL | "the plasma volume enclosed by the last closed flux surface" | no |
 | 53 | `wavelength_of_wave_beam` | 2 | TRUE-OF-ALL | — | no |
+
+## The nine rows that are not TRUE-OF-ALL
+
+Every row below carries the offending sentence verbatim, the bindings it is
+untrue or under-informative of, and the replacement sentence I would write, in
+the register the correct descriptions in this cohort already use — the register
+of `radial_coordinate_of_strike_point`: an indefinite bearer, the mechanism,
+and the frame.
+
+### 4. `radial_coordinate_of_magnetic_axis` — FALSE-OF-SOME (1 of 4 bindings)
+
+> "Major-radius coordinate locating the magnetic-axis O-point in the
+> right-handed cylindrical (R, φ, Z) frame around which nested closed flux
+> surfaces are organized."
+
+False of **`equilibrium/time_slice/contour_tree/node/r`**. The leaf's own
+documentation is only `"Major radius"`, which is why this row needed the
+container read: `equilibrium/time_slice/contour_tree/node` is documented as
+*"Nodes representing critical points (O-points and X-points) within the
+poloidal flux map. These connectivity nodes define the topological structure of
+the magnetic equilibrium."* A contour-tree node may be an X-point, which is not
+the magnetic axis and has no nested closed flux surfaces organized around it;
+a reader who trusts the description reads a separatrix saddle as the axis. True
+of the other three (`equilibrium/time_slice/global_quantities/magnetic_axis/r`,
+`summary/boundary/magnetic_axis_r/value`, `summary/local/magnetic_axis/position/r`).
+
+**Replacement:** *"Major-radius coordinate of a designated critical point of
+the poloidal flux map — a magnetic-axis O-point, or another O-point or X-point
+node of the equilibrium contour tree — in the right-handed cylindrical
+(R, φ, Z) frame."*
+
+The cost of that sentence is real and worth stating: it is true of all four
+bindings and tells three of them less than they deserve. The alternative remedy
+is on the binding axis rather than the description axis, and that is outside
+this node.
+
+### 14. `radial_coordinate_of_measurement_position` — FALSE-OF-SOME (1 of 3)
+
+> "Major-radius coordinate locating a measurement position by perpendicular
+> distance from the toroidal symmetry axis in the right-handed cylindrical
+> (R, φ, Z) frame."
+
+False of **`camera_x_rays/aperture/centre/r`** — the major radius of the
+camera's *aperture centre*, a viewing-optics element of the diagnostic's
+geometry, not a position at which anything is measured. True of
+`ece/channel/position/r` and `magnetics/b_field_phi_probe/position/r`, which
+are measurement positions.
+
+**Replacement:** *"Major-radius coordinate of a designated diagnostic reference
+position — a channel's measurement position or an aperture centre — given as
+perpendicular distance from the toroidal symmetry axis in the right-handed
+cylindrical (R, φ, Z) frame."*
+
+Recorded without proposing it: the read-only repair worklist already carries a
+name repair moving the camera aperture binding elsewhere. If that repair lands
+first, the present description becomes true of what remains and needs no edit.
+The two remedies are alternatives, not additions.
+
+### 22. `coolant_mass_flow_rate` — NARROWER (2 bindings)
+
+> "Coolant mass throughput across a fluid-flow boundary, representing the rate
+> at which coolant mass passes through a port or cooling loop."
+
+Names the loop, while the identity is also bound to
+`calorimetry/group/component/mass_flow` — *"Mass flow of the coolant going
+through the component"*, under a container documented as *"Definition of
+cooling loop components targeted for calorimetry"*. Nothing in the sentence is
+false of a component; the enumeration simply names fewer loci than the identity
+holds. Its two siblings `coolant_temperature_at_inlet` and
+`coolant_temperature_at_outlet` already enumerate both loci, so this row is out
+of line with its own family.
+
+**Replacement:** *"Coolant mass throughput across a fluid-flow boundary, giving
+the rate at which coolant mass passes through an instrumented cooling loop or
+one of its components."*
+
+### 27. `initial_polarization_ellipticity_of_polarimeter_beam` — FALSE-OF-SOME (1 of 2)
+
+> "It gives only the ellipticity component of the initial polarization vector,
+> not the ellipse orientation."
+
+False of **`polarimeter/channel/polarization_initial`**, documented as
+*"Initial polarization vector state before an optical beam enters the plasma,
+serving as the reference for measured Faraday rotation and ellipticity"* — that
+path *is* the polarization state the sentence says it is not. True of
+`polarimeter/channel/ellipticity_initial` (*"Phase ellipticity of the
+polarimeter beam before it propagates through the plasma"*).
+
+**Replacement:** *"Initial polarization state of a polarimeter probing beam
+before it enters the plasma, serving as the reference against which Faraday
+rotation and ellipticity are measured on that beam."*
+
+Two observations that are not verdicts. The two bindings are a state and one
+component of that state, so no single sentence naming the component can be true
+of both; the replacement above is the truthful minimum and the rest is a
+binding question. And both paths carry data-dictionary unit `m` for a
+dimensionless ellipticity — the identity's `sn_unit` agrees with `dd_unit` on
+both bindings, so that discrepancy is upstream in the data dictionary and is
+neither a description nor a naming defect.
+
+### 28. `launched_power_of_lower_hybrid_antenna` — FALSE-OF-SOME (1 of 2)
+
+> "Launched power of a lower-hybrid antenna is the net RF power entering the
+> vacuum vessel after reflection at the antenna input reference plane."
+
+False of **`summary/heating_current_drive/power_lh/value`** on the bearer:
+that path is documented *"Total Lower Hybrid (LH) power coupled to the plasma.
+Aggregated scalar parameter…"* — a machine total over all launchers, not one
+antenna, against the per-launcher `summary/heating_current_drive/lh/power`
+(*"LH heating power (PLH) coupled to the plasma from specific Lower Hybrid
+launchers"*). A reader attributes the whole LHCD system's power to a single
+antenna.
+
+The sentence additionally asserts power *entering the vacuum vessel at the
+antenna input reference plane* while both data-dictionary texts say *coupled to
+the plasma*, which coupling efficiency separates by 10–30 %. That half is an
+open contradiction already recorded against this plan and is **not settled
+here**.
+
+**Replacement:** *"Lower-hybrid radio-frequency power coupled to the plasma,
+taken either from a single launcher or as the machine total over all launchers
+according to the bound source."* If the open adjudication rules that these
+nodes hold launched rather than coupled power, substitute *"launched into the
+vacuum vessel"* for *"coupled to the plasma"* in that same sentence — the
+per-launcher-versus-total half of the defect is independent of that ruling and
+has to be fixed either way.
+
+### 34. `net_power_due_to_ion_cyclotron_heating` — FALSE-OF-SOME (1 of 2)
+
+> "Net ion-cyclotron radio-frequency power launched into the vacuum vessel by a
+> specified heating launcher before absorption by plasma particles."
+
+True of `ic_antennas/antenna/power_launched` (*"Total Ion Cyclotron Radio
+Frequency (ICRF) power launched from the antenna into the vacuum vessel"*).
+False of **`summary/heating_current_drive/ic/power/value`**, documented as
+*"Ion Cyclotron (IC) resonance heating power coupled to the plasma from a
+specific launcher"*. Coupled power is what survives reflection at the
+antenna–plasma interface, so a reader of the summary binding is handed a
+launched-power reading of a coupled-power number. Unlike the lower-hybrid row
+above, the prior instruments agree this node holds coupled power, so the
+differential falsity here is not contingent on the open adjudication.
+
+**Replacement:** *"Ion-cyclotron radio-frequency heating power attributed to a
+single launcher, taken at the launcher's output into the vacuum vessel or as
+coupled to the plasma according to the bound source."*
+
+No sentence can reconcile a 10–30 % physical difference between two bindings.
+Telling the reader which binding is which is the most a description can do, and
+it is strictly better than asserting one of them of both.
+
+### 36. `normalized_toroidal_flux_coordinate_at_measurement_position` — FALSE-OF-SOME (1 of 2)
+
+> "Dimensionless normalized toroidal-flux label that maps a physical
+> measurement position onto a nested magnetic surface between the magnetic axis
+> and equilibrium boundary."
+
+False of **`hard_x_rays/emissivity_profile_1d/peak_position`**, documented as
+*"Radial position, in normalized toroidal flux, where hard X-ray emissivity
+reaches its maximum."* That is an inferred feature of a reconstructed
+emissivity profile — the hard X-ray channels measure along chords and the peak
+is derived afterwards — so there is no physical measurement position there to
+map. True of `ece/channel/position/rho_tor_norm`.
+
+**Replacement:** *"Dimensionless normalized toroidal-flux label locating a
+designated position on a nested magnetic surface between the magnetic axis and
+the equilibrium boundary — a diagnostic channel's measurement position, or a
+feature of an emission profile such as its peak."*
+
+### 51. `vertical_coordinate_of_strike_point` — FALSE-OF-SOME (1 of 2)
+
+> "Signed vertical (Z) coordinate of the inner divertor strike point, where the
+> inner separatrix leg intersects the divertor target in the right-handed
+> cylindrical (R, φ, Z) frame."
+
+False of **`summary/boundary/strike_point_outer_z/value`** (parent: *"Z
+position of the outer strike point"*). True of
+`summary/boundary/strike_point_inner_z/value`.
+
+**Replacement**, mirroring its radial twin exactly: *"Signed vertical (Z)
+location of an individual magnetic strike point where a separatrix leg
+intersects a divertor target, expressed in the right-handed cylindrical
+(R, φ, Z) frame."*
+
+### 3. `toroidal_coordinate_of_line_of_sight` — NARROWER (8 of 14 bindings under-covered)
+
+> "Toroidal angular coordinate of the first reference point on a diagnostic
+> line of sight, locating that point around the machine symmetry axis."
+
+The identity holds 6 `first_point/phi`, 6 `second_point/phi` and 2
+`third_point/phi` bindings; the sentence names one ordinal member of an ordered
+point set and leaves the other 8 uncovered. It is classed NARROWER rather than
+FALSE-OF-SOME because first/second/third are ordered members of a single point
+set — a reader of the second point is under-informed about which member is
+meant — whereas inner/outer in row 51 is a contrastive qualifier that positively
+excludes the other member. That is the distinction the two classes turn on, and
+this row sits closest to the line.
+
+**Replacement**, in the register its two siblings already use: *"Toroidal
+angular coordinate of a designated point defining a diagnostic line of sight,
+locating that point around the machine symmetry axis."*
