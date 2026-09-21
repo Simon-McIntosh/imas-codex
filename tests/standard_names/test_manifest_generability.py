@@ -11,8 +11,10 @@ into the same refusal the release paths already read. These tests pin the
 verdict's exhaustiveness (every source appears once, as carried or as blocked),
 its resolution (a source is blocked by one named mechanism, never a bucket), and
 the two mechanisms a real manifest produces most often, a spent search and a
-composition nothing scheduled. One bucket named "excluded" is what lets an
-uncarried source read as accounted for, so the mechanisms are kept distinct.
+composition nothing scheduled. It also pins the explicit waiver that can settle
+a permanent exclusion without removing it from the uncarried accounting. One
+bucket named "excluded" is what lets an uncarried source read as accounted for,
+so the mechanisms are kept distinct.
 """
 
 from __future__ import annotations
@@ -21,7 +23,12 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
-from imas_codex.standard_names.export import run_export
+from imas_codex.standard_names.export import (
+    ExportReport,
+    SourceDispositionRecord,
+    describe_manifest_generability,
+    run_export,
+)
 
 
 class _ReadOnlyGraphClient:
@@ -283,3 +290,80 @@ def test_a_manifest_whose_sources_all_reach_a_name_is_not_refused(
     assert len(generability) == 1
     assert generability[0].passed is True
     assert generability[0].issues == []
+
+
+def test_explicit_waiver_is_generable_and_remains_visible_as_uncarried() -> None:
+    """Only the row's explicit waiver settles a permanent exclusion."""
+    source_path = "equilibrium/time_slice/constraints/flux_loop/weight"
+    reason = "dd_node_category_ineligible: Backing DD node category fit_artifact"
+    waived = SourceDispositionRecord(
+        source_path=source_path,
+        disposition="waived",
+        reason=reason,
+        source_status="skipped",
+    )
+
+    verdict = describe_manifest_generability([waived])
+
+    assert verdict["generable"] is True
+    assert verdict["manifest_size"] == 1
+    assert verdict["carried"] == 0
+    assert verdict["uncarried"] == 1
+    assert verdict["carried_sources"] == []
+    assert verdict["mechanism_counts"] == {"waived": 1}
+    assert verdict["uncarried_sources"] == [
+        {
+            "source_path": source_path,
+            "mechanism": "waived",
+            "source_status": "skipped",
+            "standard_name_id": None,
+            "terminal_stage": None,
+            "detail": reason,
+        }
+    ]
+    reconciliation = ExportReport(
+        source_disposition_records=[waived],
+        manifest_generability=verdict,
+    ).to_dict()["source_reconciliation"]
+    assert reconciliation["manifest_size"] == 1
+    assert reconciliation["accounted"] == 1
+    assert reconciliation["waived"] == 1
+    assert reconciliation["rows"] == [waived.to_dict()]
+
+    # The same permanent refusal without the explicit row disposition remains
+    # a blocker: neither its category nor its reason grants a waiver by itself.
+    unwaived = SourceDispositionRecord(
+        source_path=source_path,
+        disposition="documented_non_nameable",
+        reason=reason,
+        source_status="skipped",
+    )
+    unwaived_verdict = describe_manifest_generability([unwaived])
+    assert unwaived_verdict["generable"] is False
+    assert unwaived_verdict["mechanism_counts"] == {"recorded_refusal": 1}
+
+
+def test_lost_refusal_cause_is_not_reported_as_unscheduled_composition() -> None:
+    """A skipped source with the lost-cause sentinel records the refusal."""
+    source_path = "equilibrium/time_axis"
+    record = SourceDispositionRecord(
+        source_path=source_path,
+        disposition="documented_non_nameable",
+        reason="cause not recorded",
+        source_status="skipped",
+    )
+
+    verdict = describe_manifest_generability([record])
+
+    assert verdict["generable"] is False
+    assert verdict["mechanism_counts"] == {"refusal_cause_not_recorded": 1}
+    assert verdict["uncarried_sources"] == [
+        {
+            "source_path": source_path,
+            "mechanism": "refusal_cause_not_recorded",
+            "source_status": "skipped",
+            "standard_name_id": None,
+            "terminal_stage": None,
+            "detail": "cause not recorded",
+        }
+    ]
