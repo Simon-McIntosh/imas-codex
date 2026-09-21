@@ -288,6 +288,66 @@
     <a href="/imas-codex/evidence/sn-catalog-audit-instrument/review-rubric-expressiveness">the
     review rubric expressiveness record</a>.</p>
   </section>
+
+  <section id="standalone-catalog-comparators">
+    <h2>Every standalone candidate now contributes its own catalog query</h2>
+    <p><strong>The defect reproduced before repair.</strong> At base
+    <code>d50d42d6d95d6bfa6d86966945ad5f40148c15d0</code>, a five-item clustered
+    batch issued one search for
+    <code>shared cluster description 0 description 1 description 2</code> and
+    returned ten shared comparators. Items four and five contributed no search,
+    and the full catalog passed as <code>all_names</code> was unused.</p>
+
+    <table>
+      <caption>Comparator signals demonstrated by the focused gate</caption>
+      <thead>
+        <tr><th>Signal</th><th>Before</th><th>After</th><th>Control</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Candidate-specific vector search in a 25-item batch</td>
+          <td>1 batch query from 3 descriptions</td>
+          <td><strong>25 queries from 25 descriptions</strong></td>
+          <td>exact query list asserted in batch order</td>
+        </tr>
+        <tr>
+          <td>Same-unit, different-base accepted name</td>
+          <td>no catalog-unit channel</td>
+          <td><strong><code>photon_radiance_of_hard_xray</code> shown to <code>hard_xray_brightness</code></strong></td>
+          <td>same base, drafted stage, and different unit all excluded</td>
+        </tr>
+        <tr>
+          <td>Standalone catalog roster</td>
+          <td>empty by construction</td>
+          <td><strong>up to 200 catalog identities</strong></td>
+          <td>carried through all quorum cycles and unmatched-item retry</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Implementation.</strong> Commit
+    <code>0e92180800892ebf976337d0bcf3efa886540917</code> routes every candidate
+    description through the existing
+    <code>_collect_nearby_name_comparators</code> share-then-spend allocator.
+    Accepted catalog entries with the candidate's unit and a different
+    <code>physical_base</code> lead the merged, identity-deduplicated comparator
+    list, so the unit signal cannot be hidden by the semantic cap. The standalone
+    prompt context receives the catalog roster instead of an unconditional empty
+    list.</p>
+
+    <p><strong>Evidence that could have failed.</strong> The focused comparator
+    gate passed <strong>3 tests</strong> on <code>all_debug</code>. Its negative
+    control changed the unit predicate to require the same physical base; the
+    brightness/photon-radiance test failed as required. The base full suite
+    recorded 20 failures and 3 errors outside this node's paths with 7,528
+    passing tests. At the committed implementation revision the same 23
+    failures/errors remained and 7,531 tests passed: <strong>zero added
+    failures</strong>.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-reviewer-sees-the-catalog-it-is-judging-against</code> &middot;
+    2026-09-21 &middot; implementation commit <code>0e9218080</code>.</p>
+  </section>
   </main>
 </body>
 </html>

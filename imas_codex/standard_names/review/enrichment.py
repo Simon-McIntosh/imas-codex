@@ -265,18 +265,22 @@ def build_neighborhood_context(
 ) -> list[dict]:
     """Build semantic neighborhood context for a review batch.
 
-    Searches for existing StandardNames near the batch's cluster label /
-    descriptions to provide the reviewer with cross-catalog awareness.
+    Searches for existing StandardNames near every candidate description and
+    adds accepted names that share a candidate's unit while using a different
+    physical base.  The latter makes split-base spellings visible even when
+    semantic search does not place them near one another.
 
     Args:
         batch: Batch dict from :func:`group_into_review_batches`.
-        all_names: Full StandardName catalog (unused in current impl,
-            reserved for future dedup-aware enrichment).
-        k: Maximum number of neighbor results.
+        all_names: Full StandardName catalog used for unit-anchored comparison.
+        k: Base cap for semantic and unit-anchored comparator results.  The
+            semantic cap grows to the batch size so every item receives a
+            first-pass share.
 
     Returns:
         List of neighbor dicts with keys ``id``, ``description``, ``kind``,
-        ``unit``, ``review_tier``.  Empty list on search failure.
+        ``unit``, ``physical_base``, ``review_tier``, and
+        ``comparison_basis``.  Empty list when no comparator is available.
     """
     try:
         from imas_codex.standard_names.search import search_standard_names_vector
@@ -285,55 +289,74 @@ def build_neighborhood_context(
         return []
 
     batch_names = batch.get("names", [])
+    if not batch_names:
+        return []
     batch_ids = {n.get("id", "") for n in batch_names}
 
-    # Build representative query: cluster label + first 3 descriptions
-    parts: list[str] = []
-    cluster = batch.get("cluster")
-    if cluster and cluster.get("cluster_label"):
-        parts.append(cluster["cluster_label"])
-    for name in batch_names[:3]:
-        desc = name.get("description", "")
-        if desc:
-            parts.append(desc)
+    from imas_codex.standard_names.workers import _collect_nearby_name_comparators
 
-    query = " ".join(parts).strip()
-    if not query:
-        return []
+    search_items = [
+        {**name, "description": name.get("description") or name.get("id", "")}
+        for name in batch_names
+    ]
 
-    try:
-        raw_results = search_standard_names_vector(query, k=k + 5)
-    except Exception:
-        logger.debug("Neighborhood search failed", exc_info=True)
-        raw_results = []
+    def _search(query: str, *, k: int) -> list[dict]:
+        try:
+            results = search_standard_names_vector(query, k=k + len(batch_ids))
+        except Exception:
+            logger.debug("Neighborhood search failed for %r", query, exc_info=True)
+            return []
+        return [result for result in results if result.get("id", "") not in batch_ids]
 
-    # Filter out names that ARE in the current batch
-    filtered = [r for r in raw_results if r.get("id", "") not in batch_ids]
+    semantic = _collect_nearby_name_comparators(
+        search_items,
+        per_item_k=k,
+        cap=k,
+        search=_search,
+    )
+    for result in semantic:
+        result.setdefault("comparison_basis", "semantic")
 
-    # Per-name fallback for unclustered batches with sparse results
-    if len(filtered) < 3:
-        unclustered_names = [
-            n for n in batch_names if not batch.get("cluster") and n.get("description")
-        ]
-        for name in unclustered_names[:3]:
-            try:
-                per_name = search_standard_names_vector(name["description"], k=3)
-                for r in per_name:
-                    if r.get("id", "") not in batch_ids:
-                        filtered.append(r)
-            except Exception:
+    unit_anchored: list[dict] = []
+    unit_cap = max(k, len(batch_names))
+    catalog = sorted(all_names, key=lambda name: name.get("id", ""))
+    for candidate in batch_names:
+        candidate_unit = candidate.get("unit")
+        candidate_base = candidate.get("physical_base")
+        if not candidate_unit or not candidate_base:
+            continue
+        for existing in catalog:
+            existing_id = existing.get("id", "")
+            existing_base = existing.get("physical_base")
+            if (
+                not existing_id
+                or existing_id in batch_ids
+                or existing.get("name_stage") != "accepted"
+                or existing.get("unit") != candidate_unit
+                or not existing_base
+                or existing_base == candidate_base
+            ):
                 continue
+            unit_anchored.append(
+                {
+                    **existing,
+                    "comparison_basis": "same_unit_different_physical_base",
+                }
+            )
+            if len(unit_anchored) >= unit_cap:
+                break
+        if len(unit_anchored) >= unit_cap:
+            break
 
-    # Deduplicate by id
+    # Unit-anchored comparators lead so a semantic cap cannot hide the signal.
+    # Deduplicate both channels by catalog identity.
     seen: set[str] = set()
     deduped: list[dict] = []
-    for r in filtered:
+    for r in [*unit_anchored, *semantic]:
         rid = r.get("id", "")
         if rid and rid not in seen:
             seen.add(rid)
             deduped.append(r)
-        if len(deduped) >= k:
-            break
 
     # Return summary-only dicts
     return [
@@ -342,7 +365,9 @@ def build_neighborhood_context(
             "description": r.get("description", ""),
             "kind": r.get("kind", ""),
             "unit": r.get("unit", ""),
+            "physical_base": r.get("physical_base", ""),
             "review_tier": r.get("review_tier", ""),
+            "comparison_basis": r.get("comparison_basis", "semantic"),
         }
         for r in deduped
     ]

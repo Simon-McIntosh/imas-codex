@@ -954,6 +954,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
     # Shared context for prompt rendering
     grammar_enums = _get_grammar_enums()
     compose_ctx = _get_compose_context_for_review()
+    existing_names = [name["id"] for name in state.all_names if name.get("id")][:200]
 
     # --- Load scored examples for review calibration ---
     from imas_codex.graph.client import GraphClient
@@ -1070,6 +1071,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     compose_ctx=compose_ctx,
                     batch_context=batch.get("group_key", ""),
                     neighborhood=batch.get("neighborhood", []),
+                    existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
                     wlog=wlog,
                     name_only=state.name_only,
@@ -1155,6 +1157,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     compose_ctx=compose_ctx,
                     batch_context=batch.get("group_key", ""),
                     neighborhood=batch.get("neighborhood", []),
+                    existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
                     wlog=wlog,
                     name_only=state.name_only,
@@ -1330,6 +1333,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     compose_ctx=compose_ctx,
                     batch_context=batch.get("group_key", ""),
                     neighborhood=batch.get("neighborhood", []),
+                    existing_names=existing_names,
                     audit_findings=batch.get("audit_findings", []),
                     wlog=wlog,
                     name_only=state.name_only,
@@ -1882,6 +1886,7 @@ async def _review_single_batch(
     neighborhood: list[dict],
     audit_findings: list[str],
     wlog: logging.LoggerAdapter,
+    existing_names: list[str] | None = None,
     name_only: bool = False,
     target: str | None = None,
     _is_retry: bool = False,
@@ -1949,7 +1954,7 @@ async def _review_single_batch(
     context = {
         **base_ctx,
         "items": items_with_issues,
-        "existing_names": [],  # not needed for standalone review
+        "existing_names": (existing_names or [])[:200],
         "review_scored_examples": _scored_examples,
         "batch_context": batch_context,
         "nearby_existing_names": neighborhood,
@@ -2072,6 +2077,7 @@ async def _review_single_batch(
             compose_ctx=compose_ctx,
             batch_context=batch_context,
             neighborhood=neighborhood,
+            existing_names=existing_names,
             audit_findings=audit_findings,
             wlog=wlog,
             name_only=name_only,
