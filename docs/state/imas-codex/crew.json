@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T21:23:17",
+  "updated": "2026-09-21T21:52:57",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -183605,6 +183605,237 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T185221747223-n-the-local-lane-concurrency-knee-is-measured-not-assumed",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a74",
+        "node": "n-the-local-lane-concurrency-knee-is-measured-not-assumed",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 910,
+                "cached_input_tokens": 645675,
+                "input_tokens": 646587,
+                "output_tokens": 1098,
+                "reasoning_output_tokens": 268,
+                "total_tokens": 647685,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "a figure and a table record completed requests per minute and the timeout rate at concurrency 1, 4, 8, 16 and 32 against the served local model with payloads the size of a review batch, and name the knee as the lowest level beyond which throughput does not rise or timeouts appear; the raw per-level measurements are recorded beside them so the knee can be rederived",
+          "estimated_hours": 1.0,
+          "goal": "Measure where throughput on the local lane stops rising with concurrency, using review-sized payloads",
+          "id": "n-the-local-lane-concurrency-knee-is-measured-not-assumed",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T18:52:23Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no numeric 'headroom'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/local-lane-knee/manifest.md",
+          "negative_control": "none: this node measures a served endpoint and adds no check that a mutation could redden",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/figures/sn-catalog-audit-instrument/local-lane-concurrency.svg",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/figures/sn-catalog-audit-instrument",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-audit-3",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T18:52:32Z",
+        "completed_at": "2026-09-21T19:10:45.356Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1084,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1093,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9b4bd7bc8946162acca4592a444ee495f15b5338",
+        "commits": [
+          "8beb1c4ee9ebbdb76e1cf83f6c1e834950ef96ef"
+        ],
+        "changed_lines": {
+          "added": 220,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "concurrency sweep against the served local endpoint with review-sized payloads, recorded in local-lane-concurrency-raw.json",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/local-lane-knee/manifest.md",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "The local-lane concurrency knee on review-sized payloads is 32, measured rather than assumed: throughput rises 9.11, 21.32, 26.76, 29.74, 36.45 req/min at concurrency 1, 4, 8, 16, 32 and falls to 34.30 at 64, with completion throughput flattening near 400 tok/s. Payloads are the production shape, real review templates at 17,173 prompt and 694 completion tokens over 40 distinct identities. This supersedes nothing: the recorded knee of 4 is compose-at-max, whose requests generate about 18,490 tokens each, so the discriminator is generated tokens per request and no concurrency number transfers between pools. Independent review scored 78 and found four record defects that do not overturn the knee but must be corrected before the record lands: the published sweep total of 184 matches no subset of the raw file, which sums to 264; the c=32 band of 13 percent excludes a fourth sample the node itself assigns to c=32, which would make it 40 percent; the figure's caption computes its delta against the sample mean while the curve plots a single point, so the curve falls where the caption describes a rise; and per-request values are claimed to ship but only aggregates do, which matters because c=64 carries a null p95 with 43 of 64 requests past the starvation deadline. Merge is held until the record is corrected.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/local-lane-knee/manifest.md",
+        "scope_changed": false,
+        "session_id": "0392f1dc-6be3-453d-b373-2e8903b202c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 3583493,
+            "input_tokens_cumulative": 3583493,
+            "output_tokens": 35133,
+            "output_tokens_cumulative": 35133,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T19:10:45.356Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 14,
+            "evidence": 12,
+            "fit": 16,
+            "goal_fidelity": 16,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 78
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 3583493,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1089.094,
+          "generated_tokens": 35133,
+          "generation_seconds": 337.996,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 26.4,
+          "machine_seconds": 751.098,
+          "peak_input_tokens": 126705,
+          "tokens_per_second": 103.95,
+          "wall_tokens_per_second": 32.26
+        },
+        "follow_on_paths": [
+          "local/hosted_vllm",
+          "/metrics"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-local-lane-concurrency-knee-is-measured-not-assumed",
+          "session_id": "0392f1dc-6be3-453d-b373-2e8903b202c3",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T19:10:45.356Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 54.0,
+        "orientation_input_tokens": 2964219.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -183917,6 +184148,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2498
+    "_version": 2499
   }
 }
