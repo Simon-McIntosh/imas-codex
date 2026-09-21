@@ -7247,17 +7247,17 @@ def _archive_role_outcomes(
 def _archive_role_parity(
     authority: _ArchiveReconstructionAuthority,
     observed: dict[str, dict[str, int]],
-) -> dict[str, dict[str, dict[str, int]]]:
+) -> dict[str, dict[str, dict[str, int | str | None]]]:
     """Per-identity expected-versus-observed count for every parity role.
 
-    ``expected`` is the count the identity must come back with: the archived
-    census where the archive record names the role, otherwise the count the
-    reconstruction closure itself carries. ``observed`` is the live count read
-    inside the transaction. A role that did not come back is a name carrying a
-    count rather than an omission, and a role neither side mentions is present
-    at zero, so the receipt shows the whole registry role set every time.
+    ``expected`` comes from the archive census where it names the role, then
+    from the reconstruction closure where it carries the role. A row names that
+    source explicitly. When neither source establishes a count, ``expected`` is
+    null rather than a fabricated zero. ``observed`` is the live count read
+    inside the transaction, including for roles with no established expected
+    count, so the receipt shows the whole parity role set every time.
     """
-    parity: dict[str, dict[str, dict[str, int]]] = {}
+    parity: dict[str, dict[str, dict[str, int | str | None]]] = {}
     for node in authority.nodes:
         identity = node["id"]
         closure: dict[str, int] = {}
@@ -7267,13 +7267,23 @@ def _archive_role_parity(
                 closure[role] = closure.get(role, 0) + 1
         archived = authority.archive_roles.get(identity, {})
         live = observed.get(identity, {})
-        parity[identity] = {
-            role: {
-                "expected": archived.get(role, closure.get(role, 0)),
+        identity_parity: dict[str, dict[str, int | str | None]] = {}
+        for role in sorted(_ARCHIVE_PARITY_ROLES | set(archived)):
+            if role in archived:
+                expected: int | None = archived[role]
+                expected_source = "archive_census"
+            elif role in closure:
+                expected = closure[role]
+                expected_source = "reconstruction_closure"
+            else:
+                expected = None
+                expected_source = "neither"
+            identity_parity[role] = {
+                "expected": expected,
+                "expected_source": expected_source,
                 "observed": live.get(role, 0),
             }
-            for role in sorted(_ARCHIVE_PARITY_ROLES | set(archived))
-        }
+        parity[identity] = identity_parity
     return parity
 
 

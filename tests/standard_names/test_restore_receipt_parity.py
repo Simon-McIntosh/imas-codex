@@ -58,10 +58,18 @@ def test_applied_receipt_counts_expected_and_observed_for_every_parity_role(
     parity = receipt["identity_role_parity"]["archived_temperature"]
 
     assert set(parity) == set(signed_manifest._ARCHIVE_PARITY_ROLES)
-    assert parity["HAS_UNIT"] == {"expected": 1, "observed": 1}
-    assert parity["HAS_PARENT"] == {"expected": 0, "observed": 0}
+    assert parity["HAS_UNIT"] == {
+        "expected": 1,
+        "expected_source": "archive_census",
+        "observed": 1,
+    }
+    assert parity["HAS_PARENT"] == {
+        "expected": None,
+        "expected_source": "neither",
+        "observed": 0,
+    }
     for role, counts in parity.items():
-        assert set(counts) == {"expected", "observed"}, role
+        assert set(counts) == {"expected", "expected_source", "observed"}, role
 
 
 def test_parity_counts_the_loss_of_a_role_with_no_reconstruction_route(
@@ -76,7 +84,11 @@ def test_parity_counts_the_loss_of_a_role_with_no_reconstruction_route(
     assert "EVIDENCED_BY" not in signed_manifest._ARCHIVE_EDGE_COUNTERPARTS
 
     parity = receipt["identity_role_parity"]["archived_temperature"]
-    assert parity["EVIDENCED_BY"] == {"expected": 2, "observed": 0}
+    assert parity["EVIDENCED_BY"] == {
+        "expected": 2,
+        "expected_source": "archive_census",
+        "observed": 0,
+    }
 
     roles = receipt["identity_roles"]["archived_temperature"]
     assert roles["unreinstatable"] == {"EVIDENCED_BY": 2}
@@ -86,6 +98,13 @@ def test_counting_a_role_does_not_admit_it_as_a_reconstruction_route(
     tmp_path: Path,
 ) -> None:
     """The counted role stays unroutable: an edge of it is still refused."""
+    receipt = _applied_receipt(tmp_path, {"archived_temperature": {"EVIDENCED_BY": 2}})
+    assert receipt["identity_role_parity"]["archived_temperature"]["EVIDENCED_BY"] == {
+        "expected": 2,
+        "expected_source": "archive_census",
+        "observed": 0,
+    }
+
     edge = {
         "owner_id": "archived_temperature",
         "relationship_type": "EVIDENCED_BY",
@@ -107,8 +126,15 @@ def test_parity_receipt_does_not_weaken_the_exact_count_guard(
     tmp_path: Path,
 ) -> None:
     """A live count that differs from the archive census still refuses."""
+    control = _applied_receipt(tmp_path, {"archived_temperature": {"HAS_UNIT": 1}})
+    assert control["identity_role_parity"]["archived_temperature"]["HAS_UNIT"] == {
+        "expected": 1,
+        "expected_source": "archive_census",
+        "observed": 1,
+    }
+
     authority = _authority(archive_roles={"archived_temperature": {"HAS_UNIT": 1}})
-    path = tmp_path / "authority.json"
+    path = tmp_path / "conflicting-authority.json"
     file_hash, payload_hash = _write_authority(path, authority)
     graph = _ArchiveGraph()
     preview = _preview(graph, path, file_hash, payload_hash)
