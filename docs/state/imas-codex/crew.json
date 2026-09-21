@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T13:37:49",
+  "updated": "2026-09-21T13:43:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5475,10 +5475,15 @@
         "id": "session-db8c4f36c218aafa61a9",
         "harness": "clive",
         "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-21"
+        "session_id": "9b2163f1-de49-4250-81c4-b875060ea24f",
+        "session_model": "deepseek-v4.1-flash",
+        "sessions": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "9b2163f1-de49-4250-81c4-b875060ea24f"
+        },
+        "created": "2026-09-21",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "instrument-20260921T0925"
+        }
       },
       {
         "id": "son-graphbase",
@@ -172368,6 +172373,184 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T105434049379-review-of-n-the-catalog-roster-reaches-the-rendered-prompt",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "review-of-n-the-catalog-roster-reaches-the-rendered-prompt",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 289,
+                "cached_input_tokens": 808829,
+                "input_tokens": 809120,
+                "output_tokens": 572,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 809692,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "the review for r-20260921T101256172855-n-the-catalog-roster-reaches-the-rendered-prompt stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260921T101256172855-n-the-catalog-roster-reaches-the-rendered-prompt",
+          "id": "review-of-n-the-catalog-roster-reaches-the-rendered-prompt",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T10:54:35Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T105434049379-review-of-n-the-catalog-roster-reaches-the-rendered-prompt/manifest.md",
+          "negative_control": "",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T101256172855-n-the-catalog-roster-reaches-the-rendered-prompt.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-db8c4f36c218aafa61a9",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T10:54:47Z",
+        "completed_at": "2026-09-21T11:24:12.870Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1735,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1765,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "faf36e9df2c9096bcc492984f0dc7f1504af15ba",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": "infrastructure-failure",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T105434049379-review-of-n-the-catalog-roster-reaches-the-rendered-prompt/manifest.md",
+        "scope_changed": false,
+        "session_id": "9b2163f1-de49-4250-81c4-b875060ea24f",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no rate-limit event in the stream yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T11:24:12.870Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "the worker ended during orientation, before any review scoring could be written",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/review-of-n-the-catalog-roster-reaches-the-rendered-prompt",
+          "session_id": "9b2163f1-de49-4250-81c4-b875060ea24f",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T11:24:12.870Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 47.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -172680,6 +172863,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2453
+    "_version": 2455
   }
 }

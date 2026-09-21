@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 </head>
 <body>
   <main class="plan-doc">
@@ -652,6 +652,9 @@
 <p><strong>The budget change.</strong> Per-candidate match lists are built first, then allocated with the same share-then-spend pass the semantic channel uses: each candidate receives <code>max(1, unit_cap // batch_size)</code> in a first pass, the remainder is spent in a second. The three-unit case now yields <strong>4/3/3</strong>.</p>
 <p><strong>The bound.</strong> Deduplication lost its terminal cap when the catalog channel landed, so the docstring's <code>k</code> was no longer a cap on anything. The terminal cap is restored at the sum of the two internally capped channels — <code>max(k, n) + min(max(k, n), 60)</code>: <strong>30</strong> at the defaults over a 2–15-item batch, <strong>120</strong> at the 60-item ceiling. A test pins the returned length at the bound under saturation.</p>
 <p><strong>Gate.</strong> Full <code>tests/standard_names/</code> on <code>all_debug</code>, <strong>zero added failures</strong> against base <code>d31f8cb92</code> (34 failures/errors at base, 23 at head; the eleven that pass at head are export/manifest tests importing neither changed module, and the base ran from a <code>/dev/shm</code> extraction with no <code>.env</code>, an asymmetry in the base's disfavour). Landed as <code>93614e077</code>. Record: <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#unit-comparator-budget">the cumulative landing record</a>.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260921T105434049379-review-of-n-the-catalog-roster-reaches-the-rendered-prompt" data-who="reckon-ship" data-when="2026-09-21T11:24:12.870Z">
+    <div class="r-comment-body"><p>Worker process ended during orientation: manifest stalled at in-progress with only the orientation checkpoint, no commits past base faf36e9df, clean worktree, and the review record was never written. Redispatched to a strong lane.</p></div>
 </div>
 </section>
   </main>
