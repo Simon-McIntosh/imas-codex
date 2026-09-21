@@ -1203,6 +1203,92 @@
     and is not type-aware, so a name declared by an unrelated class still passes. That limit and the
     deferred type-aware design are recorded in
     <a href="#defaulted-attribute-scan-aperture">the aperture and limitation record</a>.</p>
+
+    <h3>The aperture now derives its defect surface from the tree</h3>
+    <p><strong>What the ratchet did not cover.</strong> The floors above are aggregate counts over a
+    literal root list, so they catch a root that is <em>deleted</em> and cannot catch one that is
+    <em>substituted</em>: a replacement contributing the same module and candidate counts leaves
+    both numbers unmoved. The defect shape the guard exists to catch — a
+    <code>getattr</code> whose default is an empty container, which makes an absent attribute
+    indistinguishable from a genuinely empty one — was not in the scanned surface at all. A census
+    of the package finds <strong>30</strong> such calls across <strong>9</strong> modules, and
+    <strong>none</strong> of the three configured roots contains one: coverage of the defect shape
+    was zero of thirty, while the roots held 30 candidates of the broader literal-name class. The
+    two thirties are a coincidence, not an overlap — the intersection is zero.</p>
+
+    <p><strong>The repair.</strong> The guard's scanned surface for the defect shape is now derived
+    by walking the <code>imas_codex</code> package, so the requirement comes from the source tree
+    rather than from a literal that a future edit can move beside it. The broader literal-name scan
+    over the three configured roots is kept as it was, and both aggregate floors remain as a second
+    independent signal. The package walk also finds the attribute names each module declares, so one
+    parse of each module now yields both facts and the scan's cost fell from
+    <strong>30.0 s</strong> to <strong>22.4 s</strong> for the file.</p>
+
+    <figure>
+      <svg viewBox="0 0 760 286" width="100%" role="img"
+           aria-label="Top row, the configured roots scan 11 modules and 30 literal defaulted getattr calls, none of which has an empty-container default, while the package holds 30 empty-container calls across 9 modules that no root reaches. Bottom row, the tree-derived defect aperture covers all 9 of those modules and 30 calls, and the three things that then red: a deleted root, an uncovered replacement's undeclared name, and the exemption applied to the one foreign-type site.">
+        <g font-family="system-ui, sans-serif" font-size="11" fill="#1a1a1a">
+
+          <text x="24" y="26" font-size="12" font-weight="600" fill="#8a1c1c">before — the defect shape sits outside the aperture</text>
+
+          <rect x="24" y="38" width="224" height="74" fill="#ffffff" stroke="#444" stroke-width="1.5"/>
+          <text x="36" y="59" font-size="11" font-weight="600">roots: review/ export.py loop.py</text>
+          <text x="36" y="77" fill="#444">11 modules, 30 literal defaults</text>
+          <text x="36" y="95" fill="#8a1c1c">0 with an empty-container default</text>
+
+          <rect x="300" y="38" width="224" height="74" fill="#fff7f7" stroke="#8a1c1c" stroke-width="1.5"/>
+          <text x="312" y="59" font-weight="600">package: 9 modules</text>
+          <text x="312" y="77" fill="#444">30 empty-container defaults</text>
+          <text x="312" y="95" fill="#8a1c1c">unscanned — 0 of 30 covered</text>
+
+          <rect x="576" y="38" width="160" height="74" fill="#ffffff" stroke="#444" stroke-width="1.5"/>
+          <text x="588" y="59" font-weight="600">verdict at base</text>
+          <text x="588" y="77" fill="#444">4 passed</text>
+          <text x="588" y="95" fill="#8a1c1c">defect shape unseen</text>
+
+          <text x="24" y="152" font-size="12" font-weight="600" fill="#0b6e4f">after — the requirement comes from the tree</text>
+
+          <rect x="24" y="164" width="224" height="74" fill="#ffffff" stroke="#0b6e4f" stroke-width="1.5"/>
+          <text x="36" y="185" font-weight="600">tree-derived aperture</text>
+          <text x="36" y="203" fill="#444">9 modules, 30 calls</text>
+          <text x="36" y="221" fill="#0b6e4f">every one of them scanned</text>
+
+          <rect x="300" y="164" width="224" height="74" fill="#ffffff" stroke="#0b6e4f" stroke-width="1.5"/>
+          <text x="312" y="185" font-weight="600">one exemption added: annotations</text>
+          <text x="312" y="203" fill="#444">LinkML slot object, foreign type</text>
+          <text x="312" y="221" fill="#0b6e4f">29 of 30 resolve unchanged</text>
+
+          <rect x="576" y="164" width="160" height="74" fill="#ffffff" stroke="#0b6e4f" stroke-width="2"/>
+          <text x="588" y="185" font-weight="600">verdict after</text>
+          <text x="588" y="203" fill="#444">6 passed</text>
+          <text x="588" y="221" fill="#0b6e4f">0 violations</text>
+        </g>
+      </svg>
+      <figcaption>The defect shape before and after the aperture is derived from the tree. The
+      configured roots were a valid aperture for the broader literal-name class and a blind spot
+      for the empty-container default that actually hides an absent attribute.</figcaption>
+    </figure>
+
+    <p><strong>Receipts.</strong> The focused file reports <strong>4 passed</strong> at worker base
+    <code>3c55df8a1</code> and <strong>6 passed</strong> with zero violations after the change. Two
+    red logs carry the control. A pure root deletion — <code>loop.py</code> removed from the
+    configured tuple — reports <strong>1 failed, 5 passed</strong>, failing on
+    <code>scanned 10 modules, below the ratchet floor of 11</code>. The declared substitution
+    control substitutes one root for another at equal module and candidate counts; it also reports
+    <strong>1 failed, 5 passed</strong>, but on a different mechanism than its sentence names: the
+    replacement module introduces a <code>getattr</code> read of an attribute
+    <code>imas_codex</code> does not declare, so the file names a violation rather than an uncovered
+    module.</p>
+
+    <p><strong>What that substitution measured.</strong> A second substitution, chosen so the
+    replacement module's names are all declared, keeps both counts at 11 and 30 and the file reports
+    <strong>6 passed</strong>: the hazard the review opened is not closed by a tree-derived
+    aperture, because an aperture and its requirement both derived from the same walk are the same
+    set, so no module can be uncovered by moving a root. The floors still catch a pure deletion,
+    which is the direction a quietly shrinking root set actually moves. Whether the substitution
+    direction should be closed by a further change, and what independent requirement it would need,
+    is left to coordinator adjudication rather than decided in this node; the measurement is
+    recorded here so the next attempt starts from it rather than repeating it.</p>
   </section>
   <section id="bypassed-maintenance-passes-are-named">
     <h2>Every bypassed maintenance pass names itself</h2>
