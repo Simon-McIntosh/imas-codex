@@ -982,6 +982,35 @@
     does not claim their absence as a repair. The retained terminal ids are pre-existing and
     outside this node's write scope; verification at the merged revision remains a separately
     dispatched test node.</p>
+</section>
+  <section id="defaulted-attributes-are-declared">
+    <h2>A defaulted attribute must exist somewhere</h2>
+    <p><strong>Guard.</strong> Commit <code>ba46a4708</code> adds
+    <code>tests/standard_names/test_defaulted_attributes_exist.py</code>. It parses the review
+    package, <code>export.py</code> and <code>loop.py</code> with <code>ast</code>, collects every
+    literal three-argument <code>getattr</code>, and rejects an attribute that no class defined in
+    <code>imas_codex</code> declares as a field or property. Two-argument <code>getattr</code> is
+    deliberately outside the guard because it raises rather than silently selecting a default.
+    The only allowlisted attributes are <code>__file__</code> and <code>__version__</code>, whose
+    values are import and distribution metadata rather than model fields.</p>
+
+    <p><strong>Known-present control.</strong> At worker base
+    <code>9a5e40f4ba6ed89ebe44ef7606d0eb6db4010236</code>, the all-debug receipt exits
+    <strong>1</strong> with one failure and names both defects:
+    <code>imas_codex/standard_names/review/pipeline.py:1720: findings</code> and
+    <code>imas_codex/standard_names/review/pipeline.py:1721: affected_names</code>. This is the
+    required proof that the guard sees a known present defect, not merely that a new test imports.</p>
+
+    <p><strong>Integrated control.</strong> The same test function, bound to integrated main
+    <code>7be5d5a8fee795bfdcd8c9ebbc36d0792a3b021d</code>, returns
+    <strong>zero violations and exit 0</strong>; the independently landed production repair has
+    removed both calls. This node did not alter either call site.</p>
+
+    <p><strong>Suite delta.</strong> The all-debug standard-names suite moved from
+    <strong>20 failed, 7497 passed, 8 skipped, 326 deselected and 3 errors</strong> at base to
+    <strong>21 failed, 7497 passed, 8 skipped, 326 deselected and 3 errors</strong> after the test.
+    The sole added failure is the new guard itself, which is expected until the production repair is
+    integrated with this commit; all 23 pre-existing failure and error identifiers are unchanged.</p>
   </section>
   </main>
 </body>
