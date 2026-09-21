@@ -1253,6 +1253,53 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       <a href="/imas-codex/evidence/sn-release-readiness/graph-client-slurm-resolution">the resolution record</a>.
     </p>
 
+  <h2 id="restore-origin-write-back">The archive restore path writes back the property that authorises deletion</h2>
+  <p><strong>Measured 2026-09-21</strong> at <code>923daf733d10dfd8591ebeabf688aeab79c36945</code>
+  over <code>git diff 3f8c06fcef..HEAD -- imas_codex/cli/sn.py</code>, 420 added
+  lines across four commits. <strong>CONFIRMED.</strong></p>
+  <p><code>compose_archive_reconstruction_authority</code> copies the archived
+  property map wholesale and changes one key &mdash;
+  <code>node_properties = dict(properties)</code> at
+  <code>cli/sn.py:8131</code>, then the id at <code>:8132</code>. <strong>Nothing
+  filters, rewrites, defaults or even reads <code>origin</code> anywhere in the
+  restore region</strong> (lines 8072&ndash;8420). That absence is measured by an
+  instrument shown to see the thing when present: the same grep finds twelve
+  occurrences elsewhere in the file, one of them <code>sn.py:4740</code>, whose
+  help text reads <em>"Name(s) to reset from catalog_edit to pipeline
+  origin"</em>. The file already knows the value has to be reset &mdash; on a
+  different command.</p>
+  <p><strong>Reproduced, not read.</strong> Composing one identity exactly as a
+  pre-correction store dump holds it returns
+  <code>{"id": "power_due_to_fusion", "name_stage": "accepted", "origin":
+  "catalog_edit", "status": "draft"}</code>, and the function's whole surface is
+  <code>(record, identity, counterpart_renames)</code>, so <strong>no knob states
+  an origin at all</strong>. The adapter then writes that map verbatim. A restore
+  composed straight from the dump returns each identity to the exact state that
+  authorised its deletion, and the acceptance in use &mdash; per-type incident
+  edge counts &mdash; passes it, because edge counts say nothing about node
+  properties. The adapter's own fixture carries that same origin, so a green
+  suite is evidence the value survives rather than evidence it should.</p>
+  <p><strong>The guard, stated and deliberately not implemented</strong> (the
+  command file is outside the reviewing node's scope): a <em>required</em>
+  <code>--origin</code> on <code>sn restore compose</code> that sets the property
+  from the operator rather than the archive, refuses the literal
+  <code>catalog_edit</code>, and echoes any archived value it dropped. Required
+  at compose rather than apply, because compose is where the property enters the
+  signed payload.</p>
+  <p><strong>Four further findings, all reproduced.</strong> The compose-seat
+  probe carries the recurring absent-key shape verbatim: <code>.get("data", [])</code>
+  defaults an absent key to empty, the emptiness check returns healthy, and the
+  seat comparison that is the entire point of the change never runs &mdash; three
+  distinct body shapes admit a seat the server does not serve, and the guard's own
+  tests construct none of them. The same comparison normalises only the configured
+  side, so a prefix-qualified served id blocks a server that does serve the seat.
+  In the restore path, a counterpart rekey is consumed by the first matching edge,
+  which can bind a later edge to the wrong node with no refusal at any layer, and
+  the role census is taken before direction routing, so a half-routable role
+  composes an authority the loader cannot load. The command-boundary exception
+  catch was checked against the swallowed-exception shape and is correct.</p>
+  <p>Full review with every <code>file:line</code>, verdict and probe output:
+  <a href="/imas-codex/evidence/sn-release-readiness/sn-cli-diff-review.md">the standard-name CLI diff review</a>.</p>
   </main>
 </body>
 </html>
