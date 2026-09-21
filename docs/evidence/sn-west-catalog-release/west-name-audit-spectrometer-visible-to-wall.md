@@ -234,3 +234,126 @@ and 238 — and those are judged here, because both halves are in hand.
 - name description: Dimensionless ratio comparing the plasma energy confinement time with the IPB98(y,2) reference scaling prediction.
 - **rejected spelling** `energy_confinement_enhancement_factor` → **proposed spelling** `ipb98y2_confinement_enhancement_factor`
 - why: A confinement enhancement factor is a ratio **against a named scaling law**, and there is no default one: H98, H89 and HIPB20 are all in routine use and differ by tens of percent on the same discharge. The published name names none of them, so it cannot distinguish the value it is bound to from the value a second scaling would produce — and a later H89 binding would have nowhere to go but onto this same identity, which is the one-name-two-quantities failure already present at rows 212 to 214, arriving prospectively. The cut already fixes the spelling of the scaling in this name's own denominator: row 233 is `ipb98y2_confinement_time`. The proposed spelling reuses it.
+
+### 226. `normalized_plasma_internal_inductance` — **correct**
+
+- source path: `summary/global_quantities/li_3/value`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Internal inductance. The li_3 definition is used, i.e. li_3 = 2/R0/mu0^2/Ip^2 * int(Bp^2 dV).
+- name description: Dimensionless li_3 parameter measuring poloidal magnetic-field peaking through a plasma-volume integral normalized by total plasma current and a reference major radius.
+- note: This is the weaker half of the shape rejected at row 225 — the description names the `li_3` definition and the name does not, and `li_1`, `li_2` and `li_3` differ by several percent on a shaped plasma. It stays **correct** because the variants are three normalizations of one quantity rather than three independent empirical laws, and nothing else in this cut is bound to this identity under a competing definition. If a `li_2` binding ever enters the catalog this row becomes the same defect as row 225; recorded so the sweep can see it coming. Also bound to `equilibrium/time_slice/global_quantities/li_3` — the same definition — deferred to the collision sweep.
+
+### 227. `total_power_at_separatrix` — **correct**
+
+- source path: `summary/global_quantities/power_loss/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Power through separatrix
+- name description: Net energy power leaving the confined plasma through the last closed magnetic flux surface and entering the scrape-off layer.
+- note: The name's `at` denotes a flux **through** a surface rather than a value **on** it, which the data dictionary says plainly and the description repeats; `total_power_through_separatrix` would carry that in the name. The distinction matters because the surface also carries quantities that genuinely are evaluated on it — row 234's `loop_voltage_at_plasma_boundary` and row 248's `electron_density_at_plasma_boundary` both use `at` in the on-the-surface sense, so one preposition is doing two jobs inside one cut.
+
+### 228. `total_power_due_to_ohmic_dissipation` — **correct**
+
+- source path: `summary/global_quantities/power_ohm/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Ohmic power
+- name description: Aggregate rate of irreversible electrical-energy conversion into heat by resistive current flow across the applicable conducting plasma or structure.
+- note: The defect is in the description, not the name. The description admits "the applicable conducting plasma **or structure**", which would cover resistive dissipation in the vessel and the coils; the data-dictionary node sits under `summary/global_quantities` and is the **plasma** ohmic power, the counterpart of the external heating at row 237. The name is correct and self-descriptive; the description should be narrowed to the plasma.
+
+### 229. `radiated_power_over_core_region` — **INCORRECT**
+
+- source path: `summary/global_quantities/power_radiated_inside_lcfs/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Radiated power from the plasma inside the Last Closed Flux Surface
+- name description: Total electromagnetic power radiated by plasma inside the last closed flux surface, representing the core-region contribution to global radiative energy loss.
+- **rejected spelling** `radiated_power_over_core_region` → **proposed spelling** `radiated_power_inside_plasma_boundary`
+- why: "Core region" is not a boundary any reader can resolve. In transport usage it names the inner plasma as distinct from the pedestal and edge — typically inside r/a of roughly 0.8 — while in edge-code usage it means everything inside the separatrix. The two readings differ by the whole pedestal, which in a radiating divertor scenario carries a large share of the radiated power, so the same published name can be off by tens of percent depending on which sense a consumer assumes. The data dictionary states the boundary exactly and the cut already has a settled spelling for it: rows 227, 234 and 248 all use `plasma_boundary` for the last closed flux surface, and the first half's `volume_of_plasma_boundary` does too. The proposed spelling says the boundary the data dictionary says, in the words the rest of the cohort already uses.
+
+### 230. `difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy` — **correct**
+
+- source path: `summary/global_quantities/power_steady/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Total power coupled to the plasma minus dW/dt (correcting from transient energy content)
+- name description: Instantaneous plasma power available for confinement losses after correcting total coupled heating for the rate of change of stored plasma energy.
+- note: Long, and exactly right: the `difference_of_X_and_Y` construction states both operands and their order, so the sign convention is readable from the name alone. The same construction carries row 252. It is the counter-example to the data-dictionary leaf name at row 223 — `power_steady` would have been as opaque as `energy_mhd`, and the name does not use it.
+
+### 231. `safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95` — **correct**
+
+- source path: `summary/global_quantities/q_95/value`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: q at the 95% poloidal flux surface
+- name description: Signed field-line winding number on the closed magnetic flux surface labeled by normalized poloidal magnetic flux 0.95, near but inside the plasma boundary.
+- note: The surface label is in the name, including which flux is normalized — so the reader is not left to guess between normalized poloidal flux and normalized toroidal flux, which select different surfaces. Also bound to `equilibrium/time_slice/global_quantities/q_95`; same quantity, deferred to the collision sweep.
+
+### 232. `energy_confinement_time` — **correct**
+
+- source path: `summary/global_quantities/tau_energy/value`
+- unit: `s` (data dictionary: `s`)
+- data-dictionary text: Energy confinement time
+- name description: Characteristic timescale for loss of confined plasma thermal energy, defined as stored thermal energy divided by the net power leaving that energy reservoir.
+
+### 233. `ipb98y2_confinement_time` — **correct**
+
+- source path: `summary/global_quantities/tau_energy_98/value`
+- unit: `s` (data dictionary: `s`)
+- data-dictionary text: Energy confinement time estimated from the IPB98(y,2) scaling
+- name description: IPB98(y,2) empirical-scaling reference for global energy confinement time, providing the denominator for the H98 confinement enhancement factor.
+- note: The scaling law is in the name, which is what row 225 was rejected for lacking — this row is the evidence that the cut can spell it. The name drops `energy` where its measured counterpart at row 232 keeps it (`energy_confinement_time`); `ipb98y2_energy_confinement_time` would make the pair symmetric. A note rather than a rejection, because the scaling law itself is defined only for energy confinement, so nothing is ambiguous.
+
+### 234. `loop_voltage_at_plasma_boundary` — **correct**
+
+- source path: `summary/global_quantities/v_loop/value`
+- unit: `V` (data dictionary: `V`)
+- data-dictionary text: LCFS loop voltage
+- name description: Toroidal electromotive force evaluated on the last closed flux surface that drives the conventionally signed ohmic plasma current.
+- note: The locus is in the name, and it matters — the loop voltage measured at a flux loop on the vessel differs from the boundary value during current ramps. The `plasma_boundary` spelling is the cohort's settled one for the LCFS.
+
+### 235. `net_power_due_to_ion_cyclotron_heating` — **INCORRECT**
+
+- source path: `summary/heating_current_drive/ic/power/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: IC heating power coupled to the plasma from this launcher
+- name description: Net ion-cyclotron radio-frequency power launched into the vacuum vessel by a specified heating launcher before absorption by plasma particles.
+- **rejected spelling** `net_power_due_to_ion_cyclotron_heating` → **proposed spelling** `coupled_power_due_to_ion_cyclotron_heating`
+- why: One identity spans the launched–coupled boundary. The first half accepted this name at `ic_antennas/antenna/power_launched`, where it genuinely is launched power, and rejected `total_power_due_to_ion_cyclotron_heating` at `summary/.../power_ic/value` precisely because the data dictionary there says **coupled to the plasma**. This row is the same mismatch on the per-launcher summary node: the name and its description both say launched into the vessel, the data dictionary says coupled to the plasma, and the two are separated by the coupling efficiency — routinely 10 to 30 percent apart, and far more at poor loading. Because the identity is bound to **both** an antenna launched-power node and a summary coupled-power node, a consumer cannot recover which quantity a value is, and the remedy is a split rather than a rewording: `net_power_due_to_ion_cyclotron_heating` stays with the antenna node and the summary per-launcher node takes `coupled_power_due_to_ion_cyclotron_heating`, under the same `total_coupled_power_due_to_ion_cyclotron_heating` the first half proposed for the system total.
+
+### 236. `launched_power_of_lower_hybrid_antenna` — **INCORRECT**
+
+- source path: `summary/heating_current_drive/lh/power/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: LH heating power coupled to the plasma from this launcher
+- name description: Launched power of a lower-hybrid antenna is the net RF power entering the vacuum vessel after reflection at the antenna input reference plane.
+- **rejected spelling** `launched_power_of_lower_hybrid_antenna` → **proposed spelling** `coupled_power_of_lower_hybrid_antenna`
+- why: The launched–coupled mismatch of row 235 on the lower-hybrid side. The name asserts power **entering the vessel**, measured after reflection at the antenna reference plane; the data dictionary states power **coupled to the plasma**, which is what remains after the fraction lost to the launcher structure and to parasitic absorption in the edge. On WEST's lower-hybrid launchers that difference is a first-order quantity, not a rounding term, and it is the quantity most often disputed in a power balance. The name asserts the larger of the two and the data supports only the smaller.
+
+### 237. `total_external_heating_power` — **correct**
+
+- source path: `summary/heating_current_drive/power_additional/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Total additional external power (NBI+EC+IC+LH, without ohmic) coupled to the plasma
+- name description: Total non-inductive power coupled from external neutral-beam and radio-frequency heating systems to the plasma, summed over auxiliary sources and excluding Ohmic.
+- note: The defect is in the description, not the name. The description calls the sum "non-inductive power", which is the vocabulary of **current drive** — the fraction of the plasma current driven other than by the transformer. The data dictionary's "without ohmic" is a statement about which heating **sources** are summed, not about how current is driven, and a heating system can deliver large power while driving no current. The name says external heating power, which is right; the description should drop "non-inductive".
+
+### 238. `launched_power_of_lower_hybrid_antenna` — **INCORRECT**
+
+- source path: `summary/heating_current_drive/power_lh/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Total LH power coupled to the plasma
+- name description: Launched power of a lower-hybrid antenna is the net RF power entering the vacuum vessel after reflection at the antenna input reference plane.
+- **rejected spelling** `launched_power_of_lower_hybrid_antenna` → **proposed spelling** `total_coupled_power_due_to_lower_hybrid_heating`
+- why: One name, two physically different quantities, and **both halves are inside this range**: row 236 is the **per-launcher** power (`heating_current_drive/lh/power/value`, "from this launcher") and this row is the **system total summed over launchers** ("Total LH power"). On WEST, which runs two lower-hybrid launchers, they differ by roughly a factor of two, and a published entry that resolves to either is unusable in a power balance. The name is also singular — "of a lower-hybrid antenna" — which is false of the total. The proposed spelling is built from the first half's proposed `total_coupled_power_due_to_ion_cyclotron_heating` at its row 80, so the two heating systems carry one grammar rather than two.
+
+### 239. `ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density` — **correct**
+
+- source path: `summary/line_average/isotope_fraction_hydrogen/value`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Fraction of hydrogen density among the hydrogenic species (nH/(nH+nD+nT))
+- name description: Dimensionless line-averaged protium fraction among hydrogenic ions, obtained by dividing the protium density by the total hydrogenic density along the same chord.
+- note: The whole distinction rides on `hydrogen` meaning protium while `hydrogenic` means protium, deuterium and tritium together — the data dictionary's `nH/(nH+nD+nT)` settles it and the description says protium explicitly. The name also states that **both** sides are line-averaged over the same chord, which is what makes the ratio well defined; a ratio of two differently averaged densities would not be.
+
+### 240. `line_averaged_electron_density` — **correct**
+
+- source path: `summary/line_average/n_e/value`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Electron density
+- name description: Number density of free electrons per physical volume averaged along a complete plasma propagation chord, equal to the path integral divided by chord length.
+- note: The leaf's own text is the bare "Electron density" and the averaging is carried entirely by the `line_average` container — so the name supplies the qualifier the data-dictionary leaf omits, which is the correct direction. Also bound to `interferometer/channel/n_e_line_average` outside this range; deferred to the collision sweep, which owns the question of whether a per-channel chord average and a summary line average are one identity.
