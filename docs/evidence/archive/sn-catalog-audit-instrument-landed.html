@@ -348,6 +348,72 @@
     <code>n-the-reviewer-sees-the-catalog-it-is-judging-against</code> &middot;
     2026-09-21 &middot; implementation commit <code>0e9218080</code>.</p>
   </section>
+
+  <section id="catalog-roster-reaches-the-prompt">
+    <h2>The catalog roster reaches the review prompt, not only the pipeline context</h2>
+    <p><code>review/pipeline.py</code> places the catalog's accepted names in the
+    review context under <code>existing_names</code> (line 1957). Neither
+    <code>sn/review_names</code> nor <code>sn/review_docs</code> referenced that
+    variable, and Jinja resolves an undefined variable to nothing without
+    raising — so the roster was assembled and discarded on every batch, with no
+    error and no failing test. The comparator work that made the context
+    non-empty is therefore only half the repair: the roster has to be both
+    supplied and read.</p>
+
+    <table>
+      <caption>Measured render of <code>sn/review_names</code> with a marker id supplied through the review context</caption>
+      <thead>
+        <tr><th>Supplied context</th><th>Marker present in render?</th><th>Render length</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>existing_names=['MARKER_CATALOG_ROSTER_ENTRY']</code></td>
+          <td>no &mdash; no template referenced the variable</td>
+          <td>31,851 characters</td>
+        </tr>
+        <tr>
+          <td>a marker name in <code>generated_nearby_names</code> in the same render</td>
+          <td><strong>yes</strong> &mdash; the block that did exist rendered</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><code>existing_names=['MARKER_CATALOG_ROSTER_ENTRY']</code> after the repair</td>
+          <td><strong>yes</strong>, in both templates</td>
+          <td>&mdash;</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>Implementation.</strong> Commit <code>95366b716</code> adds a
+    Catalog Roster block to <code>sn/review_names</code> and
+    <code>sn/review_docs</code>, following the shape of the
+    <code>nearby_existing_names</code> block. The roster is the catalog as a
+    whole rather than the local neighbourhood, so the name template frames it as
+    the reuse reference and the docs template frames it as the checked-against
+    set for cited names.</p>
+
+    <p><strong>Evidence that could have failed.</strong> The new test calls
+    <code>render_prompt</code> for real and asserts the supplied id is a substring
+    of the returned text for both templates. It deliberately does not assert on a
+    context dict and does not stub the renderer. Negative control: removing the
+    Catalog Roster block from both templates fails both parametrised cases, with
+    the marker absent from the render.</p>
+
+    <p><strong>Gate.</strong> <code>tests/standard_names/</code> on
+    <code>all_debug</code>, base revision <code>d31f8cb92</code> against the
+    committed implementation revision. The base run recorded <strong>31 failed,
+    7,527 passed, 3 errors</strong>; the implementation run recorded <strong>20
+    failed, 7,541 passed, 3 errors</strong>. Every failure in the implementation
+    run is present in the base run and <strong>zero failures were added</strong>.
+    The eleven base-only failures are order- and state-dependent rather than
+    repaired by this change: re-run at the base revision in isolation, four of the
+    affected files fail 15 of 30 tests, so their presence in a full-suite run
+    varies between runs of identical code.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-catalog-roster-reaches-the-rendered-prompt</code> &middot;
+    2026-09-21 &middot; implementation commit <code>95366b716</code>.</p>
+  </section>
   </main>
 </body>
 </html>

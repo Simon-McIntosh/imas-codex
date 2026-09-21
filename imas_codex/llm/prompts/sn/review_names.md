@@ -275,6 +275,19 @@ Collapse only exact same-quantity synonyms:
 {% endfor %}
 {% endif %}
 
+{% if existing_names %}
+## Catalog Roster
+
+The accepted names below are the catalog as a whole, not the local neighbourhood.
+They exist to make reuse the first option: a candidate that expresses the same
+quantity as one of these should reuse that name rather than introduce a variant
+spelling, and a candidate whose base is a minority spelling of a base already
+fixed here should adopt the established spelling.
+{% for name in existing_names %}
+- `{{ name }}`
+{% endfor %}
+{% endif %}
+
 ## Candidates to Review
 
 You receive **the same per-item DD context the composer received**, so you can
