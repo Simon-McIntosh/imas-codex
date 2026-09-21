@@ -1611,6 +1611,13 @@ async def run_sn_pools(
     # runs in a finally block, so an open 'started' row means the process died
     # before it could close the run). Best-effort — never let a sweep failure
     # abort a fresh run.
+    def _record_bypassed_maintenance(function_name: str) -> None:
+        logger.info(
+            "run_sn_pools: global maintenance bypassed — %s",
+            function_name,
+        )
+        summary.bypassed_maintenance_passes.append(function_name)
+
     async def _global_maintenance_call(
         fn: Callable[..., Any],
         *args: Any,
@@ -1622,26 +1629,25 @@ async def run_sn_pools(
             function_name = (
                 fn.__name__ if hasattr(fn, "__name__") else type(fn).__name__
             )
-            logger.info(
-                "run_sn_pools: global maintenance bypassed — %s",
-                function_name,
-            )
-            summary.bypassed_maintenance_passes.append(function_name)
+            _record_bypassed_maintenance(function_name)
             return default
         return await asyncio.to_thread(fn, *args, **kwargs)
 
-    if not skip_global_maintenance:
-        try:
-            from imas_codex.standard_names.graph_ops import (
-                mark_orphaned_standard_name_runs_stale,
-            )
+    try:
+        from imas_codex.standard_names.graph_ops import (
+            mark_orphaned_standard_name_runs_stale,
+        )
 
-            mark_orphaned_standard_name_runs_stale(current_run_id=run_id)
-        except Exception as _stale_exc:  # noqa: BLE001 — non-fatal reconciliation
-            logger.warning(
-                "run_sn_pools: orphaned-SNRun sweep failed (non-fatal): %s",
-                _stale_exc,
-            )
+        await _global_maintenance_call(
+            mark_orphaned_standard_name_runs_stale,
+            current_run_id=run_id,
+            default=0,
+        )
+    except Exception as _stale_exc:  # noqa: BLE001 — non-fatal reconciliation
+        logger.warning(
+            "run_sn_pools: orphaned-SNRun sweep failed (non-fatal): %s",
+            _stale_exc,
+        )
 
     cost_is_exact = True
 
@@ -1927,10 +1933,17 @@ async def run_sn_pools(
         # 'extracted' so the generate pool composes a correct name the same run.
         # Accepted names are catalog-authoritative and are reported, not
         # detached, without an explicit opt-in. Idempotent.
-        await _run_attachment_audit_for_pool_run(
-            skip_global_maintenance=skip_global_maintenance,
-            run_id=run_id,
+        from imas_codex.standard_names.attachment_audit import (
+            AttachmentAuditResult,
+            reconcile_attachment_consistency,
         )
+
+        attachment_result = await _global_maintenance_call(
+            reconcile_attachment_consistency,
+            run_id=run_id,
+            default=AttachmentAuditResult(audit_ran=False),
+        )
+        _log_attachment_audit_result(attachment_result)
 
         # Materialize the DD-side HAS_STANDARD_NAME edge from per-source
         # provenance, so a name reaches every DD path its provenance asserts —
@@ -2326,6 +2339,8 @@ async def run_sn_pools(
                 ),
                 name="embed_sn",
             )
+        else:
+            _record_bypassed_maintenance("embed_description_worker")
 
         # Periodic ``SNRun.cost_spent`` sync so ``imas-codex sn status``
         # reflects real spend even when the run is interrupted or crashes
@@ -2752,7 +2767,7 @@ async def run_sn_pools(
         # before its control-flow boundary, so it must not repeat mutating
         # work during shutdown.
         FIXUP_TIMEOUT = 30.0
-        if not reconcile_only and not skip_global_maintenance:
+        if not reconcile_only:
             try:
                 from imas_codex.standard_names.graph_ops import (
                     normalize_derived_parent_lifecycle,
@@ -2760,12 +2775,17 @@ async def run_sn_pools(
                     rederive_structural_edges,
                 )
 
-                await asyncio.to_thread(rederive_structural_edges)
-                _normalized_parents = await asyncio.to_thread(
-                    normalize_derived_parent_lifecycle
+                await _global_maintenance_call(
+                    rederive_structural_edges,
+                    default={},
                 )
-                _reconciled_parent_sources = await asyncio.to_thread(
-                    reconcile_orphan_parent_sources
+                _normalized_parents = await _global_maintenance_call(
+                    normalize_derived_parent_lifecycle,
+                    default=0,
+                )
+                _reconciled_parent_sources = await _global_maintenance_call(
+                    reconcile_orphan_parent_sources,
+                    default=0,
                 )
                 if _normalized_parents or _reconciled_parent_sources:
                     logger.info(
@@ -2807,14 +2827,17 @@ async def run_sn_pools(
         # for every sibling family whose live members are all docs-accepted
         # (a member joined, or a member's docs changed and re-passed review).
         # Purely additive scalar writes; no-op when nothing changed.
-        if not names_only and not skip_global_maintenance:
+        if not names_only:
             try:
                 from imas_codex.standard_names.harmonize import (
                     restamp_harmonized_families,
                 )
 
                 _fam_stats = await asyncio.wait_for(
-                    asyncio.to_thread(restamp_harmonized_families),
+                    _global_maintenance_call(
+                        restamp_harmonized_families,
+                        default={},
+                    ),
                     timeout=FIXUP_TIMEOUT,
                 )
                 if _fam_stats.get("restamped"):

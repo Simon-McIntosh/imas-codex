@@ -2,41 +2,63 @@
 
 from __future__ import annotations
 
+import ast
 import logging
+from pathlib import Path
 
 import pytest
 
+from imas_codex.standard_names import loop
 from imas_codex.standard_names.loop import summary_table
 from tests.standard_names import test_scoped_global_maintenance as scoped_maintenance
 
 _LOOP_LOGGER = "imas_codex.standard_names.loop"
 
-_BYPASSED_PASSES = (
-    "reconcile_standard_name_sources",
-    "reconcile_vocab_gaps",
-    "revive_unit_skipped_sources",
-    "retry_vocab_gap_sources_on_grammar_change",
-    "reconcile_provenance",
-    "reconcile_source_status_liveness",
-    "retire_unreachable_hint_edits",
-    "reconcile_grammar_segments",
-    "reconcile_catalog_status",
-    "reconcile_reviewable_name_stage",
-    "reconcile_standard_name_cocos_links",
-    "reconcile_dd_unit_corrections",
-    "reconcile_standard_name_unit_edges",
-    "reconcile_standard_name_dd_edges",
-    "reconcile_standard_name_source_paths",
-    "refresh_drifted_sources",
-    "promote_stranded_reviewed",
-    "rederive_structural_edges",
-    "seed_parent_sources",
-    "normalize_derived_parent_lifecycle",
-    "structural_accept_derived_parents",
-    "reconcile_orphan_parent_sources",
-    "release_all_orphan_claims",
-    "resolve_doc_links",
-)
+
+def _contains_negated_maintenance_bypass(node: ast.expr) -> bool:
+    return any(
+        isinstance(candidate, ast.UnaryOp)
+        and isinstance(candidate.op, ast.Not)
+        and isinstance(candidate.operand, ast.Name)
+        and candidate.operand.id == "skip_global_maintenance"
+        for candidate in ast.walk(node)
+    )
+
+
+def _calls_any(nodes: list[ast.stmt], names: set[str]) -> bool:
+    return any(
+        isinstance(candidate, ast.Call)
+        and isinstance(candidate.func, ast.Name)
+        and candidate.func.id in names
+        for node in nodes
+        for candidate in ast.walk(node)
+    )
+
+
+def _unreceipted_direct_maintenance_guards(path: Path) -> list[int]:
+    """Return direct bypass guards that neither delegate nor record the skip."""
+    tree = ast.parse(path.read_text(), filename=str(path))
+    run = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.AsyncFunctionDef) and node.name == "run_sn_pools"
+    )
+    violations: list[int] = []
+    for guard in (node for node in ast.walk(run) if isinstance(node, ast.If)):
+        if not _contains_negated_maintenance_bypass(guard.test):
+            continue
+        delegated = _calls_any(guard.body, {"_global_maintenance_call"})
+        recorded = _calls_any(guard.orelse, {"_record_bypassed_maintenance"})
+        if not delegated and not recorded:
+            violations.append(guard.lineno)
+    return violations
+
+
+def test_every_direct_maintenance_guard_records_its_bypass() -> None:
+    path = Path(loop.__file__)
+    violations = _unreceipted_direct_maintenance_guards(path)
+    rendered = "\n".join(f"{path}:{line}" for line in violations)
+    assert not violations, f"unreceipted maintenance bypass guard(s):\n{rendered}"
 
 
 @pytest.mark.asyncio
@@ -59,22 +81,32 @@ async def test_scoped_run_names_every_bypassed_maintenance_pass(
         "_maintenance_mocks",
         named_maintenance_mocks,
     )
-    summary, *_ = await scoped_maintenance._run_loop(skip_global_maintenance=True)
+    result = await scoped_maintenance._run_loop(skip_global_maintenance=True)
+    summary, maintenance, *_ = result
 
-    expected = list(_BYPASSED_PASSES)
-    assert summary.bypassed_maintenance_passes == expected
-    assert summary_table(summary)["bypassed_maintenance_passes"] == expected
+    receipt = summary.bypassed_maintenance_passes
+    assert summary_table(summary)["bypassed_maintenance_passes"] == receipt
+
+    skipped_writers = {
+        function_name
+        for function_name, function_mock in maintenance.items()
+        if function_name != "run_orphan_sweep_loop" and not function_mock.called
+    }
+    assert skipped_writers <= set(receipt)
 
     messages = [record.getMessage() for record in caplog.records]
-    for function_name in expected:
-        assert (
-            f"run_sn_pools: global maintenance bypassed — {function_name}" in messages
-        )
+    prefix = "run_sn_pools: global maintenance bypassed — "
+    logged_bypasses = [
+        message.removeprefix(prefix)
+        for message in messages
+        if message.startswith(prefix)
+    ]
+    assert logged_bypasses == receipt
 
     summary_message = next(
         message
         for message in messages
         if message.startswith("run_sn_pools: bypassed global maintenance summary")
     )
-    assert f"count={len(expected)}" in summary_message
-    assert ", ".join(expected) in summary_message
+    assert f"count={len(receipt)}" in summary_message
+    assert ", ".join(receipt) in summary_message
