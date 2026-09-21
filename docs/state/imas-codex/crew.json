@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T06:54:13",
+  "updated": "2026-09-21T06:57:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -74,9 +74,11 @@
         "id": "claude-opus-c",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "1d1fbc0c-ebf8-4eec-b806-44741739b4bf",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "1d1fbc0c-ebf8-4eec-b806-44741739b4bf"
+        },
         "created": "2026-09-21"
       },
       {
@@ -159316,6 +159318,228 @@
           "status": "failed",
           "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
         }
+      },
+      {
+        "run_id": "r-20260921T044444337248-n-sli-the-remaining-local-lane-landings-are-audited",
+        "plan": "sn-lifecycle-integrity",
+        "section": "\u00a75",
+        "node": "n-sli-the-remaining-local-lane-landings-are-audited",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 925,
+                "cached_input_tokens": 796013,
+                "input_tokens": 796940,
+                "output_tokens": 777,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 797717,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-lifecycle-integrity/local-lane-pipeline-audit.md exists and, for each of the scoped-edit maintenance bypass at dd88d0d3f in imas_codex/standard_names/edit.py, the quarantine-instrument refusal at 0ba05e980 in imas_codex/standard_names/review/audits.py, and the parked-disposition writer at 73242777f in imas_codex/standard_names/orphan_sweep.py, states whether the change can suppress or skip something it should not, whether any guard or refusal it adds is bypassable on an input its own tests do not construct, and whether it can misreport; names every defect with its file:line and a concrete triggering input; and gives a verdict per change of SAFE-FOR-WEST or MUST-FIX-FIRST. The export audit found three sites of one key-presence fail-open shape in one file, so check explicitly for presence-style tests and absent-key short circuits on these paths too. Run the relevant tests rather than reading only, and write the file incrementally",
+          "estimated_hours": null,
+          "goal": "audit the remaining local-lane pipeline changes from this sprint for the same defect shape the export audit found",
+          "id": "n-sli-the-remaining-local-lane-landings-are-audited",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T04:34:51.045Z",
+            "read_at": "2026-09-21T04:44:45Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 24.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T044444337248-n-sli-the-remaining-local-lane-landings-are-audited/manifest.md",
+          "negative_control": "",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a75",
+          "spec_level": "open",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-lifecycle-integrity/local-lane-pipeline-audit.md",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "open",
+        "member": "claude-opus-c",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T04:44:51Z",
+        "completed_at": "2026-09-21T04:55:19.844Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 623,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 628,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "ec9d7af424057be8b1dc306389ad0e14eed73993",
+        "commits": [
+          "d154cc8a3dbff965a20762196c29cc831e8e181b"
+        ],
+        "changed_lines": {
+          "added": 155,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "local-lane-pipeline-audit fence at the merged head: a verdict per change, eight defect rows carrying file:line, and a WEST conclusion",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gates/local-lane-pipeline-audit.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T044444337248-n-sli-the-remaining-local-lane-landings-are-audited/manifest.md",
+        "scope_changed": false,
+        "session_id": "1d1fbc0c-ebf8-4eec-b806-44741739b4bf",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 28.999999999999996,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 143234,
+            "cache_creation_input_tokens_cumulative": 143234,
+            "cache_read_input_tokens": 4991828,
+            "cache_read_input_tokens_cumulative": 4991828,
+            "inference_geo": "not_available",
+            "input_tokens": 88,
+            "input_tokens_cumulative": 88,
+            "output_tokens": 47930,
+            "output_tokens_cumulative": 47930,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.126943999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.126943999999998
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T04:55:19.844Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4991828,
+          "cumulative_input_tokens": 5135150,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 625.437,
+          "generated_tokens": 47930,
+          "generation_seconds": 571.587,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 15.6,
+          "machine_seconds": 53.85,
+          "peak_input_tokens": 156266,
+          "tokens_per_second": 83.85,
+          "wall_tokens_per_second": 76.63
+        },
+        "follow_on_paths": [
+          "review/pipeline.py:1720-1721",
+          "docs/evidence/sn-lifecycle-integrity/parking-writer-reuse-map.md"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-sli-the-remaining-local-lane-landings-are-audited",
+          "session_id": "1d1fbc0c-ebf8-4eec-b806-44741739b4bf",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T04:55:19.844Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.985,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.985,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 2,
+          "missing": [
+            "e18c97cd0abf335c45cf98ee0dda147127577295"
+          ],
+          "message": "run 'r-20260921T044444337248-n-sli-the-remaining-local-lane-landings-are-audited' has a passing gate presenting 1 commit(s) of the 2 its manifest declares; missing: e18c97cd0abf335c45cf98ee0dda147127577295. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 50.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -159628,6 +159852,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2371
+    "_version": 2373
   }
 }
