@@ -930,6 +930,62 @@
     host class.</p>
   </section>
 
+  <section id="release-sibling-export-doubles-require-verdict">
+    <h2>Both sibling release doubles now require their gate verdict</h2>
+    <p><strong>The same defect in two directions, in two files.</strong>
+    <code>tests/standard_names/test_exclusion_report_is_reachable.py</code> returned a
+    <code>SimpleNamespace</code> carrying a hardcoded <code>all_gates_passed=True</code>, so a
+    test appended to the file inherited a passing export verdict without ever stating one.
+    <code>tests/standard_names/test_release_rehearsal_writes_nothing.py</code> returned a
+    <code>SimpleNamespace</code> with no verdict attribute at all, so the double could not
+    answer the gate question. In both files <code>_stub_exporter</code> now takes
+    <code>all_gates_passed</code> as a required keyword-only parameter with no default, and
+    every call site writes one. In the reachability file the runner helper
+    <code>_run_cut</code> also requires the verdict, so a test cannot reach the double
+    without writing one.</p>
+    <table>
+      <caption>Proof one &mdash; each file's passed count before and after the edit</caption>
+      <thead><tr><th>File</th><th>Before (base <code>9412a6c0e</code>)</th><th>After (<code>b17003315</code>)</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_exclusion_report_is_reachable.py</code></td><td>3 passed, exit 0</td><td>3 passed, exit 0</td></tr>
+        <tr><td><code>test_release_rehearsal_writes_nothing.py</code></td><td>5 passed, exit 0</td><td>5 passed, exit 0</td></tr>
+      </tbody>
+    </table>
+    <p>Both counts are unchanged, which is the point: this is scaffolding, so no test's
+    meaning moved. A changed count would have meant a test had started or stopped
+    exercising a verdict it did not before.</p>
+    <p><strong>The negative control removes the verdict from a call site.</strong> The
+    declared mutation was &ldquo;remove the hardcoded all_gates_passed value from the
+    _stub_exporter in tests/standard_names/test_exclusion_report_is_reachable.py and the file
+    fails with TypeError on the missing required argument&rdquo;. Dropping the argument from the
+    <code>_run_cut</code> &rarr; <code>_stub_exporter</code> call site fails with
+    <code>TypeError: _stub_exporter() missing 1 required keyword-only argument:
+    'all_gates_passed'</code>, exit 1, failing
+    <code>test_publish_commits_report_and_body_links_its_derived_address</code> and
+    <code>test_report_missing_from_checkout_refuses_the_request</code> &mdash; the refusal is
+    at the call, not inside a shared helper. The mutation was reverted and the file's
+    SHA-256 returned to <code>e63dc5af7465f43e80a554b7d4d5d9cdd535cf4635d7599991cf739de5a1edd8</code>.</p>
+    <p><strong>Proof three &mdash; no default survives, and every call site writes a
+    verdict.</strong> A grep over both factory signatures
+    (<code>def _stub_exporter(record, *, all_gates_passed):</code>) finds no <code>=</code>
+    default. Call sites updated: <code>test_exclusion_report_is_reachable.py</code> writes the
+    verdict at one <code>_stub_exporter</code> call site and at both of its
+    <code>_run_cut</code> call sites (3 in total);
+    <code>test_rehearsal_writes_nothing.py</code> writes it at its single
+    <code>_stub_exporter</code> call site (1).</p>
+    <p>Red log and focused logs:
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict/logs/</code>
+    (<code>negative_control_exclusion.log</code>, <code>before_exclusion.log</code>,
+    <code>after_exclusion.log</code>, <code>before_rehearsal.log</code>,
+    <code>after_rehearsal.log</code>).</p>
+    <p>No figure accompanies this result: the evidence is three tabular proofs (before/after
+    counts, one red type error, per-file call-site counts), which a table communicates
+    without turning tabular data into an image.</p>
+    <p class="r-meta">Worker: n-the-sibling-export-doubles-state-their-verdict &middot;
+    2026-09-21 &middot; commit <code>b17003315</code> &middot; focused gate on the login
+    host class.</p>
+  </section>
+
 </main>
 
 </body>
