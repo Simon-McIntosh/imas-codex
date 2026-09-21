@@ -1810,11 +1810,15 @@ def _collect_nearby_name_comparators(
     """Share a bounded nearby-name budget across the items in a batch.
 
     The first pass gives each item a share before a second pass spends any
-    remaining capacity. Results remain deduplicated by standard-name id.
+    remaining capacity. Results remain deduplicated by standard-name id. The
+    configured cap is a floor: above thirty items the comparator block grows
+    linearly with the batch because twenty items composing against no cohort
+    comparator at all is worse than twenty extra comparator lines in the prompt.
     """
     if not items or cap <= 0:
         return []
 
+    effective_cap = max(cap, len(items))
     search_names = search or _search_nearby_names
     results_by_item = [
         search_names(
@@ -1832,7 +1836,7 @@ def _collect_nearby_name_comparators(
         added = 0
         next_index = 0
         for result in item_results:
-            if len(nearby) >= cap:
+            if len(nearby) >= effective_cap or added >= per_item_allowance:
                 break
             next_index += 1
             result_id = result.get("id", "")
@@ -1840,22 +1844,20 @@ def _collect_nearby_name_comparators(
                 seen.add(result_id)
                 nearby.append(result)
                 added += 1
-            if len(nearby) >= cap or added >= per_item_allowance:
-                break
         next_result_indices.append(next_index)
 
-    if len(nearby) < cap:
+    if len(nearby) < effective_cap:
         for item_results, next_index in zip(
             results_by_item, next_result_indices, strict=True
         ):
             for result in item_results[next_index:]:
-                if len(nearby) >= cap:
+                if len(nearby) >= effective_cap:
                     break
                 result_id = result.get("id", "")
                 if result_id and result_id not in seen:
                     seen.add(result_id)
                     nearby.append(result)
-                if len(nearby) >= cap:
+                if len(nearby) >= effective_cap:
                     break
 
     return nearby
@@ -3787,7 +3789,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         batch: ExtractionBatch, lease_box: list[BudgetLease]
     ) -> list[dict] | None:
         # Search for nearby existing names with a bounded share per item.
-        nearby = _collect_nearby_name_comparators(batch.items)
+        nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch.items)
 
         # IDS-level context — collect for each IDS present in batch
         ids_names = sorted(
@@ -5651,7 +5653,7 @@ async def compose_batch(
     # leaf) to get semantically relevant nearby names. Deduplicate across
     # items, give each item a share, and cap at 30 total.
     group_key = batch[0].get("path", "").split("/")[0] if batch else ""
-    nearby = _collect_nearby_name_comparators(batch)
+    nearby = await asyncio.to_thread(_collect_nearby_name_comparators, batch)
 
     # ── IDS context ────────────────────────────────────────────────────
     ids_names = sorted(
