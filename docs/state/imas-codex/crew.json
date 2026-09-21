@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:11:43",
+  "updated": "2026-09-21T09:14:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -164209,6 +164209,236 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T061331427622-n-a-skipped-audit-does-not-look-clean",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-a-skipped-audit-does-not-look-clean",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1321,
+                "cached_input_tokens": 341791,
+                "input_tokens": 343114,
+                "output_tokens": 1769,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 344883,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm the defect reproduces before repairing it, and quote the reproduction: at imas_codex/standard_names/loop.py:1884 the attachment-consistency reconcile is skipped under skip_global_maintenance by substituting a default-constructed AttachmentAuditResult(), whose every field is zero or empty. The log line at loop.py:1890 then gates on attach_result.detached or attach_result.rejected and stays silent, and loop.py:1896 would report checked 0, so a run that never looked is shaped exactly like a run that looked and found nothing. Show a scoped-maintenance run producing a result indistinguishable from a clean audit, then repair it, then show the same run reporting that the audit did not run. The repair is specified: give AttachmentAuditResult a field recording whether the pass actually ran, defaulting to the value that means it ran so every existing construction site keeps its current meaning, construct the bypass value with that field set to not-run, and make every reader distinguish the two. Readers in scope are the log block at loop.py:1890 and _attachment_violation_rows in imas_codex/standard_names/provenance_rebuild.py:465. The bypassed run must emit a line saying the audit was skipped and why, rather than emitting nothing, because silence is what makes the skip invisible. A reader that reports or gates on the result must report not-audited rather than clean, and must never treat not-audited as a pass. The done-when is that a test under tests/standard_names/ constructs both a bypassed and a genuinely-clean result, asserts they are distinguishable through the new field and through what the readers emit for each, asserts the bypassed one is not reported as clean, and fails against the declared negative control -- and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. Six existing test files already exercise this surface -- test_scoped_global_maintenance.py, test_pool_orchestration_contracts.py, test_detachment_attribution.py, test_detachment_attribution_wiring.py, test_source_revival.py and test_pool_endpoint_failure_scope.py -- so expect the default to matter and read them before changing the dataclass. Do not remove or widen the bypass itself: the scoped bypass is deliberate and correct, and this node makes its effect visible rather than reversing it. A guard that passes its own test by weakening itself is worse than no guard. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 1.5,
+          "goal": "make a skipped attachment audit distinguishable from one that ran and found nothing",
+          "id": "n-a-skipped-audit-does-not-look-clean",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T06:13:32Z",
+            "read_at": "2026-09-21T06:13:33Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 2.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T061331427622-n-a-skipped-audit-does-not-look-clean/manifest.md",
+          "negative_control": "Set the scoped bypass result back to default audit_ran=True by removing audit_ran=False from its AttachmentAuditResult construction.",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/loop.py",
+            "imas_codex/standard_names/attachment_audit.py",
+            "imas_codex/standard_names/provenance_rebuild.py",
+            "tests/standard_names/test_skipped_audit_is_visible.py",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-bypassvisible",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T06:13:43Z",
+        "completed_at": "2026-09-21T06:41:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1656,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1656,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "509a4703dfbb5b02daf846d7774c20d0c2f93427",
+        "commits": [
+          "1a0b021645a4fb5a1f457343016b395a7b27754f",
+          "d24da5905d7afae4bd049d5b3c753d550b9ebe8b"
+        ],
+        "changed_lines": {
+          "added": 138,
+          "removed": 22,
+          "files": 6
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/ at the merged head, compared id-by-id against the same command on pristine main",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/skipped-audit-gate.log.delta",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "AttachmentAuditResult records whether the pass ran, the scoped bypass constructs it false, the pool run emits an explicit skipped line, and _attachment_violation_rows raises rather than serialising a not-audited result as clean. Zero added failures over an identical id set, passed 7497 to 7510. The independent opus review scored 85 and found the invariant incomplete one call site away: attachment_audit.py:2749's except branch returns a bare result, so an audit that RAISED is still serialised as clean and fully audited, and test_attachment_audit.py:3202 actively pins that equivalence green. It also named the systemic form, loop.py:1619's shared _global_maintenance_call, which returns the caller's default with no not-run marker for nine sibling maintenance passes. All three are outside this node's fence and are dispatched separately",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T061331427622-n-a-skipped-audit-does-not-look-clean/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c299-55f2-76b2-a95e-8e4be0a3e868",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15726336,
+            "cached_input_tokens_cumulative": 15726336,
+            "input_tokens": 15951145,
+            "input_tokens_cumulative": 15951145,
+            "output_tokens": 32905,
+            "output_tokens_cumulative": 32905,
+            "reasoning_output_tokens": 8831,
+            "reasoning_output_tokens_cumulative": 8831
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T06:41:19Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 5.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T06:41:19Z"
+            }
+          ],
+          "notional_cost_usd": 64.4627,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 14,
+            "evidence": 18,
+            "fit": 16,
+            "goal_fidelity": 17,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 85
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 15726336,
+          "cumulative_input_tokens": 31677481,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 41736
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-skipped-audit-does-not-look-clean",
+          "session_id": "01a0c299-55f2-76b2-a95e-8e4be0a3e868",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T06:41:19Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.985,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.985,
+          "at_complete": 0.985,
+          "verdict": "waived",
+          "reason": "two further nodes on this plan are still in flight and hold its HTML as a declared write path, so the coordinator advances impl once when the wave lands rather than writing the plan under live workers"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_skipped_audit_is_visible.py"
+          ],
+          "declaration": "Set the scoped bypass result back to default audit_ran=True by removing audit_ran=False from its AttachmentAuditResult construction.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T061331427622-n-a-skipped-audit-does-not-look-clean/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T061331427622-n-a-skipped-audit-does-not-look-clean/negative-control.log"
+        },
+        "tool_steps": 85.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -164521,6 +164751,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2414
+    "_version": 2415
   }
 }
