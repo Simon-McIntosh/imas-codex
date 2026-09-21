@@ -387,6 +387,42 @@
       list is the evidence.
     </p>
 
+    <h3 id="s3-roster-render">Landed: the catalog roster reaches the rendered prompt</h3>
+    <p>
+      The per-candidate comparator work below supplies the catalog roster through
+      the review context's <code>existing_names</code> variable. That is only half
+      the repair. Neither <code>sn/review_names</code> nor
+      <code>sn/review_docs</code> read the variable, and Jinja resolves an
+      undefined variable to nothing without raising, so the roster was assembled
+      and discarded on every batch with no error and no failing test. It is the
+      same fail-open shape as the discarded Layer 1 findings above: a value is
+      produced, a lookup returns nothing, and the caller proceeds as though it had
+      looked.
+    </p>
+    <p>
+      Measured on the base revision, a render of <code>sn/review_names</code> with
+      <code>existing_names=['MARKER_CATALOG_ROSTER_ENTRY']</code> produced 31,851
+      characters containing no occurrence of its own supplied roster entry, while
+      a marker name in the block that <em>did</em> exist rendered normally — the
+      failure is specific to this variable, not to rendering.
+    </p>
+    <p>
+      <strong>Repair.</strong> Commit <code>95366b716</code> adds a Catalog Roster
+      block to both templates, following the shape of the
+      <code>nearby_existing_names</code> block. <strong>Evidence.</strong> Two
+      parametrised cases call <code>render_prompt</code> for real and assert the
+      supplied id is a substring of the returned text, one per template. The test
+      asserts on rendered output rather than on a context dict or a stubbed
+      renderer, because the value is present in the context either way and only
+      the render distinguishes a read template from one that ignores it. The
+      negative control removes the block from both templates and both invalidate
+      the id's presence. The full <code>tests/standard_names/</code> suite on a
+      debug partition adds zero failures against a base run at the base revision.
+      What the measure does not establish is the instrument's behaviour on the
+      live graph: the test exercises the template, not a review run against the
+      catalog.
+    </p>
+
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 
     <p>
