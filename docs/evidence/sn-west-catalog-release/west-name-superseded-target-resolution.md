@@ -160,3 +160,87 @@ whole-label scan, no unbounded traversal, no cartesian product.
 - reverse lineage: **0 reachable names at any hop up to six**
 - No live end, so the repair mints. The spelling is retired and nothing was ever refined from it.
 - **Independently reproduced**, and it agrees with the peer's report of nothing at all. The agreement is worth stating precisely because an empty result is the answer that a wrong instrument would also give: the forward-looking `superseded_by` scalar is null here, as it is on all eight, so a forward traversal would have returned this same emptiness for every one of the six REDIRECTs above.
+
+## The seven accepted targets
+
+All seven are **ALREADY-LIVE** and need no resolution: each was read
+individually and each returned `name_stage = 'accepted'`, confirming the
+revision record's lookup. Each was also put through the same six-hop reverse
+traversal, and **all seven returned zero reachable successors** — which is the
+expected shape for a live end and is a second, independent confirmation that
+each is the current identity rather than a way-station. A name that had since
+been refined into something else would have shown a successor here even while
+its own stage still read accepted.
+
+| # | target | own stage | reverse-reachable successors | class |
+| --- | --- | --- | --- | --- |
+| 9 | `vertical_coordinate_of_measurement_position` | accepted | 0 | **ALREADY-LIVE** |
+| 10 | `vertical_coordinate_of_aperture` | accepted | 0 | **ALREADY-LIVE** |
+| 11 | `volume_of_plasma_boundary` | accepted | 0 | **ALREADY-LIVE** |
+| 12 | `toroidal_angle_of_toroidal_magnetic_field_probe` | accepted | 0 | **ALREADY-LIVE** |
+| 13 | `toroidal_angle_of_poloidal_magnetic_field_probe` | accepted | 0 | **ALREADY-LIVE** |
+| 14 | `volume_averaged_effective_charge` | accepted | 0 | **ALREADY-LIVE** |
+| 15 | `vertical_coordinate_of_x_point` | accepted | 0 | **ALREADY-LIVE** |
+
+All seven carry `status = 'draft'` against `name_stage = 'accepted'`. That is
+the catalog lifecycle field rather than the pipeline verdict and the two are
+independent — the first audit record established that `status` holds only
+`draft` and `superseded` across the whole graph, so `draft` here is the normal
+state of an accepted, unreleased name and is not a contradiction.
+
+## The three toroidal loci
+
+The revision record's split row 56 resolves the three bindings of
+`toroidal_angle_of_measurement_position`, and one of the audit halves had
+proposed a different spelling for the ECE binding. The graph was asked about
+all three spellings directly. It answers one of them outright and leaves the
+other two open, and the difference matters because only the first is a rename
+onto an identity that exists.
+
+### `toroidal_coordinate_of_measurement_position` — **the graph answers it**
+
+- **`toroidal_coordinate_of_measurement_position` is `superseded`** in the
+  graph, and its reverse lineage holds exactly one reachable name:
+  **`toroidal_angle_of_measurement_position`, accepted, at hop 1.**
+- So the audit row that proposed renaming `ece/channel/position/phi` from
+  `toroidal_angle_of_measurement_position` onto
+  `toroidal_coordinate_of_measurement_position` **is a rename onto a retired
+  identity**, and following that identity's lineage to its live end returns the
+  very name the proposal rejects. This is the same round-trip shape as the five
+  above.
+- **The base question is therefore answered by the graph rather than by
+  adjudication**: `toroidal_angle_of_measurement_position` is the live spelling
+  of this base, the `toroidal_coordinate` spelling was tried and retired, and
+  the revision record's decision to leave the ECE binding on
+  `toroidal_angle_of_measurement_position` is the one the graph already
+  records. No adjudication is required and none should be scheduled.
+- **Independently reproduced.** A peer reported this resolution; the traversal
+  was run from the target rather than from the peer's answer and agrees
+  exactly, at the same hop distance of 1.
+- **One discrepancy with the revision record, and it is in the record's favour.**
+  This spelling is *not* among the revision record's 15, because that record
+  resolved split row 56's ECE binding as a `keeps` and so never looked the
+  spelling up. It is a sixteenth already-present target of the *worklist's*
+  proposals, though not of the *revised* 59 — the revision had already dropped
+  the proposal, and the graph now independently confirms that drop was right.
+  The 15 is correct for the revised repair set; the record simply did not know
+  that the proposal it dropped pointed at a retired identity.
+
+### `toroidal_coordinate_of_toroidal_magnetic_field_probe` — **the graph leaves it open**
+
+- The identity **does not exist** in the graph at any stage: the single-row read
+  returns empty, against the two controls above.
+- So there is nothing to redirect and nothing retired to avoid. The spelling is
+  free to mint, and the choice between `toroidal_coordinate_of_*` and some other
+  form for a probe *position* is a naming decision the graph does not make.
+- It does contribute one fact: `toroidal_angle_of_toroidal_magnetic_field_probe`
+  is **accepted** (target 12) and denotes the probe's sensing *orientation*, a
+  physically different quantity. So the position spelling must differ from the
+  orientation spelling, and minting `toroidal_coordinate_of_*` collides with
+  nothing.
+
+### `toroidal_coordinate_of_poloidal_magnetic_field_probe` — **the graph leaves it open**
+
+- Also **does not exist** at any stage, and the same reasoning applies against
+  the accepted `toroidal_angle_of_poloidal_magnetic_field_probe` (target 13).
+- Both of these are ordinary mints. Neither is blocked and neither is settled.
