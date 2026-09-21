@@ -58,7 +58,12 @@ def _stub_exporter(record):
         sd = Path(staging_dir)
         (sd / "standard_names").mkdir(parents=True, exist_ok=True)
         (sd / "catalog.yml").write_text("catalog_name: t\n")
-        return SimpleNamespace(exported_count=len(review_batch))
+        # Export gates are scaffolding; these tests exercise release orchestration.
+        return SimpleNamespace(
+            exported_count=len(review_batch),
+            all_gates_passed=True,
+            gate_results=[],
+        )
 
     return exporter
 
@@ -464,7 +469,12 @@ def test_review_export_restores_approved_entry_bytes(
             approved_entry + "- name: plasma_current\n  unit: A\n",
         )
         (root / "catalog.yml").write_text("catalog_name: t\n", encoding="utf-8")
-        return SimpleNamespace(exported_count=2)
+        # Export gates are scaffolding; this test exercises baseline preservation.
+        return SimpleNamespace(
+            exported_count=2,
+            all_gates_passed=True,
+            gate_results=[],
+        )
 
     report = run_review_release(
         isnc_repo,
@@ -636,7 +646,12 @@ def test_review_assembly_reproduces_and_closes_sparse_baseline_failure(
             encoding="utf-8",
         )
         observed["before"] = approved_baseline_delta(isnc_repo, root)
-        return SimpleNamespace(exported_count=len(review_batch))
+        # Export gates are scaffolding; this test exercises sparse assembly.
+        return SimpleNamespace(
+            exported_count=len(review_batch),
+            all_gates_passed=True,
+            gate_results=[],
+        )
 
     report = run_review_release(
         isnc_repo,

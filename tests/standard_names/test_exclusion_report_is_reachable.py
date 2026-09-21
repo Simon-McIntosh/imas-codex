@@ -104,7 +104,12 @@ def _stub_exporter(record):
         # The export report must always be written; the publisher decides
         # whether the cut actually carries it.
         _write_export_report(sd)
-        return SimpleNamespace(exported_count=len(review_batch))
+        # Export gates are scaffolding; these tests exercise report reachability.
+        return SimpleNamespace(
+            exported_count=len(review_batch),
+            all_gates_passed=True,
+            gate_results=[],
+        )
 
     return exporter
 

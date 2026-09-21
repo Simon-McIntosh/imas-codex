@@ -51,7 +51,12 @@ def _exporter(**kwargs: object) -> SimpleNamespace:
     staging = Path(str(kwargs["staging_dir"]))
     (staging / "standard_names").mkdir(parents=True, exist_ok=True)
     (staging / "catalog.yml").write_text("catalog_name: test\n", encoding="utf-8")
-    return SimpleNamespace(exported_count=1)
+    # Export gates are scaffolding; these tests exercise checkout restoration.
+    return SimpleNamespace(
+        exported_count=1,
+        all_gates_passed=True,
+        gate_results=[],
+    )
 
 
 def _publisher(**kwargs: object) -> SimpleNamespace:
