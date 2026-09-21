@@ -5,6 +5,10 @@ Grouped review is the cohort axis: it reports the sibling families
 member count, drift and anchor, and it stops there. The read-only decision is
 the mutation ban, so one test makes the four harmonization apply helpers raise
 and shows the command still succeeds.
+
+The scoping options select individual identities and grouped review has no
+per-family equivalent for any of them, so supplying one is refused rather than
+across a run that reports every family under a scoped-looking invocation.
 """
 
 from __future__ import annotations
@@ -115,6 +119,69 @@ def test_grouped_target_reports_parent_members_drift_and_anchor(
     assert int(line.group(2)) == len(_MEMBERS)
     assert float(line.group(3)) == pytest.approx(family["drift"], abs=1e-3)
     assert line.group(4) == family["anchor"]
+
+
+@pytest.mark.parametrize(
+    ("option", "supplied"),
+    [
+        ("--ids", ["equilibrium"]),
+        ("--physics-domain", ["equilibrium"]),
+        ("--stage", ["accepted"]),
+        # The value equals the option's own default, so a comparison of
+        # values cannot see this one: only the parameter source can.
+        ("--stage", ["drafted"]),
+        ("--unreviewed", []),
+        ("--force", []),
+    ],
+)
+def test_grouped_target_refuses_scoping_it_cannot_honour(
+    monkeypatch: Any, option: str, supplied: list[str]
+) -> None:
+    """A scoping option the groups target cannot honour is refused by name."""
+    from imas_codex.cli.sn import sn
+
+    _install_family_graph(monkeypatch)
+
+    result = CliRunner().invoke(sn, ["review", "--target", "groups", option, *supplied])
+
+    assert result.exit_code == 2, result.output
+    assert option in result.output, result.output
+    # A refusal, not a rendered worklist under a scoped invocation.
+    assert "Grouped review:" not in result.output, result.output
+
+
+@pytest.mark.parametrize(
+    "supplied",
+    [
+        ["--ids", "equilibrium", "--force"],
+        ["--physics-domain", "equilibrium", "--unreviewed"],
+    ],
+)
+def test_grouped_target_names_every_scoping_option_supplied(
+    monkeypatch: Any, supplied: list[str]
+) -> None:
+    """Each supplied option is named, so the refusal is not first-match-only."""
+    from imas_codex.cli.sn import sn
+
+    _install_family_graph(monkeypatch)
+
+    result = CliRunner().invoke(sn, ["review", "--target", "groups", *supplied])
+
+    assert result.exit_code == 2, result.output
+    for option in [token for token in supplied if token.startswith("--")]:
+        assert option in result.output, result.output
+
+
+def test_grouped_target_succeeds_with_no_scoping_option(monkeypatch: Any) -> None:
+    """The refusal is not a blanket ban on the target itself."""
+    from imas_codex.cli.sn import sn
+
+    _install_family_graph(monkeypatch)
+
+    result = CliRunner().invoke(sn, ["review", "--target", "groups"])
+
+    assert result.exit_code == 0, result.output
+    assert "Grouped review:" in result.output, result.output
 
 
 def test_grouped_target_calls_none_of_the_apply_helpers(monkeypatch: Any) -> None:
