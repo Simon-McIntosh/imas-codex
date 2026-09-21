@@ -1620,9 +1620,7 @@ async def run_sn_pools(
         """Run one graph-wide maintenance function unless explicitly bypassed."""
         if skip_global_maintenance:
             function_name = (
-                getattr(fn, "__name__", None)
-                or getattr(fn, "_mock_name", None)
-                or type(fn).__name__
+                fn.__name__ if hasattr(fn, "__name__") else type(fn).__name__
             )
             logger.info(
                 "run_sn_pools: global maintenance bypassed — %s",

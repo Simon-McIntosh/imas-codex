@@ -7,7 +7,7 @@ import logging
 import pytest
 
 from imas_codex.standard_names.loop import summary_table
-from tests.standard_names.test_scoped_global_maintenance import _run_loop
+from tests.standard_names import test_scoped_global_maintenance as scoped_maintenance
 
 _LOOP_LOGGER = "imas_codex.standard_names.loop"
 
@@ -42,10 +42,24 @@ _BYPASSED_PASSES = (
 @pytest.mark.asyncio
 async def test_scoped_run_names_every_bypassed_maintenance_pass(
     caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     caplog.set_level(logging.INFO, logger=_LOOP_LOGGER)
 
-    summary, *_ = await _run_loop(skip_global_maintenance=True)
+    maintenance_mocks = scoped_maintenance._maintenance_mocks
+
+    def named_maintenance_mocks(stack):
+        mocks = maintenance_mocks(stack)
+        for function_name, function_mock in mocks.items():
+            function_mock.__name__ = function_name
+        return mocks
+
+    monkeypatch.setattr(
+        scoped_maintenance,
+        "_maintenance_mocks",
+        named_maintenance_mocks,
+    )
+    summary, *_ = await scoped_maintenance._run_loop(skip_global_maintenance=True)
 
     expected = list(_BYPASSED_PASSES)
     assert summary.bypassed_maintenance_passes == expected
