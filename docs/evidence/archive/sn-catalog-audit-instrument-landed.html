@@ -859,6 +859,71 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     and this record; logs under the run directory
     <code>terminal-cap-guard/</code>.</p>
   </section>
+
+  <section id="grouped-review-target">
+    <h2>Grouped review reads the harmonization worklist and never the apply half of that module</h2>
+
+    <p><strong>The cohort axis is where the two per-identity targets are blind.</strong>
+    A base split across two spellings, a family whose members disagree, an identity
+    bound to loci of different kinds: none of these is visible to a reader shown one
+    identity at a time. The detection already existed in
+    <code>imas_codex/standard_names/harmonize.py</code> and had no command-line
+    surface of any kind — <code>build_worklist</code> assembles sibling families by
+    <code>HAS_PARENT</code> or shared <code>physical_base</code>, computes a
+    deterministic drift over the members' opening signatures, and returns a
+    <code>parent</code>, <code>n</code>, <code>drift</code> and <code>anchor</code>
+    per family. It issues only <code>gc.query</code> reads.</p>
+
+    <p><strong>Repair.</strong> Commit <code>04b0794b4</code> adds
+    <code>groups</code> as a third value of <code>--target</code> on
+    <code>sn review</code>. The branch imports <code>build_worklist</code> from
+    that read-only surface and nothing else from that module; it renders one line
+    per family carrying the four fields, then the worklist as JSON, and returns
+    before any reviewer resolution, audit or state construction, so a grouped
+    review reaches no model and spends nothing.</p>
+
+    <p><strong>Evidence.</strong> <code>tests/standard_names/test_grouped_review_target.py</code>
+    patches <code>GraphClient</code> with a stand-in that serves only the family
+    query. One case asserts that <code>parent</code>, <code>members</code>,
+    <code>drift</code> and <code>anchor</code> reach the output — parsed out of the
+    JSON worklist and re-read from the rendered line, so the two forms have to
+    agree. The second case patches <code>mark_members_for_regen</code>,
+    <code>stamp_harmonized</code>, <code>mark_families_for_regen</code> and
+    <code>restamp_harmonized_families</code> to raise, calls each one directly to
+    show the ban is live rather than merely unexercised, and then runs the
+    command, requiring the run to succeed. Both cases pass
+    (<strong>2 passed</strong>). The negative control adds
+    <code>mark_families_for_regen()</code> to the groups branch: the run is then
+    rejected with the recorded
+    <code>AssertionError("grouped review must not mutate the graph")</code> and
+    <strong>2 failed</strong>, so the ban is what the passing run is resting on.
+    Logs and the raw CLI transcript are under
+    <code>sn-grouped/</code> in the dispatch run directory:
+    <code>focused_green.log</code>, <code>negative_control.log</code> and
+    <code>cli_transcript.txt</code>.</p>
+
+    <p><strong>What the measure does not establish.</strong> The GraphClient
+    patched here is a stand-in, so this node shows that the fields the command
+    prints are the fields <code>build_worklist</code> returns, not that a live
+    graph produces families to print. The <code>harmonized_group_signature</code>
+    filter inside <code>build_worklist</code> stays inert only because this target
+    never stamps; a live run is the only place that compatibility is observable.
+    Verifying the merged result against the real graph belongs to a separately
+    dispatched node.</p>
+
+    <figure>
+      <img src="/imas-codex/figures/sn-catalog-audit-instrument/grouped-review-target.svg"
+           alt="The grouped review target routes sn review --target groups into harmonize.build_worklist's read-only surface and emits one line per family plus a JSON worklist, while the four harmonization apply helpers are crossed out and never imported.">
+      <figcaption>The read side of <code>harmonize.py</code> under the new target, and the four apply helpers the read-only decision bans.</figcaption>
+    </figure>
+
+    <p class="r-meta">Worker:
+    <code>n-grouped-review-reads-families-without-writing-them</code>
+    &middot; 2026-09-21 &middot; <code>imas_codex/cli/sn.py</code> and
+    <code>tests/standard_names/test_grouped_review_target.py</code> at
+    <code>04b0794b4</code>; the figure under
+    <code>docs/figures/sn-catalog-audit-instrument/</code>.</p>
+  </section>
   </main>
 </body>
 </html>
