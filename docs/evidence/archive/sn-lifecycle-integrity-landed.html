@@ -983,6 +983,55 @@
     outside this node's write scope; verification at the merged revision remains a separately
     dispatched test node.</p>
 </section>
+  <section id="comparator-share-holds-at-production-batch-size">
+    <h2>Comparator sharing holds at the configured production batch width</h2>
+    <p><strong>The production-scale defect reproduced before repair.</strong>
+    <code>pyproject.toml</code> configures name-only batches at fifty items, and
+    <code>group_for_name_only</code> chunks dense bins at that width. The allocator still enforced
+    a fixed total of thirty: zero-contributor items measured <strong>0, 1, 2 and 170</strong> at
+    batch sizes 30, 31, 32 and 200. Replacing <code>max(1, cap // len(items))</code> with the bare
+    division produced byte-identical output at sizes 1, 5, 25, 30, 31, 40, 50 and 200 because the
+    allowance check ran after append. A fifty-search timing probe took 0.166 seconds and advanced
+    the event loop zero times while the synchronous helper ran.</p>
+
+    <table>
+      <thead><tr><th>Batch</th><th>Base contributors / total</th><th>Repaired contributors / total</th></tr></thead>
+      <tbody>
+        <tr><td>30</td><td>30 / 30</td><td>30 / 30</td></tr>
+        <tr><td>31</td><td>30 / 30</td><td><strong>31 / 31</strong></td></tr>
+        <tr><td>32</td><td>30 / 30</td><td>32 / 32</td></tr>
+        <tr><td>50 — configured production width</td><td>30 / 30</td><td><strong>50 / 50</strong></td></tr>
+        <tr><td>200</td><td>30 / 30</td><td>200 / 200</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Commit <code>f0a7c40b8</code> makes the bound honest at both scales.</strong> The
+    effective cap is <code>max(cap, len(items))</code>, retaining thirty as the small-batch floor
+    while granting every larger batch one line per item. The allowance remains derived from the
+    configured thirty-entry cap and is checked before append, so its one-result floor governs the
+    first pass rather than merely describing it. Both async compose call sites await
+    <code>asyncio.to_thread</code> around the unchanged synchronous helper, keeping fifty serial
+    graph searches off the event loop without changing the helper contract.</p>
+
+    <p><strong>The gate measures used results rather than eager work.</strong> The former assertion
+    that every description was searched is gone. The 31-item and 50-item cases instead require
+    every unique primary result to appear in the returned comparator set and require the total to
+    equal the effective cap. A separate source-shape assertion requires exactly two awaited thread
+    offloads and rejects a direct synchronous call in either async compose path. Four isolated
+    controls are red: fixing the effective cap back at thirty gives two failures; removing the
+    allowance floor gives two; replacing both offloads with direct calls gives one; and eagerly
+    searching the last item while discarding its result gives two. Each control log begins with its
+    applied mutation under
+    <code>~/.config/reckon/crew/runs/r-20260921T074102582326-n-the-comparator-share-holds-at-the-production-batch-size/</code>.</p>
+
+    <p><strong>The same full-suite measurement adds zero failures.</strong> On
+    <code>all_debug</code>, base <code>3a9d05502</code> returned 20 failed, 7,515 passed, 8 skipped,
+    326 deselected and 3 errors. Commit <code>f0a7c40b8</code> returned the identical 23 failure and
+    error identifiers with 20 failed, 7,517 passed, 8 skipped, 326 deselected and 3 errors. The two
+    additional passes are the production-width parameter cases; added terminal identifiers are
+    <strong>zero</strong>. Verification of the merged revision remains the separately dispatched
+    test node's responsibility.</p>
+  </section>
   <section id="defaulted-attributes-are-declared">
     <h2>A defaulted attribute must exist somewhere</h2>
     <p><strong>Guard.</strong> Commit <code>ba46a4708</code> adds
