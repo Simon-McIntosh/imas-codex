@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <title>Landed evidence | Catalog audit instrument | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Cumulative execution evidence &mdash; catalog audit instrument</h1>
+
+  <section id="review-pipeline-capability-gaps">
+    <h2>Two of the five defect classes are unreachable by any layer, and a sixth fail-open hides the Data Dictionary from the reviewer</h2>
+    <p>The five review modules and the <code>sn review</code> CLI surface, read against the
+    defect classes an independent audit found in the WEST cohort.</p>
+    <table>
+      <caption>Each WEST defect class against the layer that could reach it</caption>
+      <thead><tr><th>Defect class</th><th>Detectable?</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>redundant spelling at the same unit</td><td><strong>No, as built</strong></td>
+            <td>the semantic result is filtered by <code>rid in block_ids</code>, so a neighbour outside the block is discarded; thresholds are 0.92 semantic and 0.8 lexical Jaccard, above where distinct spellings of one quantity score</td></tr>
+        <tr><td>name asserts more than the DD text supports</td><td>Yes &mdash; Layer 2 only</td>
+            <td>needs <code>dd_source_docs</code>, whose supply can vanish silently &mdash; finding 1</td></tr>
+        <tr><td>name bound to the wrong object</td><td>Yes &mdash; Layer 2 only</td>
+            <td>same channel, same exposure</td></tr>
+        <tr><td>physics error in the modifier</td><td><strong>No</strong></td>
+            <td><code>physics_accuracy</code> is a <em>docs</em>-axis dimension only; a names-axis review is never asked</td></tr>
+        <tr><td>one identity, loci of different kinds</td><td><strong>No</strong></td>
+            <td>a property of the <em>set</em> of source paths; Layer 1 is per-record, Layer 3 sees only scores</td></tr>
+      </tbody>
+    </table>
+    <p><strong>CONFIRMED, and the costliest.</strong> <code>review/pipeline.py:737-740</code>
+    swallows every non-resolution exception from the DD source-doc fetch at
+    <code>debug</code>. <code>path_docs</code> stays empty and the consumer at
+    <code>:786-788</code> guards with <code>if docs:</code>, so <code>dd_source_docs</code>
+    is never set &mdash; no key, no marker. The batch is scored at full cost as though the
+    Data Dictionary had been read. A <em>partial</em> omission in the same function logs at
+    <code>warning</code> naming every path (<code>:711</code>), so the louder signal covers
+    the smaller failure. The hybrid comparator queueing is nested in the same branch, so one
+    swallowed exception removes two context channels.</p>
+    <p><strong>Two more CONFIRMED of the same shape:</strong> the version-history fetch
+    (<code>pipeline.py:769-770</code>), which loses the unit, sign-convention and COCOS notes
+    that decide whether a modifier still matches the DD; and the per-name semantic search in
+    duplicate detection (<code>audits.py:613-614</code>), after which a result is
+    indistinguishable from a genuine pass that found nothing. The comment at
+    <code>audits.py:571</code> reads &ldquo;Quick probe &mdash; don't fail if graph is
+    down&rdquo; above code containing no probe: the flag is set from the <em>import</em>
+    succeeding, which it does whether or not the service is up.</p>
+    <p><strong>Why nothing downstream noticed.</strong> Layer 3's detectors measure variance
+    within a group. A systematic blindness scores a whole class alike, and a variance
+    detector reports nothing from a uniform column &mdash; so consolidation is loudest when
+    scoring works and silent when it is blind.</p>
+    <p><strong>One hypothesis checked and refuted:</strong> the third duplicate-blocking pass
+    reads <code>geometric_base</code>, which the catalog query would plausibly have omitted,
+    making the pass a silent no-op. The query projects it (<code>sn.py:6046</code>), so the
+    pass fires. Recorded because the absence would have been invisible either way.</p>
+    <p>Seven sites of one shape in one pipeline: the durable fix is a report field every
+    audit must fill, not seven repairs. Full record:
+    <a href="/imas-codex/evidence/sn-catalog-audit-instrument/review-pipeline-capability-gaps">the
+    capability-gap review</a>.</p>
+    <p class="r-meta">Worker: n-the-review-pipeline-capability-gaps-are-named &middot;
+    2026-09-21 &middot; base revision <code>409809bff7538002648a5fd42a324f52a864b74b</code>.</p>
+  </section>
+
+</main>
+</body>
+</html>
