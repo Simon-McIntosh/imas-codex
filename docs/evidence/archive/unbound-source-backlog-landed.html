@@ -737,6 +737,65 @@
     commit <code>12f028f2b</code> &middot; host class <code>all_debug</code>.</p>
   </section>
 
+  <section id="release-verdict-must-be-readable">
+    <h2>An unreadable export verdict now refuses the release; 23 fixtures had relied on the permissive default</h2>
+    <p><strong>The defect reproduced before repair at
+    <code>21e94fec5fb02a64c5e1c92e9eef54890d0055ff</code>.</strong> The existing
+    <code>test_review_release_restores_clean_main_with_remote_refs</code> supplied an export
+    report containing only <code>exported_count=1</code>. The test passed and asserted
+    <code>report.errors == []</code>, <code>pushed is True</code>, and
+    <code>tag_pushed is True</code>: absence of <code>all_gates_passed</code> was therefore
+    observed crossing the gate and reaching publication, not inferred from a source read.</p>
+    <p>Commit <code>ce35cbf73</code> removes both permissive reads from the review-release
+    boundary. A report without <code>all_gates_passed</code> is refused with an error naming
+    that attribute. A report carrying <code>all_gates_passed=False</code> but no failed gate
+    is refused with a distinct error stating that the failure cause was not observed. A
+    report carrying a named failed gate keeps the existing
+    <code>Export quality gates failed: manifest_generability</code> refusal.</p>
+    <table>
+      <caption>Guard evidence on the debug partition</caption>
+      <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-repair three-case contract</td><td><strong>2 failed, 1 passed</strong>: missing verdict continued into assembly; empty failed-gate list emitted <code>unnamed export gate</code>; named failure already held</td></tr>
+        <tr><td>Repaired three-case contract</td><td><strong>3 passed</strong></td></tr>
+        <tr><td>Counterfactual: restore <code>getattr(..., True)</code></td><td><strong>1 failed</strong>, the missing-verdict refusal</td></tr>
+        <tr><td>Counterfactual: restore <code>unnamed export gate</code></td><td><strong>1 failed</strong>, the unattributed-failure refusal</td></tr>
+        <tr><td>Source restoration after both mutations</td><td>SHA-256 <code>01f5899292f9ff5cb63fac9f1752981bb1845a6a1ab6db6122830730f2b92825</code> before and after</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The full-suite stop fence fired.</strong> On <code>all_debug</code>, the base
+    recorded 20 failed, 7,523 passed and 3 errors across 23 failure/error ids. The repaired
+    commit recorded 43 failed, 7,503 passed and 3 errors across 46 ids. The original 23 ids
+    are unchanged; <strong>23 previously green tests turned red</strong>. That exceeds the
+    node's five-test limit, so none was repaired and the permissive default was not restored.
+    Every new red feeds the same invalid shape: a <code>SimpleNamespace</code> carrying an
+    <code>exported_count</code> but no <code>all_gates_passed</code> or
+    <code>gate_results</code>.</p>
+    <table>
+      <caption>Previously green tests grouped by the report double they feed</caption>
+      <thead><tr><th>Report input</th><th>Newly red tests</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_exclusion_report_is_reachable._stub_exporter</code>: <code>SimpleNamespace(exported_count=len(review_batch))</code></td><td><code>test_publish_commits_report_and_body_links_its_derived_address</code>; <code>test_report_missing_from_checkout_refuses_the_request</code></td></tr>
+        <tr><td><code>test_review_body_authored._exporter</code>: <code>SimpleNamespace(exported_count=1)</code></td><td><code>test_authored_body_reaches_pr_unchanged_apart_from_preview_line</code>; <code>test_synthesized_body_still_gets_exclusion_ledger_paragraph</code></td></tr>
+        <tr><td><code>test_review_release._stub_exporter</code> or an equivalent local exporter: <code>SimpleNamespace(exported_count=len(review_batch))</code> or <code>exported_count=2</code>, with no verdict fields</td><td><code>test_frozen_artifact_is_schema_valid_with_the_label</code>; <code>test_pr_target_fork_uses_origin_slug</code>; <code>test_real_run_writes_exactly_one_artifact_and_advances_candidate_once</code>; <code>test_review_assembly_reproduces_and_closes_sparse_baseline_failure</code>; <code>test_review_branch_transport_ignores_upstream_remote</code>; both <code>test_review_export_restores_approved_entry_bytes</code> parameters; <code>test_review_release_can_cut_and_tag_without_opening_pr</code>; <code>test_review_release_explicit_pr_text_wins_verbatim</code>; <code>test_review_release_full_flow</code>; <code>test_review_release_reclaims_branch_at_closed_pr_head</code>; <code>test_review_release_reclaims_branch_contained_in_main</code>; <code>test_review_release_refuses_branch_with_unique_commits</code>; <code>test_review_release_scopes_dd_caveats_to_batch_names</code>; <code>test_review_release_uses_injected_notes_builder</code>; <code>test_unavailable_dd_gap_read_is_visible_but_not_release_blocking</code></td></tr>
+        <tr><td><code>test_review_release_checkout._exporter</code>: <code>SimpleNamespace(exported_count=1)</code></td><td><code>test_review_release_restores_clean_main_with_remote_refs</code></td></tr>
+        <tr><td><code>test_review_release_preview_link._exporter</code>: <code>SimpleNamespace(exported_count=1)</code></td><td><code>test_release_names_missing_preview_link_invariant</code>; <code>test_release_writes_and_reads_back_exact_pr_preview_address</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Permissive-default inventory, deliberately not repaired here.</strong> The same
+    publication path still defaults absent exporter accounting fields at
+    <code>catalog_release.py:1695 total_candidates</code>, <code>:1696 exported_count</code>,
+    <code>:1697 exclusion_counts</code>, and <code>:1701 exclusion_records</code>; after
+    publication it treats absent publisher fields permissively at <code>:2096 errors</code>
+    and <code>:2100 commit_sha</code>. Their semantics and fixture fallout require separate
+    nodes rather than widening this one past its two specified reads.</p>
+    <p>No figure accompanies this record: the evidence is an exact mapping from report inputs
+    to refusal outcomes and test ids, for which the two tables are the natural representation.</p>
+    <p class="r-meta">Worker:
+    n-a-release-cannot-read-a-missing-verdict-as-a-pass &middot; 2026-09-21 &middot;
+    commit <code>ce35cbf73</code> &middot; host class <code>all_debug</code>.</p>
+  </section>
+
 </main>
 
 </body>
