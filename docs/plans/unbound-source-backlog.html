@@ -128,6 +128,56 @@
     <strong>7 worker-hours</strong>, down from 10.0. Full row set, queries and code reads:
     <a href="/imas-codex/evidence/unbound-source-backlog/plan-figure-audit">plan-figure-audit.md</a>.</p>
 
+    <h2 id="s6">&sect;6 &mdash; The gate chain now refuses the WEST cut, and two of its blockers are permanent</h2>
+
+    <p>The three export changes this sprint landed were audited before a cut, with the export test
+    files run rather than only read. <strong>None of them can admit a name a source does not
+    justify</strong> &mdash; the exposure this plan opened with is closed in that direction. The risk
+    that remains is the opposite one, and it is live: the chain refuses names and whole cuts that it
+    should carry.</p>
+
+    <p>The producing-source predicate (<code>617fdaca9</code>) is correct and is
+    <strong>SAFE-FOR-WEST</strong>; its live-child carve-out uses the same terminal-stage set as the
+    graph's own structural acceptance, verified against four independent sites. Its fail-closed
+    repair (<code>b161235bb</code>) and the manifest-generability instrument (<code>e0c2d5ef3</code>)
+    are each <strong>MUST-FIX-FIRST</strong>, for measured reasons rather than argued ones.</p>
+
+    <p><strong>The WEST manifest is ungenerable as it stands.</strong> Run over the 355 sources of
+    <code>v0.4.0rc7+west-task-2e</code>, the instrument reports <strong>330 carried, 25 uncarried,
+    <code>generable False</code></strong>, which fails <code>all_gates_passed</code> and refuses the
+    cut at both release sites. Two of the 25 are the <code>b_field_pol_probe/weight</code> and
+    <code>flux_loop/weight</code> constraints, refused because their backing Data Dictionary category
+    is <code>fit_artifact</code> &mdash; the class &sect;1 above calls correctly excluded. There is no
+    waived disposition in the mechanism set, so no amount of pipeline work makes this manifest pass;
+    the only route to green is removing sources from it. That is the invariant of
+    <code>f-usb-a-manifest-must-be-fully-generable</code> meeting a source that can never satisfy it,
+    and it needs a decision rather than a repair.</p>
+
+    <p><strong>The producer refusal empties a cut rather than dropping a name.</strong> Three of the
+    four red export tests are one event: a fixture population carrying <code>name_stage</code> but not
+    the producer flags is refused entirely, <code>exported_count</code> is <strong>0</strong>, no
+    catalogue file is written, and the exclusion ledger still closes and the accounting gate still
+    passes &mdash; because an empty cut accounts perfectly. A projection defect on this path now
+    presents as a silent empty catalogue, so <strong>a cut that emits zero names must refuse
+    itself</strong>. Re-opening the predicate to clear those reds would restore the fail-open the
+    repair closed and must not be done.</p>
+
+    <p><strong>Two mechanism labels are wrong, and both collapse a distinction the instrument exists
+    to preserve.</strong> <code>refusal_cause_not_recorded</code> is declared and returned nowhere:
+    the lost-cause sentinel is mapped to <code>composition_not_scheduled</code>, its opposite, and the
+    discriminator &mdash; the source's own status &mdash; is carried on the record and never read.
+    The trigger is a skipped source with no surviving cause, of which &sect;5 counts <strong>397</strong>
+    live. Separately a compose attempt cap reached before any identity exists is reported as a
+    recorded refusal, because the budget test reads only a terminal stage.
+    <code>gas_injection/valve/flow_rate</code> in WEST is an instance. A release reading
+    <code>recorded_refusal: 21</code> therefore concludes it waits on the grammar repository when at
+    least one of those waits on nothing and two will never close.</p>
+
+    <p>Full record, with every <code>file:line</code>, the triggering input for each of the five
+    defects and the test output that reproduces two of them:
+    <a href="/imas-codex/evidence/unbound-source-backlog/export-gate-audit">the export gate
+    audit</a>.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="skip-reason-enforcement" data-choice="refuse-at-write" data-by="reckon-ship" data-when="2026-09-17T15:01:32+00:00">
