@@ -157,3 +157,143 @@ contradicts the text that ships with it. `calorimetry_component` is also the loc
 cohort already uses twice, at row 11 and at the prior half's
 `coolant_absorbed_power_of_calorimetry_component`, so the fix reuses a settled spelling rather than
 minting one.
+
+### 16. `toroidal_coordinate_of_aperture` — **correct**
+
+- source path: `camera_x_rays/aperture/centre/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Azimuthal position of an aperture's geometric center around the machine symmetry axis, measured as the toroidal angle in the right-handed (R, φ, Z) frame.
+- This is the correct member of the split the prior half flagged as its finding 2. Rows 17 and 18 are the other two coordinates of this same point and they name a different object; this row is the one to keep.
+
+### 17. `radial_coordinate_of_measurement_position` — **INCORRECT**
+
+- source path: `camera_x_rays/aperture/centre/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate locating a measurement position by perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+| rejected | proposed |
+| --- | --- |
+| `radial_coordinate_of_measurement_position` | `radial_coordinate_of_aperture` |
+
+An aperture centre is a point on the **instrument**: a machined opening whose position is fixed by
+the hardware. A measurement position is where in the **plasma** a value was measured. The two are
+different loci, separated by the whole optical path, and a reader mapping the catalog onto a
+geometry would place a plasma sample point at the pinhole. This is not a new finding — the prior
+half named it as its finding 1 and could not judge it because the row fell outside the
+every-fourth draw. It falls inside this range, so it is judged here.
+
+The name is also self-contradicting inside its own data-dictionary container: row 16 spells the φ
+of this identical point `toroidal_coordinate_of_aperture`. A catalog cannot publish one point whose
+φ belongs to an aperture and whose R belongs to a measurement position.
+
+### 18. `vertical_coordinate_of_measurement_position` — **INCORRECT**
+
+- source path: `camera_x_rays/aperture/centre/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a generic measurement location, measured from the machine midplane along the Z direction of the right-handed cylindrical (R, φ, Z) frame.
+
+| rejected | proposed |
+| --- | --- |
+| `vertical_coordinate_of_measurement_position` | `vertical_coordinate_of_aperture` |
+
+The Z half of row 17, with the same distinction: the DD object is the vertical position of an
+aperture's geometric centre, and the name asserts a generic plasma measurement location. Together
+rows 16–18 are one point carrying two loci across three coordinates.
+
+### 19. `radial_coordinate_of_camera` — **correct**
+
+- source path: `camera_x_rays/camera/centre/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius location of a camera's geometric center, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 20. `vertical_coordinate_of_camera` — **correct**
+
+- source path: `camera_x_rays/camera/centre/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of the camera's geometric center, measured along Z in the right-handed cylindrical (R, φ, Z) frame.
+
+### 21. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `camera_x_rays/camera/line_of_sight/first_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+
+### 22. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `camera_x_rays/camera/line_of_sight/first_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+
+### 23. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `camera_x_rays/camera/line_of_sight/second_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+- note: **the defect is in the description, not the name** — the second occurrence of row 5's note, on a different IDS. The identity is bound to first, second and third points across the cohort; its description names only the first. One description fix serves all 14 bindings.
+
+### 24. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `camera_x_rays/camera/line_of_sight/second_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 25. `toroidal_coordinate_at_detector_pixel` — **INCORRECT**
+
+- source path: `camera_x_rays/camera/pixel_position/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Azimuthal coordinate locating the geometric center of each detector pixel in the right-handed cylindrical (R, φ, Z) frame.
+
+| rejected | proposed |
+| --- | --- |
+| `toroidal_coordinate_at_detector_pixel` | `toroidal_coordinate_of_detector_pixel` |
+
+The cohort uses the two prepositions for two different things, and this row uses the wrong one.
+`at_<locus>` marks a **field evaluated at** a named locus — `poloidal_magnetic_flux_at_plasma_boundary`
+(row 36), `poloidal_magnetic_flux_at_measurement_position` (row 45),
+`radiative_temperature_at_magnetic_axis` (row 49). `of_<object>` marks a **coordinate that locates**
+the object itself — `radial_coordinate_of_camera` (row 19), `radial_coordinate_of_detector_pixel`
+(row 26), `vertical_coordinate_of_detector_pixel` (row 27). A pixel's own φ locates the pixel, so it
+takes `of_`, which is exactly what its two siblings do. As spelled, the three coordinates of one
+pixel centre read as two different kinds of quantity.
+
+### 26. `radial_coordinate_of_detector_pixel` — **correct**
+
+- source path: `camera_x_rays/camera/pixel_position/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a detector pixel's geometric center, locating the pixel relative to the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 27. `vertical_coordinate_of_detector_pixel` — **correct**
+
+- source path: `camera_x_rays/camera/pixel_position/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Vertical coordinate locating the geometric center of an individual detector pixel in the right-handed cylindrical (R, φ, Z) frame.
+
+### 28. `temperature_of_soft_xray_detector` — **INCORRECT**
+
+- source path: `camera_x_rays/detector_temperature`
+- unit: `K` (data dictionary: `K`)
+- data-dictionary text: Temperature measured at the detector level
+- name description: Thermodynamic temperature of the soft X-ray detector assembly, describing its physical thermal state for calibration and monitoring rather than a plasma temperature inferred from radiation.
+
+| rejected | proposed |
+| --- | --- |
+| `temperature_of_soft_xray_detector` | `temperature_of_x_ray_detector` |
+
+Two defects, one dominant. The **band assertion is unsupported**: the path is in `camera_x_rays`,
+an X-ray imaging camera IDS that names no spectral band, while `soft_x_rays` and `hard_x_rays` are
+separate IDSs that do. Calling this detector a soft X-ray detector asserts a band membership
+nothing in the path or its documentation carries, and it would collide with a genuine
+`soft_x_rays` detector temperature if one were ever named. Second, `xray` is the minority spelling
+the prior half already rejected on `hard_xray_brightness`; the fix adopts `x_ray` in the same move.
