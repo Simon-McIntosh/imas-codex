@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T08:13:05",
+  "updated": "2026-09-21T08:13:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -641,6 +641,15 @@
           "{\"alias\":\"terra5.6\",\"backend\":\"codex-terra\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-terra\",\"sandbox\":\"worktree-full\"}": "01a07f48-973f-72a2-ae83-daa3aed4f5f8"
         },
         "created": "2026-09-07"
+      },
+      {
+        "id": "cx-bypassvisible",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "cx-catalogpin",
@@ -163000,6 +163009,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2404
+    "_version": 2405
   }
 }
