@@ -36,8 +36,9 @@ _CYPHER_LITERAL_OR_COMMENT = re.compile(
     r"/\*.*?\*/|//[^\n]*|'(?:\\.|''|[^'])*'|\"(?:\\.|\"\"|[^\"])*\"|`(?:``|[^`])*`",
     re.DOTALL,
 )
-_CYPHER_MUTATION_KEYWORDS = frozenset(
-    {"CREATE", "DELETE", "DROP", "MERGE", "REMOVE", "SET"}
+_CYPHER_MUTATION_CLAUSE = re.compile(
+    r"\b(?:CREATE|DELETE|DROP|MERGE|REMOVE|SET)\b",
+    re.IGNORECASE,
 )
 
 
@@ -46,16 +47,15 @@ def _cypher_mutation_clause(cypher: str) -> str | None:
 
     The clause is returned in upper case for reporting; ``None`` means the
     statement only reads.
+
+    The keyword is matched on word boundaries, so a keyword appearing as one
+    underscore-delimited part of an identifier -- ``catalog_merge_commit_sha``
+    tokenises to the segment ``merge`` -- does not report a read-only statement
+    as a mutation.
     """
     executable = _CYPHER_LITERAL_OR_COMMENT.sub(" ", cypher)
-    return next(
-        (
-            token
-            for token in re.findall(r"[A-Za-z]+", executable.upper())
-            if token in _CYPHER_MUTATION_KEYWORDS
-        ),
-        None,
-    )
+    match = _CYPHER_MUTATION_CLAUSE.search(executable)
+    return match.group(0).upper() if match else None
 
 
 class _WriteSuppressingRun:
