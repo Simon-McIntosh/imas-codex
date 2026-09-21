@@ -231,6 +231,43 @@
       <strong>230 distinct identities</strong>. The release unit is 230.
     </p>
 
+    <p><strong>A prior question was measured before any of these four land: can the rubric
+    express the defects at all?</strong> Reading the ten reviewer prompt files in
+    <code>imas_codex/llm/prompts/sn/</code> against the structured output models the reviewer must
+    fill, <strong>4 of 6 defect classes have both a dimension that expresses them and a field that
+    carries the correction</strong>. For two of those four the prompt's language is sharper than the
+    audit's own &mdash; source-fidelity is called "the <strong>#1 silent failure</strong>" and its
+    worked example is a strike-point path from this very cohort. So the rubric is mostly not why the
+    defects shipped, which supports the ordering above: the first two capabilities are repairs to
+    what the reviewer is <em>shown</em>, and that is where the constraint sits.</p>
+
+    <p><strong>Two classes are the exception, and they fail for opposite reasons.</strong> An
+    identity whose bindings span loci of different kinds has <strong>no dimension and no field</strong>:
+    the repair is two or three names and the model offers two single-string slots
+    (<code>revised_name</code>, <code>suggested_name</code>), neither addressed to a binding, so a
+    reviewer can only write prose into <code>issues</code> that nothing reads as a correction. That
+    is the class the name audit found 10 times over 24 bindings and called unrepairable by a reader
+    &mdash; the rubric agrees by construction. <strong>This is a capability the grouped-review target
+    above needs and does not yet have</strong>: grouped detection without a per-binding correction
+    field can find the cohort defect and still not report its repair. A documentation that
+    contradicts its own bindings has the opposite problem &mdash; both a dimension
+    (<code>physics_accuracy</code>) and a field (<code>revised_documentation</code>) are waiting,
+    but the docs prompt hands the reviewer the binding list under "dock if cited in output" where
+    the name prompt calls the same field the "authoritative bound-source cohort". One of those two
+    sentences is wrong about what bindings are for, and the measured
+    <code>vertical_coordinate_of_strike_point</code> case is what the disagreement costs.</p>
+
+    <p><strong>The ordinal convention is encoded and is backed in code, but reaches 3 of the 10
+    reviewer prompts and lands on no dimension.</strong> It is absent from every docs and
+    description prompt &mdash; where the audit's most-repeated description defect lives &mdash; and
+    a reviewer following it has no told place to dock, while the validator that clears an
+    unparseable suggestion does not clear an ordinal one because an ordinal-qualified name parses
+    cleanly. Full reading with every quoted line:
+    <a href="/imas-codex/evidence/sn-catalog-audit-instrument/review-rubric-expressiveness">the
+    rubric expressiveness record</a>, anchored in
+    <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#rubric-expressiveness">the
+    cumulative record</a>.</p>
+
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 
     <p>
