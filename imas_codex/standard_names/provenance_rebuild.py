@@ -464,6 +464,10 @@ _ADJUDICATION_KEYS = frozenset({"attachment_violations", "semantic_source_violat
 
 def _attachment_violation_rows(result: AttachmentAuditResult) -> list[dict[str, Any]]:
     """Serialize attachment findings for exact adjudication and reporting."""
+    if not result.audit_ran:
+        raise ValueError(
+            "attachment consistency was not audited; refusing to report it as clean"
+        )
     return [
         {
             "source_node_id": verdict.source_node_id,
