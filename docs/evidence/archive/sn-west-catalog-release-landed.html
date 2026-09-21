@@ -1078,6 +1078,16 @@
     86 rows of the first half, so the two halves sum rather than compare. No query
     was issued and no database opened: every row was already drawn into the cohort
     file by the first-half node.</p>
+</section>
+  <section id="west-name-audit-equilibrium-boundary-to-profiles">
+    <h2>The equilibrium half of the WEST cohort remainder &mdash; eight of fifty-one</h2>
+    <p>The <strong>51</strong> accepted-name bindings at cohort indices 52&ndash;102
+    of the remainder file &mdash; one contiguous region of the equilibrium IDS,
+    running from <code>equilibrium/time_slice/boundary/minor_radius</code> to
+    <code>equilibrium/time_slice/profiles_1d/rho_tor</code> &mdash; were judged
+    against the data-dictionary text of the path each is bound to, its unit and
+    its own description. Every row was already drawn from the live graph, so no
+    query was issued and no database opened.</p>
     <table>
       <thead>
         <tr><th>Measure</th><th>Value</th></tr>
@@ -1109,6 +1119,43 @@
     <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit-magnetics-to-spectrometer-visible">the
     magnetics-to-spectrometer name audit</a>, appended in three parts as the rows
     were judged and closed in a fourth.</p>
+        <tr><td>Rows judged (cohort indices 52&ndash;102, inclusive)</td><td><strong>51</strong></td></tr>
+        <tr><td>Correct</td><td>43</td></tr>
+        <tr><td>Incorrect, with a proposed spelling beside the rejected one</td><td><strong>8</strong> &mdash; <strong>15.7 %</strong> of 51</td></tr>
+        <tr><td>Correct + incorrect</td><td>51</td></tr>
+        <tr><td>Notes on correct rows, counted separately</td><td>6 &mdash; 2 description defects, 2 cohort-consistency follow-ons, 1 imprecision inherited from the data dictionary, 1 duplicate producer binding</td></tr>
+        <tr><td>Bound to the wrong object (2)</td><td><code>radial_coordinate_of_magnetic_axis</code> on an indexed node of the flux map's contour tree, where one equilibrium has one axis and the tree has many critical points; <code>volume_of_flux_surface</code> on the global scalar the DD calls the <strong>total plasma volume</strong>. Both identities are correct elsewhere &mdash; the remedy detaches a locus, it does not rename.</td></tr>
+        <tr><td>Not self-descriptive (5)</td><td><code>faraday_angle</code>, which needs its own description to supply the word &ldquo;rotation&rdquo;; <code>mhd_energy</code> for a DD quantity defined as <sup>3</sup>&frasl;<sub>2</sub>&int;p&nbsp;dV; <code>minimum_safety_factor</code>, whose sibling and whose own description both say the extremum is of the <em>magnitude</em>; and <code>radial_coordinate_at_inboard_midplane</code> with its outboard twin, which never say what the radius belongs to.</td></tr>
+        <tr><td>Minority spelling of a base the cohort already fixes (1)</td><td><code>line_integrated_electron_number_density</code> against eight <code>electron_density</code> names</td></tr>
+        <tr><td>Classes with no members here</td><td>2 &mdash; <em>asserts more than the data supports</em> and <em>one name, two quantities</em>. The block is one IDS of equilibrium geometry whose DD text mostly carries explicit formulas, so the over-claim shape does not arise.</td></tr>
+        <tr><td>Where the two-quantity class nearly had members</td><td>Rows 58&ndash;63 bind one identity across <code>measured</code> and <code>reconstructed</code> loci &mdash; the exact split-required shape. They are correct because the difference is provenance, which <code>provenance_verb_check</code> (<code>imas_codex/standard_names/audits.py:1215</code>) encodes. The guard was <strong>made to refuse</strong> rather than assumed: <code>reconstructed_poloidal_magnetic_field</code> against a path lacking the word returns <code>audit:provenance_verb_check: name contains 'reconstructed' but source path does not</code>, while the unqualified name returns clean at the same path.</td></tr>
+        <tr><td>Instrument control &mdash; the uniform unit column</td><td>Units agree on <strong>51 of 51</strong>. The same comparison over the whole 255-row remainder finds <strong>3 genuine disagreements</strong> (indices 152, 159, 198), so it can see a difference where one exists and its silence here is a result rather than a blind spot.</td></tr>
+        <tr><td>Instrument control &mdash; the empty parent-documentation column</td><td><code>dd_doc_parent</code> is null on all 51. It is populated on <strong>41 of the 255</strong> cohort rows, only where the leaf text is empty or the literal <code>Value</code>; no leaf here matches that predicate. Six rows (58&ndash;63) nevertheless carry near-contentless leaf text and say so in place rather than presenting a reading it does not support.</td></tr>
+        <tr><td>A finding no catalog reader can see</td><td>Cohort rows 67 and 68 are byte-identical but for <code>index</code> &mdash; one identity with two producer bindings to one source path, and the <strong>only</strong> duplicated <code>(name, path)</code> pair in the 255-row remainder. The 341 accepted bindings are 340 distinct ones.</td></tr>
+        <tr><td>Identities colliding outside this index range</td><td>23 of 51, recorded in place and adjudicated nowhere here; the whole-cohort sweep is the only vantage that sees all loci of a shared identity at once. Rows 64 and 79 are where a collision and a verdict interact, so the sweep needs those verdicts first.</td></tr>
+      </tbody>
+    </table>
+    <p>One name arrives better than it was left: the area derivative with respect
+    to poloidal flux carries exactly the spelling
+    <a href="/imas-codex/evidence/sn-west-catalog-release/the-flux-surface-area-derivative">the
+    flux-surface area derivative record</a> names as its intended target, from a
+    point at which the source had no standard name at all and the escalation to a
+    vendor-diverse composer seat had failed with grammar-invalid output. The gap
+    is closed, and closed on the intended name rather than on a near miss.</p>
+    <p>This block and the every-fourth sample are disjoint by construction, so the
+    rows sum: <strong>137 of 341 bindings judged, 18 incorrect, 13.1 %</strong>.
+    The rates do not sum in the same sense &mdash; 11.6 % comes from a
+    deterministic sample spread over 20 IDSs and estimates the cohort, while
+    15.7 % comes from one contiguous region of one IDS and estimates equilibrium
+    geometry naming. A cohort-wide rate should still be taken from the sample.</p>
+    <p>Per-row verdicts, each rejection's proposed spelling and the semantic
+    distinction behind it are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit-equilibrium-boundary-to-profiles">the
+    equilibrium half of the WEST name audit</a>, appended as each row was judged
+    and committed in three parts (<strong>89f2cf80e</strong>,
+    <strong>860b03d1b</strong>, <strong>59c90d62d</strong>). It matches the shape of
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit">the WEST
+    name audit</a> so the two halves sum rather than needing reconciliation.</p>
   </section>
 </main>
 </body>
