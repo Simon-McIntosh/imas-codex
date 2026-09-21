@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-status" content="active">
 </head>
 <body>
@@ -448,9 +448,26 @@
     where <code>unit_cap = max(k, batch_size)</code> and the semantic channel
     is capped at <code>min(max(k, batch_size), 60)</code>. At the defaults
     <code>k=10</code> over a 15-item batch the returned neighbourhood holds at
-    most <strong>30</strong> comparators; at the helper's 60-item ceiling,
-    <strong>120</strong>. The docstring previously called <code>k</code> a cap
-    while neither channel was capped at <code>k</code>.</p>
+    most <strong>30</strong> comparators. The docstring previously called
+    <code>k</code> a cap while neither channel was capped at <code>k</code>.</p>
+
+    <p><strong>What the reachable maximum actually is.</strong> This entry first
+    gave the maximum as 120, at &ldquo;the helper's 60-item ceiling&rdquo;. That
+    describes a state the command cannot reach, because the 60 is the ceiling on
+    the <em>semantic</em> channel rather than on the batch, and
+    <code>sn review</code> clamps the batch itself to 25
+    (<code>cli/sn.py:6084</code>). At that clamp with <code>k=10</code>,
+    <code>unit_cap</code> and <code>semantic_cap</code> are both 25, so the
+    reachable maximum through the CLI is <strong>50</strong>. The figure 120 is
+    reachable only by calling <code>build_neighborhood_context</code> directly
+    with a 60-item batch, which no caller does.</p>
+
+    <p>The unit channel has no absolute ceiling of its own: <code>unit_cap</code>
+    is <code>max(k, batch_size)</code> and grows with the batch. That is the
+    intended shape rather than a defect, since each candidate must keep at least
+    one unit-anchored comparator as the batch grows, but the bound is a function
+    of the batch and not a constant, and the batch clamp is what makes it finite
+    in practice.</p>
 
     <p><strong>Evidence that could have failed.</strong> Two focused tests in
     <code>tests/standard_names/test_review_comparator_budget.py</code> pin the
