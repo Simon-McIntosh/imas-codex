@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-18T19:51:10",
+  "updated": "2026-09-21T06:23:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5200,17 +5200,6 @@
           "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
         },
         "created": "2026-09-01"
-      },
-      {
-        "id": "session-e7007bcf7b2657baa55d",
-        "harness": "clive",
-        "role": "implement",
-        "session_id": "c38600e3-8944-46e7-86a1-7f90214ea9df",
-        "session_model": "deepseek-v4.1-flash",
-        "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "c38600e3-8944-46e7-86a1-7f90214ea9df"
-        },
-        "created": "2026-09-17"
       },
       {
         "id": "son-graphbase",
@@ -158959,8 +158948,22 @@
         "reason": "utilisation 92% with burn multiple 1.5x and projected exhaustion 2026-09-20T09:35:23Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-18T14:43:44Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-codex-20260921042221",
+        "backend": "codex",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-21T04:22:21Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 100.0,
+        "resets_at": "2026-09-21T05:57:32Z",
+        "effective_ceiling_pct": 92.0,
+        "reason": "utilisation 100% with burn multiple 1.0x and projected exhaustion 2026-09-21T05:56:37Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-21T04:22:19Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 2361
+    "_version": 2363
   }
 }
