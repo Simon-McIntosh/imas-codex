@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T00:14:54",
+  "updated": "2026-09-22T00:17:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -185180,6 +185180,264 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T215700385896-opus-review-of-the-stale-waiver-refusal",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "opus-review-of-the-stale-waiver-refusal",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1115,
+                "cached_input_tokens": 139018,
+                "input_tokens": 140135,
+                "output_tokens": 493,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 140628,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "the review for r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name stores a parsed record scoring all 5 dimensions in the range 0..20, and its justifications name a concrete triggering input for every defect claimed",
+          "estimated_hours": null,
+          "goal": "audit the landed stale-waiver refusal diff for whether the guard can wrongly admit, wrongly refuse, or be bypassed",
+          "id": "opus-review-of-the-stale-waiver-refusal",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T15:56:50.855Z",
+            "read_at": "2026-09-21T21:57:01Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 56.00000000000001
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T215700385896-opus-review-of-the-stale-waiver-refusal/manifest.md",
+          "negative_control": "",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-4994115311a2b7a92ac8",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-21T21:57:12Z",
+        "completed_at": "2026-09-21T22:05:21.645Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 480,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 489,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "750ce1b9da1a6cbd36160bdc5fc380f730da2327",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_waived_sources.py at the merged head",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T215700385896-opus-review-of-the-stale-waiver-refusal/waived-sources-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T215700385896-opus-review-of-the-stale-waiver-refusal/manifest.md",
+        "scope_changed": false,
+        "session_id": "063b1fdb-e758-4458-a36e-65a207b9fa47",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 92.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-22T01:20:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 130517,
+            "cache_creation_input_tokens_cumulative": 130517,
+            "cache_read_input_tokens": 2789665,
+            "cache_read_input_tokens_cumulative": 2789665,
+            "inference_geo": "not_available",
+            "input_tokens": 54,
+            "input_tokens_cumulative": 54,
+            "output_tokens": 30371,
+            "output_tokens_cumulative": 30371,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.4595475000000007,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.4595475000000007
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T22:05:21.645Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1486,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1825,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a3e5a7639d1fe0253ef607551787fd47c2689b15",
+                "aab072fa72cf2c4e233ff269e9b6c000b206d2da"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "4b6493329ada2923feb07eb63bfe334749ecd1b9745ad9140be1232a13553e2a",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan unbound-source-backlog --section '' --role review --spec-level exact --node review-of-n-a-stale-waiver-refuses-instead-of-hiding-a-name --goal 'attach an independent review to run r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name' --done-when 'the review for r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name.json --time-budget 45m --session ship-s10-20260918 --allow-unreconciled-runs --local",
+              "node": "n-a-stale-waiver-refuses-instead-of-hiding-a-name",
+              "phase": "starting",
+              "plan": "unbound-source-backlog",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1954,
+              "terminal_at": "2026-09-21T21:24:31Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-stale-waiver-refuses-instead-of-hiding-a-name"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2789665,
+          "cumulative_input_tokens": 2920236,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 485.556,
+          "generated_tokens": 30371,
+          "generation_seconds": 406.882,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 14.1,
+          "machine_seconds": 78.674,
+          "peak_input_tokens": 141332,
+          "tokens_per_second": 74.64,
+          "wall_tokens_per_second": 62.55
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "review role; the only write path is the reviews store, which is not a git tree",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/opus-review-of-the-stale-waiver-refusal",
+          "session_id": "063b1fdb-e758-4458-a36e-65a207b9fa47",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T22:05:21.645Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.96,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 31.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -185492,6 +185750,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2504
+    "_version": 2505
   }
 }
