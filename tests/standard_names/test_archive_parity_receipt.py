@@ -29,6 +29,7 @@ def _apply_authority(
     *,
     archive_roles: dict[str, dict[str, int]],
     edges: list[dict[str, Any]] | None = None,
+    graph_counterparts: dict[tuple[str, str], dict[str, Any]] | None = None,
     extra_counts: dict[tuple[str, str], int] | None = None,
 ) -> dict[str, Any]:
     path = tmp_path / "authority.json"
@@ -36,6 +37,7 @@ def _apply_authority(
         path, _authority(edges=edges, archive_roles=archive_roles)
     )
     graph = _ArchiveGraph()
+    graph.counterparts.update(graph_counterparts or {})
     graph.extra_counts.update(extra_counts or {})
     preview = _preview(graph, path, file_hash, payload_hash)
     assert preview["outcome"] == "would_apply", preview["refusals"]
@@ -98,16 +100,17 @@ def test_archive_census_wins_when_it_disagrees_with_the_closure(
             "owner_id": "archived_temperature",
             "relationship_type": "HAS_UNIT",
             "direction": "outgoing",
-            "counterpart_id": "unit:eV",
-            "properties": {"source": source},
+            "counterpart_id": unit_id,
+            "properties": {"source": "archive"},
         }
-        for source in ("archive-primary", "archive-secondary")
+        for unit_id in ("unit:eV", "unit:keV")
     ]
 
     receipt = _apply_authority(
         tmp_path,
         archive_roles={"archived_temperature": {"HAS_UNIT": 1}},
         edges=edges,
+        graph_counterparts={("Unit", "unit:keV"): {"properties": {"id": "unit:keV"}}},
     )
 
     assert receipt["identity_role_parity"]["archived_temperature"]["HAS_UNIT"] == {

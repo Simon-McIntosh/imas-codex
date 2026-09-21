@@ -61,14 +61,14 @@ class _Transaction:
             relationship_type = re.search(r"\[relationship:([A-Z_]+)\]", cypher).group(
                 1
             )
-            edge = (
-                params["start_id"],
-                relationship_type,
-                params["end_id"],
-                params["properties"],
-            )
-            if edge not in self.graph.edges:
-                self.graph.edges.append(edge)
+            edge_key = (params["start_id"], relationship_type, params["end_id"])
+            for index, edge in enumerate(self.graph.edges):
+                if edge[:3] == edge_key:
+                    properties = deepcopy(edge[3])
+                    properties.update(deepcopy(params["properties"]))
+                    self.graph.edges[index] = (*edge_key, properties)
+                    return [{"count": 1}]
+            self.graph.edges.append((*edge_key, deepcopy(params["properties"])))
             return [{"count": 1}]
         if "archive-reconstruction-edge-counts" in cypher:
             return [
@@ -219,6 +219,29 @@ def test_signed_archive_reconstruction_creates_identity_and_allowlisted_edges(
     assert graph.edges == [
         ("archived_temperature", "HAS_UNIT", "unit:eV", {"source": "archive"})
     ]
+
+
+def test_duplicate_edge_rows_follow_merge_identity_and_refuse_false_count(
+    tmp_path: Path,
+) -> None:
+    """Relationship properties do not create a second edge with the same key."""
+    edges = [
+        {
+            "owner_id": "archived_temperature",
+            "relationship_type": "HAS_UNIT",
+            "direction": "outgoing",
+            "counterpart_id": "unit:eV",
+            "properties": {"source": source},
+        }
+        for source in ("first", "second")
+    ]
+    path = tmp_path / "duplicate-edge-authority.json"
+    file_hash, payload_hash = _write_authority(path, _authority(edges=edges))
+    graph = _ArchiveGraph()
+    preview = _preview(graph, path, file_hash, payload_hash)
+
+    with pytest.raises(SignedManifestConflict, match="counts differ"):
+        _apply(graph, path, file_hash, payload_hash, preview["manifest_sha256"])
 
 
 def test_signed_archive_reconstruction_creates_allowlisted_counterparts(
