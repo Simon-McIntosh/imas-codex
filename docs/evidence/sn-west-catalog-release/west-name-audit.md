@@ -485,3 +485,195 @@ the literal string `Value`, the parent container's documentation is used
 - data-dictionary text: Height
 - name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
 
+### 61. `lower_bound_photon_energy` — **correct**
+
+- source path: `soft_x_rays/channel/energy_band/lower_bound`
+- unit: `eV` (data dictionary: `eV`)
+- data-dictionary text: Lower bound of the energy band
+- name description: Lower boundary of an X-ray photon-energy band, specifying the minimum photon energy included in the defined detection or emission band.
+
+### 62. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `soft_x_rays/channel/line_of_sight/first_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 63. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `soft_x_rays/channel/line_of_sight/second_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+
+### 64. `voltage_of_mass_spectrometer_channel` — **INCORRECT**
+
+- source path: `spectrometer_mass/channel/photomultiplier_voltage`
+- unit: `V` (data dictionary: `V`)
+- data-dictionary text: Voltage applied to the photomultiplier
+- name description: Signed bias potential applied between the photomultiplier detector electrode and its electronics reference for one mass-resolved channel, setting ion-signal gain.
+- **rejected spelling** `voltage_of_mass_spectrometer_channel` → **proposed spelling** `photomultiplier_voltage_of_mass_spectrometer_channel`
+- why: The DD source is `photomultiplier_voltage` — the bias applied to the photomultiplier. A mass-spectrometer channel carries several distinct voltages (ion-source, quadrupole/analyser, detector bias), so `voltage_of_mass_spectrometer_channel` does not identify which one and cannot be resolved by a reader without opening the DD path. The description already knows the answer ("bias potential applied between the photomultiplier detector electrode and its electronics reference").
+
+### 65. `wavelength_of_spectral_line` — **correct**
+
+- source path: `spectrometer_visible/channel/grating_spectrometer/processed_line/wavelength_central`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Central wavelength of the processed line
+- name description: Characteristic vacuum wavelength assigned to an atomic, ionic, molecular, or nuclear spectral transition, identifying its central line position.
+
+### 66. `cold_neutral_temperature` — **correct**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/cold_neutrals_temperature`
+- unit: `eV` (data dictionary: `eV`)
+- data-dictionary text: Temperature of cold neutrals for this isotope
+- name description: Translational kinetic temperature, expressed as energy per particle, of the cold neutral population, based on random translational motion after removal of its bulk flow.
+
+### 67. `atomic_number` — **correct**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/element/z_n`
+- unit: `1` (data dictionary: `e`)
+- data-dictionary text: Nuclear charge
+- name description: Nuclear proton count identifying the selected element in a plasma or neutral-particle species, independent of isotope and ionization state.
+- note: Name correct. The unit disagrees with the DD: the standard name carries `1` and the DD carries `e`. Atomic number is a proton count and dimensionless, so the standard name is the defensible side of the disagreement.
+
+### 68. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `spectrometer_visible/channel/line_of_sight/first_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+
+### 69. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `spectrometer_visible/channel/line_of_sight/second_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 70. `gap_at_closest_wall_point` — **correct**
+
+- source path: `summary/boundary/gap_limiter_wall/value`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Distance between the separatrix and the nearest limiter or wall element
+- name description: Minimum geometric clearance between the plasma separatrix and the nearest limiter or wall element, evaluated at the closest-wall point.
+
+### 71. `vertical_coordinate_of_magnetic_axis` — **correct**
+
+- source path: `summary/boundary/magnetic_axis_z/value`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Z position of the magnetic axis
+- name description: Signed vertical Z coordinate of the magnetic axis in the right-handed cylindrical (R, φ, Z) frame, marking the interior extremum organizing nested magnetic flux surfaces.
+
+### 72. `radial_coordinate_of_strike_point` — **INCORRECT**
+
+- source path: `summary/boundary/strike_point_outer_r/value`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: R position of the outer strike point
+- name description: Major-radius location of an individual magnetic strike point where a separatrix leg intersects a divertor target, expressed in the right-handed cylindrical (R, φ, Z) frame.
+- **rejected spelling** `radial_coordinate_of_strike_point` → **proposed spelling** `radial_coordinate_of_outer_strike_point`
+- why: This one name is bound to **two different DD paths**: `summary/boundary/strike_point_inner_r/value` and `summary/boundary/strike_point_outer_r/value` (and `vertical_coordinate_of_strike_point` likewise covers both `_inner_z` and `_outer_z`). The inner and outer strike points are physically distinct locations on opposite divertor legs, with different heat flux, different geometry and different control significance. A published catalog entry that resolves to either is not a standard name — the pair must be `radial_coordinate_of_inner_strike_point` and `radial_coordinate_of_outer_strike_point`.
+
+### 73. `radial_coordinate_of_x_point` — **INCORRECT**
+
+- source path: `summary/boundary/x_point_main/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate locating the main X-point, the poloidal magnetic-field null that defines the separatrix in an equilibrium.
+- **rejected spelling** `radial_coordinate_of_x_point` → **proposed spelling** `radial_coordinate_of_primary_x_point`
+- why: The two coordinates of one DD container disagree with each other: `summary/boundary/x_point_main/r` is `radial_coordinate_of_x_point` while `summary/boundary/x_point_main/z` is `vertical_coordinate_of_**primary**_x_point`. One container, one locus, two spellings — so at most one is right, and the DD's own qualifier (`_main`) says the qualified spelling is. An unqualified `x_point` is also wrong on its own terms in a double-null-capable machine description, where secondary X-points exist.
+
+### 74. `total_neutral_source_rate_due_to_gas_injection` — **correct**
+
+- source path: `summary/gas_injection_rates/total/value`
+- unit: `s^-1` (data dictionary: `s^-1`)
+- data-dictionary text: Total gas injection rate (sum over species)
+- name description: Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.
+
+### 75. `normalized_toroidal_beta` — **correct**
+
+- source path: `summary/global_quantities/beta_tor_norm_mhd/value`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Normalised toroidal beta, using the pressure determined by an equilibrium reconstruction code
+- name description: Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.
+
+### 76. `plasma_current` — **correct**
+
+- source path: `summary/global_quantities/ip/value`
+- unit: `A` (data dictionary: `A`)
+- data-dictionary text: Total plasma current
+- name description: Net toroidal electric current carried by the entire plasma column, obtained by integrating toroidal current density over its enclosed poloidal cross-section.
+
+### 77. `total_plasma_radiated_power` — **correct**
+
+- source path: `summary/global_quantities/power_radiated/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Radiated power
+- name description: Total plasma radiated power is the electromagnetic power emitted by the full plasma, summed over all photon-emission mechanisms and integrated over the plasma volume.
+
+### 78. `reference_major_radius` — **correct**
+
+- source path: `summary/global_quantities/r0/value`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Reference major radius where the vacuum toroidal magnetic field is given (usually a fixed position such as the middle of the vessel at the equatorial midplane)
+- name description: Nonnegative perpendicular distance from the toroidal symmetry axis to a designated reference location, serving as the major-radius coordinate where the vacuum toroidal magnetic field is specified in the right-handed cylindrical (R, φ, Z) frame.
+
+### 79. `volume_of_plasma_boundary` — **correct**
+
+- source path: `summary/global_quantities/volume/value`
+- unit: `m^3` (data dictionary: `m^3`)
+- data-dictionary text: Volume of the confined plasma
+- name description: Volume enclosed by the plasma boundary, representing the total confined-plasma region inside the last closed magnetic flux surface.
+- note: Same enclosed-volume convention as `volume_of_flux_surface`; consistent with the family.
+
+### 80. `total_power_due_to_ion_cyclotron_heating` — **INCORRECT**
+
+- source path: `summary/heating_current_drive/power_ic/value`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Total IC power coupled to the plasma
+- name description: Total ion-cyclotron radio-frequency power launched into the vacuum vessel by the complete heating-antenna system, summed over all antennas.
+- **rejected spelling** `total_power_due_to_ion_cyclotron_heating` → **proposed spelling** `total_coupled_power_due_to_ion_cyclotron_heating`
+- why: The DD text says "Total IC power **coupled to the plasma**", while the name's description says "launched into the vacuum vessel" — those are separated by the coupling efficiency and differ by the power reflected or dissipated in the antenna and vessel structure. The cohort's sibling `net_power_due_to_ion_cyclotron_heating` is bound to `ic_antennas/antenna/power_launched` and genuinely is launched power, so the two names are one word apart from being indistinguishable while denoting quantities that are routinely 10-30 % apart.
+
+### 81. `line_averaged_effective_charge` — **correct**
+
+- source path: `summary/line_average/zeff/value`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Effective charge
+- name description: Dimensionless line-averaged effective ionic charge of a plasma mixture, obtained by averaging local effective charge along a prescribed plasma line of sight.
+
+### 82. `toroidal_magnetic_field_at_magnetic_axis` — **correct**
+
+- source path: `summary/local/magnetic_axis/b_field_tor/value`
+- unit: `T` (data dictionary: `T`)
+- data-dictionary text: Toroidal magnetic field
+- name description: Toroidal magnetic field at the magnetic axis is the signed toroidal component of the total equilibrium magnetic field at the magnetic axis in the right-handed cylindrical (R, φ, Z) frame. It includes externally applied vacuum-field and plasma-current-generated contributions.
+
+### 83. `safety_factor_at_magnetic_axis` — **correct**
+
+- source path: `summary/local/magnetic_axis/q/value`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Safety factor
+- name description: Limiting signed field-line winding number on the innermost closed flux surface, giving toroidal turns per poloidal circuit at the magnetic axis.
+
+### 84. `breakdown_initial_time` — **correct**
+
+- source path: `summary/time_breakdown/value`
+- unit: `s` (data dictionary: `s`)
+- data-dictionary text: Time of the plasma breakdown
+- name description: Timestamp at which plasma breakdown begins and discharge current starts to flow.
+
+### 85. `radial_outline_of_limiter_tile` — **correct**
+
+- source path: `wall/description_2d/limiter/unit/outline/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate R locating each point on the boundary outline of a plasma-facing limiter tile in the right-handed cylindrical (R, φ, Z) frame.
+
+### 86. `vertical_outline_of_plasma_facing_component` — **correct**
+
+- source path: `wall/description_2d/mobile/unit/outline/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: The vertical coordinate of each point on a plasma-facing component boundary outline is the signed height in the right-handed cylindrical (R, φ, Z) frame.
+
