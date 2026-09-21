@@ -1,6 +1,6 @@
 # Resolving the already-present repair targets to their live ends
 
-provisional: true — rows are being appended as each target is resolved and the result table is not yet closed.
+provisional: false — all 15 targets carry a class, the four classes sum to 15, and the result table is closed.
 
 [The ordinal revision](west-name-repair-worklist-ordinal-revision) found that
 **15 of the 61 proposed repair targets already exist** in the graph — 7 at
@@ -244,3 +244,90 @@ onto an identity that exists.
 - Also **does not exist** at any stage, and the same reasoning applies against
   the accepted `toroidal_angle_of_poloidal_magnetic_field_probe` (target 13).
 - Both of these are ordinary mints. Neither is blocked and neither is settled.
+
+## The lineages
+
+![Reverse REFINED_FROM lineage of each superseded repair target: the target at hop zero, intermediate superseded names along the chain, and the accepted live end with its hop distance, with the five round trips marked](/imas-codex/figures/sn-west-catalog-release/superseded-target-lineage.png)
+
+The figure carries the one thing a table cannot: **hop distance is evidence
+strength.** Four of the six redirects land at hop 1, where the target and its
+live end are adjacent and the resolution is as strong as the edge itself. One
+lands at hop 2 and one at hop 5, and the five-hop chain is the weakest claim
+in this record — it is trusted because the chain is linear with no branch and
+every intermediate is superseded, not because five hops is close.
+
+## Result
+
+| class | count | targets |
+| --- | --- | --- |
+| **ALREADY-LIVE** | **7** | the seven accepted targets, each with zero reverse-reachable successors |
+| **REDIRECT** | **6** | `ipb98y2_confinement_enhancement_factor`, `hot_neutral_temperature`, `line_integrated_electron_density`, `thermal_electron_pressure`, `toroidal_coordinate_of_detector_pixel`, `radial_coordinate_of_aperture` |
+| **ADJUDICATE** | **0** | no target reached more than one live end |
+| **MINT** | **2** | `radial_outline_of_plasma_facing_component`, `radial_coordinate_of_toroidal_magnetic_field_probe` |
+| **the four classes, summed** | **15** | reconciling against the 15 already-present targets |
+
+| | count |
+| --- | --- |
+| revised repairs in the ordinal revision | **59** |
+| **repairs whose target string can no longer be applied literally** | **7** |
+| target strings involved in those 7 repairs | **8** — split row 55 carries two of them |
+| of those 8, resolving to a live end that is the repair's own rejected spelling | **5** |
+| of those 8, resolving to a genuinely different live end | **1** — `radial_coordinate_of_aperture` → `radial_coordinate_of_diagnostic_aperture` |
+| of those 8, resolving to no live end and therefore minting | **2** |
+| live ends found at hop 1 | 4 of 6 |
+| live ends found at hop 2 or beyond | 2 of 6 — one at hop 2, one at hop 5 |
+| graph statements issued | 21, all reads, **0.137 s** in total |
+| graph writes issued | **0** |
+
+**The seven repairs whose target cannot be applied literally** are rename rows
+11, 17, 18, 29, 38 and 42 of the worklist, plus split row 55, which carries two
+superseded targets on its own. Every other one of the 59 either targets an
+accepted identity or mints an absent one, and needs nothing from this record.
+
+### Five of the six redirects are round trips, and that is the finding
+
+Only one of the six redirects behaves the way a redirect is supposed to. The
+other five resolve to the exact spelling their own repair rejects:
+
+| repair | rejects | proposes | its target's live end |
+| --- | --- | --- | --- |
+| row 11 | `energy_confinement_enhancement_factor` | `ipb98y2_confinement_enhancement_factor` | **`energy_confinement_enhancement_factor`** |
+| row 17 | `hot_neutral_temperature_at_plasma_boundary` | `hot_neutral_temperature` | **`hot_neutral_temperature_at_plasma_boundary`** |
+| row 18 | `line_integrated_electron_number_density` | `line_integrated_electron_density` | **`line_integrated_electron_number_density`** |
+| row 38 | `thermal_electron_pressure_at_post_sawtooth_crash` | `thermal_electron_pressure` | **`thermal_electron_pressure_at_post_sawtooth_crash`** |
+| row 42 | `toroidal_coordinate_at_detector_pixel` | `toroidal_coordinate_of_detector_pixel` | **`toroidal_coordinate_at_detector_pixel`** |
+
+Resolving the target under the governing rule hands each of these repairs back
+its own starting point, so **each is a no-op that reverses a decision the
+pipeline already recorded.** Whether the audits were right and the pipeline
+wrong is a question about the names, and this record does not answer it — it
+establishes that these five cannot be executed as renames, because the
+identity they would rename onto is retired and the live end of that identity
+is the name they would rename away from.
+
+**The right reading is not that the audits were wrong.** An audit that rejects
+a spelling without seeing that the catalog already tried and retired the
+alternative is making a real argument against the current name; what it cannot
+see is that the argument has been had. The remedy for these five is an
+adjudication between the audit's reasoning and the pipeline's recorded
+decision — which is a different piece of work from applying a rename, and it
+belongs to whoever owns the repair schedule.
+
+**The one genuine redirect is worth its own line**, because it is what all six
+were assumed to be: `radial_coordinate_of_aperture` is retired and its live end
+is the third spelling `radial_coordinate_of_diagnostic_aperture`, which neither
+the worklist's rejected name nor its proposed name mentions. Split row 55's
+aperture binding lands there and the repair remains applicable once its target
+string is rewritten.
+
+### What the instrument choice was worth
+
+Had this record used the forward-looking fields — `superseded_by`,
+`HAS_SUCCESSOR`, `SUPERSEDES` — all eight superseded targets would have
+returned empty, because `superseded_by` is null on all eight and the three
+forward mechanisms together hold 69 edges against `REFINED_FROM`'s 1850. The
+record would have read **0 REDIRECT, 8 MINT**, and eight repairs would have
+been sent to mint spellings the catalog can in six cases already resolve. The
+two genuine MINTs would have been right for the wrong reason, which is the
+part that makes the error hard to catch: a wrong instrument agreed with the
+correct answer on exactly the two rows where the correct answer was *nothing*.
