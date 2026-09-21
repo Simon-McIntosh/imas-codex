@@ -1064,6 +1064,39 @@
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260917T103407462401-review-of-n-audit-paid-identity-deletion-protection-headline-figures-are-remeasured" data-who="reckon-ship" data-when="2026-09-17T12:07:53.462Z">
     <div class="r-comment-body"><p>Independent review stored and re-verified: 5/5 dimensions, absent none, stored scores match reparse.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260921T042522010114-n-pidp-the-graph-writing-paths-are-audited" data-who="claude-opus-b" data-when="2026-09-21T05:05:00Z">
+    <div class="r-comment-body"><p><strong>Both graph-writing paths are audited, and they do not get the same verdict.</strong> The restore-receipt parity change at <code>da2b5619e</code> is <strong>SAFE-FOR-WEST</strong>: it cannot write when it should refuse, its refusal cannot be bypassed, and its two receipt defects are display-only. <code>sn restore compose</code>/<code>apply</code> at <code>21e4739e9</code> is <strong>MUST-FIX-FIRST</strong>, and the reason is not subtle &mdash; <strong>it restores the false origin the repair was right to remove</strong>. Every answer below is a probe that could have come out the other way; six ran, all six reproduced their predicted outcome, and the two test files are green at 26 passed on <code>all_debug</code> from base <code>1fa396151</code>.</p>
+<svg viewBox="0 0 700 172" width="700" height="172" role="img" aria-label="The two sources of the receipt expected column and where each is enforced"><rect width="700" height="172" fill="#fbfbfc"></rect>
+<text x="12" y="20" font-size="12" fill="#333" font-weight="bold">One column named expected, two sources, one of them enforced</text>
+<rect x="12" y="34" width="190" height="46" fill="#eef4fb" stroke="#2b6cb0"></rect>
+<text x="22" y="52" font-size="11" fill="#2b6cb0" font-weight="bold">reconstruction closure</text>
+<text x="22" y="68" font-size="10" fill="#333">what the edges can put back</text>
+<rect x="12" y="98" width="190" height="46" fill="#fdf3e7" stroke="#b7791f"></rect>
+<text x="22" y="116" font-size="11" fill="#b7791f" font-weight="bold">archive census</text>
+<text x="22" y="132" font-size="10" fill="#333">what the dump recorded</text>
+<line x1="202" y1="57" x2="286" y2="57" stroke="#2b6cb0"></line>
+<line x1="202" y1="121" x2="286" y2="121" stroke="#b7791f"></line>
+<rect x="288" y="34" width="176" height="46" fill="#eef4fb" stroke="#2b6cb0"></rect>
+<text x="298" y="52" font-size="11" fill="#2b6cb0" font-weight="bold">refusal, in-transaction</text>
+<text x="298" y="68" font-size="10" fill="#333">RAISES on any difference</text>
+<rect x="288" y="98" width="176" height="46" fill="#fdf3e7" stroke="#b7791f"></rect>
+<text x="298" y="116" font-size="11" fill="#b7791f" font-weight="bold">receipt expected</text>
+<text x="298" y="132" font-size="10" fill="#333">DISPLAYS, never raises</text>
+<line x1="464" y1="121" x2="536" y2="121" stroke="#b7791f"></line>
+<rect x="538" y="34" width="150" height="110" fill="#f6f6f7" stroke="#888"></rect>
+<text x="548" y="52" font-size="11" fill="#333" font-weight="bold">loader guard :6944</text>
+<text x="548" y="70" font-size="10" fill="#1a7f37">routable role, census</text>
+<text x="548" y="84" font-size="10" fill="#1a7f37">above closure: REFUSED</text>
+<text x="548" y="104" font-size="10" fill="#b3261e">no route (EVIDENCED_BY):</text>
+<text x="548" y="118" font-size="10" fill="#b3261e">shown, not raised</text>
+<text x="548" y="136" font-size="10" fill="#b3261e">census below closure: mute</text>
+</svg>
+<p><strong>The recorded finding is real and narrower than it was recorded.</strong> The loader already refuses a census above the closure for every role the reconstruction registry routes, so the displayed-not-raised shortfall survives only for a role with <em>no</em> reconstruction route &mdash; <code>EVIDENCED_BY</code>, and nothing else today. <strong>The closure should stay authoritative for the refusal</strong>, because it is the only expectation a restore can satisfy: an inbound <code>EVIDENCED_BY</code> cannot be carried by any reconstruction edge, so letting the census govern would make every identity that ever held one permanently unrestorable. That is the wrong trade for a plan whose whole purpose is returning 67 identities. <strong>The census should become a separately named receipt field</strong> instead of sharing a column with the closure. A shortfall on a routable role must fail and already does; on a non-routable role it must be recorded and already is.</p>
+<p><strong>The shared column is not cosmetic, because it is not monotone.</strong> The load guard is one-sided &mdash; it refuses a census above the closure and is silent about one below it &mdash; so an under-counting census applies cleanly and prints <code>expected 0 / observed 1</code> against a restore that wrote exactly the one edge it was authorised to write. Beside it: the parity block iterates every role the archive names, but <code>observed</code> is read only over the counted set, so a role outside that set reports <code>observed: 0</code> <strong>without the graph ever being asked</strong> &mdash; measured at zero against a live count of two. An unmeasured zero presented as a measurement is a shape this programme has recorded before.</p>
+<p><strong>The entry point is the one that must not restore anything yet, and the plan already knew why.</strong> Section 4 says the dump predates the origin correction; <code>compose</code> copies the archived properties verbatim and offers no override, so a restore composed straight from the dump returns each identity carrying <code>origin: catalog_edit</code> &mdash; the value that made it deletable &mdash; and the per-type edge-count acceptance passes it without complaint. The suite cannot catch this: the adapter own fixture carries that same origin. <strong>Restore and reclassification are one action in this plan, and the entry point currently makes them two with the safe one optional.</strong> Separately, a <code>--rename-counterpart</code> rekey is consumed by the first matching edge alone, so an identity with two edges to one renamed counterpart gets one rekeyed and one left on the archived id; where that id still exists live, the edge is created against the wrong node <strong>with no refusal at any layer</strong>, because the parity guard counts roles and not endpoints. That is exactly the renamed-parent shape this restore set contains.</p>
+<p><strong>What was verified sound, each with a control that could have failed.</strong> The refusal rewrite from <code>live != expected</code> to an <code>any()</code> over the closure reads like a narrowing and is not: <code>expected</code> is seeded with every registry role at zero, and a live <code>HAS_PARENT</code> the closure does not carry still raises. Node and counterpart writes cannot overwrite a live node. An apply still requires a preview digest and re-reads the closure inside the transaction. The loader independently verifies the embedded signature, so the command recomputing both digests from its own file is not vacuous &mdash; though the signature is tamper-evidence for transport rather than authorisation, since anyone who can run the apply can re-sign arbitrary content.</p>
+<p>Five defects with <code>file:line</code>, triggering input and probe output: <a href="/imas-codex/evidence/paid-identity-deletion-protection/graph-write-audit.md">the graph-write audit</a>; anchored landing: <a href="/imas-codex/evidence/archive/paid-identity-deletion-protection-landed.html#graph-write-audit">the cumulative execution record</a>.</p></div>
+</div>
 </section>
 </main>
 </body>
