@@ -1716,18 +1716,29 @@ def _extract_audit_findings(audit_report: Any, batch_ids: set[str]) -> list[str]
     if audit_report is None:
         return findings
 
-    # AuditReport has .findings: list of AuditFinding
-    for finding in getattr(audit_report, "findings", []):
-        affected = getattr(finding, "affected_names", []) or []
-        # Check if any affected name is in this batch
-        overlap = [nid for nid in affected if nid in batch_ids]
-        if overlap:
-            severity = getattr(finding, "severity", "info")
-            message = getattr(finding, "message", str(finding))
-            category = getattr(finding, "category", "general")
-            # One-line summary, capped
-            summary = f"[{severity}:{category}] {message[:200]}"
-            findings.append(summary)
+    # Each report list has its own affected-name field and prompt summary.
+    for finding in audit_report.lint_findings:
+        if finding.name_id in batch_ids:
+            findings.append(
+                f"[{finding.severity}:lint:{finding.finding_type}] "
+                f"{finding.name_id}: {finding.detail[:200]}"
+            )
+
+    for finding in audit_report.link_findings:
+        if finding.name_id in batch_ids:
+            target = f" -> {finding.target}" if finding.target else ""
+            findings.append(
+                f"[warning:link:{finding.finding_type}] "
+                f"{finding.name_id}{target}: {finding.detail[:200]}"
+            )
+
+    for component in audit_report.duplicate_components:
+        if batch_ids.intersection(component.names):
+            names = ", ".join(component.names)
+            findings.append(
+                f"[warning:duplicate] {names}: near-duplicate component "
+                f"(max similarity {component.max_similarity:.4f})"
+            )
 
     # Cap total findings per batch
     return findings[:20]
