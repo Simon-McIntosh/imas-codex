@@ -1,6 +1,6 @@
 # What the review pipeline can see, and the seven gaps between it and a physicist reading the DD
 
-provisional: true
+provisional: false
 
 Read: `imas_codex/standard_names/review/{pipeline,audits,consolidation,projection,enrichment}.py`
 and the `sn review` surface in `imas_codex/cli/sn.py`.
@@ -27,7 +27,7 @@ detection by blocking plus similarity.
 
 **What it structurally cannot detect.** Every Layer 1 audit reads only the
 name's own record — `id`, `description`, `documentation`, `unit`, `kind` and the
-grammar segment fields (`audits.py:139-175`). **No Layer 1 audit ever reads the
+grammar segment fields (`audits.py:119-137`). **No Layer 1 audit ever reads the
 Data Dictionary path or its text.** So no deterministic check can compare what a
 name asserts against what the DD says, which is the comparison three of the five
 WEST defect classes require. This is a property of the input, not of the checks:
@@ -38,15 +38,15 @@ Two further structural limits, both in `run_duplicate_detection`:
 
 - **Comparison never crosses a block.** Blocking keys are
   `unit|kind|physics_domain`, `unit|kind|physical_base` and
-  `unit|kind|geometric_base` (`audits.py:528-552`). The semantic search result is
-  then filtered by `rid in block_ids` (`audits.py:606`), so a neighbour found
+  `unit|kind|geometric_base` (`audits.py:540-552`). The semantic search result is
+  then filtered by `rid in block_ids` (`audits.py:608`), so a neighbour found
   anywhere else in the catalog is discarded. Two spellings of one quantity that
   sit in different physics domains — which is the normal case for a redundant
   spelling, since the redundancy usually arises from two diagnostics naming the
   same physical thing — can never be compared.
 - **Both thresholds are set where near-duplicates do not live.** Semantic
   acceptance is `score > 0.92` (`audits.py:608`) and lexical acceptance is
-  `_token_overlap > 0.8` (`audits.py:625`), a Jaccard ratio over snake tokens.
+  `_token_overlap > 0.8` (`audits.py:624`), a Jaccard ratio over snake tokens.
   Distinct spellings of one quantity routinely share no tokens at all.
 
 ### Layer 2 — batched LLM scoring (`pipeline.py`)
@@ -82,7 +82,7 @@ them without a single consolidation warning.
 
 | WEST defect class | Detectable in principle? | Through which layer | Why |
 |---|---|---|---|
-| Redundant spelling of a registered base — `hard_xray_brightness` vs `photon_radiance`, same unit | **No, as built** | would have to be Layer 1 duplicate detection | the two sit in different physics domains, so the block filter at `audits.py:606` discards the comparison before any threshold applies; even same-block, 0.92 semantic / 0.8 lexical are above where distinct spellings score, and the token sets are disjoint |
+| Redundant spelling of a registered base — `hard_xray_brightness` vs `photon_radiance`, same unit | **No, as built** | would have to be Layer 1 duplicate detection | the two sit in different physics domains, so the block filter at `audits.py:608` discards the comparison before any threshold applies; even same-block, 0.92 semantic / 0.8 lexical are above where distinct spellings score, and the token sets are disjoint |
 | Name asserts more than the DD text supports — `surface_temperature` on a path reading *apparent temperature* | **Yes — Layer 2 only** | `dd_source_docs` in the reviewer prompt | requires comparing the name against DD text; only `_fetch_review_dd_context` supplies it, and finding 1 shows that supply can vanish silently |
 | Name bound to the wrong object — `area_of_diagnostic_aperture` on a detector/surface path | **Yes — Layer 2 only** | `dd_source_docs` plus the DD path itself | same channel, same exposure |
 | Physics error in the modifier — `radial_derivative_of_poloidal_magnetic_flux` on `dpsi_drho_tor` | **No** | none | needs the DD path's *coordinate* to be read as physics (ρ_tor is not a radius). No layer compares the modifier against the coordinate; Layer 1 does not see the path, Layer 2's rubric has no dimension for it on the names axis — `physics_accuracy` exists only on the **docs** axis (`pipeline.py:2205-2210`), so a names-axis review is never asked the question |
@@ -156,7 +156,7 @@ narrower consequence than finding 1, and the same repair.
 
 ### Finding 3 — CONFIRMED. Duplicate detection cannot tell a clean semantic pass from a failed one
 
-`imas_codex/standard_names/review/audits.py:616-617`
+`imas_codex/standard_names/review/audits.py:613-614`
 
 ```python
 except Exception:
@@ -169,7 +169,7 @@ call fails, `candidate_pairs` is populated by lexical overlap alone, and
 semantic pass that found nothing**. `DuplicateComponent` and `AuditReport` carry
 no field recording whether the semantic path ran.
 
-**The comment at `audits.py:570` names a guard that does not exist:**
+**The comment at `audits.py:571` names a guard that does not exist:**
 
 ```python
 # Quick probe — don't fail if graph is down
@@ -189,7 +189,7 @@ not run".
 
 ### Finding 4 — CONFIRMED. A lint report cannot say whether the round-trip check ran
 
-`imas_codex/standard_names/review/audits.py:308-315`
+`imas_codex/standard_names/review/audits.py:314-315`
 
 ```python
 except ImportError:
@@ -210,7 +210,7 @@ is a declared dependency, so in a synced environment the branch does not fire.
 
 ### Finding 5 — PLAUSIBLE. Nothing gates on the embedding preflight's own result
 
-`imas_codex/standard_names/review/audits.py:674-703`
+`imas_codex/standard_names/review/audits.py:674-702`
 
 `run_all_audits` calls `run_embedding_preflight` first, explicitly to ensure
 "fresh embeddings for duplicate detection", stores the report, and then calls
@@ -259,3 +259,29 @@ executed, and a review must refuse rather than score when a channel it depends o
 did not load.** Counting seven sites of one shape in one pipeline says the
 individual repairs are not the durable fix; a report field that every audit must
 fill is.
+
+## 5. The CLI surface, and one thing checked that turned out sound
+
+`sn review` (`imas_codex/cli/sn.py:5825-5890`) carries every flag the plan
+records: `--ids`, `--physics-domain`, `--stage`, `--force`, `--models`,
+`--batch-size`, `--cost-limit`, `--concurrency`, `--dry-run` and
+`--target names|docs`, plus `--skip-audit`. `--dry-run` is documented as "Run
+Layer 1 audits, show batch plan, no LLM calls" and the guard at
+`sn.py:6012` is `if not skip_audit or dry_run:` — so a dry run always executes
+Layer 1.
+
+**That makes the already-confirmed discard at `pipeline.py:1709` worse than it
+looks from the pipeline alone.** An operator running `sn review --dry-run` sees
+Layer 1 execute against the full catalog and report its findings; the same
+findings, on a real run, are dropped before the prompt is built. The surface that
+exists to show you Layer 1 working is the one place its output is not thrown
+away, so the flag intended to build confidence in the layer is exactly what
+conceals that the layer is inert.
+
+**Checked and sound.** `run_duplicate_detection`'s third blocking pass reads
+`geometric_base` (`audits.py:549-552`), which is not among the fields the
+duplicate blocking obviously needs and would have been a silent no-op pass had
+the catalog query omitted it. The query does project it
+(`sn.py:6046`, `sn.geometric_base AS geometric_base`), so the pass fires. Recorded
+because the absence would have been invisible and is the shape this review was
+hunting — it was checked, not assumed.
