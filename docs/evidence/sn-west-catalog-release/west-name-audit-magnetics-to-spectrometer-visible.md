@@ -762,12 +762,11 @@ visible as two colours under one parent.
 
 | | count |
 | --- | --- |
-| accepted bindings with cohort `index` in 154–204 | **51** |
-| sections carrying a verdict | **51** |
+| `rows_judged` — accepted bindings with cohort `index` in 154–204, one verdict section each | **51** |
 | judged **correct** | 37 |
 | judged **INCORRECT**, each with a proposed spelling | **14** |
-| correct + incorrect | **51** |
-| incorrect as a fraction of 51 | **27.5 %** |
+| `correct + incorrect` | 37 + 14 = **51** |
+| incorrect as a percentage of 51 | **27.5 %** |
 | defects recorded as notes on a **correct** row, carrying no incorrect verdict | 8 |
 | re-observations of the already-recorded shared line-of-sight description defect | 4 |
 | identities also bound to paths outside 154–204, deferred to the collision sweep | 7 |
