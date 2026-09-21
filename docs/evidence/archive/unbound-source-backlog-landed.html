@@ -986,6 +986,115 @@
     host class.</p>
   </section>
 
+  <section id="release-export-double-verdict-and-gate-results">
+    <h2>The last four release export doubles require a verdict and its gate results</h2>
+    <p><strong>Four doubles supplied an export outcome on the tests' behalf, in two
+    directions.</strong> <code>_exporter</code> in
+    <code>tests/standard_names/test_review_release_checkout.py</code>,
+    <code>_exporter</code> in <code>tests/standard_names/test_review_body_authored.py</code>
+    and <code>_exporter</code> in
+    <code>tests/standard_names/test_review_release_preview_link.py</code> each returned a
+    <code>SimpleNamespace</code> carrying a hardcoded <code>all_gates_passed=True</code>, so a
+    test appended to any of those files inherited a passing export verdict without ever
+    stating one. <code>_export_report</code> in
+    <code>tests/standard_names/test_release_rehearsal_accounting.py</code> returned a
+    namespace with no verdict attribute at all, so the double could not answer the gate
+    question in either direction. Commit <code>3496ccaf7</code> makes
+    <code>all_gates_passed</code> and <code>gate_results</code> required keyword-only
+    parameters with no default in all four factories, and writes both at every call site.</p>
+    <p><strong>Why gate results travel with the verdict.</strong> The release consumer reads
+    <code>gate_results</code> only when the verdict is not True, so a double that states a
+    refusal without naming a failed gate asserts a refusal it cannot substantiate. The two
+    parameters are required together rather than one of them, and no default is supplied for
+    either.</p>
+    <table>
+      <caption>Proof one &mdash; each file's passed count before and after the edit</caption>
+      <thead><tr><th>File</th><th>Before (base <code>497462fec</code>)</th><th>After (<code>3496ccaf7</code>)</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_review_release_checkout.py</code></td><td>2 passed, exit 0</td><td>2 passed, exit 0</td></tr>
+        <tr><td><code>test_review_body_authored.py</code></td><td>2 passed, exit 0</td><td>2 passed, exit 0</td></tr>
+        <tr><td><code>test_review_release_preview_link.py</code></td><td>3 passed, exit 0</td><td>3 passed, exit 0</td></tr>
+        <tr><td><code>test_release_rehearsal_accounting.py</code></td><td>5 passed, exit 0</td><td>5 passed, exit 0</td></tr>
+      </tbody>
+    </table>
+    <p>The combined focused selection passes <strong>12</strong> at head
+    (<code>logs/after_four.log</code>). Both counts are unchanged, which is the point: the
+    doubles are scaffolding, so a changed count would have meant a test had started or stopped
+    exercising a verdict it did not before.</p>
+    <p><strong>The negative control is a factory call that states no verdict.</strong> The
+    declared sentence, repeated verbatim as the red log's first line:
+    &ldquo;negative control: _exporter() called with no verdict must fail; the required
+    keyword-only parameter is what refuses an unstated export outcome.&rdquo; Calling
+    <code>_exporter()</code> with no arguments fails with
+    <code>TypeError: _exporter() missing 2 required keyword-only arguments:
+    'all_gates_passed' and 'gate_results'</code> at exit 1 &mdash; not 2, 4 or 5. The refusal is
+    at the call, so no future test can reach the double without writing both a verdict and its
+    gate results. Red log: <code>logs/negative_control.log</code>.</p>
+    <p><strong>Aperture, accounted for at every site.</strong> <code>grep -rn "Export gates
+    are scaffolding" tests/</code> returned, at the base:</p>
+    <pre>test_review_body_authored.py:77:    # Export gates are scaffolding; these tests exercise review-body authorship.
+test_review_release.py:478:        # Export gates are scaffolding; this test exercises baseline preservation.
+test_review_release.py:655:        # Export gates are scaffolding; this test exercises sparse assembly.
+test_review_release_checkout.py:54:    # Export gates are scaffolding; these tests exercise checkout restoration.
+test_review_release_preview_link.py:61:    # Export gates are scaffolding; these tests exercise preview-link handling.</pre>
+    <p>and at head only <code>test_review_release.py:478</code> and
+    <code>test_review_release.py:655</code>. <strong>Those two are not stale comments: they sit
+    on test-local inline closures (at lines 471 and 640) that still hardcode
+    <code>all_gates_passed=True</code>, so each comment still accurately describes a double
+    that does not require its verdict, and neither closure can leak into another test.
+    They were left in place as recorded residue rather than removed: the file's write fence
+    covers only stale-comment removal, and correcting these is a closure edit, not a comment
+    edit.</strong></p>
+    <table>
+      <caption>Proof three &mdash; the AST classifier over every export-report double in <code>tests/</code></caption>
+      <thead><tr><th>Site</th><th>Base</th><th>Head</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_review_release_checkout.py:50 _exporter</code> (module)</td><td>SELF-LITERAL</td><td>SUPPLIED, gate results a parameter</td></tr>
+        <tr><td><code>test_review_body_authored.py:69 _exporter</code> (module)</td><td>SELF-LITERAL</td><td>SUPPLIED, gate results a parameter</td></tr>
+        <tr><td><code>test_review_release_preview_link.py:53 _exporter</code> (module)</td><td>SELF-LITERAL</td><td>SUPPLIED, gate results a parameter</td></tr>
+        <tr><td><code>test_release_rehearsal_accounting.py:81 _export_report</code> (module)</td><td>ABSENT</td><td>SUPPLIED, gate results a parameter</td></tr>
+        <tr><td><code>test_review_release.py:460/471, :611/640</code> (inline closures)</td><td>SELF-LITERAL</td><td>SELF-LITERAL &mdash; cannot inherit (single-test scope)</td></tr>
+        <tr><td><code>test_release_gate_verdict_is_read.py:89, :105, :125</code></td><td>ABSENT, SELF-LITERAL &times;2</td><td>unchanged &mdash; the guard's own refusal controls</td></tr>
+        <tr><td><code>test_review_release.py:55 _stub_exporter</code>; <code>test_exclusion_report_is_reachable.py:92</code>; <code>test_release_rehearsal_writes_nothing.py:92</code></td><td>SUPPLIED</td><td>SUPPLIED, but <code>gate_results</code> hardcoded internally &mdash; reported, outside this node's fence</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The searches ran, and their commands are written down.</strong> (1)
+    <code>grep -rn "Export gates are scaffolding" tests/</code>, quoted above at both
+    revisions. (2) <code>grep -rn "all_gates_passed" tests/</code> and (3)
+    <code>grep -rn "exporter=" tests/</code>, which together reach every site naming the
+    verdict or handing an exporter to the release flow. (4) The classifier of proof three,
+    run against a base tree extracted with
+    <code>git archive 497462fec tests</code> into <code>/dev/shm/exp-base-tests</code> and
+    against this head, classing each double <em>SELF-LITERAL</em> when the namespace carries a
+    constant verdict, <em>SUPPLIED</em> when the verdict arrives
+    as a parameter of the factory or of the test enclosing it, or <em>ABSENT</em> otherwise.
+    Its positive control is the four flagged doubles above, which it must see and does. At the
+    base it flagged exactly those four; at head it flags none of them.</p>
+    <p><strong>Is the family closed?</strong> For the <em>inheritable</em> verdict shape, yes:
+    every module-level export-report factory in <code>tests/</code> either requires the verdict
+    or is a test that deliberately states one to exercise the refusal. Two residues are
+    reported rather than repaired because they sit outside this node's write fence: the two
+    inline closures above, which cannot be inherited by any test; and three module-level
+    factories landed by the sibling nodes, namely
+    <code>test_review_release.py</code>'s <code>_stub_exporter</code>,
+    <code>test_exclusion_report_is_reachable.py:92</code> and
+    <code>test_release_rehearsal_writes_nothing.py:92</code>, which require the verdict but
+    still hardcode <code>gate_results=[]</code> internally, so each can state a refusal without
+    gate results &mdash; the same substantiation defect this node removes, one scope smaller.
+    No file other than the four targets was edited; the stale-comment file
+    <code>test_review_release.py</code> was inspected and left unchanged, because the two
+    comments it carries are accurate.</p>
+    <p>Focused logs and the red log are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T132143954397-n-every-release-export-double-requires-its-verdict/logs/</code>
+    (<code>after_four.log</code>, <code>negative_control.log</code>).</p>
+    <p>No figure accompanies this result: the evidence is per-file pass counts at two
+    revisions, a site-by-site classification table, and quoted grep output &mdash; all of which
+    are naturally tabular, and a drawn version would be an image of a table.</p>
+    <p class="r-meta">Worker: n-every-release-export-double-requires-its-verdict &middot;
+    2026-09-21 &middot; commit <code>3496ccaf7</code> &middot; focused gate on the login
+    host class.</p>
+  </section>
+
 </main>
 
 </body>

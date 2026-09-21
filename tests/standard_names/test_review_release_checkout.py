@@ -47,16 +47,20 @@ def _focus_file(tmp_path: Path) -> Path:
     return focus
 
 
-def _exporter(**kwargs: object) -> SimpleNamespace:
-    staging = Path(str(kwargs["staging_dir"]))
-    (staging / "standard_names").mkdir(parents=True, exist_ok=True)
-    (staging / "catalog.yml").write_text("catalog_name: test\n", encoding="utf-8")
-    # Export gates are scaffolding; these tests exercise checkout restoration.
-    return SimpleNamespace(
-        exported_count=1,
-        all_gates_passed=True,
-        gate_results=[],
-    )
+def _exporter(*, all_gates_passed: bool, gate_results: list[object]):
+    """An export double whose verdict and gate results each call site states."""
+
+    def exporter(**kwargs: object) -> SimpleNamespace:
+        staging = Path(str(kwargs["staging_dir"]))
+        (staging / "standard_names").mkdir(parents=True, exist_ok=True)
+        (staging / "catalog.yml").write_text("catalog_name: test\n", encoding="utf-8")
+        return SimpleNamespace(
+            exported_count=1,
+            all_gates_passed=all_gates_passed,
+            gate_results=gate_results,
+        )
+
+    return exporter
 
 
 def _publisher(**kwargs: object) -> SimpleNamespace:
@@ -79,7 +83,7 @@ def test_review_release_restores_clean_main_with_remote_refs(
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_exporter,
+        exporter=_exporter(all_gates_passed=True, gate_results=[]),
         publisher=_publisher,
         open_pr=False,
     )

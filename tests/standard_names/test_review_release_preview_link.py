@@ -50,20 +50,24 @@ def _focus_file(tmp_path: Path) -> Path:
     return focus
 
 
-def _exporter(**kwargs):
-    staging = Path(kwargs["staging_dir"])
-    (staging / "standard_names").mkdir(parents=True, exist_ok=True)
-    (staging / "catalog.yml").write_text("catalog_name: test\n", encoding="utf-8")
-    (staging / "standard_names" / "equilibrium.yml").write_text(
-        "- name: plasma_current\n  unit: A\n",
-        encoding="utf-8",
-    )
-    # Export gates are scaffolding; these tests exercise preview-link handling.
-    return SimpleNamespace(
-        exported_count=1,
-        all_gates_passed=True,
-        gate_results=[],
-    )
+def _exporter(*, all_gates_passed: bool, gate_results: list[object]):
+    """An export double whose verdict and gate results each call site states."""
+
+    def exporter(**kwargs):
+        staging = Path(kwargs["staging_dir"])
+        (staging / "standard_names").mkdir(parents=True, exist_ok=True)
+        (staging / "catalog.yml").write_text("catalog_name: test\n", encoding="utf-8")
+        (staging / "standard_names" / "equilibrium.yml").write_text(
+            "- name: plasma_current\n  unit: A\n",
+            encoding="utf-8",
+        )
+        return SimpleNamespace(
+            exported_count=1,
+            all_gates_passed=all_gates_passed,
+            gate_results=gate_results,
+        )
+
+    return exporter
 
 
 def _publisher(**kwargs):
@@ -95,7 +99,13 @@ class MockGitHubClient:
         return self.created_body or ""
 
 
-def _release(tmp_path: Path, client: MockGitHubClient):
+def _release(
+    tmp_path: Path,
+    client: MockGitHubClient,
+    *,
+    all_gates_passed: bool,
+    gate_results: list[object],
+):
     checkout = _catalog_checkout(tmp_path)
     return run_review_release(
         checkout,
@@ -104,7 +114,9 @@ def _release(tmp_path: Path, client: MockGitHubClient):
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_exporter,
+        exporter=_exporter(
+            all_gates_passed=all_gates_passed, gate_results=gate_results
+        ),
         publisher=_publisher,
         github_client=client,
         upstream_repo="review-owner/example-catalog",
@@ -116,7 +128,7 @@ def _release(tmp_path: Path, client: MockGitHubClient):
 def test_release_writes_and_reads_back_exact_pr_preview_address(tmp_path):
     client = MockGitHubClient()
 
-    report = _release(tmp_path, client)
+    report = _release(tmp_path, client, all_gates_passed=True, gate_results=[])
 
     expected = "https://review-owner.github.io/example-catalog/pr-17/"
     assert report.errors == []
@@ -127,7 +139,12 @@ def test_release_writes_and_reads_back_exact_pr_preview_address(tmp_path):
 
 
 def test_release_names_missing_preview_link_invariant(tmp_path):
-    report = _release(tmp_path, MockGitHubClient(return_written_body=False))
+    report = _release(
+        tmp_path,
+        MockGitHubClient(return_written_body=False),
+        all_gates_passed=True,
+        gate_results=[],
+    )
 
     assert report.errors == [
         "ReviewPreviewLinkInvariantError: read-back body for "
