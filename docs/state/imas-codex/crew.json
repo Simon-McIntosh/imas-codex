@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T06:29:29",
+  "updated": "2026-09-21T06:32:20",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -52,9 +52,11 @@
         "id": "claude-opus-a",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "95c3cb2b-db29-4adb-b658-de2c55867b67",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "95c3cb2b-db29-4adb-b658-de2c55867b67"
+        },
         "created": "2026-09-08"
       },
       {
@@ -158679,6 +158681,228 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T042303171463-n-usb-the-export-gate-chain-is-audited-before-the-west-cut",
+        "plan": "unbound-source-backlog",
+        "section": "\u00a72",
+        "node": "n-usb-the-export-gate-chain-is-audited-before-the-west-cut",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1145,
+                "cached_input_tokens": 758383,
+                "input_tokens": 759530,
+                "output_tokens": 1316,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 760846,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/unbound-source-backlog/export-gate-audit.md exists and, for each of the three landed changes in imas_codex/standard_names/export.py this sprint - the producing-source eligibility predicate at 617fdaca9, its fail-closed repair at b161235bb, and the manifest generability instrument at e0c2d5ef3 - states whether the change is correct, whether it can wrongly ADMIT a name to a cut, whether it can wrongly REFUSE one, and whether any guard it adds can be bypassed; names every defect found with its file:line and a concrete input that triggers it; and gives one verdict per change of SAFE-FOR-WEST or MUST-FIX-FIRST with the reason. Run the export test files to check claims rather than reading only. Write the file incrementally as each finding lands",
+          "estimated_hours": null,
+          "goal": "audit the export gate chain landed this sprint for defects that could reach a published catalog",
+          "id": "n-usb-the-export-gate-chain-is-audited-before-the-west-cut",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "unknown",
+            "metered": true,
+            "observed_at": "2026-09-08T13:30:28.930Z",
+            "read_at": "2026-09-21T04:23:03Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 98.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T042303171463-n-usb-the-export-gate-chain-is-audited-before-the-west-cut/manifest.md",
+          "negative_control": "",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a72",
+          "spec_level": "open",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/unbound-source-backlog/export-gate-audit.md",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "open",
+        "member": "claude-opus-a",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T04:23:10Z",
+        "completed_at": "2026-09-21T04:30:48.029Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 452,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 458,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "83e93c42c661b168a4c0abb153730a9f39b048d3",
+        "commits": [
+          "c715bf8ee6b8eb82f63e1b39e0ffeaed3e8b4bbd"
+        ],
+        "changed_lines": {
+          "added": 127,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "export-gate-audit fence at the merged head: a verdict per change, defect rows carrying file:line, and a measured WEST generability verdict",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gates/export-gate-audit.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T042303171463-n-usb-the-export-gate-chain-is-audited-before-the-west-cut/manifest.md",
+        "scope_changed": false,
+        "session_id": "95c3cb2b-db29-4adb-b658-de2c55867b67",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 21.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 129031,
+            "cache_creation_input_tokens_cumulative": 129031,
+            "cache_read_input_tokens": 3008583,
+            "cache_read_input_tokens_cumulative": 3008583,
+            "inference_geo": "not_available",
+            "input_tokens": 60,
+            "input_tokens_cumulative": 60,
+            "output_tokens": 31436,
+            "output_tokens_cumulative": 31436,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.5808015,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.5808015
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T04:30:48.029Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3008583,
+          "cumulative_input_tokens": 3137674,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 455.366,
+          "generated_tokens": 31436,
+          "generation_seconds": 379.393,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.9,
+          "machine_seconds": 75.973,
+          "peak_input_tokens": 139376,
+          "tokens_per_second": 82.86,
+          "wall_tokens_per_second": 69.03
+        },
+        "follow_on_paths": [
+          "tests/standard_names/test_export_exclusion_ledger.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-usb-the-export-gate-chain-is-audited-before-the-west-cut",
+          "session_id": "95c3cb2b-db29-4adb-b658-de2c55867b67",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T04:30:48.029Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.72,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.72,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 3,
+          "missing": [
+            "83ed02fd57e27d38b1081750ac8cd66942667a40",
+            "a876c37e24f4c9055cdcecf105487bd3c01059d1"
+          ],
+          "message": "run 'r-20260921T042303171463-n-usb-the-export-gate-chain-is-audited-before-the-west-cut' has a passing gate presenting 1 commit(s) of the 3 its manifest declares; missing: 83ed02fd57e27d38b1081750ac8cd66942667a40, a876c37e24f4c9055cdcecf105487bd3c01059d1. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 35.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -158991,6 +159215,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2366
+    "_version": 2368
   }
 }
