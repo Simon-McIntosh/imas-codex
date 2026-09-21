@@ -247,3 +247,127 @@ describe and what all three are used for — the outer normalization reference.
 `magnetics/flux_loop/flux`. Flux linked by one loop, `Wb`, observation and
 reconstruction of the same quantity.
 
+### 14. `radial_coordinate_of_measurement_position` — **MUST-SPLIT** (3 bindings)
+
+Three bindings, three different kinds of locus, all with the bare
+data-dictionary text "Major radius":
+
+- `ece/channel/position/r` — where the electron-cyclotron channel's emission
+  originates. A genuine measurement position.
+- `camera_x_rays/aperture/centre/r` — the centre of an **instrument aperture**.
+  The aperture is a hole in front of the detector; no measurement is made there.
+- `magnetics/b_field_phi_probe/position/r` — the **location of a sensor coil**.
+  The probe measures the field at itself, so its position is a piece of
+  instrument geometry, not the locus of a plasma quantity.
+
+A reader given `radial_coordinate_of_measurement_position` alone would place an
+aperture and a pickup coil where a plasma measurement was taken.
+
+| binding | spelling |
+| --- | --- |
+| `ece/channel/position/r` | keeps `radial_coordinate_of_measurement_position` |
+| `camera_x_rays/aperture/centre/r` | **needs** `radial_coordinate_of_aperture` |
+| `magnetics/b_field_phi_probe/position/r` | **needs** `radial_coordinate_of_toroidal_magnetic_field_probe` |
+
+Both proposed spellings already exist in the cohort on the sibling axes, so
+neither invents a stem: `camera_x_rays/aperture/centre/phi` is already
+`toroidal_coordinate_of_aperture`, and `magnetics/b_field_phi_probe/position/z`
+is already `vertical_coordinate_of_toroidal_magnetic_field_probe`
+(`west-name-audit.md` row 51, judged correct there).
+
+**Confirms the prior reading.** `west-name-audit.md`'s closing finding 1 reports
+this group with the same three loci and the same two proposed spellings. Judged
+here independently from the group's own evidence, it is confirmed; the union of
+the two records counts it once.
+
+> **Sibling-disagreement resolution for `magnetics/b_field_phi_probe/position`.**
+> The container's three axes currently read
+> `radial_coordinate_of_measurement_position` (r),
+> `toroidal_angle_of_measurement_position` (φ, group 16 below) and
+> `vertical_coordinate_of_toroidal_magnetic_field_probe` (z). The **z sibling is
+> the outlier by count and the correct one by physics**, so the container as a
+> whole should carry the `_of_toroidal_magnetic_field_probe` locus and the r and
+> φ axes are the two that move.
+
+### 15. `reference_major_radius` — **ONE-QUANTITY** (3 bindings)
+
+`core_profiles/vacuum_toroidal_field/r0`,
+`equilibrium/vacuum_toroidal_field/r0` and `summary/global_quantities/r0/value`
+carry word-for-word the same data-dictionary text. One quantity, three IDSs
+declaring the same machine reference.
+
+### 16. `toroidal_angle_of_measurement_position` — **MUST-SPLIT** (3 bindings)
+
+The φ axis of the group 14 defect, and it is **not** the same three containers:
+here the poloidal probe joins the toroidal one, so the collision reaches a
+container group 14 does not touch.
+
+- `ece/channel/position/phi` — a genuine measurement position.
+- `magnetics/b_field_phi_probe/position/phi` — a sensor coil's toroidal
+  location.
+- `magnetics/b_field_pol_probe/position/phi` — a second sensor coil's toroidal
+  location, on a different probe type.
+
+| binding | spelling |
+| --- | --- |
+| `ece/channel/position/phi` | keeps `toroidal_angle_of_measurement_position` |
+| `magnetics/b_field_phi_probe/position/phi` | **needs** `toroidal_angle_of_toroidal_magnetic_field_probe` |
+| `magnetics/b_field_pol_probe/position/phi` | **needs** `toroidal_angle_of_poloidal_magnetic_field_probe` |
+
+The distinction in plain language: an ECE channel's position is a point in the
+plasma whose emission reaches the instrument; a magnetic probe's position is
+where a piece of hardware is bolted to the vessel. Attributing one to the other
+misplaces the measurement by the whole minor radius.
+
+> **Sibling-disagreement resolution for `magnetics/b_field_pol_probe/position`.**
+> This container reads `radial_coordinate_of_poloidal_magnetic_field_probe` (r,
+> `west-name-audit.md` row 53, correct),
+> `toroidal_angle_of_measurement_position` (φ) and
+> `vertical_coordinate_of_poloidal_magnetic_field_probe` (z, correct). **φ is
+> the outlier, two-to-one**, and the container should carry the
+> `_of_poloidal_magnetic_field_probe` locus its other two axes already carry.
+
+> **New relative to the prior record — extends rather than contradicts.**
+> `west-name-audit.md` finding 1 reaches the toroidal probe's `r` only. The φ
+> axis of both probes is found here, and the poloidal probe's φ is a container
+> the prior record does not name at all. Nothing in the prior reading is
+> contradicted; two bindings are added to the same defect class. Counted once
+> in the union as two additional bindings.
+
+### 17. `toroidal_vacuum_magnetic_field` — **ONE-QUANTITY** (3 bindings)
+
+`core_profiles/vacuum_toroidal_field/b0`,
+`equilibrium/vacuum_toroidal_field/b0` and `summary/global_quantities/b0/value`
+— the partner of group 15, with the same text in all three and the same
+consistency requirement against the `tf` IDS. One quantity.
+
+### 18. `upper_photon_energy` — **ONE-QUANTITY** (3 bindings)
+
+The high-energy mirror of group 7, on the same three containers. One quantity.
+
+> **Family note.** The low edge is spelled `lower_bound_photon_energy` and the
+> high edge `upper_photon_energy` — one carries `bound`, the other does not,
+> for the two edges of a single band. That is a grammar asymmetry across two
+> identities rather than a defect inside either, and it is recorded under
+> follow-ons.
+
+### 19. `vertical_coordinate_of_magnetic_axis` — **ONE-QUANTITY** (3 bindings)
+
+`equilibrium/time_slice/global_quantities/magnetic_axis/z`,
+`summary/boundary/magnetic_axis_z/value` and
+`summary/local/magnetic_axis/position/z`. All three are the magnetic axis. Note
+that this group does **not** carry a `contour_tree/node/z` binding — the WEST
+manifest admits only the `r` axis of that container — so the group 4 defect has
+no counterpart here and this identity is clean.
+
+### 20. `volume_of_flux_surface` — **ONE-QUANTITY** (3 bindings)
+
+`core_profiles/profiles_1d/grid/volume`,
+`equilibrium/time_slice/profiles_1d/volume` and
+`equilibrium/time_slice/global_quantities/volume`. The first two are explicitly
+the volume enclosed by a flux surface; the third is "Total plasma volume", which
+is the same quantity evaluated on the outermost closed surface rather than a
+different one. **This name is on the settled list** — the `*_of_flux_surface`
+family is adjudicated and is not relitigated here — and the sharing is
+consistent with that adjudication.
+
