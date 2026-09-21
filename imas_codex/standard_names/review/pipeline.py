@@ -25,6 +25,7 @@ from imas_codex.standard_names.budget import (
     charge_billable_exception,
     model_provider_exposure,
 )
+from imas_codex.standard_names.review.audits import AuditReport
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
 # revised_name values (e.g. multi-hundred-char stream-of-consciousness strings).
@@ -1710,7 +1711,9 @@ def _query_ids_names(ids_prefix: str) -> set[str]:
         return {r["id"] for r in rows} if rows else set()
 
 
-def _extract_audit_findings(audit_report: Any, batch_ids: set[str]) -> list[str]:
+def _extract_audit_findings(
+    audit_report: AuditReport | None, batch_ids: set[str]
+) -> list[str]:
     """Extract one-line audit findings relevant to names in the batch.
 
     Processes the AuditReport from Layer 1, extracting per-name findings

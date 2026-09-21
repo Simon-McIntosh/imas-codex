@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import ast
 import difflib
+import shutil
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -216,6 +217,12 @@ def _declared_fields(
     for base in info.bases:
         base_info = _annotation_class(base, info.module, index)
         if base_info is None:
+            if _framework_base(base, info.module, index):
+                # A framework base declares no data fields of its own, so the
+                # subclass body is the complete declaration. Its field set is
+                # known rather than unknown, and a class whose fields are known
+                # is judged instead of reported unverifiable.
+                continue
             bases_ok = False
             continue
         child = _declared_fields(base_info, index, seen)
@@ -250,6 +257,20 @@ def _annotation_class(
     if dotted is None:
         return None
     return index.find(dotted, module)
+
+
+# Framework bases whose declared-field contribution is known to be empty: the
+# subclass body is the whole declaration. Any other base outside the package
+# keeps its fields unknown, because an unseen base may declare them.
+_FRAMEWORK_BASES = frozenset({"pydantic.BaseModel"})
+
+
+def _framework_base(node: ast.expr, module: str, index: _Index) -> bool:
+    """True when a base is a framework base contributing no declared fields."""
+    dotted = _dotted(node)
+    if dotted is None:
+        return False
+    return index.imports.get(module, {}).get(dotted, dotted) in _FRAMEWORK_BASES
 
 
 def _scope_annotations(fn: ast.AST) -> dict[str, ast.expr]:
@@ -484,3 +505,31 @@ def test_aperture_floor_refuses_a_scan_that_resolves_nothing(
     with pytest.raises(AssertionError) as excinfo:
         assert_declared_attribute_access(root, min_resolved=1)
     assert "below the floor 1" in str(excinfo.value)
+
+
+def _scratch_review_tree(tmp_path: Path, *, old: str, new: str) -> Path:
+    """Copy the review package and replace one exact source fragment in it."""
+    package = tmp_path / PACKAGE_NAME
+    shutil.copytree(REPO_ROOT / PACKAGE_NAME / REVIEW_SUBTREE, package / REVIEW_SUBTREE)
+    target = package / REVIEW_SUBTREE / "pipeline.py"
+    text = target.read_text()
+    assert old in text, "the fragment this control mutates is no longer in the source"
+    target.write_text(text.replace(old, new, 1))
+    return tmp_path
+
+
+def test_a_reintroduced_findings_getattr_is_refused(tmp_path: Path) -> None:
+    # The check exists because a three-argument getattr on the audit report's
+    # ``findings`` returned the empty default on every call and lost the whole
+    # Layer 1 layer. It must refuse that form at that parameter, which it cannot
+    # do while the parameter is annotated Any.
+    root = _scratch_review_tree(
+        tmp_path,
+        old="    findings: list[str] = []\n",
+        new='    findings: list[str] = getattr(audit_report, "findings", [])\n',
+    )
+    with pytest.raises(AssertionError) as excinfo:
+        assert_declared_attribute_access(root, index_root=REPO_ROOT, min_resolved=0)
+    message = str(excinfo.value)
+    assert "getattr(audit_report, 'findings', ...)" in message
+    assert "AuditReport declares no such field" in message
