@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T14:52:45",
+  "updated": "2026-09-21T15:18:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -176424,6 +176424,218 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T130513026809-review-of-the-sibling-export-doubles",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "review-of-the-sibling-export-doubles",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 785,
+                "cached_input_tokens": 435650,
+                "input_tokens": 436437,
+                "output_tokens": 2172,
+                "reasoning_output_tokens": 913,
+                "total_tokens": 438609,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "the review for r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict stores a parsed record scoring all 5 dimensions in the range 0..20, read from the landed diff at the integrated head, with SOUND or MUST-FIX and a concrete triggering input for each defect. This node made the gate verdict a required parameter of the export double in two sibling test files, closing the last two instances a prior review reported. One file had hardcoded a passing verdict; the other carried no verdict attribute at all. The worker used keyword-only form rather than the positional form the brief specified. Answer four things. ONE: is keyword-only actually equivalent or stronger for the property wanted, which is that no test can inherit or omit a verdict without stating one \u2014 and does it hold at every call site including any helper that threads the value through. TWO: one file routes the verdict through an intermediate helper; verify that helper also requires it and cannot default, since a required parameter behind an optional helper is not required. THREE: check the VALUE at each site, not merely that a value is present: a site that previously exercised a refusal and now reads True is a changed meaning rather than scaffolding, and the per-file passed counts were equal before and after so a swap would be invisible to the count. FOUR: search the whole test suite for any remaining export double that decides its own verdict, and say whether this family is now closed or whether more instances exist \u2014 the prior review found these two by reading siblings, so the search aperture is the question.",
+          "estimated_hours": 0.5,
+          "goal": "attach an independent cross-model review to run r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict",
+          "id": "review-of-the-sibling-export-doubles",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T12:32:35.275Z",
+            "read_at": "2026-09-21T13:05:14Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 59.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T130513026809-review-of-the-sibling-export-doubles/manifest.md",
+          "negative_control": "",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "claude-opus-rev-6",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-21T13:05:30Z",
+        "completed_at": "2026-09-21T13:14:27.528Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 530,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 537,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "44650230ce9b585c83add9b5a547ee94121cec1f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review record parses with all five dimensions scored",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T130513026809-review-of-the-sibling-export-doubles/manifest.md",
+        "scope_changed": false,
+        "session_id": "dcd1dda6-a655-45c2-806d-0537918f43ad",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 72.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T13:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 110406,
+            "cache_creation_input_tokens_cumulative": 110406,
+            "cache_read_input_tokens": 1854187,
+            "cache_read_input_tokens_cumulative": 1854187,
+            "inference_geo": "not_available",
+            "input_tokens": 42,
+            "input_tokens_cumulative": 42,
+            "output_tokens": 25142,
+            "output_tokens_cumulative": 25142,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.6599135,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 2.6599135
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T13:14:27.528Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 1854187,
+          "cumulative_input_tokens": 1964635,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 533.215,
+          "generated_tokens": 25142,
+          "generation_seconds": 312.176,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 12.3,
+          "machine_seconds": 221.039,
+          "peak_input_tokens": 123438,
+          "tokens_per_second": 80.54,
+          "wall_tokens_per_second": 47.15
+        },
+        "follow_on_paths": [
+          "tests/standard_names/test_review_release_checkout.py:50",
+          "tests/standard_names/test_review_body_authored.py:69",
+          "tests/standard_names/test_review_release_preview_link.py:53.",
+          "tests/standard_names/test_release_rehearsal_accounting.py:81",
+          "tests/standard_names/test_release_rehearsal_writes_nothing.py:98"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-the-sibling-export-doubles",
+          "session_id": "dcd1dda6-a655-45c2-806d-0537918f43ad",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T13:14:27.528Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.96,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 25.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -176736,6 +176948,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2469
+    "_version": 2470
   }
 }
