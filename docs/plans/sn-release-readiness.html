@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="173">
+<meta name="plan-version" content="174">
 <meta name="plan-commits" content="459279203f628c110ca9f8daa33cc674f93682d1,f4b32b332af6d7da7f7fb701ac5550ab6202bd1f">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/unsourced-origin-cause.md,docs/evidence/sn-release-readiness/unsourced-origin-verification.md,docs/evidence/sn-release-readiness/tail-drain-to-the-ceiling.md">
 <meta name="plan-impl" content="0.9">
@@ -1395,6 +1395,9 @@ statement review</a>.</p>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-run-r-20260921T043226381172-n-the-local-lane-graph-writes-are-sound" data-who="reckon-ship" data-when="2026-09-21T04:39:13.665Z">
     <div class="r-comment-body"><p>no suite: a diff review. 5 defects over the fenced diff, 4 confirmed</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20260921T045234213046-n-the-graph-write-statements-landed-this-sprint-are-sound" data-who="reckon-ship" data-when="2026-09-21T04:59:29.818Z">
+    <div class="r-comment-body"><p>no suite: a diff review. 591 added lines, 1 confirmed, 2 plausible, 3 hypotheses refuted by measurement</p></div>
 </div>
 <div class="r-comment" data-section="§12a" data-id="c-run-r-20260901T160441383261-n-sourceattach" data-who="impl-sourceattach" data-when="2026-09-01T16:13:02Z">
     <div class="r-comment-body"><p>5/5 bound via apply_signed_manifest with receipts, 0 identity changes, idempotent on replay, USD 0.000000 of 15.00; 5 further candidates refused on unit mismatch. CRITERION WAS INSUFFICIENT AND THE BINDINGS NEED RE-JUDGING: the node met its stated done-when exactly, but that done-when made unit equality the discriminator, and every one of the five carries an unstated semantic element - aggregation, GGD locus, module locus, central-measurement locus, non-linear-response qualifier - so under the lead's stricter test of whether a pipeline run on that source would regenerate the same name, each is inexact by the amount its delta names</p></div>
