@@ -1077,14 +1077,15 @@
   </section>
   <section id="defaulted-attribute-scan-aperture">
     <h2>The guard proves it inspected a non-empty aperture</h2>
-    <p><strong>Non-empty instrument.</strong> The static guard now asserts floors of at least
-    <strong>8 scanned modules</strong>, <strong>3,000 declared class attributes</strong> and
-    <strong>24 literal three-argument candidates</strong>. The comment beside those constants states
-    the reason: a scan that sees nothing must fail rather than pass. On integrated main
-    <code>a0d303ca47357821f4a1f595d8a8089e462b32fa</code>, the focused all-debug receipt records
-    <strong>11 modules</strong>, <strong>4,013 declared attributes</strong>,
-    <strong>30 candidates</strong> and <strong>0 violations</strong>, so each floor is a ratchet
-    below a measured value rather than an assertion of an exact implementation detail.</p>
+    <p><strong>Retired record.</strong> This section once described the aperture through the
+    class-attribute name set the check resolves against, quoting a floor for that name set and a
+    receipt for the run that measured it. Both constants were deleted from the code, so the figures
+    asserted a guard that no longer exists: the check builds no name set of that kind and counts
+    nothing of that kind, and a reader could not reproduce the numbers from any run. The sentence
+    carrying them is removed rather than renumbered, because correcting a figure to match a
+    computation that is gone would keep the false claim in a more plausible shape. What the guard
+    holds today is set out in
+    <a href="#static-check-aperture-cannot-shrink-silently">the aperture-ratchet record</a>.</p>
 
     <p><strong>What a green result still cannot say.</strong> The check resolves an attribute name
     against the union of fields and properties on <em>every</em> class in <code>imas_codex</code>.
@@ -1100,6 +1101,109 @@
     package-wide name set. That is a distinct type-analysis design and is recorded as follow-on work,
     not folded into this narrow static guard.</p>
 </section>
+  <section id="static-check-aperture-cannot-shrink-silently">
+    <h2>The aperture floors are ratcheted to what the tree measures</h2>
+    <p><strong>The bypass, reproduced before it was repaired.</strong> The guard held two root
+    lists a few lines apart — the configured tuple and an independent required set — and asserted
+    one against the other. The comparison was two-sided in name only, because the second list was a
+    verbatim copy of the first: deleting a root from both left the file green. Reproduced at the
+    worker base <code>f2cb7b21b</code> on the unchanged test file by removing
+    <code>imas_codex/standard_names/export.py</code> from both lists, after which the focused file
+    reported <strong>3 passed</strong>. A guard whose expected input is a second copy of its actual
+    input cannot notice that the copy shrank.</p>
+
+    <p><strong>The repair.</strong> The duplicate list and its assertion are deleted, and the two
+    aggregate aperture floors are ratcheted to the counts this tree measures —
+    <strong>11 scanned modules</strong> and <strong>30 literal three-argument candidates</strong>,
+    with <strong>0 violations</strong>. Each floor carries an assertion message stating that it may
+    be raised when the tree grows and must never be lowered to make a failure go away. The per-root
+    coverage assertion is kept unchanged beside the floors, because per-root coverage does not imply
+    the totals and the totals do not imply per-root coverage.</p>
+
+    <figure>
+      <svg viewBox="0 0 760 300" width="100%" role="img"
+           aria-label="Top row, the base guard: the configured module-root tuple and a required-root set held the same three paths, so deleting export.py from both left the set difference empty and the file green at 3 passed. Bottom row, after the repair: the tuple is the only list, and the shrunken tuple scans 10 modules against a ratchet floor of 11, so the same deletion fails on a count; restoring the root returns 4 passed.">
+        <g font-family="system-ui, sans-serif" font-size="11" fill="#1a1a1a">
+
+          <text x="24" y="26" font-size="12" font-weight="600" fill="#8a1c1c">base — the control is a copy of its subject</text>
+
+          <rect x="24" y="38" width="206" height="62" fill="#ffffff" stroke="#8a1c1c" stroke-width="1.5"/>
+          <text x="36" y="59" font-size="11" font-weight="600">MODULE_ROOTS</text>
+          <text x="36" y="77" fill="#444">review/ · export.py</text>
+          <text x="36" y="93" fill="#444">loop.py</text>
+
+          <line x1="240" y1="69" x2="268" y2="69" stroke="#8a1c1c" stroke-width="1"/>
+          <polygon points="268,69 259,65 259,73" fill="#8a1c1c"/>
+          <text x="254" y="116" text-anchor="middle" fill="#8a1c1c">verbatim copy</text>
+
+          <rect x="278" y="38" width="176" height="62" fill="#ffffff" stroke="#8a1c1c" stroke-width="1.5"/>
+          <text x="290" y="59" font-size="11" font-weight="600">REQUIRED set</text>
+          <text x="290" y="77" fill="#444">the same three</text>
+          <text x="290" y="93" fill="#444">paths</text>
+
+          <line x1="464" y1="69" x2="492" y2="69" stroke="#8a1c1c" stroke-width="1"/>
+          <polygon points="492,69 483,65 483,73" fill="#8a1c1c"/>
+          <text x="478" y="116" text-anchor="middle" fill="#8a1c1c">delete from both</text>
+
+          <rect x="502" y="38" width="234" height="62" fill="#ffffff" stroke="#8a1c1c" stroke-width="1.5"/>
+          <text x="514" y="59" font-size="11" font-weight="600" fill="#8a1c1c">difference is empty</text>
+          <text x="514" y="77" fill="#444">no root is reported missing</text>
+          <text x="514" y="93" fill="#444">3 passed — the bypass</text>
+
+          <text x="24" y="164" font-size="12" font-weight="600" fill="#0b6e4f">after — one list, one measured floor</text>
+
+          <rect x="24" y="176" width="206" height="62" fill="#ffffff" stroke="#0b6e4f" stroke-width="1.5"/>
+          <text x="36" y="197" font-size="11" font-weight="600">MODULE_ROOTS</text>
+          <text x="36" y="215" fill="#444">review/ · loop.py</text>
+          <text x="36" y="231" fill="#444">export.py deleted</text>
+
+          <line x1="240" y1="207" x2="268" y2="207" stroke="#0b6e4f" stroke-width="1"/>
+          <polygon points="268,207 259,203 259,211" fill="#0b6e4f"/>
+          <text x="254" y="254" text-anchor="middle" fill="#0b6e4f">delete</text>
+
+          <rect x="278" y="176" width="176" height="62" fill="#ffffff" stroke="#0b6e4f" stroke-width="1.5"/>
+          <text x="290" y="197" font-size="11" font-weight="600">scan vs floor</text>
+          <text x="290" y="215" fill="#444">10 modules scanned</text>
+          <text x="290" y="231" fill="#444">floor is 11</text>
+
+          <line x1="464" y1="207" x2="492" y2="207" stroke="#0b6e4f" stroke-width="1"/>
+          <polygon points="492,207 483,203 483,211" fill="#0b6e4f"/>
+          <text x="478" y="254" text-anchor="middle" fill="#0b6e4f">fails on a count</text>
+
+          <rect x="502" y="176" width="234" height="62" fill="#ffffff" stroke="#0b6e4f" stroke-width="2"/>
+          <text x="514" y="197" font-size="11" font-weight="600" fill="#8a1c1c">1 failed, 3 passed</text>
+          <text x="514" y="215" fill="#444">below the ratchet floor</text>
+          <text x="514" y="231" fill="#444">restored: 4 passed</text>
+        </g>
+      </svg>
+      <figcaption>The same deletion, before and after. At base the configured tuple and the required
+      set were the same three paths, so a deletion applied to both left the comparison empty and the
+      file green at 3 passed. After the repair the tuple is the only list and the count it reaches
+      is compared against a floor ratcheted to the measured aperture, so the deletion fails on a
+      count rather than passing silently.</figcaption>
+    </figure>
+
+    <p><strong>Negative control.</strong> The declared mutation removes
+    <code>imas_codex/standard_names/export.py</code> from the module-root declaration. The focused
+    file then reports <strong>1 failed, 3 passed</strong>, failing on
+    <code>scanned 10 modules, below the ratchet floor of 11</code> — a count, not a path, which is
+    the shape a silently shrunken root set produces. The same mutation against the base revision
+    passed, so this is the bypass and not a coincidence of the new assertions; the restored file
+    reports <strong>4 passed</strong>.</p>
+
+    <p><strong>The silent direction change is closed too.</strong> A configured root that was
+    neither a directory nor a file contributed no modules, so a misspelled root disappeared from the
+    aperture instead of failing. That branch now raises naming the resolved path, and a test drives
+    it with a mistyped <code>reviwe</code> root and asserts the message carries the path. The
+    ratchet would still fire on the totals, but it would report a count and leave the misspelling to
+    be inferred.</p>
+
+    <p><strong>What a green result still cannot say.</strong> The check resolves an attribute name
+    against the union of fields and properties on <em>every</em> class in <code>imas_codex</code>
+    and is not type-aware, so a name declared by an unrelated class still passes. That limit and the
+    deferred type-aware design are recorded in
+    <a href="#defaulted-attribute-scan-aperture">the aperture and limitation record</a>.</p>
+  </section>
   <section id="bypassed-maintenance-passes-are-named">
     <h2>Every bypassed maintenance pass names itself</h2>
     <p><strong>All three silent-default defects reproduced at base
