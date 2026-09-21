@@ -1292,6 +1292,71 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
 
   </section>
 
+    <h2>The export path was audited before the cut, and it drops nothing silently</h2>
+
+    <p>
+      The four export suites the readiness measure names were captured once:
+      <strong>7 failed, 16 passed, 3 errors in 20.59&nbsp;s</strong>. Ten red
+      results, and none of them an export defect &mdash; established by
+      experiment rather than by triaging ten symptoms one at a time.
+    </p>
+
+    <p>
+      A session plugin replaced <em>only</em> the producer-evidence predicate
+      <code>_has_producing_source</code> with a constant and the same four files
+      were re-run: <strong>1 failed, 25 passed</strong>. Nine of the ten are
+      therefore one cause. Those fixtures mock the population fetch and
+      hand-build candidate rows that predate the three projection keys the live
+      query now supplies, and <code>dict.get</code> returns <code>None</code>
+      for an absent key, so the predicate fails closed on a path only a fixture
+      can reach. The drop is named and counted as
+      <code>no_producing_source</code>, never silent.
+    </p>
+
+    <p>
+      The tenth is stale twice over, and the contradiction is between two suites
+      rather than between a test and the code: the older assertion expects a
+      manifest carrying an exhausted identity and a non-nameable time axis to
+      pass, while the newer <code>manifest_generability</code> gate refuses
+      exactly that shape by design and its own suite asserts the refusal. Both
+      adjacent suites read <strong>10 passed, exit 0</strong>.
+    </p>
+
+    <p>
+      Because a green suite never shows a guard firing, the closure guard was
+      made to fail. Wrapping the classifier to swallow one of its own exclusion
+      records produced the refusal on demand, and the refusal names the identity
+      that went unaccounted rather than reporting a bare mismatch:
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>population</th><th>reading</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>unmutated</td>
+          <td>emitted 1 + excluded 3 = 4 = N; zero unnamed-reason rows;
+              <strong>ledger closes</strong></td></tr>
+        <tr><td>one exclusion record swallowed</td>
+          <td><code>exclusion_accounting</code> fails:
+              <code>accepted_population 4, emitted 1, excluded 2,
+              accounted_total 3, unaccounted 1</code>, naming
+              <code>docs_pending_name</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      That probe is also the load control for the staleness verdict: supplying
+      only the one missing projection key reproduces exactly the counts the
+      stale test asserts. One suspected finding was probed and refuted &mdash;
+      the mechanism tuple does declare <code>recorded_refusal</code> and its
+      counts sum to the uncarried total &mdash; and one prior entry no longer
+      reproduces: the non-quantity token collision gate, recorded as failing
+      open, <strong>passes</strong>. Commands, logs and the disposition per
+      failure:
+      <a href="/imas-codex/evidence/sn-release-readiness/export-path-review">the export path review</a>.
+    </p>
+
   </main>
 </body>
 </html>
