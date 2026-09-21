@@ -11,6 +11,7 @@ import yaml
 
 from imas_codex.standard_names.export import (
     ExportReport,
+    GateResult,
     _classify_export_population,
     _entry_model,
     run_export,
@@ -150,6 +151,7 @@ def test_empty_input_population_is_refused_with_named_report_reason(
     assert population_gate.issues == [
         {
             "type": "empty_input_population",
+            "manifest_size": None,
             "detail": (
                 "the export input population is empty; there is nothing to publish"
             ),
@@ -167,9 +169,14 @@ def test_empty_input_population_is_refused_with_named_report_reason(
 def test_fully_excluded_population_is_refused_with_named_report_reason(
     tmp_path: Path,
 ) -> None:
+    manifest_sources = [
+        {"source_path": "equilibrium/a", "standard_name_id": "refused_name"},
+        {"source_path": "equilibrium/b", "standard_name_id": "refused_name"},
+    ]
     report = _run_fixture_export(
         tmp_path,
         [_candidate("refused_name", validation_status="quarantined")],
+        manifest_sources=manifest_sources,
     )
     population_gate = next(
         gate for gate in report.gate_results if gate.gate == "export_population"
@@ -181,6 +188,7 @@ def test_fully_excluded_population_is_refused_with_named_report_reason(
             "type": "fully_excluded_population",
             "population_size": 1,
             "excluded": 1,
+            "manifest_size": 2,
             "detail": "every input identity was excluded before export gates ran",
         }
     ]
@@ -194,6 +202,134 @@ def test_fully_excluded_population_is_refused_with_named_report_reason(
         (tmp_path / ".export_report.json").read_text(encoding="utf-8")
     )
     assert persisted["gates"][1]["issues"] == population_gate.issues
+    assert persisted["source_reconciliation"]["manifest_size"] == 2
+    assert persisted["source_reconciliation"]["accounted"] == 0
+
+
+def test_post_gate_empty_population_is_refused_without_skipping_gates(
+    tmp_path: Path,
+) -> None:
+    population = [
+        _candidate(
+            "low_score_name",
+            reviewer_score_name=0.10,
+            _has_derived_producer=False,
+            _has_non_derived_producer=True,
+            _has_live_child=False,
+        )
+    ]
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.export._fetch_export_population",
+                return_value=population,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.export._fetch_graph_name_ids",
+                return_value={"low_score_name"},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.export._run_gate_a",
+                return_value=GateResult(gate="graph_tests", passed=True),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.export._run_gate_b",
+                return_value=GateResult(gate="cross_field_consistency", passed=True),
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.settings.get_sn_isnc_dir", return_value=None)
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.graph.client.GraphClient",
+                return_value=_ReadOnlyGraphClient(),
+            )
+        )
+        report = run_export(
+            tmp_path,
+            min_score=0.65,
+            skip_gate=False,
+            force=True,
+            include_sources=False,
+        )
+
+    population_gate = next(
+        gate for gate in report.gate_results if gate.gate == "export_population"
+    )
+    score_gate = next(
+        gate for gate in report.gate_results if gate.gate == "score_thresholds"
+    )
+    persisted = json.loads(
+        (tmp_path / ".export_report.json").read_text(encoding="utf-8")
+    )
+
+    assert score_gate.passed
+    assert score_gate.issues == [
+        {
+            "type": "below_name_score",
+            "name": "low_score_name",
+            "score": 0.1,
+            "threshold": 0.65,
+        }
+    ]
+    assert not population_gate.passed
+    assert population_gate.issues == [
+        {
+            "type": "fully_excluded_population",
+            "population_size": 1,
+            "excluded": 1,
+            "manifest_size": None,
+            "detail": "every input identity was excluded before catalog manifest write",
+        }
+    ]
+    assert not report.all_gates_passed
+    assert report.exported_count == 0
+    assert not (tmp_path / "catalog.yml").exists()
+    assert (
+        next(
+            gate for gate in persisted["gates"] if gate["gate"] == "export_population"
+        )["issues"]
+        == population_gate.issues
+    )
+
+
+def test_null_catalog_status_refusal_reports_supplied_manifest_size(
+    tmp_path: Path,
+) -> None:
+    manifest_sources = [
+        {"source_path": "equilibrium/a", "standard_name_id": "null_status_name"},
+        {"source_path": "equilibrium/b", "standard_name_id": "null_status_name"},
+    ]
+    report = _run_fixture_export(
+        tmp_path,
+        [_candidate("null_status_name", status=None)],
+        manifest_sources=manifest_sources,
+    )
+    status_gate = next(
+        gate for gate in report.gate_results if gate.gate == "catalog_status"
+    )
+    persisted = json.loads(
+        (tmp_path / ".export_report.json").read_text(encoding="utf-8")
+    )
+
+    assert not status_gate.passed
+    assert status_gate.issues == [
+        {
+            "type": "null_catalog_status",
+            "name": "null_status_name",
+            "manifest_size": 2,
+            "detail": "graph catalog status is null",
+        }
+    ]
+    assert persisted["source_reconciliation"]["manifest_size"] == 2
+    assert persisted["source_reconciliation"]["accounted"] == 0
 
 
 def test_export_ledger_closes_over_fixture_population(tmp_path: Path) -> None:
@@ -412,12 +548,25 @@ def test_export_withholds_hard_catalog_semantic_issue(tmp_path: Path) -> None:
 
     report = _run_fixture_export(tmp_path, population, validate_entries=True)
     rows = {row["reason"]: row for row in report.to_dict()["exclusion_ledger"]}
+    population_gate = next(
+        gate for gate in report.gate_results if gate.gate == "export_population"
+    )
 
-    assert report.all_gates_passed
+    assert not report.all_gates_passed
     assert report.total_candidates == 1
     assert report.exported_count == 0
     assert rows["invalid_catalog_entry"]["identities"] == ["radial_coordinate"]
     assert report.exported_count + sum(row["count"] for row in rows.values()) == 1
+    assert population_gate.issues == [
+        {
+            "type": "fully_excluded_population",
+            "population_size": 1,
+            "excluded": 1,
+            "manifest_size": None,
+            "detail": "every input identity was excluded before catalog manifest write",
+        }
+    ]
+    assert not (tmp_path / "catalog.yml").exists()
 
 
 def test_export_validates_cross_links_against_full_catalog(tmp_path: Path) -> None:
