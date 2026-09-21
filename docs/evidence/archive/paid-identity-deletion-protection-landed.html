@@ -618,6 +618,78 @@
     &mdash; because those belong to the restore writer rather than to its entry
     point.</p>
   </section>
+<section id="graph-write-audit">
+    <h2>Both graph-writing paths landed this sprint were audited; one of the two must be fixed before it restores anything</h2>
+    <p><strong>Measured 2026-09-21</strong> from base
+    <code>1fa39615146cc6c88a61e36f4829fde60f4d6f86</code> on the
+    <code>all_debug</code> partition. Three questions were put to each path
+    &mdash; can it write the graph when it should refuse, can its refusal be
+    bypassed, can the receipt it emits disagree with what was written &mdash;
+    and every answer is a probe that could have come out the other way rather
+    than a reading of the diff.</p>
+    <table>
+      <thead><tr><th>Path</th><th>Writes when it should refuse</th><th>Refusal bypassable</th><th>Receipt can disagree</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>restore-receipt parity, <code>da2b5619e</code></td><td>no</td><td>no</td><td>yes, two ways, display only</td><td><strong>SAFE-FOR-WEST</strong></td></tr>
+        <tr><td><code>sn restore compose</code>/<code>apply</code>, <code>21e4739e9</code></td><td><strong>yes, two ways</strong></td><td>no</td><td>indirectly, as the census producer</td><td><strong>MUST-FIX-FIRST</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The recorded finding is real and narrower than recorded.</strong>
+    The receipt's <code>expected</code> does fall back to the archive census
+    while the refusal builds its own from the reconstruction closure, but the
+    loader at <code>signed_manifest.py:6944</code> already refuses a census
+    above the closure for any role the reconstruction registry routes. So the
+    displayed-not-raised shortfall survives only for a role with no
+    reconstruction route, which today is <code>EVIDENCED_BY</code> and nothing
+    else. <strong>The closure must stay authoritative for the refusal</strong>,
+    because it is the only expectation a restore can satisfy: an inbound
+    <code>EVIDENCED_BY</code> cannot be carried by any reconstruction edge, so
+    letting the census govern would make every identity that ever held one
+    permanently unrestorable &mdash; the wrong trade for a plan whose purpose is
+    returning 67 identities. <strong>The census must become a separately named
+    receipt field</strong> rather than sharing a column with the closure. A
+    shortfall on a routable role must fail, and already does at load; on a
+    non-routable role it must be recorded, and already is.</p>
+    <p><strong>The column is not monotone, which is why the shared name is not
+    cosmetic.</strong> The load guard is one-sided &mdash; it refuses a census
+    above the closure and says nothing about one below it &mdash; so an
+    under-counting census applies cleanly and prints
+    <code>expected 0 / observed 1</code> against a restore that wrote exactly
+    the one edge it was authorised to write. A second receipt defect sits
+    beside it: the parity block iterates every role the archive names, but
+    <code>observed</code> is read only over the counted set, so a role outside
+    that set reports <code>observed: 0</code> without the graph ever being
+    asked &mdash; measured at zero against a live count of two. Neither changes
+    what is written or withheld.</p>
+    <p><strong>The entry point is the one that must not restore anything
+    yet.</strong> <code>compose</code> copies the archived properties verbatim
+    and offers no origin override, so a restore composed straight from the
+    pre-correction dump returns each identity carrying
+    <code>origin: catalog_edit</code> &mdash; the value that made it deletable
+    &mdash; and the per-type edge-count acceptance passes such a restore
+    without complaint. The suite cannot see it: the adapter's own fixture
+    carries that same origin. Separately, a
+    <code>--rename-counterpart</code> rekey is consumed by the first matching
+    edge alone, so an identity holding two edges to one renamed counterpart gets
+    one rekeyed and one left on the archived id; where that id still exists live
+    the edge is created against the wrong node with no refusal at any layer,
+    because the parity guard counts roles and not endpoints. That is the
+    renamed-parent shape this plan's own restore set contains.</p>
+    <p><strong>What was verified sound, each with a control that could have
+    failed.</strong> The refusal rewrite from <code>live != expected</code> to
+    an <code>any()</code> over the closure is exactly equivalent over the
+    registry, because <code>expected</code> is seeded with every registry role
+    at zero; a live <code>HAS_PARENT</code> the closure does not carry still
+    raises. Node and counterpart writes cannot overwrite a live node. An apply
+    still requires a preview digest and re-reads the closure inside the
+    transaction. The loader independently verifies the embedded signature, so
+    the command recomputing both digests from its own file is not vacuous
+    &mdash; though the signature is tamper-evidence for transport and not
+    authorisation, since anyone who can run the apply can re-sign arbitrary
+    content.</p>
+    <p>Full audit with every <code>file:line</code>, triggering input and probe
+    output: <a href="/imas-codex/evidence/paid-identity-deletion-protection/graph-write-audit.md">the graph-write audit</a>.</p>
+  </section>
 </main>
 </body>
 </html>
