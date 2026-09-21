@@ -89,13 +89,15 @@ def _write_names_focus(tmp_path, *, name="west-task-2e", filename="batch.yaml"):
     return path
 
 
-def _stub_exporter(record):
+def _stub_exporter(record, *, all_gates_passed):
     def exporter(*, staging_dir, force, review_batch, **kw):
         record["review_batch"] = review_batch
         sd = Path(staging_dir)
         (sd / "standard_names").mkdir(parents=True, exist_ok=True)
         (sd / "catalog.yml").write_text("catalog_name: t\n")
-        return SimpleNamespace(exported_count=len(review_batch))
+        return SimpleNamespace(
+            exported_count=len(review_batch), all_gates_passed=all_gates_passed
+        )
 
     return exporter
 
@@ -143,7 +145,7 @@ def test_rehearsal_writes_no_staging_no_roster_and_moves_no_candidate(
         bump="minor",
         dry_run=True,
         reviews_dir=reviews,
-        exporter=_stub_exporter(exporter_record),
+        exporter=_stub_exporter(exporter_record, all_gates_passed=True),
         publisher=_stub_publisher(isnc_repo),
         pr_creator=_stub_pr(),
         **_PR_TARGET,

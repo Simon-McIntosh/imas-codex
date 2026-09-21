@@ -89,7 +89,7 @@ def _write_export_report(staging: Path) -> None:
     )
 
 
-def _stub_exporter(record):
+def _stub_exporter(record, *, all_gates_passed):
     def exporter(*, staging_dir, force, review_batch, **kw):
         record["review_batch"] = review_batch
         sd = Path(staging_dir)
@@ -104,10 +104,11 @@ def _stub_exporter(record):
         # The export report must always be written; the publisher decides
         # whether the cut actually carries it.
         _write_export_report(sd)
-        # Export gates are scaffolding; these tests exercise report reachability.
+        # The report must be able to answer the gate question: the verdict is
+        # supplied by the caller, never defaulted here.
         return SimpleNamespace(
             exported_count=len(review_batch),
-            all_gates_passed=True,
+            all_gates_passed=all_gates_passed,
             gate_results=[],
         )
 
@@ -147,7 +148,9 @@ def _capture_pr(bodies, calls):
     return pr_creator
 
 
-def _run_cut(isnc_repo, tmp_path, *, copy_report: bool, record: dict) -> tuple:
+def _run_cut(
+    isnc_repo, tmp_path, *, copy_report: bool, record: dict, all_gates_passed: bool
+) -> tuple:
     focus = _write_names_focus(tmp_path)
     reviews = tmp_path / "reviews"
     pr_bodies: list[str] = []
@@ -159,7 +162,7 @@ def _run_cut(isnc_repo, tmp_path, *, copy_report: bool, record: dict) -> tuple:
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=reviews,
-        exporter=_stub_exporter(record),
+        exporter=_stub_exporter(record, all_gates_passed=all_gates_passed),
         publisher=_stub_publisher(copy_report=copy_report),
         pr_creator=_capture_pr(pr_bodies, pr_calls),
         dd_gap_reader=lambda **_kwargs: [],
@@ -178,7 +181,11 @@ def test_publish_commits_report_and_body_links_its_derived_address(isnc_repo, tm
     """A cut that delivers the report links it from the composed body."""
     exporter_record: dict = {}
     report, pr_bodies, pr_calls = _run_cut(
-        isnc_repo, tmp_path, copy_report=True, record=exporter_record
+        isnc_repo,
+        tmp_path,
+        copy_report=True,
+        record=exporter_record,
+        all_gates_passed=True,
     )
 
     assert report.errors == []
@@ -246,7 +253,11 @@ def test_report_missing_from_checkout_refuses_the_request(isnc_repo, tmp_path):
     """A cut whose report never reached the checkout cannot open a request."""
     exporter_record: dict = {}
     report, pr_bodies, pr_calls = _run_cut(
-        isnc_repo, tmp_path, copy_report=False, record=exporter_record
+        isnc_repo,
+        tmp_path,
+        copy_report=False,
+        record=exporter_record,
+        all_gates_passed=True,
     )
 
     assert not (isnc_repo / ".export_report.json").exists()
