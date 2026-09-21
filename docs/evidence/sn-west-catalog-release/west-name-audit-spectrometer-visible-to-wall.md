@@ -357,3 +357,124 @@ and 238 — and those are judged here, because both halves are in hand.
 - data-dictionary text: Electron density
 - name description: Number density of free electrons per physical volume averaged along a complete plasma propagation chord, equal to the path integral divided by chord length.
 - note: The leaf's own text is the bare "Electron density" and the averaging is carried entirely by the `line_average` container — so the name supplies the qualifier the data-dictionary leaf omits, which is the correct direction. Also bound to `interferometer/channel/n_e_line_average` outside this range; deferred to the collision sweep, which owns the question of whether a per-channel chord average and a summary line average are one identity.
+
+### 241. `electron_density_at_divertor_target` — **correct**
+
+- source path: `summary/local/divertor_target/n_e/value`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Electron density
+- name description: Number density of the electron species at the divertor target is the local particle count per volume for free electrons at the sheath entrance immediately upstream of the target-facing plasma boundary.
+- note: The description pins the evaluation point to the sheath entrance, which is the convention divertor measurements and two-point models use; without it, "at the target" would be ambiguous between the sheath entrance and the material surface.
+
+### 242. `energy_flux_maximum_at_divertor_target` — **correct**
+
+- source path: `summary/local/divertor_target/power_flux_peak/value`
+- unit: `W.m^-2` (data dictionary: `W.m^-2`)
+- data-dictionary text: Peak power flux on the divertor target or limiter surface
+- name description: Peak local energy-deposition rate per unit area on one divertor target surface, combining incident plasma-particle and radiative energy-carrying channels.
+- note: The data-dictionary text admits "the divertor target **or limiter** surface" while the name commits to a divertor target. The name is faithful to its path — the container is `summary/local/divertor_target` — so the verdict is correct, but WEST operates in both limited and diverted configurations and a limiter-phase value stored under this node would be published under a name that denies it. Recorded for the sweep rather than rejected, because the remedy lies in the data dictionary's container naming and not in this cut.
+
+### 243. `electron_temperature_at_divertor_target` — **correct**
+
+- source path: `summary/local/divertor_target/t_e/value`
+- unit: `eV` (data dictionary: `eV`)
+- data-dictionary text: Electron temperature
+- name description: Electron temperature at the divertor target is the thermal energy per particle of the electron population evaluated at the plasma side of a divertor-target sheath, distinct from the target material temperature.
+- note: The description draws exactly the distinction a reader of the name could get wrong — plasma electron temperature at the target, not the temperature of the target tile, which this batch also publishes from infrared thermography. Units agree at `eV` on both sides.
+
+### 244. `electron_density_at_magnetic_axis` — **correct**
+
+- source path: `summary/local/magnetic_axis/n_e/value`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Electron density
+- name description: Particle number density of the electron population evaluated at the magnetic axis is the local electron count per physical volume at that location.
+- note: `electron_density` is the base the first half found spelled eight ways to one and settled as the survivor; this row uses it.
+
+### 245. `radial_coordinate_of_magnetic_axis` — **correct**
+
+- source path: `summary/local/magnetic_axis/position/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate locating the magnetic-axis O-point in the right-handed cylindrical (R, φ, Z) frame around which nested closed flux surfaces are organized.
+- note: The same identity as row 210, reached through the `summary/local/magnetic_axis/position` container rather than the `summary/boundary` scalar mirror. Both are genuinely the magnetic axis, so both are correct; the contour-tree binding named at row 210 is the one that is not, and it is deferred to the collision sweep with the rest of that identity's out-of-range paths.
+
+### 246. `vertical_coordinate_of_magnetic_axis` — **correct**
+
+- source path: `summary/local/magnetic_axis/position/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical Z coordinate of the magnetic axis in the right-handed cylindrical (R, φ, Z) frame, marking the interior extremum organizing nested magnetic flux surfaces.
+- note: Also bound to `equilibrium/time_slice/global_quantities/magnetic_axis/z` and `summary/boundary/magnetic_axis_z/value`, both genuinely the magnetic axis; deferred to the collision sweep. Unlike its radial twin this identity is **not** bound to a contour-tree node, so the R and the Z of one locus reach different numbers of objects.
+
+### 247. `electron_temperature_at_magnetic_axis` — **correct**
+
+- source path: `summary/local/magnetic_axis/t_e/value`
+- unit: `eV` (data dictionary: `eV`)
+- data-dictionary text: Electron temperature
+- name description: Thermal energy per particle of the electron population, expressed as an energy-equivalent temperature and evaluated at the magnetic axis.
+
+### 248. `electron_density_at_plasma_boundary` — **correct**
+
+- source path: `summary/local/separatrix/n_e/value`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Electron density
+- name description: Number density of electrons at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface.
+- note: The path's container is `separatrix` and the name says `plasma_boundary`. In a diverted configuration the two coincide and the substitution is the cohort's settled spelling for the last closed flux surface, which is why the verdict is correct. In a limited configuration they do not: the last closed surface is then set by the limiter contact point and a separatrix may lie outside the vessel or not exist in the confined region at all. WEST runs both, so the row is recorded for the sweep as a case where the name's boundary definition and the path's are the same object only under one magnetic topology.
+
+### 249. `pulse_duration` — **INCORRECT**
+
+- source path: `summary/plasma_duration/value`
+- unit: `s` (data dictionary: `s`)
+- data-dictionary text: Duration of existence of a confined plasma during the pulse
+- name description: Elapsed duration of the confined-plasma phase in a single discharge, from plasma breakdown until termination of the confined plasma.
+- **rejected spelling** `pulse_duration` → **proposed spelling** `confined_plasma_duration`
+- why: The data dictionary says this is the duration of the confined plasma **during** the pulse — a sub-interval — and the name gives it the whole pulse. They are not the same number on any discharge: the machine pulse starts with the toroidal-field and gas prefill phases and ends after the current has fully decayed, while the confined plasma exists only between breakdown and termination, and on a disruptive shot the two can differ by seconds. WEST's long-pulse programme reports both quantities routinely, so publishing the shorter one under the longer one's name is a direct source of error. The description is already correct and says the confined-plasma phase; only the name asserts the pulse. The cut also publishes `breakdown_initial_time` (first half, row 84), the instant this interval begins, which makes the intended interval unambiguous once the name says which one it is.
+
+### 250. `volume_averaged_electron_density` — **correct**
+
+- source path: `summary/volume_average/n_e/value`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Electron density
+- name description: Number density of free electrons per physical volume averaged over the plasma volume enclosed by the last closed flux surface, giving the global mean free-electron density.
+- note: The averaging qualifier is supplied by the name where the data-dictionary leaf is bare, as at row 240, and the description states the averaging volume. Also bound to `interferometer/n_e_volume_average` outside this range; deferred to the collision sweep.
+
+### 251. `vacuum_poloidal_current_function` — **correct**
+
+- source path: `tf/b_field_phi_vacuum_r`
+- unit: `T.m` (data dictionary: `T.m`)
+- data-dictionary text: Vacuum field times major radius in the toroidal field magnet. Positive sign means anti-clockwise when viewed from above
+- name description: Signed major-radius-weighted toroidal magnetic field produced by external coils in an axisymmetric current-free vacuum region.
+- note: The name states the physics rather than the storage: R·B_φ **is** the poloidal current function F of an axisymmetric equilibrium, and in the vacuum region it is the constant set by the toroidal-field coil current. The unit `T.m` agrees on both sides and is itself the check that the quantity is the R-weighted field and not the field. This is the radius-independent counterpart of row 220, which is why that row's missing locus is recoverable by a reader who has both.
+
+### 252. `difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function` — **correct**
+
+- source path: `tf/delta_b_field_phi_vacuum_r`
+- unit: `T.m` (data dictionary: `T.m`)
+- data-dictionary text: Variation of (vacuum field times major radius in the toroidal field magnet) from the start of the plasma.
+- name description: Signed change in the combined external-coil vacuum poloidal current function relative to its initial reference value, representing variation of the toroidal field multiplied by major radius.
+- note: The `difference_of_X_and_Y` construction of row 230, applied to row 251's quantity, so both operands and the sign are readable from the name. The reference instant is what the name calls "initial" and the data dictionary calls "the start of the plasma"; those agree here but "initial" would not resolve on its own if a second reference instant ever entered the catalog.
+
+### 253. `vertical_outline_of_limiter_tile` — **correct**
+
+- source path: `wall/description_2d/limiter/unit/outline/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical (Z) coordinate of each point on a limiter-tile boundary contour in the right-handed cylindrical (R, φ, Z) frame.
+- note: The vertical twin of the first half's row 85, `radial_outline_of_limiter_tile`, accepted there. One container, one object, two coordinates, one locus — which is what row 255 fails to do.
+
+### 254. `toroidal_angular_width_of_limiter_tile` — **INCORRECT**
+
+- source path: `wall/description_2d/limiter/unit/phi_extensions`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Simplified description of toroidal angle extensions of the unit, by a list of zones defined by their center and full width (in toroidal angle). In each of these zones, the unit outline remains the same. Leave this node empty for an axisymmetric unit. The first dimension gives the center and full width toroidal angle values for the unit. The second dimension represents the toroidal occurrences of the unit countour (i.e. the number of toroidal zones).
+- **rejected spelling** `toroidal_angular_width_of_limiter_tile` → **proposed spelling** `toroidal_angular_centre_and_full_width_of_limiter_tile`
+- why: The node is not a width. Its first dimension carries **two different quantities** — a zone centre angle and a zone full width — and its second dimension runs over the toroidal repetitions of the unit. The name publishes one of the two and silently drops the other, so a consumer reading `toroidal_angular_width_of_limiter_tile` and indexing the array gets a centre angle half the time. The description compounds it with a third reading: "full toroidal angular span of one limiter tile between its minimum and maximum φ coordinates" is the span of the tile, not the width of a zone in which the tile's outline is constant, and those differ whenever a unit repeats. This is the one-name-two-quantities class in its least fixable form, because the two quantities share a single data-dictionary node and cannot be split into two bindings; the name must therefore say that it covers a packed pair, or the catalog must decline the node until the data dictionary separates them.
+
+### 255. `radial_outline_of_wall` — **INCORRECT**
+
+- source path: `wall/description_2d/mobile/unit/outline/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of every point on a wall boundary outline, measured from the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+- **rejected spelling** `radial_outline_of_wall` → **proposed spelling** `radial_outline_of_plasma_facing_component`
+- why: Its own Z sibling already carries the right base. The first half accepted `vertical_outline_of_plasma_facing_component` at its row 86 for `wall/description_2d/mobile/unit/outline/**z**`, and this is the same container's `r`. One container, one object, and two different loci across its two coordinates — the shape the first half rejected at its row 73 for the X-point. The spelling is wrong on its own terms as well: `description_2d/mobile/unit` is a **single movable plasma-facing unit**, and WEST's mobile units are its movable limiters, so a name that says "the wall" claims the whole vessel contour for one component's outline and collides with the fixed-wall outlines in the neighbouring `limiter` container at row 253. The proposed spelling is the one already accepted for the sibling, so this is a minority spelling of a base the cohort has already fixed, with a wrong-object consequence.
