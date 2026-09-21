@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T11:19:04",
+  "updated": "2026-09-21T11:25:24",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -169173,6 +169173,302 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T074102582326-n-the-comparator-share-holds-at-the-production-batch-size",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-the-comparator-share-holds-at-the-production-batch-size",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2162,
+                "cached_input_tokens": 552442,
+                "input_tokens": 554606,
+                "output_tokens": 3136,
+                "reasoning_output_tokens": 868,
+                "total_tokens": 557742,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm all three defects reproduce before repairing them, and quote each reproduction; an independent opus review of the landed comparator-share change measured each of them and all three are present at HEAD. First and most consequential: the property the change claims, that every batch item receives a comparator share, holds only for batches of at most 30, and production configures 50. pyproject.toml line 415 sets name-only-batch-size to 50 and group_for_name_only in imas_codex/standard_names/enrichment.py chunks at exactly that size, so a dense name-only bin is a 50-item batch in which the per-item allowance is max(1, 30 // 50) = 1, the first 30 items take their one each, and the remaining 20 hit the cap guard on their first result and contribute nothing. Measured items contributing zero: 0 at n=30, 1 at n=31, 2 at n=32, 170 at n=200. The repair is specified: compute an effective cap of max(cap, len(items)) so the floor of one comparator per item always holds, and say in the docstring that above 30 items the comparator block grows linearly with the batch because twenty items composing against no cohort comparator at all is worse than twenty extra comparator lines in the prompt. Keep 30 as the floor of the cap for small batches. Second, the max(1, ...) that appears to enforce the per-item floor is decorative: because the allowance test runs AFTER the append, replacing it with a bare cap // len(items) yields byte-identical output at n = 1, 5, 25, 30, 31, 40, 50 and 200, so the floor is held by statement order rather than by the expression, and a plausible tidy-up that moves the test above the append silently removes it for every batch longer than 30. Move the allowance test before the append so the expression governs what it appears to govern, and pin the mechanism with an assertion at n=31, which is the smallest batch where the two differ. Third, on the compose hot path: the helper materialises every item's search eagerly before allocating, so identical inputs cost 25 searches where the removed loop cost 6 at batch-size 25, and 50 where it cost 6 at batch-size 50. Most of that is the necessary price of the fix and must stay, and the effective-cap repair above removes the specific waste, because once every item has an allowance every search can affect the output. What remains is that each call reaches search_standard_names_vector against the live graph synchronously from inside the async compose body at workers.py:3790, with no await and no asyncio.to_thread, so fifty graph round trips serialise on the event loop against the configured compose concurrency. Wrap the helper call in asyncio.to_thread at both call sites rather than making the helper async, so the searches leave the event loop without changing the helper's signature. Fourth, a test currently pins the cost in rather than flagging it: test_every_item_receives_a_comparator_before_budget_refill asserts that every item's description was searched, which is an assertion about eagerness. Rewrite it to assert that every item's search RESULT is used -- that every item with at least one unique result contributes at least one comparator -- which is the property that matters and is true under any search strategy. The review also records that the cap is defended by only one of the two landed tests: mutating the second pass to drop its pre-append cap guard lets the total reach 52 at n=25 and turns test_item_without_search_results_uses_no_comparator_share red while the other stays green, so do not weaken that one. The done-when is that the test file carries assertions at n=31 and n=50 proving every item with a result contributes at least one comparator and that the total equals the effective cap rather than 30, all failing against the declared negative control, and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. Expect about twenty failures and three errors at the base that predate you. With four repairs here you need one negative-control log per repair, each naming which repair it controls, and each log's first line must repeat the mutation you actually applied in your own words. A guard that passes its own test by weakening itself is worse than no guard. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 1.5,
+          "goal": "make the per-item comparator share hold at the fifty-item batch production actually configures",
+          "id": "n-the-comparator-share-holds-at-the-production-batch-size",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T07:41:03Z",
+            "read_at": "2026-09-21T07:41:04Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 10.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T074102582326-n-the-comparator-share-holds-at-the-production-batch-size/manifest.md",
+          "negative_control": "min(max(cap, len(items)), _NEARBY_COMPARATOR_HARD_CEILING) was replaced with max(cap, len(items)), removing the hard ceiling.",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/workers.py",
+            "tests/standard_names/test_comparator_budget_share.py",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-comparator50",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T07:41:15Z",
+        "completed_at": "2026-09-21T09:22:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 6102,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 6102,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3a9d055028e63b07c3bea2d03d287cd99c513883",
+        "commits": [
+          "3459623206b9f2851a515d4a52c93e14d98b5541",
+          "982f1546227d4df4965a3439179636cb937d0587"
+        ],
+        "changed_lines": {
+          "added": 75,
+          "removed": 34,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "measure the helper at the merged head across n=25, 50, 60, 200 and 2000, recording rows returned and items contributing, independently of the worker",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/comparator-ceiling-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the per-item comparator share holds at the batch sizes production configures and the prompt is bounded again. My own brief caused the regression this repairs: I specified the cap as max(cap, len(items)) without establishing that every caller chunks, and one does not, so a 2000-path run returned 2000 comparator rows where the base returned 30. A hard ceiling of 60 now bounds it, chosen because the two bounded call sites produce 50 and 25 so the guarantee still holds for every batch they can make. Measured by the coordinator at the merged head, independent of the worker: rows 30/50/60/60/60 at n=25/50/60/200/2000 with every item contributing up to 60. Five negative-control logs, one per repair, including one that removes only the ceiling and fails at n=200 and n=2000. The unchunked pool_adapter flatten that made the unbounded path reachable is recorded as a follow-on: it predates this wave and is a prompt-size hazard wider than comparators",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T074102582326-n-the-comparator-share-holds-at-the-production-batch-size/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c2e9-77c5-79c2-b46e-63ad99b05a72",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29989760,
+            "cached_input_tokens_cumulative": 29989760,
+            "input_tokens": 30279826,
+            "input_tokens_cumulative": 30279826,
+            "output_tokens": 68898,
+            "output_tokens_cumulative": 68898,
+            "reasoning_output_tokens": 16330,
+            "reasoning_output_tokens_cumulative": 16330
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T09:22:57Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 13.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T09:22:57Z"
+            }
+          ],
+          "notional_cost_usd": 123.2025,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+              "elapsed_seconds": 1227,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1517,
+              "log_fresh": false,
+              "manifest_commits": [
+                "b085479688713da47089eefd304b367adcb0607a",
+                "172be6de77086bfba6e5f1d93415d24218c32e69"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "92a9c49c58d2cca56f815270116de6e2bcaecfdd0328079c468812b571e28859",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share --gate <verdict> --commit b085479688713da47089eefd304b367adcb0607a --commit 172be6de77086bfba6e5f1d93415d24218c32e69",
+              "node": "n-every-batch-item-gets-a-comparator-share",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": true,
+              "review_status": "parsed",
+              "run_id": "r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1551,
+              "terminal_at": "2026-09-21T07:15:15Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-every-batch-item-gets-a-comparator-share"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "goal_fidelity": 12,
+            "evidence": 14,
+            "durability": 12,
+            "fit": 15,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 73
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 29989760,
+          "cumulative_input_tokens": 60269586,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 85228
+        },
+        "follow_on_paths": [
+          "imas_codex/standard_names/pool_adapter.py:270-275"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-comparator-share-holds-at-the-production-batch-size",
+          "session_id": "01a0c2e9-77c5-79c2-b46e-63ad99b05a72",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T09:22:57Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.985,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.985,
+          "at_complete": 0.985,
+          "verdict": "waived",
+          "reason": "further nodes on this plan are still in flight and hold its HTML as a declared write path, so the coordinator advances impl once when the wave lands"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_comparator_budget_share.py"
+          ],
+          "declaration": "min(max(cap, len(items)), _NEARBY_COMPARATOR_HARD_CEILING) was replaced with max(cap, len(items)), removing the hard ceiling.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T074102582326-n-the-comparator-share-holds-at-the-production-batch-size/negative-control-hard-ceiling.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T074102582326-n-the-comparator-share-holds-at-the-production-batch-size/negative-control-hard-ceiling.log"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 2,
+          "declared": 4,
+          "missing": [
+            "45f1413cce2b22d589383f0cbf842db6741e5d46",
+            "f0a7c40b8f6fc7f73aff8d255e7108fbf5a71dff"
+          ],
+          "message": "run 'r-20260921T074102582326-n-the-comparator-share-holds-at-the-production-batch-size' has a passing gate presenting 2 commit(s) of the 4 its manifest declares; missing: 45f1413cce2b22d589383f0cbf842db6741e5d46, f0a7c40b8f6fc7f73aff8d255e7108fbf5a71dff. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 87.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -169485,6 +169781,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2438
+    "_version": 2439
   }
 }
