@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T11:35:27",
+  "updated": "2026-09-21T11:46:09",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -169826,6 +169826,248 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T075944746907-n-an-unjudgeable-candidate-is-refused-not-published",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "n-an-unjudgeable-candidate-is-refused-not-published",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2949,
+                "cached_input_tokens": 593500,
+                "input_tokens": 596451,
+                "output_tokens": 1046,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 597497,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm both defects reproduce before repairing them, and quote each reproduction; both were named by an audit of this surface and both are verbatim present at HEAD. First and most serious, in _classify_export_population in imas_codex/standard_names/export.py: a candidate dict that does not carry a name_stage key is appended to the eligible list and the loop continues, so it bypasses every subsequent eligibility clause -- missing_physics_domain, outside_requested_domain, invalid_validation_status, validation_observation_missing, name_not_accepted, name_review_quorum_shortfall, no_producing_source, never_reviewed and resolution_unrecorded. The irony is that _has_producing_source in the same module is carefully fail-closed and its own docstring says an absent flag is no licence, and this branch makes it unreachable for any candidate missing one unrelated key. Reproduce it by passing a candidate that carries no name_stage, no validation_status, no producing-source flags and no review flags, and showing it comes back eligible with no exclusion record. The repair is specified: such a candidate is refused, not admitted, with its own reason of eligibility_input_incomplete and a detail naming the missing key, so it appears in the exclusion ledger where a reader can see it rather than in the cut where nobody can. A projection that cannot be judged must not be published, because absence of a key is never permission. The branch's stated purpose is compatibility with explicitly pre-filtered projections from low-level callers, so establish whether such a caller exists: grep the package and the tests for every call into this function and report what you find. If a real production caller depends on passing a pre-filtered projection, give it an explicit parameter that says so by name, and refuse the same input when that parameter is absent -- the permission must be stated by the caller rather than inferred from a missing key. If no production caller depends on it, delete the branch and say so. Second, nothing refuses an empty cut: there is no check anywhere in the module on the eligible list being empty, so an export whose eligible list ends empty publishes nothing and returns the same success it returns for a full cut. Distinguish the two ways that happens, because they are different findings and want different reasons. An input population that is itself empty means there was nothing to publish, which is reportable but not a defect. A non-empty population whose every member was excluded is a gate failure, because a cut that excludes everything it was given is never the intended outcome. Refuse both, each with its own named reason, and make each visible in the export report rather than only in a log. The done-when is that tests/standard_names/test_export_exclusion_ledger.py grows one test per repair -- a candidate missing name_stage appears in the exclusion ledger under eligibility_input_incomplete rather than in the eligible list, an empty input population is refused under its own reason, and a fully-excluded non-empty population is refused under its own reason -- each failing against the declared negative control, and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. THIS SUITE IS RED AT THE BASE AND THE RED IS CONCENTRATED IN EXPORT: about twenty failures and three errors predate you, most of them in tests/standard_names/test_export_*.py, so expect the tests you are closest to to be failing already and expect closing a fail-open to expose more. Making a guard fail closed usually turns previously green tests red because they were passing only while the guard was open; that is the finding, not a regression, so report each newly red test with the input it feeds and whether that input carries the evidence the new refusal demands, and NEVER re-open the guard or relax an assertion to reach green. If more than five previously-green tests turn red, stop and report rather than repairing them all: that is a scope decision for the coordinator. With two repairs you need one negative-control log per repair, each naming which repair it controls, and each log's first line must repeat the mutation you actually applied in your own words. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 2.0,
+          "goal": "refuse a candidate the eligibility classifier cannot judge instead of admitting it to the cut",
+          "id": "n-an-unjudgeable-candidate-is-refused-not-published",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T07:59:46Z",
+            "read_at": "2026-09-21T07:59:48Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 10.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T075944746907-n-an-unjudgeable-candidate-is-refused-not-published/manifest.md",
+          "negative_control": "do not re-evaluate export population emptiness before the catalog manifest write.",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_export_exclusion_ledger.py",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-exportadmits",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T07:59:57Z",
+        "completed_at": "2026-09-21T09:39:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5975,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5975,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "95ddb29693f14f0108d5ce40099f4b111f49c0b3",
+        "commits": [
+          "3c9710cb8fcae41ef598ad29ab598ac9b823edb4",
+          "dbfb7448570c1f1025664f566188ff44c3909fea",
+          "9474644490b263be9c9ee075b2fcb4fbeb80ec8e"
+        ],
+        "changed_lines": {
+          "added": 266,
+          "removed": 23,
+          "files": 4
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/ at the merged head, test-id sets compared against the same command on pristine main with logger lines excluded",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/export-postgate-gate.log.delta",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "an export with nothing left to publish is now refused at both stages instead of only before the gates. The review showed the first refusal was blind to everything the filtering gates remove afterwards, and that Gate C reports passed regardless of how much it filters, so a single low-score candidate produced all_gates_passed True, exported_count 0 and a written catalog with published_count 0 while the CLI exited 0. One shared predicate is now evaluated before the gates and again before the catalog manifest write, each naming its stage. The report also states the manifest size the caller supplied rather than deriving an unmeasured zero from records a refusal path never reaches, so a reader can tell no manifest was supplied from a manifest every row of which went unreconciled. Zero added failures against pristine main over identical test-id sets, passed 7497 to 7533",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T075944746907-n-an-unjudgeable-candidate-is-refused-not-published/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c2fa-982c-7671-b1e5-5714f4bd6adc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 40192640,
+            "cached_input_tokens_cumulative": 40192640,
+            "input_tokens": 40504233,
+            "input_tokens_cumulative": 40504233,
+            "output_tokens": 71974,
+            "output_tokens_cumulative": 71974,
+            "reasoning_output_tokens": 18376,
+            "reasoning_output_tokens_cumulative": 18376
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T09:39:32Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 14.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-21T09:39:32Z"
+            }
+          ],
+          "notional_cost_usd": 171.9955,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "goal_fidelity": 13,
+            "evidence": 18,
+            "scope_discipline": 20,
+            "durability": 13,
+            "fit": 16
+          },
+          "absent": [],
+          "total": 80
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 40192640,
+          "cumulative_input_tokens": 80696873,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 90350
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-an-unjudgeable-candidate-is-refused-not-published",
+          "session_id": "01a0c2fa-982c-7671-b1e5-5714f4bd6adc",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T09:39:32Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.82,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.82,
+          "at_complete": 0.9,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_export_exclusion_ledger.py"
+          ],
+          "declaration": "do not re-evaluate export population emptiness before the catalog manifest write.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T075944746907-n-an-unjudgeable-candidate-is-refused-not-published/negative_control_post_gate_population.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T075944746907-n-an-unjudgeable-candidate-is-refused-not-published/negative_control_post_gate_population.log"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 3,
+          "declared": 5,
+          "missing": [
+            "12f028f2bbcf0a9f061f049ee7b18dd995b28692",
+            "4b8778a8b44fdaff47851fb273093a5ff89b11c6"
+          ],
+          "message": "run 'r-20260921T075944746907-n-an-unjudgeable-candidate-is-refused-not-published' has a passing gate presenting 3 commit(s) of the 5 its manifest declares; missing: 12f028f2bbcf0a9f061f049ee7b18dd995b28692, 4b8778a8b44fdaff47851fb273093a5ff89b11c6. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 76.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -170138,6 +170380,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2441
+    "_version": 2442
   }
 }
