@@ -769,6 +769,46 @@
     <p>The focused gate, negative-control failure, and both full-suite runs are
     preserved under the run directory named in the worker manifest.</p>
   </section>
+  <section id="receipt-expectation-precedence-and-cli-output">
+    <h2>The archive census wins a receipt disagreement, and the operator sees why</h2>
+    <p><strong>Landed 2026-09-21</strong> at <code>3c47fa002d79947424110199ee119ccfc4ee50a1</code>,
+    from base <code>a0d303ca47357821f4a1f595d8a8089e462b32fa</code>. Both operator-visible
+    gaps were reproduced before repair. With one archived <code>HAS_UNIT</code>
+    edge in the census and two in the reconstruction closure, the landed branch
+    order returned <code>expected 1</code> from <code>archive_census</code>; reversing
+    only that order returned <code>expected 2</code> from
+    <code>reconstruction_closure</code>. With an empty archive census, the applied
+    receipt emitted 35 parity rows, 34 without an established expectation, and
+    the command rendered one of them as
+    <code>expected None observed 0</code>.</p>
+    <table>
+      <thead><tr><th>Surface</th><th>Before</th><th>After</th><th>Guard</th></tr></thead>
+      <tbody>
+        <tr><td>source disagreement</td><td>no unequal-count fixture</td><td>archive count <strong>1</strong> wins over closure count <strong>2</strong></td><td>branch reversal makes the new test fail with <code>expected 2</code> and source <code>reconstruction_closure</code></td></tr>
+        <tr><td>operator receipt</td><td><code>expected None observed 0</code></td><td><code>expected unestablished source neither observed 0</code></td><td>removing the source and word makes the Click-runner test fail on the exact old line</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The review's broader test claim had gone stale, and the record keeps
+    the correction.</strong> Before the new disagreement test, reversing the branches
+    did not leave the full suite unchanged: two existing tests already asserted
+    <code>expected_source=archive_census</code> for <code>HAS_UNIT</code>. Their archive
+    and closure counts were both one, so they pinned the source label but could not
+    prove which numeric count would be printed when the sources disagreed. The
+    runtime reversal moved the suite from the base 20 failures and 3 setup errors
+    to 22 failures and 3 setup errors; the two additions were those existing source
+    assertions. The new test closes the narrower, real gap by making the counts
+    differ.</p>
+    <p><strong>The measured gate adds no suite-wide failure.</strong> The focused file
+    passed <strong>4 of 4</strong> tests in 5.64 seconds on <code>all_debug</code>.
+    Each repair has its own red control: branch reversal failed the disagreement
+    test once, and restoring the bare Python rendering failed the Click test once.
+    The full Standard Names run moved from <strong>7,515</strong> to
+    <strong>7,517 passed</strong> while retaining the identical 20 failures and 3
+    setup errors, with 8 skipped and 326 deselected in both runs: zero added
+    failures, exactly two added passes. The baseline, after-run, reproductions and
+    both first-line-labelled control logs are preserved under the run directory
+    named in the worker manifest.</p>
+  </section>
 </main>
 </body>
 </html>

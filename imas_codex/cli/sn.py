@@ -8466,9 +8466,12 @@ def sn_restore_apply(
     parity = receipt.get("identity_role_parity") or {}
     for identity, identity_roles in sorted(parity.items()):
         for role, role_counts in sorted(identity_roles.items()):
+            expected = role_counts["expected"]
+            expected_display = "unestablished" if expected is None else str(expected)
             click.echo(
                 f"  parity {identity} {role}: "
-                f"expected {role_counts['expected']} "
+                f"expected {expected_display} "
+                f"source {role_counts['expected_source']} "
                 f"observed {role_counts['observed']}"
             )
     click.echo(f"manifest_sha256 {receipt.get('manifest_sha256')}")
