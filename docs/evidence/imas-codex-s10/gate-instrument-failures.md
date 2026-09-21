@@ -285,3 +285,53 @@ surface is a fail-open closure whose exposure is the node's scope, not a
 tidying-up. The rule this repository already carries — measure the exposure in a
 scratch copy before writing the change, and put the number in the brief — was not
 followed here.
+
+## Correction: for the defect class it exists to catch, coverage was 0 of 30
+
+The section above reported the guarded surface as 11 modules and 30 candidates
+against 55 and 321 in the package, and framed that as "under 10% of the calls it
+exists to inspect". Directionally right, materially understated, and the sharper
+measurement reverses part of it.
+
+**The guard's defect class is not every literal-name three-argument `getattr`. It
+is the one whose default is an empty container** — the shape that dropped every
+Layer-1 audit finding in this sprint's worst defect, `getattr(audit_report,
+"findings", [])` against a report with no such field. Counted package-wide with the
+project interpreter, that class holds exactly **30 calls across 9 modules**. And:
+
+| | |
+|---|---|
+| empty-container candidates **inside** the three declared roots | **0** |
+| **outside** them | **30** |
+
+So for the shape the guard was built for, coverage was **zero**. The 30 the ratchet
+floor names are literal-name candidates of *any* default within the roots; the 30 in
+the defect class are elsewhere entirely. **Two different thirties, matched by
+coincidence** — a worker's census read the match as an identity and concluded the
+aperture was already complete, which is the opposite of the truth. Caught by
+recomputing coverage rather than by re-reading the claim.
+
+Where they are, and why they are not 30 bugs:
+
+- **24 of the 30** are `getattr(..., 'operators' | 'args' | 'qualifiers', <empty>)`
+  in `standard_names/audits.py` (12), `workers.py` (6) and `graph_ops.py` (6) —
+  reads on ISN grammar objects. All three names **are** declared, in the
+  `imas_standard_names` package, verified by walking its classes. They are
+  legitimate, and a package-wide widening flags them only because
+  `_declared_class_attributes` walks `imas_codex` alone.
+- **6 residual sites** in `discovery/base/engine.py`, `discovery/base/progress.py`,
+  `graph/schema.py`, `services/response.py`, `standard_names/benchmark.py` and
+  `standard_names/fanout/runners.py` need classifying one at a time.
+
+**So the fix has two halves and the coordinator's first design had only one.**
+Widening the *candidate* surface without widening the *declaration* surface
+produces 49 findings that are nearly all false, which is exactly what the refusing
+node measured. The revised design narrows the widening to the defect class and adds
+the ISN package to the declaration collector.
+
+**The refusal was the right outcome and is worth recording as such.** The node
+reproduced the incompatibility end to end, restored the file byte-for-byte with a
+verified digest, left the worktree clean, and reported a blocker rather than adding
+exemptions to force a green gate. A worker that had forced green would have shipped
+a guard reporting 49 false findings, and a reviewer would then have been arguing
+about exemption lists instead of about coverage.
