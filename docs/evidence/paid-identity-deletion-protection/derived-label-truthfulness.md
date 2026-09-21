@@ -7,6 +7,13 @@
 
 # Is the `origin='derived'` label truthful?
 
+**The label is load-bearing and cannot simply be dropped.** 428 names are live
+at `origin='derived'`; its meaning is not recoverable from the `derived`-typed
+producer edge (121 names disagree), not recoverable from
+`StandardName.source_types` at all (no name anywhere carries the value), and 52
+non-deletion read lines across 34 decision paths still branch on it. §7a stage 2
+is a behaviour change, not a refactor.
+
 §7a stage 1 reclassified the *leaders*; stage 2 is "repoint every reader at the
 source binding" and stage 4 drops the field. Both assume the label is a
 computable summary of the topology — that "derived" means "structural parent
