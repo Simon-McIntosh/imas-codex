@@ -725,6 +725,49 @@
     relationship directions. The earlier audit's restore-entry-point verdict is
     therefore closed for these graph-corruption paths; the restore itself remains
     a separately authorised operation.</p>
+</section>
+  <section id="restore-receipt-expectation-sources">
+    <h2>The restore receipt names the authority behind every expected count</h2>
+    <p><strong>Landed 2026-09-21</strong> at
+    <code>a19188a6ee126b183d518a46fc5b3835139f42b6</code>, from base
+    <code>9a5e40f4ba6ed89ebe44ef7606d0eb6db4010236</code>. The defect reproduced
+    before repair: an authority whose archive census and reconstruction closure
+    both omitted <code>EVIDENCED_BY</code>, against a live count of one, emitted
+    <code>{'expected': 0, 'observed': 1}</code>. The zero asserted an expectation
+    neither source had established.</p>
+    <table>
+      <thead><tr><th><code>expected_source</code></th><th><code>expected</code></th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>archive_census</code></td><td>the census count</td><td>the archive record explicitly names the role, including an explicit zero</td></tr>
+        <tr><td><code>reconstruction_closure</code></td><td>the closure count</td><td>the archive record is silent and the signed reconstruction carries the role</td></tr>
+        <tr><td><code>neither</code></td><td><code>null</code></td><td>no expected count is established; the receipt does not manufacture zero</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The refusal did not move.</strong> The reconstruction closure still
+    governs the exact-count refusal, while the archive census remains receipt
+    evidence. This preserves the adjudication for inbound
+    <code>EVIDENCED_BY</code>: no reconstruction edge can carry it, so making the
+    census govern refusal would make an identity that once held such an edge
+    unrestorable. The applied receipt still reads every parity role inside the
+    transaction. With neither expectation source naming <code>EVIDENCED_BY</code>,
+    a live count of one now records
+    <code>{'expected': None, 'expected_source': 'neither', 'observed': 1}</code>.</p>
+    <p><strong>The pre-existing contract test proved the defect was load-bearing.</strong>
+    <code>test_applied_receipt_counts_expected_and_observed_for_every_parity_role</code>
+    had asserted <code>expected: 0</code> for <code>HAS_PARENT</code> even though
+    neither source named that role. It now asserts an unestablished expectation
+    and all four existing tests retain exact three-field row assertions.</p>
+    <table>
+      <thead><tr><th>Gate</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>focused receipt modules on <code>all_debug</code></td><td><strong>6 passed</strong> in 5.78 s</td></tr>
+        <tr><td>negative control</td><td><strong>1 failed as required</strong>: replacing the live observation map with an empty map changed only <code>observed: 1</code> to <code>observed: 0</code></td></tr>
+        <tr><td>full Standard Names baseline</td><td>7,497 passed; 20 failed; 3 errors; 8 skipped; 326 deselected</td></tr>
+        <tr><td>full Standard Names after</td><td><strong>7,499 passed</strong>; the same 20 failures and 3 errors; <strong>zero added failures</strong>; 8 skipped; 326 deselected</td></tr>
+      </tbody>
+    </table>
+    <p>The focused gate, negative-control failure, and both full-suite runs are
+    preserved under the run directory named in the worker manifest.</p>
   </section>
 </main>
 </body>
