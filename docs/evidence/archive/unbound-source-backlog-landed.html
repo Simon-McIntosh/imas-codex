@@ -631,6 +631,62 @@
     2026-09-21 &middot; base revision <code>83e93c42c661b168a4c0abb153730a9f39b048d3</code>.</p>
   </section>
 
+  <section id="permanent-exclusion-waiver">
+    <h2>A settled permanent exclusion stays visible without blocking generability</h2>
+    <p><strong>Both defects reproduced at the assigned base before repair.</strong> A disposition row
+    for <code>equilibrium/time_slice/constraints/flux_loop/weight</code>, whose recorded reason was
+    <code>dd_node_category_ineligible: Backing DD node category fit_artifact</code>, returned
+    <code>generable False</code> with <code>{'recorded_refusal': 1}</code>. A separate
+    <code>skipped</code> row carrying the sentinel <code>cause not recorded</code> returned
+    <code>{'composition_not_scheduled': 1}</code>. The first made settled work indistinguishable
+    from unfinished work; the second claimed no attempt happened even though the row recorded that
+    a refusal happened and its cause was lost.</p>
+    <p><strong>The repair is explicit and fail closed.</strong> A waiver is now one member of the
+    closed mechanism set, selected only when that source's own
+    <code>SourceDispositionRecord.disposition</code> is exactly <code>waived</code>. It is not
+    inferred from a <code>fit_artifact</code> category, a refusal reason, a missing identity, or an
+    absent row. The source remains in <code>uncarried_sources</code>, increments
+    <code>mechanism_counts.waived</code>, and remains in serialized source reconciliation
+    (<code>manifest_size=1</code>, <code>accounted=1</code>, <code>waived=1</code> in the regression
+    control); only its contribution to <code>generable</code> changes. A skipped source with the
+    lost-cause sentinel now reaches <code>refusal_cause_not_recorded</code>, while an extracted row
+    with the same sentinel remains <code>composition_not_scheduled</code>.</p>
+    <table>
+      <caption>The row evidence, reported mechanism and gate effect</caption>
+      <thead><tr><th>Evidence on this source's row</th><th>Mechanism</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>disposition='waived'</code></td><td><code>waived</code></td><td>visible as uncarried; does not block</td></tr>
+        <tr><td><code>documented_non_nameable</code>, <code>source_status='skipped'</code>, sentinel reason</td><td><code>refusal_cause_not_recorded</code></td><td>visible and blocking</td></tr>
+        <tr><td>the same <code>fit_artifact</code> reason without the explicit waiver</td><td><code>recorded_refusal</code></td><td>visible and blocking</td></tr>
+      </tbody>
+    </table>
+    <p><strong>This node granted no waiver.</strong> The authority that adjudicates a permanent
+    source exclusion must grant one by writing the explicit disposition on that source's row; the
+    exporter only reads that evidence. In particular, neither of the two WEST
+    <code>fit_artifact</code> sources nor any of its other 25 uncarried sources was reclassified by
+    this change. Which rows deserve that disposition remains a separate adjudication, so the WEST
+    cut is not made generable by category-wide inference.</p>
+    <p><strong>The counterfactual failed in both directions.</strong> Under the declared mutation
+    &ldquo;classify explicit waived rows as <code>recorded_refusal</code> and classify skipped
+    lost-cause sentinel rows as <code>composition_not_scheduled</code>&rdquo;, both new tests failed:
+    the waiver produced <code>assert False is True</code>, and the lost cause produced
+    <code>{'composition_not_scheduled': 1}</code> instead of
+    <code>{'refusal_cause_not_recorded': 1}</code>. Restoring the repair made the focused file
+    <strong>5 passed</strong>.</p>
+    <p><strong>Added failures: zero on the same debug host class.</strong> At base revision
+    <code>80bcb6419deb6038b312320fdd62c45a528c3ada</code>, the full
+    <code>tests/standard_names/</code> surface recorded 20 failed, 7,497 passed and 3 errors over
+    23 failure/error ids. At <code>1196c07192b960062c2f1b29d03a390c51e4d130</code>, it recorded
+    20 failed, 7,499 passed and 3 errors; the 23 ids are identical. Both runs used
+    <code>all_debug</code>. The absolute red suite is preserved as existing evidence rather than
+    smoothed into green; the revision delta is zero.</p>
+    <p>No additional figure accompanies this record: the decision surface is three exact row-to-
+    mechanism mappings, which the table expresses without turning tabular data into an image.</p>
+    <p class="r-meta">Worker: n-a-permanent-exclusion-stops-blocking-generability &middot;
+    2026-09-21 &middot; commits <code>8c33f2003</code>, <code>1196c0719</code> &middot; host class
+    <code>all_debug</code>.</p>
+  </section>
+
 </main>
 
 </body>
