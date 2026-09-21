@@ -2746,7 +2746,7 @@ def gate_migrated_attachments(
             sn_id,
             exc_info=True,
         )
-        return AttachmentAuditResult()
+        return AttachmentAuditResult(audit_ran=False)
 
 
 def _record_detachments(

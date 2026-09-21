@@ -1036,6 +1036,66 @@
     the annotated or inferred type of the object receiving <code>getattr</code>, not against the
     package-wide name set. That is a distinct type-analysis design and is recorded as follow-on work,
     not folded into this narrow static guard.</p>
+</section>
+  <section id="bypassed-maintenance-passes-are-named">
+    <h2>Every bypassed maintenance pass names itself</h2>
+    <p><strong>All three silent-default defects reproduced at base
+    <code>6f81dc047</code>.</strong> The reviewed startup block contained <strong>13</strong>
+    calls through <code>_global_maintenance_call</code>, from
+    <code>reconcile_standard_name_sources</code> through
+    <code>reconcile_standard_name_unit_edges</code>. A complete mocked scoped run crossed
+    <strong>24</strong> helper-routed calls once the later source, structural, claim-release and
+    document-link passes were included. Every one returned its caller-supplied empty default;
+    the only general log line said that global maintenance was bypassed, and
+    <code>summary_table()</code> carried no field naming what did not run.</p>
+
+    <p>The independent migrated-attachment gate had the same observable shape for a different
+    reason. With its graph client raising <code>RuntimeError("graph unavailable")</code>,
+    <code>gate_migrated_attachments</code> returned <code>audit_ran=True</code>, compared equal to
+    a default clean <code>AttachmentAuditResult()</code>, carried zero rejected rows, and
+    serialized an all-zero receipt whose <code>audit_ran</code> was true. The existing
+    <code>test_gate_survives_a_graph_failure</code> asserted that equality, so it actively pinned
+    “raised before auditing” to “audited and clean.”</p>
+
+    <table>
+      <thead><tr><th>Surface</th><th>Base receipt</th><th>Landed receipt</th></tr></thead>
+      <tbody>
+        <tr><td>Scoped global maintenance</td>
+          <td>one generic bypass line; no returned names</td>
+          <td>one info line per function, one <code>count=24</code> summary line, and the ordered
+          <code>bypassed_maintenance_passes</code> list in the returned mapping</td></tr>
+        <tr><td>Migrated-attachment graph failure</td>
+          <td><code>audit_ran=True</code>, equal to a clean default</td>
+          <td><code>audit_ran=False</code>, still zero detachments and zero rejections, and still
+          fail-open so the rename survives</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Commit <code>1270dd22c</code> makes the skipped work observable without running
+    it.</strong> <code>RunSummary</code> now owns the ordered bypass list and
+    <code>summary_table</code> carries it. The helper derives each function name, logs it at info
+    level, appends it before returning the unchanged default, and emits the aggregate count and
+    names after the maintenance sequence. No skip predicate was widened and no maintenance
+    function became eligible. The attachment-gate repair is exactly
+    <code>AttachmentAuditResult(audit_ran=False)</code> in the existing exception branch; the
+    docstring's fail-open contract remains unchanged.</p>
+
+    <p><strong>The gate is red-first and mutation-proven.</strong> Before implementation, the two
+    focused assertions failed independently: <code>RunSummary</code> had no bypass field, and the
+    raised attachment audit reported true. The landed focused surface on
+    <code>all_debug</code> is <strong>94 passed, 20 deselected, exit 0</strong>. The declared
+    counterfactual — “removed per-pass bypass naming and receipt recording from
+    <code>_global_maintenance_call</code>” — leaves the list empty and fails the new test with
+    24 expected names; that exact sentence is the negative-control log's first line.</p>
+
+    <p>The complete <code>tests/standard_names/</code> command ran on the same
+    <code>all_debug</code> host class at base and at the committed revision. Base returned
+    <strong>20 failed, 3 errors, 7,510 passed</strong>; after returned
+    <strong>20 failed, 3 errors, 7,511 passed</strong>. The 23 terminal IDs are identical, so
+    added failures are <strong>zero</strong>. Logs and the direct reproductions are retained under
+    <code>~/.config/reckon/crew/runs/r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself/</code>.
+    This worker leaves the driving followup, section declaration, implementation fraction and
+    terminal plan state unchanged for coordinator adjudication.</p>
   </section>
   </main>
 </body>

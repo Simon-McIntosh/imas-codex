@@ -3199,7 +3199,9 @@ def test_gate_survives_a_graph_failure() -> None:
     gc = MagicMock()
     gc.query.side_effect = RuntimeError("graph unavailable")
     result = gate_migrated_attachments(gc, sn_id="electron_density")
-    assert result == AttachmentAuditResult()
+    assert result.rejected == []
+    assert result.detached == 0
+    assert result.audit_ran is False
 
 
 @pytest.mark.graph
