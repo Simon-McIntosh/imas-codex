@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="980" height="620" viewBox="0 0 980 620" font-family="Helvetica,Arial,sans-serif">
   <rect width="980" height="620" fill="#ffffff"/>
   <text x="24" y="32" font-size="18" font-weight="bold" fill="#111">Review-sized traffic keeps scaling to 32 concurrent, then flattens</text>
-  <text x="24" y="53" font-size="12.5" fill="#555">17,173-token review prompts, 694-token answers, medium thinking, against the served sglang endpoint. Throughput still climbs to 32; a doubling to 64 buys +1.5% inside a 13% run-to-run spread, so the knee is 32 — not the 4 the compose-shaped probe found.</text>
+  <text x="24" y="51" font-size="12" fill="#555">17,173-token review prompts, 694-token answers, medium thinking, served by sglang.</text>
+  <text x="24" y="66" font-size="12" fill="#555">Throughput climbs to 32 (36.45 req/min); the doubling to 64 falls 5.9% against that plotted point, so the knee is 32.</text>
 
   <!-- axes -->
   <line x1="90" y1="340" x2="920" y2="340" stroke="#333"/>
@@ -43,7 +44,9 @@
   <!-- c=32 repeats: the measurement spread at the knee -->
   <circle cx="728" cy="131.9" r="3.5" fill="#ef6c00"/>
   <circle cx="748" cy="125.6" r="3.5" fill="#ef6c00"/>
-  <text x="628" y="196" font-size="11" fill="#ef6c00">orange = two repeats at 32 (32.0, 33.0 req/min) — the spread the knee sits inside</text>
+  <!-- c=32 sample held out of the curve: a c=64 dispatch that emitted only 32 requests -->
+  <circle cx="738" cy="170.2" r="4" fill="none" stroke="#757575" stroke-width="1.6"/>
+  <text x="592" y="185" font-size="11" fill="#757575">orange = two c=32 repeats; grey = held-out c=64 attempt (achieved 32, 26.1)</text>
 
   <!-- latency curve, same x, own scale 0..80 over the same 260 px -->
   <polyline fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="5 3"
@@ -80,5 +83,6 @@
     <text x="24"  y="560" font-weight="bold">32</text><text x="86"  y="560">32</text><text x="120" y="560">repeat</text><text x="190" y="560">32/32</text><text x="278" y="560">32.98</text><text x="356" y="560">384.3</text><text x="446" y="560">55.13</text><text x="526" y="560">—</text><text x="606" y="560">0</text><text x="706" y="560">0/32</text><text x="826" y="560">0</text>
     <text x="24"  y="578">64</text><text x="86"  y="578">64</text><text x="120" y="578">111.94</text><text x="190" y="578">64/64</text><text x="278" y="578">34.30</text><text x="356" y="578">400.2</text><text x="446" y="578">69.93</text><text x="526" y="578">—</text><text x="606" y="578">43</text><text x="706" y="578">0/64</text><text x="826" y="578">0</text>
   </g>
-  <text x="24" y="602" font-size="11" fill="#555">Zero errors and zero timeouts at every level. The binding pipeline timeout is 900 s, so it never fires in range; the starvation column is the earlier-warning instrument. At 64 every request pays more than 60 s of latency for no throughput.</text>
+  <text x="24" y="594" font-size="11" fill="#555">Zero errors and zero 900 s timeouts at every level; starvation (&gt;60 s) is the earlier-warning instrument. At 64, 43 of the 64 requests exceeded it.</text>
+  <text x="24" y="610" font-size="11" fill="#555">Four samples carry achieved concurrency 32 (the level, two repeats, the mis-dispatched first c=64 attempt): 26.1-36.5 req/min, a 32% band. Knee 32, not the compose probe's 4.</text>
 </svg>
