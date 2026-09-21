@@ -730,11 +730,54 @@
     <strong>24 failure/error test identifiers are identical</strong>; the delta is zero.
     Both runs used <code>all_debug</code>. The suite's existing export reds remain visible
     rather than being weakened to make this guard green.</p>
+    <h3>Independent review: the refusal now survives every downstream filter</h3>
+    <p>An independent review scored the first landing <strong>80 and SOUND</strong>, then
+    demonstrated that its property ended at the classifier boundary. At review base
+    <code>4b8778a8b44fdaff47851fb273093a5ff89b11c6</code>, one candidate named
+    <code>low_score_name</code> with <code>reviewer_score_name=0.10</code> entered a cut whose
+    threshold was <code>0.65</code>. Gate C removed it while reporting <code>passed=True</code>;
+    every other gate also passed, <code>exported_count</code> was zero, and
+    <code>catalog.yml</code> was written with <code>published_count: 0</code>,
+    <code>domains_included: []</code>, and <code>names: {}</code>. This was the original
+    defect reproduced one stage later.</p>
+    <p><code>3c9710cb8</code> evaluates the same population invariant again at the actual
+    publication boundary, after score, grammar, model-validation, ordering, and semantic
+    exclusions have established <code>exported_count</code>. A cut emptied by any of those
+    stages now changes the existing <code>export_population</code> gate to
+    <code>fully_excluded_population</code>, writes only the report, and returns before the
+    catalog manifest. The new regression calls <code>run_export</code> with
+    <code>skip_gate=False</code>; it does not use the helper that hard-codes
+    <code>skip_gate=True</code>. The declared mutation &ldquo;do not re-evaluate export population emptiness
+    before the catalog manifest write&rdquo; makes that test fail with
+    <code>population_gate.passed is True</code>. Restoring the implementation returns the
+    source digest byte-for-byte.</p>
+    <p><strong>Manifest cardinality is now an input fact, not a reconciliation side
+    effect.</strong> Before repair, a caller supplying the two source paths
+    <code>equilibrium/a</code> and <code>equilibrium/b</code> received
+    <code>source_reconciliation.manifest_size=0</code> from both an early population refusal
+    and the pre-existing null-catalog-status refusal. The report could not distinguish
+    &ldquo;no manifest&rdquo; from &ldquo;two rows not yet reconciled&rdquo;. The report now captures the supplied
+    size at function entry, uses it in serialized source reconciliation, and includes it in
+    population-gate issues. Null-status issues include it when a manifest was supplied;
+    <code>dbfb74485</code> preserves the established no-manifest issue shape rather than
+    adding an unmeasured <code>None</code> field.</p>
+    <p><strong>The review correction adds zero terminal test failures.</strong> The fresh
+    <code>all_debug</code> base at <code>4b8778a8</code> recorded 21 failed, 7,518 passed,
+    8 skipped and 3 errors in 311.58 seconds. Final code head <code>dbfb74485</code> recorded
+    the same 21 failed and 3 errors, with 7,520 passed and 8 skipped in 307.01 seconds.
+    Comparison admitted only lines beginning <code>FAILED tests/</code> and
+    <code>ERROR tests/</code>: the 24 identifiers are identical, with zero added and zero
+    removed. Logger lines beginning <code>ERROR</code> were excluded from the instrument.
+    The whole focused file returned its four pre-existing failure ids and 13 passes; the one
+    newly exposed semantic-empty fixture was corrected in scope to require the refusal and
+    absence of <code>catalog.yml</code>.</p>
     <p>No figure accompanies this record: the decision surface is three exact input-to-
-    reason mappings, which the table communicates directly.</p>
+    reason mappings plus two sequential refusal boundaries, which the table and measured
+    event sequence communicate directly.</p>
     <p class="r-meta">Worker:
     n-an-unjudgeable-candidate-is-refused-not-published &middot; 2026-09-21 &middot;
-    commit <code>12f028f2b</code> &middot; host class <code>all_debug</code>.</p>
+    commits <code>12f028f2b</code>, <code>3c9710cb8</code>, <code>dbfb74485</code> &middot;
+    host class <code>all_debug</code>.</p>
   </section>
 
 </main>
