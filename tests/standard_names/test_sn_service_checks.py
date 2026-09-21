@@ -76,7 +76,8 @@ class TestCheckLocalLLM:
             return result, urlopen
 
     def test_healthy_returns_model_short_name(self) -> None:
-        (healthy, detail), _ = self._run(_ok_response())
+        body = b'{"data": [{"id": "deepseek-v4-flash"}]}'
+        (healthy, detail), _ = self._run(_ok_response(body))
         assert healthy is True
         assert detail == "deepseek-v4-flash"
 
@@ -137,12 +138,46 @@ class TestCheckLocalLLM:
         assert detail == "serves deepseek-v4.1-flash, not deepseek-v4-flash"
 
     def test_unparsable_body_does_not_invent_a_mismatch(self) -> None:
+        """Unreadable means unread: the endpoint stays usable, but the detail
+        must not pass the configured name off as an observed one."""
         (healthy, detail), _ = self._run(_ok_response(b"not json"))
+        assert healthy is True
+        assert detail == "listing unreadable"
+
+    def test_empty_model_listing_does_not_claim_a_served_name(self) -> None:
+        (healthy, detail), _ = self._run(_ok_response(b'{"data": []}'))
+        assert healthy is True
+        assert detail == "listing carried no model"
+
+    def test_absent_data_key_is_unread_not_empty(self) -> None:
+        """A body with no `data` key established nothing about the seat, so the
+        probe must not report the configured name as the served one."""
+        (healthy, detail), _ = self._run(_ok_response(b'{"object": "list"}'))
+        assert healthy is True
+        assert detail == "listing unreadable"
+
+    def test_list_body_is_unread_not_empty(self) -> None:
+        (healthy, detail), _ = self._run(_ok_response(b'[{"id": "x"}]'))
+        assert healthy is True
+        assert detail == "listing unreadable"
+
+    def test_bare_string_entries_are_read_as_model_ids(self) -> None:
+        body = b'{"data": ["deepseek-v4-flash"]}'
+        (healthy, detail), _ = self._run(_ok_response(body))
         assert healthy is True
         assert detail == "deepseek-v4-flash"
 
-    def test_empty_model_listing_does_not_invent_a_mismatch(self) -> None:
-        (healthy, detail), _ = self._run(_ok_response(b'{"data": []}'))
+    def test_bare_string_entries_can_still_mismatch(self) -> None:
+        body = b'{"data": ["deepseek-v4.1-flash"]}'
+        (healthy, detail), _ = self._run(_ok_response(body))
+        assert healthy is False
+        assert detail == "serves deepseek-v4.1-flash, not deepseek-v4-flash"
+
+    def test_provider_qualified_served_id_still_matches_the_seat(self) -> None:
+        """The configured seat arrives stripped of its provider prefix; a server
+        that qualifies its ids does serve it, and must not be refused."""
+        body = b'{"data": [{"id": "local/deepseek-v4-flash"}]}'
+        (healthy, detail), _ = self._run(_ok_response(body))
         assert healthy is True
         assert detail == "deepseek-v4-flash"
 

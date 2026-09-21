@@ -133,22 +133,45 @@ def _check_local_llm() -> tuple[bool, str]:
 
     # The server answered. Whether it can serve THIS seat is a separate
     # question, and the one that decides whether generation can run.
+    # Read the listing before judging it. Every branch that does NOT establish
+    # what the server offers must say so in the detail: reporting the CONFIGURED
+    # name on a branch that never read one is the failure this probe exists to
+    # prevent, and it is indistinguishable from a real observation downstream.
     try:
-        served = [
-            str(entry.get("id", ""))
-            for entry in json.loads(body).get("data", [])
-            if entry.get("id")
-        ]
-    except (ValueError, AttributeError, TypeError):
-        # A 200 whose body we cannot parse tells us nothing about the seat;
-        # treat the endpoint as usable rather than inventing a mismatch.
-        return True, model_label
+        payload = json.loads(body)
+    except ValueError:
+        return True, "listing unreadable"
+    if not isinstance(payload, dict):
+        return True, "listing unreadable"
+    entries = payload.get("data")
+    if not isinstance(entries, list):
+        # An absent or non-list `data` is an unread listing, not an empty one.
+        return True, "listing unreadable"
+
+    served: list[str] = []
+    for entry in entries:
+        # vLLM returns objects; some OpenAI-compatible servers return bare
+        # strings. Anything else is not a model id.
+        if isinstance(entry, dict):
+            entry_id = entry.get("id")
+        elif isinstance(entry, str):
+            entry_id = entry
+        else:
+            continue
+        if isinstance(entry_id, str) and entry_id:
+            served.append(entry_id)
 
     if not served:
+        return True, "listing carried no model"
+
+    # Compare on the bare model name at both ends: the configured seat is
+    # already stripped of its provider prefix, and a server may or may not
+    # qualify the ids it publishes. Comparing a stripped name against an
+    # unstripped id refuses a server that does serve the seat.
+    if model_label in {entry_id.rsplit("/", 1)[-1] for entry_id in served}:
         return True, model_label
-    if model_label in served:
-        return True, model_label
-    return False, f"serves {', '.join(sorted(served)[:3])}, not {model_label}"
+    shown = ", ".join(sorted(entry_id.rsplit("/", 1)[-1] for entry_id in served)[:3])
+    return False, f"serves {shown}, not {model_label}"
 
 
 def _run_can_generate_names(
