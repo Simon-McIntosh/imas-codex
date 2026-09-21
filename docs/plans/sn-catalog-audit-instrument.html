@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 </head>
 <body>
   <main class="plan-doc">
@@ -583,25 +583,26 @@
     <div class="r-comment-body"><p>no suite: a rubric map. 4 of 6 classes expressible, 1 not expressible (per-binding correction field absent), 1 not reachable (docs and name prompts disagree on what bindings are for). Ordinal convention encoded but in 3 of 10 prompts and on zero dimensions</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T092336965497-n-the-reviewer-sees-the-catalog-it-is-judging-against" data-who="reckon-ship-worker" data-when="2026-09-21T09:43:57Z">
-    <div class="r-comment-body">
-      <p><strong>Standalone review now receives catalog comparators from every candidate.</strong>
+    <div class="r-comment-body"><p><strong>Standalone review now receives catalog comparators from every candidate.</strong>
       The recorded defect reproduced at base <code>d50d42d6d</code>: five clustered items made
       one vector query, <code>shared cluster description 0 description 1 description 2</code>.
       Commit <code>0e9218080</code> reuses the compose path's share-then-spend collector, so the
       25-item regression fixture makes <strong>25 candidate-specific queries</strong>.</p>
-      <p><strong>The unit anchor exposes the measured split-base spelling.</strong>
-      <code>hard_xray_brightness</code> and
+<p><strong>The unit anchor exposes the measured split-base spelling.</strong>
+<code>hard_xray_brightness</code> and
       <code>photon_radiance_of_hard_xray</code> both carry
       <code>m^-2.s^-1.sr^-1</code>; the accepted different-base name is included, while an
       accepted same-base name, a drafted different-base name, and an accepted different-unit
       name are excluded. Standalone review also carries up to 200 catalog identities through
       every review cycle and the unmatched-item retry.</p>
-      <p>The focused gate passed <strong>3 tests</strong>. Changing the unit predicate to require
+<p>The focused gate passed <strong>3 tests</strong>. Changing the unit predicate to require
       the same physical base produced the required failure. The full Standard Names suite held
       the base's exact 23 failures/errors: <strong>7,528 to 7,531 passes, zero added
       failures</strong>. Full record:
-      <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed.html#standalone-catalog-comparators">catalog comparator evidence</a>.</p>
-    </div>
+      <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed.html#standalone-catalog-comparators">catalog comparator evidence</a>.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260921T095520760461-review-of-n-the-reviewer-sees-the-catalog-it-is-judging-against" data-who="reckon-ship" data-when="2026-09-21T10:02:12.291Z">
+    <div class="r-comment-body"><p>Independent opus review of the comparator change: score 66 (goal_fidelity 10, evidence 13, scope_discipline 20, durability 9, fit 14), verdict MUST-FIX, 4 findings, 2 of them MUST-FIX with measured positive controls and render probes.</p></div>
 </div>
 </section>
   </main>
