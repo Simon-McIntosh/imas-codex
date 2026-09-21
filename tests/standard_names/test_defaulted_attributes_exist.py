@@ -15,6 +15,14 @@ MODULE_ROOTS = (
     Path("imas_codex/standard_names/loop.py"),
 )
 
+REQUIRED_MODULE_ROOTS = frozenset(
+    {
+        Path("imas_codex/standard_names/review"),
+        Path("imas_codex/standard_names/export.py"),
+        Path("imas_codex/standard_names/loop.py"),
+    }
+)
+
 # Module and distribution metadata are intentionally dynamic, not model fields.
 LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES = {
     "__file__": "Module metadata is assigned by Python's import machinery.",
@@ -165,6 +173,12 @@ def _undeclared_defaulted_attributes(source_root: Path) -> list[tuple[Path, int,
 
 def test_configured_module_roots_have_coverage() -> None:
     """Every configured root must contribute both modules and defaulted reads."""
+    missing_roots = REQUIRED_MODULE_ROOTS - set(MODULE_ROOTS)
+    unexpected_roots = set(MODULE_ROOTS) - REQUIRED_MODULE_ROOTS
+    assert not missing_roots, f"required module roots are missing: {missing_roots}"
+    assert not unexpected_roots, (
+        f"unexpected module roots are configured: {unexpected_roots}"
+    )
     scan = _defaulted_attribute_scan(REPOSITORY_ROOT)
     assert scan.module_count >= MINIMUM_SCANNED_MODULES
     assert scan.candidate_count >= MINIMUM_LITERAL_DEFAULTED_GETATTRS
