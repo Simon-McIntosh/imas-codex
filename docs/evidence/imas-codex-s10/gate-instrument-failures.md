@@ -129,3 +129,28 @@ two pytest sessions over one fixed tree differ only in their tmpdir sequence
 numbers — identical ordering, identical per-line output, identical duration. An
 earlier claim that the suite's failure count was unstable is not supported; the
 readings behind it had been taken through different setups.
+
+## A seventh failure, found by a peer's audit of a different field
+
+Every `--gate-log-path` this session passed to `crew complete` pointed into the
+harness scratchpad under `/run/user/<uid>/…`, which is node-local and dies with
+the session. The ledger rows therefore cite evidence that will not resolve for
+anyone reading them later, including from another login node **now**.
+
+This is the same defect a peer coordinator found from the worker side: a control
+log written to `/tmp` that had already been cleaned when they went to verify it,
+nearly producing a false report that the node had no evidence. Theirs was a
+worker writing evidence to scratch; mine was the coordinator *citing* it. The
+field accepted both without complaint.
+
+The cited logs are copied to durable storage at
+`~/.local/share/imas-codex/gate-logs/ship-s10-20260918/` — 900 KB, eleven files,
+including both isolated base/head pairs, the two contaminated runs kept as
+counter-evidence, and the hand-built negative control.
+
+**The rule this earns:** a path field that accepts a location under `/tmp`,
+`/dev/shm` or `/run/user` is accepting evidence with a few hours of shelf life.
+Write gate and control logs where the run record lives, or copy them there before
+citing them. A promote that cites a path nobody else can open has recorded the
+*claim* without the evidence — the same shape as the git note that never leaves
+one clone.
