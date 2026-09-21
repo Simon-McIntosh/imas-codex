@@ -790,6 +790,75 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     <code>n-a-suppressed-write-returns-a-consumable-result</code> &middot;
     2026-09-21 &middot; implementation commit <code>658df1631</code>.</p>
   </section>
+
+  <section id="unit-comparator-terminal-cap">
+    <h2>The comparator neighbourhood's terminal cap is unreachable from the catalog route</h2>
+
+    <p><strong>The bound is the sum of the two channels' own caps, so no
+    catalog can carry the returned length past it.</strong> In
+    <code>build_neighborhood_context</code>
+    (<code>imas_codex/standard_names/review/enrichment.py</code>) the
+    unit-anchored channel holds at most <code>unit_cap = max(k, n)</code> and
+    the semantic channel at most
+    <code>min(max(k, n), 60)</code> — the same expression the semantic share
+    contributes to the terminal bound <code>unit_cap + semantic_cap</code>. The
+    concatenation of the two channels is therefore never above the bound, and
+    the terminal cap can never trim anything.</p>
+
+    <p><strong>The specified construction cannot fail at base.</strong> The
+    node brief asked for a catalog large enough that the deduplicated
+    neighbourhood would exceed <code>unit_cap + semantic_cap</code> without the
+    terminal cap, run against base <code>d31f8cb92</code> where the cap is
+    absent. Measured there: the existing bound-pinning case returns
+    <strong>30</strong>, and a 61-candidate case — unit channel filled to
+    <strong>61</strong>, semantic channel to <strong>60</strong> — returns
+    <strong>121</strong>, each exactly at its own bound. Removing the terminal
+    cap at HEAD leaves every catalog-driven case green: the three
+    catalog-driven tests pass with the cap and without it.</p>
+
+    <p><strong>What makes the guard observable is a channel above its own
+    share.</strong> The semantic channel is supplied at <strong>40</strong>
+    comparators against its share of <strong>15</strong>, so the concatenation
+    is <strong>55</strong> and the returned length must still be
+    <strong>30</strong>. That case reddens when the terminal cap is
+    removed (1 failed, 3 passed) and against base <code>d31f8cb92</code>
+    (2 failed, 2 passed; the second failure is the predecessor's allocation
+    case).</p>
+
+    <table>
+      <thead>
+        <tr><th>Tree</th><th>Catalog saturation (61 candidates)</th><th>Over-supplied channel (40 vs share 15)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>HEAD <code>ed94158e3</code> (terminal cap present)</td><td>121 &mdash; passed</td><td>30 &mdash; passed</td></tr>
+        <tr><td>HEAD with the cap removed</td><td>121 &mdash; passed</td><td><strong>55 &mdash; failed</strong></td></tr>
+        <tr><td>base <code>d31f8cb92</code> (cap absent)</td><td>121 &mdash; passed</td><td><strong>55 &mdash; failed</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Deviation from the brief, reported and accepted.</strong> The
+    catalog-driven saturation case cannot carry the node's done-when, because
+    the catalog route provably cannot exceed the bound; the observable case
+    supplies the semantic channel above its share instead. That construction is
+    kept: the terminal cap is a <em>backstop that binds only when a channel
+    exceeds its own share</em>, and the over-supply is the only input that
+    exercises it. The role is now explicit in the source. A comment at the cap
+    in <code>build_neighborhood_context</code> states that the concatenation
+    cannot exceed the bound and the break binds only on an over-supplied
+    channel, and the test's docstring states why the construction over-supplies
+    rather than driving the catalog past the bound, so a later reader does not
+    mistake the case for an unrealistic fixture and delete it. The channel caps
+    are unchanged. Tightening the semantic share below its own cap so the
+    catalog could reach the bound was considered and declined, as was deleting
+    the cap.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-terminal-comparator-cap-has-a-test-that-fails-without-it</code>
+    &middot; 2026-09-21 &middot; comment-only source change at the terminal cap in
+    <code>imas_codex/standard_names/review/enrichment.py</code>, plus the test
+    and this record; logs under the run directory
+    <code>terminal-cap-guard/</code>.</p>
+  </section>
   </main>
 </body>
 </html>

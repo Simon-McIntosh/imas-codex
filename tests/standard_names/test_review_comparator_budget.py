@@ -126,3 +126,113 @@ def test_returned_neighbourhood_respects_the_stated_bound(monkeypatch) -> None:
     # unit_cap = max(10, 15) = 15 and semantic_cap = min(15, 60) = 15, with
     # disjoint ids on each channel, so the stated bound is saturated.
     assert len(comparators) == 30
+
+
+def test_large_catalog_saturation_lands_on_the_bound(monkeypatch) -> None:
+    """A catalog that saturates both channels returns exactly the stated bound.
+
+    Sixty-one candidates, each on its own unit, against a catalog carrying two
+    hundred accepted cross-base names per unit.  The unit-anchored channel
+    fills its share of 61 from the catalog and the semantic channel its share
+    of 60 from a wide result set, over disjoint identity sets, so the returned
+    length sits at ``unit_cap + semantic_cap`` — 121 at ``k=10`` over a batch
+    above the shared helper's 60-item ceiling.
+    """
+
+    def search(query: str, *, k: int) -> list[dict]:
+        tag = query.rsplit(" ", 1)[-1]
+        return [
+            _catalog_name(
+                f"semantic_{tag}_{slot}", unit="1", physical_base=f"peer_{tag}"
+            )
+            for slot in range(5)
+        ]
+
+    monkeypatch.setattr(
+        "imas_codex.standard_names.search.search_standard_names_vector", search
+    )
+    batch_size = 61
+    candidates = [
+        _candidate(f"candidate_{index}", unit=f"unit_{index}", physical_base="cand")
+        for index in range(batch_size)
+    ]
+    catalog = [*candidates]
+    for index in range(batch_size):
+        catalog.extend(
+            _catalog_name(
+                f"existing_{index}_{slot}",
+                unit=f"unit_{index}",
+                physical_base=f"existing_base_{slot}",
+            )
+            for slot in range(200)
+        )
+
+    comparators = build_neighborhood_context(
+        {"names": candidates, "cluster": None},
+        catalog,
+        k=10,
+    )
+
+    unit_cap = max(10, batch_size)
+    semantic_cap = min(unit_cap, 60)
+    assert len(comparators) == unit_cap + semantic_cap == 121
+
+
+def test_over_supplied_channel_is_closed_at_the_terminal_bound(monkeypatch) -> None:
+    """The terminal cap is a backstop, exercised by over-supplying one channel.
+
+    Do not delete this case as an unrealistic fixture: the over-supply is the
+    only construction that can exercise the terminal cap at all, and it is a
+    deliberate one.
+
+    A catalog-driven case can never reach the cap.  The unit-anchored channel
+    is closed at ``unit_cap`` and the semantic channel at ``semantic_cap``, and
+    the terminal bound is their sum, so no catalog leaves their concatenation
+    above it — a large catalog fills both channels and stops exactly on the
+    bound.  The cap exists for the case those two budgets do not cover: a
+    channel handing back more than the share counted for it.  The semantic
+    channel is supplied at 40 comparators here, above its share of 15, and the
+    returned length must still be ``unit_cap + semantic_cap``.  Against a build
+    without the terminal cap this returns 55.
+    """
+    over_supplied = [
+        _catalog_name(f"semantic_{index}", unit="1", physical_base=f"peer_{index}")
+        for index in range(40)
+    ]
+    monkeypatch.setattr(
+        "imas_codex.standard_names.workers._collect_nearby_name_comparators",
+        lambda _items, **_kwargs: list(over_supplied),
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.search.search_standard_names_vector",
+        lambda _query, *, k: [],
+    )
+    candidates = [
+        _candidate(f"candidate_{index}", unit=f"unit_{index}", physical_base="cand")
+        for index in range(15)
+    ]
+    catalog = [*candidates]
+    for index in range(15):
+        catalog.extend(
+            _catalog_name(
+                f"existing_{index}_{slot}",
+                unit=f"unit_{index}",
+                physical_base=f"existing_base_{slot}",
+            )
+            for slot in range(5)
+        )
+
+    comparators = build_neighborhood_context(
+        {"names": candidates, "cluster": None},
+        catalog,
+        k=10,
+    )
+
+    # unit_cap = max(10, 15) = 15, semantic_cap = min(15, 60) = 15.
+    unit_anchored = sum(
+        1
+        for comparator in comparators
+        if comparator["comparison_basis"] == "same_unit_different_physical_base"
+    )
+    assert len(comparators) == 30
+    assert unit_anchored == 15
