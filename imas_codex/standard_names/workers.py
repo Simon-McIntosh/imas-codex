@@ -1784,6 +1784,8 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
 # COMPOSE phase
 # =============================================================================
 
+_NEARBY_COMPARATOR_HARD_CEILING = 60
+
 
 def _search_nearby_names(query: str, k: int = 5) -> list[dict]:
     """Search for existing standard names near *query* for collision avoidance.
@@ -1811,14 +1813,20 @@ def _collect_nearby_name_comparators(
 
     The first pass gives each item a share before a second pass spends any
     remaining capacity. Results remain deduplicated by standard-name id. The
-    configured cap is a floor: above thirty items the comparator block grows
-    linearly with the batch because twenty items composing against no cohort
-    comparator at all is worse than twenty extra comparator lines in the prompt.
+    configured cap is a floor while the batch fits the hard ceiling: up to sixty
+    items the comparator block grows linearly because composing against no cohort
+    comparator is worse than one extra comparator line. Above the ceiling the
+    allocation degrades to first-come, exactly the base behaviour, because the
+    per-item guarantee cannot hold for an unbounded batch without an unbounded
+    prompt and bounding the prompt wins.
     """
     if not items or cap <= 0:
         return []
 
-    effective_cap = max(cap, len(items))
+    effective_cap = min(
+        max(cap, len(items)),
+        _NEARBY_COMPARATOR_HARD_CEILING,
+    )
     search_names = search or _search_nearby_names
     results_by_item = [
         search_names(
