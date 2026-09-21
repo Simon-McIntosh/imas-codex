@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T14:08:14",
+  "updated": "2026-09-21T14:18:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -221,9 +221,13 @@
         "session_id": "e4816ef0-de3c-4a91-91fa-119e9a2fd2a0",
         "session_model": "deepseek-v4.1-flash",
         "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "e4816ef0-de3c-4a91-91fa-119e9a2fd2a0"
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "e4816ef0-de3c-4a91-91fa-119e9a2fd2a0",
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "5d5ed2d5-ebaa-4420-973f-fa96a27c43ee"
         },
-        "created": "2026-09-17"
+        "created": "2026-09-17",
+        "session_owners": {
+          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"worktree-full\",\"usable_input_window\":480000}": "instrument-20260921T0925"
+        }
       },
       {
         "id": "clive-audit-3",
@@ -174079,6 +174083,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2460
+    "_version": 2461
   }
 }
