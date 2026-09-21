@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
+import re
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from typing import Any
 
@@ -28,6 +30,104 @@ from imas_codex.standard_names.turn import TURN_PHASES
 
 logger = logging.getLogger(__name__)
 console = Console()
+
+
+_CYPHER_LITERAL_OR_COMMENT = re.compile(
+    r"/\*.*?\*/|//[^\n]*|'(?:\\.|''|[^'])*'|\"(?:\\.|\"\"|[^\"])*\"|`(?:``|[^`])*`",
+    re.DOTALL,
+)
+_CYPHER_MUTATION_KEYWORDS = frozenset(
+    {"CREATE", "DELETE", "DROP", "MERGE", "REMOVE", "SET"}
+)
+
+
+def _cypher_mutation_clause(cypher: str) -> str | None:
+    """Return the first graph-mutating Cypher clause outside literals/comments.
+
+    The clause is returned in upper case for reporting; ``None`` means the
+    statement only reads.
+    """
+    executable = _CYPHER_LITERAL_OR_COMMENT.sub(" ", cypher)
+    return next(
+        (
+            token
+            for token in re.findall(r"[A-Za-z]+", executable.upper())
+            if token in _CYPHER_MUTATION_KEYWORDS
+        ),
+        None,
+    )
+
+
+class _WriteSuppressingRun:
+    """Drop mutating statements before they reach the driver.
+
+    ``run`` is the single statement entry point shared by a session and a
+    transaction, so suppressing it covers every method that reaches the graph
+    through a session rather than one method per write helper.
+    """
+
+    _target: Any
+    _suppressed: list[str]
+
+    def run(self, cypher: str, *args: Any, **params: Any) -> Any:
+        clause = _cypher_mutation_clause(cypher)
+        if clause is not None:
+            self._suppressed.append(clause)
+            return []
+        return self._target.run(cypher, *args, **params)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._target, name)
+
+
+class _WriteSuppressingSession(_WriteSuppressingRun):
+    """Session proxy that refuses graph mutations."""
+
+    def __init__(self, session: Any, suppressed: list[str]) -> None:
+        self._target = session
+        self._suppressed = suppressed
+
+    def begin_transaction(self, *args: Any, **kwargs: Any) -> Any:
+        transaction = self._target.begin_transaction(*args, **kwargs)
+        return _WriteSuppressingTransaction(transaction, self._suppressed)
+
+
+class _WriteSuppressingTransaction(_WriteSuppressingRun):
+    """Transaction proxy that refuses graph mutations."""
+
+    def __init__(self, transaction: Any, suppressed: list[str]) -> None:
+        self._target = transaction
+        self._suppressed = suppressed
+
+
+@contextmanager
+def _suppress_review_graph_writes() -> Iterator[list[str]]:
+    """Run review graph reads while every Cypher mutation becomes a no-op.
+
+    The guard replaces :meth:`GraphClient.session`, the one route every
+    write-capable client method takes to a Neo4j session, rather than a single
+    convenience method on it. Intercepting the boundary means a method added to
+    the client, or a caller that opens a session block directly, is covered
+    without being named here; a narrower aperture silently writes through.
+
+    The yielded list collects the mutation clauses that were dropped, in order,
+    so a caller can report that the run persists nothing.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    original_session = GraphClient.session
+    suppressed: list[str] = []
+
+    @contextmanager
+    def _suppressing_session(client: Any) -> Iterator[Any]:
+        with original_session(client) as session:
+            yield _WriteSuppressingSession(session, suppressed)
+
+    GraphClient.session = _suppressing_session
+    try:
+        yield suppressed
+    finally:
+        GraphClient.session = original_session
 
 
 def _suppress_console_handlers() -> None:
@@ -5883,6 +5983,15 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
 @click.option(
     "--dry-run", is_flag=True, help="Run Layer 1 audits, show batch plan, no LLM calls"
 )
+@click.option(
+    "--report-only",
+    "report_only",
+    is_flag=True,
+    help=(
+        "Run all three review layers and emit the normal report without "
+        "writing anything to the graph."
+    ),
+)
 @click.option("--skip-audit", is_flag=True, help="Skip Layer 1 audits (debug only)")
 @click.option("--concurrency", type=int, default=8, help="Parallel review batches")
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
@@ -5927,6 +6036,7 @@ def sn_review(
     neighborhood: int,
     cost_limit: float,
     dry_run: bool,
+    report_only: bool,
     skip_audit: bool,
     concurrency: int,
     verbose: bool,
@@ -5956,6 +6066,13 @@ def sn_review(
     from imas_codex.standard_names.review.state import StandardNameReviewState
 
     setup_logging("sn", "sn-review", use_rich=False, verbose=verbose)
+
+    if dry_run and report_only:
+        raise click.UsageError("--dry-run and --report-only are mutually exclusive")
+    if report_only and skip_audit:
+        raise click.UsageError(
+            "--report-only runs all three layers and cannot be combined with --skip-audit"
+        )
 
     # Resolve --target.
     target_normalized = target.lower()
@@ -6011,6 +6128,8 @@ def sn_review(
         review_models=review_models,
         disagreement_threshold=disagreement_threshold,
     )
+
+    suppressed_graph_writes: list[str] = []
 
     async def _run() -> None:
         # Layer 1: Audits (on full catalog, unless --skip-audit or --dry-run)
@@ -6159,6 +6278,15 @@ def sn_review(
 
         summary = run_consolidation(state)
 
+        console.print(
+            "\n[bold]Report mode:[/bold] "
+            + (
+                f"report-only ({len(suppressed_graph_writes)} graph mutations suppressed)"
+                if report_only
+                else "persist review results"
+            )
+        )
+
         # Print summary report
         console.print("\n[bold]═══ Review Summary ═══[/bold]")
         scored_info = f"  Scored: {summary.total_scored} / {summary.total_catalog_size}"
@@ -6212,7 +6340,11 @@ def sn_review(
                 f" ${bs['total_budget']:.2f} ({bs['batch_count']} batches)"
             )
 
-    asyncio.run(_run())
+    if report_only:
+        with _suppress_review_graph_writes() as suppressed_graph_writes:
+            asyncio.run(_run())
+    else:
+        asyncio.run(_run())
 
 
 # ---------------------------------------------------------------------------
