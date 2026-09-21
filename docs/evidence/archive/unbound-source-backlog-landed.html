@@ -554,6 +554,83 @@
     base revision <code>d170a6ec29331dbe6a2247d42b845c3f44f8ec32</code> &middot; host class
     <code>all_debug</code> &middot; commit <code>e0c2d5ef3</code>.</p>
   </section>
+
+  <section id="export-gate-chain-audit">
+    <h2>The WEST manifest cannot pass the gate chain, and two of its blockers are permanent</h2>
+    <p>The three export changes that landed this sprint were read for whether any can admit a wrong
+    name to a published catalog or withhold a right one, and the export test files were run rather
+    than only read. <strong>Neither risk is an admission risk.</strong> Both defects that matter are
+    wrong-refusal, and both reproduce on real inputs.</p>
+    <table>
+      <caption>Verdict per landed change</caption>
+      <thead><tr><th>Change</th><th>Verdict</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td><code>617fdaca9</code> producer predicate</td><td><strong>SAFE-FOR-WEST</strong></td>
+            <td>correct; live-child stage set verified identical to <code>graph_ops.py:1876</code>,
+            <code>graph_ops.py:8284</code>, <code>pools.py:309</code> and
+            <code>sn_link_guardrail.py:69</code></td></tr>
+        <tr><td><code>b161235bb</code> fail-closed repair</td><td><strong>MUST-FIX-FIRST</strong></td>
+            <td>a candidate carrying <code>name_stage</code> but no producer key is refused, and the
+            cut empties to zero names with no gate refusing an empty cut</td></tr>
+        <tr><td><code>e0c2d5ef3</code> generability instrument</td><td><strong>MUST-FIX-FIRST</strong></td>
+            <td>refuses the WEST manifest on two sources that can never become names</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The WEST manifest is measured ungenerable.</strong> Running
+    <code>describe_manifest_generability</code> over the 355 sources of
+    <code>v0.4.0rc7+west-task-2e.sn_names.yaml</code> gives <code>carried 330, uncarried 25,
+    generable False</code>, with <code>{'recorded_refusal': 21, 'composition_not_scheduled': 4}</code>.
+    Two of the 25 are <code>equilibrium/time_slice/constraints/b_field_pol_probe/weight</code> and
+    <code>.../flux_loop/weight</code>, both refused
+    <code>dd_node_category_ineligible: Backing DD node category fit_artifact</code> &mdash; the class
+    &sect;1 of the plan calls correctly excluded. The instrument has no waived disposition, so the
+    gate is unsatisfiable on this manifest except by removing sources from it.</p>
+    <p><strong>The same shape reproduces in the suite</strong>, so the reds are the reproduction
+    rather than incidental. <code>test_manifest_sources_reconcile_emitted_excluded_and_non_nameable</code>
+    now fails <code>assert report.all_gates_passed</code> on a source whose reason is
+    <code>non_nameable_coordinate: time axis</code>: a coordinate is permanently non-nameable and the
+    gate reads reconciliation as a defect.</p>
+    <p><strong>The producer refusal empties a whole cut rather than dropping one name.</strong>
+    <code>test_export_ledger_closes_over_fixture_population</code> gives
+    <code>assert 0 == 1</code> with <code>exclusion_counts={'invalid_validation_status': 1,
+    'no_producing_source': 3}</code>; two further reds in the same file are that one event seen
+    downstream &mdash; no <code>equilibrium.yml</code> written at all, and the cross-link validator
+    handed an empty set where <code>{'electron_density', 'ion_density'}</code> was expected. The
+    exclusion ledger still closes and the accounting gate still passes, because an empty cut accounts
+    perfectly. <code>no_producing_source</code> is a marker <code>617fdaca9</code> introduced, which is
+    what attributes the refusal to this chain.</p>
+    <p><strong>Two corrections to the mechanism vocabulary recorded above.</strong> The row in the
+    preceding section asserting that <code>refusal_cause_not_recorded</code> is read from the roster's
+    lost-cause sentinel does not hold: that member is declared at <code>export.py:2410</code> and
+    returned nowhere, because <code>export.py:2438</code> maps the sentinel to
+    <code>composition_not_scheduled</code> &mdash; the opposite class. The discriminator is already on
+    the record as <code>source_status</code>, which the same change added and the mechanism ladder
+    never reads, against its own docstring. The trigger is a source with
+    <code>source_status='skipped'</code> and no surviving cause; &sect;5 of the plan counts
+    <strong>397</strong> such rows live. Separately,
+    <code>attempt_budget_exhausted</code> fires only on <code>terminal_stage == 'exhausted'</code>
+    (<code>export.py:2433</code>), so a search capped before reaching any identity &mdash;
+    <code>gas_injection/valve/flow_rate</code> in WEST, carrying the named constant
+    <code>_COMPOSE_CAP_REASON</code> from <code>graph_ops.py:11399</code> &mdash; is reported as a
+    recorded refusal. A release reading <code>recorded_refusal: 21</code> concludes it waits on the
+    grammar repository; at least one of the 21 waits on nothing and two will never close.</p>
+    <p><strong>One bypass the fail-closed repair did not shut.</strong>
+    <code>export.py:826</code> admits any candidate lacking <code>name_stage</code> unconditionally,
+    skipping every eligibility clause including the new guard, so the caller class the repair was
+    written against still walks past it whenever that projection also omits <code>name_stage</code>.
+    <code>_fetch_export_population</code> is the only production source of candidate rows and it
+    projects both keys, so the exposure is latent rather than live &mdash; and inherited silently by
+    any projection path added later.</p>
+    <p>Gate run: the four export test files, <code>4 failed, 21 passed</code>, log path in the node's
+    manifest. This gate measures this node's own change only; the four reds lie outside this node's
+    write fence and are reported as follow-ons rather than triaged. No graph read was performed and no
+    identity was mutated.</p>
+    <p>Full record: <a href="/imas-codex/evidence/unbound-source-backlog/export-gate-audit">the gate
+    audit</a>.</p>
+    <p class="r-meta">Worker: n-usb-the-export-gate-chain-is-audited-before-the-west-cut &middot;
+    2026-09-21 &middot; base revision <code>83e93c42c661b168a4c0abb153730a9f39b048d3</code>.</p>
+  </section>
+
 </main>
 
 </body>
