@@ -154,3 +154,50 @@ Write gate and control logs where the run record lives, or copy them there befor
 citing them. A promote that cites a path nobody else can open has recorded the
 *claim* without the evidence — the same shape as the git note that never leaves
 one clone.
+
+## An eighth and a ninth, and two adopted improvements
+
+**Eighth: a cold archive tree can blow the per-test timeout and report a class
+that is neither pass nor fail.** A peer reproducing a control against a freshly
+extracted tree got **exit 3** and nearly read it as a red. The cause was
+`Failed: Timeout (>30.0s) from pytest-timeout` on a cold GPFS tree, which pytest
+reported as `INTERNALERROR` **with no totals line at all**. Re-run at
+`--timeout=180` the same command gave exit 1 and 2 failed, which was the real
+control. So the first run against any newly extracted tree pays cold-cache cost
+against a 30-second per-test ceiling, and the failure presents as an exit class
+rather than as a test result.
+
+Audited across this session's nine cited gate logs: **zero timeouts, zero
+`INTERNALERROR`, and every pytest log carries its totals line**, so none of the
+measurements here are affected. The hazard is real for the next cold tree.
+
+**Ninth: a gate can finish without summarising, and counting failures cannot
+tell.** Both of the checks this session used — `grep -cE '^FAILED '` and
+`grep -cE '^ERROR tests/'` — return a perfectly good `0` from a log that has no
+totals line because the run died. The standing assertion that catches it costs
+one line and is now part of the recipe:
+
+```bash
+grep -cE "^=+ .*(passed|failed)" "$LOG"    # must be 1; 0 means the run never summarised
+```
+
+Anchor on `^=+` rather than a fixed run of `=`: pytest pads the banner to
+terminal width, so a literal `=====` can miss a line that reads `= 31 failed, …`.
+A peer's comparison loop silently matched nothing for twelve and thirty-four
+minutes for exactly that reason.
+
+**Adopted: reproduce a control against committed history, not by mutating.**
+Where a predecessor commit already contains the behaviour a control is meant to
+demonstrate, checking out that revision is strictly better evidence than either
+a worker's self-report or a mutation applied by hand. It needs no weakening of
+the thing under test — and a hand-applied narrowing of a live guard is the kind
+of edit a safety classifier will decline, correctly.
+
+This session has one datum on the other side, which is why "strictly better" is
+worth taking seriously. The one hand-built control here — adding a seventh
+classifier branch returning a string outside the declared vocabulary — returned
+**exit 0**. The mutation was applied correctly and the test passed, because the
+test never supplies the input that reaches a newly added branch. That was a true
+finding about the test's aperture rather than a failed control, but it cost two
+attempts, the first of which returned exit 2 from a malformed edit. A checkout
+of committed history has neither failure mode.
