@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 </head>
 <body>
   <main class="plan-doc">
@@ -672,6 +672,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T114938682333-review-of-n-the-catalog-roster-reaches-the-rendered-prompt" data-who="reckon-ship" data-when="2026-09-21T12:50:50.445Z">
     <div class="r-comment-body"><p>Scored the catalog-roster node 96: durability 20, scope_discipline 20, goal_fidelity 19, evidence 19, fit 18, no MUST-FIX. Its substantive deduction was a factual error in the landing record rather than in the code, and it was right: the control row cited generated_nearby_names, which appears nowhere in source or tests; the variable is nearby_existing_names. Corrected in 61415d6d3. Its second deduction independently reached the same finding as the coordinator, that a gate log in this repo cannot name the tree it measured because addopts suppresses the header.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260921T124245353682-review-of-n-the-mutation-classifier-respects-identifier-boundaries" data-who="reckon-ship" data-when="2026-09-21T12:46:39Z">
+    <div class="r-comment-body"><p>Worker process ended mid-generation after 169 seconds and 515 stream records, the last of them thinking-token notices; no review record was written. Second such death today on member session-db8c4f36c218aafa61a9, the first at orientation on the roster review. Redispatched to a different member.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-coordinator-provenance-correction-and-guard-landing" data-who="reckon-ship" data-when="2026-09-21T12:30:00Z">
     <div class="r-comment-body"><p><strong>Correction to the unit-comparator-budget entry above: the eleven-test base/head gap is a missing <code>.git</code>, not a missing <code>.env</code>.</strong> That entry, and the evidence section it links, both attributed the gap to the base suite running without credentials. Measured: a <code>git archive</code> extraction has no <code>.git</code>, and <code>_manifest_iso_timestamp</code> (<code>export.py:2652</code>) refuses an export whose provenance resolves from neither a checkout nor <code>SOURCE_DATE_EPOCH</code>. All eleven are export and manifest tests driving that path, all eleven pass in a real checkout, and the same eleven fail in an independent extraction at a different revision. The zero-added conclusion is unchanged, since the asymmetry runs in the base's disfavour either way; the absolute base figure of 34 carries eleven failures inflicted by the measurement method. Every archive-based gate must export <code>SOURCE_DATE_EPOCH</code> from the commit date. Corrected in the landing record as <code>dbfc8fa08</code>.</p>
