@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import dataclass
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +20,21 @@ LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES = {
     "__file__": "Module metadata is assigned by Python's import machinery.",
     "__version__": "Distribution metadata is supplied by the installed package.",
 }
+
+# Floors make a scan that sees nothing fail instead of passing silently.
+MINIMUM_SCANNED_MODULES = 8
+MINIMUM_DECLARED_CLASS_ATTRIBUTES = 3_000
+MINIMUM_LITERAL_DEFAULTED_GETATTRS = 24
+
+
+@dataclass(frozen=True)
+class DefaultedAttributeScan:
+    """The aperture and violations reported by one static scan."""
+
+    module_count: int
+    declared_attribute_count: int
+    candidate_count: int
+    violations: list[tuple[Path, int, str]]
 
 
 def _python_modules(source_root: Path, module_roots: tuple[Path, ...]) -> list[Path]:
@@ -87,11 +103,13 @@ def _declared_class_attributes(source_root: Path) -> set[str]:
     return attributes
 
 
-def _undeclared_defaulted_attributes(source_root: Path) -> list[tuple[Path, int, str]]:
-    """Find literal three-argument getattr calls whose default hides no class field."""
+def _defaulted_attribute_scan(source_root: Path) -> DefaultedAttributeScan:
+    """Scan the configured modules for defaulted reads and their declared names."""
+    modules = _python_modules(source_root, MODULE_ROOTS)
     declared_attributes = _declared_class_attributes(source_root)
+    candidates: list[tuple[Path, int, str]] = []
     violations: list[tuple[Path, int, str]] = []
-    for module in _python_modules(source_root, MODULE_ROOTS):
+    for module in modules:
         tree = ast.parse(module.read_text(), filename=str(module))
         for node in ast.walk(tree):
             if not (
@@ -104,17 +122,33 @@ def _undeclared_defaulted_attributes(source_root: Path) -> list[tuple[Path, int,
             ):
                 continue
             attribute_name = node.args[1].value
+            candidates.append((module, node.lineno, attribute_name))
             if (
                 attribute_name not in declared_attributes
                 and attribute_name not in LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES
             ):
                 violations.append((module, node.lineno, attribute_name))
-    return violations
+    return DefaultedAttributeScan(
+        module_count=len(modules),
+        declared_attribute_count=len(declared_attributes),
+        candidate_count=len(candidates),
+        violations=violations,
+    )
+
+
+def _undeclared_defaulted_attributes(source_root: Path) -> list[tuple[Path, int, str]]:
+    """Return violations for callers that only need the guard verdict."""
+    return _defaulted_attribute_scan(source_root).violations
 
 
 def test_defaulted_literal_attributes_are_declared() -> None:
     """A default may not turn an undeclared attribute read into empty evidence."""
-    violations = _undeclared_defaulted_attributes(REPOSITORY_ROOT)
+    scan = _defaulted_attribute_scan(REPOSITORY_ROOT)
+    assert scan.module_count >= MINIMUM_SCANNED_MODULES
+    assert scan.declared_attribute_count >= MINIMUM_DECLARED_CLASS_ATTRIBUTES
+    assert scan.candidate_count >= MINIMUM_LITERAL_DEFAULTED_GETATTRS
+
+    violations = scan.violations
     rendered = "\n".join(
         f"{path.relative_to(REPOSITORY_ROOT)}:{line}: {attribute_name}"
         for path, line, attribute_name in violations
