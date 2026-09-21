@@ -403,3 +403,76 @@ its proposed spelling is that adjudication's, not a new one.
 - data-dictionary text: Volume average plasma density estimated from the line densities measured by the various channels
 - name description: Number density of free electrons per physical volume averaged over the plasma volume enclosed by the last closed flux surface, giving the global mean free-electron density.
 - The data dictionary says the quantity is *estimated from* the line densities, which is a statement about how it was obtained rather than about what it is; the name correctly denotes the volume average itself. Also bound to `summary/volume_average/n_e/value` (index 250), the same quantity.
+
+### 146. `area_of_toroidal_magnetic_field_probe` — **INCORRECT**
+
+- source path: `magnetics/b_field_phi_probe/area`
+- unit: `m^2` (data dictionary: `m^2`)
+- data-dictionary text: Area of each turn of the sensor; becomes effective area when multiplied by the turns
+- name description: Geometric area enclosed by one complete winding turn of a toroidal magnetic-field probe coil, setting its single-turn magnetic-flux sensitivity.
+- **rejected spelling** `area_of_toroidal_magnetic_field_probe` → **proposed spelling** `turn_area_of_toroidal_magnetic_field_probe`
+- why: The data dictionary is explicit that two areas exist and that this is the smaller one: the per-turn area, which "becomes effective area when multiplied by the turns". The effective area is what converts a measured coil voltage into a field, so using the per-turn area in that conversion under-reads the field by the full turn count — and this probe's turn count is itself published in this same cohort as `turn_count_of_toroidal_magnetic_field_probe` (row 152), so both factors are in the catalog and only the name distinguishes them. An unqualified `area_of_<probe>` reads as the probe's area, which a consumer would naturally take as the effective one. The name's description already says "one complete winding turn"; the name does not.
+
+### 147. `toroidal_magnetic_field` — **correct**
+
+- source path: `magnetics/b_field_phi_probe/field`
+- unit: `T` (data dictionary: `T`)
+- data-dictionary text: Magnetic field component in direction of sensor normal axis (n) averaged over sensor volume defined by area and length, where n = cos(poloidal_angle)*cos(toroidal_angle)*grad(R) - sin(poloidal_angle)*grad(Z) + cos(poloidal_angle)*sin(toroidal_angle)*grad(Phi)/norm(grad(Phi))
+- name description: Signed toroidal component of the local total magnetic induction, resolved along increasing toroidal angle in the right-handed cylindrical (R, φ, Z) frame.
+- The first half accepts the exact analogue `poloidal_magnetic_field` at `magnetics/b_field_pol_probe/field` (row 52), and a toroidal-field probe's reading is nominally the toroidal component, so the name is consistent with a settled sibling and is accepted.
+- note: The data dictionary defines the value as the component along the *sensor normal*, volume-averaged over the sensor, and the probe publishes both a `poloidal_angle` (row 148) and a `toroidal_angle` (row 151) that let that normal depart from φ. So the name is exact only for an ideally aligned probe, and for a tilted one the datum is a projection. This is recorded because a consumer combining probes should use the published angles rather than assume the name; it does not rise to a rejected spelling, since rejecting it would also unsettle the accepted poloidal sibling whose data-dictionary text says only "Measured magnetic field".
+
+### 148. `poloidal_angle_of_toroidal_magnetic_field_probe` — **correct**
+
+- source path: `magnetics/b_field_phi_probe/poloidal_angle`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Angle of the sensor normal vector (vector parallel to the the axis of the coil, n on the diagram) with respect to horizontal plane (clockwise theta-like angle). Zero if sensor normal vector fully in the horizontal plane and oriented towards increasing major radius. Values in [0 , 2Pi]
+- name description: Signed poloidal tilt angle of a toroidal magnetic-field probe's sensitive-axis normal in the right-handed cylindrical (R, φ, Z) frame, measured clockwise from +R.
+- The name correctly denotes an orientation of the probe rather than a position of it, which is the distinction rows 149 and 150 get wrong.
+- note: The description calls the angle "signed" while the data dictionary states the range as `[0, 2Pi]`, which is unsigned. The two conventions agree modulo 2π on the same physical orientation, so no value is wrong, but a consumer writing a range check against the description would reject valid data. This is a description defect and carries no incorrect verdict.
+
+### 149. `toroidal_angle_of_measurement_position` — **INCORRECT**
+
+- source path: `magnetics/b_field_phi_probe/position/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate locating a measurement position around the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+- **rejected spelling** `toroidal_angle_of_measurement_position` → **proposed spelling** `toroidal_coordinate_of_toroidal_magnetic_field_probe`
+- why: A magnetic probe's `position` is where the sensor is installed, a fixed property of the machine; a measurement position is where a diagnostic samples the plasma, which for a line-integrating or imaging instrument is somewhere else entirely. The probe case is decided inside its own container: the `/z` sibling of this very node is already published as `vertical_coordinate_of_toroidal_magnetic_field_probe` and accepted in the first half (row 51), so one probe position currently carries two different loci across its coordinates — the same defect this half records at row 127 for the antenna strap outline.
+- The proposal deliberately says `toroidal_coordinate`, not `toroidal_angle`, because `toroidal_angle_of_toroidal_magnetic_field_probe` is already taken by row 151 and means something else: the probe's sensing *orientation*. The cohort's settled position spelling is `toroidal_coordinate_of_line_of_sight`, so `toroidal_coordinate` for a location and `toroidal_angle` for an orientation is the distinction the batch already draws.
+- The identity is also bound to `ece/channel/position/phi` (index 44), where it is a genuine measurement position, and to `magnetics/b_field_pol_probe/position/phi` (index 156), which repeats this defect on the poloidal probe. That collision spans outside this index range and is deferred to the whole-cohort collision sweep.
+
+### 150. `radial_coordinate_of_measurement_position` — **INCORRECT**
+
+- source path: `magnetics/b_field_phi_probe/position/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate locating a measurement position by perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+- **rejected spelling** `radial_coordinate_of_measurement_position` → **proposed spelling** `radial_coordinate_of_toroidal_magnetic_field_probe`
+- why: The same defect as row 149 on the radial axis of the same point, and the spelling proposed here is the one the first half already proposed when it reported this exact binding as a whole-cohort finding. A sensor location is not a measurement position, and the `/z` member of this identical point is accepted as `vertical_coordinate_of_toroidal_magnetic_field_probe`, so R, φ and Z of one installed probe are presently published under three different loci.
+- Also bound to `camera_x_rays/aperture/centre/r` (index 17), an aperture centre, which is a third distinct object under the one name; that collision is the first half's recorded finding and is deferred to the collision sweep.
+
+### 151. `toroidal_angle_of_toroidal_magnetic_field_probe` — **correct**
+
+- source path: `magnetics/b_field_phi_probe/toroidal_angle`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Angle of the projection of the sensor normal vector (n) in the horizontal plane with the increasing R direction (i.e. grad(R)) (angle is counter-clockwise from above as in cocos=11 phi-like angle). Values should be taken modulo pi with values within (-pi/2,pi/2]. Zero if projected sensor normal is parallel to grad(R), pi/2 if it is parallel to grad(phi).
+- name description: The toroidal angle of a toroidal magnetic-field probe is the signed azimuthal orientation of the probe sensitive-axis normal projected onto the horizontal plane, measured from +R toward increasing φ in the right-handed cylindrical (R, φ, Z) frame. Opposite projected normals are folded into the same principal orientation.
+- The description captures both the reference direction and the modulo-π fold the data dictionary specifies, which is the non-obvious part of this quantity; the name denotes an orientation and the locus is the probe, both correct. It is the name whose existence forces row 149's proposal to use `toroidal_coordinate` for the position.
+
+### 152. `turn_count_of_toroidal_magnetic_field_probe` — **correct**
+
+- source path: `magnetics/b_field_phi_probe/turns`
+- unit: `1` (data dictionary: *empty*)
+- data-dictionary text: Turns in the coil, including sign
+- name description: Signed number of complete winding turns in a toroidal magnetic-field probe coil, with orientation referenced to the positive toroidal direction.
+- note: **The one unit disagreement in this half.** The standard name carries `1` and the data dictionary carries no unit at all. The standard name is the defensible side: a turn count is a signed dimensionless integer, and `1` is the catalog's spelling for dimensionless, whereas an empty unit is indistinguishable from an unfilled field. The name correctly keeps `signed`, which matters because the sign encodes winding orientation and flipping it inverts the measured field.
+
+### 153. `area_of_poloidal_magnetic_field_probe` — **INCORRECT**
+
+- source path: `magnetics/b_field_pol_probe/area`
+- unit: `m^2` (data dictionary: `m^2`)
+- data-dictionary text: Area of each turn of the coil
+- name description: Geometric cross-sectional area enclosed by one winding turn of a poloidal magnetic-field probe coil, defining its per-turn magnetic-flux coupling.
+- **rejected spelling** `area_of_poloidal_magnetic_field_probe` → **proposed spelling** `turn_area_of_poloidal_magnetic_field_probe`
+- why: The same defect as row 146 on the poloidal probe. The data dictionary says "area of each turn of the coil" and the name says the area of the probe; the two differ by the turn count, and the quantity that converts a coil voltage to a field is the product, not this factor. The proposal keeps the two probes' spellings parallel, which is why both rows are renamed together rather than one of them.
