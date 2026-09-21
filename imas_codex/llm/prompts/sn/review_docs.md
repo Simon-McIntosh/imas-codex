@@ -120,6 +120,18 @@ These names already exist in the catalog. Compare docs for consistency and cross
 {% endfor %}
 {% endif %}
 
+{% if existing_names %}
+## Catalog Roster
+
+The accepted names below are the catalog as a whole, not the local neighbourhood.
+A documentation that names a related quantity not on this roster, or that cites a
+spelling the roster does not carry, is describing a quantity the catalog does not
+recognise — check the candidate against these before treating a citation as valid.
+{% for name in existing_names %}
+- `{{ name }}`
+{% endfor %}
+{% endif %}
+
 ## Candidates to Review
 
 {% for item in items %}
