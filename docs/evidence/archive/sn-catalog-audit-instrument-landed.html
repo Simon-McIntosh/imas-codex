@@ -6,6 +6,17 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="evidence">
   <title>Landed evidence | Catalog audit instrument | imas-codex</title>
+  <meta name="viewport"      content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="imas-codex">
+  <meta name="reckon-type"   content="evidence">
+  <meta name="plan-slug"     content="sn-catalog-audit-instrument-landed">
+  <meta name="plan-title"    content="SN Catalog Audit Instrument: What Landed">
+  <meta name="plan-summary"  content="Cumulative execution record for the catalog audit instrument: what each node measured, with the evidence anchor it landed against.">
+  <meta name="plan-status"   content="active">
+  <meta name="plan-owner"    content="Simon McIntosh">
+  <meta name="plan-tags"     content="standard-names,review,routing">
+  <meta name="plan-evidence-for" content="sn-catalog-audit-instrument">
+  <title>SN Catalog Audit Instrument: What Landed | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
@@ -68,5 +79,64 @@
   </section>
 
 </main>
+  <main class="plan-doc">
+
+  <h2 id="review-local-lane-surface">The review surface does not run on the local lane, and one model is the whole of it</h2>
+  <p><strong>Measured 2026-09-21</strong> at
+  <code>409809bff7538002648a5fd42a324f52a864b74b</code>, by resolving every seat
+  through the real registry rather than by reading <code>pyproject.toml</code>
+  &mdash; which matters, because the file gives the wrong answer in the
+  reassuring direction.</p>
+  <p><strong>Exactly one model in the entire configuration resolves to the local
+  endpoint.</strong> <code>_MODEL_ENDPOINTS</code> holds one key,
+  <code>local/deepseek-v4.1-flash</code>, and the two seats that use it are
+  <code>sn-compose</code> and <code>sn-parent-enrich</code>. Everything else
+  &mdash; <code>sn-docs</code>, <code>sn-refine</code>,
+  <code>sn-escalation</code>, <code>sn-classifier</code>,
+  <code>sn-prose-adjudicator</code>, <code>sn-release-notes</code>, and both
+  review axes &mdash; resolves no endpoint and is routed to a paid provider
+  <strong>without the operator asking for one</strong>.</p>
+  <p><strong>Both starting facts hold.</strong> A live
+  <code>GET /v1/models</code> returns exactly one entry,
+  <code>deepseek-v4.1-flash</code>. And the registry is keyed on the full seat
+  string, shown by a negative control rather than asserted: the name the server
+  <em>actually serves</em>, without its <code>local/</code> prefix, resolves
+  nothing and falls to the proxy &mdash; as does the previous sprint's seat
+  spelling. <strong>One character of drift in a seat string silently moves a
+  call onto a paid lane.</strong></p>
+  <p><strong>The profile trap is the finding a configuration read would have
+  missed.</strong> <code>[sn-review.names].models</code> lists one local model
+  and two paid ones, with a comment describing the first cycle as free. That
+  list does not run: the accessor the pipeline calls resolves a profile first,
+  and the hard-coded default at <code>settings.py:1556</code> is a different
+  section whose three members are all paid. Measured through the accessor,
+  <code>--target names</code> with no flags is grok-4.5, gpt-5.6-luna and
+  claude-sonnet-5 &mdash; zero local cycles. The free lane exists and has to be
+  asked for.</p>
+  <p><strong><code>--target docs</code> is fully paid and structurally unable to
+  be otherwise.</strong> Its section carries no <code>model-route</code> at all,
+  and the registry binds a local member only when the node it sits in resolves
+  an <code>api_base</code>, so adding a local model to that list would change
+  nothing.</p>
+  <p><strong>The embedding path is the one surface entirely on the local
+  lane</strong>, and it needed checking rather than assuming because a paid
+  embedding client exists in the same package: nothing outside that module
+  constructs it, and the encoder resolves to a remote GPU server. The encoder is
+  explicit that it refuses rather than falling back &mdash; but the audit around
+  it wraps the whole preflight in a bare <code>except Exception</code>, so an
+  unreachable embedding server produces a clean-looking audit over stale
+  vectors. <strong>A review that cannot embed still reports.</strong> Layer 1
+  audits and consolidation reach no model at all.</p>
+  <p><strong>Five silent fallbacks, four of them absent-value defaults</strong>
+  &mdash; an unresolved model admitted to the proxy, a registry miss
+  indistinguishable from an intentionally paid seat, the paid quorum as the
+  profile default, the swallowed embedding failure, and a missing routing key.
+  None requires the operator to ask for a paid provider. The single check that
+  would close the first: a model carrying a local-lane prefix that resolves no
+  endpoint is a configuration error, not a request for the proxy.</p>
+  <p>Per-surface table, every <code>file:line</code>, and the probe output:
+  <a href="/imas-codex/evidence/sn-catalog-audit-instrument/review-local-lane-surface.md">the review local-lane surface audit</a>.</p>
+
+  </main>
 </body>
 </html>
