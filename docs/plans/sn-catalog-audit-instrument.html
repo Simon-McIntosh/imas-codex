@@ -610,6 +610,14 @@
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T100424261129-n-the-comparators-reach-the-reviewer-and-are-shared" data-who="reckon-ship" data-when="2026-09-21T10:09:11Z">
     <div class="r-comment-body"><p>Stopped deliberately at 7m49s. It bundled three independent review findings into one node, which is the shape that made its predecessor fail two of three requirements. Re-dispatched as n-the-catalog-roster-reaches-the-rendered-prompt and n-the-unit-comparator-budget-is-shared-and-bounded on the local lane.</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260921T102956857376-n-the-write-suppression-covers-every-write-method" data-who="reckon-ship-worker" data-when="2026-09-21T10:55:00Z">
+    <div class="r-comment-body"><p><strong>The report-only write suppression now sits on the session boundary, and the aperture is measured rather than asserted.</strong>
+      The review's aperture finding reproduced: with the guard installed on <code>GraphClient.query</code> alone, <code>create_node()</code> and <code>create_relationship()</code> delivered their <code>MERGE</code> statements to the driver while the Cypher mutation was dropped.
+      The guard now replaces <code>GraphClient.session</code> — the one construct every method takes to reach a session — so node writes, edge writes, direct session blocks and Cypher all pass through one interception, and a transaction opened from that session is wrapped the same way. It yields the clauses it dropped, so suppression is read from a receipt.</p>
+<p>A test enumerates the boundary-reaching <code>GraphClient</code> methods by introspection: <strong>22</strong> maintain a call path to the boundary, <strong>13</strong> deliver a mutating statement when run unguarded (<strong>79</strong> statements), and under the guard <strong>0</strong> reach the driver while <strong>79</strong> are receipted. The oracle classifies statements with a detector sharing no code with the guard's own. Focused gate: <strong>25 tests pass</strong>; the query-only mutation failed <strong>15</strong> of them.</p>
+<p><strong>Dispatch note:</strong> this node's base was <code>fe5012a13</code> (main), which does not carry the predecessor's suppression commit — it lives only in worktree <code>n-the-review-can-report-without-writing</code> (<code>3d7f56cc4</code>), unmerged. The guard and its <code>--report-only</code> CLI surface were therefore implemented here; the two edits overlap and must be reconciled before both land.</p>
+<p><strong>Not this node:</strong> the review's other MUST-FIX — report-only suppresses Layer 1's embedding refresh, which Layer 2's vector-index neighbourhood search reads back — is untouched here.</p></div>
+</div>
 </section>
   </main>
 </body>

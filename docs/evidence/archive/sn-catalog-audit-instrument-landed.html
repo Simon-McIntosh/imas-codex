@@ -348,6 +348,57 @@
     <code>n-the-reviewer-sees-the-catalog-it-is-judging-against</code> &middot;
     2026-09-21 &middot; implementation commit <code>0e9218080</code>.</p>
   </section>
+  <section id="write-suppression-aperture">
+    <h2>The report-only write suppression sits on the session boundary</h2>
+
+    <p><strong>The recorded defect reproduced before the repair.</strong>
+    Suppression installed on <code>GraphClient.query</code> only intercepts one
+    of the client's write routes. With that aperture installed and the driver
+    replaced by a recorder, <code>client.query("MERGE …")</code> was dropped
+    while <code>client.create_node(…)</code> and
+    <code>client.create_relationship(…)</code> delivered their
+    <code>MERGE</code> statements straight to the session. The negative-control
+    log for this node is that run: narrowing the guard to
+    <code>GraphClient.query</code> fails <strong>13 of 22</strong> enumerated
+    methods plus the boundary and shape tests, <em>15 failed, 10 passed</em>.</p>
+
+    <p><strong>The repair.</strong> The guard replaces
+    <code>GraphClient.session</code> — the one construct every method takes to
+    reach a Neo4j session — and wraps the yielded session in a proxy whose
+    <code>run</code> drops a statement naming a mutating clause; a transaction
+    opened from that session is wrapped the same way.
+    <code>query()</code> funnels through <code>self.session()</code>, so the
+    Cypher route is covered by the same interception rather than beside it. The
+    guard yields the clauses it dropped, so suppression is read from a receipt
+    and not inferred from an empty session.</p>
+
+    <p><strong>Evidence that could have failed.</strong> The focused gate
+    (<code>tests/standard_names/test_review_write_suppression.py</code>) passes
+    <strong>25 tests</strong>. The enumeration is introspective: 22
+    <code>GraphClient</code> methods maintain a call path to the boundary, and
+    <strong>13</strong> of them deliver a mutating statement when run
+    unguarded, <strong>79 statements</strong> in total. Under the guard
+    <strong>0</strong> reach the driver and <strong>79</strong> are receipted.
+    The oracle classifies recorded statements with a detector that shares no
+    code with the guard's classifier.</p>
+
+    <table>
+      <thead>
+        <tr><th>Route</th><th>Unguarded</th><th>Session-boundary guard</th><th>Query-only guard</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>query()</code> — Cypher mutation</td><td>reaches</td><td>dropped</td><td>dropped</td></tr>
+        <tr><td><code>create_node()</code></td><td>reaches</td><td>dropped</td><td><strong>reaches</strong></td></tr>
+        <tr><td><code>create_relationship()</code></td><td>reaches</td><td>dropped</td><td><strong>reaches</strong></td></tr>
+        <tr><td>direct <code>client.session()</code> block</td><td>reaches</td><td>dropped</td><td><strong>reaches</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="r-meta">Worker:
+    <code>n-the-write-suppression-covers-every-write-method</code> &middot;
+    2026-09-21 &middot; implementation commit
+    <code>dcc4c3d42</code>.</p>
+  </section>
   </main>
 </body>
 </html>
