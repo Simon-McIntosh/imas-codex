@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T11:29:19",
+  "updated": "2026-09-21T11:35:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -169478,6 +169478,354 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T073632893423-n-the-receipt-shows-which-source-set-each-expectation",
+        "plan": "paid-identity-deletion-protection",
+        "section": "",
+        "node": "n-the-receipt-shows-which-source-set-each-expectation",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1308,
+                "cached_input_tokens": 541044,
+                "input_tokens": 542354,
+                "output_tokens": 1886,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 544240,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm both gaps reproduce before repairing them, and quote each reproduction; an independent opus review of the landed parity-receipt change found them and both are present at HEAD. First, the precedence rule the change's own docstring states -- the archive census establishes the expected count where it names the role, and only otherwise the reconstruction closure -- is pinned by no test, so swapping the two branches of that if/elif leaves the entire standard-names suite green. The reason is that every landed test places a role in exactly one source, so no test exercises a disagreement. Reproduce it by building an authority whose archive_roles give an identity one HAS_UNIT while its reconstruction closure carries two HAS_UNIT edges for that same identity, which is admissible because _load_archive_role_counts refuses only when the reconstructable count is LESS than the archived count and never when it is greater; show the landed code returning expected 1 with expected_source archive_census, then swap the branches and show it returning expected 2 with expected_source reconstruction_closure while the suite stays green. The repair is one test in tests/standard_names/test_archive_parity_receipt.py asserting the census wins where the two sources disagree, and it must fail against the declared negative control. Do not change the precedence: it is correct as landed and this repair is the guard that keeps it so. Second, the field the change added is invisible where an operator would read it. The sole non-test consumer of the parity mapping is in imas_codex/cli/sn.py near line 8466 and prints only the expected and observed counts, so a row whose expected count is unestablished prints as expected None observed 0 and cannot be told apart from a census that recorded a null. Measured by the reviewer: with an empty archive_roles an apply emits 35 rows per identity of which 34 read that way, and the 67-identity restore this surface exists to perform would emit roughly 2,345 such lines. Interpolate the row's expected_source into that same output line so each row says which source established its expectation, and render an unestablished expectation as a word rather than as the bare None that a Python f-string produces. Third, no test anywhere asserts any line of this receipt's CLI output, which is why the second gap was invisible; add one that invokes the command through the click runner and asserts the line for an unestablished row names its source. The done-when is that tests/standard_names/test_archive_parity_receipt.py carries the disagreement test and the CLI output test, both failing against the declared negative control, and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. Expect about twenty failures and three errors at the base that predate you. The negative-control log's first line must repeat the mutation you actually applied in your own words, because that line is compared against the declaration, and with two repairs here you need one control per repair and two logs, each naming which repair it controls. A guard that passes its own test by weakening itself is worse than no guard. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 1.0,
+          "goal": "pin the expectation precedence and show its source where an operator reads the receipt",
+          "id": "n-the-receipt-shows-which-source-set-each-expectation",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T07:36:33Z",
+            "read_at": "2026-09-21T07:36:35Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 9.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073632893423-n-the-receipt-shows-which-source-set-each-expectation/manifest.md",
+          "negative_control": "check reconstruction_closure before archive_census in _archive_role_parity, reversing the landed precedence.",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_archive_parity_receipt.py",
+            "docs/evidence/archive/paid-identity-deletion-protection-landed.html",
+            "docs/plans/paid-identity-deletion-protection.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-receiptvisible",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T07:36:42Z",
+        "completed_at": "2026-09-21T09:28:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 6678,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "a0d303ca47357821f4a1f595d8a8089e462b32fa",
+        "commits": [
+          "e061c2fe9bd9a7840be7f88e907d1b9f54ff82bc",
+          "000f67400160fd383602f3a74d18425c3daf925c",
+          "cd56750b16999927c22453dc8960d99fc35f2280"
+        ],
+        "changed_lines": {
+          "added": 97,
+          "removed": 11,
+          "files": 4
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider the four archive and receipt test files at the merged head, plus a check that every 40-hex revision cited in the evidence document resolves with git cat-file -e",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/receipt-precedence-gate.log.delta",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the receipt names which source established each expectation, the precedence is pinned on a state the writer can actually produce, and the CLI line carries the source so a 67-identity restore no longer emits thousands of indistinguishable expected-None rows. Two review findings closed: the precedence fixture built two edges Cypher MERGE would collapse into one and was green only because the test double keyed its store on the whole tuple, so the double is now keyed on start, type and end with properties merged on match and the fixture rebuilt with distinct endpoints; and a padded, nonexistent 40-character revision in the evidence document and manifest is replaced by the git-resolved value, with every hash the document cites verified to resolve. 43 passed at the merged head. The run's process ended after committing both corrections without setting a terminal status, so the work was recovered from its clean worktree rather than redispatched",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073632893423-n-the-receipt-shows-which-source-set-each-expectation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c2e5-50b9-7101-a6ae-a14c48be7321",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 41663232,
+            "cached_input_tokens_cumulative": 41663232,
+            "input_tokens": 42350417,
+            "input_tokens_cumulative": 42350417,
+            "output_tokens": 81153,
+            "output_tokens_cumulative": 81153,
+            "reasoning_output_tokens": 23182,
+            "reasoning_output_tokens_cumulative": 23182
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T09:28:00Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 14.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T09:28:00Z"
+            }
+          ],
+          "notional_cost_usd": 243.655,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1227,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1247,
+              "log_fresh": false,
+              "manifest_commits": [
+                "b085479688713da47089eefd304b367adcb0607a",
+                "172be6de77086bfba6e5f1d93415d24218c32e69"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "92a9c49c58d2cca56f815270116de6e2bcaecfdd0328079c468812b571e28859",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-lifecycle-integrity --section '' --role review --spec-level exact --node review-of-n-every-batch-item-gets-a-comparator-share --goal 'attach an independent review to run r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share' --done-when 'the review for r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share.json --time-budget 55m --session ship-s10-20260918 --local",
+              "node": "n-every-batch-item-gets-a-comparator-share",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1282,
+              "terminal_at": "2026-09-21T07:15:15Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-every-batch-item-gets-a-comparator-share"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 399,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1349,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none \u2014 the review record lives outside the repository; no repo file was modified."
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "daca985d6b63a5586adb4df7a02261c67b996f5506750628222c1a179c2c1195",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "review-of-n-a-skipped-audit-does-not-look-clean",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1361,
+              "terminal_at": "2026-09-21T07:13:55Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-a-skipped-audit-does-not-look-clean"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 13,
+            "evidence": 14,
+            "fit": 17,
+            "goal_fidelity": 15,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 79
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 41663232,
+          "cumulative_input_tokens": 84013649,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 104335
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": [
+          {
+            "path": "tests/standard_names/test_archive_reconstruction.py",
+            "reason": "the archive-graph test double lives here, and the review's MUST-FIX was that the double diverged from Cypher MERGE semantics: it keyed its edge store on the whole tuple including properties, which is the only reason the precedence fixture was green. Making the double MERGE-faithful is the repair itself, so the file is a necessary companion my own fence failed to name"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-receipt-shows-which-source-set-each-expectation",
+          "session_id": "01a0c2e5-50b9-7101-a6ae-a14c48be7321",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T09:28:00Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.86,
+        "impl_move": {
+          "plan": "paid-identity-deletion-protection",
+          "at_dispatch": 0.86,
+          "at_complete": 0.9,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_archive_parity_receipt.py"
+          ],
+          "declaration": "check reconstruction_closure before archive_census in _archive_role_parity, reversing the landed precedence.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073632893423-n-the-receipt-shows-which-source-set-each-expectation/negative-control-precedence-review-fix.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073632893423-n-the-receipt-shows-which-source-set-each-expectation/negative-control-precedence-review-fix.log"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 3,
+          "declared": 4,
+          "missing": [
+            "3c47fa00277b8c9347efc7031679dc6e23b11ebc"
+          ],
+          "message": "run 'r-20260921T073632893423-n-the-receipt-shows-which-source-set-each-expectation' has a passing gate presenting 3 commit(s) of the 4 its manifest declares; missing: 3c47fa00277b8c9347efc7031679dc6e23b11ebc. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 125.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -169790,6 +170138,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2440
+    "_version": 2441
   }
 }
