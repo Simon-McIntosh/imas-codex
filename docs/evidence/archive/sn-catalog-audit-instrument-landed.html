@@ -1058,6 +1058,162 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     <code>tests/standard_names/test_grouped_review_target.py</code>
     &middot; base revision <code>6f9a29f9f7aab13f722f3783f003382fb7ce6b77</code>.</p>
   </section>
+
+  <section id="local-lane-concurrency-knee">
+    <h2>The local-lane concurrency knee on review-sized payloads is 32, not 4</h2>
+
+    <p><strong>What was measured.</strong> The served endpoint
+    (<code>http://98dci4-gpu-0003:18802/v1</code>, sglang, <code>max_model_len</code>
+    512000, model <code>deepseek-v4.1-flash</code>) was driven with review-sized
+    payloads: the real <code>sn/review_names_system</code> and
+    <code>sn/review_names_user</code> templates rendered through
+    <code>render_prompt</code> over <code>build_compose_context()</code>, giving
+    <strong>17,173 prompt tokens</strong> and <strong>694 completion tokens</strong>
+    per request, at <code>reasoning_effort="medium"</code> and
+    <code>max_tokens=700</code>. Forty distinct user payloads were built from forty
+    real <code>StandardName</code> identities read from the live graph, so the
+    requests are not identical and the shared system prefix is the only cached
+    span — which is the production shape of a review pass.</p>
+
+    <p><strong>The result.</strong> Throughput rises through 32 concurrent requests
+    and then flattens: 9.11 req/min at 1, 21.32 at 4, 26.76 at 8, 29.74 at 16,
+    36.45 at 32, and 34.30 at 64, the c=64 point taken from a run whose 64 requests
+    were all emitted and completed. Aggregate
+    completion throughput saturates near 400 tokens per second (105 → 247 → 312 →
+    347 → 425 → 400). The knee, as the lowest level beyond which throughput does
+    not rise, is <strong>32</strong>: the doubling to 64 falls 5.9% against the
+    same 36.45 the curve plots at 32, so the curve flattens rather than rises.</p>
+
+    <p><strong>The spread is measured, not assumed, and it is why the criterion is
+    the plateau rather than a single point.</strong> Four samples in the record
+    carry an achieved concurrency of 32: the 36.45 req/min at the c=32 level, the
+    two identical-load repeats at 32.01 and 32.98, and a first attempt at c=64
+    that emitted only 32 requests, whose 26.13 req/min therefore belongs to c=32
+    on its achieved concurrency. Across all four the band is 10.32 req/min wide —
+    32% of their mean — and the c=64 point at 34.30 sits inside it, which is the
+    sense in which the plateau is flat rather than a fall.</p>
+
+    <p><strong>That mis-dispatched attempt is held out of the curve, not out of
+    the spread, and the two exclusions are separate.</strong> Its own
+    <code>concurrency</code> field reads 64 while its <code>n_requests</code> is
+    32, so it cannot supply the c=64 point: the c=64 value the curve plots comes
+    from a run that emitted and completed all 64 requests. It is recorded under
+    <code>rejected_samples</code> for that reason alone. Naming a knee from that
+    single pass would have read 26.13 req/min at c=64 — 28% below the 36.45 the
+    curve plots at 32 — reporting a collapse above 32 that does not exist.</p>
+
+    <p><strong>Timeout rate.</strong> Every level records <code>timeout_rate_900s</code>
+    0.0 and zero errors, so none of the requests the record carries hit the
+    pipeline's own local-endpoint deadline of 900 s
+    (<code>MODEL_TOKEN_LIMITS</code> in <code>imas_codex/discovery/base/llm.py</code>).
+    The record carries 264 requests in all: 168 across the six measured levels, 64
+    in the two c=32 repeats, and 32 in the mis-dispatched attempt held out of the
+    curve. That deadline is too loose to be the
+    instrument near this knee, so the starvation column records requests exceeding
+    60 s — eight times the solo latency, the shape a stalled slot takes. It is
+    zero through 32 and, at c=64, 43 of the 64 requests, matching the latency
+    series (p50 6.42 s solo, 50.7 s at 32, 69.9 s at 64).</p>
+
+    <p><strong>What this resolves and what it does not.</strong> The two prior
+    readings were both honest and neither governs this workload. The compose-path
+    probe found its knee at 4 because a compose batch <em>generates</em> ~18.5k
+    tokens, so it is decode-bound end to end; a review request generates ~694
+    tokens and is instead prompt-dominated, and the served variant adds
+    prefix caching over the shared system span. On review-sized payloads the knee
+    is 32, which confirms the lead's ~30 for this instrument rather than the
+    compose default of 4 — and it is the number the instrument's default should be
+    set from. The caution that survives is the shape above 4: each doubling past 4
+    buys 26%, 11% and 23% while per-request latency grows roughly in proportion,
+    so concurrency buys aggregate throughput at the cost of every individual
+    request's wall time.</p>
+
+    <figure>
+      <img src="/imas-codex/figures/sn-catalog-audit-instrument/local-lane-concurrency.svg"
+           alt="A throughput curve rising from 9.1 requests per minute at concurrency 1 to 36.5 at 32, then falling to 34.3 at 64, with the two c=32 repeats plotted as orange points and a grey hollow point for the held-out mis-dispatched attempt whose achieved concurrency was also 32; a dashed per-request latency curve rises from 6.4 seconds to 69.9 seconds. A table below gives completed count, throughput, latency percentiles, starvation count and timeout rate per level.">
+      <figcaption>Throughput against concurrency on review-sized payloads. The curve
+      plots 36.45 req/min at c=32 and 34.30 at c=64, so the caption's 5.9% drop is
+      measured against that same plotted 36.45; the orange points are the two c=32
+      repeats and the grey point is the mis-dispatched attempt, held out of the
+      curve while remaining one of the four samples in the c=32 band. The raw
+      per-level and per-request values are beside it in
+      <code>local-lane-concurrency-raw.json</code> so the knee can be rederived.</figcaption>
+    </figure>
+
+    <p><strong>Instrument limits, stated.</strong> The load generator is
+    network-I/O bound and ran on the login node; it issues HTTP against the served
+    endpoint and performs no local CPU work. Neither <code>nvidia-smi</code> on the
+    serving node nor its <code>/metrics</code> gauge was reachable from here (SSH
+    key exchange is refused, <code>/metrics</code> answers empty through the
+    router), so no server-side concurrency gauge corroborates the client-side
+    in-flight count; achieved concurrency is asserted from the emitted request
+    counts plus the flat plateau, and the c=32 repeats are the control on that.
+    A concurrent worker on this lane would appear as spread of exactly the kind
+    measured, so the 32% band is the upper bound the conclusion is held to.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-local-lane-concurrency-knee-is-measured-not-assumed</code>
+    &middot; 2026-09-21 &middot; measure
+    <code>docs/figures/sn-catalog-audit-instrument/local-lane-concurrency.svg</code>
+    + raw at <code>local-lane-concurrency-raw.json</code>
+    &middot; base revision <code>9b4bd7bc8946162acca4592a444ee495f15b5338</code>.</p>
+  </section>
+
+  <section id="knee-record-reconciliation">
+    <h2>The knee record reconciled against the raw file it publishes</h2>
+
+    <p><strong>What was wrong.</strong> The section above disagreed with
+    <code>local-lane-concurrency-raw.json</code> in four places. None was a defect
+    in the measurement; three were numbers carried from an earlier draft of the
+    sweep and one was a delta computed against a different reference point than the
+    curve plots. The raw file was not edited and the knee remains <strong>32</strong>.</p>
+
+    <p><strong>1. The sweep total.</strong> The record said "zero of 184 requests".
+    No row set in the file sums to 184. Its nine <code>n_requests</code> rows sum to
+    <strong>264</strong>: 16+16+16+24+32+64 = 168 across the six measured levels,
+    32+32 = 64 in the two c=32 repeats, and 32 in the mis-dispatched first c=64
+    attempt. The 900 s claim is now carried by what the file holds — every level's
+    <code>timeout_rate_900s</code> is 0.0 and every level's <code>errors</code> is 0 —
+    stated beside the starvation figure the file also holds.</p>
+
+    <p><strong>2. The c=32 spread.</strong> The band was quoted over three samples
+    and read 13%. Four samples in the file carry an achieved concurrency of 32:
+    36.45 (the c=32 level), 32.01 and 32.98 (the repeats), and 26.13 — the first
+    c=64 attempt, whose <code>n_requests</code> is 32 and whose achieved concurrency
+    is therefore 32, not 64. Over all four the range is 36.45 − 26.13 = 10.32
+    req/min on a mean of 31.89, a <strong>32%</strong> band, and the c=64 point at
+    34.30 lies inside it. The mis-dispatched row is held out of the curve (a c=64
+    point requires 64 requests in flight) but is counted in the spread, and the
+    record now states those two exclusions separately rather than running them
+    together. Excluding it shrank the band to 13%; counting it is what the file's
+    own rows require.</p>
+
+    <p><strong>3. The caption delta.</strong> The figure's caption said the doubling
+    to 64 "buys +1.5%", computed against the mean of the three retained c=32 samples
+    (33.81), while the curve itself plots 36.45 at c=32 down to 34.30 at c=64.
+    Caption and figcaption now compute the delta against that same plotted 36.45:
+    (34.30 − 36.45) / 36.45 = <strong>−5.9%</strong>, a fall, which is the direction
+    the curve shows. The figure also plots the held-out attempt as a grey point and
+    its footer line — which said "at 64 every request pays more than 60 s", where the
+    file records 43 of 64 — now states 43 of the 64.</p>
+
+    <p><strong>4. A further disagreement.</strong> The prose listed the doublings
+    past 4 as "26%, 11% and 9%". The throughput column gives 21.32 → 26.76
+    (+25.5%), 26.76 → 29.74 (+11.1%) and 29.74 → 36.45 (+22.6%): the last is
+    <strong>23%</strong>.</p>
+
+    <p><strong>What this does not do.</strong> It re-measures nothing, re-decides no
+    knee, and edits no raw value; the four corrections are the prose, the figure
+    caption and the §4 comment agreeing with rows already recorded. Setting the
+    instrument's default from 32, and any merged-result verification, remain outside
+    this node.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-knee-record-agrees-with-its-own-measurements</code>
+    &middot; 2026-09-21 &middot; repair
+    <code>docs/figures/sn-catalog-audit-instrument/local-lane-concurrency.svg</code>
+    + raw at <code>local-lane-concurrency-raw.json</code>
+    &middot; base revision <code>8beb1c4ee9ebbdb76e1cf83f6c1e834950ef96ef</code>.</p>
+  </section>
   </main>
 </body>
 </html>

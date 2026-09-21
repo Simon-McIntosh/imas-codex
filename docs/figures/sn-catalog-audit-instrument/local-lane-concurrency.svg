@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="620" viewBox="0 0 980 620" font-family="Helvetica,Arial,sans-serif">
+  <rect width="980" height="620" fill="#ffffff"/>
+  <text x="24" y="32" font-size="18" font-weight="bold" fill="#111">Review-sized traffic keeps scaling to 32 concurrent, then flattens</text>
+  <text x="24" y="51" font-size="12" fill="#555">17,173-token review prompts, 694-token answers, medium thinking, served by sglang.</text>
+  <text x="24" y="66" font-size="12" fill="#555">Throughput climbs to 32 (36.45 req/min); the doubling to 64 falls 5.9% against that plotted point, so the knee is 32.</text>
+
+  <!-- axes -->
+  <line x1="90" y1="340" x2="920" y2="340" stroke="#333"/>
+  <line x1="90" y1="80"  x2="90"  y2="340" stroke="#333"/>
+  <text x="30" y="90" font-size="11" fill="#333">40</text>
+  <text x="30" y="155" font-size="11" fill="#333">30</text>
+  <text x="30" y="220" font-size="11" fill="#333">20</text>
+  <text x="30" y="285" font-size="11" fill="#333">10</text>
+  <text x="46" y="344" font-size="11" fill="#333">0</text>
+  <text x="14" y="66" font-size="11.5" fill="#333">req/min</text>
+  <text x="60" y="363" font-size="11.5" fill="#333">concurrency</text>
+  <text x="82"  y="363" font-size="11" fill="#333">1</text>
+  <text x="244" y="363" font-size="11" fill="#333">4</text>
+  <text x="406" y="363" font-size="11" fill="#333">8</text>
+  <text x="568" y="363" font-size="11" fill="#333">16</text>
+  <text x="730" y="363" font-size="11" fill="#333">32</text>
+  <text x="892" y="363" font-size="11" fill="#333">64</text>
+
+  <!-- knee marker at 32 -->
+  <rect x="716" y="80" width="48" height="260" fill="#e8f5e9" opacity="0.75"/>
+  <text x="700" y="76" font-size="11.5" font-weight="bold" fill="#2e7d32">knee = 32</text>
+
+  <!-- throughput curve -->
+  <polyline fill="none" stroke="#1565c0" stroke-width="2.5"
+    points="90,280.8 252,201.4 414,166.1 576,146.7 738,103.1 900,117.0"/>
+  <circle cx="90"  cy="280.8" r="4.5" fill="#1565c0"/>
+  <circle cx="252" cy="201.4" r="4.5" fill="#1565c0"/>
+  <circle cx="414" cy="166.1" r="4.5" fill="#1565c0"/>
+  <circle cx="576" cy="146.7" r="4.5" fill="#1565c0"/>
+  <circle cx="738" cy="103.1" r="4.5" fill="#1565c0"/>
+  <circle cx="900" cy="117.0" r="4.5" fill="#1565c0"/>
+  <text x="86"  y="272" font-size="11" fill="#1565c0">9.1</text>
+  <text x="248" y="193" font-size="11" fill="#1565c0">21.3</text>
+  <text x="410" y="158" font-size="11" fill="#1565c0">26.8</text>
+  <text x="566" y="138" font-size="11" fill="#1565c0">29.7</text>
+  <text x="722" y="95"  font-size="11" fill="#1565c0">36.5</text>
+  <text x="870" y="109" font-size="11" fill="#1565c0">34.3</text>
+
+  <!-- c=32 repeats: the measurement spread at the knee -->
+  <circle cx="728" cy="131.9" r="3.5" fill="#ef6c00"/>
+  <circle cx="748" cy="125.6" r="3.5" fill="#ef6c00"/>
+  <!-- c=32 sample held out of the curve: a c=64 dispatch that emitted only 32 requests -->
+  <circle cx="738" cy="170.2" r="4" fill="none" stroke="#757575" stroke-width="1.6"/>
+  <text x="592" y="185" font-size="11" fill="#757575">orange = two c=32 repeats; grey = held-out c=64 attempt (achieved 32, 26.1)</text>
+
+  <!-- latency curve, same x, own scale 0..80 over the same 260 px -->
+  <polyline fill="none" stroke="#c62828" stroke-width="2" stroke-dasharray="5 3"
+    points="90,319.1 252,304.6 414,282.2 576,247.0 738,155.2 900,112.7"/>
+  <text x="96" y="315" font-size="11" fill="#c62828">6.4 s</text>
+  <text x="258" y="300" font-size="11" fill="#c62828">10.9 s</text>
+  <text x="420" y="278" font-size="11" fill="#c62828">17.8 s</text>
+  <text x="582" y="243" font-size="11" fill="#c62828">28.6 s</text>
+  <text x="676" y="151" font-size="11" fill="#c62828">50.7 s</text>
+  <text x="838" y="108" font-size="11" fill="#c62828">69.9 s</text>
+  <text x="640" y="376" font-size="11" fill="#c62828">dashed = per-request latency (p50), 0–80 s on the same plot height</text>
+
+  <!-- table -->
+  <text x="24" y="410" font-size="13.5" font-weight="bold" fill="#111">Per-level measurement (raw values in local-lane-concurrency-raw.json)</text>
+  <g font-size="11.5" fill="#222">
+    <text x="24"  y="432" font-weight="bold">conc.</text>
+    <text x="86"  y="432" font-weight="bold">n</text>
+    <text x="120" y="432" font-weight="bold">wall s</text>
+    <text x="190" y="432" font-weight="bold">completed</text>
+    <text x="278" y="432" font-weight="bold">req/min</text>
+    <text x="356" y="432" font-weight="bold">agg tok/s</text>
+    <text x="446" y="432" font-weight="bold">lat p50 s</text>
+    <text x="526" y="432" font-weight="bold">lat p95 s</text>
+    <text x="606" y="432" font-weight="bold">starved &gt;60 s</text>
+    <text x="706" y="432" font-weight="bold">timeout 900 s</text>
+    <text x="826" y="432" font-weight="bold">errors</text>
+
+    <text x="24"  y="452">1</text><text x="86"  y="452">16</text><text x="120" y="452">105.33</text><text x="190" y="452">16/16</text><text x="278" y="452">9.11</text><text x="356" y="452">105.4</text><text x="446" y="452">6.42</text><text x="526" y="452">7.68</text><text x="606" y="452">0</text><text x="706" y="452">0/16</text><text x="826" y="452">0</text>
+    <text x="24"  y="470">4</text><text x="86"  y="470">16</text><text x="120" y="470">45.04</text><text x="190" y="470">16/16</text><text x="278" y="470">21.32</text><text x="356" y="470">247.3</text><text x="446" y="470">10.88</text><text x="526" y="470">12.42</text><text x="606" y="470">0</text><text x="706" y="470">0/16</text><text x="826" y="470">0</text>
+    <text x="24"  y="488">8</text><text x="86"  y="488">16</text><text x="120" y="488">35.87</text><text x="190" y="488">16/16</text><text x="278" y="488">26.76</text><text x="356" y="488">312.2</text><text x="446" y="488">17.79</text><text x="526" y="488">20.03</text><text x="606" y="488">0</text><text x="706" y="488">0/16</text><text x="826" y="488">0</text>
+    <text x="24"  y="506">16</text><text x="86"  y="506">24</text><text x="120" y="506">48.42</text><text x="190" y="506">24/24</text><text x="278" y="506">29.74</text><text x="356" y="506">346.9</text><text x="446" y="506">28.62</text><text x="526" y="506">34.16</text><text x="606" y="506">0</text><text x="706" y="506">0/24</text><text x="826" y="506">0</text>
+    <text x="24"  y="524">32</text><text x="86"  y="524">32</text><text x="120" y="524">52.67</text><text x="190" y="524">32/32</text><text x="278" y="524">36.45</text><text x="356" y="524">425.2</text><text x="446" y="524">50.71</text><text x="526" y="524">52.32</text><text x="606" y="524">0</text><text x="706" y="524">0/32</text><text x="826" y="524">0</text>
+    <text x="24"  y="542" font-weight="bold">32</text><text x="86"  y="542">32</text><text x="120" y="542">repeat</text><text x="190" y="542">32/32</text><text x="278" y="542">32.01</text><text x="356" y="542">373.4</text><text x="446" y="542">56.92</text><text x="526" y="542">—</text><text x="606" y="542">0</text><text x="706" y="542">0/32</text><text x="826" y="542">0</text>
+    <text x="24"  y="560" font-weight="bold">32</text><text x="86"  y="560">32</text><text x="120" y="560">repeat</text><text x="190" y="560">32/32</text><text x="278" y="560">32.98</text><text x="356" y="560">384.3</text><text x="446" y="560">55.13</text><text x="526" y="560">—</text><text x="606" y="560">0</text><text x="706" y="560">0/32</text><text x="826" y="560">0</text>
+    <text x="24"  y="578">64</text><text x="86"  y="578">64</text><text x="120" y="578">111.94</text><text x="190" y="578">64/64</text><text x="278" y="578">34.30</text><text x="356" y="578">400.2</text><text x="446" y="578">69.93</text><text x="526" y="578">—</text><text x="606" y="578">43</text><text x="706" y="578">0/64</text><text x="826" y="578">0</text>
+  </g>
+  <text x="24" y="594" font-size="11" fill="#555">Zero errors and zero 900 s timeouts at every level; starvation (&gt;60 s) is the earlier-warning instrument. At 64, 43 of the 64 requests exceeded it.</text>
+  <text x="24" y="610" font-size="11" fill="#555">Four samples carry achieved concurrency 32 (the level, two repeats, the mis-dispatched first c=64 attempt): 26.1-36.5 req/min, a 32% band. Knee 32, not the compose probe's 4.</text>
+</svg>
