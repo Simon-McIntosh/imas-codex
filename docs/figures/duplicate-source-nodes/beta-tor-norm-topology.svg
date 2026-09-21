@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 260" width="760" height="260" font-family="sans-serif">
+ <style>
+  .lbl{font-size:12px;fill:#1b1b1b}.sub{font-size:10.5px;fill:#555}
+  .box{fill:#fff;stroke:#333;stroke-width:1.4;rx:6}
+  .bad{fill:#fdecea;stroke:#b3261e}.ok{fill:#eaf4ec;stroke:#2e7d32}
+  .name{fill:#e8eef9;stroke:#1a4f8a;stroke-width:1.6}
+  .edge{stroke:#1a4f8a;stroke-width:1.6;fill:none;marker-end:url(#a)}
+  .cap{font-size:11px;fill:#b3261e}
+ </style>
+ <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 z" fill="#1a4f8a"/></marker></defs>
+ <text class="lbl" x="12" y="20" font-weight="600">source_id = equilibrium/time_slice/global_quantities/beta_tor_norm  (one data-dictionary path)</text>
+ <rect class="box bad" x="14" y="44" width="300" height="86" rx="6"/>
+ <text class="lbl" x="28" y="66">StandardNameSource</text>
+ <text class="sub" x="28" y="84">status: attached   attempt_count: 5</text>
+ <text class="sub" x="28" y="100">parked_disposition: name_produced</text>
+ <text class="cap" x="28" y="120">last_error: compose claim-attempt cap reached</text>
+ <rect class="box ok" x="14" y="150" width="300" height="70" rx="6"/>
+ <text class="lbl" x="28" y="172">StandardNameSource</text>
+ <text class="sub" x="28" y="190">status: composed   attempt_count: 2</text>
+ <text class="sub" x="28" y="206">not parked</text>
+ <rect class="box name" x="500" y="96" width="246" height="74" rx="6"/>
+ <text class="lbl" x="514" y="120">StandardName</text>
+ <text class="sub" x="514" y="138">normalized_toroidal_beta</text>
+ <text class="sub" x="514" y="156">name_stage: accepted</text>
+ <path class="edge" d="M314 87 C 410 87, 420 118, 498 122"/>
+ <path class="edge" d="M314 185 C 410 185, 420 148, 498 144"/>
+ <text class="sub" x="356" y="82">PRODUCED_NAME</text>
+ <text class="sub" x="356" y="200">PRODUCED_NAME</text>
+ <text class="sub" x="12" y="243">Two independent attempt counters on one path, two lifecycle states at once, and one accepted name reached twice.</text>
+</svg>
