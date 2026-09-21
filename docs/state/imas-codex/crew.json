@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T07:56:35",
+  "updated": "2026-09-21T08:03:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -161193,6 +161193,230 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T054814516200-n-west-names-repair-worklist",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-names-repair-worklist",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 993,
+                "cached_input_tokens": 260093,
+                "input_tokens": 261088,
+                "output_tokens": 1738,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 262826,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-west-catalog-release/west-name-repair-worklist.md exists and carries one row per rejected spelling drawn from the six landed records of this cohort, and its closing table reconciles to these figures: 341 accepted bindings judged over 340 distinct name-and-path pairs, 74 bindings carrying an INCORRECT verdict (10 from west-name-audit.md and 64 across the five range records), 61 distinct identities among them, and 53 shared identities of which 10 are MUST-SPLIT covering 24 bindings. The six records are docs/evidence/sn-west-catalog-release/west-name-audit.md (indices judged every fourth, 86 rows), west-name-audit-bremsstrahlung-to-equilibrium-boundary.md (51), west-name-audit-equilibrium-boundary-to-profiles.md (51), west-name-audit-equilibrium-profiles-to-magnetics.md (51), west-name-audit-magnetics-to-spectrometer-visible.md (51), west-name-audit-spectrometer-visible-to-wall.md (51) and west-name-shared-identities.md (53 groups). Read all seven; issue no graph query and open no database, because every fact needed is already in them. Each worklist row carries the rejected spelling, the proposed spelling, every source path the rejected identity is bound to, which record it came from, and which of the five defect classes it belongs to -- the name asserts more than the data supports; the name is bound to the wrong object; one name covers two physically different quantities; not self-descriptive; minority spelling of a base the cohort already fixes. The rows are grouped so that one repair closes every binding it covers: where two records reject the same identity, emit ONE row naming both records and reconcile the two proposed spellings, stating which is adopted and why, and where a MUST-SPLIT group and a range record describe the same defect, emit ONE row for the split rather than one per axis or per binding. State the deduplicated repair count explicitly, since it is smaller than 74 and it is the number that sizes the work. The five range records use different presentation for the rejected-and-proposed pair, some a two-column table and some prose, so read the verdict body rather than pattern-matching a format, and where a record gives no explicit proposed spelling say so in the row rather than inventing one. Separate the rows into those whose repair is a rename of one identity and those that require a split into two or more identities, because a split cannot be performed by a reader and is the class that blocks publication. Record for each row whether the two halves of the cohort agree, and name any case where one record's accepted spelling is another record's rejected spelling, because that is a contradiction between the two halves and must be surfaced rather than silently resolved. Do not judge any name afresh and do not add a defect the seven records do not contain; this node aggregates and reconciles rather than audits. Close with a short section stating the measured defect rate of 74 of 341 bindings against the 11.6 percent the every-fourth sample estimated, and explaining which structural property of the draws accounts for the gap, using only what the records themselves say about it. Open the file with a `provisional: true` line and have the closing pass rewrite it to `provisional: false`; append rows as they are compiled rather than composing the file at the end.",
+          "estimated_hours": 1.5,
+          "goal": "compile one deduplicated repair worklist from the seven landed WEST name-audit records",
+          "id": "n-west-names-repair-worklist",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T05:42:13.543Z",
+            "read_at": "2026-09-21T05:48:15Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 43.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T054814516200-n-west-names-repair-worklist/manifest.md",
+          "negative_control": "",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/west-name-repair-worklist.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "claude-opus-c",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T05:48:22Z",
+        "completed_at": "2026-09-21T05:57:05.943Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 518,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 523,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6a632dfb3df52098756b2d31692ceb6c36fa92bc",
+        "commits": [
+          "76b90a89eb62f84b94c526ee5ffaaa5e7099c42c"
+        ],
+        "changed_lines": {
+          "added": 106,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "count the rename rows, the split sections and the result-table reconciliation lines in the worklist at the merged head",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/west-name-repair-worklist-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "74 rejected bindings across seven records collapse to 61 deduplicated repairs: 51 renames and 10 splits, the splits minting 12 new identities rather than 20 because 8 keep the existing spelling on at least one binding; 0 spellings invented, 6 open contradictions surfaced rather than resolved (2 accepted-versus-rejected, 3 on the toroidal-angle base axis, 1 coupled-versus-launched) and 1 order-dependent pair",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T054814516200-n-west-names-repair-worklist/manifest.md",
+        "scope_changed": false,
+        "session_id": "1d1fbc0c-ebf8-4eec-b806-44741739b4bf",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 48.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 81848,
+            "cache_read_input_tokens": 3892689,
+            "cache_read_input_tokens_cumulative": 10316127,
+            "inference_geo": "not_available",
+            "input_tokens": 10,
+            "input_tokens_cumulative": 68,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 42493,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 7.039208500000004,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 17.6897015
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T05:57:05.943Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 21731393,
+          "cumulative_input_tokens": 22059113,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 520.577,
+          "generated_tokens": 141915,
+          "generation_seconds": 503.569,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 34.1,
+          "machine_seconds": 17.008,
+          "peak_input_tokens": 340538,
+          "tokens_per_second": 281.82,
+          "wall_tokens_per_second": 272.61
+        },
+        "follow_on_paths": [
+          "global_quantities/volume",
+          "67/68"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-west-names-repair-worklist",
+          "session_id": "1d1fbc0c-ebf8-4eec-b806-44741739b4bf",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T05:57:05.943Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.984,
+        "impl_move": {
+          "plan": "sn-west-catalog-release",
+          "at_dispatch": 0.984,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 4,
+          "missing": [
+            "188607e5fe0af9ade3c8fdeeea3509a2f8f0ce90",
+            "5dcc144d754c5a48a2c5367d3a34b2484ec934cd",
+            "c6165b71996e5698e40fe98a3f7294c2845dd26f"
+          ],
+          "message": "run 'r-20260921T054814516200-n-west-names-repair-worklist' has a passing gate presenting 1 commit(s) of the 4 its manifest declares; missing: 188607e5fe0af9ade3c8fdeeea3509a2f8f0ce90, 5dcc144d754c5a48a2c5367d3a34b2484ec934cd, c6165b71996e5698e40fe98a3f7294c2845dd26f. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 36.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -161495,16 +161719,16 @@
         "backend": "codex",
         "purpose": "dispatch",
         "opened_at": "2026-09-21T04:22:21Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-09-21T05:57:37Z",
+        "held_seconds": 5716,
         "utilisation_pct": 100.0,
         "resets_at": "2026-09-21T05:57:32Z",
         "effective_ceiling_pct": 92.0,
         "reason": "utilisation 100% with burn multiple 1.0x and projected exhaustion 2026-09-21T05:56:37Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-21T04:22:19Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "dispatch",
         "resumption_fired": false
       }
     ],
-    "_version": 2394
+    "_version": 2396
   }
 }
