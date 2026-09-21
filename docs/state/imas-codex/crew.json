@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-22T00:17:55",
+  "updated": "2026-09-22T00:20:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -185748,8 +185748,22 @@
         "reason": "utilisation 100% with burn multiple 1.0x and projected exhaustion 2026-09-21T05:56:37Z is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve); the account surface was read at 2026-09-21T04:22:19Z and is the operative reading Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
         "closed_by_purpose": "dispatch",
         "resumption_fired": false
+      },
+      {
+        "hold_id": "hold-claude-opus-20260921222031",
+        "backend": "claude-opus",
+        "purpose": "dispatch",
+        "opened_at": "2026-09-21T22:20:31Z",
+        "closed_at": null,
+        "held_seconds": null,
+        "utilisation_pct": 92.0,
+        "resets_at": "2026-09-22T01:20:00Z",
+        "effective_ceiling_pct": 92.0,
+        "reason": "utilisation 92% with burn multiple unknown is at or above the 92.0% ceiling for a dispatch (ceiling 100% less 5% resume reserve and 3% coordinator reserve) Resolve with `reckon crew preflight`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume-ready`.",
+        "closed_by_purpose": null,
+        "resumption_fired": false
       }
     ],
-    "_version": 2505
+    "_version": 2506
   }
 }
