@@ -698,6 +698,57 @@
     2026-09-21 &middot; gate <code>tests/standard_names/test_declared_attribute_access.py</code>
     &middot; base revision <code>f15d33851c99c19d464ecb3d225f4e3cdd830383</code>.</p>
   </section>
+  <section id="audit-report-parameter-annotation">
+    <h2>Annotating the audit report parameter reaches the site the check was built for, and the annotation alone does not</h2>
+    <p><code>_extract_audit_findings</code> took its audit report as <code>Any</code>, so
+    every three-argument <code>getattr</code> on that parameter was reported
+    <strong>unresolved</strong> &mdash; unjudged rather than safe. The check exists because
+    a <code>getattr(audit_report, "findings", [])</code> read once discarded the whole
+    deterministic layer, and against the <code>Any</code> annotation the same read is not
+    refused.</p>
+
+    <p><strong>The annotation is necessary and was not sufficient.</strong> Declaring the
+    parameter <code>AuditReport | None</code> resolves the site to
+    <code>imas_codex.standard_names.review.audits.AuditReport</code>, but that class
+    derives from pydantic's <code>BaseModel</code>, whose base resolves outside the class
+    index. The site was therefore reported <strong>unverifiable</strong> and the check
+    stayed green &mdash; measured, violations 0, after the annotation alone. A framework
+    base declares no data fields of its own, so the subclass body is the complete
+    declaration and its field set is known rather than unknown; the census now counts that
+    base as empty instead of unverified. A base outside the package whose fields are
+    genuinely unknown keeps its <strong>unverifiable</strong> outcome.</p>
+
+    <p><strong>Negative control.</strong> Declared mutation: the three-argument
+    <code>getattr(audit_report, "findings", [])</code> reintroduced into
+    <code>_extract_audit_findings</code> in a scratch copy of the review package, which the
+    control scans in place of the repository. Measured both ways, same command:</p>
+
+    <table>
+      <caption>One mutation, two annotations</caption>
+      <thead><tr><th>Parameter annotation</th><th>Outcome at the mutated site</th><th>Control</th></tr></thead>
+      <tbody>
+        <tr><td><code>Any</code> (pre-change)</td><td>unresolved, not judged</td><td>fails, <strong>1 failed</strong>, exit 1</td></tr>
+        <tr><td><code>AuditReport | None</code></td><td>undeclared, refused</td><td>passes, <strong>9 passed</strong>, exit 0</td></tr>
+      </tbody>
+      <figcaption>The mutation was reintroduced by the test itself in both runs; only the
+      annotation differs. The pre-change run is the reproduction of the gate's claim that
+      the check does not reach this site today.</figcaption>
+    </table>
+
+    <p><strong>The resolved floor did not move, and saying otherwise would have falsified
+    the instrument.</strong> The site the annotation reaches exists only while a
+    three-argument <code>getattr</code> is present, and the committed reader iterates the
+    three declared lists directly, so the committed tree gained no resolvable site and its
+    scan still resolves <strong>5 of 18</strong> with 0 violations. Raising the floor to 6
+    would redden the unmutated tree. Measured the same way, this node's aperture gain is
+    visible only under the mutation, which is the shape of the residual: the parameter is
+    now judgeable, the site it was built for is not in the tree.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-audit-report-parameter-names-the-class-it-carries</code> &middot;
+    2026-09-21 &middot; gate <code>tests/standard_names/test_declared_attribute_access.py</code>
+    &middot; base revision <code>89d65fddd919508d1ddbff12e457b84acdab7234</code>.</p>
+  </section>
   </main>
 </body>
 </html>
