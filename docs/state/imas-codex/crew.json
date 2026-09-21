@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T15:20:30",
+  "updated": "2026-09-21T15:46:03",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -177025,6 +177025,239 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T101344384603-n-the-unit-comparator-budget-is-shared-and-bounded",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-the-unit-comparator-budget-is-shared-and-bounded",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2656,
+                "cached_input_tokens": 775833,
+                "input_tokens": 778491,
+                "output_tokens": 1692,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 780183,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "Two changes to build_neighborhood_context in imas_codex/standard_names/review/enrichment.py, both pinned by tests on the RETURNED list. ONE: the unit-anchored channel at lines 311-341 sets unit_cap then loops candidates outside and catalog inside, appending every eligible match first-come and breaking both loops at the cap - so one candidate on a common unit absorbs the whole budget. Measured: three candidates on units m, s and eV against a catalog of 40 cross-base names on m and 3 each on s and eV with unit_cap 10 gave candidate_0 all 10 and candidates 1 and 2 zero, though each had three eligible comparators present. Replace with the same share-then-spend pass the semantic channel already uses: build per-candidate match lists first, grant each max(1, unit_cap // len(batch_names)) in a first pass, then spend the remainder. TWO: the dedup loop lost its terminal cap, so the returned list is now unit_cap plus the semantic effective_cap - up to 30 at the defaults neighborhood_k=10 and batch_size=15, and up to 120 at the shared helper's 60-item ceiling - while the docstring still calls k a cap. Either restore an overall bound or state the real bound in the docstring; either way pin the returned length with a test. Write tests in tests/standard_names/test_review_comparator_budget.py: one with several candidates carrying DIFFERENT units and a catalog larger than the cap asserting every candidate receives at least one unit-anchored comparator, and one asserting the returned length against the stated bound. A one-member batch cannot show starvation, so do not use one. Do not edit tests/standard_names/test_review_catalog_comparators.py or any prompt template. Gate with .venv/bin/python -m pytest tests/standard_names/ -p no:cacheprovider on a SLURM debug partition captured to a named on-disk log, reporting ADDED failures against your own base run.",
+          "estimated_hours": 0.5,
+          "goal": "Share the unit-anchored comparator budget across candidates and give the returned neighbourhood a stated bound",
+          "id": "n-the-unit-comparator-budget-is-shared-and-bounded",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T10:13:46Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/unit-budget-1010/manifest.md",
+          "negative_control": "Revert the unit channel to its first-come loop with no per-candidate allowance; the new test asserting every candidate on a distinct unit receives at least one unit-anchored comparator must fail.",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/review/enrichment.py",
+            "tests/standard_names/test_review_comparator_budget.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-audit-2",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T10:14:11Z",
+        "completed_at": "2026-09-21T11:18:40.145Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3844,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3869,
+        "stalled": true,
+        "time_budget": "30m",
+        "base_sha": "d31f8cb92ae868dffc5d16dbb7f06c7ca7992eeb",
+        "commits": [
+          "93614e077d3f335484f471657a38c1beb3546157",
+          "4f51651d009b6fbb751eb079d46deabaa44a6451"
+        ],
+        "changed_lines": {
+          "added": 278,
+          "removed": 31,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug uv run pytest tests/standard_names/",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/unit-budget-1010/logs/after.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "The unit-anchored comparator budget is now shared across candidates with the same share-then-spend pass the semantic channel uses, so one candidate on a common unit can no longer absorb the whole budget. Independent review scored 93 and found the terminal cap has no test that fails when it is removed; carried as its own node. Negative control reproduced by the coordinator against base d31f8cb92, the first-come loop as committed history: the allocation test reddens and the bound test stays green, the same finding from the other direction. The record's stated maximum of 120 was corrected to the reachable 50.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/unit-budget-1010/manifest.md",
+        "scope_changed": false,
+        "session_id": "5d5ed2d5-ebaa-4420-973f-fa96a27c43ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9742900,
+            "input_tokens_cumulative": 9742900,
+            "output_tokens": 54338,
+            "output_tokens_cumulative": 54338,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T11:18:40.145Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 16,
+            "evidence": 19,
+            "fit": 19,
+            "goal_fidelity": 19,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 93
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 9896240,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3864.898,
+          "generated_tokens": 60587,
+          "generation_seconds": 3030.736,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.7,
+          "machine_seconds": 834.162,
+          "peak_input_tokens": 152040,
+          "tokens_per_second": 19.99,
+          "wall_tokens_per_second": 15.68
+        },
+        "follow_on_paths": [
+          "export/manifest",
+          "/dev/shm"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-unit-comparator-budget-is-shared-and-bounded",
+          "session_id": "5d5ed2d5-ebaa-4420-973f-fa96a27c43ee",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T11:18:40.145Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_review_comparator_budget.py"
+          ],
+          "declaration": "Revert the unit channel to its first-come loop with no per-candidate allowance; the new test asserting every candidate on a distinct unit receives at least one unit-anchored comparator must fail.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/unit-budget-1010/coordinator-negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/unit-budget-1010/coordinator-negative-control.log"
+        },
+        "tool_steps": 96.0,
+        "orientation_input_tokens": 1693775.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -177337,6 +177570,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2471
+    "_version": 2472
   }
 }
