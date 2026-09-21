@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T12:11:28",
+  "updated": "2026-09-21T12:26:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -170987,6 +170987,206 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T100511862184-review-of-n-the-review-can-report-without-writing",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "review-of-n-the-review-can-report-without-writing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2178,
+                "cached_input_tokens": 767942,
+                "input_tokens": 770122,
+                "output_tokens": 1047,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 771169,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "the review for r-20260921T093650846739-n-the-review-can-report-without-writing stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": 0.75,
+          "goal": "attach an independent review to run r-20260921T093650846739-n-the-review-can-report-without-writing",
+          "id": "review-of-n-the-review-can-report-without-writing",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T10:02:12.291Z",
+            "read_at": "2026-09-21T10:05:13Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 34.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-of-report-only-1005/manifest.md",
+          "negative_control": "",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T093650846739-n-the-review-can-report-without-writing.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "claude-opus-b",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-21T10:05:24Z",
+        "completed_at": "2026-09-21T10:13:26.535Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 475,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 482,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b99f23a7d6045f65542409c4beebdbb04c694ee9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-of-report-only-1005/manifest.md",
+        "scope_changed": false,
+        "session_id": "cdace6b4-e668-4167-beea-340b9cb73cf8",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 35.0,
+          "rate_limit_type": "seven_day",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-27T06:00:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 137787,
+            "cache_creation_input_tokens_cumulative": 137787,
+            "cache_read_input_tokens": 3950689,
+            "cache_read_input_tokens_cumulative": 3950689,
+            "inference_geo": "not_available",
+            "input_tokens": 70,
+            "input_tokens_cumulative": 70,
+            "output_tokens": 31861,
+            "output_tokens_cumulative": 31861,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.1500895,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.1500895
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T10:13:26.535Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3950689,
+          "cumulative_input_tokens": 4088546,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 477.664,
+          "generated_tokens": 31861,
+          "generation_seconds": 405.428,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 15.1,
+          "machine_seconds": 72.236,
+          "peak_input_tokens": 150819,
+          "tokens_per_second": 78.59,
+          "wall_tokens_per_second": 66.7
+        },
+        "follow_on_paths": [
+          "imas_codex/cli/sn.py",
+          "imas_codex/graph/;",
+          "tests/standard_names/test_pool_orchestrator_integration.py:302"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/review-of-n-the-review-can-report-without-writing",
+          "session_id": "cdace6b4-e668-4167-beea-340b9cb73cf8",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T10:13:26.535Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 40.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -171299,6 +171499,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2445
+    "_version": 2446
   }
 }
