@@ -15,6 +15,14 @@ MODULE_ROOTS = (
     Path("imas_codex/standard_names/loop.py"),
 )
 
+REQUIRED_MODULE_ROOTS = frozenset(
+    {
+        Path("imas_codex/standard_names/review"),
+        Path("imas_codex/standard_names/export.py"),
+        Path("imas_codex/standard_names/loop.py"),
+    }
+)
+
 # Module and distribution metadata are intentionally dynamic, not model fields.
 LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES = {
     "__file__": "Module metadata is assigned by Python's import machinery.",
@@ -23,7 +31,6 @@ LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES = {
 
 # Floors make a scan that sees nothing fail instead of passing silently.
 MINIMUM_SCANNED_MODULES = 8
-MINIMUM_DECLARED_CLASS_ATTRIBUTES = 3_000
 MINIMUM_LITERAL_DEFAULTED_GETATTRS = 24
 
 
@@ -32,21 +39,29 @@ class DefaultedAttributeScan:
     """The aperture and violations reported by one static scan."""
 
     module_count: int
-    declared_attribute_count: int
     candidate_count: int
+    roots: list[ModuleRootScan]
     violations: list[tuple[Path, int, str]]
 
 
-def _python_modules(source_root: Path, module_roots: tuple[Path, ...]) -> list[Path]:
-    """Return the explicit files and package trees covered by the guard."""
-    modules: list[Path] = []
-    for module_root in module_roots:
-        candidate = source_root / module_root
-        if candidate.is_dir():
-            modules.extend(candidate.rglob("*.py"))
-        else:
-            modules.append(candidate)
-    return sorted(modules)
+@dataclass(frozen=True)
+class ModuleRootScan:
+    """The source and candidate coverage contributed by one configured root."""
+
+    root: Path
+    exists: bool
+    module_count: int
+    candidate_count: int
+
+
+def _python_modules(source_root: Path, module_root: Path) -> list[Path]:
+    """Return Python modules contributed by one explicit root."""
+    candidate = source_root / module_root
+    if candidate.is_dir():
+        return sorted(candidate.rglob("*.py"))
+    if candidate.is_file():
+        return [candidate]
+    return []
 
 
 def _decorator_names(decorators: list[ast.expr]) -> set[str]:
@@ -103,35 +118,50 @@ def _declared_class_attributes(source_root: Path) -> set[str]:
     return attributes
 
 
-def _defaulted_attribute_scan(source_root: Path) -> DefaultedAttributeScan:
+def _defaulted_attribute_scan(
+    source_root: Path, module_roots: tuple[Path, ...] = MODULE_ROOTS
+) -> DefaultedAttributeScan:
     """Scan the configured modules for defaulted reads and their declared names."""
-    modules = _python_modules(source_root, MODULE_ROOTS)
     declared_attributes = _declared_class_attributes(source_root)
     candidates: list[tuple[Path, int, str]] = []
     violations: list[tuple[Path, int, str]] = []
-    for module in modules:
-        tree = ast.parse(module.read_text(), filename=str(module))
-        for node in ast.walk(tree):
-            if not (
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Name)
-                and node.func.id == "getattr"
-                and len(node.args) == 3
-                and isinstance(node.args[1], ast.Constant)
-                and isinstance(node.args[1].value, str)
-            ):
-                continue
-            attribute_name = node.args[1].value
-            candidates.append((module, node.lineno, attribute_name))
-            if (
-                attribute_name not in declared_attributes
-                and attribute_name not in LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES
-            ):
-                violations.append((module, node.lineno, attribute_name))
+    roots: list[ModuleRootScan] = []
+    for module_root in module_roots:
+        root_path = source_root / module_root
+        modules = _python_modules(source_root, module_root)
+        root_candidate_count = 0
+        for module in modules:
+            tree = ast.parse(module.read_text(), filename=str(module))
+            for node in ast.walk(tree):
+                if not (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id == "getattr"
+                    and len(node.args) == 3
+                    and isinstance(node.args[1], ast.Constant)
+                    and isinstance(node.args[1].value, str)
+                ):
+                    continue
+                attribute_name = node.args[1].value
+                root_candidate_count += 1
+                candidates.append((module, node.lineno, attribute_name))
+                if (
+                    attribute_name not in declared_attributes
+                    and attribute_name not in LEGITIMATELY_ABSENT_DEFAULTED_ATTRIBUTES
+                ):
+                    violations.append((module, node.lineno, attribute_name))
+        roots.append(
+            ModuleRootScan(
+                root=module_root,
+                exists=root_path.exists(),
+                module_count=len(modules),
+                candidate_count=root_candidate_count,
+            )
+        )
     return DefaultedAttributeScan(
-        module_count=len(modules),
-        declared_attribute_count=len(declared_attributes),
+        module_count=sum(root.module_count for root in roots),
         candidate_count=len(candidates),
+        roots=roots,
         violations=violations,
     )
 
@@ -141,12 +171,30 @@ def _undeclared_defaulted_attributes(source_root: Path) -> list[tuple[Path, int,
     return _defaulted_attribute_scan(source_root).violations
 
 
+def test_configured_module_roots_have_coverage() -> None:
+    """Every configured root must contribute both modules and defaulted reads."""
+    missing_roots = REQUIRED_MODULE_ROOTS - set(MODULE_ROOTS)
+    unexpected_roots = set(MODULE_ROOTS) - REQUIRED_MODULE_ROOTS
+    assert not missing_roots, f"required module roots are missing: {missing_roots}"
+    assert not unexpected_roots, (
+        f"unexpected module roots are configured: {unexpected_roots}"
+    )
+    scan = _defaulted_attribute_scan(REPOSITORY_ROOT)
+    assert scan.module_count >= MINIMUM_SCANNED_MODULES
+    assert scan.candidate_count >= MINIMUM_LITERAL_DEFAULTED_GETATTRS
+    for root in scan.roots:
+        assert root.exists, f"configured module root is missing: {root.root}"
+        assert root.module_count > 0, (
+            f"configured module root has no modules: {root.root}"
+        )
+        assert root.candidate_count > 0, (
+            f"configured module root has no literal defaulted getattr calls: {root.root}"
+        )
+
+
 def test_defaulted_literal_attributes_are_declared() -> None:
     """A default may not turn an undeclared attribute read into empty evidence."""
     scan = _defaulted_attribute_scan(REPOSITORY_ROOT)
-    assert scan.module_count >= MINIMUM_SCANNED_MODULES
-    assert scan.declared_attribute_count >= MINIMUM_DECLARED_CLASS_ATTRIBUTES
-    assert scan.candidate_count >= MINIMUM_LITERAL_DEFAULTED_GETATTRS
 
     violations = scan.violations
     rendered = "\n".join(
@@ -154,3 +202,15 @@ def test_defaulted_literal_attributes_are_declared() -> None:
         for path, line, attribute_name in violations
     )
     assert not violations, f"defaulted undeclared attributes:\n{rendered}"
+
+
+def test_defaulted_literal_attribute_fixture_is_reported(tmp_path: Path) -> None:
+    """The guard has a permanent counterexample independent of production code."""
+    source_file = tmp_path / "imas_codex/standard_names/review/fixture.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text('getattr(subject, "fixture_missing", [])\n')
+
+    scan = _defaulted_attribute_scan(tmp_path, (source_file.relative_to(tmp_path),))
+
+    assert scan.candidate_count == 1
+    assert scan.violations == [(source_file, 1, "fixture_missing")]
