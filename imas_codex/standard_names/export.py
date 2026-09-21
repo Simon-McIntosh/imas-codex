@@ -179,6 +179,7 @@ GATE_B = "cross_field_consistency"
 GATE_C = "score_thresholds"
 GATE_D = "divergence_detection"
 GATE_EXCLUSION_ACCOUNTING = "exclusion_accounting"
+GATE_EXPORT_POPULATION = "export_population"
 GATE_IDENTITY_TOKEN_COLLISION = "identity_token_collision"
 GATE_CATALOG_STATUS = "catalog_status"
 GATE_MANIFEST_GENERABILITY = "manifest_generability"
@@ -824,12 +825,15 @@ def _classify_export_population(
             )
             continue
 
-        # Some low-level callers provide a projection already returned by the
-        # historical eligibility query rather than a full graph node. The live
-        # upstream query always includes name_stage; retain compatibility with
-        # those explicitly pre-filtered projections.
         if "name_stage" not in candidate:
-            eligible.append(candidate)
+            excluded.append(
+                ExclusionRecord(
+                    standard_name_id=candidate_id,
+                    stage="eligibility",
+                    reason="eligibility_input_incomplete",
+                    detail="eligibility input is missing required key 'name_stage'",
+                )
+            )
             continue
         has_physics_domain = "physics_domain" in candidate
         candidate_domains = candidate.get("physics_domain") or []
@@ -2786,6 +2790,37 @@ def run_export(
         len(candidates),
         len(eligibility_exclusions),
     )
+
+    population_issues: list[dict[str, Any]] = []
+    if report.total_candidates == 0:
+        population_issues.append(
+            {
+                "type": "empty_input_population",
+                "detail": "the export input population is empty; there is nothing to publish",
+            }
+        )
+    elif not candidates:
+        population_issues.append(
+            {
+                "type": "fully_excluded_population",
+                "population_size": report.total_candidates,
+                "excluded": len(report.exclusion_records),
+                "detail": "every input identity was excluded before export gates ran",
+            }
+        )
+    population_gate = GateResult(
+        gate=GATE_EXPORT_POPULATION,
+        passed=not population_issues,
+        issues=population_issues,
+    )
+    report.gate_results.append(population_gate)
+    if not population_gate.passed:
+        report.all_gates_passed = False
+        report.gate_failures = 1
+        logger.error("Export blocked: %s", population_issues[0]["type"])
+        staging_path.mkdir(parents=True, exist_ok=True)
+        _write_export_report(staging_path, report)
+        return report
 
     # ── 2. Run gates ────────────────────────────────────────────
     if not skip_gate:

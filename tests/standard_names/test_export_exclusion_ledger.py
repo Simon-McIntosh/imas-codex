@@ -9,7 +9,12 @@ from unittest.mock import patch
 
 import yaml
 
-from imas_codex.standard_names.export import _entry_model, run_export
+from imas_codex.standard_names.export import (
+    ExportReport,
+    _classify_export_population,
+    _entry_model,
+    run_export,
+)
 
 
 class _ReadOnlyGraphClient:
@@ -105,6 +110,90 @@ def _run_fixture_export(
             include_sources=include_sources,
             manifest_sources=manifest_sources,
         )
+
+
+def test_missing_name_stage_is_recorded_as_incomplete_eligibility_input() -> None:
+    candidate = {"id": "unjudgeable_candidate"}
+
+    eligible, exclusions = _classify_export_population(
+        [candidate],
+        domain=None,
+        names_only=False,
+    )
+    report = ExportReport()
+    report.record_exclusions(exclusions)
+    ledger = report.to_dict()["exclusion_ledger"]
+
+    assert eligible == []
+    assert [record.reason for record in exclusions] == ["eligibility_input_incomplete"]
+    assert exclusions[0].detail == (
+        "eligibility input is missing required key 'name_stage'"
+    )
+    assert ledger == [
+        {
+            "reason": "eligibility_input_incomplete",
+            "count": 1,
+            "identities": ["unjudgeable_candidate"],
+        }
+    ]
+
+
+def test_empty_input_population_is_refused_with_named_report_reason(
+    tmp_path: Path,
+) -> None:
+    report = _run_fixture_export(tmp_path, [])
+    population_gate = next(
+        gate for gate in report.gate_results if gate.gate == "export_population"
+    )
+
+    assert not population_gate.passed
+    assert population_gate.issues == [
+        {
+            "type": "empty_input_population",
+            "detail": (
+                "the export input population is empty; there is nothing to publish"
+            ),
+        }
+    ]
+    assert not report.all_gates_passed
+    assert report.exported_count == 0
+    assert not (tmp_path / "catalog.yml").exists()
+    persisted = json.loads(
+        (tmp_path / ".export_report.json").read_text(encoding="utf-8")
+    )
+    assert persisted["gates"][1]["issues"] == population_gate.issues
+
+
+def test_fully_excluded_population_is_refused_with_named_report_reason(
+    tmp_path: Path,
+) -> None:
+    report = _run_fixture_export(
+        tmp_path,
+        [_candidate("refused_name", validation_status="quarantined")],
+    )
+    population_gate = next(
+        gate for gate in report.gate_results if gate.gate == "export_population"
+    )
+
+    assert not population_gate.passed
+    assert population_gate.issues == [
+        {
+            "type": "fully_excluded_population",
+            "population_size": 1,
+            "excluded": 1,
+            "detail": "every input identity was excluded before export gates ran",
+        }
+    ]
+    assert [record.reason for record in report.exclusion_records] == [
+        "invalid_validation_status"
+    ]
+    assert not report.all_gates_passed
+    assert report.exported_count == 0
+    assert not (tmp_path / "catalog.yml").exists()
+    persisted = json.loads(
+        (tmp_path / ".export_report.json").read_text(encoding="utf-8")
+    )
+    assert persisted["gates"][1]["issues"] == population_gate.issues
 
 
 def test_export_ledger_closes_over_fixture_population(tmp_path: Path) -> None:
