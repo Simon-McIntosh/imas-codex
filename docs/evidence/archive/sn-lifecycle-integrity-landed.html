@@ -860,6 +860,44 @@
     (<code>review/pipeline.py:1720</code>) predates <code>0ba05e980</code>; it is reported here
     because it is the exact surface that change declares, and it lies outside this node's fence.</p>
   </section>
+
+  <section id="skipped-attachment-audit-is-visible">
+    <h2>A skipped attachment audit now says that it did not run</h2>
+    <p><strong>The defect reproduced before repair.</strong> The scoped-maintenance branch at
+    <code>loop.py</code> constructed a default <code>AttachmentAuditResult()</code>. Compared with a
+    genuinely clean result, the two objects were equal, their serialized receipts were identical,
+    and the log predicate was false for both. The reproduction printed
+    <code>skipped_equals_clean=True</code>, <code>same_receipt=True</code>, and two false log gates;
+    every reported count was zero or empty. Silence therefore meant either “checked and clean” or
+    “never checked,” with no observation capable of distinguishing them.</p>
+
+    <table>
+      <thead><tr><th>Result</th><th><code>audit_ran</code></th><th>Pool-loop report</th><th>Provenance reader</th></tr></thead>
+      <tbody>
+        <tr><td>Scoped bypass</td><td><code>false</code></td><td><code>attachment-consistency audit skipped — skip_global_maintenance=True</code></td><td>refuses to serialize an empty finding set</td></tr>
+        <tr><td>Genuinely clean audit</td><td><code>true</code></td><td>no rejection line</td><td>serializes an empty finding set</td></tr>
+        <tr><td>Audit with findings</td><td><code>true</code></td><td>reports checked, rejected, detached and rerouted counts</td><td>serializes the exact rejected rows</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>What landed.</strong> <code>AttachmentAuditResult.audit_ran</code> defaults to true,
+    preserving the meaning of every existing construction site. Only the deliberate
+    <code>skip_global_maintenance</code> bypass constructs it false. The pool loop now reports that
+    bypass and its reason, while <code>_attachment_violation_rows</code> raises rather than letting a
+    not-audited result pass as clean. Commit <code>1a0b02164</code> changes
+    <code>attachment_audit.py</code>, <code>loop.py</code>, <code>provenance_rebuild.py</code>, and
+    adds <code>tests/standard_names/test_skipped_audit_is_visible.py</code>.</p>
+
+    <p><strong>The evidence could fail.</strong> The new test and the six pre-existing files named by
+    the execution contract return <strong>72 passed, 15 deselected, exit 0</strong> on
+    <code>all_debug</code>. Removing <code>audit_ran=False</code> from the bypass makes the new test
+    fail by name at <code>assert bypassed.audit_ran is False</code>, exit 1. The complete
+    <code>tests/standard_names/</code> measurement used the same command and host class on both
+    sides: base <code>509a4703d</code> returned 20 failed, 7,497 passed, 8 skipped, 326 deselected and
+    3 errors; commit <code>1a0b02164</code> returned the identical 23 failure IDs, 7,498 passed, 8
+    skipped, 326 deselected and 3 errors. Added failures: <strong>0</strong>. The scoped bypass itself
+    remains in place; this node changes its receipt, not its authority.</p>
+  </section>
   </main>
 </body>
 </html>
