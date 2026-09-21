@@ -1,7 +1,7 @@
 # WEST accepted names, cohort indices 154–204 — physical-correctness audit
 
-provisional: true — verdicts are appended row by row as each name is judged;
-the closing pass rewrites this line.
+provisional: false — all 51 rows in cohort indices 154–204 carry a verdict and
+the result section is closed.
 
 This is the second half of the same cohort judged in
 [the WEST name audit](west-name-audit.md), in the same shape so the two halves
@@ -719,3 +719,108 @@ rejection is carried forward to the same identity here rather than re-argued.
 - name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
 - note: The recorded description defect a fourth time — bound to the **second**
   point, described as the first.
+
+## Identities bound outside this index range
+
+Seven of the 51 rows carry an identity that is also bound to source paths
+outside indices 154–204. Each is named in its own section; none is judged here,
+because a collision cannot be adjudicated from one of its halves. Three need no
+action and are recorded so the sweep does not re-open them —
+`poloidal_magnetic_flux_of_flux_loop` (rows differing only on the measured /
+reconstructed provenance axis, which is a source-binding property and never a
+name segment), `plasma_current` (one quantity reported by a measurement, an
+equilibrium reconstruction and a summary aggregate), and `wavelength_of_wave_beam`
+(the vacuum wavelength of a probing beam, deliberately instrument-independent).
+Two carry a rejection that a single repair closes on both halves —
+`faraday_angle` (row 171) and `upper_photon_energy` (row 181). One,
+`toroidal_angle_of_measurement_position` (row 156), is a genuine three-way locus
+collision whose ECE binding is the only correct member, and it is deferred to
+the whole-cohort sweep. The three shared `*_coordinate_of_line_of_sight`
+identities span sixteen paths each and are correct as spellings; only their
+shared description is defective, as recorded.
+
+`initial_polarization_ellipticity_of_polarimeter_beam` is the exception that is
+judged here rather than deferred: **both** of its bindings, rows 170 and 178,
+lie inside this range, so the whole collision is visible and row 178 carries the
+rejection.
+
+## No figure was written
+
+The landing contract asks for a figure wherever a spatial or structural
+relationship reads better shown than described, and one relationship here
+qualifies: the sibling leaves of a single data-dictionary container splitting
+across two different named objects, which is what rows 155–158 and rows 165–167
+each are. The node's write fence is three files and does not include
+`docs/figures/`, so the graphic is left as follow-on work with its content
+specified rather than written outside scope, following the precedent this plan's
+drafted-successor node set. What it should show: two container trees, one
+`magnetics/b_field_pol_probe` and one `pf_active/coil/element/geometry/rectangle`,
+each leaf tinted by the object its accepted name claims, making the split
+visible as two colours under one parent.
+
+## Result
+
+| | count |
+| --- | --- |
+| accepted bindings with cohort `index` in 154–204 | **51** |
+| sections carrying a verdict | **51** |
+| judged **correct** | 37 |
+| judged **INCORRECT**, each with a proposed spelling | **14** |
+| correct + incorrect | **51** |
+| incorrect as a fraction of 51 | **27.5 %** |
+| defects recorded as notes on a **correct** row, carrying no incorrect verdict | 8 |
+| re-observations of the already-recorded shared line-of-sight description defect | 4 |
+| identities also bound to paths outside 154–204, deferred to the collision sweep | 7 |
+
+**14 of 51 — 27.5 % of this block — are not publishable as spelled.** Grouped
+into the five classes the first half established:
+
+- **The name is bound to the wrong object** (6): `poloidal_angle_of_flux_surface`
+  on a probe coil's orientation; `toroidal_angle_of_measurement_position` on a
+  probe's installed location whose own vertical sibling names the probe;
+  `height_of_poloidal_field_coil` and `width_of_poloidal_field_coil` on one
+  conductor element's cross-section, against an accepted sibling spelling;
+  `effective_turn_count_of_passive_loop` on a per-element leaf;
+  `spectral_wavelength_of_optical_element` on a spectrometer's measured
+  wavelength axis.
+- **Not self-descriptive** (4): `toroidal_angle_of_poloidal_magnetic_field_probe`,
+  which cannot be told from the probe's positional φ in the same container;
+  `faraday_angle`, carried forward from the first half;
+  `power_of_soft_xray_detector`, which reads first as the detector's own
+  electrical power; `spectral_rate_of_spectrometer_channel`, which names no
+  measurand and misuses `spectral_` for a quantity that is not a spectral
+  density.
+- **The name asserts more than the data supports** (2): the isotope density
+  ratio claiming a **total** neutral density where the DD sums only the isotopes
+  present in its own array; `hot_neutral_temperature_at_plasma_boundary`, which
+  pins a locus the source never states.
+- **One name covers two physically different quantities** (1):
+  `initial_polarization_ellipticity_of_polarimeter_beam` across the
+  polarimeter's `ellipticity_initial` and `polarization_initial` leaves. As in
+  the first half this is the class a reader cannot resolve — only a split can.
+- **Minority spelling of a base the cohort already fixes** (1):
+  `upper_photon_energy` against the accepted `lower_bound_photon_energy` for the
+  opposite edge of the same kind of energy band.
+
+The eight defects recorded as **notes on correct rows** are three unit
+disagreements where the standard name is the defensible side (rows 159 and 198,
+`1` against an empty DD unit string) or where neither side is (row 170, an
+ellipticity declared in metres by the DD and inherited by the name); one DD leaf
+that contradicts itself by a factor of ten (row 201, text in bels, unit in
+decibels); one loose description denominator observed on two rows (195 and 199);
+one imprecise mechanism word (row 160); and two cautions about spellings that
+are correct but sit close to a different base (rows 191 and 198).
+
+### Reading the rate against the first half
+
+This block's 27.5 % is higher than the first half's 11.6 %, and the two numbers
+are not measuring the same thing. The first half sampled every fourth row of the
+path-ordered cohort, spreading 86 rows over 20 IDSs; this block is 51
+**contiguous** rows over 7, and it is the part of the cohort densest in
+instrument geometry — probe positions and orientations, coil conductor
+cross-sections, three-point lines of sight. That is exactly where the
+wrong-object class lives, and it is 6 of the 14 here against 2 of the 10 there.
+Neither figure should be extrapolated to the cohort on its own. Summed, the two
+halves now give **24 incorrect of 137 judged — 17.5 %** of the 137 rows judged
+so far out of 341 accepted bindings, and that sum is the number to carry
+forward, since the halves were judged in one shape against one evidence base.
