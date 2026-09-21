@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T08:34:27",
+  "updated": "2026-09-21T08:34:51",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -163115,6 +163115,226 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T055834971890-n-restore-cannot-reinstate-a-delete-permission",
+        "plan": "paid-identity-deletion-protection",
+        "section": "",
+        "node": "n-restore-cannot-reinstate-a-delete-permission",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1101,
+                "cached_input_tokens": 302319,
+                "input_tokens": 303422,
+                "output_tokens": 709,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 304131,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm the defect reproduces before repairing it, and quote the reproduction: compose_archive_reconstruction_authority in imas_codex/cli/sn.py copies the archive extraction's `properties` dict into `node_properties` and overrides only `id`, so an extraction taken from a dump that predates the origin correction carries `origin: catalog_edit` straight into the authority that `sn restore apply` consumes. Build that input and show the composed authority carrying `origin: catalog_edit`, then repair it, then show the same input refused or corrected. The done-when is that tests/standard_names/test_archive_reconstruction_entry_point.py grows a test that composes an authority from an extraction whose properties carry `origin: catalog_edit`, asserts the composed authority does not reinstate it, and fails against the declared negative control -- and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/test_archive_reconstruction_entry_point.py runs on a debug SLURM partition with exit status 0 and its log path recorded. The repair is specified, not open: strip `origin` from the properties the composer carries, and require the value to be stated at compose time through a new mandatory `--origin` option on `sn restore compose`, refusing with a click.UsageError when it is absent and refusing a value outside the origins the graph currently means. The archived dump is never the authority for this field. The origin field is a delete permission, so a restore that reinstates a false one re-arms an automatic deletion that previously destroyed 93 identities; making the signer state it removes the inference rather than guarding it. Two adjacent defects in the same function were recorded by the same audit and are in scope: two `--rename-counterpart` entries naming one restored target bind the second edge silently to the archived id rather than refusing the collision, and a registry role archived in the unregistered direction is carried without complaint. Confirm each independently before repairing it, and where one is already correct verify it and add the missing test rather than reimplementing a working guard. A guard that passes its own test by weakening itself is worse than no guard: never widen a swallow or relax an assertion to reach green. Report any defect you find outside these write paths under follow_ons rather than fixing it.",
+          "estimated_hours": 1.5,
+          "goal": "stop an archive reconstruction carrying an origin the graph no longer means",
+          "id": "n-restore-cannot-reinstate-a-delete-permission",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T05:58:35Z",
+            "read_at": "2026-09-21T05:58:36Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 0.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T055834971890-n-restore-cannot-reinstate-a-delete-permission/manifest.md",
+          "negative_control": "remove the origin handling from compose_archive_reconstruction_authority so the archived properties are carried verbatim",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_archive_reconstruction_entry_point.py",
+            "docs/evidence/archive/paid-identity-deletion-protection-landed.html",
+            "docs/plans/paid-identity-deletion-protection.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-restoreorigin",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T05:58:45Z",
+        "completed_at": "2026-09-21T06:23:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1467,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1467,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "80bcb6419deb6038b312320fdd62c45a528c3ada",
+        "commits": [
+          "27dabbf9f3703a426d0129d1c964ed3fcaf29c1f",
+          "2ee0cfe5772995685ebbd6edf358f6672ae57aab"
+        ],
+        "changed_lines": {
+          "added": 238,
+          "removed": 15,
+          "files": 4
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/test_archive_reconstruction_entry_point.py at the merged head",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/restore-origin-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "sn restore compose now takes a mandatory --origin validated against StandardNameOrigin and strips the archived value, so a pre-correction dump can no longer reinstate origin catalog_edit; the same change refuses two rekeys colliding on one restored target and refuses an unregistered edge direction, and replaces the renames.pop mutation that silently bound a second edge to the archived id; 21 passed at the merged head, negative control failed 1 of 21",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T055834971890-n-restore-cannot-reinstate-a-delete-permission/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c28b-a243-7631-89fc-d4d9b7020175",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15541376,
+            "cached_input_tokens_cumulative": 15541376,
+            "input_tokens": 15959982,
+            "input_tokens_cumulative": 15959982,
+            "output_tokens": 34753,
+            "output_tokens_cumulative": 34753,
+            "reasoning_output_tokens": 10479,
+            "reasoning_output_tokens_cumulative": 10479
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T06:23:12Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 3.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T06:23:12Z"
+            }
+          ],
+          "notional_cost_usd": 64.535,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 15541376,
+          "cumulative_input_tokens": 31501358,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 45232
+        },
+        "follow_on_paths": [
+          "imas_codex/standard_names/signed_manifest.py:7025"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-restore-cannot-reinstate-a-delete-permission",
+          "session_id": "01a0c28b-a243-7631-89fc-d4d9b7020175",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T06:23:12Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.72,
+        "impl_move": {
+          "plan": "paid-identity-deletion-protection",
+          "at_dispatch": 0.72,
+          "at_complete": 0.72,
+          "verdict": "waived",
+          "reason": "a second node on this plan is still in flight and holds its HTML as a declared write path, so the coordinator advances impl once when the wave lands rather than writing the plan under a live worker"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_archive_reconstruction_entry_point.py"
+          ],
+          "declaration": "remove the origin handling from compose_archive_reconstruction_authority so the archived properties are carried verbatim",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T055834971890-n-restore-cannot-reinstate-a-delete-permission/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T055834971890-n-restore-cannot-reinstate-a-delete-permission/negative-control.log"
+        },
+        "tool_steps": 101.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "failed",
+          "error": "IntegrityError: UNIQUE constraint failed: runs.run_id"
+        }
       }
     ],
     "holds": [
@@ -163427,6 +163647,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2407
+    "_version": 2408
   }
 }
