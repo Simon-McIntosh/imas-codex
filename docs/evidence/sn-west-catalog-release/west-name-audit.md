@@ -1,6 +1,6 @@
 # WEST batch accepted names — physical-correctness audit
 
-provisional: true
+provisional: false — every sampled name carries a verdict and the result section is closed.
 
 Are the accepted standard names bound to WEST batch sources physically correct
 and self-descriptive? Each row below is judged against the data-dictionary
@@ -677,3 +677,68 @@ the literal string `Value`, the parent container's documentation is used
 - data-dictionary text: Height
 - name description: The vertical coordinate of each point on a plasma-facing component boundary outline is the signed height in the right-handed cylindrical (R, φ, Z) frame.
 
+## Three findings the sample pointed at but does not contain
+
+Judging the sample surfaced three collisions whose second half sits outside the
+every-fourth draw. They are reported because the sample rows cannot be judged
+without them, and each is a whole-cohort query result rather than a reading.
+
+1. **`radial_coordinate_of_measurement_position` is bound to three different
+   kinds of locus.** `ece/channel/position/r` is a genuine measurement position
+   and is correct. `camera_x_rays/aperture/centre/r` is the centre of an
+   instrument aperture, and `magnetics/b_field_phi_probe/position/r` is the
+   location of a sensor — neither is where a measurement is made. Proposed:
+   `radial_coordinate_of_aperture` and
+   `radial_coordinate_of_toroidal_magnetic_field_probe` respectively. The second
+   is already contradicted inside its own DD container: sample row 51 spells
+   `magnetics/b_field_phi_probe/position/**z**` as
+   `vertical_coordinate_of_toroidal_magnetic_field_probe`, so `r` and `z` of one
+   probe position carry two different loci.
+2. **One DD aperture centre carries two loci across its three coordinates.**
+   `camera_x_rays/aperture/centre/phi` is `toroidal_coordinate_of_aperture`
+   while its `r` and `z` siblings are `*_of_measurement_position`. Whichever
+   spelling wins, a catalog cannot publish a point whose φ belongs to one object
+   and whose R and Z belong to another.
+3. **`vertical_coordinate_of_strike_point` repeats the sample's row-72 defect on
+   the vertical axis**, binding both `strike_point_inner_z` and
+   `strike_point_outer_z`. Proposed: `vertical_coordinate_of_inner_strike_point`
+   and `vertical_coordinate_of_outer_strike_point`.
+
+## Result
+
+| | count |
+| --- | --- |
+| accepted names bound to the 342 WEST manifest paths | 341 |
+| distinct accepted identities in that cohort | 230 |
+| names judged (every fourth, path-ordered) | **86** |
+| judged **correct** | 76 |
+| judged **incorrect**, with a proposed spelling | **10** |
+| additional whole-cohort collisions found outside the sample | 3 |
+
+**10 of 86 — 11.6 % of the sample — are not publishable as spelled.** Grouped
+by what went wrong, because the groups have different remedies:
+
+- **The name asserts more than the data supports** (2): `surface_temperature`
+  for an apparent temperature; `total_power_due_to_ion_cyclotron_heating` for
+  coupled rather than launched power.
+- **The name is bound to the wrong object** (2): `area_of_diagnostic_aperture`
+  on a detector surface; `radial_coordinate_of_x_point` on a container its own
+  sibling calls primary.
+- **One name, two physical quantities** (1): `radial_coordinate_of_strike_point`
+  across both divertor legs. This is the most serious class — it cannot be fixed
+  by a reader, only by a split.
+- **Not self-descriptive** (3): `faraday_angle`,
+  `voltage_of_mass_spectrometer_channel`,
+  `radial_derivative_of_poloidal_magnetic_flux`.
+- **Minority spelling of a base the cohort already fixes** (2):
+  `line_integrated_electron_number_density`, `hard_xray_brightness`.
+
+Two further defects are in the **descriptions** rather than the names and so do
+not carry an incorrect verdict: the shared line-of-sight identity's description
+names "the first reference point" while the identity is bound to second and
+third points as well (sample row 46), and `atomic_number` carries unit `1`
+against the DD's `e` (sample row 67 — the standard name is the defensible side).
+
+The sample is deterministic and drawn before any verdict, so the 11.6 % is an
+estimate of the cohort rather than of the rows that looked wrong: extrapolated,
+roughly **40 of the 341 bindings** carry a name defect of one of these classes.
