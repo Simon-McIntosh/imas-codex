@@ -565,7 +565,7 @@
     <p><strong>The route question was asked twice, and the second asking was the dangerous one.</strong> The
     root conftest already answers whether a credential is configured and whether the host responds, once per
     session — and it answers the credential question <em>without constructing a client</em>, because
-    authenticating with the packaged placeholder against the project graph is a failed login that trips the
+    authenticating with the packaged placeholder credential against the project graph is a failed login that trips the
     server's own failed-attempt limiter. The probe now consults that session verdict for the route and
     credential cases and only asks for content once the route is known good, so the classification has one
     source of truth and a checkout with no credential never reaches a login attempt. A test asserts exactly
@@ -1484,6 +1484,54 @@
     subscript safe are two source changes in <code>graph_ops.py</code> recorded as follow-ons.
     Verifying the merged result belongs to a separately dispatched test node, and this worker
     does not resolve its driving followup or set a terminal state.</p>
+  </section>
+<section id="classifier-precedence-is-pinned">
+    <h2>The classifier's branch precedence is asserted, not only its membership</h2>
+
+    <p><code>classify_parked_source</code> returns the first branch that matches, so the disposition a
+    row receives is decided by the order of the conditions and by nothing else. The tests that pinned
+    the disposition vocabulary supply one signal per branch, which establishes that every branch is
+    reachable but not the order in which two competing signals resolve: a case carrying one signal
+    still passes when a pair of conditions is swapped, because the swap changes the answer only for a
+    row that satisfies both. The classifier's own history is the mechanism written down in this
+    section's own landing record — a node-category test placed above a recorded-cause test retyped a
+    row that records a specific vocabulary gap as <code>compose_not_applicable</code>, and nothing in
+    the closed set or the write path would have shown the difference, because both values are members.
+    A total classifier makes a wrong branch reachable rather than visible, so the order has to be
+    asserted and not inferred.</p>
+
+    <p>Four cases make two branches true at once. Each is keyed by the precedence it pins, so a case
+    is named for the rule it holds rather than for a branch position that a future insert would
+    renumber.</p>
+
+    <table>
+      <thead><tr><th>precedence the case pins</th><th>both signals supplied</th><th>asserted winner</th></tr></thead>
+      <tbody>
+        <tr><td>a produced name outranks a removed upstream quantity</td>
+            <td><code>produced=1</code> with <code>lifecycle_status=removed</code></td>
+            <td><code>name_produced</code></td></tr>
+        <tr><td>a removed upstream quantity outranks a recorded cause</td>
+            <td><code>lifecycle_status=removed</code> with <code>last_error="compose request timed out"</code></td>
+            <td><code>upstream_quantity_removed</code></td></tr>
+        <tr><td>a recorded cause outranks the node category</td>
+            <td><code>last_error="compose request timed out"</code> with <code>node_category=geometry</code></td>
+            <td><code>attempt_budget_exhausted</code></td></tr>
+        <tr><td>a recorded vocabulary gap outranks the node category</td>
+            <td><code>last_error="... a vocabulary gap"</code> with <code>node_category=coordinate</code></td>
+            <td><code>vocabulary_gap</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Every adjacent pair is covered</h3>
+
+    <p>The classifier has five terminating branches, evaluated in this order: <em>produced</em>,
+    <em>upstream quantity removed</em>, <em>recorded cause</em>, <em>node category</em>, and the fallback that records silence. Four adjacent pairs of branches exist. Produced / removed, removed / recorded cause and recorded cause / node category are pinned by the four cases above, the third from both of its sides; node category / the fallback is pinned by the reachability test the file already carried, and that was measured rather than assumed -- placing the category test below the fallback return makes <code>compose_not_applicable</code> unreachable and reports 1 failed, 5 passed, exit 1.</p>
+
+    <p><strong>Gate.</strong> 2 passed at exit 0 before the change, 6 passed at exit 0 after it, ruff clean, both runs using the main checkout's environment with <code>--no-sync</code>.</p>
+
+    <p><strong>The reorder this section records as the original defect, reproduced.</strong> Moving the node-category condition above the recorded-cause condition in a scratch copy outside the repository reports 2 failed, 5 passed, exit 1, and the two red cases are exactly the ones pinning the recorded-cause precedence, both returning <code>compose_not_applicable</code> for a row that records a real cause. The two pre-existing tests still pass under that mutation, so the reorder is visible only through the new cases. The scratch copy parses under the project interpreter (3.12.11) before the run, and a scratch-only probe asserts the imported module resolves under the scratch root, so the mutated source is what ran.</p>
+
+    <p><strong>What this does not establish.</strong> The classifier's source is not edited here: the refusal message's <code>row['id']</code> subscript defect the same followup names is untouched and recorded as a follow-on. Verifying the merged result belongs to a separately dispatched test node, and this worker does not resolve its driving followup or set a terminal state.</p>
   </section>
 </section>
   </main>
