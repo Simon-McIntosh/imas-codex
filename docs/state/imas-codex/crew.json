@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T15:18:17",
+  "updated": "2026-09-21T15:20:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -176636,6 +176636,395 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "n-the-sibling-export-doubles-state-their-verdict",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 368,
+                "cached_input_tokens": 331740,
+                "input_tokens": 332110,
+                "output_tokens": 1389,
+                "reasoning_output_tokens": 136,
+                "total_tokens": 333499,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Two sibling test files each define their own _stub_exporter that supplies or omits the gate verdict rather than requiring it, and an independent review reported both. Close both, and nothing else. In tests/standard_names/test_exclusion_report_is_reachable.py the factory at line 92 returns a SimpleNamespace carrying a hardcoded all_gates_passed=True at line 110, consumed at line 162. In tests/standard_names/test_release_rehearsal_writes_nothing.py the factory at line 92 returns a SimpleNamespace with NO verdict attribute at all, which is the same defect in the opposite direction: a report that cannot answer the question. In BOTH files make the verdict a REQUIRED parameter of that file's factory with no default, and pass it explicitly at every call site in that file, so a test added to either file later cannot inherit or omit a verdict without writing one. Three proofs, all required. ONE: for each file, measure its passed count BEFORE your edit and after, and state both \u2014 they must be equal, because this is a scaffolding change and any change in the count means a test's meaning moved. TWO: the negative control, captured to exactly one red log whose FIRST LINE is verbatim this node's declared negative-control sentence and nothing else, followed by the pytest output; record the exception type and the failing test id, name the call site you mutated, and confirm you reverted it. Check the exit status is 1, a real test failure \u2014 an exit of 2, 4 or 5 is a collection or usage error and proves nothing, so if you see one, fix your mutation rather than reporting it. THREE: confirm by grep that neither file contains a default value for the verdict in a factory signature, and state the number of call sites updated per file. FORBIDDEN: adding a default, adding a shared helper or fixture or conftest patch that supplies the verdict for more than one call site, changing what any test asserts, and editing any file other than those two. Write the manifest incrementally, appending each figure as you establish it. Commit with a conventional subject AND a body, stage only your two declared paths, and add no attribution trailer of any kind.",
+          "estimated_hours": 0.5,
+          "goal": "make the two sibling release-flow export doubles require their gate verdict instead of supplying it",
+          "id": "n-the-sibling-export-doubles-state-their-verdict",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T12:08:53Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict/manifest.md",
+          "negative_control": "remove the hardcoded all_gates_passed value from the _stub_exporter in tests/standard_names/test_exclusion_report_is_reachable.py and the file fails with TypeError on the missing required argument",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/standard_names/test_exclusion_report_is_reachable.py",
+            "tests/standard_names/test_release_rehearsal_writes_nothing.py",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-a",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T12:09:42Z",
+        "completed_at": "2026-09-21T12:59:52.445Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2995,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3010,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "9412a6c0ee1cd5c91f6197a7b47d85b797688a4a",
+        "commits": [
+          "b170033157dfd964d1e4f94496b867387fa807e6",
+          "e159b4b0591164b460948ed6cb9b26ea14e0f890"
+        ],
+        "changed_lines": {
+          "added": 85,
+          "removed": 10,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug uv run pytest -p no:cacheprovider --timeout=180 tests/standard_names/ (isolated gate tree, isolation and provenance asserted OK)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/gate-logs/ship-s10-20260918/gate-sib-head.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Both sibling doubles now take the gate verdict as a required keyword-only parameter with no default, so no test in either file can inherit or omit one. The worker chose keyword-only over the positional form the brief specified, which the review confirmed is equal-or-stronger. Isolated base and head both 21 failed / 3 errors with identical failing id sets and identical 7572 passed / 7931 collected \u2014 correct for a pure scaffolding change, which adds and removes no tests. Totals line present, zero timeouts, isolation and provenance asserted OK in-job. Review SOUND for the node; MUST-FIX at the family level because four more doubles of the same shape survive elsewhere in the suite, now owned by a successor node whose brief requires it to state the search it ran so the aperture is auditable rather than assumed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict/manifest.md",
+        "scope_changed": false,
+        "session_id": "bba569ae-d823-470b-a377-f0ff9d0778d0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 8128151,
+            "input_tokens_cumulative": 8128151,
+            "output_tokens": 40415,
+            "output_tokens_cumulative": 40415,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T12:59:52.445Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+              "elapsed_seconds": 1354,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 4354,
+              "log_fresh": false,
+              "manifest_commits": [
+                "8ac1b1b2f",
+                "cc1acd9fd"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "c7fc432366be955c3c53fcac19c64ae7f965235235e91c96b784abea2e669c28",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T103345050873-n-the-release-export-double-states-its-verdict-at-each-site/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260921T103345050873-n-the-release-export-double-states-its-verdict-at-each-site --gate <verdict> --commit 8ac1b1b2f --commit cc1acd9fd",
+              "node": "n-the-release-export-double-states-its-verdict-at-each-site",
+              "phase": "starting",
+              "plan": "unbound-source-backlog",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": true,
+              "review_status": "parsed",
+              "run_id": "r-20260921T103345050873-n-the-release-export-double-states-its-verdict-at-each-site",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 4392,
+              "terminal_at": "2026-09-21T10:56:09Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-release-export-double-states-its-verdict-at-each-site"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 1473,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1585,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none - this node's only write path is outside the repository; the worktree is unchanged and git status is clean at fe5012a136b11b7383a2617b6a3e7129c4ac62c8",
+                "so there is nothing to commit here"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "854598b8573cb0cfe00c77639528442659fe6e92f4dd8b0d2ba80d2d7f748dac",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T105017572039-review-of-n-the-parked-disposition-vocabulary-is-pinned/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "review-of-n-the-parked-disposition-vocabulary-is-pinned",
+              "phase": "working",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T105017572039-review-of-n-the-parked-disposition-vocabulary-is-pinned",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1678,
+              "terminal_at": "2026-09-21T11:41:23Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-the-parked-disposition-vocabulary-is-pinned"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2700,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 2470,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 804,
+              "log_fresh": true,
+              "manifest_commits": [
+                "5d5ac0dae",
+                "f44fceae9"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "3c9ae2e3ef6d2fb5cd8fce0e10e21845879b0a7b56421a22dfc237739cd90619",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T111426058296-n-the-static-check-aperture-cannot-shrink-silently/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-lifecycle-integrity --section '' --role review --spec-level exact --node review-of-n-the-static-check-aperture-cannot-shrink-silently --goal 'attach an independent review to run r-20260921T111426058296-n-the-static-check-aperture-cannot-shrink-silently' --done-when 'the review for r-20260921T111426058296-n-the-static-check-aperture-cannot-shrink-silently stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T111426058296-n-the-static-check-aperture-cannot-shrink-silently.json --time-budget 45m --session ship-s10-20260918 --allow-unreconciled-runs --local",
+              "node": "n-the-static-check-aperture-cannot-shrink-silently",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T111426058296-n-the-static-check-aperture-cannot-shrink-silently",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1167,
+              "terminal_at": "2026-09-21T11:49:54Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-static-check-aperture-cannot-shrink-silently"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 17,
+            "evidence": 17,
+            "fit": 17,
+            "goal_fidelity": 18,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 89
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 8128151,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3004.009,
+          "generated_tokens": 40415,
+          "generation_seconds": 2565.749,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 30.1,
+          "machine_seconds": 438.26,
+          "peak_input_tokens": 144283,
+          "tokens_per_second": 15.75,
+          "wall_tokens_per_second": 13.45
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest output",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-sibling-export-doubles-state-their-verdict",
+          "session_id": "bba569ae-d823-470b-a377-f0ff9d0778d0",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T12:59:52.445Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.94,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.94,
+          "at_complete": 0.96,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_exclusion_report_is_reachable.py",
+            "tests/standard_names/test_release_rehearsal_writes_nothing.py"
+          ],
+          "declaration": "remove the hardcoded all_gates_passed value from the _stub_exporter in tests/standard_names/test_exclusion_report_is_reachable.py and the file fails with TypeError on the missing required argument",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict/logs/negative_control_exclusion.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T120850952449-n-the-sibling-export-doubles-state-their-verdict/logs/negative_control_exclusion.log"
+        },
+        "tool_steps": 82.0,
+        "orientation_input_tokens": 1466155.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -176948,6 +177337,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2470
+    "_version": 2471
   }
 }
