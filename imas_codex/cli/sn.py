@@ -11,7 +11,12 @@ import click
 from rich.console import Console
 
 from imas_codex.core.physics_domain import PhysicsDomain
-from imas_codex.graph.models import DDGapKind, DDGapStatus, EditScope
+from imas_codex.graph.models import (
+    DDGapKind,
+    DDGapStatus,
+    EditScope,
+    StandardNameOrigin,
+)
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_MIN_SCORE,
@@ -8106,6 +8111,7 @@ def _archive_reconstruction_graph_client() -> Any:
 def compose_archive_reconstruction_authority(
     record: dict[str, Any],
     *,
+    origin: str | None = None,
     identity: str | None = None,
     counterpart_renames: dict[str, str] | None = None,
 ) -> dict[str, Any]:
@@ -8124,6 +8130,10 @@ def compose_archive_reconstruction_authority(
     carry that counterpart's archived properties, because the restore rebuilds
     the node; every other label's counterpart is required to pre-exist live and
     nothing here invents it.
+
+    The archived ``origin`` is discarded. ``origin`` must state the current
+    provenance explicitly, because the archive may predate a provenance repair
+    and is not authoritative for that field.
 
     ``counterpart_renames`` rekeys an archived ``StandardName`` counterpart that
     the graph now holds under a different name, and every key must name a
@@ -8150,13 +8160,35 @@ def compose_archive_reconstruction_authority(
     archived_id = properties.get("id")
     if not isinstance(archived_id, str) or not archived_id:
         raise click.UsageError("archive extraction properties carry no identity")
+    if origin is None:
+        raise click.UsageError(
+            "archive reconstruction origin must be stated at compose time"
+        )
+    allowed_origins = tuple(item.value for item in StandardNameOrigin)
+    if origin not in allowed_origins:
+        raise click.UsageError(
+            f"unknown origin {origin!r}; expected one of {', '.join(allowed_origins)}"
+        )
+    rename_targets: dict[str, str] = {}
+    for archived_counterpart, restored_counterpart in renames.items():
+        prior = rename_targets.get(restored_counterpart)
+        if prior is not None and prior != archived_counterpart:
+            raise click.UsageError(
+                "counterpart rekeys collide on restored StandardName "
+                f"{restored_counterpart}: {prior}, {archived_counterpart}"
+            )
+        rename_targets[restored_counterpart] = archived_counterpart
     node_id = identity or archived_id
-    node_properties = dict(properties)
+    node_properties = {
+        key: value for key, value in properties.items() if key != "origin"
+    }
     node_properties["id"] = node_id
+    node_properties["origin"] = origin
 
     routed: list[dict[str, Any]] = []
     declared: dict[tuple[str, str | int], dict[str, Any]] = {}
     census: dict[str, int] = {}
+    matched_renames: set[str] = set()
     for edge in edges:
         if not isinstance(edge, dict):
             raise click.UsageError("an archive extraction edge must be an object")
@@ -8167,9 +8199,16 @@ def compose_archive_reconstruction_authority(
                 "an archive extraction edge names its relationship type and direction"
             )
         census[relationship_type] = census.get(relationship_type, 0) + 1
-        label = _ARCHIVE_EDGE_COUNTERPARTS.get(relationship_type, {}).get(direction)
-        if label is None:
+        registered_directions = _ARCHIVE_EDGE_COUNTERPARTS.get(relationship_type)
+        if registered_directions is None:
             continue
+        label = registered_directions.get(direction)
+        if label is None:
+            expected = ", ".join(sorted(registered_directions))
+            raise click.UsageError(
+                f"archive {relationship_type}/{direction} has no reconstruction "
+                f"route; registered direction: {expected}"
+            )
         labels = edge.get("counterpart_labels")
         if isinstance(labels, list) and labels and label not in labels:
             held = "|".join(str(item) for item in labels)
@@ -8184,9 +8223,10 @@ def compose_archive_reconstruction_authority(
             raise click.UsageError(
                 f"archive {relationship_type}/{direction} carries no counterpart id"
             )
-        if label == "StandardName" and str(counterpart_id) in renames:
-            renamed_counterpart = renames.pop(str(counterpart_id))
-            counterpart_id = renamed_counterpart
+        archived_counterpart = str(counterpart_id)
+        if label == "StandardName" and archived_counterpart in renames:
+            counterpart_id = renames[archived_counterpart]
+            matched_renames.add(archived_counterpart)
         routed.append(
             {
                 "owner_id": node_id,
@@ -8212,10 +8252,11 @@ def compose_archive_reconstruction_authority(
             "id": counterpart_id,
             "properties": counterpart_properties,
         }
-    if renames:
+    unmatched_renames = set(renames) - matched_renames
+    if unmatched_renames:
         raise click.UsageError(
             "a counterpart rekey names no archived StandardName counterpart: "
-            f"{', '.join(sorted(renames))}"
+            f"{', '.join(sorted(unmatched_renames))}"
         )
     if not routed:
         raise click.UsageError(
@@ -8255,6 +8296,12 @@ def sn_restore() -> None:
     help="Path the signed authority artifact is written to.",
 )
 @click.option(
+    "--origin",
+    required=True,
+    type=click.Choice([item.value for item in StandardNameOrigin], case_sensitive=True),
+    help="Current provenance stated by the restore signer; never read from the archive.",
+)
+@click.option(
     "--identity",
     default=None,
     help="Reconstruct the identity under a name other than the archived one.",
@@ -8269,6 +8316,7 @@ def sn_restore() -> None:
 def sn_restore_compose(
     extraction: str,
     output: str,
+    origin: str,
     identity: str | None,
     counterpart_renames: tuple[str, ...],
 ) -> None:
@@ -8282,6 +8330,7 @@ def sn_restore_compose(
     \b
     Example:
       imas-codex sn restore compose archive-extraction.json \\
+          --origin pipeline \\
           --identity spectral_etendue_of_spectrometer_channel \\
           --output /tmp/reconstruction-authority.json
     """
@@ -8311,7 +8360,10 @@ def sn_restore_compose(
         renames[archived.strip()] = restored.strip()
 
     authority = compose_archive_reconstruction_authority(
-        payload, identity=identity, counterpart_renames=renames
+        payload,
+        origin=origin,
+        identity=identity,
+        counterpart_renames=renames,
     )
     Path(output).write_text(json.dumps(authority, sort_keys=True))
     roles = authority["archive_roles"][authority["identities"][0]]

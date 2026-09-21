@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 
+import click
 import pytest
 from click.testing import CliRunner
 
@@ -37,7 +38,7 @@ class _SentinelGraph:
         raise AdapterReached
 
 
-def _extraction(*, review_properties: bool = True) -> dict:
+def _extraction(*, review_properties: bool = True, origin: str | None = None) -> dict:
     review = {
         "relationship_type": "HAS_REVIEW",
         "direction": "outgoing",
@@ -47,8 +48,11 @@ def _extraction(*, review_properties: bool = True) -> dict:
     }
     if review_properties:
         review["counterpart_properties"] = {"id": "review-1", "score": 0.9}
+    properties = {"id": "archived_temperature", "description": "archived"}
+    if origin is not None:
+        properties["origin"] = origin
     return {
-        "properties": {"id": "archived_temperature", "description": "archived"},
+        "properties": properties,
         "edges": [
             review,
             {
@@ -93,6 +97,7 @@ def _load(path):
 @pytest.fixture
 def authority_file(tmp_path):
     def write(record: dict, **kwargs) -> tuple:
+        kwargs.setdefault("origin", "pipeline")
         authority = compose_archive_reconstruction_authority(record, **kwargs)
         path = tmp_path / "authority.json"
         path.write_text(json.dumps(authority, sort_keys=True))
@@ -142,7 +147,9 @@ def test_composed_authority_counts_a_role_with_no_reconstruction_route(authority
 
 def test_composition_refuses_a_counterpart_the_restore_must_create(authority_file):
     with pytest.raises(Exception) as caught:
-        compose_archive_reconstruction_authority(_extraction(review_properties=False))
+        compose_archive_reconstruction_authority(
+            _extraction(review_properties=False), origin="pipeline"
+        )
     assert "no properties for the StandardNameReview counterpart" in str(caught.value)
 
 
@@ -150,6 +157,7 @@ def test_composition_refuses_a_rekey_that_names_no_counterpart():
     with pytest.raises(Exception) as caught:
         compose_archive_reconstruction_authority(
             _extraction(),
+            origin="pipeline",
             counterpart_renames={
                 "etendue_of_spectrometer_channel": "etendue_of_detector"
             },
@@ -161,6 +169,7 @@ def test_composition_rekeys_an_archived_counterpart(authority_file):
     """The rekey the driver hardcoded is now stated at the entry point."""
     path, _ = authority_file(
         _extraction(),
+        origin="pipeline",
         counterpart_renames={
             "archived_temperature_parent": "temperature_parent",
         },
@@ -174,6 +183,85 @@ def test_composition_rekeys_an_archived_counterpart(authority_file):
         if edge["relationship_type"] == "HAS_PARENT"
     ]
     assert parents == ["temperature_parent"]
+
+
+def test_composition_replaces_archived_origin_with_the_stated_origin():
+    """The archive cannot supply the delete-permission field."""
+    record = _extraction(origin="catalog_edit")
+
+    authority = compose_archive_reconstruction_authority(record, origin="pipeline")
+
+    assert record["properties"]["origin"] == "catalog_edit"
+    assert authority["nodes"][0]["properties"]["origin"] == "pipeline"
+
+
+def test_composition_requires_an_explicit_current_origin():
+    with pytest.raises(click.UsageError, match="origin must be stated"):
+        compose_archive_reconstruction_authority(_extraction(), origin=None)
+
+
+def test_composition_refuses_an_unknown_origin():
+    with pytest.raises(click.UsageError, match="unknown origin"):
+        compose_archive_reconstruction_authority(_extraction(), origin="restored")
+
+
+def test_composition_rekeys_every_edge_to_the_same_archived_counterpart():
+    record = _extraction()
+    record["edges"].append(
+        {
+            "relationship_type": "REFERENCES",
+            "direction": "outgoing",
+            "counterpart_id": "archived_temperature_parent",
+            "counterpart_labels": ["StandardName"],
+            "properties": {},
+        }
+    )
+
+    authority = compose_archive_reconstruction_authority(
+        record,
+        origin="pipeline",
+        counterpart_renames={
+            "archived_temperature_parent": "temperature_parent",
+        },
+    )
+
+    renamed = [
+        edge["counterpart_id"]
+        for edge in authority["edges"]
+        if edge["relationship_type"] in {"HAS_PARENT", "REFERENCES"}
+    ]
+    assert renamed == ["temperature_parent", "temperature_parent"]
+
+
+def test_composition_refuses_two_archived_counterparts_rekeyed_to_one_target():
+    record = _extraction()
+    record["edges"].append(
+        {
+            "relationship_type": "REFERENCES",
+            "direction": "outgoing",
+            "counterpart_id": "other_archived_parent",
+            "counterpart_labels": ["StandardName"],
+            "properties": {},
+        }
+    )
+
+    with pytest.raises(click.UsageError, match="counterpart rekeys collide"):
+        compose_archive_reconstruction_authority(
+            record,
+            origin="pipeline",
+            counterpart_renames={
+                "archived_temperature_parent": "temperature_parent",
+                "other_archived_parent": "temperature_parent",
+            },
+        )
+
+
+def test_composition_refuses_a_registered_role_in_an_unregistered_direction():
+    record = _extraction()
+    record["edges"][0]["direction"] = "incoming"
+
+    with pytest.raises(click.UsageError, match="HAS_REVIEW/incoming"):
+        compose_archive_reconstruction_authority(record, origin="pipeline")
 
 
 # ---------------------------------------------------------------------------
@@ -194,6 +282,8 @@ def test_cli_compose_writes_an_authority_the_loader_accepts(tmp_path, authority_
             str(extraction),
             "--output",
             str(output),
+            "--origin",
+            "pipeline",
             "--identity",
             "temperature",
             "--rename-counterpart",
@@ -296,8 +386,50 @@ def test_cli_compose_refuses_more_than_one_extraction(tmp_path):
             str(extraction),
             "--output",
             str(tmp_path / "out.json"),
+            "--origin",
+            "pipeline",
         ],
     )
 
     assert result.exit_code != 0
     assert "holds 2" in result.output
+
+
+def test_cli_compose_requires_an_origin(tmp_path):
+    extraction = tmp_path / "extraction.json"
+    extraction.write_text(json.dumps(_extraction(origin="catalog_edit")))
+
+    result = CliRunner().invoke(
+        sn,
+        [
+            "restore",
+            "compose",
+            str(extraction),
+            "--output",
+            str(tmp_path / "out.json"),
+        ],
+    )
+
+    assert result.exit_code == 2
+    assert "Missing option '--origin'" in result.output
+
+
+def test_cli_compose_refuses_an_unknown_origin(tmp_path):
+    extraction = tmp_path / "extraction.json"
+    extraction.write_text(json.dumps(_extraction()))
+
+    result = CliRunner().invoke(
+        sn,
+        [
+            "restore",
+            "compose",
+            str(extraction),
+            "--output",
+            str(tmp_path / "out.json"),
+            "--origin",
+            "restored",
+        ],
+    )
+
+    assert result.exit_code == 2
+    assert "Invalid value for '--origin'" in result.output
