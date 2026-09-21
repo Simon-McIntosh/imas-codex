@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:46:06",
+  "updated": "2026-09-21T09:48:46",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -165668,6 +165668,338 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T073205564517-n-west-names-superseded-target-resolution",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-names-superseded-target-resolution",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2023,
+                "cached_input_tokens": 525701,
+                "input_tokens": 527726,
+                "output_tokens": 2644,
+                "reasoning_output_tokens": 708,
+                "total_tokens": 530370,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-west-catalog-release/west-name-superseded-target-resolution.md exists and carries one row for each of the 15 proposed repair targets that docs/evidence/sn-west-catalog-release/west-name-repair-worklist-ordinal-revision.md found already present in the graph, classifying each as ALREADY-LIVE, REDIRECT, ADJUDICATE or MINT, and its closing table reports the four counts summing to 15 together with how many of the 59 revised repairs have a target string that can no longer be applied literally. Read that revision record and the worklist it revises first; the 15 are listed there with their stages, 7 accepted and 8 superseded. The governing rule, stated by the project lead: a superseded name is historical record and is never a target. No repair binds onto a superseded identity. Where a proposed target is superseded, follow its lineage to the live end and bind there; where the lineage has no live end, the repair mints a fresh identity instead of reviving a retired one. So an accepted target is ALREADY-LIVE and needs no resolution, a superseded target resolving to exactly one live end is a REDIRECT naming that end, one resolving to more than one live end is an ADJUDICATE because a lookup cannot choose between them, and one resolving to no live end is a MINT. The instrument matters more than the traversal here and using the obvious one would make almost every answer a false negative. Measured on this graph: of 2163 superseded names only 18 carry a superseded_by scalar, the whole graph holds 48 HAS_SUCCESSOR edges and 3 SUPERSEDES edges, while REFINED_FROM holds 1850. So resolve through REFINED_FROM and traverse it IN REVERSE: the successor carries the edge and points back at its predecessor, so the live end is found by asking which name was refined FROM this one, never by asking where this one went. Confirm the direction yourself on one sample before traversing 15 targets, by matching a REFINED_FROM edge and printing both ends with their name_stage, and record what you saw. Then for each target run a bounded reverse traversal of at most six hops over REFINED_FROM from that identity, collect every reachable name whose name_stage is accepted, and record the set. Every query is an indexed read anchored on a named identity or a fixed edge type, at most a few dozen in total; issue no whole-label scan, no unbounded traversal and no cartesian product. Report the hop count at which each live end was found, because a distant one is weaker evidence than an adjacent one. Three of the 15 have already been resolved by a peer and must be reproduced independently rather than copied, with any disagreement reported as the finding: radial_coordinate_of_aperture is said to reach radial_coordinate_of_diagnostic_aperture accepted, toroidal_coordinate_of_measurement_position to reach toroidal_angle_of_measurement_position accepted, and radial_coordinate_of_toroidal_magnetic_field_probe to reach nothing at all. That middle one bears on an open contradiction and must be stated explicitly: if the catalog holds toroidal_coordinate_of_measurement_position superseded while toroidal_angle_of_measurement_position is accepted, then a repair renaming onto the toroidal_coordinate spelling is renaming onto a retired one and the base question is answered by the graph rather than by adjudication. Check the other two toroidal loci the revision record names the same way and say for each whether the graph answers it or leaves it open. Do not apply, edit or propose any graph write, and do not amend the worklist or the revision record: this is a third linked record and both of those are read-only inputs. Open the file with a `provisional: true` line and have the closing pass rewrite it to `provisional: false`; append rows as they are resolved rather than composing the file at the end.",
+          "estimated_hours": 1.0,
+          "goal": "resolve each already-present repair target to its live end through reverse refinement lineage",
+          "id": "n-west-names-superseded-target-resolution",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T07:05:16.655Z",
+            "read_at": "2026-09-21T07:32:07Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 82.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073205564517-n-west-names-superseded-target-resolution/manifest.md",
+          "negative_control": "",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/west-name-superseded-target-resolution.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "claude-opus-e",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T07:32:15Z",
+        "completed_at": "2026-09-21T07:43:47.813Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 673,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 692,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "10d2725c09432999b84140725ef4c254a726fa96",
+        "commits": [
+          "9fbcb6632b69e856847e8c015ff67890eebfd56c",
+          "9ee6c5d275319321822ede4e71969feebfd0ea15",
+          "e6bd13425a82156b5982f266d155a5ea973c23e4"
+        ],
+        "changed_lines": {
+          "added": 257,
+          "removed": 1,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "reconcile every figure in the record's result table against the record itself at the merged head, including that no graph write was issued",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/superseded-resolution-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "all 15 already-present repair targets resolved through reverse REFINED_FROM: 7 ALREADY-LIVE, 6 REDIRECT, 0 ADJUDICATE, 2 MINT, in 21 read statements and no writes. Seven of the 59 revised repairs carry a target that cannot be applied literally, over 8 target strings. The finding is that FIVE of the six redirects are round trips: the target's live end is the very spelling the repair rejects, so each is a no-op that would reverse a refinement the pipeline already recorded, and whether the audit or the pipeline is right is a question about the names that this record does not answer. Only one redirect behaves as one should. The toroidal base question is answered by the graph rather than by adjudication: toroidal_coordinate_of_measurement_position is superseded with toroidal_angle_of_measurement_position accepted at hop 1, so the proposal to rename onto the coordinate spelling was a rename onto a retired identity and the revision record had already dropped it. The other two toroidal loci do not exist at any stage and are ordinary mints. A peer's three independent resolutions are reproduced exactly, including one empty result, and the emptiness is qualified: the forward superseded_by scalar is null on all eight, so a forward traversal would have returned that same emptiness for every one of the six redirects",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T073205564517-n-west-names-superseded-target-resolution/manifest.md",
+        "scope_changed": false,
+        "session_id": "f01be7c4-b0c3-44b9-8ad7-9aba90cba196",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 95.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed_warning",
+          "surpassed_threshold": 0.9,
+          "tokens": {
+            "cache_creation_input_tokens": 84207,
+            "cache_creation_input_tokens_cumulative": 260966,
+            "cache_read_input_tokens": 1683012,
+            "cache_read_input_tokens_cumulative": 7197541,
+            "inference_geo": "not_available",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 62,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 40172,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 7.2130405,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 13.510884999999998
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T07:43:47.813Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 1227,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 980,
+              "log_fresh": false,
+              "manifest_commits": [
+                "b085479688713da47089eefd304b367adcb0607a",
+                "172be6de77086bfba6e5f1d93415d24218c32e69"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "92a9c49c58d2cca56f815270116de6e2bcaecfdd0328079c468812b571e28859",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-lifecycle-integrity --section '' --role review --spec-level exact --node review-of-n-every-batch-item-gets-a-comparator-share --goal 'attach an independent review to run r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share' --done-when 'the review for r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share.json --time-budget 55m --session ship-s10-20260918 --local",
+              "node": "n-every-batch-item-gets-a-comparator-share",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1014,
+              "terminal_at": "2026-09-21T07:15:15Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-every-batch-item-gets-a-comparator-share"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 1800,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 399,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1081,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none \u2014 the review record lives outside the repository; no repo file was modified."
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "daca985d6b63a5586adb4df7a02261c67b996f5506750628222c1a179c2c1195",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan sn-lifecycle-integrity --section '' --role review --spec-level exact --node review-of-review-of-n-a-skipped-audit-does-not-look-clean --goal 'attach an independent review to run r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean' --done-when 'the review for r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean.json --time-budget 30m --session ship-s10-20260918 --local",
+              "node": "review-of-n-a-skipped-audit-does-not-look-clean",
+              "phase": "starting",
+              "plan": "sn-lifecycle-integrity",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T070714150110-review-of-n-a-skipped-audit-does-not-look-clean",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1094,
+              "terminal_at": "2026-09-21T07:13:55Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-a-skipped-audit-does-not-look-clean"
+            }
+          ]
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 12712070,
+          "cumulative_input_tokens": 13149935,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 687.9,
+          "generated_tokens": 111076,
+          "generation_seconds": 641.354,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 27.4,
+          "machine_seconds": 46.546,
+          "peak_input_tokens": 273998,
+          "tokens_per_second": 173.19,
+          "wall_tokens_per_second": 161.47
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": [
+          {
+            "path": "docs/figures/sn-west-catalog-release/superseded-target-lineage.png",
+            "reason": "the figure the record embeds: reverse lineage per superseded target with hop distance and the five round trips marked. Project policy requires a figure where a sequential relationship is clearer shown than described, and a lineage chain is exactly that, so the companion path is deliberate and the brief did not fence it"
+          }
+        ],
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-west-names-superseded-target-resolution",
+          "session_id": "f01be7c4-b0c3-44b9-8ad7-9aba90cba196",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T07:43:47.813Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.984,
+        "impl_move": {
+          "plan": "sn-west-catalog-release",
+          "at_dispatch": 0.984,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 3,
+          "declared": 4,
+          "missing": [
+            "9c4be8d48502e674f5be241ab78df60b2b9f8b5b"
+          ],
+          "message": "run 'r-20260921T073205564517-n-west-names-superseded-target-resolution' has a passing gate presenting 3 commit(s) of the 4 its manifest declares; missing: 9c4be8d48502e674f5be241ab78df60b2b9f8b5b. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 36.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165980,6 +166312,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2425
+    "_version": 2426
   }
 }
