@@ -6,10 +6,13 @@ import inspect
 import pytest
 
 from imas_codex.standard_names import workers
-from imas_codex.standard_names.workers import _collect_nearby_name_comparators
+from imas_codex.standard_names.workers import (
+    _NEARBY_COMPARATOR_HARD_CEILING,
+    _collect_nearby_name_comparators,
+)
 
 
-@pytest.mark.parametrize("item_count", [31, 50])
+@pytest.mark.parametrize("item_count", [25, 31, 50, 60])
 def test_every_item_receives_a_comparator_before_budget_refill(
     item_count: int,
 ) -> None:
@@ -37,6 +40,19 @@ def test_every_item_receives_a_comparator_before_budget_refill(
     assert expected_primary_ids <= nearby_ids
     assert len(nearby_ids) == max(30, item_count)
     assert len(nearby_ids) == len(nearby)
+
+
+@pytest.mark.parametrize("item_count", [200, 2000])
+def test_comparator_count_never_exceeds_hard_ceiling(item_count: int) -> None:
+    items = [{"description": f"item {index}"} for index in range(item_count)]
+
+    def search(description: str, *, k: int) -> list[dict]:
+        index = description.rsplit(" ", 1)[-1]
+        return [{"id": f"item_{index}_{offset}"} for offset in range(k)]
+
+    nearby = _collect_nearby_name_comparators(items, search=search)
+
+    assert len(nearby) == _NEARBY_COMPARATOR_HARD_CEILING
 
 
 def test_item_without_search_results_uses_no_comparator_share() -> None:
