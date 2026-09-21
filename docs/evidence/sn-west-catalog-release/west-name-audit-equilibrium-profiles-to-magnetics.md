@@ -299,3 +299,107 @@ its proposed spelling is that adjudication's, not a new one.
 - name description: Relative phase angle of a radio-frequency phasor at an antenna element in an ion-cyclotron heating launcher, measured relative to the first element for inter-element phasing.
 - **rejected spelling** `wave_phase_of_ion_cyclotron_heating_antenna` → **proposed spelling** `voltage_phase_of_ion_cyclotron_heating_antenna`
 - why: Four distinct phases live in this one data-dictionary container — of the voltage, of the current, of the forward power and of the reflected power — and the name identifies none of them. This row is the voltage's, the direct sibling of `voltage/amplitude`; the forward and reflected ones are already published as `forward_wave_phase_of_ion_cyclotron_heating_antenna` (row 123) and `reflected_wave_phase_of_ion_cyclotron_heating_antenna` (first half). The differences are not academic: the voltage-to-current phase is what sets the strap's reactive loading, so a consumer that reads `wave_phase_of_ion_cyclotron_heating_antenna` as the current phase computes the wrong sign of reactive power. The name's own description says only "a radio-frequency phasor", which is the self-descriptiveness test failing in the description as well.
+
+### 133. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/first_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+- The settled line-of-sight coordinate family; the description's "first reference point" is accurate at this binding.
+
+### 134. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/first_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 135. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/first_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+
+### 136. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/second_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 137. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/second_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+
+### 138. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/third_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+- note: The name is correct and deliberately generic across the points of a sightline, but its shared description says "the **first** reference point" while this binding is the **third** point. The first half recorded this same description defect at its row 46; it is one text to repair on one shared identity, not a per-binding fault, and it carries no incorrect verdict.
+
+### 139. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `interferometer/channel/line_of_sight/third_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+- The vertical member of the family carries the point-agnostic wording "a designated point", so it does not have the defect row 138 records.
+
+### 140. `line_integrated_electron_number_density` — **INCORRECT**
+
+- source path: `interferometer/channel/n_e_line`
+- unit: `m^-2` (data dictionary: `m^-2`)
+- data-dictionary text: Line integrated density, possibly obtained by a combination of multiple interferometry wavelengths. Corresponds to the density integrated along the full line-of-sight (i.e. forward AND return for a reflected channel: NO dividing by 2 correction)
+- name description: Free-electron column density accumulated along a complete electromagnetic propagation path, including both forward and return segments when present.
+- **rejected spelling** `line_integrated_electron_number_density` → **proposed spelling** `line_integrated_electron_density`
+- why: Already adjudicated in the first half (row 22) and reused here rather than re-argued. The cohort spells this physical base `electron_density` in eight names — including `line_averaged_electron_density` at the very next leaf of this container (row 141) and `volume_averaged_electron_density` (row 145) — and `electron_number_density` in this one identity only. The semantic content is identical, so the minority spelling is an inconsistency rather than a distinction, and two spellings of one base inside one published batch is not publishable.
+- The identity is also bound to `equilibrium/time_slice/constraints/n_e_line/measured` (index 63) and, per the first half, to the `reconstructed` sibling; the collision belongs to the whole-cohort sweep and the rename covers every binding.
+
+### 141. `line_averaged_electron_density` — **correct**
+
+- source path: `interferometer/channel/n_e_line_average`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Line average density, possibly obtained by a combination of multiple interferometry wavelengths. Corresponds to the density integrated along the full line-of-sight and then divided by the length of the line-of-sight
+- name description: Number density of free electrons per physical volume averaged along a complete plasma propagation chord, equal to the path integral divided by chord length.
+- The `m^-3` unit and the "divided by the length" wording both confirm this is the averaged rather than the integrated form, and the name says `averaged`. This row and row 140 are the pair whose distinction the `electron_number_density` spelling blurs.
+
+### 142. `wave_phase_of_wave_beam` — **INCORRECT**
+
+- source path: `interferometer/channel/wavelength/phase_corrected`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Phase measured for this wavelength, corrected from fringe jumps
+- name description: Fringe-jump-corrected phase angle of a probing electromagnetic signal at a selected wavelength, referenced to the channel's defined launch phase.
+- **rejected spelling** `wave_phase_of_wave_beam` → **proposed spelling** `fringe_jump_corrected_phase_of_interferometer_beam`
+- why: Two things are missing and both matter. The datum is the phase *after* fringe-jump correction, and a fringe jump is a discrete 2π-multiple error an interferometer accumulates when the density moves faster than the acquisition can follow; the raw and corrected phases of the same channel can differ by many radians, so publishing them under a name that does not say which is which invites a consumer to take a corrupted trace for a clean one. The name's own description supplies "fringe-jump-corrected", which the name omits. Second, `wave_phase_of_wave_beam` names neither the instrument nor the measured quantity — every probing beam in the batch is a wave beam — and the cohort already spells this object `interferometer_beam` in the accepted `length_variation_of_interferometer_beam` (first half, row 48), which the proposal reuses.
+
+### 143. `spectral_calibration_factor_at_line_of_sight` — **INCORRECT**
+
+- source path: `interferometer/channel/wavelength/phase_to_n_e_line`
+- unit: `m^-2.rad^-1` (data dictionary: `m^-2.rad^-1`)
+- data-dictionary text: Conversion factor to be used to convert phase into line density for this wavelength
+- name description: Wavelength-specific interferometric conversion coefficient that converts a signed phase change along a line of sight into electron column density.
+- **rejected spelling** `spectral_calibration_factor_at_line_of_sight` → **proposed spelling** `phase_to_line_integrated_electron_density_conversion_factor`
+- why: The name is not merely vague, it is misdescriptive. A "spectral calibration factor" in diagnostics is the intensity response of an instrument as a function of wavelength, in radiometric units; this quantity is a phase-to-column-density conversion coefficient, `m^-2.rad^-1`, which is a different physical object entirely and is fixed by the probing wavelength and fundamental constants rather than by any calibration measurement. The `_at_line_of_sight` locus is wrong too: the coefficient varies with wavelength, not with which chord it is applied to, and the data dictionary says so ("for this wavelength"). The proposed spelling states both ends of the conversion and uses `line_integrated_electron_density`, the survivor spelling proposed at row 140, so the factor and the quantity it produces name the same base.
+
+### 144. `wavelength_of_wave_beam` — **correct**
+
+- source path: `interferometer/channel/wavelength/value`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Wavelength value
+- name description: Vacuum spatial period of a probing electromagnetic wave propagating as a diagnostic beam, defining its spectral wavelength.
+- note: The generic `wave_beam` locus is justified here and not at row 142, because this identity is genuinely cross-diagnostic: it is also bound to `polarimeter/channel/wavelength` (index 179), where an interferometer-specific spelling would be wrong. The batch nevertheless carries two spellings for a probing beam — `wave_beam` here and `interferometer_beam` in the accepted `length_variation_of_interferometer_beam` — and which survives where is a cohort-wide consistency question rather than a defect in this row.
+
+### 145. `volume_averaged_electron_density` — **correct**
+
+- source path: `interferometer/n_e_volume_average`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Volume average plasma density estimated from the line densities measured by the various channels
+- name description: Number density of free electrons per physical volume averaged over the plasma volume enclosed by the last closed flux surface, giving the global mean free-electron density.
+- The data dictionary says the quantity is *estimated from* the line densities, which is a statement about how it was obtained rather than about what it is; the name correctly denotes the volume average itself. Also bound to `summary/volume_average/n_e/value` (index 250), the same quantity.
