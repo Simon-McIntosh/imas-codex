@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T06:57:11",
+  "updated": "2026-09-21T07:19:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -79,6 +79,15 @@
         "sessions": {
           "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "1d1fbc0c-ebf8-4eec-b806-44741739b4bf"
         },
+        "created": "2026-09-21"
+      },
+      {
+        "id": "claude-opus-d",
+        "harness": "claude-opus",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-09-21"
       },
       {
@@ -159852,6 +159861,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2373
+    "_version": 2374
   }
 }
