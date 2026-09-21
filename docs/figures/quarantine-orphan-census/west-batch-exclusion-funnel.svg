@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" font-family="system-ui, sans-serif">
+  <rect width="900" height="340" fill="#ffffff"/>
+  <text x="24" y="28" font-size="15" font-weight="600" fill="#2e3440">Where quarantined and orphan identities leave the path to the WEST batch</text>
+  <text x="24" y="47" font-size="11" fill="#4c566a">live graph, 2026-09-21 &#183; bar length is proportional to count (square-root scale); 0 is drawn as a tick</text>
+
+  <g font-size="10.5" fill="#2e3440">
+    <rect x="24" y="66" width="12" height="12" fill="#d8dee9" stroke="#4c566a"/><text x="42" y="76">identities at this step</text>
+    <rect x="200" y="66" width="12" height="12" fill="#bf616a"/><text x="218" y="76">quarantined</text>
+    <rect x="330" y="66" width="12" height="12" fill="#5e81ac"/><text x="348" y="76">orphan (no producing source)</text>
+  </g>
+
+  <!-- rows: x0=250, max width 560 at sqrt(5130)=71.6 -->
+  <g font-size="11" fill="#2e3440">
+    <!-- row 1: 5130 / 660 / 2341 -->
+    <text x="238" y="106" text-anchor="end" font-weight="600">All StandardName</text>
+    <rect x="250" y="96" width="560" height="13" fill="#d8dee9" stroke="#4c566a" stroke-width="0.6"/>
+    <rect x="250" y="111" width="200" height="7" fill="#bf616a"/>
+    <rect x="250" y="120" width="376" height="7" fill="#5e81ac"/>
+    <text x="818" y="106" font-size="10.5" fill="#4c566a">5,130</text>
+    <text x="456" y="118" font-size="10" fill="#bf616a" font-weight="600">660</text>
+    <text x="632" y="127" font-size="10" fill="#5e81ac" font-weight="600">2,341</text>
+
+    <!-- row 2: 2528 / 46 / 9 -->
+    <text x="238" y="152" text-anchor="end" font-weight="600">Accepted stage</text>
+    <rect x="250" y="142" width="393" height="13" fill="#d8dee9" stroke="#4c566a" stroke-width="0.6"/>
+    <rect x="250" y="157" width="53" height="7" fill="#bf616a"/>
+    <rect x="250" y="166" width="23" height="7" fill="#5e81ac"/>
+    <text x="651" y="152" font-size="10.5" fill="#4c566a">2,528</text>
+    <text x="309" y="164" font-size="10" fill="#bf616a" font-weight="600">46</text>
+    <text x="279" y="173" font-size="10" fill="#5e81ac" font-weight="600">9</text>
+
+    <!-- row 3: 233 / 3 / 105 -->
+    <text x="238" y="198" text-anchor="end" font-weight="600">Bound to a WEST source</text>
+    <rect x="250" y="188" width="119" height="13" fill="#d8dee9" stroke="#4c566a" stroke-width="0.6"/>
+    <rect x="250" y="203" width="14" height="7" fill="#bf616a"/>
+    <rect x="250" y="212" width="80" height="7" fill="#5e81ac"/>
+    <text x="377" y="198" font-size="10.5" fill="#4c566a">233</text>
+    <text x="270" y="210" font-size="10" fill="#bf616a" font-weight="600">3 (all terminal)</text>
+    <text x="336" y="219" font-size="10" fill="#5e81ac" font-weight="600">105 (all superseded)</text>
+
+    <!-- row 4: 230 / 0 / 0 -->
+    <text x="238" y="244" text-anchor="end" font-weight="600">Resolved WEST batch</text>
+    <rect x="250" y="234" width="118" height="13" fill="#d8dee9" stroke="#4c566a" stroke-width="0.6"/>
+    <line x1="250" y1="249" x2="250" y2="262" stroke="#bf616a" stroke-width="2.5"/>
+    <line x1="256" y1="249" x2="256" y2="262" stroke="#5e81ac" stroke-width="2.5"/>
+    <text x="376" y="244" font-size="10.5" fill="#4c566a">230</text>
+    <text x="266" y="260" font-size="10" fill="#4c566a">0 quarantined &#183; 0 orphan</text>
+
+    <!-- row 5: 230 / 0 / 0 -->
+    <text x="238" y="290" text-anchor="end" font-weight="600">Export candidates</text>
+    <rect x="250" y="280" width="118" height="13" fill="#d8dee9" stroke="#4c566a" stroke-width="0.6"/>
+    <line x1="250" y1="295" x2="250" y2="308" stroke="#bf616a" stroke-width="2.5"/>
+    <line x1="256" y1="295" x2="256" y2="308" stroke="#5e81ac" stroke-width="2.5"/>
+    <text x="376" y="290" font-size="10.5" fill="#4c566a">230</text>
+    <text x="266" y="306" font-size="10" fill="#4c566a">0 quarantined &#183; 0 orphan &#183; positive control: the same id list returns seen=230</text>
+  </g>
+  <text x="24" y="330" font-size="10" fill="#4c566a">Row 3 counts are the two binding routes separately: 3 by PRODUCED_NAME from a manifest source, 105 by a manifest uri in source_paths or HAS_STANDARD_NAME.</text>
+</svg>

@@ -256,6 +256,13 @@ None of these 108 is at an exportable stage, and none appears in the resolved
 230-name batch. **Answer: no quarantined and no orphan identity reaches the
 WEST batch release.**
 
+
+![WEST batch exclusion funnel](/imas-codex/figures/quarantine-orphan-census/west-batch-exclusion-funnel.svg)
+
+The funnel is the one relationship here a table does not carry: both classes
+survive to the WEST-bound step and both reach exactly zero at batch
+resolution, with the positive control drawn on the same row as the zero.
+
 ## 6. What this does and does not settle
 
 - The 660 quarantine count is **correct**. Its *classification* is correct for
