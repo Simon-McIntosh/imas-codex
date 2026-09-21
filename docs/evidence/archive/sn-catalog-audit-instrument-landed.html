@@ -638,6 +638,66 @@
     <code>n-the-mutation-classifier-respects-identifier-boundaries</code> &middot;
     2026-09-21 &middot; implementation commit <code>78d5cbef0</code>.</p>
   </section>
+
+  <section id="declared-attribute-access">
+    <h2>A three-argument getattr must name a field the class declares, and the check measures five of eighteen sites</h2>
+    <p><code>getattr(obj, "name", default)</code> is a fail-open read: the two-argument
+    form raises <code>AttributeError</code> when the attribute is absent, while the
+    three-argument form folds the miss into the default and the caller proceeds as
+    though it had read a value. The instance the plan named &mdash;
+    <code>getattr(audit_report, "findings", [])</code> against an
+    <code>AuditReport</code> declaring <code>embedding</code>,
+    <code>lint_findings</code>, <code>link_findings</code> and
+    <code>duplicate_components</code> &mdash; <strong>no longer reproduces</strong>:
+    the reader is now <code>_extract_audit_findings</code>, which iterates the three
+    declared lists directly.</p>
+
+    <table>
+      <caption>The scan over <code>imas_codex/standard_names/review</code>, base revision <code>f15d33851</code></caption>
+      <thead><tr><th>Outcome</th><th>Sites</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>declared</td><td><strong>5</strong></td><td>resolves to an annotated class that declares the literal attribute</td></tr>
+        <tr><td>undeclared</td><td><strong>0</strong></td><td>a class with the whole chain in view declares no such field</td></tr>
+        <tr><td>unresolved</td><td><strong>13</strong></td><td>no annotation names the object's class, so the site is not judged</td></tr>
+        <tr><td>unverifiable</td><td><strong>0</strong></td><td>a base outside the index, so the field set is not closed</td></tr>
+        <tr><td>total sites</td><td><strong>18</strong></td><td>three-argument <code>getattr</code> with a string-literal attribute</td></tr>
+      </tbody>
+      <figcaption>Each outcome the scanner can return, with the count it returned on the
+      base revision. The <strong>13</strong> unresolved sites are not a claim of safety;
+      they are the objects whose class no annotation states.</figcaption>
+    </table>
+
+    <p><strong>The 13 unresolved sites are the instrument's aperture, measured rather
+    than asserted.</strong> Eight are <code>llm_out</code> in the cost-event block, where
+    the value is the result of a structured LLM call with no annotation; four are the loop
+    variable in the review-matching pass; one is a parameter annotated <code>Any</code>.
+    Each is an object whose class no annotation states, so no check of this shape can judge
+    it. They are recorded as evidence inputs, not repairs, because the fenced scope for this
+    node was the test file and the two documents.</p>
+
+    <p><strong>A floor keeps a narrowing from reading as a clean tree.</strong> The scan
+    asserts at least <strong>5</strong> resolved sites, the measured figure, so a change
+    that drops a resolvable site reddens until the test documents the new figure. A class
+    with an unindexed base is reported <strong>unverifiable</strong> and a site whose object
+    no
+    annotation names is reported <strong>unresolved</strong>, so neither is passed as
+    a clean result. Nothing is imported: the class index is built from package source, so
+    the check runs on a revision that does not resolve against the installed
+    environment.</p>
+
+    <p><strong>Negative control.</strong> Declared mutation: one three-argument
+    <code>getattr(state, "no_such_declared_field", None)</code> inserted into
+    <code>persist_review_worker</code> in a scratch copy of the review package, which the
+    test scans in place of the repository. The gate test fails naming
+    <code>pipeline.py:1510</code> and <code>StandardNameReviewState declares no such
+    field</code>; <strong>1 failed, 7 passed</strong>, exit 1. All eight pass on the
+    unmutated tree.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-a-defaulted-attribute-read-must-name-a-declared-field</code> &middot;
+    2026-09-21 &middot; gate <code>tests/standard_names/test_declared_attribute_access.py</code>
+    &middot; base revision <code>f15d33851c99c19d464ecb3d225f4e3cdd830383</code>.</p>
+  </section>
   </main>
 </body>
 </html>
