@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 </head>
 <body>
   <main class="plan-doc">
@@ -226,12 +226,34 @@
       fixed cap of 30, while <code>name-only-batch-size</code> is <strong>50</strong>
       — so a dense name-only batch still left twenty items with no comparator, and
       neither landed test could see it because both used 25 items. The complete
-      repair is <code>f0a7c40b8</code> at <code>2026-09-21T07:57:59Z</code>, which
-      makes the cap a <em>floor</em>: <code>effective_cap = max(cap, len(items))</code>,
-      so the comparator block grows linearly with the batch. Measured here against
-      current <code>main</code> with distinct neighbours: <strong>zero items receive
-      zero comparators at n = 25, 30, 31, 50 and 200</strong>. <strong>Calibration
-      runs pin to <code>f0a7c40b8</code>, not to the 07:22:04Z commit.</strong>
+      repair is the merge <code>8d2518116</code> at
+      <strong><code>2026-09-21T08:11:05Z</code></strong>, which carries three
+      changes: the cap became a <em>floor</em>
+      (<code>effective_cap = max(cap, len(items))</code>, landed in
+      <code>f0a7c40b8</code> at 07:57:59Z) so the comparator block grows linearly
+      with the batch; the allowance test moved <em>before</em> the append, so the
+      <code>max(1, …)</code> floor governs what it appeared to govern rather than
+      being held by statement order; and both compose sites offload the search
+      pass through <code>asyncio.to_thread</code>, verified present at
+      <code>workers.py:3792</code> and <code>:5656</code>. Measured here against
+      current <code>main</code> with distinct neighbours: <strong>zero items
+      receive zero comparators at n = 25, 30, 31, 50 and 200</strong>.
+      <strong>Calibration runs pin to <code>8d2518116</code>.</strong>
+    </p>
+
+    <p>
+      <strong>Three commits, three timestamps, and two of them have been quoted
+      wrongly in this programme already — including by me.</strong> The sequence is
+      <code>064476e26</code> 07:22:04Z (partial), <code>f0a7c40b8</code> 07:57:59Z
+      (the floor), <code>8d2518116</code> 08:11:05Z (the merge carrying all three
+      changes). Every one of those commits records <code>+02:00</code>, so a
+      timestamp read off <code>git log</code> without normalising is two hours
+      fast; the merge has been reported elsewhere as "10:11:05Z", which is its
+      local time with a <code>Z</code> appended. A calibration baseline is exactly
+      the kind of record where a two-hour error survives unchallenged, so the
+      normalisation belongs in the procedure: <code>TZ=UTC git log -1 --format=%cd
+      --date=iso-local &lt;sha&gt;</code>, never <code>--date=format-local</code>
+      with a literal <code>Z</code> in the format string.
     </p>
 
     <p>
