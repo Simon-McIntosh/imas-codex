@@ -943,6 +943,46 @@
     skipped, 326 deselected and 3 errors. Added failures: <strong>0</strong>. The scoped bypass itself
     remains in place; this node changes its receipt, not its authority.</p>
   </section>
+
+  <section id="every-batch-item-gets-a-comparator-share">
+    <h2>Nearby comparator capacity reaches every compose item</h2>
+    <p><strong>The allocation defect reproduced before repair.</strong> A batch of twenty-five
+    distinct descriptions, each returning five unique nearby-name results, filled the thirty-entry
+    prompt bound from only the first six items. The observed receipt was
+    <code>contributing_items=6</code>, <code>total_comparators=30</code>, with contributor indices
+    <code>[0, 1, 2, 3, 4, 5]</code>. The cap protected prompt size but the outer-loop break denied
+    nineteen items any comparator from their own semantic neighbourhood.</p>
+
+    <table>
+      <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td>Items with search results represented in the first pass</td><td>6 of 25</td><td>25 of 25</td></tr>
+        <tr><td>Total nearby comparators</td><td>30</td><td>30</td></tr>
+        <tr><td>Duplicate comparator ids</td><td>0 in the reproduction</td><td>0 with an overlapping-result fixture</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Both compose paths now use one bounded allocator.</strong> Commit
+    <code>b08547968</code> computes an initial per-item allowance from the thirty-entry cap and
+    batch length, never below one; searches every item; deduplicates by result id; and spends any
+    capacity left after that pass from the remaining unused results. An item whose search returns
+    nothing consumes no entry. The linear <code>compose_worker</code> path and pooled
+    <code>compose_batch</code> path both delegate to the same helper, so their prompt context cannot
+    drift.</p>
+
+    <p><strong>The counterfactual is red.</strong> Setting the per-item allowance back to the full
+    five-result search width recreates early exhaustion: both regression tests fail because later
+    items lose their primary comparator. Restoring the shared allowance gives <strong>2 passed</strong>
+    with the cap at thirty and all ids distinct. The same full
+    <code>tests/standard_names/</code> command ran at base and after on <code>all_debug</code>:
+    base was <strong>22 failed and 3 errors</strong>; after was <strong>20 failed and 3
+    errors</strong>. The after terminal-id set is a strict subset of the baseline, so the change
+    adds <strong>zero failures</strong>. The two baseline-only ids are the name and documentation
+    cases in <code>test_refine_model_dispatch.py</code>; this change does not reach that module and
+    does not claim their absence as a repair. The retained terminal ids are pre-existing and
+    outside this node's write scope; verification at the merged revision remains a separately
+    dispatched test node.</p>
+  </section>
   </main>
 </body>
 </html>

@@ -1800,6 +1800,67 @@ def _search_nearby_names(query: str, k: int = 5) -> list[dict]:
         return []
 
 
+def _collect_nearby_name_comparators(
+    items: Sequence[dict[str, Any]],
+    *,
+    per_item_k: int = 5,
+    cap: int = 30,
+    search: Callable[..., list[dict]] | None = None,
+) -> list[dict]:
+    """Share a bounded nearby-name budget across the items in a batch.
+
+    The first pass gives each item a share before a second pass spends any
+    remaining capacity. Results remain deduplicated by standard-name id.
+    """
+    if not items or cap <= 0:
+        return []
+
+    search_names = search or _search_nearby_names
+    results_by_item = [
+        search_names(
+            item.get("description") or item.get("path", ""),
+            k=per_item_k,
+        )
+        for item in items
+    ]
+    per_item_allowance = max(1, cap // len(items))
+    seen: set[str] = set()
+    nearby: list[dict] = []
+    next_result_indices: list[int] = []
+
+    for item_results in results_by_item:
+        added = 0
+        next_index = 0
+        for result in item_results:
+            if len(nearby) >= cap:
+                break
+            next_index += 1
+            result_id = result.get("id", "")
+            if result_id and result_id not in seen:
+                seen.add(result_id)
+                nearby.append(result)
+                added += 1
+            if len(nearby) >= cap or added >= per_item_allowance:
+                break
+        next_result_indices.append(next_index)
+
+    if len(nearby) < cap:
+        for item_results, next_index in zip(
+            results_by_item, next_result_indices, strict=True
+        ):
+            for result in item_results[next_index:]:
+                if len(nearby) >= cap:
+                    break
+                result_id = result.get("id", "")
+                if result_id and result_id not in seen:
+                    seen.add(result_id)
+                    nearby.append(result)
+                if len(nearby) >= cap:
+                    break
+
+    return nearby
+
+
 # =============================================================================
 # DD context enrichment — fetch rich graph data before composing
 # =============================================================================
@@ -3725,23 +3786,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     async def _compose_batch_body(
         batch: ExtractionBatch, lease_box: list[BudgetLease]
     ) -> list[dict] | None:
-        # Search for nearby existing names (per-item for better relevance)
-        _nearby_seen: set[str] = set()
-        nearby: list[dict] = []
-        _PER_ITEM_K = 5
-        _NEARBY_CAP = 30
-        for item in batch.items:
-            hint = item.get("description") or item.get("path", "")
-            item_results = _search_nearby_names(hint, k=_PER_ITEM_K)
-            for nr in item_results:
-                nid = nr.get("id", "")
-                if nid and nid not in _nearby_seen:
-                    _nearby_seen.add(nid)
-                    nearby.append(nr)
-                    if len(nearby) >= _NEARBY_CAP:
-                        break
-            if len(nearby) >= _NEARBY_CAP:
-                break
+        # Search for nearby existing names with a bounded share per item.
+        nearby = _collect_nearby_name_comparators(batch.items)
 
         # IDS-level context — collect for each IDS present in batch
         ids_names = sorted(
@@ -5602,26 +5648,10 @@ async def compose_batch(
 
     # ── Search nearby existing names (per-item) ──────────────────────────
     # For each batch item, search using the item's description (or path
-    # leaf) to get semantically relevant nearby names.  Deduplicate across
-    # items and cap at 30 total to keep prompt size bounded.
+    # leaf) to get semantically relevant nearby names. Deduplicate across
+    # items, give each item a share, and cap at 30 total.
     group_key = batch[0].get("path", "").split("/")[0] if batch else ""
-    _nearby_seen: set[str] = set()
-    nearby: list[dict] = []
-    _PER_ITEM_K = 5
-    _NEARBY_CAP = 30
-    for item in batch:
-        # Prefer item description for embedding query; fall back to path
-        hint = item.get("description") or item.get("path", "")
-        item_results = _search_nearby_names(hint, k=_PER_ITEM_K)
-        for nr in item_results:
-            nid = nr.get("id", "")
-            if nid and nid not in _nearby_seen:
-                _nearby_seen.add(nid)
-                nearby.append(nr)
-                if len(nearby) >= _NEARBY_CAP:
-                    break
-        if len(nearby) >= _NEARBY_CAP:
-            break
+    nearby = _collect_nearby_name_comparators(batch)
 
     # ── IDS context ────────────────────────────────────────────────────
     ids_names = sorted(
