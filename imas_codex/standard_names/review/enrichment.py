@@ -273,14 +273,19 @@ def build_neighborhood_context(
     Args:
         batch: Batch dict from :func:`group_into_review_batches`.
         all_names: Full StandardName catalog used for unit-anchored comparison.
-        k: Base cap for semantic and unit-anchored comparator results.  The
-            semantic cap grows to the batch size so every item receives a
-            first-pass share.
+        k: Base cap.  Both channels treat it as a floor while the batch fits
+            the hard ceiling, so each grows with the batch size ``n``: the
+            unit-anchored channel holds at most ``max(k, n)`` comparators and
+            the semantic channel at most ``min(max(k, n), 60)``.  The returned
+            neighbourhood holds at most their sum — 20 at ``k=10`` over a
+            3-item batch, 30 at ``k=10`` over a 15-item batch, and 120 at the
+            shared helper's 60-item ceiling.
 
     Returns:
         List of neighbor dicts with keys ``id``, ``description``, ``kind``,
         ``unit``, ``physical_base``, ``review_tier``, and
-        ``comparison_basis``.  Empty list when no comparator is available.
+        ``comparison_basis``, bounded as described above.  Empty list when no
+        comparator is available.
     """
     try:
         from imas_codex.standard_names.search import search_standard_names_vector
@@ -293,7 +298,10 @@ def build_neighborhood_context(
         return []
     batch_ids = {n.get("id", "") for n in batch_names}
 
-    from imas_codex.standard_names.workers import _collect_nearby_name_comparators
+    from imas_codex.standard_names.workers import (
+        _NEARBY_COMPARATOR_HARD_CEILING,
+        _collect_nearby_name_comparators,
+    )
 
     search_items = [
         {**name, "description": name.get("description") or name.get("id", "")}
@@ -317,42 +325,83 @@ def build_neighborhood_context(
     for result in semantic:
         result.setdefault("comparison_basis", "semantic")
 
-    unit_anchored: list[dict] = []
-    unit_cap = max(k, len(batch_names))
+    # Unit-anchored comparators share one bounded budget across the batch with
+    # the same share-then-spend pass the semantic channel uses: every candidate
+    # receives its allowance before a second pass spends what is left, so one
+    # candidate on a common unit cannot absorb the whole budget and starve the
+    # others of the signal.
     catalog = sorted(all_names, key=lambda name: name.get("id", ""))
+    unit_cap = max(k, len(batch_names))
+    semantic_cap = min(unit_cap, _NEARBY_COMPARATOR_HARD_CEILING)
+    per_candidate_allowance = max(1, unit_cap // len(batch_names))
+
+    matches_by_candidate: list[list[dict]] = []
     for candidate in batch_names:
         candidate_unit = candidate.get("unit")
         candidate_base = candidate.get("physical_base")
-        if not candidate_unit or not candidate_base:
-            continue
-        for existing in catalog:
-            existing_id = existing.get("id", "")
-            existing_base = existing.get("physical_base")
-            if (
-                not existing_id
-                or existing_id in batch_ids
-                or existing.get("name_stage") != "accepted"
-                or existing.get("unit") != candidate_unit
-                or not existing_base
-                or existing_base == candidate_base
-            ):
-                continue
-            unit_anchored.append(
-                {
-                    **existing,
-                    "comparison_basis": "same_unit_different_physical_base",
-                }
-            )
-            if len(unit_anchored) >= unit_cap:
+        matches: list[dict] = []
+        if candidate_unit and candidate_base:
+            for existing in catalog:
+                existing_id = existing.get("id", "")
+                existing_base = existing.get("physical_base")
+                if (
+                    not existing_id
+                    or existing_id in batch_ids
+                    or existing.get("name_stage") != "accepted"
+                    or existing.get("unit") != candidate_unit
+                    or not existing_base
+                    or existing_base == candidate_base
+                ):
+                    continue
+                matches.append(
+                    {
+                        **existing,
+                        "comparison_basis": "same_unit_different_physical_base",
+                    }
+                )
+        matches_by_candidate.append(matches)
+
+    unit_anchored: list[dict] = []
+    seen_unit_ids: set[str] = set()
+    next_indices: list[int] = []
+    for matches in matches_by_candidate:
+        added = 0
+        next_index = 0
+        for match in matches:
+            if len(unit_anchored) >= unit_cap or added >= per_candidate_allowance:
                 break
-        if len(unit_anchored) >= unit_cap:
-            break
+            next_index += 1
+            match_id = match.get("id", "")
+            if match_id and match_id not in seen_unit_ids:
+                seen_unit_ids.add(match_id)
+                unit_anchored.append(match)
+                added += 1
+        next_indices.append(next_index)
+
+    if len(unit_anchored) < unit_cap:
+        for matches, next_index in zip(
+            matches_by_candidate, next_indices, strict=True
+        ):
+            for match in matches[next_index:]:
+                if len(unit_anchored) >= unit_cap:
+                    break
+                match_id = match.get("id", "")
+                if match_id and match_id not in seen_unit_ids:
+                    seen_unit_ids.add(match_id)
+                    unit_anchored.append(match)
+                if len(unit_anchored) >= unit_cap:
+                    break
 
     # Unit-anchored comparators lead so a semantic cap cannot hide the signal.
-    # Deduplicate both channels by catalog identity.
+    # Deduplicate both channels by catalog identity and close on the terminal
+    # bound: each channel is internally capped, and the returned neighbourhood
+    # holds at most unit_cap + semantic_cap comparators.
+    overall_cap = unit_cap + semantic_cap
     seen: set[str] = set()
     deduped: list[dict] = []
     for r in [*unit_anchored, *semantic]:
+        if len(deduped) >= overall_cap:
+            break
         rid = r.get("id", "")
         if rid and rid not in seen:
             seen.add(rid)
