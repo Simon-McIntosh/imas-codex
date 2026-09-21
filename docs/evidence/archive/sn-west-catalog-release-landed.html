@@ -1068,6 +1068,47 @@
     <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit-bremsstrahlung-to-equilibrium-boundary">the
     second-half WEST name audit</a>, appended row by row as each name was judged and committed in
     four parts.</p>
+</section>
+  <section id="west-names-magnetics-to-spectrometer">
+    <h2>The second half of the WEST name cohort &mdash; fourteen of fifty-one</h2>
+    <p>The <strong>51 accepted bindings at cohort indices 154&ndash;204</strong>,
+    running from <code>magnetics/b_field_pol_probe/length</code> to
+    <code>spectrometer_visible/channel/line_of_sight/second_point/phi</code> across
+    seven IDSs, judged in the same shape and against the same evidence base as the
+    86 rows of the first half, so the two halves sum rather than compare. No query
+    was issued and no database opened: every row was already drawn into the cohort
+    file by the first-half node.</p>
+    <table>
+      <thead>
+        <tr><th>Measure</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Bindings in the range, and sections carrying a verdict</td><td><strong>51</strong> and <strong>51</strong></td></tr>
+        <tr><td>Correct</td><td>37</td></tr>
+        <tr><td>Incorrect, with a proposed spelling beside the rejected one</td><td><strong>14</strong> &mdash; 27.5 % of 51</td></tr>
+        <tr><td>Dominant class &mdash; bound to the wrong object</td><td>6 of 14, against 2 of 10 in the first half; the block is contiguous and dense in instrument geometry</td></tr>
+        <tr><td>Worst class &mdash; one name, two physical quantities</td><td><code>initial_polarization_ellipticity_of_polarimeter_beam</code> over both <code>ellipticity_initial</code> and <code>polarization_initial</code>; both bindings are inside the range, so it is judged here rather than deferred</td></tr>
+        <tr><td>Rejections carried forward from the first half, one repair closing both halves</td><td>2 &mdash; <code>faraday_angle</code> &rarr; <code>faraday_rotation_angle</code>, and <code>upper_photon_energy</code> &rarr; <code>upper_bound_photon_energy</code></td></tr>
+        <tr><td>Defects recorded as notes on a <strong>correct</strong> row, carrying no incorrect verdict</td><td>8 &mdash; including a DD leaf whose text (log10, bels) and unit (<code>dB</code>) disagree by a factor of ten, and an ellipticity the DD declares in metres</td></tr>
+        <tr><td>Identities reaching paths outside 154&ndash;204, deferred to the collision sweep</td><td>7, of which 3 are recorded as needing no action</td></tr>
+        <tr><td>Slice control before judging</td><td><strong>51 of 51</strong> rows carry non-empty data-dictionary text and <strong>0 of 51</strong> needed the parent-container fallback, so no verdict rests on an absence</td></tr>
+        <tr><td>Both halves summed</td><td><strong>24 incorrect of 137 judged &mdash; 17.5 %</strong>, out of 341 accepted bindings</td></tr>
+      </tbody>
+    </table>
+    <p>The sharpest rejection is structural rather than semantic: three of the five
+    leaves of one <code>pf_active</code> conductor rectangle name the
+    cross-section &mdash; including the <code>r</code> leaf the first half
+    <strong>accepted</strong> as
+    <code>radial_coordinate_of_conductor_cross_section</code> &mdash; while
+    <code>height</code> and <code>width</code> name the whole coil, which is a
+    different and larger object. The same split appears in
+    <code>magnetics/b_field_pol_probe</code>, where the position's &phi; is spelled
+    <code>_of_measurement_position</code> and its Z
+    <code>_of_poloidal_magnetic_field_probe</code>. Per-row verdicts, each
+    rejection's proposed spelling and the semantic distinction behind it are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit-magnetics-to-spectrometer-visible">the
+    magnetics-to-spectrometer name audit</a>, appended in three parts as the rows
+    were judged and closed in a fourth.</p>
   </section>
 </main>
 </body>
