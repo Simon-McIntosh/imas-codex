@@ -1111,8 +1111,9 @@
       <tbody>
         <tr><td>Scoped global maintenance</td>
           <td>one generic bypass line; no returned names</td>
-          <td>one info line per function, one <code>count=24</code> summary line, and the ordered
-          <code>bypassed_maintenance_passes</code> list in the returned mapping</td></tr>
+          <td>one info line per bypassed operation, a current <code>count=31</code> summary line,
+          and the ordered <code>bypassed_maintenance_passes</code> list in the returned mapping;
+          the initial <code>count=24</code> receipt was incomplete</td></tr>
         <tr><td>Migrated-attachment graph failure</td>
           <td><code>audit_ran=True</code>, equal to a clean default</td>
           <td><code>audit_ran=False</code>, still zero detachments and zero rejections, and still
@@ -1145,6 +1146,46 @@
     <code>~/.config/reckon/crew/runs/r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself/</code>.
     This worker leaves the driving followup, section declaration, implementation fraction and
     terminal plan state unchanged for coordinator adjudication.</p>
+
+    <p><strong>Independent review found that the first landed receipt made a completeness claim it
+    had not earned.</strong> Two exact <code>if not skip_global_maintenance</code> guards bypassed
+    the orphaned-run reconcile and the embedding worker outside
+    <code>_global_maintenance_call</code>. The wider census also found the separately skipped
+    attachment audit, three repeated post-drain structural fixups, and the family-restamp pass.
+    The complete scoped receipt is therefore <strong>31 entries</strong>, not 24: the original 24
+    helper calls plus <code>mark_orphaned_standard_name_runs_stale</code>,
+    <code>reconcile_attachment_consistency</code>, <code>embed_description_worker</code>, the
+    three post-drain structural calls, and <code>restamp_harmonized_families</code>. Repeated names
+    are retained when the same function is bypassed at distinct startup and shutdown passes,
+    because the receipt records operations that did not run rather than a unique-name census.</p>
+
+    <p><strong>Commit <code>cd024030a</code> closes both the receipt and the instrument.</strong>
+    Synchronous work now reaches the shared helper, including startup orphan reconciliation,
+    attachment consistency, post-drain structural maintenance and family restamping. The
+    asynchronous embedding worker cannot be expressed as a completed helper call, so its direct
+    guard records the same function-named log and list entry explicitly. The runtime test no
+    longer compares against a fixed tuple: it derives the skipped writer set from the mocks,
+    requires every skipped writer to be present in the receipt, and requires the ordered per-pass
+    log names, returned list and aggregate count to agree.</p>
+
+    <p><strong>The structural guard has a measured aperture.</strong> It parses
+    <code>run_sn_pools</code> with <code>ast</code>, finds every direct negative
+    <code>skip_global_maintenance</code> guard, and requires the guarded body to delegate through
+    <code>_global_maintenance_call</code> or the skip branch to call
+    <code>_record_bypassed_maintenance</code>. A scratch copy outside the repository received one
+    new direct guard with neither route; the check failed at the planted file and line, exit 1.
+    The scratch tree was then removed. The focused gate is <strong>99 passed, 20 deselected</strong>
+    on <code>all_debug</code>. The complete suite is <strong>20 failed, 3 errors, 7,512
+    passed</strong>; comparing only lines beginning <code>FAILED </code> or
+    <code>ERROR tests/</code> gives 23 at base and 23 at head with an empty diff, so added failures
+    are <strong>zero</strong>. This deliberately excludes logger lines beginning
+    <code>ERROR</code>.</p>
+
+    <p><strong>The callable-name lookup is left as measured.</strong> It cannot raise for the 31
+    current sites because every one passes a module-level function. A future
+    <code>functools.partial</code> or lambda would fall back to its class name rather than a useful
+    operation name; no current site uses either, so that is a stated limitation rather than an
+    invented repair.</p>
   </section>
   </main>
 </body>
