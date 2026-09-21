@@ -740,6 +740,126 @@
     <code>has_critical_audit_failure</code> and the 32-check <code>CRITICAL_CHECKS</code> set — which lies outside
     this node's fence and therefore still declares nothing; the two files share the basename <code>audits.py</code>.</p>
   </section>
+
+  <section id="local-lane-landings-audited">
+    <h2>The remaining local-lane landings, audited for the export shape</h2>
+    <p><strong>Question.</strong> The export gate audit found three sites of one shape in
+    <code>export.py</code> — a key-presence test standing in for an observation, so an absent key
+    licensed a decision nothing had measured. This asks whether the sprint's three remaining
+    local-lane pipeline changes carry it: <code>dd88d0d3f</code> (the scoped-edit maintenance
+    bypass, <code>imas_codex/standard_names/edit.py</code>), <code>0ba05e980</code> (the
+    quarantine-instrument refusal, <code>imas_codex/standard_names/review/audits.py</code>) and
+    <code>73242777f</code> (the parked-disposition writer,
+    <code>imas_codex/standard_names/orphan_sweep.py</code> and <code>graph_ops.py</code>) — and
+    whether each can suppress, skip or misreport. Measured at <code>ec9d7af42</code> in a detached
+    worktree against the shared project environment.</p>
+
+    <p><strong>Verdict: all three SAFE-FOR-WEST.</strong> None of the three is read by
+    <code>export.py</code> — verified by grep over <code>imas_codex/</code> for
+    <code>parked_disposition</code>, <code>AuditReport</code> and
+    <code>skip_global_maintenance</code>, which the export module references nowhere — so no defect
+    among them can admit a wrong name into a published catalog or keep a right one out. The
+    parked-disposition writer is separately <strong>MUST-FIX for §5's own measure</strong>, because
+    the footgun that row exists to remove is not yet removed.</p>
+
+    <p><strong>The half that could have failed.</strong> The three suites return
+    <strong>13 passed, exit 0</strong>
+    (<code>tests/standard_names/test_scoped_edit_keeps_its_scope.py</code>,
+    <code>test_quarantine_instrument_agreement.py</code>,
+    <code>test_attempt_cap_disposition.py</code>; log
+    <code>/tmp/sli-lane-audit/three-changes.log</code>) and <strong>not one of the eight defects
+    below is visible to any of them</strong>. So the green is the finding about the suites, not
+    evidence about the code, and every defect was reproduced directly against the landed code
+    instead (log <code>/tmp/sli-lane-audit/probes.log</code>). Three reproductions carry the whole
+    conclusion: <code>hasattr(AuditReport(), "findings")</code> is <code>False</code> and a report
+    carrying one ERROR lint finding yields <code>_extract_audit_findings(...) == []</code>;
+    <code>classify_parked_source</code> returns a member of the closed set on all 135 enumerated
+    evidence shapes and <code>cause_not_recorded</code> on <code>{}</code>, so the
+    <code>ValueError</code> beside it cannot fire; and the same classifier returns
+    <code>name_produced</code> for a row with <code>produced=3</code> but
+    <code>cause_not_recorded</code> for the identical row with the <code>produced</code> key
+    removed.</p>
+
+    <figure>
+      <svg viewBox="0 0 680 300" width="680" height="300" role="img"
+           aria-label="Which of the six parked dispositions each caller can reach, and where the original cause is destroyed">
+        <text fill="#333" font-size="13" font-weight="bold" x="10" y="18">Where the parked disposition loses two of its six classes</text>
+
+        <rect fill="#fdf1f1" height="52" rx="6" stroke="#c46a6a" width="300" x="10" y="36"></rect>
+        <text fill="#333" font-size="12" x="22" y="56">sweep parking statement — orphan_sweep.py:114</text>
+        <text fill="#8a3a3a" font-size="11" x="22" y="74">SET last_error = 'compose claim-attempt cap reached'</text>
+        <text fill="#8a3a3a" font-size="11" x="22" y="88">↑ overwrites the original cause</text>
+
+        <line stroke="#888" x1="160" x2="160" y1="92" y2="118" marker-end="url(#a)"></line>
+        <defs><marker id="a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#888"></path></marker></defs>
+
+        <rect fill="#f4f7fb" height="46" rx="6" stroke="#6a8ec4" width="300" x="10" y="122"></rect>
+        <text fill="#333" font-size="12" x="22" y="142">_CAP_UNDISPOSED_QUERY — graph_ops.py:11585</text>
+        <text fill="#456" font-size="11" x="22" y="160">WHERE last_error = $cap_reason  (every row, by construction)</text>
+
+        <line stroke="#888" x1="160" x2="160" y1="172" y2="198" marker-end="url(#a)"></line>
+
+        <rect fill="#f4f7fb" height="46" rx="6" stroke="#6a8ec4" width="300" x="10" y="202"></rect>
+        <text fill="#333" font-size="12" x="22" y="222">classify_parked_source — graph_ops.py:11451</text>
+        <text fill="#456" font-size="11" x="22" y="240">if reason and reason != _COMPOSE_CAP_REASON:  → dead here</text>
+
+        <line stroke="#bbb" x1="330" x2="360" y1="150" y2="150"></line>
+
+        <text fill="#333" font-size="12" font-weight="bold" x="370" y="52">the six classes</text>
+        <rect fill="#e8f5ec" height="22" rx="4" stroke="#5f9e74" width="280" x="370" y="62"></rect>
+        <text fill="#2f5d44" font-size="11" x="382" y="77">name_produced — reachable</text>
+        <rect fill="#e8f5ec" height="22" rx="4" stroke="#5f9e74" width="280" x="370" y="88"></rect>
+        <text fill="#2f5d44" font-size="11" x="382" y="103">upstream_quantity_removed — reachable</text>
+        <rect fill="#e8f5ec" height="22" rx="4" stroke="#5f9e74" width="280" x="370" y="114"></rect>
+        <text fill="#2f5d44" font-size="11" x="382" y="129">compose_not_applicable — reachable</text>
+        <rect fill="#e8f5ec" height="22" rx="4" stroke="#5f9e74" width="280" x="370" y="140"></rect>
+        <text fill="#2f5d44" font-size="11" x="382" y="155">cause_not_recorded — reachable</text>
+        <rect fill="#fdf1f1" height="22" rx="4" stroke="#c46a6a" width="280" x="370" y="166"></rect>
+        <text fill="#8a3a3a" font-size="11" x="382" y="181">attempt_budget_exhausted — UNREACHABLE</text>
+        <rect fill="#fdf1f1" height="22" rx="4" stroke="#c46a6a" width="280" x="370" y="192"></rect>
+        <text fill="#8a3a3a" font-size="11" x="382" y="207">vocabulary_gap — UNREACHABLE</text>
+
+        <rect fill="#fff4e5" height="44" rx="6" stroke="#d8a24a" width="280" x="370" y="224"></rect>
+        <text fill="#7a5a1e" font-size="11" x="382" y="242">disposition_parked_sources reaches all six —</text>
+        <text fill="#7a5a1e" font-size="11" x="382" y="258">but has no production caller, so it never runs.</text>
+      </svg>
+      <figcaption>The two classes that separate a nameable quantity from a permanent exclusion are
+      the two the writer cannot produce: its own filter guarantees the reason branch is dead, and
+      the parking statement destroyed the original cause one step earlier. The pass that could
+      reach them is not wired to anything.</figcaption>
+    </figure>
+
+    <p><strong>The eight defects, by direction.</strong> Misreports:
+    <code>loop.py:1884</code> and <code>loop.py:1570</code> return a default-constructed result for
+    every bypassed maintenance call, so a run that never looked is indistinguishable from one that
+    looked and found nothing, on every <code>sn edit</code>; <code>graph_ops.py:11585</code> with
+    <code>11451</code> is the figure above; <code>graph_ops.py:11589</code> filters
+    <code>parked_disposition IS NULL</code> while no path clears the property, so a revived and
+    re-parked source keeps its stale class — a conclusion <code>graph/models.py:6999</code> states
+    independently in the generated schema. Skips: <code>loop.py:2722</code>, <code>2286</code> and
+    <code>2777</code> remove the in-fence reconcile along with the out-of-fence one, so an edited
+    name carries no refreshed embedding and its family keeps a pre-edit harmonization signature;
+    <code>review/pipeline.py:1720</code> drops every Layer-1 finding in the same run whose console
+    line at <code>cli/sn.py:6049</code> tells the operator how many exist;
+    <code>orphan_sweep.py:162</code> gates the disposition read on a parking count, with a reconcile
+    net behind it that has no production caller. Fails open or never arms:
+    <code>graph_ops.py:11540</code>, and <code>audits.py:41</code>, whose refusal is imported only
+    by its own test while the two report fields are overridable defaults —
+    <code>AuditReport(answers_question=QUARANTINE_QUESTION)</code> constructs a report claiming the
+    opposite of the declaration and no test sees it.</p>
+
+    <p><strong>What this does not establish.</strong> The gate measures this node's read only; no
+    defect here was repaired, and verifying the merged result belongs to a separately dispatched
+    node. One coupling could not be settled from the code and is recorded as a question rather than
+    a finding: <code>rederive_structural_edges</code> is suppressed on the edit path, and the
+    export's producer predicate (<code>export.py:777</code>) admits partly on a live structural
+    child, so an <code>sn edit</code> that mints an identity whose only producing evidence would
+    have been such a child may leave the run without it. Settling that needs a live graph —
+    <code>sn edit</code> on a name with structural children, edge count before and after. Defect 4
+    (<code>review/pipeline.py:1720</code>) predates <code>0ba05e980</code>; it is reported here
+    because it is the exact surface that change declares, and it lies outside this node's fence.</p>
+  </section>
   </main>
 </body>
 </html>

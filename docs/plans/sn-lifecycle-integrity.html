@@ -152,6 +152,41 @@ falls below threshold, that the gate then skips the reviewer call entirely, and 
 rejected the name. Making the synthetic origin unmistakable — a distinct resolution method, or a tier
 the aggregate readers refuse to treat as a verdict — is the fix.</p>
 
+<p><strong>The sprint's three remaining local-lane landings were read for the shape the
+export gate audit found</strong> — a key-presence test standing in for an observation — and all
+three are <strong>SAFE-FOR-WEST</strong>: none of <code>dd88d0d3f</code> (<code>edit.py</code>),
+<code>0ba05e980</code> (<code>review/audits.py</code>) or <code>73242777f</code>
+(<code>graph_ops.py</code>, <code>orphan_sweep.py</code>) is read by <code>export.py</code>, and no
+defect among them changes a name, a description or an eligibility decision. Their three suites
+return <strong>13 passed, exit 0</strong>, and none of the eight defects found is visible to any of
+them, which is the finding about the suites rather than an aside. The shape recurs three more
+times, in three different files: a bypassed reconcile returning a default-constructed
+<code>AttachmentAuditResult()</code> indistinguishable from a clean one
+(<code>loop.py:1884</code>); <code>getattr(audit_report, "findings", [])</code>
+(<code>review/pipeline.py:1720</code>) naming a field <code>AuditReport</code> does not have, so
+every Layer-1 lint finding is dropped in the same run whose console line tells the operator how
+many exist; and a <code>ValueError</code> refusal that cannot fire because
+<code>classify_parked_source</code> is total over all 135 evidence shapes enumerated
+(<code>graph_ops.py:11540</code>), while the absence it was aimed at is absorbed as
+<code>cause_not_recorded</code> instead. That is six known sites of one shape in this sprint's
+local-lane work.</p>
+
+<p><strong>The parked-disposition row of the table above is not yet repaired, and the reason is
+mechanical rather than partial.</strong> The sweep writer selects on
+<code>sns.last_error = $cap_reason</code> (<code>graph_ops.py:11585</code>) while
+<code>classify_parked_source</code> enters its reason branch only when the reason differs from that
+same constant (<code>graph_ops.py:11451</code>), so <code>attempt_budget_exhausted</code> and
+<code>vocabulary_gap</code> — the two classes that separate a nameable quantity from a permanent
+exclusion — are unreachable from it; the parking statement overwrites <code>last_error</code> with
+the cap string before the classifier ever sees the original cause
+(<code>orphan_sweep.py:114</code>); the reconcile pass that could reach all six,
+<code>disposition_parked_sources</code>, has <strong>no production caller</strong> (three call
+sites, all in tests); and nothing clears <code>parked_disposition</code>, so a revived and re-parked
+source keeps its stale class. The footgun therefore still reads as a uniform failure, which is what
+this row exists to remove. Full audit with every file:line and triggering input:
+<a href="/imas-codex/evidence/sn-lifecycle-integrity/local-lane-pipeline-audit">the local-lane
+pipeline audit</a>, anchored in <a href="/imas-codex/evidence/archive/sn-lifecycle-integrity-landed#local-lane-landings-audited">the cumulative record</a>.</p>
+
 <h2 id="s5a">§5a — A timestamp is uniform or it is noise</h2>
     <p><code>StandardName.updated_at</code> is written at <strong>3 of 218</strong> property-write
     sites in <code>graph_ops.py</code> and read at none. Measured today after the static Cypher
