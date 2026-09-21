@@ -80,12 +80,19 @@ def _no_dd_gaps(*, name_ids, gc=None):
 
 def _export_report(
     *,
+    all_gates_passed: bool,
+    gate_results: list[object],
     total_candidates=220,
     exported_count=218,
     exclusion_counts=None,
     exclusion_records=None,
 ):
-    """An export-leg report shaped exactly as ``_record_export_accounting`` reads it."""
+    """An export-leg report shaped exactly as ``_record_export_accounting`` reads it.
+
+    The verdict and the gate results are stated by each call site rather than
+    supplied here, so a report can never be handed to the release flow without
+    an explicit export outcome.
+    """
     if exclusion_counts is None:
         exclusion_counts = {"missing_physics_domain": 1, "invalid_catalog_entry": 1}
     if exclusion_records is None:
@@ -95,14 +102,16 @@ def _export_report(
         exported_count=exported_count,
         exclusion_counts=exclusion_counts,
         exclusion_records=exclusion_records,
+        all_gates_passed=all_gates_passed,
+        gate_results=gate_results,
     )
 
 
 class _RehearsalExporter:
     """Stands in for the production export leg, recording how it was driven."""
 
-    def __init__(self, report=None, raises=None):
-        self.report = report if report is not None else _export_report()
+    def __init__(self, report, raises=None):
+        self.report = report
         self.raises = raises
         self.calls: list[dict] = []
 
@@ -183,6 +192,8 @@ def test_rehearsal_prints_candidate_published_and_every_exclusion(
     each exclusion with its mechanism."""
     leg = _RehearsalExporter(
         _export_report(
+            all_gates_passed=True,
+            gate_results=[],
             total_candidates=220,
             exported_count=218,
             exclusion_counts={
@@ -234,6 +245,8 @@ def test_rehearsal_reports_a_residue_rather_than_hiding_it(
     silently absorbed into the arithmetic."""
     leg = _RehearsalExporter(
         _export_report(
+            all_gates_passed=True,
+            gate_results=[],
             total_candidates=220,
             exported_count=218,
             exclusion_counts={"missing_physics_domain": 1},
@@ -254,7 +267,10 @@ def test_rehearsal_survives_an_unreachable_leg_and_says_so(
 ):
     """A rehearsal whose accounting cannot be measured still rehearses: the
     roster and branch it would cut are reported and the failure is named."""
-    leg = _RehearsalExporter(raises=RuntimeError("export leg is unavailable"))
+    leg = _RehearsalExporter(
+        _export_report(all_gates_passed=True, gate_results=[]),
+        raises=RuntimeError("export leg is unavailable"),
+    )
     monkeypatch.setattr(catalog_release, "_default_exporter", leg)
     caplog.set_level(logging.INFO)
 
@@ -277,7 +293,7 @@ def test_rehearsal_leaves_the_checkout_untouched_it_measured(
     """The accounting appears and nothing is written: no staging directory, no
     roster, no candidate artifact, no review branch, no tag, and the scratch
     tree the leg ran in is gone."""
-    leg = _RehearsalExporter()
+    leg = _RehearsalExporter(_export_report(all_gates_passed=True, gate_results=[]))
     monkeypatch.setattr(catalog_release, "_default_exporter", leg)
     caplog.set_level(logging.INFO)
 
@@ -319,6 +335,8 @@ def test_a_published_run_still_records_the_same_accounting(
     exports with, so the rehearsal's figures are the cut's figures."""
     leg = _RehearsalExporter(
         _export_report(
+            all_gates_passed=True,
+            gate_results=[],
             total_candidates=5,
             exported_count=4,
             exclusion_counts={"missing_physics_domain": 1},

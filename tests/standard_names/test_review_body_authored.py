@@ -66,20 +66,24 @@ def _focus_file_with_ledger(tmp_path: Path) -> Path:
     return focus
 
 
-def _exporter(**kwargs):
-    staging = Path(kwargs["staging_dir"])
-    (staging / "standard_names").mkdir(parents=True, exist_ok=True)
-    (staging / "catalog.yml").write_text("catalog_name: test\n", encoding="utf-8")
-    (staging / "standard_names" / "equilibrium.yml").write_text(
-        "- name: plasma_current\n  unit: A\n",
-        encoding="utf-8",
-    )
-    # Export gates are scaffolding; these tests exercise review-body authorship.
-    return SimpleNamespace(
-        exported_count=1,
-        all_gates_passed=True,
-        gate_results=[],
-    )
+def _exporter(*, all_gates_passed: bool, gate_results: list[object]):
+    """An export double whose verdict and gate results each call site states."""
+
+    def exporter(**kwargs):
+        staging = Path(kwargs["staging_dir"])
+        (staging / "standard_names").mkdir(parents=True, exist_ok=True)
+        (staging / "catalog.yml").write_text("catalog_name: test\n", encoding="utf-8")
+        (staging / "standard_names" / "equilibrium.yml").write_text(
+            "- name: plasma_current\n  unit: A\n",
+            encoding="utf-8",
+        )
+        return SimpleNamespace(
+            exported_count=1,
+            all_gates_passed=all_gates_passed,
+            gate_results=gate_results,
+        )
+
+    return exporter
 
 
 def _publisher(**kwargs):
@@ -109,7 +113,14 @@ class MockGitHubClient:
 
 
 def _release(
-    tmp_path: Path, client: MockGitHubClient, *, focus, pr_title=None, pr_body=None
+    tmp_path: Path,
+    client: MockGitHubClient,
+    *,
+    focus,
+    all_gates_passed: bool,
+    gate_results: list[object],
+    pr_title=None,
+    pr_body=None,
 ):
     checkout = _catalog_checkout(tmp_path)
     return run_review_release(
@@ -119,7 +130,9 @@ def _release(
         staging_dir=tmp_path / "staging",
         bump="minor",
         reviews_dir=tmp_path / "reviews",
-        exporter=_exporter,
+        exporter=_exporter(
+            all_gates_passed=all_gates_passed, gate_results=gate_results
+        ),
         publisher=_publisher,
         github_client=client,
         upstream_repo="review-owner/example-catalog",
@@ -139,6 +152,8 @@ def test_authored_body_reaches_pr_unchanged_apart_from_preview_line(tmp_path):
         tmp_path,
         client,
         focus=focus,
+        all_gates_passed=True,
+        gate_results=[],
         pr_title="authored review",
         pr_body=authored_body,
     )
@@ -156,7 +171,13 @@ def test_synthesized_body_still_gets_exclusion_ledger_paragraph(tmp_path):
     focus = _focus_file_with_ledger(tmp_path)
     client = MockGitHubClient()
 
-    report = _release(tmp_path, client, focus=focus)
+    report = _release(
+        tmp_path,
+        client,
+        focus=focus,
+        all_gates_passed=True,
+        gate_results=[],
+    )
 
     assert report.errors == []
     assert client.created_body is not None
