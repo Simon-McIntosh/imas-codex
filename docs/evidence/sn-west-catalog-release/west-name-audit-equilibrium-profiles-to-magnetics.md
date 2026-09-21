@@ -198,3 +198,104 @@ its proposed spelling is that adjudication's, not a new one.
 - name description: High-energy boundary of an X-ray photon-acceptance band, defining the maximum photon energy included in a selected spectral window.
 - **rejected spelling** `upper_photon_energy` → **proposed spelling** `upper_bound_photon_energy`
 - why: The same identity and the same defect as row 110 — this is the sibling of the settled `lower_bound_photon_energy`, which the first half accepts at this very container (row 40), and the pair must be spelled symmetrically. It is listed separately because it is a separate binding; the fix is one rename covering both, and `soft_x_rays/channel/energy_band/upper_bound` (index 181) outside this range carries the same identity.
+
+### 121. `wave_current_amplitude_of_antenna_strap` — **INCORRECT**
+
+- source path: `ic_antennas/antenna/module/current/amplitude`
+- unit: `A` (data dictionary: `A`)
+- data-dictionary text: Amplitude of the measurement
+- name description: Peak magnitude of the radio-frequency current at a specified position along an ion-cyclotron-heating antenna strap.
+- **rejected spelling** `wave_current_amplitude_of_antenna_strap` → **proposed spelling** `wave_current_amplitude_of_ion_cyclotron_heating_antenna`
+- why: The bound path is `module/current`, a quantity of the module. The data dictionary gives the strap its own subtree at `module/strap/`, and this batch uses it — `back_surface_distance_of_antenna_strap`, `wave_phase_of_antenna_strap` (both accepted in the first half) and rows 127 to 130 here are all genuine `module/strap/` leaves. Binding a `_of_antenna_strap` name to the module container therefore claims a locus the batch spends on something else. The decisive evidence is internal: the immediate sibling `module/voltage/amplitude` is spelled `voltage_amplitude_of_ion_cyclotron_heating_antenna` (row 131), so the current and the voltage of one identical container are published under two different loci. A module may carry more than one strap, so the two are not even the same object in general.
+
+### 122. `capacitance_of_ion_cyclotron_heating_antenna` — **INCORRECT**
+
+- source path: `ic_antennas/antenna/module/matching_element/capacitance`
+- unit: `F` (data dictionary: `F`)
+- data-dictionary text: Capacitance of the macthing element
+- name description: Effective capacitance of an impedance-matching element in an ion-cyclotron heating antenna, relating stored charge to the RF voltage used for circuit tuning.
+- **rejected spelling** `capacitance_of_ion_cyclotron_heating_antenna` → **proposed spelling** `capacitance_of_impedance_matching_element`
+- why: An antenna capacitance and a matching-element capacitance are different components of the same circuit and different numbers. The antenna's own capacitance is a fixed property of its geometry; the matching element's is the *tuned* value an operator varies shot to shot to cancel the reactive part of the load. Publishing the tuning capacitor under the antenna's name means a consumer reading `capacitance_of_ion_cyclotron_heating_antenna` across a shot sees a quantity that moves, and attributes the movement to the antenna. The name's description already says "of an impedance-matching element", so the correct locus is known and simply absent from the name. (The data dictionary's own text misspells "matching"; that is upstream and not a naming defect.)
+
+### 123. `forward_wave_phase_of_ion_cyclotron_heating_antenna` — **correct**
+
+- source path: `ic_antennas/antenna/module/phase_forward`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Phase of the forward power with respect to the first module
+- name description: Relative phase of the forward radio-frequency power-wave phasor at an ion-cyclotron-heating antenna module, referenced to the first module for inter-module toroidal phasing.
+- The `forward` qualifier is present and the antenna locus matches the first half's accepted `reflected_wave_phase_of_ion_cyclotron_heating_antenna` at the sibling leaf `module/phase_reflected`, so the forward/reflected pair is spelled symmetrically.
+
+### 124. `forward_power_of_ion_cyclotron_heating_antenna` — **correct**
+
+- source path: `ic_antennas/antenna/module/power_forward`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Forward power arriving to the back of the module
+- name description: Forward RF power of an ion-cyclotron heating antenna is the incident power traveling from the generator toward the antenna before reflection and coupling to the plasma.
+- Forward power is correctly kept distinct here from both launched and coupled power, which is the distinction the first half found violated in `total_power_due_to_ion_cyclotron_heating` (row 80).
+
+### 125. `reflected_power_of_ion_cyclotron_heating_antenna` — **correct**
+
+- source path: `ic_antennas/antenna/module/power_reflected`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Reflected power
+- name description: Reflected power of an ion-cyclotron heating antenna is the backward-traveling radio-frequency power returned from one antenna toward the transmission-line source rather than coupled into the plasma.
+
+### 126. `pressure_of_ion_cyclotron_heating_antenna` — **INCORRECT**
+
+- source path: `ic_antennas/antenna/module/pressure/amplitude`
+- unit: `Pa` (data dictionary: `Pa`)
+- data-dictionary text: Amplitude of the measurement
+- name description: Pressure associated with an ion-cyclotron-heating antenna module, representing mechanical normal loading or contained-gas pressure at hardware components.
+- **rejected spelling** `pressure_of_ion_cyclotron_heating_antenna` → **proposed spelling** `pressure_amplitude_of_ion_cyclotron_heating_antenna`
+- why: The leaf is `/amplitude` — the peak magnitude of an oscillating signal, carried in the same amplitude-and-phase wrapper the data dictionary uses for the module's current and voltage. Its two siblings in that identical container both keep the qualifier: `wave_current_amplitude_of_antenna_strap` (row 121) and `voltage_amplitude_of_ion_cyclotron_heating_antenna` (row 131). This one drops it, so the published name reads as a static pressure while the datum is the amplitude of a varying one — for a sinusoid those differ by the factor between peak and mean, and the mean of a pure oscillation is zero.
+- The description compounds the problem by hedging between two unrelated physical quantities, "mechanical normal loading or contained-gas pressure": a structural stress on the strap and a gas pressure in the feedthrough are not the same measurement and cannot both be right. That hedge is a description defect and would be a note on its own; it is recorded here because it shows the amplitude omission is not the only thing unresolved about this row.
+
+### 127. `toroidal_angle_of_antenna_strap` — **INCORRECT**
+
+- source path: `ic_antennas/antenna/module/strap/outline/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of each antenna-strap outline point around the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+- **rejected spelling** `toroidal_angle_of_antenna_strap` → **proposed spelling** `toroidal_angle_of_antenna_strap_outline`
+- why: Two different things are called the toroidal angle of a strap: the single installation angle at which the strap is mounted, and the per-point φ of each vertex of its outline. This row is the second, and the name reads as the first — a reader would take one scalar where the datum is an array around a contour. The row's own two siblings at the identical container say so: `radial_outline_of_antenna_strap` (row 128) and `vertical_outline_of_antenna_strap` (row 129) both carry `outline`, so one geometric point set is published with two naming schemes across its three coordinates. This is the same shape as the aperture-centre finding the first half reported, where φ belonged to one object and R and Z to another.
+- The `*_outline_of_X` family is settled by the first half (`radial_outline_of_limiter_tile`, `vertical_outline_of_plasma_facing_component`) but has no φ member in it, so there is no settled spelling to copy. The proposal keeps the physically correct word `toroidal_angle` for an angle in radians and names the outline locus explicitly rather than inventing a `toroidal_outline` that would read as a length.
+
+### 128. `radial_outline_of_antenna_strap` — **correct**
+
+- source path: `ic_antennas/antenna/module/strap/outline/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of each point on an antenna-strap outline in the right-handed cylindrical (R, φ, Z) frame.
+- Member of the `*_outline_of_X` family the first half settled; not relitigated.
+
+### 129. `vertical_outline_of_antenna_strap` — **correct**
+
+- source path: `ic_antennas/antenna/module/strap/outline/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of each contour point defining an ion-cyclotron antenna strap boundary, distinguishing the strap outline from its geometric-center location.
+
+### 130. `toroidal_width_of_antenna_strap` — **correct**
+
+- source path: `ic_antennas/antenna/module/strap/width_phi`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Width of strap in the toroidal direction
+- name description: Full toroidal width of the rectangular cross-section of an ICRH antenna strap conductor element, measured along the toroidal direction in the right-handed cylindrical (R, φ, Z) frame.
+- A toroidal width in metres rather than radians is the physically useful form and matches the data dictionary exactly.
+
+### 131. `voltage_amplitude_of_ion_cyclotron_heating_antenna` — **correct**
+
+- source path: `ic_antennas/antenna/module/voltage/amplitude`
+- unit: `V` (data dictionary: `V`)
+- data-dictionary text: Amplitude of the measurement
+- name description: Peak magnitude of the radio-frequency voltage waveform on a single transmission-line feed of an ion-cyclotron-heating antenna module.
+- This row is the reference against which rows 121, 126 and 132 are judged: it keeps the `amplitude` qualifier, names the measured electrical quantity, and puts the locus at the antenna, which is what the module container supports.
+
+### 132. `wave_phase_of_ion_cyclotron_heating_antenna` — **INCORRECT**
+
+- source path: `ic_antennas/antenna/module/voltage/phase`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Phase of the measurement
+- name description: Relative phase angle of a radio-frequency phasor at an antenna element in an ion-cyclotron heating launcher, measured relative to the first element for inter-element phasing.
+- **rejected spelling** `wave_phase_of_ion_cyclotron_heating_antenna` → **proposed spelling** `voltage_phase_of_ion_cyclotron_heating_antenna`
+- why: Four distinct phases live in this one data-dictionary container — of the voltage, of the current, of the forward power and of the reflected power — and the name identifies none of them. This row is the voltage's, the direct sibling of `voltage/amplitude`; the forward and reflected ones are already published as `forward_wave_phase_of_ion_cyclotron_heating_antenna` (row 123) and `reflected_wave_phase_of_ion_cyclotron_heating_antenna` (first half). The differences are not academic: the voltage-to-current phase is what sets the strap's reactive loading, so a consumer that reads `wave_phase_of_ion_cyclotron_heating_antenna` as the current phase computes the wrong sign of reactive power. The name's own description says only "a radio-frequency phasor", which is the self-descriptiveness test failing in the description as well.
