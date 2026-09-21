@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T22:23:23",
+  "updated": "2026-09-21T23:28:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -184387,6 +184387,219 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T203208658839-review-of-n-a-settled-exclusion-can-be-waived",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "review-of-n-a-settled-exclusion-can-be-waived",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1674,
+                "cached_input_tokens": 782927,
+                "input_tokens": 784603,
+                "output_tokens": 813,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 785416,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "the review for r-20260921T195953375664-n-a-settled-exclusion-can-be-waived stores a parsed record scoring all 5 dimensions in the range 0..20",
+          "estimated_hours": null,
+          "goal": "attach an independent review to run r-20260921T195953375664-n-a-settled-exclusion-can-be-waived",
+          "id": "review-of-n-a-settled-exclusion-can-be-waived",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T20:32:10Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T203208658839-review-of-n-a-settled-exclusion-can-be-waived/manifest.md",
+          "negative_control": "",
+          "plan": "unbound-source-backlog",
+          "requested_backend": null,
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "session-4994115311a2b7a92ac8",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "xhigh",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "read-only",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T20:32:27Z",
+        "completed_at": "2026-09-21T20:41:47.844Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 550,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 560,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "485836e4d6ea420574742d1e39540c1fcdb2cd23",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "review record parses with all five dimensions scored",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T203208658839-review-of-n-a-settled-exclusion-can-be-waived/manifest.md",
+        "scope_changed": false,
+        "session_id": "653faba8-1a8f-4d83-ad7f-21655a146c64",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5201932,
+            "input_tokens_cumulative": 5201932,
+            "output_tokens": 40484,
+            "output_tokens_cumulative": 40484,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T20:41:47.844Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5355472,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 556.673,
+          "generated_tokens": 47901,
+          "generation_seconds": 494.686,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.7,
+          "machine_seconds": 61.987,
+          "peak_input_tokens": 152240,
+          "tokens_per_second": 96.83,
+          "wall_tokens_per_second": 86.05
+        },
+        "follow_on_paths": [
+          "carried/uncarried",
+          "tests/standard_names/",
+          "runs/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived/logs/base_suite_missing_checkout_failure_ids.txt"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "a review run produces a review record rather than repository commits; its deliverable is the parsed JSON at the declared write path, which is named as the gate log",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-a-settled-exclusion-can-be-waived",
+          "session_id": "653faba8-1a8f-4d83-ad7f-21655a146c64",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T20:41:47.844Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.96,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 67.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -184699,6 +184912,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2501
+    "_version": 2502
   }
 }
