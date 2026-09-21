@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T13:43:12",
+  "updated": "2026-09-21T13:45:58",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -172551,6 +172551,258 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T060727584350-n-a-defaulted-attribute-must-exist-somewhere",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-a-defaulted-attribute-must-exist-somewhere",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 540,
+                "cached_input_tokens": 326003,
+                "input_tokens": 326545,
+                "output_tokens": 667,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 327212,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm the shape reproduces before building the check, and quote the reproduction: imas_codex/standard_names/review/pipeline.py reads getattr(audit_report, \"findings\", []) and getattr(finding, \"affected_names\", []), and neither `findings` nor `affected_names` is a declared field of any model in imas_codex.standard_names.review.audits -- AuditReport carries lint_findings, link_findings and duplicate_components, and LintFinding carries name_id, finding_type, detail and severity. The default therefore stands in for an observation never made, and the same shape was recorded at six sites in one sprint's work. Build the check that would have caught it. The check is specified: a test under tests/standard_names/ that parses the named modules with ast, collects every three-argument getattr call whose second argument is a string literal, and asserts each literal attribute name is a declared field or property of at least one pydantic model, dataclass or class defined in imas_codex, failing with the file, line and attribute name for each literal that is not. Cover imas_codex/standard_names/review/, imas_codex/standard_names/export.py and imas_codex/standard_names/loop.py, and make the module list a module-level constant so it is extended by editing one line. Carry an explicit allowlist of attribute names that are legitimately absent, each entry paired with a one-line reason, and keep it empty unless a real case forces an entry -- an allowlist entry is the fail-open this check exists to remove, so prefer repairing the call site. A two-argument getattr raises rather than defaulting and is not this defect, so exclude it. The test must currently FAIL on the pipeline.py sites named above if they are still present at your base revision, which is the evidence it can see something known present; if a peer has already repaired them, say so in the manifest, plant one of the two back in a scratch copy outside the repository to prove the check fires, and record that log. The done-when is that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, and that the new test's own failure output names every offending file, line and attribute. Do not repair any call site this check finds: repairing pipeline.py is another node's declared write path and a collision there would lose work. List every finding under follow_ons instead, with file, line and attribute name.",
+          "estimated_hours": 1.0,
+          "goal": "make a getattr default on an attribute no model declares fail a test instead of passing silently",
+          "id": "n-a-defaulted-attribute-must-exist-somewhere",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T06:07:28Z",
+            "read_at": "2026-09-21T06:07:30Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 1.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060727584350-n-a-defaulted-attribute-must-exist-somewhere/manifest.md",
+          "negative_control": "retain getattr(audit_report, \"findings\", []) and getattr(finding, \"affected_names\", []) in imas_codex/standard_names/review/pipeline.py at lines 1720-1721",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/standard_names/test_defaulted_attributes_exist.py",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-attrcheck",
+        "backend": "codex-terra",
+        "local": false,
+        "agent": {
+          "alias": "terra5.6",
+          "backend": "codex-terra",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-terra",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T06:07:43Z",
+        "completed_at": "2026-09-21T09:26:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 11934,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "9a5e40f4ba6ed89ebe44ef7606d0eb6db4010236",
+        "commits": [
+          "ba46a4708ccef57537d762904ca3b2bb973f4ac5",
+          "a19c1a4c56241b717add700532a97b377569ac61",
+          "8ceb00f332859259b451ec471c8661a43b1bdc74",
+          "88f8097e0cbba2849e9421f78416f1f25439d1bf",
+          "486dfc17f34d25f920be59f230eff07839bb45e1",
+          "9778934d19ac2f118d38ebd86aad37aef97ab83a",
+          "e1ab3df810a313112439e50b94f43282ee8da137"
+        ],
+        "changed_lines": {
+          "added": 306,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug uv run pytest -p no:cacheprovider tests/standard_names/ (isolated gate tree, isolation asserted OK)",
+          "exit_status": 1,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gate-head-isolated.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "LANDED WITH TWO MUST-FIX OPEN, both owned by the successor node. Isolated base 1e2cb7e8b and head f2cb7b21b both 31 failed / 3 errors, identical failing id sets, zero added. The independent opus review proved the guard is still bypassable: REQUIRED_MODULE_ROOTS is a verbatim copy of MODULE_ROOTS in the same file, refusing a one-sided edit but not a two-sided one, measured at 3 passed with a root deleted from both tuples. It also found the archived evidence still records floors and a receipt for a guard deleted from the code, and that this correction silently inverted the misspelled-root path from raising to contributing nothing. Scores goal_fidelity 17, scope_discipline 19, evidence 14, durability 15, fit 16. Record repair at promote: the negative_control_log field named two later mutation logs as a single bracketed list, neither of which was the log matching the node's declared mutation; it now names defaulted-attributes-base-red.log, whose first line repeats the declaration verbatim, with the other two retained as additional evidence. Ledger note: earlier outcomes this session quote a base of 20 failed / 3 errors, a shared-checkout artifact; the true isolated figure is 31 / 3, independently reproduced by a peer at the same SHA through a different extraction path.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060727584350-n-a-defaulted-attribute-must-exist-somewhere/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c293-db31-7452-82a2-7dfe08995b97",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29454464,
+            "cached_input_tokens_cumulative": 29454464,
+            "input_tokens": 30167820,
+            "input_tokens_cumulative": 30167820,
+            "output_tokens": 73568,
+            "output_tokens_cumulative": 73568,
+            "reasoning_output_tokens": 20728,
+            "reasoning_output_tokens_cumulative": 20728
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T09:26:37Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 14.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-21T09:26:37Z"
+            }
+          ],
+          "notional_cost_usd": 61.4869,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-terra",
+            "input_per_million": 2.0,
+            "output_per_million": 12.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "lane-change",
+          "lanes": [
+            {
+              "changed_at": "2026-09-21T06:59:23Z",
+              "detail": "continued session '01a0c293-db31-7452-82a2-7dfe08995b97' on harness 'codex'",
+              "from_backend": "codex",
+              "from_harness": "codex",
+              "reason": "the prior turn ended on a provider capacity refusal from the sol5.6 seat, not a spend limit and not a defect: the stream's last two records are an error reading 'Selected model is at capacity' followed by turn.failed, with an empty stderr. Moving to a sibling seat on the same account rather than waiting on capacity.",
+              "session": "continued",
+              "session_id": "01a0c293-db31-7452-82a2-7dfe08995b97",
+              "session_source": "stream",
+              "to_backend": "codex-terra",
+              "to_harness": "codex"
+            }
+          ],
+          "root_run_id": "r-20260921T060727584350-n-a-defaulted-attribute-must-exist-somewhere"
+        },
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 15,
+            "evidence": 14,
+            "fit": 16,
+            "goal_fidelity": 17,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 81
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 29454464,
+          "cumulative_input_tokens": 30167820,
+          "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+          "generated_tokens": 94296,
+          "generation_seconds": 10969.815,
+          "machine_seconds": 961.266,
+          "tokens_per_second": 8.6
+        },
+        "follow_on_paths": [
+          "imas_codex/standard_names/review/pipeline.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-defaulted-attribute-must-exist-somewhere",
+          "session_id": "01a0c293-db31-7452-82a2-7dfe08995b97",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T09:26:37Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.985,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.985,
+          "at_complete": 0.985,
+          "verdict": "waived",
+          "reason": "the guard this node built is still bypassable by a two-sided edit, proved by mutation in the independent review, so the section it serves is not closed; the impl advance belongs to the successor node n-the-static-check-aperture-cannot-shrink-silently which owns both MUST-FIX findings and is in flight"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_defaulted_attributes_exist.py"
+          ],
+          "declaration": "retain getattr(audit_report, \"findings\", []) and getattr(finding, \"affected_names\", []) in imas_codex/standard_names/review/pipeline.py at lines 1720-1721",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060727584350-n-a-defaulted-attribute-must-exist-somewhere/defaulted-attributes-base-red.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060727584350-n-a-defaulted-attribute-must-exist-somewhere/defaulted-attributes-base-red.log"
+        },
+        "tool_steps": 23.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -172863,6 +173115,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2455
+    "_version": 2456
   }
 }
