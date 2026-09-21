@@ -180,3 +180,162 @@ section says so rather than presenting a reading the text does not support.
 - **rejected spelling** `line_integrated_electron_number_density` → **proposed spelling** `line_integrated_electron_density`
 - why: the cohort spells this physical base `electron_density` in eight names and `electron_number_density` in this one identity alone. The semantic content is identical — a number density per volume, integrated along a path — so the extra segment marks no distinction and leaves one published batch carrying two spellings of one base. The majority spelling is the survivor.
 - as with row 60, the other half recorded this defect at the `reconstructed` sibling; it reappears here because the identity, not the path, carries it.
+
+### 64. `radial_coordinate_of_magnetic_axis` — **INCORRECT**
+
+- cohort index: 64
+- source path: `equilibrium/time_slice/contour_tree/node/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate locating the magnetic-axis O-point in the right-handed cylindrical (R, φ, Z) frame around which nested closed flux surfaces are organized.
+- **rejected spelling** `radial_coordinate_of_magnetic_axis` → **proposed spelling** `radial_coordinate_of_flux_map_critical_point`
+- why: the bound path is an indexed **node of the contour tree** of the poloidal flux map, not the magnetic axis. A contour tree has many nodes — the critical points of ψ, comprising O-points and X-points and the saddles that join them — whereas an equilibrium has exactly one magnetic axis. A name asserting "magnetic axis" over an array whose members are, by construction, not all the magnetic axis is bound to the wrong object, and the error is not recoverable by a reader: every node in the array arrives carrying a claim to be the O-point. The DD leaf text here is the generic `Major radius` and says nothing that supports the stronger claim; the name's specificity comes from nowhere in the row.
+- this identity is correctly bound elsewhere. `equilibrium/time_slice/global_quantities/magnetic_axis/r` genuinely is the magnetic axis and the other half judged it correct; the repair is to detach this locus, not to rename the identity. The identity is additionally bound to `summary/boundary/magnetic_axis_r/value` and `summary/local/magnetic_axis/position/r`, both genuine axis loci; the collision itself belongs to the whole-cohort sweep.
+
+### 65. `poloidal_plane_cross_sectional_area_of_plasma_boundary` — **correct**
+
+- cohort index: 65
+- source path: `equilibrium/time_slice/global_quantities/area`
+- unit: `m^2` (data dictionary: `m^2`)
+- data-dictionary text: Area of the LCFS poloidal cross section
+- name description: Area enclosed by the last closed magnetic flux surface in a poloidal plane, defining the equilibrium plasma cross-sectional size at the plasma boundary.
+- The name names the surface the DD names — the LCFS, spelled `plasma_boundary` — and distinguishes the poloidal-plane area from the toroidal surface area, which is a different quantity with the same unit. This row and row 80 together establish that the cohort *does* distinguish a global boundary scalar from a per-surface profile; that convention is what row 79 departs from.
+
+### 66. `poloidal_beta` — **correct**
+
+- cohort index: 66
+- source path: `equilibrium/time_slice/global_quantities/beta_pol`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Poloidal beta. Defined as betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]
+- name description: Poloidal beta is a dimensionless measure of total plasma pressure relative to the magnetic-pressure scale of the plasma-current-generated poloidal field.
+- collision outside this range: also bound to `summary/global_quantities/beta_pol_mhd/value`; deferred to the whole-cohort sweep.
+
+### 67. `normalized_toroidal_beta` — **correct**
+
+- cohort index: 67
+- source path: `equilibrium/time_slice/global_quantities/beta_tor_norm`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Normalized toroidal beta, defined as 100 * beta_tor * a[m] * B0 [T] / ip [MA]
+- name description: Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.
+- The Troyon-normalised form is what the DD defines and what the name claims; `normalized` is load-bearing, since the unnormalised `toroidal_beta` is a separate identity the other half judged correct at the `beta_tor` sibling.
+
+### 68. `normalized_toroidal_beta` — **correct**, with a defect that is not in the name
+
+- cohort index: 68
+- source path: `equilibrium/time_slice/global_quantities/beta_tor_norm`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Normalized toroidal beta, defined as 100 * beta_tor * a[m] * B0 [T] / ip [MA]
+- name description: Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.
+- note: **this row and row 67 are the same binding recorded twice.** Every field of the two rows is byte-identical except `index`, and the cohort's own collision list for this identity repeats `equilibrium/time_slice/global_quantities/beta_tor_norm` twice. Counted across the whole 255-row remainder, this is the **only** duplicated `(name, path)` pair, so the cohort is not generally double-counting and this is one duplicate edge rather than a systematic inflation. The name is correct at both; what is wrong is that one identity holds two producer bindings to one source path, which means the accepted-binding count of 341 is one higher than the number of distinct bindings. Reported as a graph-hygiene follow-on, not as a name verdict — no reader of the catalog can see it.
+
+### 69. `mhd_energy` — **INCORRECT**
+
+- cohort index: 69
+- source path: `equilibrium/time_slice/global_quantities/energy_mhd`
+- unit: `J` (data dictionary: `J`)
+- data-dictionary text: Plasma energy content = 3/2 * int(p,dV) with p being the total pressure (thermal + fast particles) [J]. Time-dependent; Scalar
+- name description: Global plasma stored energy obtained from the volume integral of total kinetic pressure, including thermal and fast-particle pressure contributions.
+- **rejected spelling** `mhd_energy` → **proposed spelling** `total_plasma_stored_energy`
+- why: the DD text is unambiguous that this is the *kinetic* energy content, three halves of the volume-integrated pressure, thermal plus fast particles. `mhd_energy` does not say that. In a catalog whose neighbouring identities include poloidal and toroidal magnetic flux, "MHD energy" reads at least as naturally as the magnetic energy of the configuration, which is a different quantity with the same unit and a comparable magnitude. The name also carries an unexpanded acronym, which this batch otherwise refuses — it spells `ion_cyclotron_heating` rather than `ich` and `electron_cyclotron` rather than `ece` wherever the quantity, not the instrument, is being named.
+- the proposed spelling reuses a convention the cohort already fixed rather than minting one: `total_` marks the sum over populations in `total_electron_density` (thermal plus non-thermal) and `total_plasma_pressure` (row 98), which is exactly the thermal-plus-fast inclusion the DD states here. It also leaves room for the thermal-only stored energy to be named without collision, which `mhd_energy` does not.
+- collision outside this range: also bound to `summary/global_quantities/energy_mhd`, the same quantity; the rename must carry both.
+
+### 70. `poloidal_length_of_flux_surface` — **correct**
+
+- cohort index: 70
+- source path: `equilibrium/time_slice/global_quantities/length_pol`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Poloidal length of the magnetic surface
+- name description: Poloidal arc length of a closed magnetic-flux-surface contour in an equilibrium poloidal cross-section, measuring the perimeter of that selected surface.
+- The name says what the DD text says. This row sits at `global_quantities`, so in practice the surface is the boundary — but the DD text itself says "the magnetic surface" and not "the plasma boundary", and the name agrees with the text it is bound to. That is the line this audit draws, and it is the same line the other half drew in accepting `surface_area_of_flux_surface` at `global_quantities/surface`, whose text likewise reads "the toroidal flux surface". Row 79 is judged differently because its DD text does not agree with its name.
+
+### 71. `normalized_plasma_internal_inductance` — **correct**, with a defect that is not in the name
+
+- cohort index: 71
+- source path: `equilibrium/time_slice/global_quantities/li_3`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Internal inductance
+- name description: Dimensionless li_3 parameter measuring poloidal magnetic-field peaking through a plasma-volume integral normalized by total plasma current and a reference major radius.
+- The name is a correct, self-descriptive reading of the DD text: a dimensionless measure of how peaked the poloidal field is inside the plasma.
+- note: the **description** identifies the definition only by echoing the DD field spelling, "the li_3 parameter", which tells a reader nothing unless they hold the path — the thing the name is supposed to make unnecessary. Three conventional definitions of internal inductance are in use and they differ numerically by several percent to tens of percent on the same discharge; the description should state which volume and which normalising radius it integrates over rather than naming the DD field. A description defect, so not an incorrect verdict.
+- follow-on: within this batch both bindings of the identity are `li_3` (the other is `summary/global_quantities/li_3/value`), so no two-quantity collision exists today. It would arise the moment a source supplying `li_1` or `li_2` is bound to the same identity, which the name as spelled would not refuse.
+
+### 72. `toroidal_magnetic_field_at_magnetic_axis` — **correct**
+
+- cohort index: 72
+- source path: `equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi`
+- unit: `T` (data dictionary: `T`)
+- data-dictionary text: Total toroidal magnetic field at the magnetic axis
+- name description: Toroidal magnetic field at the magnetic axis is the signed toroidal component of the total equilibrium magnetic field at the magnetic axis in the right-handed cylindrical (R, φ, Z) frame. It includes externally applied vacuum-field and plasma-current-generated contributions.
+- The description's "total" matches the DD's "Total", meaning vacuum plus plasma contributions — the distinction that separates this from the vacuum reference field `b0`, which the catalog names separately.
+
+### 73. `vertical_coordinate_of_magnetic_axis` — **correct**
+
+- cohort index: 73
+- source path: `equilibrium/time_slice/global_quantities/magnetic_axis/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height of the magnetic axis
+- name description: Signed vertical Z coordinate of the magnetic axis in the right-handed cylindrical (R, φ, Z) frame, marking the interior extremum organizing nested magnetic flux surfaces.
+- Bound to a genuine `magnetic_axis` container, unlike row 64, and its R sibling at the same container was accepted in the other half — the point is one locus.
+
+### 74. `poloidal_magnetic_flux_at_magnetic_axis` — **correct**
+
+- cohort index: 74
+- source path: `equilibrium/time_slice/global_quantities/psi_axis`
+- unit: `Wb` (data dictionary: `Wb`)
+- data-dictionary text: Poloidal flux at the magnetic axis
+- name description: Signed poloidal magnetic flux evaluated at the magnetic axis, providing the inner reference value for normalized poloidal-flux coordinates.
+- Same identity the other half accepted at `core_profiles/profiles_1d/grid/psi_magnetic_axis`, which is the collision partner; the two paths carry one quantity.
+
+### 75. `poloidal_magnetic_flux_at_plasma_boundary` — **correct**
+
+- cohort index: 75
+- source path: `equilibrium/time_slice/global_quantities/psi_boundary`
+- unit: `Wb` (data dictionary: `Wb`)
+- data-dictionary text: Poloidal flux at the selected plasma boundary
+- name description: Signed poloidal magnetic flux evaluated on the last closed flux surface, providing the outer reference for normalized poloidal-flux coordinates.
+- The `_at_magnetic_axis` / `_at_plasma_boundary` pair is spelled symmetrically with row 74 and the two together are what row 55's normalisation is referred to.
+
+### 76. `safety_factor_at_magnetic_axis` — **correct**
+
+- cohort index: 76
+- source path: `equilibrium/time_slice/global_quantities/q_axis`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: q at the magnetic axis
+- name description: Limiting signed field-line winding number on the innermost closed flux surface, giving toroidal turns per poloidal circuit at the magnetic axis.
+- "Limiting" is the right word: the safety factor on the axis is a limit of the profile, since the poloidal circuit degenerates there. The name expands the DD's bare `q`, which is the self-descriptiveness the catalog requires.
+
+### 77. `normalized_toroidal_flux_coordinate_at_minimum_absolute_safety_factor` — **correct**
+
+- cohort index: 77
+- source path: `equilibrium/time_slice/global_quantities/q_min/rho_tor_norm`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Minimum q position in normalised toroidal flux coordinate
+- name description: Dimensionless magnetic-surface label giving the normalized toroidal flux at the closed surface where the magnitude of the safety factor reaches its minimum.
+- Long, but every segment is load-bearing: the quantity is a surface label, the label is the normalized toroidal flux coordinate, and the surface is selected by an extremum of the safety factor. The name and its description agree that the extremum is of the **magnitude**, which matters in a catalog where the safety factor is signed.
+- note: its value sibling, row 78, drops the word `absolute` and so does not read as the same locus. See that row.
+
+### 78. `minimum_safety_factor` — **INCORRECT**
+
+- cohort index: 78
+- source path: `equilibrium/time_slice/global_quantities/q_min/value`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Minimum q value
+- name description: Signed safety-factor value on the closed magnetic flux surface where the magnitude of field-line winding is smallest, distinct from that surface’s location.
+- **rejected spelling** `minimum_safety_factor` → **proposed spelling** `minimum_absolute_safety_factor`
+- why: rows 77 and 78 are the two children of one DD container, `q_min` — one is where the minimum occurs and the other is what it is. As spelled, they do not read as one object: the location says the minimum is of the *magnitude* of the safety factor and the value says it is of the safety factor itself. Those are different extrema whenever the safety factor is negative or changes sign, which is exactly the case a signed-safety-factor catalog exists to handle, and a reader holding both names cannot tell that they refer to one surface.
+- the qualifier the name drops is supplied by both of its neighbours: by its sibling's spelling, and by its own description, which says the surface is the one "where the magnitude of field-line winding is smallest". Two independent statements of the magnitude reading against one name that omits it is what decides the direction of the repair.
+- if instead the signed reading is the intended one, then the pair is still not publishable and the repair falls on row 77 rather than here — the two names cannot both stand as spelled. This audit takes the magnitude reading for the reasons above and records the alternative so the decision is visible rather than assumed.
+
+### 79. `volume_of_flux_surface` — **INCORRECT**
+
+- cohort index: 79
+- source path: `equilibrium/time_slice/global_quantities/volume`
+- unit: `m^3` (data dictionary: `m^3`)
+- data-dictionary text: Total plasma volume
+- name description: Geometric volume contained within a nested magnetic flux surface, cumulative from the magnetic axis toward the outermost closed surface.
+- **rejected spelling** `volume_of_flux_surface` → **proposed spelling** `volume_of_plasma_boundary`
+- why: this is a global scalar whose DD text says **"Total plasma volume"**, while the name and description say a per-surface profile value, "cumulative from the magnetic axis toward the outermost closed surface". One equilibrium has one total plasma volume and a whole profile of enclosed volumes; binding the profile identity to the scalar makes the two indistinguishable in the catalog.
+- the cohort already fixes both spellings and already applies the distinction: `volume_of_plasma_boundary` is the accepted name for the same physical scalar at `summary/global_quantities/volume/value`, and in this very block `global_quantities/area` is spelled `..._of_plasma_boundary` (row 65) while `profiles_1d/area` is spelled `..._of_flux_surface` (row 80). The area pair is the positive control: the convention exists, is applied one container away, and this row is where it lapsed.
+- this does **not** reopen the settled `*_of_flux_surface` family adjudication. That adjudication fixed what the suffix *means* — the volume and area enclosed by the surface rather than of the surface — and it is taken as given here. The finding is about which locus the identity is attached to, not about its semantics.
+- the identity is correctly bound at `equilibrium/time_slice/profiles_1d/volume` and `core_profiles/profiles_1d/grid/volume`, both genuine per-surface profiles accepted in the other half; as with row 64 the repair detaches this locus rather than renaming the identity, and the collision itself belongs to the whole-cohort sweep.
