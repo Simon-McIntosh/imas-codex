@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 </head>
 <body>
   <main class="plan-doc">
@@ -639,6 +639,14 @@
 <p><strong>It must not call the four mutating helpers</strong> — <code>mark_members_for_regen</code>, <code>stamp_harmonized</code>, <code>mark_families_for_regen</code> and <code>restamp_harmonized_families</code>. That is the <em>read-only</em> decision expressed as a list of names rather than as a principle, which is the form a worker can check itself against.</p>
 <p><strong>The interaction worth stating, because it looks like a problem and is not.</strong> <code>build_worklist</code> skips families whose stored <code>harmonized_group_signature</code> already matches the current one, so it carries state that would ordinarily make a second run measure a different population — exactly the hazard the read-only decision was locked to avoid. That filter stays inert here <em>because</em> the instrument never stamps, so the property is never written and a missing property is already treated as never harmonized. The two decisions are compatible, and this node should not try to remove or parameterise the filter.</p>
 <p>Scope note: this lands in <code>imas_codex/cli/sn.py</code>, which is the session's serialization bottleneck at roughly 320 KB — every other open repair on the review surface also writes it, so it cannot run concurrently with them.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-catalog-audit-instrument §3</pre>
+    </article>
+<article class="r-fu" data-id="f-scai-getattr-aperture" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="coordinator" data-written-at="2026-09-21" data-recommends-skill="/reckon-ship sn-catalog-audit-instrument §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Annotate llm_out so the declared-attribute check can judge 13 of 18 sites instead of 5</h4>
+    <div class="r-fu-body"><p>The declared-attribute static check judges <strong>5 of 18</strong> three-argument <code>getattr</code> sites in <code>imas_codex/standard_names/review</code> and reports zero undeclared among them. The other <strong>13 are unresolved rather than clean</strong>: no annotation names the object's class, so no check of that shape can judge them. The check says so itself and holds a floor at the measured figure, which is the right behaviour &mdash; but 28 percent coverage must not be allowed to read as a clean tree.</p>
+<p><strong>Eight of the thirteen are one variable.</strong> They are <code>llm_out</code> in the cost-event block, the result of a structured LLM call carrying no annotation. Annotating it with the model the call returns brings all eight into the check's view in one edit, taking the aperture from 5/18 to 13/18. The remaining five are a loop variable in the review-matching pass (four sites) and one parameter annotated <code>Any</code>.</p>
+<p><strong>Raise the floor in the same commit.</strong> The check asserts at least 5 resolved sites so that a narrowing reddens; a change that widens the aperture must move that number to the new measured figure, or the floor silently stops protecting the sites it just gained.</p>
+<p>This is an aperture repair, not a defect repair: the scan found no undeclared read anywhere it could see. Its value is that the sites it cannot see are the ones a future fail-open would land in unnoticed.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-catalog-audit-instrument §3</pre>
     </article>
 </section>
