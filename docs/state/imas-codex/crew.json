@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T11:25:24",
+  "updated": "2026-09-21T11:29:19",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -912,6 +912,15 @@
       },
       {
         "id": "cx-releasedefault",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
+      },
+      {
+        "id": "cx-releasefixtures",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -169781,6 +169790,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2439
+    "_version": 2440
   }
 }
