@@ -58,7 +58,12 @@ def _exporter(**kwargs):
         "- name: plasma_current\n  unit: A\n",
         encoding="utf-8",
     )
-    return SimpleNamespace(exported_count=1)
+    # Export gates are scaffolding; these tests exercise preview-link handling.
+    return SimpleNamespace(
+        exported_count=1,
+        all_gates_passed=True,
+        gate_results=[],
+    )
 
 
 def _publisher(**kwargs):
