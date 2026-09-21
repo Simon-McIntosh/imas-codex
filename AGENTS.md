@@ -241,8 +241,20 @@ Environment policy is user-global and binding: see **Development Environment**
 in `~/.agents/AGENTS.md`. The repo-specific facts:
 
 - `/home/ITER/mcintos/Code/imas-codex/.venv` is the project environment. Use it
-  and keep it current: `uv sync`, or a plain `uv run <cmd>` in the main checkout,
-  is normal workflow. The hatch build hook runs on sync, so syncing is also how
+  and keep it current: **`uv sync --extra test`**, which is the sync this repo
+  means by "up to date". A bare `uv sync` leaves out `torch` and
+  `sentence-transformers`, and `pytest tests/` then **aborts at collection** with
+  a usage error naming the missing extra — exit code 4, before a single test
+  runs. That reads in a log like a finished selection, so a whole-tree run
+  without the extra has measured nothing. `uv run <cmd>` in the main checkout is
+  otherwise normal workflow.
+
+  The extra cannot be made to sync by default in uv 0.11.7: `default-extras` is
+  not a recognised key (and setting it makes uv discard the whole `[tool.uv]`
+  table, silently dropping the pinned torch indexes), while routing it through a
+  default dependency group resolves `torch` from the CPU and CUDA indexes in one
+  split and breaks the `gpu` extra the embedding server needs. So the flag is the
+  interface; name it in every sync. The hatch build hook runs on sync, so syncing is also how
   the generated models and `agents/schema-reference.md` get rebuilt. Declare
   dependency changes with `uv add` / `uv remove` and commit `pyproject.toml`
   together with `uv.lock`; never `pip install` into `.venv`.
