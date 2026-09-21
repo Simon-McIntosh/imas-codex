@@ -11,6 +11,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from click.testing import CliRunner
+
+from imas_codex.cli.sn import sn
 from imas_codex.standard_names import signed_manifest
 from standard_names.test_archive_reconstruction import (
     _apply,
@@ -25,11 +28,12 @@ def _apply_authority(
     tmp_path: Path,
     *,
     archive_roles: dict[str, dict[str, int]],
+    edges: list[dict[str, Any]] | None = None,
     extra_counts: dict[tuple[str, str], int] | None = None,
 ) -> dict[str, Any]:
     path = tmp_path / "authority.json"
     file_hash, payload_hash = _write_authority(
-        path, _authority(archive_roles=archive_roles)
+        path, _authority(edges=edges, archive_roles=archive_roles)
     )
     graph = _ArchiveGraph()
     graph.extra_counts.update(extra_counts or {})
@@ -83,3 +87,70 @@ def test_applied_receipt_reads_live_count_without_an_expected_source(
         "expected_source": "neither",
         "observed": 1,
     }
+
+
+def test_archive_census_wins_when_it_disagrees_with_the_closure(
+    tmp_path: Path,
+) -> None:
+    """The archive census is the receipt authority when both sources exist."""
+    edges = [
+        {
+            "owner_id": "archived_temperature",
+            "relationship_type": "HAS_UNIT",
+            "direction": "outgoing",
+            "counterpart_id": "unit:eV",
+            "properties": {"source": source},
+        }
+        for source in ("archive-primary", "archive-secondary")
+    ]
+
+    receipt = _apply_authority(
+        tmp_path,
+        archive_roles={"archived_temperature": {"HAS_UNIT": 1}},
+        edges=edges,
+    )
+
+    assert receipt["identity_role_parity"]["archived_temperature"]["HAS_UNIT"] == {
+        "expected": 1,
+        "expected_source": "archive_census",
+        "observed": 2,
+    }
+
+
+def test_cli_receipt_names_an_unestablished_expectation_source(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    """The operator sees why an expectation has no numeric count."""
+    path = tmp_path / "authority.json"
+    _write_authority(path, _authority(archive_roles={}))
+    monkeypatch.setattr(
+        signed_manifest,
+        "apply_signed_manifest",
+        lambda *args, **kwargs: {
+            "outcome": "applied",
+            "counts": {"authority_rows": 1, "admitted": 1, "refused": 0},
+            "identity_role_parity": {
+                "archived_temperature": {
+                    "EVIDENCED_BY": {
+                        "expected": None,
+                        "expected_source": "neither",
+                        "observed": 0,
+                    }
+                }
+            },
+            "manifest_sha256": "0" * 64,
+        },
+    )
+
+    result = CliRunner().invoke(
+        sn,
+        ["restore", "apply", str(path), "--reason", "show receipt provenance"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (
+        "parity archived_temperature EVIDENCED_BY: "
+        "expected unestablished source neither observed 0"
+    ) in result.output
+    assert "expected None" not in result.output
