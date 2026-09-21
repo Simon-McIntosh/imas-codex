@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T20:45:33",
+  "updated": "2026-09-21T20:46:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -182958,6 +182958,240 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T153443877960-n-the-west-gate-chain-verdict-is-measured",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "n-the-west-gate-chain-verdict-is-measured",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 473,
+                "cached_input_tokens": 620102,
+                "input_tokens": 620577,
+                "output_tokens": 1199,
+                "reasoning_output_tokens": 211,
+                "total_tokens": 621776,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "The followup that blocks the WEST cut records the manifest reporting generable False with 25 uncarried of 355, and names four export-gate defects to repair. All four are landed at HEAD, verified by reading the source: the name_stage-absent short-circuit now refuses as eligibility_input_incomplete, waived is a declared and documented disposition, the empty-cut refusal is evaluated at both the pre-gate and pre-manifest stages, and the misattributed refusal cause is reachable with the source status read. What does not exist is a measurement. A code repair is not a gate verdict, and this node produces the verdict.\n\nRE-MEASURE the WEST manifest's generability against the live graph and report, as numbers rather than as a narrative: whether generable is now True or False; the uncarried count and the total, against the recorded 25 of 355; and for every uncarried identity that remains, its identity and the specific gate clause that withholds it. Where a clause withholds on a disposition, say which disposition and whether it is one the pipeline has permanently refused \u2014 those were the two fit_artifact rows that made the manifest permanently ungenerable before waived existed, so confirm specifically that they now carry waived and no longer block.\n\nBOUND THE READ AND SAY HOW YOU BOUNDED IT. Name the cohort before you query it and keep every statement to that cohort. An indexed read over the WEST manifest's sources is in scope; a whole-graph scan, an unbounded traversal, or a cartesian product over a large label is not, however it is phrased. No single query may exceed ten seconds, and splitting a scan into a hundred fast queries is not a way around that ceiling \u2014 the ceiling is on the work. Bound the result at the caller too: an unbounded result has killed the MCP transport in this repository before.\n\nPLACEMENT AND ENVIRONMENT. This is an ordinary heavy job, so run it inside a SLURM step on a debug partition with a time limit at or under one hour, never on the login node. The graph client resolves its endpoint by discovery and connects from inside a step exactly as it does on a login node, so a connection failure there is a real failure to investigate and report, not a reason to move to the login node. Your worktree carries a .env symlink to the main checkout; if an authenticated call reports Unauthorized, verify that link resolves before concluding anything about the credential, because a missing link is a provisioning fault rather than evidence.\n\nWRITE NOTHING TO THE GRAPH. This node reads. It must not apply, restore, repair, reclassify, compose, or mutate any node, edge or property, and it must not run any command that could. If you find something that needs repairing, say so in follow_ons with the identity and the mechanism. Sixty-seven identities are currently absent from this graph because a pass wrote where it should have read, and the restore of those is held pending a lead decision.\n\nDELIVERABLE: an evidence record at docs/evidence/unbound-source-backlog/west-gate-chain-verdict.md carrying the generability verdict, the uncarried table with one row per identity and its withholding clause, the named queries you ran with their row counts, and an explicit statement of the cohort you bounded to. Illustrate it with a figure if a figure would make the gate chain's decision path clearer than prose \u2014 the project's convention is an SVG under a topic-named directory beneath docs/figures, embedded with a project-absolute src beginning /imas-codex/figures. Write the record incrementally, appending each figure as you establish it, so a partial result is recoverable rather than lost. Conventional subject AND body, stage only your declared paths, no attribution trailer of any kind.",
+          "estimated_hours": 0.75,
+          "goal": "measure whether the WEST manifest now passes the export gate chain",
+          "id": "n-the-west-gate-chain-verdict-is-measured",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T15:34:46Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T153443877960-n-the-west-gate-chain-verdict-is-measured/manifest.md",
+          "negative_control": "none: this node reads the live graph and writes no source, so no mutation exists whose absence could be demonstrated; the measure is the manifest's own generability verdict read against the graph",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/unbound-source-backlog/west-gate-chain-verdict.md",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/figures/unbound-source-backlog",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-b",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T15:35:04Z",
+        "completed_at": "2026-09-21T16:35:37.221Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3620,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3633,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ea566ff15935ac3ebf1c7d26746ebdd31eb3b4bf",
+        "commits": [
+          "0dceb0d94788b2ad6c574239dbcf2c569a1a7a80"
+        ],
+        "changed_lines": {
+          "added": 309,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "read-only live-graph measurement inside a SLURM step; the measure is the manifest's own generability verdict, and the node changed no production file",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/usb-west-gate/verdict.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "THE WEST CUT IS NOT GENERABLE AND CANNOT BECOME SO BY FINISHING WORK. Measured against the live graph: manifest_size 355, carried 340, uncarried 15, generable False, against a recorded baseline of 330 carried and 25 uncarried. All fifteen remaining are withheld on a recorded refusal and every one is a permanent exclusion \u2014 five fit_artifact weights and convergence counters, seven non_nameable_coordinate time axes, a nested temporal coordinate. THE BLOCKING FINDING: the waived disposition that exists to express a settled exclusion has no producer anywhere in the package and no channel. It is read in four places in export.py and written in none; the manifest row schema carries no disposition key and the live cohort projection reads no waiver property. The coordinator verified that independently of the node. So a source the pipeline correctly refuses forever renders the manifest permanently ungenerable, which is the audit's defect 5, still live. A coordinator had previously reported that repair as landed on the strength of the vocabulary member being declared and documented \u2014 presence, not reachability. Generability requires an adjudication mandate deciding who may waive and on what basis, which is a decision rather than an implementation. Independent review SOUND at goal_fidelity 19, evidence 18, scope_discipline 19, fit 19, durability 17. Two corrections it produced: a line citation for the attempt_budget_exhausted gate is off by four, and the ten-source movement from uncarried to carried is arithmetically verified while its attribution to specific repairs is NOT established on disk, because the recorded baseline never enumerated its twenty-five. The reviewer reconstructed that baseline independently and matched the recorded mechanism counts exactly. The node was fenced read-only against a graph missing sixty-seven identities and wrote no production file; its four declared paths are exactly what landed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T153443877960-n-the-west-gate-chain-verdict-is-measured/manifest.md",
+        "scope_changed": false,
+        "session_id": "6493cab1-880b-4e3d-8fe2-6decc1f668b4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 12515407,
+            "input_tokens_cumulative": 12515407,
+            "output_tokens": 54482,
+            "output_tokens_cumulative": 54482,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T16:35:37.221Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "goal_fidelity": 19,
+            "evidence": 18,
+            "scope_discipline": 19,
+            "durability": 17,
+            "fit": 19
+          },
+          "absent": [
+            "An independent re-run of the live measurement: this review role has no live-graph path, so the 355/340/15 counts are verified against the run's own receipt (verdict.json, run.log, SLURM job 1275229), the printed log and the JSON agreeing line for line, and an identity-level reconstruction of the recorded baseline from the embedded manifest -- not from a second execution."
+          ],
+          "total": 92
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 12668632,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3627.899,
+          "generated_tokens": 61259,
+          "generation_seconds": 2690.223,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.7,
+          "machine_seconds": 937.676,
+          "peak_input_tokens": 151925,
+          "tokens_per_second": 22.77,
+          "wall_tokens_per_second": 16.89
+        },
+        "follow_on_paths": [
+          "imas_codex/",
+          "camera_x_rays/camera/camera_dimensions",
+          "calorimetry/group/component/energy_total/data"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-west-gate-chain-verdict-is-measured",
+          "session_id": "6493cab1-880b-4e3d-8fe2-6decc1f668b4",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T16:35:37.221Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.96,
+          "at_complete": 0.96,
+          "verdict": "waived",
+          "reason": "this node measures rather than implements; what it establishes is that the plan's remaining fraction is blocked on an adjudication decision about waiving permanently-excluded sources, not on work, so no implementation advanced"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 131.0,
+        "orientation_input_tokens": 8986751.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -183270,6 +183504,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2495
+    "_version": 2496
   }
 }
