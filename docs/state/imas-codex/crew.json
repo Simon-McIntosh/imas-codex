@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T23:32:06",
+  "updated": "2026-09-22T00:14:54",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -184838,6 +184838,348 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name",
+        "plan": "unbound-source-backlog",
+        "section": "",
+        "node": "n-a-stale-waiver-refuses-instead-of-hiding-a-name",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1108,
+                "cached_input_tokens": 814722,
+                "input_tokens": 815832,
+                "output_tokens": 3355,
+                "reasoning_output_tokens": 1170,
+                "total_tokens": 819187,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "An independent review of the settled-exclusion producer found a real defect in imas_codex/standard_names/export.py. In _source_disposition the waived test precedes the emitted test, so a source that is BOTH declared waived AND reached a name reports as uncarried and waived rather than carried. Two consequences, and they point in opposite directions: the name never reaches the catalog, and the fact that the declaration entry has gone stale is hidden. The combination is untested; every call in tests/standard_names/test_waived_sources.py passes a null identity, so no test constructs a source that is waived and named at once.\n\nDO NOT FIX THIS BY REORDERING THE TESTS. Reordering trades one silent wrong answer for another. Waived-first silently suppresses a name that exists. Emitted-first silently publishes a name for a source the lead declared not to be a physical quantity. Either way a reader sees a plausible row and learns nothing.\n\nTHE FIX IS A REFUSAL. A source that appears in the declaration's waived list and also resolves to an exported identity is a contradiction between two sources of truth: the lead's declaration says the source is settled and not nameable, and the pipeline says it produced a name that was exported. Neither may win quietly. Raise, with a message that names the source path, the identity it resolved to, and both facts in plain words, so whoever reads it knows the declaration entry is stale or the composition is wrong and that a human must decide which. Use the same error type the declaration loader already raises for a self-contradictory declaration, since this is the same class of fault discovered later, and raise it before any staging output is written rather than after, so a contradicted cut produces no partial artifact.\n\nTESTS, added to tests/standard_names/test_waived_sources.py. A source that is declared waived and whose identity is in the exported set raises, and the message names the path and the identity. A source declared waived with a null identity is still waived, which is the ordinary case the existing tests cover and must not regress. A source declared waived whose identity resolved but was NOT exported is still waived, because an identity that did not reach the cut is not a contradiction. A source not declared waived and whose identity is exported is still emitted. State each test's count in the manifest and state the file's passed count before and after.\n\nPROOFS. The focused file green with its count stated. The standard-names suite at your base revision and at your head, both from your own worktree with PYTHONPATH set to it and both with SOURCE_DATE_EPOCH set to the same value, because that variable changes one test's outcome and a pair that differs in it produces a spurious fixed test; compare only lines matching the FAILED prefix and lines matching ERROR followed by tests slash, and require a totals line in BOTH logs before reporting any comparison, since a log whose run never summarised yields a clean zero from a failure count. The negative control captured to exactly one red log whose FIRST LINE is verbatim this node's declared negative-control sentence and nothing else, at exit status 1 and not 2, 4 or 5. Write every log into your run directory by absolute path, never into slash tmp and never into dev slash shm.\n\nFORBIDDEN. Editing imas_codex/standard_names/waived_sources.yaml. Reordering the disposition tests instead of refusing. Returning any disposition string for the contradicted case. Downgrading the refusal to a warning or a report entry. Write the manifest by appending the fields you are not changing and replace the status field rather than adding a second one. Conventional subject AND body, stage only the paths you changed, no attribution trailer of any kind.",
+          "estimated_hours": 0.75,
+          "goal": "refuse when a declared waiver and an exported identity contradict each other",
+          "id": "n-a-stale-waiver-refuses-instead-of-hiding-a-name",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T21:01:34Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name/manifest.md",
+          "negative_control": "declare a source waived while its identity is in the exported set and the export refuses with a message naming both the source path and the identity",
+          "plan": "unbound-source-backlog",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/export.py",
+            "tests/standard_names/test_waived_sources.py",
+            "docs/evidence/archive/unbound-source-backlog-landed.html",
+            "docs/figures/unbound-source-backlog",
+            "docs/plans/unbound-source-backlog.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-b",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T21:01:54Z",
+        "completed_at": "2026-09-21T21:26:40.337Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 1473,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 1486,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "485836e4d6ea420574742d1e39540c1fcdb2cd23",
+        "commits": [
+          "a3e5a7639d1fe0253ef607551787fd47c2689b15",
+          "aab072fa72cf2c4e233ff269e9b6c000b206d2da"
+        ],
+        "changed_lines": {
+          "added": 180,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug gate.sh <merged-head> tests/standard_names/",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/gate-logs/ship-s10-20260918/merge-head.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "a declared waiver whose identity reaches the cut now raises instead of classifying; merged-head gate 24 failure ids identical to base, zero added, +4 passes",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name/manifest.md",
+        "scope_changed": false,
+        "session_id": "a5140a9d-b84a-49f8-9f03-9c829c34e99a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 5180702,
+            "input_tokens_cumulative": 5180702,
+            "output_tokens": 30692,
+            "output_tokens_cumulative": 30692,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T21:26:40.337Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3000,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+              "elapsed_seconds": 1856,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1838,
+              "log_fresh": false,
+              "manifest_commits": [
+                "b764cec8e",
+                "35e554954",
+                "2795d927d"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "79c1b2e5482cb2192acf28620a5b2d6c75888e2933b4278dd17bcd72d7ae79c6",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T195953375664-n-a-settled-exclusion-can-be-waived/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew complete --run r-20260921T195953375664-n-a-settled-exclusion-can-be-waived --gate <verdict> --commit b764cec8e --commit 35e554954 --commit 2795d927d",
+              "node": "n-a-settled-exclusion-can-be-waived",
+              "phase": "starting",
+              "plan": "unbound-source-backlog",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": true,
+              "review_status": "parsed",
+              "run_id": "r-20260921T195953375664-n-a-settled-exclusion-can-be-waived",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1850,
+              "terminal_at": "2026-09-21T20:30:54Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-settled-exclusion-can-be-waived"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3000,
+              "classification": "promotable",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+              "elapsed_seconds": 560,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1197,
+              "log_fresh": false,
+              "manifest_commits": [
+                "none: the deliverable is a review record under /home/ITER/mcintos/.config/reckon",
+                "outside any git repository",
+                "so there is no commit to record; the reviewed node's commits are b764cec8e",
+                "35e554954",
+                "2795d927d"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "97afdf8ab9f67f0d9b57c0fc760c659271f2e61f3a6fc5457713193e9724c9ff",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T203208658839-review-of-n-a-settled-exclusion-can-be-waived/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+              "node": "review-of-n-a-settled-exclusion-can-be-waived",
+              "phase": "starting",
+              "plan": "unbound-source-backlog",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "promote",
+              "recovery_classification": "promotable",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T203208658839-review-of-n-a-settled-exclusion-can-be-waived",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1297,
+              "terminal_at": "2026-09-21T20:40:07Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-a-settled-exclusion-can-be-waived"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 13,
+            "evidence": 19,
+            "fit": 18,
+            "goal_fidelity": 18,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 88
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 5332779,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 1481.358,
+          "generated_tokens": 37610,
+          "generation_seconds": 638.49,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.4,
+          "machine_seconds": 842.868,
+          "peak_input_tokens": 150777,
+          "tokens_per_second": 58.9,
+          "wall_tokens_per_second": 25.39
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-stale-waiver-refuses-instead-of-hiding-a-name",
+          "session_id": "a5140a9d-b84a-49f8-9f03-9c829c34e99a",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T21:26:40.337Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.96,
+        "impl_move": {
+          "plan": "unbound-source-backlog",
+          "at_dispatch": 0.96,
+          "at_complete": 0.97,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "waived",
+          "test_paths": [
+            "tests/standard_names/test_waived_sources.py"
+          ],
+          "declaration": "declare a source waived while its identity is in the exported set and the export refuses with a message naming both the source path and the identity",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name/logs/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T210131263451-n-a-stale-waiver-refuses-instead-of-hiding-a-name/logs/negative_control.log",
+          "reason": "The control is sound and the mismatch is in the coordinator's declaration, not the worker's evidence. I declared the property to prove \u2014 a waived source whose identity is exported must refuse naming both \u2014 where the field wants the mutation to apply. The worker declared and applied the correct mutation, and its log's first line states it verbatim: reordering the disposition tests so the waived test precedes the emitted test instead of refusing must fail the contradiction regression. Under it exactly one test failed, test_a_waiver_that_reached_an_exported_name_refuses, at 1 failed and 10 passed, and the source was restored byte-identical by digest."
+        },
+        "tool_steps": 44.0,
+        "orientation_input_tokens": 2021501.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -185150,6 +185492,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2503
+    "_version": 2504
   }
 }
