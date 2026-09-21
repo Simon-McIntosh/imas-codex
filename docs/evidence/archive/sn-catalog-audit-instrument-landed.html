@@ -9,12 +9,11 @@
   <meta name="viewport"      content="width=device-width, initial-scale=1">
   <meta name="docs-project"  content="imas-codex">
   <meta name="reckon-type"   content="evidence">
-  <meta name="plan-slug"     content="sn-catalog-audit-instrument-landed">
-  <meta name="plan-title"    content="SN Catalog Audit Instrument: What Landed">
-  <meta name="plan-summary"  content="Cumulative execution record for the catalog audit instrument: what each node measured, with the evidence anchor it landed against.">
-  <meta name="plan-status"   content="active">
-  <meta name="plan-owner"    content="Simon McIntosh">
-  <meta name="plan-tags"     content="standard-names,review,routing">
+  <meta name="plan-slug" content="sn-catalog-audit-instrument-landed">
+  <meta name="plan-title" content="Catalog Audit Instrument: What Landed">
+  <meta name="plan-summary" content="Each capability the audit instrument gained, with the measure that proves it and what the measure does not establish.">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,review,audit-instrument">
   <meta name="plan-evidence-for" content="sn-catalog-audit-instrument">
   <title>SN Catalog Audit Instrument: What Landed | imas-codex</title>
   <meta name="docs-project"       content="imas-codex">
@@ -22,13 +21,15 @@
   <meta name="plan-slug"          content="sn-catalog-audit-instrument-landed">
   <meta name="plan-title"         content="Catalog Audit Instrument: What Landed">
   <meta name="plan-summary"       content="Each capability the audit instrument gained, with the measure that proves it and what the measure does not establish.">
-  <meta name="plan-status"        content="active">
   <meta name="plan-owner"         content="Simon McIntosh">
   <meta name="plan-tags"          content="standard-names,review,audit-instrument">
   <meta name="plan-evidence-for"  content="sn-catalog-audit-instrument">
   <title>Catalog Audit Instrument: What Landed | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-status" content="active">
+<meta name="plan-modified" content="2026-09-21">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -466,11 +467,34 @@
     failures/errors at base, 23 at head, none introduced. The eleven that pass
     at head are export and manifest tests importing neither
     <code>review/enrichment</code> nor <code>review/pipeline</code>, and the
-    comparison is asymmetric in the base's disfavour — the base suite ran from
-    a <code>/dev/shm</code> extraction outside the repository (no
-    <code>.env</code>) while the head suite ran inside the worktree. That
-    asymmetry can only make the base look worse, never better, so it cannot
-    manufacture the zero-added result.</p>
+    comparison is asymmetric in the base's disfavour. The cause of that
+    asymmetry was recorded here as a missing <code>.env</code>; that was wrong,
+    and the measured cause is a missing <code>.git</code>. The base suite ran
+    from an archive extraction, and <code>_manifest_iso_timestamp</code>
+    (<code>export.py:2652</code>) refuses an export whose provenance it can
+    resolve from neither a Git checkout nor <code>SOURCE_DATE_EPOCH</code>,
+    raising <code>export provenance timestamp unavailable</code>. All eleven are
+    export and manifest tests driving that path; none imports
+    <code>review/enrichment</code> or <code>review/pipeline</code>, and all
+    eleven pass in a real checkout. The direction of the argument is unchanged
+    &mdash; the asymmetry can only make the base look worse, so it cannot
+    manufacture the zero-added result &mdash; but the absolute base figure of 34
+    carries eleven failures inflicted by the measurement method, and the
+    comparable figure for a checkout is 23, which is the head figure.</p>
+
+    <p><strong>The general form, since it will recur.</strong> A
+    <code>git archive</code> extraction is the honest way to measure a base
+    revision while peers mutate the shared checkout, but it silently removes
+    provenance that the export path requires. Any archive-based gate in this
+    repository must supply it explicitly:</p>
+
+    <pre><code>export SOURCE_DATE_EPOCH=$(git -C &lt;repo&gt; show -s --format=%ct &lt;sha&gt;)</code></pre>
+
+    <p>Verified directly in the extraction: without the variable the call raises
+    the refusal above; with it set the same call returns a timestamp. This is
+    the same defect class as a job whose <code>cd</code> into a node-local
+    directory fails and falls back to the shared checkout &mdash; a setup fault
+    that reports itself as a plausible test count rather than as an error.</p>
 
     <p class="r-meta">Worker:
     <code>n-the-unit-comparator-budget-is-shared-and-bounded</code> &middot;
