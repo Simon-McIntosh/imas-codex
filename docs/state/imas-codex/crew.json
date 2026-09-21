@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T08:11:58",
+  "updated": "2026-09-21T08:13:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -162471,6 +162471,223 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T043143645324-n-the-export-path-would-not-silently-drop-or-misemit",
+        "plan": "sn-release-readiness",
+        "section": "\u00a712",
+        "node": "n-the-export-path-would-not-silently-drop-or-misemit",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1028,
+                "cached_input_tokens": 251645,
+                "input_tokens": 252675,
+                "output_tokens": 1317,
+                "reasoning_output_tokens": 260,
+                "total_tokens": 253992,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "audit-s14-20260921T042900"
+          },
+          "done_when": "docs/evidence/sn-release-readiness/export-path-review.md exists and reports: the result of running tests/standard_names/test_export_exclusion_ledger.py tests/standard_names/test_export_domain_resolution.py tests/standard_names/test_export_deprecation.py tests/standard_names/test_catalog_status_reconcile.py with .venv/bin/python -m pytest -p no:cacheprovider captured to a named on-disk log; for each distinct failure, whether it is a real export defect or a stale test expectation, with the reasoning; and a yes or no on whether the exclusion ledger still closes, meaning every excluded name is counted under a named reason. Read imas_codex/standard_names/export.py and catalog_release.py; NEVER open imas_codex/standard_names/graph_ops.py whole, it is over 300k tokens and will exhaust the context window, read only the diff hunks via git diff 3f8c06fcef82b8a769ee5ec5d81ae83b4fe3c5c5..HEAD -- that path. The file is APPENDED TO as each finding lands and carries a provisional: true line the final pass clears",
+          "estimated_hours": 0.75,
+          "goal": "Determine whether the catalog export path would silently drop or wrongly emit names at the WEST release, and whether its currently failing tests indicate a real defect",
+          "id": "n-the-export-path-would-not-silently-drop-or-misemit",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "unknown",
+            "metered": true,
+            "observed_at": "2026-09-08T13:30:28.930Z",
+            "read_at": "2026-09-21T04:31:44Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 98.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/export-review-042900/manifest.md",
+          "negative_control": "",
+          "plan": "sn-release-readiness",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a712",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-release-readiness/export-path-review.md",
+            "docs/evidence/archive/sn-release-readiness-landed.html",
+            "docs/plans/sn-release-readiness.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-cascadefield",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T04:31:49Z",
+        "completed_at": "2026-09-21T04:40:06.283Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 492,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 497,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "0994e0313131052f9a0e87f1b26a75e1cae1ec9e",
+        "commits": [
+          "2595adcc8c7cb1c665dcf1c8ac95e3e10f20708e"
+        ],
+        "changed_lines": {
+          "added": 69,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "gate_check": {
+          "command": ".venv/bin/python -m pytest tests/standard_names/test_export_exclusion_ledger.py tests/standard_names/test_export_domain_resolution.py tests/standard_names/test_export_deprecation.py tests/standard_names/test_catalog_status_reconcile.py -p no:cacheprovider",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/export-review-042900/ledger-closure-probe.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": "pre-existing-failure",
+        "outcome": "7 failed / 16 passed / 3 errors, exit 1, all pre-existing: 9 of 10 trace to one absent projection key in fixtures predating export.py:697-702 and the tenth asserts a superseded generability contract. 0 export defects; the exclusion ledger closes, proven by making the guard fire",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/export-review-042900/manifest.md",
+        "scope_changed": false,
+        "session_id": "d82f68fd-94a2-44dd-bdf2-36ab6d6f1bbd",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 25.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 125297,
+            "cache_creation_input_tokens_cumulative": 125297,
+            "cache_read_input_tokens": 3742563,
+            "cache_read_input_tokens_cumulative": 3742563,
+            "inference_geo": "not_available",
+            "input_tokens": 74,
+            "input_tokens_cumulative": 74,
+            "output_tokens": 30688,
+            "output_tokens_cumulative": 30688,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.8918215000000003,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.8918215000000003
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T04:40:06.283Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3742563,
+          "cumulative_input_tokens": 3867934,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 494.111,
+          "generated_tokens": 30688,
+          "generation_seconds": 375.5,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.8,
+          "machine_seconds": 118.611,
+          "peak_input_tokens": 138329,
+          "tokens_per_second": 81.73,
+          "wall_tokens_per_second": 62.11
+        },
+        "follow_on_paths": [
+          "tests/standard_names/test_export_exclusion_ledger.py",
+          "test_export_domain_resolution.py",
+          "test_export_deprecation.py",
+          "test_catalog_status_reconcile.py",
+          "export.py",
+          "docs/figures/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "running tests",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/audit-s14-20260921T042900/n-the-export-path-would-not-silently-drop-or-misemit",
+          "session_id": "d82f68fd-94a2-44dd-bdf2-36ab6d6f1bbd",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T04:40:06.283Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.9,
+        "impl_move": {
+          "plan": "sn-release-readiness",
+          "at_dispatch": 0.9,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 45.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -162783,6 +163000,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2403
+    "_version": 2404
   }
 }
