@@ -1,6 +1,6 @@
 # Quarantine and orphan census
 
-provisional: true
+provisional: false
 
 Measured 2026-09-21 against the live production graph through
 `GraphClient()`, resolved URI `bolt://98dci4-gpu-0002:7687`. Every statement
@@ -164,3 +164,111 @@ identity sets were not compared; treat the match as coincidence until checked.
 
 Raw re-check record: `/tmp/qcensus/recheck.json` (transient; the verdicts and
 cleared ids above are the durable form).
+
+## 4. The orphan figure of 170 reproduces under no definition tested
+
+"Orphan" in this portfolio means an identity with no producing source — no
+`(:StandardNameSource)-[:PRODUCED_NAME]->(sn)` edge (`unbound-source-backlog`
+§ on the nine exportable orphans). Ten candidate definitions were measured
+live; **none returns 170**:
+
+| Definition | Live count |
+|---|---:|
+| no producing source, any stage | 2,341 |
+| no producing source, non-terminal | **21** |
+| no producing source and no sourced ancestor within 6 `REFINED_FROM` hops, non-terminal | 21 |
+| no producing source, exportable stages (`accepted`/`approved`) | **9** |
+| no incoming edge of any type except `FOR_STANDARD_NAME` | 549 |
+| quarantined and no producing source | 544 |
+| `HAS_PARENT` target not accepted | 257 |
+| exhausted with no producing source | 244 |
+| `StandardNameSource` with `status='extracted'` and no `PRODUCED_NAME` | 1,359 |
+| `run_id` set but no `SNRun` node of that id | 557 |
+
+The instrument is not blind: the same queries return 2,341, 549 and 1,359 on
+adjacent definitions, so a zero was never the risk — 170 simply is not a
+population this graph holds under any reading of the word tested here. The
+two figures that *do* carry release meaning are **21** live orphans and **9**
+exportable ones, matching the unbound-source plan's own count.
+
+### Orphans by `name_stage`
+
+```cypher
+MATCH (sn:StandardName) WHERE NOT ()-[:PRODUCED_NAME]->(sn)
+RETURN coalesce(sn.name_stage,'<null>') AS stage, count(*) AS n ORDER BY n DESC
+```
+
+| `name_stage` | Orphans | Exportable stage? |
+|---|---:|---|
+| superseded | 2,076 | no |
+| exhausted | 244 | no |
+| **accepted** | **9** | **yes** |
+| pending | 8 | no |
+| reviewed | 3 | no |
+| drafted | 1 | no |
+
+2,320 of 2,341 (99.1%) are terminal tombstones and freed identities, which is
+the documented and explained shape. The exportable population is 9.
+
+## 5. Does any of them reach the WEST batch? — **No**
+
+The WEST batch is not a stage or a facility predicate: it is the committed
+manifest `imas_codex/standard_names/manifests/west_production_dd_paths.yaml`
+(`name: west-task-2e`, 342 DD v4 source ids), resolved to standard names by
+`fetch_manifest_source_release_rows` and passed to `_fetch_candidates` as
+`batch`. The question was answered through that exact path, not a proxy.
+
+| Step | Result |
+|---|---:|
+| Manifest source ids | 342 (342 distinct) |
+| Manifest sources resolving to a `StandardNameSource` | 342 of 342 |
+| Resolved batch standard names | **230** |
+| Manifest sources with no terminal name | 2 |
+| Batch names by stage | accepted 230, nothing else |
+| **Batch names that are quarantined** | **0** |
+| **Batch names that are orphans** | **0** |
+| Export candidates returned by `_fetch_candidates(names_only=True, batch=…)` | 230 |
+| Export candidates that are quarantined | **0** |
+| Export candidates that are orphans | **0** |
+
+**Positive control on the zero**: the same `sn.id IN $ids` predicate that
+returned 0 quarantined was re-run without the status clause and returned
+`seen: 230` — the query sees every row it was asked about, so the two zeros
+are measurements and not an empty match.
+
+### The near misses, named
+
+Three quarantined identities *are* bound to a WEST manifest source by a
+`PRODUCED_NAME` edge, and all three are already terminal:
+
+| Identity | Stage | Manifest source |
+|---|---|---|
+| `normalized_toroidal_hard_xray_peak_lower_bound_width` | exhausted | `hard_x_rays/emissivity_profile_1d/half_width_internal` |
+| `plasma_breakdown_time` | exhausted | `summary/time_breakdown/value` |
+| `lower_bound_hard_xray_peak_width` | superseded | `hard_x_rays/emissivity_profile_1d/half_width_internal` |
+
+104 orphan identities carry a WEST manifest uri in their `source_paths`
+scalar, and **all 104 are `superseded`** — tombstones of names the manifest
+sources have since re-minted. One further orphan is reached by
+`HAS_STANDARD_NAME` from a manifest `IMASNode`, also superseded.
+
+None of these 108 is at an exportable stage, and none appears in the resolved
+230-name batch. **Answer: no quarantined and no orphan identity reaches the
+WEST batch release.**
+
+## 6. What this does and does not settle
+
+- The 660 quarantine count is **correct**. Its *classification* is correct for
+  23 of the 46 accepted rows and wrong for the other 23, which are held out of
+  the catalog by a status the current gate does not reproduce.
+- 254 of 660 quarantines record no cause and 596 carry no validation stamp,
+  so a majority of the population cannot be justified from its own record.
+  These are terminal rows, so the defect is in the record rather than in the
+  release — but it means the quarantine axis is not a trustworthy instrument
+  for any future question asked of it.
+- The 170 orphan figure does not reproduce. The live orphan population is
+  2,341 total, 21 live, 9 exportable.
+- The WEST batch is clean on both axes, proven through the release path's own
+  resolver and export selector with a positive control on each zero.
+
+provisional: false
