@@ -1,6 +1,6 @@
 # Is each shared identity's description true of every binding it holds?
 
-provisional: true
+provisional: false
 
 Source record: `docs/evidence/sn-west-catalog-release/west-name-shared-identities.json`
 (53 groups, 164 bindings, drawn over the whole 341-binding / 230-identity WEST
@@ -345,3 +345,94 @@ this row sits closest to the line.
 **Replacement**, in the register its two siblings already use: *"Toroidal
 angular coordinate of a designated point defining a diagnostic line of sight,
 locating that point around the machine symmetry axis."*
+
+## How far the class reaches beyond these 53 groups
+
+**42 of the 53 descriptions (79.2 %) mention a locus, an ordinal or an index
+term at all**; 11 define only the physical quantity and name no bearer
+(rows 5, 6, 8, 10, 11, 25, 32, 35, 37, 46, 53).
+
+Of those 42, **9 use that wording selectively** — naming an object, member or
+ordinal that fewer than all of the identity's own bindings satisfy — and those
+9 are exactly the 9 rows that are not TRUE-OF-ALL. Mentioning a locus is not
+itself a defect: 33 of the 42 name one and still cover every binding, which is
+what the correct register looks like. The defect is a locus term that *selects*.
+
+The cohort holds 230 identities over 341 bindings; 53 are shared and the
+remaining **177 identities hold exactly one binding each** (341 − 164 = 177).
+A single-binding identity cannot carry this defect today — with one binding
+there is no "some" for the description to be false of. So the estimate this
+count supports is one of **exposure, not of present defects**:
+
+| Quantity | Value | Basis |
+|---|---|---|
+| Shared identities whose description mentions a locus/ordinal/index | 42 of 53 (79.2 %) | counted above |
+| Of those, wording that selects among the bindings | 9 of 42 (21.4 %) | the 9 non-TRUE-OF-ALL rows |
+| Single-binding identities in the cohort | 177 | 341 − 164 |
+| Expected to carry locus/ordinal/index wording | ≈ 140 | 79.2 % of 177 |
+| Expected to become a truthfulness defect on a second attachment | ≈ 30 | 21.4 % of ≈ 140 |
+
+The second figure carries an explicit assumption and should be read as an
+order of magnitude: it holds only if a future second binding is drawn like the
+ones in this cohort — a sibling member of the same array or a `summary` mirror
+of the same quantity. It is not a prediction that 30 defects exist; it is the
+number of descriptions that would have to be re-read the next time those
+identities gain a binding.
+
+## Observations that are not verdicts
+
+- **164 bindings stand for 163 distinct source paths.**
+  `equilibrium/time_slice/global_quantities/beta_tor_norm` appears twice under
+  `normalized_toroidal_beta` (row 8) — the one-path-two-source-nodes case
+  already recorded against this plan. Binding counts here follow the record's
+  own edge count of 164, so one TRUE-OF-ALL binding is that duplicate.
+- **Row 11 `poloidal_magnetic_field`** describes the magnitude *"formed from
+  radial and vertical components"* while all three bindings are poloidal-field
+  *probe* quantities, which measure a projection along the probe axis. The
+  imprecision is uniform across all three bindings rather than differential, so
+  it is not a truthfulness verdict under this node's question; it is a docs-axis
+  observation.
+- **Row 20 `volume_of_flux_surface`** reads *"cumulative from the magnetic axis
+  toward the outermost closed surface"*, which describes a profile, while
+  `equilibrium/time_slice/global_quantities/volume` is the scalar total plasma
+  volume. That scalar is the limiting member of the family the sentence
+  describes, so nothing is asserted falsely of it — TRUE-OF-ALL. The identity
+  is separately contested on the naming axis in three read-only records; this
+  sweep takes no position there.
+- **Row 25 `effective_charge`** holds a local profile and a volume-averaged
+  resistive estimate. The description names no locus and no averaging, so it is
+  true of both; whether one identity should hold both is a naming question, not
+  a description one.
+- **Provenance is correctly absent from every description.** Fourteen bindings
+  across rows 5, 6, 11 and 13 are `equilibrium/time_slice/constraints/*/measured`
+  and `*/reconstructed` pairs, and no description mentions measurement or
+  reconstruction. That is the intended design — provenance is an edge property,
+  not description text — and it is why those four rows are TRUE-OF-ALL rather
+  than split by provenance.
+
+## Result
+
+| Metric | Value |
+|---|---|
+| **groups_judged** | **53** |
+| TRUE-OF-ALL | **44** groups — **131** of 164 bindings |
+| NARROWER | **2** groups — **16** of 164 bindings |
+| FALSE-OF-SOME | **7** groups — **17** of 164 bindings |
+| Verdicts sum | 44 + 2 + 7 = **53** |
+| Bindings accounted for | 131 + 16 + 17 = **164** |
+| Bindings the defective wording is actually untrue of | **7** (one per FALSE-OF-SOME group) |
+| Bindings a NARROWER description leaves uncovered | **9** (8 in row 3, 1 in row 22) |
+| Descriptions mentioning a locus / ordinal / index at all | **42** of 53 (79.2 %) |
+| Of those, wording that selects among the bindings | **9** — identical to the non-TRUE-OF-ALL set |
+| Replacement sentences supplied | **9** — one for every NARROWER and FALSE-OF-SOME row |
+
+**The headline.** 83 % of shared identities (44 of 53, 131 of 164 bindings)
+carry a description that is true of everything they hold, so shared identity is
+working as the convention intends. The damage is concentrated: **7 groups, 17
+bindings, 7 individual bindings whose reader is told the wrong object** — an
+X-point read as the magnetic axis, an aperture centre read as a measurement
+position, a polarization state read as one component of itself, a machine-total
+LH power read as one antenna's, a coupled IC power read as launched, an
+emissivity peak read as a measurement position, and the outer strike point read
+as the inner. Five of the seven are new to this sweep; two reproduce the
+instances the brief named. None of them is fixable by a rename.
