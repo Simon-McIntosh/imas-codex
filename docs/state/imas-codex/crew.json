@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T12:26:30",
+  "updated": "2026-09-21T12:27:36",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -171187,6 +171187,213 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T093650846739-n-the-review-can-report-without-writing",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-the-review-can-report-without-writing",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1637,
+                "cached_input_tokens": 724783,
+                "input_tokens": 726422,
+                "output_tokens": 1817,
+                "reasoning_output_tokens": 369,
+                "total_tokens": 728239,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "imas-codex sn review gains a report-only flag that runs Layer 1, Layer 2 and Layer 3 in full and emits the normal report and exit status while writing NOTHING to the graph. This is the precondition for calibrating the instrument: persist_review_worker in imas_codex/standard_names/review/pipeline.py near line 1496 calls write_reviews(), and --dry-run is not a substitute because it skips the LLM entirely and runs Layer 1 only, so today a review cannot be run for measurement without writing reviewer scores onto the very cohort being measured. Suppress EVERY graph write on the review path, not only write_reviews: audit the path and name each suppressed site in the manifest. Three design points the plan leaves to this node, each to be decided and stated in the manifest with its reason: whether a report-only run still records LLM cost, what the report carries so a report-only run is distinguishable from a persisting run when read afterwards, and what the exit status is when the review completes but persists nothing. Report-only must not change what the review COMPUTES - only whether it persists - so a report-only run and a persisting run over identical input must produce identical report content, and a test must assert that. A further test proves a report-only run writes zero Review nodes, and the stated negative control fails against the unguarded code. Gate with .venv/bin/python -m pytest tests/standard_names/ -p no:cacheprovider on a SLURM debug partition captured to a named on-disk log, reporting ADDED failures against your own base run at the dispatch base rather than an absolute count. Do not run sn review against the live graph as part of this node.",
+          "estimated_hours": 1.5,
+          "goal": "Give sn review a report-only mode that runs all three layers and emits its report without writing anything to the graph",
+          "id": "n-the-review-can-report-without-writing",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T09:36:52Z",
+            "read_at": "2026-09-21T09:36:53Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 14.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-no-persist-0935/manifest.md",
+          "negative_control": "Remove the no-persist guard so persist_review_worker writes unconditionally; the new test asserting a report-only run writes zero Review nodes must fail.",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_review_report_only.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-swcr-areaderiv",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T09:37:04Z",
+        "completed_at": "2026-09-21T10:02:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1506,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1506,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "4f5cc736cf88bc107ef36d00f7ed7d6642adfb9e",
+        "commits": [
+          "ddcf43b71a4de2b4de8e8c38192d773196610e6a"
+        ],
+        "changed_lines": {
+          "added": 59,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Report-only mode implemented in cli/sn.py; the three design questions are answered (cost measured not persisted, a Report mode line, exit 0). NOT MERGED: its review found the suppression guard patches only GraphClient.query while the class exposes seven write-capable methods, and graph_ops.py:15367 calls gc.create_nodes for SNRun - so zero-graph-writes is false. Reproduced independently; repair dispatched as a single-purpose local-lane node.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-no-persist-0935/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c353-8413-70a2-9115-614473fe2cef",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17704704,
+            "cached_input_tokens_cumulative": 17704704,
+            "input_tokens": 17923319,
+            "input_tokens_cumulative": 17923319,
+            "output_tokens": 36531,
+            "output_tokens_cumulative": 36531,
+            "reasoning_output_tokens": 14521,
+            "reasoning_output_tokens_cumulative": 14521
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T10:02:10Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 15.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-21T10:02:10Z"
+            }
+          ],
+          "notional_cost_usd": 72.4239,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 17704704,
+          "cumulative_input_tokens": 35628023,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 51052
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-review-can-report-without-writing",
+          "session_id": "01a0c353-8413-70a2-9115-614473fe2cef",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T10:02:10Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "gate-not-passing",
+          "test_paths": [
+            "tests/standard_names/test_review_report_only.py"
+          ]
+        },
+        "tool_steps": 96.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -171499,6 +171706,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2446
+    "_version": 2447
   }
 }
