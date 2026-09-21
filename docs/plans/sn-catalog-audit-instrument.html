@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 </head>
 <body>
   <main class="plan-doc">
@@ -549,6 +549,52 @@
       cumulative landing record</a>.
     </p>
 
+    <h3 id="s3-grouped-review-target">Landed: grouped review reads the harmonization worklist and never the apply half of that module</h3>
+    <p>
+      <code>--target</code> took <code>names</code> or <code>docs</code>, both
+      per-identity, so the cohort defects &mdash; a base split across two
+      spellings, a family whose members disagree, an identity bound to loci of
+      different kinds &mdash; had no surface at all. The detection already
+      existed in <code>harmonize.py</code> and had no command-line entry point:
+      <code>build_worklist</code> assembles sibling families by
+      <code>HAS_PARENT</code> or shared <code>physical_base</code>, computes a
+      deterministic drift over the members' opening signatures, and issues only
+      <code>gc.query</code> reads.
+    </p>
+    <p>
+      <strong>Landed.</strong> Commit <code>04b0794b4</code> adds
+      <code>groups</code> as a third value of <code>--target</code> on
+      <code>sn review</code>. It imports <code>build_worklist</code> from that
+      read-only surface and nothing else from that module, renders one line per
+      family carrying its parent, member count, drift and anchor, then the
+      worklist as JSON, and returns before any reviewer resolution, audit or
+      state construction &mdash; so a grouped review reaches no model and spends
+      nothing. <strong>Evidence.</strong>
+      <code>tests/standard_names/test_grouped_review_target.py</code> patches
+      <code>GraphClient</code> with a stand-in that serves only the family
+      query: one case parses the four fields out of the JSON worklist and
+      re-reads them from the rendered line, so the two forms must agree; the
+      second patches <code>mark_members_for_regen</code>,
+      <code>stamp_harmonized</code>, <code>mark_families_for_regen</code> and
+      <code>restamp_harmonized_families</code> to raise, calls each directly to
+      show the ban is live rather than merely unexercised, and requires the
+      command to succeed (<strong>2 passed</strong>). The negative control adds
+      <code>mark_families_for_regen()</code> to the groups branch, and both
+      tests then fail with the recorded
+      <code>AssertionError("grouped review must not mutate the graph")</code>.
+      Full record and figure:
+      <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#grouped-review-target">the
+      grouped-review anchor</a> in the cumulative landing record.
+    </p>
+    <p>
+      <strong>What the measure does not establish.</strong> The patched client
+      is a stand-in, so this shows the four fields the command prints are the
+      fields <code>build_worklist</code> returns, not that a live graph produces
+      families to print. The stored-signature filter inside that function stays
+      inert only because this target never stamps; observing that compatibility
+      needs the real graph, which belongs to the merged-result test node.
+    </p>
+
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 
     <p>
@@ -849,7 +895,7 @@
     <div class="r-comment-body"><p>Scored the terminal-cap node 85 and was right on both deductions, each of which traces to a coordinator decision rather than to the worker: the base clause of the original done-when stays unmet because the cap is unreachable from the catalog route, and a fourth path landed because the coordinator's resume advice ordered a comment in a file the dispatch fence had not declared. Both accepted at promotion, the second through an explicit path acceptance.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T152220179551-review-of-n-a-suppressed-write-returns-a-consumable-result" data-who="reckon-ship" data-when="2026-09-21T16:02:55.959Z">
-    <div class="r-comment-body"><p>Scored the consumable-result node 91. It verified the coordinator&#x27;s own negative-control log rather than taking it, and re-derived the consumer-level reproduction that the landing record described but that was absent from disk, recording both directions. Its record landed and was used to promote and merge the node; the run itself then went quiet without terminating, so it is reconciled here on the record it delivered.</p></div>
+    <div class="r-comment-body"><p>Scored the consumable-result node 91. It verified the coordinator's own negative-control log rather than taking it, and re-derived the consumer-level reproduction that the landing record described but that was absent from disk, recording both directions. Its record landed and was used to promote and merge the node; the run itself then went quiet without terminating, so it is reconciled here on the record it delivered.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-coordinator-provenance-correction-and-guard-landing" data-who="reckon-ship" data-when="2026-09-21T12:30:00Z">
     <div class="r-comment-body"><p><strong>Correction to the unit-comparator-budget entry above: the eleven-test base/head gap is a missing <code>.git</code>, not a missing <code>.env</code>.</strong> That entry, and the evidence section it links, both attributed the gap to the base suite running without credentials. Measured: a <code>git archive</code> extraction has no <code>.git</code>, and <code>_manifest_iso_timestamp</code> (<code>export.py:2652</code>) refuses an export whose provenance resolves from neither a checkout nor <code>SOURCE_DATE_EPOCH</code>. All eleven are export and manifest tests driving that path, all eleven pass in a real checkout, and the same eleven fail in an independent extraction at a different revision. The zero-added conclusion is unchanged, since the asymmetry runs in the base's disfavour either way; the absolute base figure of 34 carries eleven failures inflicted by the measurement method. Every archive-based gate must export <code>SOURCE_DATE_EPOCH</code> from the commit date. Corrected in the landing record as <code>dbfc8fa08</code>.</p>
