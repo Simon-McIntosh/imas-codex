@@ -1,0 +1,95 @@
+# Sources whose exclusion from a catalog cut is settled, not outstanding.
+#
+# A manifest is generable only when every uncarried source carries the
+# ``waived`` disposition (export.py, _manifest_generability). Nothing infers a
+# waiver: the row itself must say ``waived``, and the only thing that may make it
+# say so is an exact-path member of the enumerated set below.
+#
+# WHY AN ENUMERATION AND NOT A PATTERN. A pattern over paths ending in ``time``
+# would waive ``summary/disruption/time/value``, which is the time at which a
+# disruption occurred -- a measured scalar that SHOULD carry a standard name.
+# It has the same shape as ``summary/global_quantities/ip/value`` and is excluded
+# from this set for that reason. A silently missing name is worse than a blocked
+# cut, because the block is visible and the omission is not. The criteria below
+# therefore PROPOSE candidates; only this enumeration waives them.
+#
+# EXTENDING THIS SET IS NOT AN AGENT'S DECISION. An agent may apply the rule and
+# may propose an addition with its evidence, but may not add an entry. Each entry
+# records the criterion it satisfies and the data-dictionary evidence for it, so a
+# reader can check the judgement rather than take it.
+
+schema: 1
+authority:
+  authored_by: Simon McIntosh
+  authored_on: 2026-09-21
+  scope: >
+    Applies to every catalog cut, not to one manifest. A source listed here is
+    settled for all cuts until this file changes.
+  extension_requires: lead
+
+criteria:
+  coordinate_axis: >
+    The node is an axis rather than a quantity measured along one: the data
+    dictionary gives it a Coordinates entry, so its values index a dimension.
+  structure_timebase: >
+    The node is the timebase of the array-of-structures element containing it.
+    It states when that element applies; it is not a property of the plasma.
+  reconstruction_artifact: >
+    The node carries no unit and describes the reconstruction or the solver
+    rather than the physical system: a constraint weight, an iteration count.
+
+waived:
+  - path: camera_x_rays/detector_humidity/time
+    criterion: coordinate_axis
+    dd_evidence: FLT_1D, units s, Coordinates 1...N
+  - path: camera_x_rays/detector_temperature/time
+    criterion: coordinate_axis
+    dd_evidence: FLT_1D, units s, Coordinates 1...N
+  - path: hard_x_rays/emissivity_profile_1d/time
+    criterion: coordinate_axis
+    dd_evidence: FLT_1D, units s, Coordinates 1...N
+  - path: camera_x_rays/frame/time
+    criterion: structure_timebase
+    dd_evidence: FLT_0D, units s, timebase of the frame array-of-structures
+  - path: core_profiles/profiles_1d/time
+    criterion: structure_timebase
+    dd_evidence: FLT_0D, units s, timebase of the profiles_1d array-of-structures
+  - path: equilibrium/time_slice/time
+    criterion: structure_timebase
+    dd_evidence: FLT_0D, units s, timebase of the time_slice array-of-structures
+  - path: equilibrium/time_slice/constraints/b_field_pol_probe/weight
+    criterion: reconstruction_artifact
+    dd_evidence: FLT_0D, no unit, "Weight factor for b field pol probe"
+  - path: equilibrium/time_slice/constraints/flux_loop/weight
+    criterion: reconstruction_artifact
+    dd_evidence: FLT_0D, no unit, "Weight factor for flux loop"
+  - path: equilibrium/time_slice/constraints/faraday_angle/weight
+    criterion: reconstruction_artifact
+    dd_evidence: FLT_0D, no unit, "Weight factor for faraday angle"
+  - path: equilibrium/time_slice/constraints/n_e_line/weight
+    criterion: reconstruction_artifact
+    dd_evidence: FLT_0D, no unit, "Weight factor for n e line"
+  - path: equilibrium/time_slice/convergence/iterations_n
+    criterion: reconstruction_artifact
+    dd_evidence: INT_0D, no unit, "Normalized iterations of convergence"
+
+# Deliberately NOT waived, recorded so a later reader does not add them by
+# pattern. Each is outstanding work or another repository's to close.
+not_waived:
+  - path: summary/disruption/time/value
+    reason: >
+      The time at which a disruption occurred. FLT_0D, units s, no Coordinates,
+      and it sits at summary/<topic>/<quantity>/value, the same shape as
+      summary/global_quantities/ip/value. A measured event time is a physical
+      quantity and wants a standard name.
+  - path: calorimetry/group/component/energy_total/data
+    reason: >
+      Recorded as a non-actionable vocabulary gap on this side; the closing work
+      belongs to the standard-names grammar, so this is another repository's.
+  - path: camera_x_rays/camera/camera_dimensions
+    reason: >
+      Reports a standing refusal while its recorded cause is a spent
+      claim-attempt budget. The attribution is defective, not the source; fix
+      the attribution rather than waiving the row.
+  - path: equilibrium/time_slice/contour_tree/node/z
+    reason: Outstanding composition work.
