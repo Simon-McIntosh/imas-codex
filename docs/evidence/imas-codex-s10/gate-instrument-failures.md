@@ -335,3 +335,64 @@ verified digest, left the worktree clean, and reported a blocker rather than add
 exemptions to force a green gate. A worker that had forced green would have shipped
 a guard reporting 49 false findings, and a reviewer would then have been arguing
 about exemption lists instead of about coverage.
+
+## Correction: the declaration surface never needed widening, and the residual is one site
+
+The section above concluded that widening the candidate surface without widening the
+declaration surface produces mostly false findings, and prescribed adding the
+`imas_standard_names` package to the declaration collector. **The prescription was
+wrong and is withdrawn.**
+
+Measured by the worker's classifier and verified independently:
+
+```
+RESOLVED_WITH_CODEX_ALONE        29
+RESOLVED_ONLY_BECAUSE_OF_ISN      0
+TOTAL                            30
+```
+
+`operators`, `args` and `qualifiers` are declared by classes in **`imas_codex`
+itself**, not only in the standard-names package. So the ISN change resolves nothing.
+
+**The reasoning error is worth naming because it is the day's most common shape in a
+new costume.** I checked whether ISN declares those attributes — it does, verified by
+walking its classes — and concluded they resolved *only* through ISN. That does not
+follow. I established a sufficient condition and read it as a necessary one, and never
+ran the one check that would have separated them: whether `imas_codex` declares them
+too. One extra query, never made, and a whole design half built on its absence.
+
+**What the measurement actually leaves is a single site.** Of the thirty
+empty-container candidates, twenty-nine resolve against the existing collector. The
+one that does not is `imas_codex/graph/schema.py:406`:
+
+```python
+annotations = getattr(slot, "annotations", {}) or {}
+```
+
+`slot` is a LinkML slot definition — a third-party type — so this is a legitimate
+foreign-object read and wants one exemption entry naming the owning library, not a
+repair.
+
+**So the node that looked like a fail-open closure with a 49-finding exposure is a
+one-line exemption plus a tree-derived coverage requirement.** The three figures this
+surface produced, in order — 49 findings, then about six residual sites, then one —
+were each measured honestly and each rested on a differently-drawn population. Every
+correction shrank it, which is the signature of a denominator nobody had stated.
+
+## A resumed worker rewrote its manifest instead of appending to it
+
+Recorded because the recovery was luck rather than design. The resumed turn replaced a
+full manifest — commits, tests, `evidence_inputs`, a three-path blocker, `follow_ons` —
+with a **two-line stub**. The blocker analysis that justified redesigning this node was
+lost from the record.
+
+It survived only because the worker had also written its probe scripts and logs into
+the run directory: `census.py`, `probe_wide.py`, `probe_empties.py`, `probe_isn.py`,
+`widened_probe.log`, `base_full.log`, and an `orig_blob.sha256` proving the byte-for-byte
+restore. Re-running `probe_isn.py` recovered the figure the manifest had dropped — and
+that figure is what produced the correction above.
+
+The manifest rule the fleet already carries is *write it incrementally so a partial
+result is recoverable*. This is its missing half: **append, never rewrite.** An
+incrementally-written manifest that a later turn truncates is no safer than one composed
+at the end.
