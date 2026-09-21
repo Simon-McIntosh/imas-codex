@@ -858,6 +858,7 @@ class NameLevelDefect:
 class AttachmentAuditResult:
     """Outcome of one audit / reconcile pass."""
 
+    audit_ran: bool = True
     checked: int = 0
     rejected: list[AttachmentVerdict] = field(default_factory=list)
     detached: int = 0
@@ -877,6 +878,7 @@ class AttachmentAuditResult:
 
     def as_dict(self) -> dict[str, Any]:
         return {
+            "audit_ran": self.audit_ran,
             "checked": self.checked,
             "rejected": len(self.rejected),
             "detached": self.detached,

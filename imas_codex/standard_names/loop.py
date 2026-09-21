@@ -1266,6 +1266,48 @@ async def preview_sn_pools(
     }
 
 
+def _log_attachment_audit_result(result: Any) -> None:
+    """Report whether attachment consistency was audited and what it found."""
+    if not result.audit_ran:
+        logger.info(
+            "run_sn_pools: attachment-consistency audit skipped — "
+            "skip_global_maintenance=True"
+        )
+        return
+    if result.detached or result.rejected:
+        logger.info(
+            "run_sn_pools: attachment-consistency reconcile — %d of %d "
+            "attachment(s) rejected, %d detached, %d source(s) rerouted "
+            "(by rule: %s)",
+            len(result.rejected),
+            result.checked,
+            result.detached,
+            result.sources_rerouted,
+            result.by_rule(),
+        )
+
+
+async def _run_attachment_audit_for_pool_run(
+    *, skip_global_maintenance: bool, run_id: str
+) -> Any:
+    """Run the attachment audit, or return an explicit not-audited receipt."""
+    from imas_codex.standard_names.attachment_audit import (
+        AttachmentAuditResult,
+        reconcile_attachment_consistency,
+    )
+
+    result = (
+        AttachmentAuditResult(audit_ran=False)
+        if skip_global_maintenance
+        else await asyncio.to_thread(
+            reconcile_attachment_consistency,
+            run_id=run_id,
+        )
+    )
+    _log_attachment_audit_result(result)
+    return result
+
+
 async def run_sn_pools(
     cost_limit: float,
     *,
@@ -1875,29 +1917,10 @@ async def run_sn_pools(
         # 'extracted' so the generate pool composes a correct name the same run.
         # Accepted names are catalog-authoritative and are reported, not
         # detached, without an explicit opt-in. Idempotent.
-        from imas_codex.standard_names.attachment_audit import (
-            AttachmentAuditResult,
-            reconcile_attachment_consistency,
+        await _run_attachment_audit_for_pool_run(
+            skip_global_maintenance=skip_global_maintenance,
+            run_id=run_id,
         )
-
-        attach_result = (
-            AttachmentAuditResult()
-            if skip_global_maintenance
-            else await asyncio.to_thread(
-                reconcile_attachment_consistency, run_id=run_id
-            )
-        )
-        if attach_result.detached or attach_result.rejected:
-            logger.info(
-                "run_sn_pools: attachment-consistency reconcile — %d of %d "
-                "attachment(s) rejected, %d detached, %d source(s) rerouted "
-                "(by rule: %s)",
-                len(attach_result.rejected),
-                attach_result.checked,
-                attach_result.detached,
-                attach_result.sources_rerouted,
-                attach_result.by_rule(),
-            )
 
         # Materialize the DD-side HAS_STANDARD_NAME edge from per-source
         # provenance, so a name reaches every DD path its provenance asserts —
