@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T07:56:33",
+  "updated": "2026-09-21T07:56:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -861,6 +861,15 @@
           "{\"alias\":\"sol5.6\",\"backend\":\"codex\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"gpt-5.6-sol\",\"sandbox\":\"worktree-full\"}": "01a02da8-07c8-77c2-b63e-2417a7aed6fa"
         },
         "session_model": "gpt-5.6-sol"
+      },
+      {
+        "id": "cx-waiveddisp",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "doc-graphkeys",
@@ -161496,6 +161505,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2393
+    "_version": 2394
   }
 }
