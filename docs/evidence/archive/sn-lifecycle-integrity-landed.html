@@ -1227,7 +1227,148 @@
     the base receipt yields exactly one added line,
     <code>test_defaulted_literal_attributes_are_declared</code>; all 23 base test failure/error
     identifiers remain unchanged.</p>
+    <section id="parked-disposition-vocabulary-is-pinned">
+    <h2>The parked-source classifier is pinned to its declared set</h2>
+
+    <p><code>classify_parked_source</code> returns the triage disposition for one source
+    parked at the compose attempt cap, and <code>CAP_PARKED_DISPOSITIONS</code> is the
+    closed set of the six values it may return. The two definitions agree today, but
+    nothing held them together: the function is <em>total by construction</em> and frozenset
+    membership is a convention the two definitions keep by hand. A new branch, or a renamed
+    disposition string, would return a value the set does not name and no test would notice.</p>
+
+    <p><strong>Two defects in the write path's guard, read at <code>graph_ops.py:11540-11541</code> and left in place.</strong>
+    The writer's guard reads
+    <code>if disposition not in CAP_PARKED_DISPOSITIONS: raise ValueError(f"row {row['id']!r} has no triage disposition")</code>.
+    First, that raise can never fire: the classifier's own docstring states the property in
+    those words — <em>"Total by construction: every input returns a member of
+    :data:CAP_PARKED_DISPOSITIONS, including the row that records nothing, so a census
+    of the cohort has no residue to interpret"</em> — so no reachable input makes the branch
+    true, and the guard reports a protection it does not provide. Second, the message
+    interpolates <code>row['id']</code> with a subscript, so a row that lacks an <code>id</code>
+    raises <code>KeyError</code> from the error message rather than the <code>ValueError</code>
+    the guard names: the one malformed shape the guard exists to describe is the shape it
+    cannot describe. Both are recorded as follow-ons below rather than repaired here, because
+    <code>graph_ops.py</code> is 285 thousand tokens and declaring it as a write path puts the
+    node over the window.</p>
+
+    <figure>
+      <svg viewBox="0 0 740 430" role="img" width="740" height="430"
+           aria-label="Six classifier branches converging into the declared disposition set, and a scratch-copy mutation returning a seventh string that escapes the set">
+        <text fill="#333" font-size="14" font-weight="bold" x="10" y="20">Where a branch's value lands: inside the declared set, or outside it</text>
+
+        <!-- left: six branches -->
+        <text fill="#555" font-size="11" x="14" y="46">classify_parked_source — branch (by precedence)</text>
+        <rect x="10" y="54"  id="b1" width="230" height="30" rx="4" fill="#eef4fb" stroke="#8fb0d0"/>
+        <text x="20" y="74" font-size="12" fill="#1f3b57">produced &gt; 0</text>
+        <rect x="10" y="90"  id="b2" width="230" height="30" rx="4" fill="#eef4fb" stroke="#8fb0d0"/>
+        <text x="20" y="110" font-size="12" fill="#1f3b57">lifecycle_status == removed</text>
+        <rect x="10" y="126" id="b3" width="230" height="30" rx="4" fill="#eef4fb" stroke="#8fb0d0"/>
+        <text x="20" y="146" font-size="12" fill="#1f3b57">cause names a vocabulary gap</text>
+        <rect x="10" y="162" id="b4" width="230" height="30" rx="4" fill="#eef4fb" stroke="#8fb0d0"/>
+        <text x="20" y="182" font-size="12" fill="#1f3b57">other recorded cause</text>
+        <rect x="10" y="198" id="b5" width="230" height="30" rx="4" fill="#eef4fb" stroke="#8fb0d0"/>
+        <text x="20" y="218" font-size="12" fill="#1f3b57">node_category geometry/coordinate</text>
+        <rect x="10" y="234" id="b6" width="230" height="30" rx="4" fill="#eef4fb" stroke="#8fb0d0"/>
+        <text x="20" y="254" font-size="12" fill="#1f3b57">records nothing</text>
+
+        <!-- mutated branch, scratch copy -->
+        <rect x="10" y="300" id="bmut" width="230" height="30" rx="4" fill="#fdecec" stroke="#c96a6a" stroke-dasharray="4 3"/>
+        <text x="20" y="320" font-size="12" fill="#8a2b2b">(scratch) vocabulary gap → seventh string</text>
+
+        <!-- set container -->
+        <rect x="330" y="54" width="396" height="210" rx="10" fill="#f2f8f2" stroke="#6f9e6f" stroke-width="2"/>
+        <text x="344" y="76" font-size="13" font-weight="bold" fill="#2f5a2f">CAP_PARKED_DISPOSITIONS (frozenset, six members)</text>
+        <text x="344" y="104" font-size="12" fill="#2f5a2f">name_produced</text>
+        <text x="344" y="126" font-size="12" fill="#2f5a2f">upstream_quantity_removed</text>
+        <text x="344" y="148" font-size="12" fill="#2f5a2f">vocabulary_gap</text>
+        <text x="344" y="170" font-size="12" fill="#2f5a2f">attempt_budget_exhausted</text>
+        <text x="344" y="192" font-size="12" fill="#2f5a2f">compose_not_applicable</text>
+        <text x="344" y="214" font-size="12" fill="#2f5a2f">cause_not_recorded</text>
+
+        <!-- arrows: six branches into the set -->
+        <path d="M240 69 L330 110"  stroke="#6f9e6f" fill="none" marker-end="url(#g)"/>
+        <path d="M240 105 L330 130" stroke="#6f9e6f" fill="none" marker-end="url(#g)"/>
+        <path d="M240 141 L330 148" stroke="#6f9e6f" fill="none" marker-end="url(#g)"/>
+        <path d="M240 177 L330 166" stroke="#6f9e6f" fill="none" marker-end="url(#g)"/>
+        <path d="M240 213 L330 190" stroke="#6f9e6f" fill="none" marker-end="url(#g)"/>
+        <path d="M240 249 L330 212" stroke="#6f9e6f" fill="none" marker-end="url(#g)"/>
+
+        <!-- escaped mutation -->
+        <path d="M240 315 L330 250 L330 300" stroke="#c0392b" fill="none" stroke-dasharray="5 4" marker-end="url(#r)"/>
+        <rect x="330" y="300" width="396" height="46" rx="8" fill="#fdecec" stroke="#c0392b" stroke-width="2"/>
+        <text x="344" y="322" font-size="13" font-weight="bold" fill="#8a2b2b">grammar_gap_not_declared</text>
+        <text x="344" y="339" font-size="11" fill="#8a2b2b">outside the set → the new test fails on membership</text>
+
+        <text x="344" y="372" font-size="11" fill="#555">Green arrows: committed classifier — every branch's value is a member.</text>
+        <text x="344" y="390" font-size="11" fill="#555">Red dashed: the scratch-copy mutation — one branch escapes, and the test fires.</text>
+        <text x="344" y="412" font-size="11" fill="#555">The left boxes are branch predicates; the right chips are the values the set declares.</text>
+
+        <defs>
+          <marker id="g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 z" fill="#6f9e6f"/>
+          </marker>
+          <marker id="r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 z" fill="#c0392b"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>The six branches of <code>classify_parked_source</code> and the values they
+      return, mapped into the declared set; the dashed branch is the scratch-copy mutation that
+      returns a seventh string the set does not name, which the new test refuses.</figcaption>
+    </figure>
+
+    <h3>One representative input per branch</h3>
+    <table>
+      <thead><tr><th>Branch (precedence order)</th><th>Representative input</th><th>Returned disposition</th><th>In the set?</th></tr></thead>
+      <tbody>
+        <tr><td>produced &gt; 0</td><td><code>{"produced": 1}</code></td><td><code>name_produced</code></td><td>yes</td></tr>
+        <tr><td>lifecycle removed</td><td><code>{"lifecycle_status": "removed"}</code></td><td><code>upstream_quantity_removed</code></td><td>yes</td></tr>
+        <tr><td>cause names a vocabulary gap</td><td><code>{"last_error": "… a vocabulary gap"}</code></td><td><code>vocabulary_gap</code></td><td>yes</td></tr>
+        <tr><td>other recorded cause</td><td><code>{"last_error": "compose request timed out"}</code></td><td><code>attempt_budget_exhausted</code></td><td>yes</td></tr>
+        <tr><td>geometry / coordinate</td><td><code>{"node_category": "geometry"}</code></td><td><code>compose_not_applicable</code></td><td>yes</td></tr>
+        <tr><td>records nothing</td><td><code>{}</code></td><td><code>cause_not_recorded</code></td><td>yes</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The guard that can fail.</strong> <code>test_every_branch_returns_a_declared_disposition</code>
+    requires each returned value to be a member of <code>CAP_PARKED_DISPOSITIONS</code>, and
+    <code>test_the_representative_inputs_cover_the_whole_declared_set</code> requires the six
+    inputs to reach every declared member, so the set also carries no dead value. Committed at
+    <code>c13646f62</code> in
+    <code>tests/standard_names/test_parked_disposition_vocabulary.py</code>; the classifier is
+    not edited, because its totality is a deliberate property with a stated reason.</p>
+
+    <p><strong>Control: a seventh string escapes, and the test fires.</strong> A scratch copy of
+    <code>graph_ops.py</code> written outside the repository has its vocabulary-gap branch
+    changed to return <code>grammar_gap_not_declared</code> instead of <code>vocabulary_gap</code>;
+    loaded in place of the committed classifier, both new tests fail on membership, the diff
+    naming that value against the set. The committed file passes both. The red log's first line
+    names the mutation, so the failure cannot be confused with an unrelated error.</p>
+
+    <p><strong>Gate, base against head, on <code>all_debug</code>.</strong>
+    <code>UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/</code>,
+    comparing only lines beginning <code>FAILED tests/</code> and <code>ERROR tests/</code>:</p>
+    <table>
+      <thead><tr><th>Revision</th><th>Exit</th><th>Failed</th><th>Passed</th><th>Errors</th><th>Anchored ids</th><th>Added vs base</th></tr></thead>
+      <tbody>
+        <tr><td>base <code>d6dbd2a0e</code></td><td>1</td><td>20</td><td>7536</td><td>3</td><td>23</td><td>—</td></tr>
+        <tr><td>head <code>c13646f62</code></td><td>1</td><td>20</td><td>7538</td><td>3</td><td>23</td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The 23 identifiers are byte-identical between the two runs, and the two extra passes are
+    this node's new tests, which execute in the merged suite (reported as two dots inline, no
+    failure line). The 20 failures and 3 errors at the base predate this node and are reported
+    as pre-existing, not triaged here.</p>
+
+    <p><strong>What this does not establish.</strong> The test pins the classifier-to-set
+    agreement in this repository; it does not repair the writer's guard, which stays unreachable
+    and still subscripts <code>row['id']</code>. Removing the raise and making the message
+    subscript safe are two source changes in <code>graph_ops.py</code> recorded as follow-ons.
+    Verifying the merged result belongs to a separately dispatched test node, and this worker
+    does not resolve its driving followup or set a terminal state.</p>
   </section>
+</section>
   </main>
 </body>
 </html>
