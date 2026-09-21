@@ -1361,6 +1361,19 @@
     failure line). The 20 failures and 3 errors at the base predate this node and are reported
     as pre-existing, not triaged here.</p>
 
+    <p><strong>A second command was run and is recorded as an artifact, not as the measurement.</strong>
+    <code>uv run --directory /home/ITER/mcintos/Code/imas-codex pytest -p no:cacheprovider
+    &lt;worktree&gt;/tests/standard_names/</code> pairs the main checkout's installed source with this
+    worktree's base-revision tests, and that pairing is two source trees in one process. It reports
+    <strong>43 failed, 7515 passed, 3 errors</strong>. The 23 added identifiers over the base are all in
+    files a concurrent release-fixture node moved on main — <code>test_review_release.py</code> (16),
+    <code>test_review_release_preview_link.py</code> (2), <code>test_review_body_authored.py</code> (2),
+    <code>test_exclusion_report_is_reachable.py</code> (2) and <code>test_review_release_checkout.py</code> (1)
+    — with three base identifiers absent. Run against the main checkout throughout, the same head
+    measures 20 failed, 7539 passed, 3 errors. None of the added failures is in this node's file,
+    which passes in both runs, so the mixed run measures the tree pair rather than this change; the
+    same-tree run above is the gate.</p>
+
     <p><strong>What this does not establish.</strong> The test pins the classifier-to-set
     agreement in this repository; it does not repair the writer's guard, which stays unreachable
     and still subscripts <code>row['id']</code>. Removing the raise and making the message
