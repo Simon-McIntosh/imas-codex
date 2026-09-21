@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T12:27:36",
+  "updated": "2026-09-21T12:28:54",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -171394,6 +171394,192 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T100424261129-n-the-comparators-reach-the-reviewer-and-are-shared",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-the-comparators-reach-the-reviewer-and-are-shared",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 12147,
+                "cached_input_tokens": 755795,
+                "input_tokens": 767944,
+                "output_tokens": 1743,
+                "reasoning_output_tokens": 304,
+                "total_tokens": 769687,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "Three repairs, each pinned by a test reading the RENDERED prompt or the returned allocation rather than the context dict the caller just built. ONE: existing_names is plumbed into the prompt context at review/pipeline.py:1957 but NO review template references it, so Jinja discards it silently - a review measured a marker in existing_names ABSENT from a 31851-character rendered sn/review_names prompt while a nearby_existing_names marker was PRESENT. Add a catalog-roster block to imas_codex/llm/prompts/sn/review_names.md and review_docs.md copying the shape of the nearby_existing_names block at review_names.md:266, and replace the test that monkeypatches render_prompt and asserts on the captured context with one asserting a supplied catalog id appears in the RENDERED string. TWO: the unit-anchored channel at review/enrichment.py:311-341 loops candidates outside and catalog inside, appending first-come and breaking both loops at unit_cap, so one candidate on a common unit absorbs the whole budget - measured, candidate_0 took all 10 while candidates 1 and 2 received 0 with eligible comparators present. Give it the same share-then-spend pass the semantic channel uses: per-candidate match lists, each granted max(1, unit_cap // len(batch_names)) first, remainder spent after. Add a test with several candidates carrying DIFFERENT units and a catalog larger than the cap, since the existing unit test uses a one-member batch where starvation is unrepresentable. THREE: the dedup loop lost its terminal cap so the returned neighborhood is unit_cap plus the semantic effective_cap, up to 30 at defaults and 120 at the helper ceiling, while the docstring still calls k a cap - either restore an overall bound or state the real bound and pin the returned length with a test. Also emit comparison_basis in the template bullet so a unit-split comparator is legible. Gate with .venv/bin/python -m pytest tests/standard_names/ -p no:cacheprovider on a SLURM debug partition captured to a named on-disk log, reporting ADDED failures against your own base run.",
+          "estimated_hours": 1.5,
+          "goal": "Make the catalog comparators actually reach the reviewer and be shared across candidates, closing two defects an independent review confirmed by measurement",
+          "id": "n-the-comparators-reach-the-reviewer-and-are-shared",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T10:04:26Z",
+            "read_at": "2026-09-21T10:04:27Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 15.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/comparators-reach-reviewer-1005/manifest.md",
+          "negative_control": "Revert the unit channel to its first-come loop with no per-candidate allowance; the new multi-unit multi-candidate test must fail. And delete the roster block from sn/review_names.md; the new render test asserting a catalog id appears in the RENDERED string must fail.",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/review/enrichment.py",
+            "imas_codex/llm/prompts/sn/review_names.md",
+            "imas_codex/llm/prompts/sn/review_docs.md",
+            "tests/standard_names/test_review_catalog_comparators.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "codex-swcr-drain",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T10:04:41Z",
+        "completed_at": "2026-09-21T10:09:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 270,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 270,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "b99f23a7d6045f65542409c4beebdbb04c694ee9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/comparators-reach-reviewer-1005/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c36c-ccc4-78e3-a165-ed498110c761",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "refusal": false,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T10:09:11Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 15.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T10:09:11Z"
+            }
+          ],
+          "notional_cost_usd": 11.5799,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": "stopped before producing work; re-split into two single-purpose local-lane nodes",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-comparators-reach-the-reviewer-and-are-shared",
+          "session_id": "01a0c36c-ccc4-78e3-a165-ed498110c761",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T10:09:11Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "gate-not-passing",
+          "test_paths": [
+            "tests/standard_names/test_review_catalog_comparators.py"
+          ]
+        },
+        "tool_steps": 31.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -171706,6 +171892,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2447
+    "_version": 2448
   }
 }
