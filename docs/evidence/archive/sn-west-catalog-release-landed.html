@@ -1420,6 +1420,87 @@
     ordinal-convention revision</a>, committed in two parts
     (<strong>fdbda5da0</strong>, <strong>2bd62b514</strong>).</p>
   </section>
+  <section id="superseded-target-resolution">
+    <h2>The already-present repair targets resolve to seven live, six redirects and two mints</h2>
+    <p>The ordinal revision found <strong>15</strong> of the 61 proposed repair
+    targets already in the graph &mdash; 7 <code>accepted</code>, 8
+    <code>superseded</code> &mdash; and reported that without resolving it. Under
+    the lead's rule that <strong>a superseded name is historical record and is
+    never a target</strong>, each of the 15 now carries a class. Nothing was
+    written to the graph; 21 read statements ran in <strong>0.137 s</strong>
+    total.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>ALREADY-LIVE</td><td>7 &mdash; each accepted, and each returning <strong>zero</strong> reverse-reachable successors, which is a second confirmation that it is a current identity rather than a way-station</td></tr>
+        <tr><td>REDIRECT</td><td><strong>6</strong></td></tr>
+        <tr><td>ADJUDICATE</td><td><strong>0</strong> &mdash; no target reached more than one live end</td></tr>
+        <tr><td>MINT</td><td>2 &mdash; <code>radial_outline_of_plasma_facing_component</code> and <code>radial_coordinate_of_toroidal_magnetic_field_probe</code>, nothing ever refined from either</td></tr>
+        <tr><td>The four classes, summed</td><td><strong>15</strong></td></tr>
+        <tr><td>Revised repairs whose target string can no longer be applied literally</td><td><strong>7</strong> of 59, over <strong>8</strong> target strings &mdash; split row 55 carries two</td></tr>
+        <tr><td>Hop distance of the live ends</td><td>4 of 6 at hop 1; one at hop 2; one at hop 5, which is the weakest claim in the record and is trusted only because the chain is linear with every intermediate superseded</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Five of the six redirects are round trips, and that is the
+    finding.</strong> Worklist rows 11, 17, 18, 38 and 42 each propose renaming
+    onto a spelling whose lineage resolves back to the very name the repair
+    rejects &mdash; <code>ipb98y2_confinement_enhancement_factor</code> to
+    <code>energy_confinement_enhancement_factor</code>,
+    <code>hot_neutral_temperature</code> to
+    <code>hot_neutral_temperature_at_plasma_boundary</code>,
+    <code>line_integrated_electron_density</code> to
+    <code>line_integrated_electron_number_density</code>,
+    <code>thermal_electron_pressure</code> to
+    <code>thermal_electron_pressure_at_post_sawtooth_crash</code>,
+    <code>toroidal_coordinate_of_detector_pixel</code> to
+    <code>toroidal_coordinate_at_detector_pixel</code>. Each hands its repair back
+    its own starting point, so none can execute as a rename: the identity it
+    would rename onto is retired and the live end of that identity is the name it
+    would rename away from. The remedy is an adjudication between the audit's
+    reasoning and the pipeline's recorded decision, which is different work from
+    applying a rename. <strong>Only one redirect is what all six were assumed to
+    be</strong>: <code>radial_coordinate_of_aperture</code> resolves to the third
+    spelling <code>radial_coordinate_of_diagnostic_aperture</code>, which neither
+    the rejected nor the proposed name mentions.</p>
+    <p><strong>The graph answers one open contradiction and leaves two spellings
+    open.</strong> <code>toroidal_coordinate_of_measurement_position</code> is
+    <code>superseded</code> and its single live end at hop 1 is
+    <code>toroidal_angle_of_measurement_position</code>, accepted &mdash; so the
+    audit proposal to rename the ECE binding onto the
+    <code>toroidal_coordinate</code> spelling targets a retired identity, the
+    revision record's decision to leave that binding where it is was right, and
+    no adjudication needs scheduling. The other two,
+    <code>toroidal_coordinate_of_toroidal_magnetic_field_probe</code> and
+    <code>toroidal_coordinate_of_poloidal_magnetic_field_probe</code>, do not
+    exist at any stage, so both are ordinary mints the graph does not decide;
+    neither collides with the accepted orientation-angle name for the same
+    probe.</p>
+    <p><strong>The instrument choice was the whole result.</strong> Only 18 of
+    2163 superseded names carry a <code>superseded_by</code> scalar, and
+    <code>HAS_SUCCESSOR</code> plus <code>SUPERSEDES</code> hold 51 edges against
+    <code>REFINED_FROM</code>'s <strong>1850</strong>. A forward traversal returns
+    empty on all eight superseded targets, so the record would have read
+    <strong>0 REDIRECT, 8 MINT</strong> &mdash; agreeing with the correct answer
+    on exactly the two rows where the correct answer was nothing. Direction was
+    confirmed before use, on one edge whose accepted end sits at the
+    <em>start</em> of the arrow (<code>total_fast_particle_count</code> refined
+    from <code>fast_count</code>) and on the aggregate, where the arrow ends on a
+    superseded name 1657 times against 95 accepted.</p>
+    <figure>
+      <img src="/imas-codex/figures/sn-west-catalog-release/superseded-target-lineage.png"
+           alt="Reverse REFINED_FROM lineage of each superseded repair target, showing the target, the intermediate superseded names and the accepted live end with its hop distance">
+      <figcaption>Each superseded target and its reverse lineage to a live end.
+      Hop distance is evidence strength; the five round trips are marked.</figcaption>
+    </figure>
+    <p>Per-target traversals, the controls, and the seven-repair impact are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-superseded-target-resolution">the
+    target resolution record</a>, appended as each target was resolved and
+    committed in three parts (<strong>9c4be8d48</strong>,
+    <strong>9fbcb6632</strong>, <strong>9ee6c5d27</strong>). It reads
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-repair-worklist-ordinal-revision">the
+    ordinal revision</a> and the worklist behind it as read-only inputs and
+    amends neither.</p>
+  </section>
 </main>
 </body>
 </html>
