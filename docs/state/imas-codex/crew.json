@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T06:32:20",
+  "updated": "2026-09-21T06:36:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -63,9 +63,11 @@
         "id": "claude-opus-b",
         "harness": "claude-opus",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "14f3fd74-a964-41dd-af2a-de1afc327363",
+        "session_model": "claude-opus-5",
+        "sessions": {
+          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "14f3fd74-a964-41dd-af2a-de1afc327363"
+        },
         "created": "2026-09-21"
       },
       {
@@ -158903,6 +158905,230 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T042522010114-n-pidp-the-graph-writing-paths-are-audited",
+        "plan": "paid-identity-deletion-protection",
+        "section": "\u00a74",
+        "node": "n-pidp-the-graph-writing-paths-are-audited",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 381,
+                "cached_input_tokens": 766432,
+                "input_tokens": 766815,
+                "output_tokens": 672,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 767487,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/paid-identity-deletion-protection/graph-write-audit.md exists and, for the restore-receipt parity change at da2b5619e in imas_codex/standard_names/signed_manifest.py and the sn restore compose and apply commands at 21e4739e9 in imas_codex/cli/sn.py, states whether either can write the graph when it should refuse, whether its refusal can be bypassed, and whether the receipt it emits can disagree with what was written; adjudicates the recorded finding that the receipt's expected count falls back to the archive census while the refusal's expected comes from the reconstruction closure alone, saying which should be authoritative and what a shortfall must do; names every defect with its file:line and a concrete triggering input; and gives a verdict of SAFE-FOR-WEST or MUST-FIX-FIRST per path. Run the relevant test files rather than reading only, and write the file incrementally",
+          "estimated_hours": null,
+          "goal": "audit the two graph-writing paths landed this sprint for defects that could corrupt the graph",
+          "id": "n-pidp-the-graph-writing-paths-are-audited",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "unknown",
+            "metered": true,
+            "observed_at": "2026-09-08T13:30:28.930Z",
+            "read_at": "2026-09-21T04:25:22Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 98.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T042522010114-n-pidp-the-graph-writing-paths-are-audited/manifest.md",
+          "negative_control": "",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "\u00a74",
+          "spec_level": "open",
+          "time_budget": "40m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/paid-identity-deletion-protection/graph-write-audit.md",
+            "docs/evidence/archive/paid-identity-deletion-protection-landed.html",
+            "docs/plans/paid-identity-deletion-protection.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "open",
+        "member": "claude-opus-b",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T04:25:28Z",
+        "completed_at": "2026-09-21T04:34:51.045Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 557,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 563,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "1fa39615146cc6c88a61e36f4829fde60f4d6f86",
+        "commits": [
+          "29ad81e2391251c8e6aa14dfee451ad9e441fd3a"
+        ],
+        "changed_lines": {
+          "added": 33,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "graph-write-audit fence at the merged head: a verdict per path, defect rows carrying file:line, and the authority question adjudicated",
+          "exit_status": 0,
+          "log_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126/scratchpad/gates/graph-write-audit.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "restore-receipt parity SAFE-FOR-WEST, its two defects being receipt truthfulness rather than graph corruption. The restore CLI is MUST-FIX-FIRST on one finding that matters more than the rest: B1 at cli/sn.py:8130-8132 restores origin catalog_edit from any dump extraction predating the origin correction, which RE-ARMS the automatic deletion that destroyed 93 identities - the plan's own followup warned of it and the CLI as landed does not guard it. It also adjudicated the receipt-versus-refusal authority instead of restating it: the closure governs the refusal because it is the only expectation a restore can satisfy, EVIDENCED_BY being inbound and uncarriable, so a census-governed refusal would make every identity that held one permanently unrestorable; the census belongs in the receipt, and the real defect is that one column named expected carries two differently-sourced numbers with nothing saying which",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T042522010114-n-pidp-the-graph-writing-paths-are-audited/manifest.md",
+        "scope_changed": false,
+        "session_id": "14f3fd74-a964-41dd-af2a-de1afc327363",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 24.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 135221,
+            "cache_creation_input_tokens_cumulative": 135221,
+            "cache_read_input_tokens": 3991107,
+            "cache_read_input_tokens_cumulative": 3991107,
+            "inference_geo": "not_available",
+            "input_tokens": 76,
+            "input_tokens_cumulative": 76,
+            "output_tokens": 42937,
+            "output_tokens_cumulative": 42937,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.421568500000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.421568500000001
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T04:34:51.045Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3991107,
+          "cumulative_input_tokens": 4126404,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 559.776,
+          "generated_tokens": 42937,
+          "generation_seconds": 504.502,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 14.8,
+          "machine_seconds": 55.274,
+          "peak_input_tokens": 148253,
+          "tokens_per_second": 85.11,
+          "wall_tokens_per_second": 76.7
+        },
+        "follow_on_paths": [
+          "imas_codex/cli/sn.py",
+          "imas_codex/cli/sn.py.",
+          "A2/A3"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-pidp-the-graph-writing-paths-are-audited",
+          "session_id": "14f3fd74-a964-41dd-af2a-de1afc327363",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T04:34:51.045Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.72,
+        "impl_move": {
+          "plan": "paid-identity-deletion-protection",
+          "at_dispatch": 0.72,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 3,
+          "missing": [
+            "03dc865600ddeaa8fe6cbc93d88842fdb47e3fde",
+            "5eb0496045e983237624875934236c404aa34b87"
+          ],
+          "message": "run 'r-20260921T042522010114-n-pidp-the-graph-writing-paths-are-audited' has a passing gate presenting 1 commit(s) of the 3 its manifest declares; missing: 03dc865600ddeaa8fe6cbc93d88842fdb47e3fde, 5eb0496045e983237624875934236c404aa34b87. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 41.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -159215,6 +159441,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2368
+    "_version": 2370
   }
 }
