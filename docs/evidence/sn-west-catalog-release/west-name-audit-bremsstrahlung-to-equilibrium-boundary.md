@@ -297,3 +297,169 @@ separate IDSs that do. Calling this detector a soft X-ray detector asserts a ban
 nothing in the path or its documentation carries, and it would collide with a genuine
 `soft_x_rays` detector temperature if one were ever named. Second, `xray` is the minority spelling
 the prior half already rejected on `hard_xray_brightness`; the fix adopts `x_ray` in the same move.
+
+### 29. `thickness_of_filter` — **correct**
+
+- source path: `camera_x_rays/filter_window/thickness`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Thickness of the filter window
+- name description: Geometric thickness of one diagnostic filter window, determining the amount of material available for photon attenuation and spectral selection.
+- The DD container is a filter *window* and the name says *filter*; that is the same functional object under its two names, and `_of_filter` is the spelling rows 1 and 2 already use.
+
+### 30. `effective_charge` — **INCORRECT**
+
+- source path: `core_profiles/global_quantities/z_eff_resistive`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Volume average plasma effective charge, estimated from the flux consumption in the ohmic phase
+- name description: Dimensionless effective ionic charge of a plasma mixture, given by the second ionic charge moment divided by free-electron density and indicating impurity content.
+
+| rejected | proposed |
+| --- | --- |
+| `effective_charge` | `volume_averaged_effective_charge` |
+
+**One name, two physically different quantities.** The bare identity `effective_charge` is bound
+both here and at row 40 (`core_profiles/profiles_1d/zeff`). Row 40 is the local profile value of
+Zeff at a flux-surface label — a function of radius. This row is a **single global scalar**: the
+volume average over the whole plasma, and moreover one inferred from ohmic flux consumption rather
+than measured per surface. They have the same units and the same physical dimension and they are
+not the same quantity; a consumer resolving `effective_charge` cannot tell which it is holding.
+
+Row 40 keeps the bare name, which is right for the local quantity. This row takes the averaging
+operator into the name, parallel to `line_averaged_effective_charge` at row 8 — the cohort already
+distinguishes an averaged Zeff from a local one by exactly this construction.
+
+The resistive-flux-consumption provenance deliberately does **not** enter the name. Provenance is
+a controlled vocabulary carried on the source binding, not a name segment, so
+`volume_averaged_effective_charge` is the full extent of the naming fix and the "estimated from
+flux consumption" clause belongs to the binding's provenance field.
+
+### 31. `thermal_electron_density` — **correct**
+
+- source path: `core_profiles/profiles_1d/electrons/density_thermal`
+- unit: `m^-3` (data dictionary: `m^-3`)
+- data-dictionary text: Density of thermal particles
+- name description: Number density of free electrons per physical volume for the local thermal electron population, excluding fast and suprathermal electron contributions.
+- The DD text says only "thermal particles"; the electron species comes from the container, and the name carries it — which is what makes it self-descriptive without the path.
+
+### 32. `total_electron_pressure` — **correct**
+
+- source path: `core_profiles/profiles_1d/electrons/pressure`
+- unit: `Pa` (data dictionary: `Pa`)
+- data-dictionary text: Pressure (thermal+non-thermal)
+- name description: Kinetic pressure associated with the entire electron population, combining thermal and suprathermal contributions in the isotropic electron stress.
+- `total` is doing real work here: it is what separates this row from row 33's thermal-only pressure in the same container, and the DD's "(thermal+non-thermal)" is exactly that distinction.
+
+### 33. `thermal_electron_pressure_at_post_sawtooth_crash` — **INCORRECT**
+
+- source path: `core_profiles/profiles_1d/electrons/pressure_thermal`
+- unit: `Pa` (data dictionary: `Pa`)
+- data-dictionary text: Pressure (thermal) associated with random motion ~average((v-average(v))^2)
+- name description: Isotropic kinetic pressure produced by random motion of bulk thermal electrons, evaluated in the plasma state immediately after a sawtooth crash.
+
+| rejected | proposed |
+| --- | --- |
+| `thermal_electron_pressure_at_post_sawtooth_crash` | `thermal_electron_pressure` |
+
+**The name asserts more than the data supports, and the excess is a discharge phase.** Nothing in
+the path, the data-dictionary text or the container mentions a sawtooth. `pressure_thermal` in
+`core_profiles/profiles_1d/electrons` is the thermal electron pressure profile at whatever time
+slice the record holds — most of which are not after a sawtooth crash, and many discharges have no
+sawteeth at all.
+
+The consequence is not cosmetic. As spelled, every ordinary profile sample is either unnameable or
+silently mislabelled as post-crash, and an analysis selecting on the name would build a
+sawtooth-conditioned dataset out of unconditioned data. The bare `thermal_electron_pressure` is
+true of every binding, and it is the exact counterpart of row 32's `total_electron_pressure` in the
+same container — the pair then reads as the thermal/total split the DD actually makes.
+
+### 34. `poloidal_plane_cross_sectional_area_of_flux_surface` — **correct**
+
+- source path: `core_profiles/profiles_1d/grid/area`
+- unit: `m^2` (data dictionary: `m^2`)
+- data-dictionary text: Cross-sectional area of the flux surface
+- name description: Geometric area enclosed by a closed magnetic-flux-surface contour in a fixed-toroidal-angle poloidal plane of the right-handed cylindrical (R, φ, Z) frame.
+- The long spelling is load-bearing rather than verbose, and this is worth stating because it looks at first like a parallel minting of the settled `area_of_flux_surface`. The cohort carries **two different areas of the same surface**: this poloidal cross-section, and `surface_area_of_flux_surface` (remainder index 103, `equilibrium/time_slice/profiles_1d/surface`), which is the area of the toroidal surface itself. They differ by roughly a factor of 2πR and are not interchangeable. A bare `area_of_flux_surface` on this row would lose the distinction the cohort has correctly made.
+
+### 35. `poloidal_magnetic_flux_at_flux_surface` — **correct**
+
+- source path: `core_profiles/profiles_1d/grid/psi`
+- unit: `Wb` (data dictionary: `Wb`)
+- data-dictionary text: Poloidal magnetic flux
+- name description: Signed poloidal magnetic flux assigned to a nested magnetic surface, serving as the equilibrium label for its position in the plasma.
+
+### 36. `poloidal_magnetic_flux_at_plasma_boundary` — **correct**
+
+- source path: `core_profiles/profiles_1d/grid/psi_boundary`
+- unit: `Wb` (data dictionary: `Wb`)
+- data-dictionary text: Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn't go from the magnetic axis to the plasma boundary)
+- name description: Signed poloidal magnetic flux evaluated on the last closed flux surface, providing the outer reference for normalized poloidal-flux coordinates.
+
+### 37. `normalized_poloidal_flux_coordinate` — **correct**
+
+- source path: `core_profiles/profiles_1d/grid/rho_pol_norm`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Normalised poloidal flux coordinate = sqrt((psi(rho)-psi(magnetic_axis) / (psi(LCFS)-psi(magnetic_axis)))
+- name description: Normalized poloidal flux coordinate is a radial label for nested magnetic flux surfaces based on poloidal magnetic flux. It is zero at the magnetic axis and one at the last closed flux surface; for a line-of-sight locus, it denotes the minimum value reached along the line.
+- note: **a description observation, not a name defect.** The description's closing clause defines a convention for a line-of-sight locus, and no binding of this identity inside indices 1–51 is a line of sight. The clause is harmless where it sits — it is a conditional, not a claim about this binding — but it is the same shape as rows 5 and 23: a description written for one locus travelling with an identity bound to others. Whether a line-of-sight binding exists elsewhere in the cohort is a whole-cohort question and is not answered here.
+
+### 38. `toroidal_flux_coordinate` — **correct**
+
+- source path: `core_profiles/profiles_1d/grid/rho_tor`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Toroidal flux coordinate. rho_tor = sqrt(b_flux_tor/(pi*b0)) ~ sqrt(pi*r^2*b0/(pi*b0)) ~ r [m]. The toroidal field used in its definition is indicated under vacuum_toroidal_field/b0
+- name description: Non-negative, radius-like label of a nested magnetic flux surface, derived from enclosed toroidal magnetic flux using a positive reference vacuum toroidal field.
+- The unit `m` is correct and is what separates this from row 39: `rho_tor` carries a length dimension, its normalized counterpart does not.
+
+### 39. `normalized_toroidal_flux_coordinate` — **correct**
+
+- source path: `core_profiles/profiles_1d/grid/rho_tor_norm`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Normalised toroidal flux coordinate. The normalizing value for rho_tor_norm, is the toroidal flux coordinate at the equilibrium boundary (LCFS or 99.x % of the LCFS in case of a fixed boundary equilibium calculation, see time_slice/boundary/b_flux_pol_norm in the equilibrium IDS)
+- name description: Dimensionless radial label equal to the square root of toroidal magnetic flux normalized between the magnetic axis and equilibrium boundary.
+- collision, deferred: 3 source paths, 2 outside this index range.
+
+### 40. `effective_charge` — **correct**
+
+- source path: `core_profiles/profiles_1d/zeff`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Effective charge
+- name description: Dimensionless effective ionic charge of a plasma mixture, given by the second ionic charge moment divided by free-electron density and indicating impurity content.
+- This is the binding the bare name is right for: the local profile quantity, which is what the description describes. Row 30 is the one that must move.
+
+### 41. `toroidal_vacuum_magnetic_field` — **correct**
+
+- source path: `core_profiles/vacuum_toroidal_field/b0`
+- unit: `T` (data dictionary: `T`)
+- data-dictionary text: Vacuum toroidal field at R0 [T]; Positive sign means anti-clockwise when viewing from above. The product R0B0 must be consistent with the b_tor_vacuum_r field of the tf IDS.
+- name description: Signed toroidal component of the current-free vacuum magnetic field at a reference major radius, defining the nominal externally generated field strength.
+- collision, deferred: 3 source paths, 2 outside this index range.
+
+### 42. `reference_major_radius` — **correct**
+
+- source path: `core_profiles/vacuum_toroidal_field/r0`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Reference major radius where the vacuum toroidal magnetic field is given (usually a fixed position such as the middle of the vessel at the equatorial midplane)
+- name description: Nonnegative perpendicular distance from the toroidal symmetry axis to a designated reference location, serving as the major-radius coordinate where the vacuum toroidal magnetic field is specified in the right-handed cylindrical (R, φ, Z) frame.
+- collision, deferred: 3 source paths, 2 outside this index range.
+
+### 43. `opacity_at_ece_channel_emission_position` — **INCORRECT**
+
+- source path: `ece/channel/optical_depth`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Optical depth of the plasma at the position of the measurement. This parameter is a proxy for the local / non-local character of the ECE emission. It must be greater than 1 to guarantee that the measurement is dominated by local ECE emission (non-local otherwise)
+- name description: Dimensionless optical depth along the electron-cyclotron-emission viewing path at a channel emission position, indicating whether the detected emission is local and thermal.
+
+| rejected | proposed |
+| --- | --- |
+| `opacity_at_ece_channel_emission_position` | `optical_depth_at_ece_channel_emission_position` |
+
+**The name denotes a different physical quantity from the one it is bound to, and the unit settles
+it.** Opacity is a material property — the mass absorption coefficient κ, carrying units of
+m²·kg⁻¹. Optical depth is the dimensionless line integral of the absorption coefficient along a
+ray, τ = ∫κρ ds. The DD text says optical depth, the name's own description says optical depth, and
+the unit is `1`, which opacity cannot be. Only the name says opacity.
+
+The locus half of the name is correct and is kept. Note that the mismatch here is in the
+**quantity**, not in the locus, which is what distinguishes this from rows 17, 18 and 48 even
+though the result table groups them together — the grouping is by remedy, and both remedies are a
+rename to the object the data dictionary names.
