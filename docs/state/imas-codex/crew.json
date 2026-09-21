@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T07:45:48",
+  "updated": "2026-09-21T07:46:48",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -160935,6 +160935,237 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T053049912972-n-west-names-shared-identities",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-names-shared-identities",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 763,
+                "cached_input_tokens": 183077,
+                "input_tokens": 183842,
+                "output_tokens": 614,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 184456,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-west-catalog-release/west-name-shared-identities.md exists and carries one verdict section for every one of the 53 groups in the `groups` list of docs/evidence/sn-west-catalog-release/west-name-shared-identities.json, and its closing result table reports groups_judged = 53, one_quantity + must_split = 53, and the number of bindings each verdict accounts for out of the 164 involved. Every group is already drawn from the live graph, so issue no graph query and open no database: each group carries the identity and, for every binding, the source path, both units and both descriptions, with `dd_doc_parent` supplying the parent container's text where the leaf's own documentation is empty or the literal \"Value\". The question for each group is one question: do all of its bindings denote the same physical quantity measured at different places or by different instruments, in which case one spelling is correct and the verdict is ONE-QUANTITY, or do two or more of them denote physically different quantities, in which case the verdict is MUST-SPLIT. A shared geometric identity across many diagnostics is the normal, correct case and must not be reported as a defect merely for being shared; what makes a group MUST-SPLIT is that a reader given the name alone would attribute a value to the wrong object. For every MUST-SPLIT group, list which bindings keep the existing spelling and which need a new one, give the proposed spelling for each and state the semantic distinction in plain language; where one data-dictionary container's sibling coordinates disagree with each other, say which sibling is the outlier and which spelling the container as a whole should carry. Check each group for the narrower failure too and report it as a note on a ONE-QUANTITY verdict: a description that names fewer loci than the identity is bound to, and a unit that disagrees between `sn_unit` and `dd_unit`. Read docs/evidence/sn-west-catalog-release/west-name-audit.md first; its closing section already reports three of these groups, being `radial_coordinate_of_measurement_position` across a measurement position, an instrument aperture and a sensor location, the `camera_x_rays/aperture/centre` container whose toroidal coordinate carries a different locus from its radial and vertical siblings, and `vertical_coordinate_of_strike_point` across both divertor legs. Judge those three independently and mark each verdict as confirming or contradicting the prior reading, so the union of the two records counts each finding once. Do not relitigate the adjudications that record names as settled: the `*_of_flux_surface` family including `volume_of_flux_surface` and `area_of_flux_surface`, `back_surface_distance_of_antenna_strap`, and the etendue `_detector` spelling. Open the file with a `provisional: true` line and have the closing pass rewrite it to `provisional: false`; append each verdict as it is judged rather than composing the file at the end, so an interrupted turn leaves a partial record instead of none.",
+          "estimated_hours": 1.5,
+          "goal": "judge whether each of the 53 shared standard-name identities in the WEST cohort spells one physical quantity or several",
+          "id": "n-west-names-shared-identities",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T05:20:25Z",
+            "read_at": "2026-09-21T05:30:50Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 25.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T053049912972-n-west-names-shared-identities/manifest.md",
+          "negative_control": "",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/west-name-shared-identities.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "claude-opus-h",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T05:30:55Z",
+        "completed_at": "2026-09-21T05:42:13.543Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 673,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 678,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a1a5e6c6d5b3bab2ba41ee0bda4ec03ceaa285cd",
+        "commits": [
+          "8fc435e41bd64853bf8d11dfc40b3b277f71cb9e"
+        ],
+        "changed_lines": {
+          "added": 3,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "count numbered group sections and each verdict class in the evidence file at the merged head and reconcile against its own result table",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/west-names-shared-identities-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "53 shared identities judged: 43 ONE-QUANTITY over 140 bindings, 10 MUST-SPLIT over 24 bindings, collapsing to eight distinct naming defects of which six are new; all three prior whole-cohort findings confirmed and none contradicted, the aperture container resolved in favour of the aperture spelling, and 0 unit disagreements against a comparator shown to find 3 elsewhere",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T053049912972-n-west-names-shared-identities/manifest.md",
+        "scope_changed": false,
+        "session_id": "4cbf0383-c742-4ca9-b42c-39d22345e7e4",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 43.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 168496,
+            "cache_creation_input_tokens_cumulative": 168496,
+            "cache_read_input_tokens": 5231431,
+            "cache_read_input_tokens_cumulative": 5231431,
+            "inference_geo": "not_available",
+            "input_tokens": 84,
+            "input_tokens_cumulative": 84,
+            "output_tokens": 57166,
+            "output_tokens_cumulative": 57166,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.730245500000001,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.730245500000001
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T05:42:13.543Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 5231431,
+          "cumulative_input_tokens": 5400011,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 675.04,
+          "generated_tokens": 57166,
+          "generation_seconds": 653.948,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 18.2,
+          "machine_seconds": 21.092,
+          "peak_input_tokens": 181528,
+          "tokens_per_second": 87.42,
+          "wall_tokens_per_second": 84.69
+        },
+        "follow_on_paths": [
+          "docs/figures/<topic>/",
+          "docs/figures/sn-west-catalog-release/coordinate-container-sibling-loci.svg",
+          "equilibrium/time_slice/global_quantities/beta_tor_norm",
+          "polarimeter/channel/ellipticity_initial",
+          "/polarization_initial"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-west-names-shared-identities",
+          "session_id": "4cbf0383-c742-4ca9-b42c-39d22345e7e4",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T05:42:13.543Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.984,
+        "impl_move": {
+          "plan": "sn-west-catalog-release",
+          "at_dispatch": 0.984,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 8,
+          "missing": [
+            "26ef2fc19e98cf9c65d1301b0b45667292fdb5ae",
+            "2b1a5ba90b199b39b226197dd5de7384cef37d45",
+            "6051f01b6dd5fd01b77a3ea7cd1cc967835bf88c",
+            "8aeb49a2d532a36cfd4fe46a971151b07f67bcc0",
+            "a914b094a931aaa46838579eb98290a0d8851fae",
+            "d1acf2d093533e79af6939a9a576a20f8f1230a8",
+            "df8054217fff7ece3b16974953e652aa35d2b896"
+          ],
+          "message": "run 'r-20260921T053049912972-n-west-names-shared-identities' has a passing gate presenting 1 commit(s) of the 8 its manifest declares; missing: 26ef2fc19e98cf9c65d1301b0b45667292fdb5ae, 2b1a5ba90b199b39b226197dd5de7384cef37d45, 6051f01b6dd5fd01b77a3ea7cd1cc967835bf88c, 8aeb49a2d532a36cfd4fe46a971151b07f67bcc0, a914b094a931aaa46838579eb98290a0d8851fae, d1acf2d093533e79af6939a9a576a20f8f1230a8, df8054217fff7ece3b16974953e652aa35d2b896. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 41.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -161247,6 +161478,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2390
+    "_version": 2391
   }
 }
