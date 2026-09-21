@@ -2755,6 +2755,31 @@ def _load_waived_source_paths(declaration: Path) -> frozenset[str]:
     return frozenset(waived_paths)
 
 
+def _refuse_waiver_that_reached_a_name(
+    source_path: str,
+    standard_name_id: str,
+) -> None:
+    """Refuse a source the declaration waives and the pipeline also named.
+
+    The declaration and the composition pipeline are two sources of truth about
+    one source, and a source that is declared a settled, non-nameable exclusion
+    while it also reached an identity the cut carries has no honest
+    disposition. The declaration entry is stale (the source does produce a
+    nameable quantity) or the composition that produced the identity is wrong;
+    one of the two must be corrected, and only a human can say which. Neither
+    fact may win quietly, so this names both rather than letting the test order
+    decide what a reader sees.
+    """
+    raise WaivedSourceDeclarationError(
+        f"waived-source declaration waives source {source_path!r}, but that "
+        f"source also resolved to the exported identity {standard_name_id!r}. "
+        "The declaration entry is stale (the source does produce a nameable "
+        "quantity) or the composition that produced the identity is wrong. A "
+        "human must decide which, and correct the declaration or the "
+        "composition, before this cut can be staged."
+    )
+
+
 def _source_disposition(
     *,
     source_path: str,
@@ -2769,8 +2794,13 @@ def _source_disposition(
     ``waived`` is granted only by exact membership of the declaration's
     enumerated set. It is never inferred from a refusal reason, a category, a
     resemblance to a settled exclusion, an absent row, or another disposition.
+    A source that is both declared waived and carried by the cut is the one
+    case this function refuses rather than classifies: the two sources of truth
+    disagree and a human must reconcile them.
     """
     if source_path in waived_paths:
+        if standard_name_id is not None and standard_name_id in exported_ids:
+            _refuse_waiver_that_reached_a_name(source_path, str(standard_name_id))
         return "waived", ""
     if non_nameable_reason:
         return "documented_non_nameable", non_nameable_reason
@@ -3310,6 +3340,24 @@ def run_export(
             pruned_examples.extend(
                 additional_examples[: max(0, 20 - len(pruned_examples))]
             )
+
+        # A declaration that a source is settled and a name that reached the
+        # cut cannot both hold. The disposition loop runs after the domain
+        # files are written, so the refusal is applied here as well, once the
+        # final published identity set is known and before any staging output
+        # exists: a contradicted cut must produce no artifact, partial or
+        # otherwise. Both call sites run the one decision function, so the
+        # refusal has a single implementation.
+        if manifest_sources is not None:
+            for source in manifest_sources:
+                _source_disposition(
+                    source_path=str(source["source_path"]),
+                    waived_paths=waived_paths,
+                    non_nameable_reason=str(source.get("non_nameable_reason") or ""),
+                    standard_name_id=source.get("standard_name_id"),
+                    exported_ids=published_names,
+                    exclusion_reason=None,
+                )
 
         identity_token_gate = _identity_token_collision_gate(domain_entries)
         role_rows = [entry for entries in domain_entries.values() for entry in entries]

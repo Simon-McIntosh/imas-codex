@@ -1241,6 +1241,63 @@ test_review_release_preview_link.py:61:    # Export gates are scaffolding; these
     commit <code>b764cec8e</code> &middot; host class <code>all_debug</code>.</p>
   </section>
 
+  <section id="stale-waiver-refuses">
+    <h2>A declaration that waives a source the cut also names is refused, not resolved</h2>
+    <p><strong>The settled-exclusion producer had a defect of order.</strong> In
+    <code>_source_disposition</code> the waived test preceded the emitted test, so a source that
+    was both a declared member of the settled-exclusion enumeration <em>and</em> resolved to an
+    identity the cut carried reported as <code>waived</code>. Two consequences pointed in opposite
+    directions and neither was visible: the name never reached the catalog, and the fact that the
+    declaration entry had gone stale was hidden behind a plausible row.</p>
+    <p><strong>Reproduced before it was repaired.</strong> With
+    <code>source_path='equilibrium/time_slice/time'</code> in
+    <code>waived_paths</code>, <code>standard_name_id='time_of_something'</code> and
+    <code>exported_ids={'time_of_something'}</code>, the pre-fix decision returned
+    <code>('waived', '')</code> &mdash; the contradiction was classified, not surfaced. Every
+    call in <code>tests/standard_names/test_waived_sources.py</code> passed a null identity, so no
+    test constructed a source that was waived and named at once.</p>
+    <p><strong>The repair is the refusal.</strong> Reordering the two tests would only trade which
+    wrong answer a reader sees: waived-first silently suppresses a name that exists, emitted-first
+    silently publishes a name for a source the lead declared not to be a physical quantity.
+    <code>_source_disposition</code> now raises the same <code>WaivedSourceDeclarationError</code>
+    the declaration loader raises for a self-contradictory declaration, naming the source path and
+    the identity it resolved to, and stating both facts in plain words so whoever reads it knows
+    the declaration entry is stale or the composition is wrong and that a human must decide which.
+    The refusal also runs over a supplied manifest once the final published identity set is known
+    and before the first domain file is written, so a contradicted cut produces no staging
+    artifact, partial or otherwise. Both call sites run the one decision function.</p>
+    <table>
+      <caption>The four cases the decision boundary must now separate</caption>
+      <thead><tr><th>Declared waived</th><th>Identity</th><th>Identity exported</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td>yes</td><td>resolved</td><td>yes</td><td><code>WaivedSourceDeclarationError</code>, naming path and identity</td></tr>
+        <tr><td>yes</td><td>null</td><td>&mdash;</td><td><code>waived</code> (the ordinary settled exclusion)</td></tr>
+        <tr><td>yes</td><td>resolved</td><td>no</td><td><code>waived</code> &mdash; an identity that did not reach the cut contradicts nothing</td></tr>
+        <tr><td>no</td><td>resolved</td><td>yes</td><td><code>emitted</code></td></tr>
+      </tbody>
+    </table>
+    <p>No figure accompanies this record: the decision surface is four exact cases and their
+    outcomes, which the table states without turning tabular data into an image.</p>
+    <p><strong>Both directions proven.</strong> The declared negative control was
+    <em>&ldquo;negative control: reordering the disposition tests so the waived test precedes the
+    emitted test instead of refusing must fail the contradiction regression.&rdquo;</em> Under the
+    mutation the focused file failed exactly one test at exit 1 &mdash;
+    <code>test_a_waiver_that_reached_an_exported_name_refuses</code> &mdash; captured to one red
+    log whose first line is that sentence verbatim. The source was restored byte-identically
+    afterwards (sha256 <code>fd66ca1138d7&hellip;c5</code> before and after). The restored focused
+    file passes <strong>11</strong>, up from <strong>7</strong> at base.</p>
+    <p><strong>The suite delta is zero.</strong> The full <code>tests/standard_names/</code>
+    surface on <code>all_debug</code>, both runs from this worktree with <code>PYTHONPATH</code>
+    set to it and <code>SOURCE_DATE_EPOCH=1758412800</code> in both, recorded at base
+    <code>485836e4d</code> 21 failed, 7,618 passed and 3 errors, and at head
+    <code>a3e5a7639</code> 21 failed, 7,622 passed and 3 errors. Both logs carry their totals
+    line. Comparing only <code>FAILED</code> lines and <code>ERROR tests/</code> lines, the two
+    id sets are identical at 24 ids, so the added-failure count is <strong>zero</strong>; the four
+    extra passes at head are this node's four new tests.</p>
+    <p class="r-meta">Worker: n-a-stale-waiver-refuses-instead-of-hiding-a-name &middot;
+    2026-09-21 &middot; commit <code>a3e5a7639</code> &middot; host class <code>all_debug</code>.</p>
+  </section>
+
 </main>
 
 </body>

@@ -178,3 +178,69 @@ def test_a_path_in_both_lists_is_refused(tmp_path: Path) -> None:
         _load_waived_source_paths(path)
 
     assert waivpath in str(excinfo.value)
+
+
+# A source the declaration waives and names at once has no disposition: the
+# declaration says it is settled and not nameable, the pipeline says it
+# produced an identity this cut carries. Neither test order may win quietly.
+
+
+def test_a_waiver_that_reached_an_exported_name_refuses() -> None:
+    """A declared waiver whose identity reached the cut refuses, naming both."""
+    waived_paths = _load_waived_source_paths(_WAIVED_SOURCES_DECLARATION)
+    path = _DECLARED_WAIVED[0]
+    identity = "detector_humidity"
+
+    with pytest.raises(WaivedSourceDeclarationError) as excinfo:
+        _source_disposition(
+            source_path=path,
+            waived_paths=waived_paths,
+            non_nameable_reason="dd_node_category_ineligible: fit_artifact",
+            standard_name_id=identity,
+            exported_ids={identity},
+            exclusion_reason=None,
+        )
+
+    message = str(excinfo.value)
+    assert path in message
+    assert identity in message
+
+
+def test_a_waiver_with_no_resolved_identity_is_still_waived() -> None:
+    """The ordinary settled exclusion resolves no identity and stays waived."""
+    waived_paths = _load_waived_source_paths(_WAIVED_SOURCES_DECLARATION)
+
+    assert _classify(_DECLARED_WAIVED[0], waived_paths) == ("waived", "")
+
+
+def test_a_waiver_whose_identity_did_not_reach_the_cut_is_still_waived() -> None:
+    """An identity that resolved but was excluded is not a contradiction."""
+    waived_paths = _load_waived_source_paths(_WAIVED_SOURCES_DECLARATION)
+
+    disposition, reason = _source_disposition(
+        source_path=_DECLARED_WAIVED[0],
+        waived_paths=waived_paths,
+        non_nameable_reason="",
+        standard_name_id="an_identity_that_was_not_exported",
+        exported_ids={"an_identity_that_was_exported"},
+        exclusion_reason="below_name_score",
+    )
+
+    assert (disposition, reason) == ("waived", "")
+
+
+def test_an_undeclared_source_whose_identity_is_exported_is_emitted() -> None:
+    """An ordinary carried source is emitted rather than refused."""
+    waived_paths = _load_waived_source_paths(_WAIVED_SOURCES_DECLARATION)
+    identity = "electron_temperature"
+
+    disposition, reason = _source_disposition(
+        source_path="core_profiles/profiles_1d/electrons/temperature",
+        waived_paths=waived_paths,
+        non_nameable_reason="",
+        standard_name_id=identity,
+        exported_ids={identity},
+        exclusion_reason=None,
+    )
+
+    assert (disposition, reason) == ("emitted", "")
