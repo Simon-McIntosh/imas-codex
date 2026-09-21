@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560" font-family="Helvetica,Arial,sans-serif">
+  <rect width="980" height="560" fill="#ffffff"/>
+  <text x="24" y="34" font-size="18" font-weight="bold" fill="#111">Where each gate instrument failed, and what it reported instead of failing</text>
+  <text x="24" y="56" font-size="12.5" fill="#555">Six failures measured 2026-09-21. Every one returned a plausible number; none returned an error.</text>
+
+  <!-- pipeline spine -->
+  <g stroke="#333" stroke-width="1.6" fill="none">
+    <path d="M120 110 H860"/>
+  </g>
+  <g font-size="12" fill="#111">
+    <circle cx="150" cy="110" r="7" fill="#2b6cb0"/><text x="132" y="96">build tree</text>
+    <circle cx="310" cy="110" r="7" fill="#2b6cb0"/><text x="288" y="96">resolve source</text>
+    <circle cx="470" cy="110" r="7" fill="#2b6cb0"/><text x="448" y="96">resolve inputs</text>
+    <circle cx="630" cy="110" r="7" fill="#2b6cb0"/><text x="610" y="96">run suite</text>
+    <circle cx="790" cy="110" r="7" fill="#2b6cb0"/><text x="762" y="96">read the log</text>
+  </g>
+
+  <!-- failures -->
+  <g font-size="11.5">
+    <rect x="30" y="150" width="240" height="118" rx="6" fill="#fdecea" stroke="#c0392b"/>
+    <text x="42" y="170" font-weight="bold" fill="#8b2b20">1. tree not on the node</text>
+    <text x="42" y="189" fill="#333">archive built in /dev/shm;</text>
+    <text x="42" y="205" fill="#333">login-node only, so cd failed</text>
+    <text x="42" y="221" fill="#333">on the compute node</text>
+    <text x="42" y="243" fill="#8b2b20">reported: 86 then 62 failures</text>
+    <text x="42" y="259" fill="#333">(it read the shared checkout)</text>
+
+    <rect x="290" y="150" width="240" height="118" rx="6" fill="#fdecea" stroke="#c0392b"/>
+    <text x="302" y="170" font-weight="bold" fill="#8b2b20">2. wrong tree served</text>
+    <text x="302" y="189" fill="#333">PYTHONPATH named a path that</text>
+    <text x="302" y="205" fill="#333">did not exist, so the editable</text>
+    <text x="302" y="221" fill="#333">install resolved main instead</text>
+    <text x="302" y="243" fill="#8b2b20">reported: a complete run</text>
+    <text x="302" y="259" fill="#333">of somebody else's tree</text>
+
+    <rect x="550" y="150" width="240" height="118" rx="6" fill="#fdecea" stroke="#c0392b"/>
+    <text x="562" y="170" font-weight="bold" fill="#8b2b20">3. input truncated</text>
+    <text x="562" y="189" fill="#333">a peer's prompt file sat at</text>
+    <text x="562" y="205" fill="#333">0 bytes; git status called it</text>
+    <text x="562" y="221" fill="#333">&quot;modified&quot;, never &quot;empty&quot;</text>
+    <text x="562" y="243" fill="#8b2b20">reported: 66 added failures</text>
+    <text x="562" y="259" fill="#333">clustered in one assertion</text>
+
+    <rect x="30" y="292" width="240" height="118" rx="6" fill="#fdecea" stroke="#c0392b"/>
+    <text x="42" y="312" font-weight="bold" fill="#8b2b20">4. no .git in the archive</text>
+    <text x="42" y="331" fill="#333">export provenance refuses</text>
+    <text x="42" y="347" fill="#333">without a commit date or</text>
+    <text x="42" y="363" fill="#333">SOURCE_DATE_EPOCH</text>
+    <text x="42" y="385" fill="#8b2b20">reported: 31 not 20</text>
+    <text x="42" y="401" fill="#333">exactly 11 self-inflicted</text>
+
+    <rect x="290" y="292" width="240" height="118" rx="6" fill="#fdecea" stroke="#c0392b"/>
+    <text x="302" y="312" font-weight="bold" fill="#8b2b20">5. probe itself wrong</text>
+    <text x="302" y="331" fill="#333">the provenance check called a</text>
+    <text x="302" y="347" fill="#333">function without its required</text>
+    <text x="302" y="363" fill="#333">argument</text>
+    <text x="302" y="385" fill="#1e7b34">caught: exit 96, suite never ran</text>
+    <text x="302" y="401" fill="#333">the one failure that announced itself</text>
+
+    <rect x="550" y="292" width="240" height="118" rx="6" fill="#fdecea" stroke="#c0392b"/>
+    <text x="562" y="312" font-weight="bold" fill="#8b2b20">6. log read selectively</text>
+    <text x="562" y="331" fill="#333">counts grepped, tail read; the</text>
+    <text x="562" y="347" fill="#333">failed cd printed on line 3</text>
+    <text x="562" y="363" fill="#333">and a padded = broke a peer's loop</text>
+    <text x="562" y="385" fill="#8b2b20">reported: nothing amiss</text>
+    <text x="562" y="401" fill="#333">for two sessions at once</text>
+  </g>
+
+  <!-- pointers -->
+  <g stroke="#c0392b" stroke-width="1.2" fill="none" stroke-dasharray="3 3">
+    <path d="M150 117 V150"/><path d="M310 117 V150"/><path d="M630 117 V150"/>
+    <path d="M470 117 V150 M470 150 L470 292" stroke-dasharray="3 3"/>
+    <path d="M790 117 V292"/>
+  </g>
+
+  <rect x="30" y="436" width="910" height="96" rx="6" fill="#eef5fb" stroke="#2b6cb0"/>
+  <text x="44" y="458" font-size="13" font-weight="bold" fill="#1a4971">The remedy is not vigilance — it is an exit that is not a number</text>
+  <text x="44" y="479" font-size="12" fill="#234">Five of the six returned a count. A count cannot distinguish a suite that ran from a setup that never did, so each precondition now</text>
+  <text x="44" y="497" font-size="12" fill="#234">exits on its own code before the suite starts: 96 provenance unavailable, 97 tree missing, 98 wrong tree resolved. Failure 5 is the</text>
+  <text x="44" y="515" font-size="12" fill="#234">proof it works: a broken probe stopped the gate instead of filling a log with plausible numbers.</text>
+</svg>
