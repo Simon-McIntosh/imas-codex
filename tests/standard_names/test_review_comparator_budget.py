@@ -179,16 +179,21 @@ def test_large_catalog_saturation_lands_on_the_bound(monkeypatch) -> None:
 
 
 def test_over_supplied_channel_is_closed_at_the_terminal_bound(monkeypatch) -> None:
-    """The terminal cap holds when a channel delivers past its own share.
+    """The terminal cap is a backstop, exercised by over-supplying one channel.
 
-    Every catalog-driven case lands on the bound by construction: the
-    unit-anchored channel is capped at ``unit_cap``, the semantic channel at
-    ``semantic_cap``, and their sum is the terminal bound, so neither channel
-    can carry the pair past it.  The terminal cap is the guard for the case
-    those two caps do not cover — a channel delivering above its share — so the
-    semantic channel is supplied at 40 comparators here, above its share of 15,
-    and the returned length must still be ``unit_cap + semantic_cap``.  Without
-    the terminal cap the excess is returned.
+    Do not delete this case as an unrealistic fixture: the over-supply is the
+    only construction that can exercise the terminal cap at all, and it is a
+    deliberate one.
+
+    A catalog-driven case can never reach the cap.  The unit-anchored channel
+    is closed at ``unit_cap`` and the semantic channel at ``semantic_cap``, and
+    the terminal bound is their sum, so no catalog leaves their concatenation
+    above it — a large catalog fills both channels and stops exactly on the
+    bound.  The cap exists for the case those two budgets do not cover: a
+    channel handing back more than the share counted for it.  The semantic
+    channel is supplied at 40 comparators here, above its share of 15, and the
+    returned length must still be ``unit_cap + semantic_cap``.  Against a build
+    without the terminal cap this returns 55.
     """
     over_supplied = [
         _catalog_name(f"semantic_{index}", unit="1", physical_base=f"peer_{index}")

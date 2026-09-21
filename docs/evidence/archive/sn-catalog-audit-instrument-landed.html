@@ -614,20 +614,28 @@
       </tbody>
     </table>
 
-    <p><strong>Deviation from the brief.</strong> The catalog-driven saturation
-    case cannot carry the node's done-when, because the catalog route
-    provably cannot exceed the bound; the observable case supplies the semantic
-    channel above its share instead. Making the catalog able to exceed the
-    bound would mean tightening the semantic share below its own cap (for
-    instance <code>min(k, 60)</code> rather than <code>min(unit_cap, 60)</code>),
-    a source change outside this node's write fence; the alternative is to
-    delete the terminal cap as unreachable and keep the stated bound as
-    documentation.</p>
+    <p><strong>Deviation from the brief, reported and accepted.</strong> The
+    catalog-driven saturation case cannot carry the node's done-when, because
+    the catalog route provably cannot exceed the bound; the observable case
+    supplies the semantic channel above its share instead. That construction is
+    kept: the terminal cap is a <em>backstop that binds only when a channel
+    exceeds its own share</em>, and the over-supply is the only input that
+    exercises it. The role is now explicit in the source. A comment at the cap
+    in <code>build_neighborhood_context</code> states that the concatenation
+    cannot exceed the bound and the break binds only on an over-supplied
+    channel, and the test's docstring states why the construction over-supplies
+    rather than driving the catalog past the bound, so a later reader does not
+    mistake the case for an unrealistic fixture and delete it. The channel caps
+    are unchanged. Tightening the semantic share below its own cap so the
+    catalog could reach the bound was considered and declined, as was deleting
+    the cap.</p>
 
     <p class="r-meta">Worker:
     <code>n-the-terminal-comparator-cap-has-a-test-that-fails-without-it</code>
-    &middot; 2026-09-21 &middot; tests only, no source change; logs under the run
-    directory <code>terminal-cap-guard/</code>.</p>
+    &middot; 2026-09-21 &middot; comment-only source change at the terminal cap in
+    <code>imas_codex/standard_names/review/enrichment.py</code>, plus the test
+    and this record; logs under the run directory
+    <code>terminal-cap-guard/</code>.</p>
   </section>
   </main>
 </body>

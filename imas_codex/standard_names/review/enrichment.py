@@ -394,8 +394,10 @@ def build_neighborhood_context(
 
     # Unit-anchored comparators lead so a semantic cap cannot hide the signal.
     # Deduplicate both channels by catalog identity and close on the terminal
-    # bound: each channel is internally capped, and the returned neighbourhood
-    # holds at most unit_cap + semantic_cap comparators.
+    # bound: each channel is a separate budget, so their concatenation cannot
+    # exceed unit_cap + semantic_cap and this break is a backstop that binds
+    # only when a channel hands back more than the share counted above — a
+    # catalog of any size leaves it unfired.
     overall_cap = unit_cap + semantic_cap
     seen: set[str] = set()
     deduped: list[dict] = []
