@@ -1012,6 +1012,31 @@
     The sole added failure is the new guard itself, which is expected until the production repair is
     integrated with this commit; all 23 pre-existing failure and error identifiers are unchanged.</p>
   </section>
+  <section id="defaulted-attribute-scan-aperture">
+    <h2>The guard proves it inspected a non-empty aperture</h2>
+    <p><strong>Non-empty instrument.</strong> The static guard now asserts floors of at least
+    <strong>8 scanned modules</strong>, <strong>3,000 declared class attributes</strong> and
+    <strong>24 literal three-argument candidates</strong>. The comment beside those constants states
+    the reason: a scan that sees nothing must fail rather than pass. On integrated main
+    <code>a0d303ca47357821f4a1f595d8a8089e462b32fa</code>, the focused all-debug receipt records
+    <strong>11 modules</strong>, <strong>4,013 declared attributes</strong>,
+    <strong>30 candidates</strong> and <strong>0 violations</strong>, so each floor is a ratchet
+    below a measured value rather than an assertion of an exact implementation detail.</p>
+
+    <p><strong>What a green result still cannot say.</strong> The check resolves an attribute name
+    against the union of fields and properties on <em>every</em> class in <code>imas_codex</code>.
+    It is not type-aware. On the five defaulted reads in <code>_extract_audit_findings</code> that
+    motivated this guard, it catches <code>findings</code> and <code>affected_names</code> but misses
+    <code>severity</code>, <code>message</code> and <code>category</code>: each of those names is
+    declared by some unrelated class elsewhere in the package. The useful result remains the two
+    caught reads, which were sufficient to make the whole function inert; it is nevertheless false
+    to read a green run as proof that no defaulted-attribute fail-open remains.</p>
+
+    <p><strong>Deferred design.</strong> Closing that gap requires resolving each attribute against
+    the annotated or inferred type of the object receiving <code>getattr</code>, not against the
+    package-wide name set. That is a distinct type-analysis design and is recorded as follow-on work,
+    not folded into this narrow static guard.</p>
+  </section>
   </main>
 </body>
 </html>
