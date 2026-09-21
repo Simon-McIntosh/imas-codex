@@ -1101,6 +1101,17 @@
     row's name, path, both units, both documentation strings and the name's own
     description were already drawn from the live graph into the JSON, and that
     is the whole evidence base.</p>
+</section>
+  <section>
+    <h2>Rows 205&ndash;255 of the same cohort &mdash; fourteen of fifty-one, and four of them close the first half's open pairs</h2>
+    <p>The contiguous path-ordered range from
+    <code>spectrometer_visible/channel/line_of_sight/second_point/z</code> to
+    <code>wall/description_2d/mobile/unit/outline/r</code> &mdash; <strong>51
+    bindings</strong>, almost entirely the <code>summary</code> IDS &mdash; judged in
+    the same shape as the 86-row sample above, against the data-dictionary text of
+    the path each name is bound to, its unit and its own description. Every row was
+    drawn from the live graph when the remainder cohort was cut, so <strong>no graph
+    query was issued here</strong>.</p>
     <table>
       <thead>
         <tr><th>Measure</th><th>Value</th></tr>
@@ -1214,6 +1225,26 @@
     <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit">the
     WEST name audit</a> and uses the same section shape and verdict vocabulary so
     the two sum.</p>
+        <tr><td>Rows judged (cohort indices 205&ndash;255)</td><td>51</td></tr>
+        <tr><td>Correct</td><td>37</td></tr>
+        <tr><td>Incorrect, with a proposed spelling beside the rejected one</td><td><strong>14</strong> &mdash; 27.5 per cent of the 51</td></tr>
+        <tr><td>Running total against the 86-row first half</td><td><strong>137 of 341 bindings judged &middot; 113 correct &middot; 24 incorrect &middot; 17.5 per cent</strong></td></tr>
+        <tr><td>Worst class &mdash; one name, two physical quantities</td><td>6, including <code>vertical_coordinate_of_strike_point</code> whose one description hard-codes the <strong>inner</strong> leg and is therefore false of its outer binding, and <code>toroidal_angular_width_of_limiter_tile</code> on an array packing a zone <strong>centre</strong> beside its width &mdash; unsplittable, because both share one data-dictionary node</td></tr>
+        <tr><td>Predictions of the first half confirmed by rows it could not see</td><td>3 &mdash; the vertical strike-point pair it forecast; the launched-versus-coupled distinction of its row 80, found on three further bindings; and its row-86 spelling, which makes <code>radial_outline_of_wall</code> a rejection rather than a judgement call</td></tr>
+        <tr><td>Defects lying in a description or a container rather than a name (no incorrect verdict)</td><td>9, including an ohmic-power description admitting &ldquo;plasma <strong>or structure</strong>&rdquo; and an external-heating description calling the sum &ldquo;non-inductive power&rdquo;</td></tr>
+        <tr><td>Identities also binding outside the range &mdash; named, deferred to the collision sweep</td><td>20, including <code>radial_coordinate_of_magnetic_axis</code> reaching <code>equilibrium/time_slice/contour_tree/node/r</code>, which is any critical point of the flux map and not an axis</td></tr>
+      </tbody>
+    </table>
+    <p>The 27.5 per cent is <strong>not</strong> a re-extrapolation of the cohort and
+    does not replace the first half's 11.6 per cent estimate: that sample was every
+    fourth row and drawn before any verdict, while this is a contiguous range
+    weighted towards the one IDS where a leaf name must carry a locus, an averaging
+    rule and a provenance that the path supplies for free. The defensible combined
+    statement is the count, not a rate. Per-row verdicts, each rejection's proposed
+    spelling and the semantic distinction behind it are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit-spectrometer-visible-to-wall">the
+    rows 205&ndash;255 audit</a>, appended row by row as each name was judged and
+    committed in four parts (<strong>a36a3aa01</strong>, <strong>c3d8401b1</strong>, <strong>ec2d73ba7</strong>, <strong>bf9a025e7</strong>).</p>
   </section>
 </main>
 </body>
