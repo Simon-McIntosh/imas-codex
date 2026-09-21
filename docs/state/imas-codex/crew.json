@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T08:05:44",
+  "updated": "2026-09-21T08:08:54",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -161435,6 +161435,214 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T042922844381-n-the-west-batch-names-are-physically-correct",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-the-west-batch-names-are-physically-correct",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 337,
+                "cached_input_tokens": 234682,
+                "input_tokens": 235021,
+                "output_tokens": 713,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 235734,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "audit-s14-20260921T042900"
+          },
+          "done_when": "docs/evidence/sn-west-catalog-release/west-name-audit.md exists and, for a stated sample of at least 60 accepted WEST-batch names drawn through GraphClient(), records per name: the name, its DD source path, its unit, its description, and a verdict of correct or incorrect; every incorrect verdict states the proposed correct spelling beside the rejected one and explains the semantic distinction in plain language; the file is APPENDED TO as each name is judged, never composed at the end, and carries a provisional: true line that the final pass clears",
+          "estimated_hours": 0.75,
+          "goal": "Judge whether the accepted standard names bound to WEST batch sources are physically correct and self-descriptive, and name the correct alternative for every one that is not",
+          "id": "n-the-west-batch-names-are-physically-correct",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "unknown",
+            "metered": true,
+            "observed_at": "2026-09-08T13:30:28.930Z",
+            "read_at": "2026-09-21T04:29:23Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 98.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/west-names-042900/manifest.md",
+          "negative_control": "",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/west-name-audit.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "session-3df31341bd3780a83b96",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T04:29:28Z",
+        "completed_at": "2026-09-21T04:38:38.101Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 544,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 550,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "1fa39615146cc6c88a61e36f4829fde60f4d6f86",
+        "commits": [
+          "a8724b4e6fc349d30c1694bfd29b59b86774f050"
+        ],
+        "changed_lines": {
+          "added": 30,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "no suite: the deliverable is a semantic judgement against the live graph, not a test. 86 of 341 WEST bindings judged, 76 correct, 10 incorrect with proposed spellings",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/west-names-042900/manifest.md",
+        "scope_changed": false,
+        "session_id": "002b8d09-eb19-45d6-976d-5584b3503cdb",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 25.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 128830,
+            "cache_creation_input_tokens_cumulative": 128830,
+            "cache_read_input_tokens": 3844098,
+            "cache_read_input_tokens_cumulative": 3844098,
+            "inference_geo": "not_available",
+            "input_tokens": 78,
+            "input_tokens_cumulative": 78,
+            "output_tokens": 36890,
+            "output_tokens_cumulative": 36890,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 4.132988999999999,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 4.132988999999999
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T04:38:38.101Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 3844098,
+          "cumulative_input_tokens": 3973006,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 546.374,
+          "generated_tokens": 36890,
+          "generation_seconds": 437.177,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 14.2,
+          "machine_seconds": 109.197,
+          "peak_input_tokens": 141862,
+          "tokens_per_second": 84.38,
+          "wall_tokens_per_second": 67.52
+        },
+        "follow_on_paths": [
+          "340/342",
+          "11.6"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/audit-s14-20260921T042900/n-the-west-batch-names-are-physically-correct",
+          "session_id": "002b8d09-eb19-45d6-976d-5584b3503cdb",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T04:38:38.101Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.984,
+        "impl_move": {
+          "plan": "sn-west-catalog-release",
+          "at_dispatch": 0.984,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 41.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -161747,6 +161955,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2398
+    "_version": 2399
   }
 }
