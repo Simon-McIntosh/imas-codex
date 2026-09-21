@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T20:46:25",
+  "updated": "2026-09-21T20:48:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -183192,6 +183192,241 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T124129677197-n-the-guarded-surface-is-derived-from-the-tree",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-the-guarded-surface-is-derived-from-the-tree",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1431,
+                "cached_input_tokens": 391451,
+                "input_tokens": 392884,
+                "output_tokens": 1617,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 394501,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "This is the FOURTH attempt at one file's aperture and each previous version was bypassable in a new way, so the instruction is to REMOVE THE ENUMERATION, not to add another assertion over it. The history constrains the fix. Version one had unanchored aggregate floors. Version two added a required-root list that was a verbatim copy of the scanned list, so editing both passed. Version three deleted the duplicate and ratcheted the floors to measured counts, and an independent review then showed a SUBSTITUTION passes: swap one root for another, the count still reads 11, and a surface that needed guarding is uncovered. All three failed for one underlying reason \u2014 the set of surfaces to guard was stated as a literal inside the very file the guard protects, so a single edit can move both sides at once. THE FIX: stop enumerating roots. Walk the imas_codex package, find every module containing a three-argument getattr call, and require the scan to cover each one, so the requirement comes from the source tree rather than from a literal a future edit can rewrite. A module that grows a candidate is then covered automatically, and a root removed or substituted fails because a module carrying a candidate is uncovered. Keep the aggregate floors as a second independent signal, with their ratchet messages. ALSO close the dead guard the same review found: the assertion that a configured root exists can no longer fail, because _python_modules raises for any path that is neither a directory nor a regular file BEFORE the scan carrying the exists flag is constructed, so every root reaching the assertion has exists true by construction. Delete that assertion, and state in your commit body why deletion is right here \u2014 it duplicates a raise that fires earlier on the same condition, which is different from a guard whose triggering input does not exist yet. This repository has just had one such guard wrongly recommended for deletion, so make the distinction explicitly rather than assuming it. ALSO parametrise the misspelled-root test to drive the wider condition its message names, adding a case for a path that exists but is neither a directory nor a regular file. PROOFS: the file green with its passed count stated; the negative control captured to exactly one red log whose FIRST LINE is verbatim this node's declared negative-control sentence and nothing else, at exit status 1 and not 2, 4 or 5, since a collection or usage error proves nothing and means the mutation is malformed; a SECOND red log showing a pure root deletion also still fails; and the manifest stating how many modules the tree-derived requirement finds, confirming it is at least the 11 the old floor named. FORBIDDEN: reintroducing any literal list of roots under any name, adding a default that makes an uncovered module tolerable, and editing any file outside tests/standard_names/test_defaulted_attributes_exist.py. Write the manifest incrementally, appending each figure as you establish it. Conventional subject AND body, stage only your one path, no attribution trailer of any kind.",
+          "estimated_hours": 0.75,
+          "goal": "derive the defaulted-attribute guard's scanned surface from the source tree instead of a literal list",
+          "id": "n-the-guarded-surface-is-derived-from-the-tree",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T12:41:34Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T124129677197-n-the-guarded-surface-is-derived-from-the-tree/manifest.md",
+          "negative_control": "substitute one module root for another in tests/standard_names/test_defaulted_attributes_exist.py so the scanned count is unchanged and the file fails because a module carrying a candidate is no longer covered",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "tests/standard_names/test_defaulted_attributes_exist.py",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-c",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T12:42:35Z",
+        "completed_at": "2026-09-21T16:36:03.945Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 13989,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 14008,
+        "stalled": true,
+        "time_budget": "45m",
+        "base_sha": "3c55df8a188169cc03bce63e18468078d5e91c93",
+        "commits": [
+          "4370ac466234518c55d48e8d0d94dfecad706ba7",
+          "697b1604dd5081486beba3b09fcc72f69349e6ae"
+        ],
+        "changed_lines": {
+          "added": 271,
+          "removed": 63,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug uv run pytest -p no:cacheprovider --timeout=180 tests/standard_names/ (isolated gate tree, isolation and provenance asserted OK)",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.local/share/imas-codex/gate-logs/ship-s10-20260918/gate-aperture-head.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "FOURTH VERSION OF ONE GUARD, STILL BYPASSABLE, LANDED ANYWAY WITH THE REASONING RECORDED. What it achieved is real: coverage of the defect class this guard exists for went from ZERO to complete. That class is a literal-name three-argument getattr whose default is an empty container \u2014 the shape that dropped every Layer-1 audit finding this sprint \u2014 and there are thirty such calls across nine modules, NONE of which lay inside the three roots the guard previously named. The surface is now derived from the tree rather than enumerated, twenty-nine of thirty resolve against the existing declaration collector, one exemption was added for a LinkML slot attribute naming its owning library, the dead configured-root assertion was deleted and the misspelled-root test parametrised. Isolated base and head both 21 failed / 3 errors, identical failing ids, zero added, +2 collected and +2 passed. Two negative controls, both exit 1 at 1 failed 5 passed: a root substitution and a pure root deletion. REVIEW: MUST-FIX, four findings, each measured with a probe log. ONE: the new requirement has no test that fails if deleted \u2014 removing five lines leaves the file green, because the fixture sits inside a configured root with an empty-container default so the roots loop reaches the same violation. TWO: the substitution bypass still reproduces for the BROADER literal-name class. Note the nuance the two artifacts together establish: the worker's substitution control genuinely fails, because the root it substituted carried empty-container candidates; the reviewer constructed a substitution whose reads all resolve, which passes. The control is real and does not cover the reviewer's case. THREE: the candidate floor is compared against the union of both apertures at sixty, so all thirty of the roots' candidates could go unchecked without moving it. FOUR: the exemption is keyed by attribute name alone package-wide, so one entry silently excuses a future in-package miss of the same name anywhere, measured with a planted phantom field. COORDINATOR JUDGEMENT, stated as one: every remaining bypass needs a deliberate edit and none is reachable by accident, which is the failure mode this guard exists for and on which it now succeeds where it previously did nothing. A fifth iteration hardens against a threat model this repository does not face while the release path is blocked elsewhere. RECORD REPAIR AT PROMOTE: the manifest's control path field was blank, apparently lost across two resumes, while both control logs sat in the run directory with verbatim first lines; the field was repointed and the second control named. LANE NOTE: this review was SAME-MODEL and found four bypasses in a guard that had survived three prior reviews \u2014 a second independent contradiction of the cross-model rule this coordinator proposed and withdrew today.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T124129677197-n-the-guarded-surface-is-derived-from-the-tree/manifest.md",
+        "scope_changed": false,
+        "session_id": "2421a84d-a645-46a9-bf1b-24f7ae4513d6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 10733966,
+            "input_tokens_cumulative": 10733966,
+            "output_tokens": 67902,
+            "output_tokens_cumulative": 67902,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T16:36:03.945Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 11,
+            "evidence": 14,
+            "fit": 16,
+            "goal_fidelity": 13,
+            "scope_discipline": 19
+          },
+          "absent": [],
+          "total": 73
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 21779066,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 4133.27,
+          "generated_tokens": 189041,
+          "generation_seconds": 3660.325,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.7,
+          "machine_seconds": 472.945,
+          "peak_input_tokens": 152101,
+          "tokens_per_second": 51.65,
+          "wall_tokens_per_second": 45.74
+        },
+        "follow_on_paths": [
+          "tests/standard_names/conftest.py:128"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-guarded-surface-is-derived-from-the-tree",
+          "session_id": "2421a84d-a645-46a9-bf1b-24f7ae4513d6",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T16:36:03.945Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.99,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.99,
+          "at_complete": 0.99,
+          "verdict": "waived",
+          "reason": "the review found the guard still bypassable four ways, so the section is not closed; the coordinator recommends against a fifth iteration and has recorded the reasoning, which a later reader may overturn from the recorded triggering inputs"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/standard_names/test_defaulted_attributes_exist.py"
+          ],
+          "declaration": "substitute one module root for another in tests/standard_names/test_defaulted_attributes_exist.py so the scanned count is unchanged and the file fails because a module carrying a candidate is no longer covered",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T124129677197-n-the-guarded-surface-is-derived-from-the-tree/negative_control_substituted_root.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T124129677197-n-the-guarded-surface-is-derived-from-the-tree/negative_control_substituted_root.log"
+        },
+        "tool_steps": 65.0,
+        "orientation_input_tokens": 4520069.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -183504,6 +183739,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2496
+    "_version": 2497
   }
 }
