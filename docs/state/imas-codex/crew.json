@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:38:23",
+  "updated": "2026-09-21T09:39:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -164964,6 +164964,216 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T071948472035-review-of-n-the-restore-receipt-names-its-expected-source",
+        "plan": "paid-identity-deletion-protection",
+        "section": "",
+        "node": "review-of-n-the-restore-receipt-names-its-expected-source",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1632,
+                "cached_input_tokens": 504463,
+                "input_tokens": 506097,
+                "output_tokens": 1350,
+                "reasoning_output_tokens": 201,
+                "total_tokens": 507447,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "the review for r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source stores a parsed record scoring all 5 dimensions in the range 0..20, read from the landed diff at the integrated head rather than from the worker's report. The change makes _archive_role_parity in imas_codex/standard_names/signed_manifest.py name whether each row's expected count came from the archive census, the reconstruction closure or neither, and carry null instead of a fabricated zero when neither establishes it; it also migrated four pre-existing tests from the two-field row shape to the three-field one. State whether the change can suppress or skip something it should not, whether it can misreport, and whether any guard it adds is bypassable on an input the node's own tests do not construct. Three specific questions must each be answered yes or no with the evidence. Does any consumer of the parity mapping now receive None where it previously received an int, and can any of them arithmetic on it or compare it and fail. Does the refusal path still read the reconstruction closure rather than the archive census, because that adjudication is settled and inverting it would make every archived identity that ever carried an inbound EVIDENCED_BY edge from a PromotionCandidate unrestorable. And do the four migrated tests still assert the exact row shape rather than a relaxed subset, or was an assertion weakened to accommodate the new field. Give a verdict of SOUND or MUST-FIX with a concrete triggering input for each defect, and report separately anything the two negative-control logs in the run directory do not cover",
+          "estimated_hours": 0.5,
+          "goal": "attach an independent review to run r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source",
+          "id": "review-of-n-the-restore-receipt-names-its-expected-source",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T07:05:16.655Z",
+            "read_at": "2026-09-21T07:19:49Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 82.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T071948472035-review-of-n-the-restore-receipt-names-its-expected-source/manifest.md",
+          "negative_control": "",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "review",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source.json"
+          ]
+        },
+        "role": "review",
+        "spec_level": "exact",
+        "member": "claude-opus-rev-2",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-09-21T07:19:55Z",
+        "completed_at": "2026-09-21T07:26:36.274Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 394,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 401,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "c0689be59304dd0922e07e18882fa4b17ab80f40",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "the review record for r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source parses and scores all five dimensions in 0..20",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source.json",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T071948472035-review-of-n-the-restore-receipt-names-its-expected-source/manifest.md",
+        "scope_changed": false,
+        "session_id": "6cd31fb9-ec2d-46bd-8a6f-24f8135296dd",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 89.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 117530,
+            "cache_creation_input_tokens_cumulative": 117530,
+            "cache_read_input_tokens": 2529765,
+            "cache_read_input_tokens_cumulative": 2529765,
+            "inference_geo": "not_available",
+            "input_tokens": 54,
+            "input_tokens_cumulative": 54,
+            "output_tokens": 26518,
+            "output_tokens_cumulative": 26518,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 3.1034025,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 3.1034025
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T07:26:36.274Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 2529765,
+          "cumulative_input_tokens": 2647349,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 396.844,
+          "generated_tokens": 26518,
+          "generation_seconds": 317.101,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 13.1,
+          "machine_seconds": 79.743,
+          "peak_input_tokens": 130562,
+          "tokens_per_second": 83.63,
+          "wall_tokens_per_second": 66.82
+        },
+        "follow_on_paths": [
+          "imas_codex/cli/sn.py:8466",
+          "tests/standard_names/test_archive_parity_receipt.py",
+          "...v1"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "review",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": "a review writes its record into the reckon review store, not the repository",
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/review-of-n-the-restore-receipt-names-its-expected-source",
+          "session_id": "6cd31fb9-ec2d-46bd-8a6f-24f8135296dd",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T07:26:36.274Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.86,
+        "impl_move": {
+          "plan": "paid-identity-deletion-protection",
+          "at_dispatch": 0.86,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:review"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 29.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165276,6 +165486,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2421
+    "_version": 2422
   }
 }
