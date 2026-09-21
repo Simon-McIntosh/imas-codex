@@ -423,6 +423,40 @@
       catalog.
     </p>
 
+    <h3 id="s3-mutation-classifier-boundaries">Landed: the mutation classifier respects identifier boundaries</h3>
+    <p>
+      The report-only guard classifies a Cypher statement by tokenising it on
+      non-letter characters and testing each token against a keyword set.
+      Underscores are non-letters, so an identifier splits at its underscores
+      and each part is tested as if it were a clause. Fed the read-only
+      protection query at <code>imas_codex/standard_names/protection.py:100</code>
+      &mdash; a <code>MATCH ... RETURN</code> that reads
+      <code>sn.catalog_merge_commit_sha</code> &mdash; the classifier returned
+      <code>MERGE</code> from the identifier's middle segment. A report-only run
+      would have suppressed its own protection read and reported a mutation no
+      statement contained.
+    </p>
+    <p>
+      <strong>Repair.</strong> Commit <code>78d5cbef0</code> matches each keyword
+      on a word boundary over the literal- and comment-stripped statement,
+      returning the first in document order. Since <code>_</code> and digits are
+      word characters, no boundary falls inside an identifier, so a keyword can
+      no longer be read out of one, while a clause standing alone is still
+      matched. <strong>Evidence.</strong>
+      <code>tests/standard_names/test_cypher_mutation_classifier.py</code>
+      asserts the protection query classifies as <code>None</code> (with a
+      fixture guard that <code>catalog_merge_commit_sha</code> is still present),
+      asserts an underscore-named identifier part is not a mutation, and asserts
+      <code>CREATE</code>, <code>MERGE</code>, <code>SET</code>,
+      <code>DELETE</code>, <code>REMOVE</code> and <code>DROP</code> each still
+      return their own clause. Run with the sibling report-only suite,
+      <strong>12 passed</strong> (9 new, 3 existing). The negative control
+      restores the old tokenisation and fails the first assertion with
+      <strong><code>assert 'MERGE' is None</code></strong>. The full record is
+      anchored in <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#mutation-classifier-boundaries">the
+      cumulative landing record</a>.
+    </p>
+
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 
     <p>
