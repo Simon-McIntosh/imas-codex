@@ -457,6 +457,40 @@
       cumulative landing record</a>.
     </p>
 
+    <h3 id="s3-suppressed-write-consumable">Landed: a suppressed write returns a result its caller can consume</h3>
+    <p>
+      The report-only guard dropped a mutating statement by returning a bare
+      empty list, which is not the shape a caller reads. Suppression removes the
+      effect of a statement, not the value of the call: the client's count
+      helpers read <code>result.single()</code> at
+      <code>imas_codex/graph/client.py:509</code>, and the DD resolution port
+      writes read <code>transaction.run(...).consume()</code> at
+      <code>imas_codex/standard_names/dd_resolutions.py:706</code>. Driven
+      through the real <code>drop_all</code> against a recording driver, the
+      guarded call raised
+      <code>AttributeError: 'list' object has no attribute
+      'single'</code> at that line, so a report-only run reaching such a
+      consumer failed instead of reporting that it had written nothing.
+    </p>
+    <p>
+      <strong>Repair.</strong> Commit <code>658df1631</code> returns a small
+      result object whose <code>single()</code> is <code>None</code>, whose
+      <code>consume()</code> returns without raising, and which iterates empty,
+      so a dropped write reads as a statement that matched no rows.
+      <strong>Evidence.</strong>
+      <code>tests/standard_names/test_review_write_suppression.py</code> gains a
+      case that drives the guard through both a session and a transaction opened
+      from it, asserting on each returned object that <code>single()</code> is
+      <code>None</code> while iteration is empty and that <code>consume()</code>
+      completes &mdash; a non-empty result cannot satisfy both. The file passes
+      (<strong>26 passed</strong>), and with the sibling report-only suites
+      <strong>38 passed</strong>. The negative control restores the bare-list
+      return and fails the test with the recorded
+      <code>AttributeError</code> verbatim. The full record is anchored in
+      <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#suppressed-write-consumable-result">the
+      cumulative landing record</a>.
+    </p>
+
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 
     <p>
