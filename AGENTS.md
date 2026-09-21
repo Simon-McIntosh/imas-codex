@@ -207,6 +207,18 @@ Multiple agents may edit this repo simultaneously on `main`. Assume another agen
 
 **Concurrent-staging race (binding):** `git commit` commits the ENTIRE index, not just the paths you `git add`ed — so if a background agent stages its files in the window between your `git add` and your `git commit`, its files are swept into YOUR commit (incident 2026-06-14: a dep-bump commit absorbed a parallel agent's 6 prompt files; no loss, but a misdescribed commit). When committing while background agents may be staging in the same worktree, use **`git commit -- <explicit paths>`** (pathspec-scoped commit — commits ONLY those paths regardless of index state), never a bare `git commit`. The orchestrator should also avoid committing during a window when a dispatched agent is known to be mid-edit; prefer waiting for the agent to commit its own scoped set first.
 
+**The same race runs in the other direction, and pathspec-scoping does not protect you from it (binding).** The rule above protects the *committer*. It does nothing for a session whose own commit fails while its paths sit staged, because the next commit in that checkout — anyone's — takes them. Measured 2026-09-21: a peer session was mid-merge when this session ran `git pull` immediately before staging. The pull refused on their unresolved conflict, `git commit -- <path>` then refused with *cannot do a partial commit during a merge*, and the staged file was swept into the peer's subsequent merge commit, whose subject describes unrelated work. No content was lost; the commit is misdescribed and the change is attributed to another node's landing.
+
+So before staging in the shared checkout, **check that the tree is not mid-merge, and stage only immediately before a commit you expect to succeed**:
+
+```bash
+git pull --no-rebase origin main
+test -f .git/MERGE_HEAD && { echo "mid-merge — do not stage"; exit 1; }
+git add <paths> && git commit -m "..." -- <paths>      # message BEFORE the pathspec
+```
+
+If a commit fails with paths already staged, `git restore --staged <your paths>` unstages them without touching content — that is the one safe recovery, and it is limited to paths this session staged. When a sweep has already happened, the commit belongs to another session and is likely pushed, so **annotate it with `git notes` rather than amending it** — and push the note, because notes do not travel with an ordinary push unless this clone carries the refspecs in the New Clone Setup block.
+
 ## Code Style
 
 - Python ≥3.12: `list[str]`, `X | Y`, `isinstance(e, ValueError | TypeError)`
