@@ -107,3 +107,124 @@ spelling to be invented, and none is recorded as missing one.**
 | `wave_phase_of_ion_cyclotron_heating_antenna` | `voltage_phase_of_ion_cyclotron_heating_antenna` | `ic_antennas/antenna/module/voltage/phase` | eq-profiles→magnetics 132 | not self-descriptive |
 | `wave_phase_of_wave_beam` | `fringe_jump_corrected_phase_of_interferometer_beam` | `interferometer/channel/wavelength/phase_corrected` | eq-profiles→magnetics 142 | not self-descriptive |
 | `width_of_poloidal_field_coil` | `width_of_conductor_cross_section` | `pf_active/coil/element/geometry/rectangle/width` | magnetics→spec-visible 166 | bound to the wrong object |
+## Part two — 10 splits, the class that blocks publication
+
+A split cannot be performed by a reader. Each of these identities resolves to two or more
+physically different objects, so a published catalog entry gives a consumer no way to tell which
+value it is holding. All ten are MUST-SPLIT groups in the shared-identities record, and all ten are
+also rejected by at least one range record — the two instruments agree on which identities are
+unsafe, which is the one cross-check the seven records make possible.
+
+| rejected identity | bindings | resolution | source | class |
+| --- | --- | --- | --- | --- |
+| `radial_coordinate_of_magnetic_axis` | 4 | 3 keep / 1 rename | shared group 4; eq-boundary→profiles 64 | wrong object |
+| `radial_coordinate_of_measurement_position` | 3 | 1 keep / 2 rename | shared group 14; brems→eq-boundary 17, eq-profiles→magnetics 150 | wrong object |
+| `toroidal_angle_of_measurement_position` | 3 | 1 keep / 2 rename | shared group 16; brems→eq-boundary 44, eq-profiles→magnetics 149, magnetics→spec-visible 156 | minority spelling |
+| `effective_charge` | 2 | 1 keep / 1 rename | shared group 25; brems→eq-boundary 30 | two quantities |
+| `initial_polarization_ellipticity_of_polarimeter_beam` | 2 | 1 keep / 1 rename | shared group 27; magnetics→spec-visible 178 | two quantities |
+| `launched_power_of_lower_hybrid_antenna` | 2 | 1 keep / 1 rename | shared group 28; spec-visible→wall 236, spec-visible→wall 238 | two quantities |
+| `net_power_due_to_ion_cyclotron_heating` | 2 | 1 keep / 1 rename | shared group 34; spec-visible→wall 235 | two quantities |
+| `normalized_toroidal_flux_coordinate_at_measurement_position` | 2 | 1 keep / 1 rename | shared group 36; eq-profiles→magnetics 118 | wrong object |
+| `radial_coordinate_of_strike_point` | 2 | 0 keep / 2 rename | shared group 42; audit 72, spec-visible→wall 212 | two quantities |
+| `vertical_coordinate_of_strike_point` | 2 | 0 keep / 2 rename | shared group 51; spec-visible→wall 213, spec-visible→wall 214 | two quantities |
+**24 bindings are covered by these ten rows** — 22 in the nine groups whose split table the
+shared-identities record prints inline, plus the two of `vertical_coordinate_of_strike_point`.
+Eight of the ten keep the existing spelling on at least one binding, so eight of these repairs
+mint one new name rather than two; only the two strike-point groups retire their spelling
+entirely, because neither divertor leg has a better claim to the unqualified name.
+
+### The per-binding resolutions
+
+#### `radial_coordinate_of_magnetic_axis` — 4 bindings (shared group 4)
+
+| binding | resolved spelling |
+| --- | --- |
+| `equilibrium/time_slice/global_quantities/magnetic_axis/r` | keeps `radial_coordinate_of_magnetic_axis` |
+| `summary/boundary/magnetic_axis_r/value` | keeps `radial_coordinate_of_magnetic_axis` |
+| `summary/local/magnetic_axis/position/r` | keeps `radial_coordinate_of_magnetic_axis` |
+| `equilibrium/time_slice/contour_tree/node/r` | **needs** `radial_coordinate_of_flux_contour_critical_point` |
+
+- rejected by: eq-boundary→profiles row 64 (`equilibrium/time_slice/contour_tree/node/r`, proposed `radial_coordinate_of_flux_map_critical_point`)
+
+#### `radial_coordinate_of_measurement_position` — 3 bindings (shared group 14)
+
+| binding | resolved spelling |
+| --- | --- |
+| `ece/channel/position/r` | keeps `radial_coordinate_of_measurement_position` |
+| `camera_x_rays/aperture/centre/r` | **needs** `radial_coordinate_of_aperture` |
+| `magnetics/b_field_phi_probe/position/r` | **needs** `radial_coordinate_of_toroidal_magnetic_field_probe` |
+
+- rejected by: brems→eq-boundary row 17 (`camera_x_rays/aperture/centre/r`, proposed `radial_coordinate_of_aperture`), eq-profiles→magnetics row 150 (`magnetics/b_field_phi_probe/position/r`, proposed `radial_coordinate_of_toroidal_magnetic_field_probe`)
+
+#### `toroidal_angle_of_measurement_position` — 3 bindings (shared group 16)
+
+| binding | resolved spelling |
+| --- | --- |
+| `ece/channel/position/phi` | keeps `toroidal_angle_of_measurement_position` |
+| `magnetics/b_field_phi_probe/position/phi` | **needs** `toroidal_angle_of_toroidal_magnetic_field_probe` |
+| `magnetics/b_field_pol_probe/position/phi` | **needs** `toroidal_angle_of_poloidal_magnetic_field_probe` |
+
+- rejected by: brems→eq-boundary row 44 (`ece/channel/position/phi`, proposed `toroidal_coordinate_of_measurement_position`), eq-profiles→magnetics row 149 (`magnetics/b_field_phi_probe/position/phi`, proposed `toroidal_coordinate_of_toroidal_magnetic_field_probe`), magnetics→spec-visible row 156 (`magnetics/b_field_pol_probe/position/phi`, proposed `toroidal_coordinate_of_poloidal_magnetic_field_probe`)
+
+#### `effective_charge` — 2 bindings (shared group 25)
+
+| binding | resolved spelling |
+| --- | --- |
+| `core_profiles/profiles_1d/zeff` | keeps `effective_charge` |
+| `core_profiles/global_quantities/z_eff_resistive` | **needs** `volume_averaged_effective_charge` |
+
+- rejected by: brems→eq-boundary row 30 (`core_profiles/global_quantities/z_eff_resistive`, proposed `volume_averaged_effective_charge`)
+
+#### `initial_polarization_ellipticity_of_polarimeter_beam` — 2 bindings (shared group 27)
+
+| binding | resolved spelling |
+| --- | --- |
+| `polarimeter/channel/ellipticity_initial` | keeps `initial_polarization_ellipticity_of_polarimeter_beam` |
+| `polarimeter/channel/polarization_initial` | **needs** `initial_polarization_of_polarimeter_beam` |
+
+- rejected by: magnetics→spec-visible row 178 (`polarimeter/channel/polarization_initial`, proposed `initial_polarization_vector_of_polarimeter_beam`)
+
+#### `launched_power_of_lower_hybrid_antenna` — 2 bindings (shared group 28)
+
+| binding | resolved spelling |
+| --- | --- |
+| `summary/heating_current_drive/lh/power/value` | keeps `launched_power_of_lower_hybrid_antenna` |
+| `summary/heating_current_drive/power_lh/value` | **needs** `total_launched_power_of_lower_hybrid_antennas` |
+
+- rejected by: spec-visible→wall row 236 (`summary/heating_current_drive/lh/power/value`, proposed `coupled_power_of_lower_hybrid_antenna`), spec-visible→wall row 238 (`summary/heating_current_drive/power_lh/value`, proposed `total_coupled_power_due_to_lower_hybrid_heating`)
+
+#### `net_power_due_to_ion_cyclotron_heating` — 2 bindings (shared group 34)
+
+| binding | resolved spelling |
+| --- | --- |
+| `ic_antennas/antenna/power_launched` | keeps a launched spelling — `launched_power_of_ion_cyclotron_antenna` |
+| `summary/heating_current_drive/ic/power/value` | **needs** `coupled_power_of_ion_cyclotron_antenna` |
+
+- rejected by: spec-visible→wall row 235 (`summary/heating_current_drive/ic/power/value`, proposed `coupled_power_due_to_ion_cyclotron_heating`)
+
+#### `normalized_toroidal_flux_coordinate_at_measurement_position` — 2 bindings (shared group 36)
+
+| binding | resolved spelling |
+| --- | --- |
+| `ece/channel/position/rho_tor_norm` | keeps `normalized_toroidal_flux_coordinate_at_measurement_position` |
+| `hard_x_rays/emissivity_profile_1d/peak_position` | **needs** `normalized_toroidal_flux_coordinate_of_emissivity_peak` |
+
+- rejected by: eq-profiles→magnetics row 118 (`hard_x_rays/emissivity_profile_1d/peak_position`, proposed `normalized_toroidal_flux_coordinate_at_emissivity_peak`)
+
+#### `radial_coordinate_of_strike_point` — 2 bindings (shared group 42)
+
+| binding | resolved spelling |
+| --- | --- |
+| `summary/boundary/strike_point_inner_r/value` | **needs** `radial_coordinate_of_inner_strike_point` |
+| `summary/boundary/strike_point_outer_r/value` | **needs** `radial_coordinate_of_outer_strike_point` |
+
+- rejected by: audit row 72 (`summary/boundary/strike_point_outer_r/value`, proposed `radial_coordinate_of_outer_strike_point`), spec-visible→wall row 212 (`summary/boundary/strike_point_inner_r/value`, proposed `radial_coordinate_of_inner_strike_point`)
+
+#### `vertical_coordinate_of_strike_point` — 2 bindings (shared group 51)
+
+| binding | resolved spelling |
+| --- | --- |
+| `summary/boundary/strike_point_inner_z/value` | **needs** `vertical_coordinate_of_inner_strike_point` |
+| `summary/boundary/strike_point_outer_z/value` | **needs** `vertical_coordinate_of_outer_strike_point` |
+
+- rejected by: spec-visible→wall row 213 (`summary/boundary/strike_point_inner_z/value`, proposed `vertical_coordinate_of_inner_strike_point`), spec-visible→wall row 214 (`summary/boundary/strike_point_outer_z/value`, proposed `vertical_coordinate_of_outer_strike_point`)
