@@ -693,10 +693,15 @@ def retarget_standard_name_sources(
         WITH DISTINCT new, old, source
         OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
         OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
-        OPTIONAL MATCH (dd)-[dd_old:HAS_STANDARD_NAME]->(:StandardName)
+        // Bind both deletes to the predecessor. An anonymous end removes the
+        // container's binding to EVERY standard name, including names other
+        // sources of the same container produce: 98 IMASNodes currently carry
+        // more than one HAS_STANDARD_NAME edge, up to three, so an unbound end
+        // destroys a peer's binding while this retarget reports success.
+        OPTIONAL MATCH (dd)-[dd_old:HAS_STANDARD_NAME]->(old)
         DELETE dd_old
         WITH DISTINCT new, old, source, dd, signal
-        OPTIONAL MATCH (signal)-[sig_old:HAS_STANDARD_NAME]->(:StandardName)
+        OPTIONAL MATCH (signal)-[sig_old:HAS_STANDARD_NAME]->(old)
         DELETE sig_old
         FOREACH (_ IN CASE WHEN dd IS NULL THEN [] ELSE [1] END |
           MERGE (dd)-[:HAS_STANDARD_NAME]->(new))
@@ -1141,17 +1146,26 @@ def bind_sources_exclusively(
         MATCH (sn:StandardName {id: $name})
         UNWIND $source_ids AS source_id
         MATCH (source:StandardNameSource {id: source_id})
-        OPTIONAL MATCH (source)-[prior:PRODUCED_NAME]->(:StandardName)
-        DELETE prior
+        // Carry the name this source used to produce, so the container deletes
+        // below can be bound to it. An anonymous end would remove the
+        // container's binding to every standard name, including names produced
+        // by OTHER sources of the same container.
+        OPTIONAL MATCH (source)-[prior:PRODUCED_NAME]->(previous:StandardName)
+        WHERE previous.id <> sn.id
+        WITH sn, source, collect(DISTINCT previous) AS superseded,
+             collect(prior) AS priors
+        FOREACH (stale_edge IN priors | DELETE stale_edge)
         MERGE (source)-[:PRODUCED_NAME]->(sn)
         SET source.produced_sn_id = sn.id
-        WITH DISTINCT sn, source
+        WITH DISTINCT sn, source, superseded
         OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
         OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
-        OPTIONAL MATCH (dd)-[dd_old:HAS_STANDARD_NAME]->(:StandardName)
+        OPTIONAL MATCH (dd)-[dd_old:HAS_STANDARD_NAME]->(dd_previous:StandardName)
+          WHERE dd_previous IN superseded
         DELETE dd_old
-        WITH DISTINCT sn, source, dd, signal
-        OPTIONAL MATCH (signal)-[sig_old:HAS_STANDARD_NAME]->(:StandardName)
+        WITH DISTINCT sn, source, dd, signal, superseded
+        OPTIONAL MATCH (signal)-[sig_old:HAS_STANDARD_NAME]->(sig_previous:StandardName)
+          WHERE sig_previous IN superseded
         DELETE sig_old
         FOREACH (_ IN CASE WHEN dd IS NULL THEN [] ELSE [1] END |
           MERGE (dd)-[:HAS_STANDARD_NAME]->(sn))

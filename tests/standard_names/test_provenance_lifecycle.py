@@ -325,7 +325,14 @@ def test_retarget_query_repairs_exact_source_mirrors_and_both_caches() -> None:
     assert "MERGE (source)-[:PRODUCED_NAME]->(new)" in cypher
     assert "source.produced_sn_id = new.id" in cypher
     assert "OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)" in cypher
-    assert "OPTIONAL MATCH (dd)-[dd_old:HAS_STANDARD_NAME]->(:StandardName)" in cypher
+    # The container deletes must be BOUND to the predecessor. An anonymous end
+    # removes the container's binding to every standard name, including names
+    # other sources of the same container produce, and 98 IMASNodes currently
+    # carry more than one such edge. The negative assertion is the one that
+    # matters: the bound form can be reintroduced alongside the unbound one.
+    assert "OPTIONAL MATCH (dd)-[dd_old:HAS_STANDARD_NAME]->(old)" in cypher
+    assert "OPTIONAL MATCH (signal)-[sig_old:HAS_STANDARD_NAME]->(old)" in cypher
+    assert "HAS_STANDARD_NAME]->(:StandardName)" not in cypher
     assert "DELETE dd_old" in cypher
     assert "MERGE (dd)-[:HAS_STANDARD_NAME]->(new)" in cypher
     assert "MERGE (signal)-[:HAS_STANDARD_NAME]->(new)" in cypher
