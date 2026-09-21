@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:48:46",
+  "updated": "2026-09-21T09:59:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -717,6 +717,15 @@
           "{\"alias\":\"haiku4.5\",\"backend\":\"claude-haiku\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-haiku-4-5-20251001\",\"sandbox\":\"worktree-full\"}": "49d5a3e4-09f9-4c99-9d4a-72b199a81f77"
         },
         "created": "2026-09-06"
+      },
+      {
+        "id": "cx-exportadmits",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
       },
       {
         "id": "cx-exportstatus",
@@ -166312,6 +166321,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2426
+    "_version": 2427
   }
 }
