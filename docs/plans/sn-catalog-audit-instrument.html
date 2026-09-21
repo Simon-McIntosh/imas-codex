@@ -297,6 +297,54 @@
       its own calibration and must be re-opened.
     </p>
 
+    <h2 id="s1-capability-gaps">&sect;1a &mdash; Seven gaps named, and the shape behind all of them</h2>
+
+    <p>The five review modules and the <code>sn review</code> surface were read against the
+    five defect classes the independent WEST audit found. <strong>One class is
+    detectable today, two are detectable only through a single context channel that can
+    vanish silently, and two are structurally undetectable by any layer.</strong></p>
+
+    <p><strong>Four further instances of this pipeline's fail-open shape, three
+    CONFIRMED.</strong> The costliest is <code>review/pipeline.py:737-740</code>: the DD
+    source-doc fetch swallows every non-resolution exception at <code>debug</code> level,
+    <code>path_docs</code> stays empty, and the consumer at <code>:786-788</code> guards
+    with <code>if docs:</code> &mdash; so <code>dd_source_docs</code> is <em>never set at
+    all</em>, not set empty. The batch is then scored at full cost as though the Data
+    Dictionary had been consulted and had nothing to say. <strong>The asymmetry is the
+    tell:</strong> a <em>partial</em> omission logs at <code>warning</code> with every path
+    named (<code>:711</code>), while total failure logs at <code>debug</code>. The hybrid
+    comparator channel is nested inside the same branch, so one swallowed exception removes
+    two independent context channels. This is exactly the channel the two recoverable WEST
+    classes depend on.</p>
+
+    <p><strong>Two classes no layer can reach.</strong> A physics error in the modifier
+    &mdash; <code>radial_derivative_of</code> on a <code>dpsi_drho_tor</code> path &mdash;
+    is grammatical, semantically coherent, conventional and complete, and
+    <code>physics_accuracy</code> exists only on the <strong>docs</strong> axis
+    (<code>pipeline.py:2205-2212</code>), so a names-axis review is never asked the
+    question. An identity bound to loci of different kinds is a property of the <em>set</em>
+    of source paths, and every Layer 1 audit is per-name-record while Layer 3 sees only
+    scores.</p>
+
+    <p><strong>Why consolidation never caught any of it.</strong> Layer 3's detectors
+    measure variance &mdash; drift within a domain, scores more than 1&sigma; below a group
+    mean. A blindness that is <em>systematic</em> scores a whole class alike, and a variance
+    detector reports nothing from a uniform column. <strong>Layer 3 is loudest exactly when
+    Layer 2 is working and silent exactly when Layer 2 is blind</strong>, which is why 74
+    defects in 341 bindings passed without one consolidation warning.</p>
+
+    <p><strong>And the dry run conceals rather than reveals it.</strong>
+    <code>sn.py:6012</code> runs Layer 1 on every dry run and prints its findings &mdash;
+    the one surface where that layer's output is not discarded. The flag that exists to show
+    the layer working is what hides that it is inert on a real run.</p>
+
+    <p>Seven sites of one shape in one pipeline says the individual repairs are not the
+    durable fix. <strong>A report must carry whether each check executed, and a review must
+    refuse rather than score when a channel it depends on did not load.</strong> Full
+    record, every finding with its file and line and a concrete triggering scenario:
+    <a href="/imas-codex/evidence/sn-catalog-audit-instrument/review-pipeline-capability-gaps">the
+    capability-gap review</a>.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="calibration-floors" data-choice="" data-by="" data-when="">
