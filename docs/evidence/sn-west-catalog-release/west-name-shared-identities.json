@@ -1,0 +1,1642 @@
+{
+ "kind": "west_shared_identity_cohort",
+ "description": "Every accepted standard name in the WEST batch cohort that is bound to more than one of the 342 data-dictionary source paths in imas_codex/standard_names/manifests/west_production_dd_paths.yaml, with the full data-dictionary evidence for each of its bindings. Drawn over the whole 341-binding cohort, so a group may mix rows the every-fourth sample judged with rows it did not.",
+ "counts": {
+  "shared_identities": 53,
+  "bindings_involved": 164,
+  "cohort_bindings": 341,
+  "cohort_identities": 230
+ },
+ "groups": [
+  {
+   "name": "radial_coordinate_of_line_of_sight",
+   "source_count": 16,
+   "bindings": [
+    {
+     "path": "bremsstrahlung_visible/channel/line_of_sight/first_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "bremsstrahlung_visible/channel/line_of_sight/second_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "camera_x_rays/camera/line_of_sight/first_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "camera_x_rays/camera/line_of_sight/second_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/channel/line_of_sight/first_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/channel/line_of_sight/second_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/first_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/second_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/third_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/first_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/second_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/third_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/line_of_sight/first_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/line_of_sight/second_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "spectrometer_visible/channel/line_of_sight/first_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "spectrometer_visible/channel/line_of_sight/second_point/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_line_of_sight",
+   "source_count": 16,
+   "bindings": [
+    {
+     "path": "bremsstrahlung_visible/channel/line_of_sight/first_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "bremsstrahlung_visible/channel/line_of_sight/second_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "camera_x_rays/camera/line_of_sight/first_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "camera_x_rays/camera/line_of_sight/second_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/channel/line_of_sight/first_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/channel/line_of_sight/second_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/first_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/second_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/third_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/first_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/second_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/third_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/line_of_sight/first_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/line_of_sight/second_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "spectrometer_visible/channel/line_of_sight/first_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "spectrometer_visible/channel/line_of_sight/second_point/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "toroidal_coordinate_of_line_of_sight",
+   "source_count": 14,
+   "bindings": [
+    {
+     "path": "bremsstrahlung_visible/channel/line_of_sight/first_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "bremsstrahlung_visible/channel/line_of_sight/second_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "camera_x_rays/camera/line_of_sight/first_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "camera_x_rays/camera/line_of_sight/second_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/first_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/second_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/line_of_sight/third_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/first_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/second_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/line_of_sight/third_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/line_of_sight/first_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/line_of_sight/second_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "spectrometer_visible/channel/line_of_sight/first_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "spectrometer_visible/channel/line_of_sight/second_point/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_magnetic_axis",
+   "source_count": 4,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/contour_tree/node/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating the magnetic-axis O-point in the right-handed cylindrical (R, \u03c6, Z) frame around which nested closed flux surfaces are organized.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/magnetic_axis/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating the magnetic-axis O-point in the right-handed cylindrical (R, \u03c6, Z) frame around which nested closed flux surfaces are organized.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius of the magnetic axis",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/magnetic_axis_r/value",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating the magnetic-axis O-point in the right-handed cylindrical (R, \u03c6, Z) frame around which nested closed flux surfaces are organized.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "R position of the magnetic axis"
+    },
+    {
+     "path": "summary/local/magnetic_axis/position/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating the magnetic-axis O-point in the right-handed cylindrical (R, \u03c6, Z) frame around which nested closed flux surfaces are organized.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "faraday_angle",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/constraints/faraday_angle/measured",
+     "sn_unit": "rad",
+     "sn_description": "Faraday rotation of a probing wave\u2019s polarization plane caused by electron density and the magnetic-field component along its plasma path.",
+     "dd_unit": "rad",
+     "dd_doc": "Measured value",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/constraints/faraday_angle/reconstructed",
+     "sn_unit": "rad",
+     "sn_description": "Faraday rotation of a probing wave\u2019s polarization plane caused by electron density and the magnetic-field component along its plasma path.",
+     "dd_unit": "rad",
+     "dd_doc": "Value calculated from the reconstructed equilibrium",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/faraday_angle",
+     "sn_unit": "rad",
+     "sn_description": "Faraday rotation of a probing wave\u2019s polarization plane caused by electron density and the magnetic-field component along its plasma path.",
+     "dd_unit": "rad",
+     "dd_doc": "Faraday angle (variation of the Faraday angle induced by crossing the plasma) ",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "line_integrated_electron_number_density",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/constraints/n_e_line/measured",
+     "sn_unit": "m^-2",
+     "sn_description": "Free-electron column density accumulated along a complete electromagnetic propagation path, including both forward and return segments when present.",
+     "dd_unit": "m^-2",
+     "dd_doc": "Measured value",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/constraints/n_e_line/reconstructed",
+     "sn_unit": "m^-2",
+     "sn_description": "Free-electron column density accumulated along a complete electromagnetic propagation path, including both forward and return segments when present.",
+     "dd_unit": "m^-2",
+     "dd_doc": "Value calculated from the reconstructed equilibrium",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "interferometer/channel/n_e_line",
+     "sn_unit": "m^-2",
+     "sn_description": "Free-electron column density accumulated along a complete electromagnetic propagation path, including both forward and return segments when present.",
+     "dd_unit": "m^-2",
+     "dd_doc": "Line integrated density, possibly obtained by a combination of multiple interferometry wavelengths. Corresponds to the density integrated along the full line-of-sight (i.e. forward AND return for a reflected channel: NO dividing by 2 correction)",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "lower_bound_photon_energy",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "hard_x_rays/channel/energy_band/lower_bound",
+     "sn_unit": "eV",
+     "sn_description": "Lower boundary of an X-ray photon-energy band, specifying the minimum photon energy included in the defined detection or emission band.",
+     "dd_unit": "eV",
+     "dd_doc": "Lower bound of the energy band",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/lower_bound",
+     "sn_unit": "eV",
+     "sn_description": "Lower boundary of an X-ray photon-energy band, specifying the minimum photon energy included in the defined detection or emission band.",
+     "dd_unit": "eV",
+     "dd_doc": "Lower bound of the energy band",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/energy_band/lower_bound",
+     "sn_unit": "eV",
+     "sn_description": "Lower boundary of an X-ray photon-energy band, specifying the minimum photon energy included in the defined detection or emission band.",
+     "dd_unit": "eV",
+     "dd_doc": "Lower bound of the energy band",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "normalized_toroidal_beta",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/beta_tor_norm",
+     "sn_unit": "1",
+     "sn_description": "Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.",
+     "dd_unit": "1",
+     "dd_doc": "Normalized toroidal beta, defined as 100 * beta_tor * a[m] * B0 [T] / ip [MA] ",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/beta_tor_norm",
+     "sn_unit": "1",
+     "sn_description": "Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.",
+     "dd_unit": "1",
+     "dd_doc": "Normalized toroidal beta, defined as 100 * beta_tor * a[m] * B0 [T] / ip [MA] ",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/beta_tor_norm_mhd/value",
+     "sn_unit": "1",
+     "sn_description": "Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Normalised toroidal beta, using the pressure determined by an equilibrium reconstruction code"
+    }
+   ]
+  },
+  {
+   "name": "normalized_toroidal_flux_coordinate",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "core_profiles/profiles_1d/grid/rho_tor_norm",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless radial label equal to the square root of toroidal magnetic flux normalized between the magnetic axis and equilibrium boundary.",
+     "dd_unit": "1",
+     "dd_doc": "Normalised toroidal flux coordinate. The normalizing value for rho_tor_norm, is the toroidal flux coordinate at the equilibrium boundary (LCFS or 99.x % of the LCFS in case of a fixed boundary equilibium calculation, see time_slice/boundary/b_flux_pol_norm in the equilibrium IDS) ",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/rho_tor_norm",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless radial label equal to the square root of toroidal magnetic flux normalized between the magnetic axis and equilibrium boundary.",
+     "dd_unit": "1",
+     "dd_doc": "Normalised toroidal flux coordinate. The normalizing value for rho_tor_norm, is the toroidal flux coordinate at the equilibrium boundary (LCFS or 99.x % of the LCFS in case of a fixed boundary equilibium calculation) ",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/rho_tor_norm",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless radial label equal to the square root of toroidal magnetic flux normalized between the magnetic axis and equilibrium boundary.",
+     "dd_unit": "1",
+     "dd_doc": "Normalised toroidal flux coordinate grid",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "plasma_current",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/ip",
+     "sn_unit": "A",
+     "sn_description": "Net toroidal electric current carried by the entire plasma column, obtained by integrating toroidal current density over its enclosed poloidal cross-section.",
+     "dd_unit": "A",
+     "dd_doc": "Plasma current. Positive sign means anti-clockwise when viewed from above.",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "magnetics/ip",
+     "sn_unit": "A",
+     "sn_description": "Net toroidal electric current carried by the entire plasma column, obtained by integrating toroidal current density over its enclosed poloidal cross-section.",
+     "dd_unit": "A",
+     "dd_doc": "Plasma current. Positive sign means anti-clockwise when viewed from above. The array of structure corresponds to a set of calculation methods (starting with the generally recommended method).",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/ip/value",
+     "sn_unit": "A",
+     "sn_description": "Net toroidal electric current carried by the entire plasma column, obtained by integrating toroidal current density over its enclosed poloidal cross-section.",
+     "dd_unit": "A",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Total plasma current"
+    }
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_field",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/constraints/b_field_pol_probe/measured",
+     "sn_unit": "T",
+     "sn_description": "Poloidal magnetic-field strength of the local total induction, formed from radial and vertical components in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "T",
+     "dd_doc": "Measured value",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/constraints/b_field_pol_probe/reconstructed",
+     "sn_unit": "T",
+     "sn_description": "Poloidal magnetic-field strength of the local total induction, formed from radial and vertical components in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "T",
+     "dd_doc": "Value calculated from the reconstructed equilibrium",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "magnetics/b_field_pol_probe/field",
+     "sn_unit": "T",
+     "sn_description": "Poloidal magnetic-field strength of the local total induction, formed from radial and vertical components in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "T",
+     "dd_doc": "Measured magnetic field",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_flux_at_plasma_boundary",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "core_profiles/profiles_1d/grid/psi_boundary",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux evaluated on the last closed flux surface, providing the outer reference for normalized poloidal-flux coordinates.",
+     "dd_unit": "Wb",
+     "dd_doc": "Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn't go from the magnetic axis to the plasma boundary)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/boundary/psi",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux evaluated on the last closed flux surface, providing the outer reference for normalized poloidal-flux coordinates.",
+     "dd_unit": "Wb",
+     "dd_doc": "Value of the poloidal flux at which the boundary is taken",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/psi_boundary",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux evaluated on the last closed flux surface, providing the outer reference for normalized poloidal-flux coordinates.",
+     "dd_unit": "Wb",
+     "dd_doc": "Poloidal flux at the selected plasma boundary ",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_flux_of_flux_loop",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/constraints/flux_loop/measured",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux linked by an individual flux loop, defined by the magnetic field threading an oriented surface bounded by that loop.",
+     "dd_unit": "Wb",
+     "dd_doc": "Measured value",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/constraints/flux_loop/reconstructed",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux linked by an individual flux loop, defined by the magnetic field threading an oriented surface bounded by that loop.",
+     "dd_unit": "Wb",
+     "dd_doc": "Value calculated from the reconstructed equilibrium",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "magnetics/flux_loop/flux",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux linked by an individual flux loop, defined by the magnetic field threading an oriented surface bounded by that loop.",
+     "dd_unit": "Wb",
+     "dd_doc": "Measured flux",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_measurement_position",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "camera_x_rays/aperture/centre/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating a measurement position by perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "ece/channel/position/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating a measurement position by perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "magnetics/b_field_phi_probe/position/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating a measurement position by perpendicular distance from the toroidal symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "reference_major_radius",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "core_profiles/vacuum_toroidal_field/r0",
+     "sn_unit": "m",
+     "sn_description": "Nonnegative perpendicular distance from the toroidal symmetry axis to a designated reference location, serving as the major-radius coordinate where the vacuum toroidal magnetic field is specified in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Reference major radius where the vacuum toroidal magnetic field is given (usually a fixed position such as the middle of the vessel at the equatorial midplane)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/vacuum_toroidal_field/r0",
+     "sn_unit": "m",
+     "sn_description": "Nonnegative perpendicular distance from the toroidal symmetry axis to a designated reference location, serving as the major-radius coordinate where the vacuum toroidal magnetic field is specified in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Reference major radius where the vacuum toroidal magnetic field is given (usually a fixed position such as the middle of the vessel at the equatorial midplane)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/r0/value",
+     "sn_unit": "m",
+     "sn_description": "Nonnegative perpendicular distance from the toroidal symmetry axis to a designated reference location, serving as the major-radius coordinate where the vacuum toroidal magnetic field is specified in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Reference major radius where the vacuum toroidal magnetic field is given (usually a fixed position such as the middle of the vessel at the equatorial midplane)"
+    }
+   ]
+  },
+  {
+   "name": "toroidal_angle_of_measurement_position",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "ece/channel/position/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate locating a measurement position around the machine symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "magnetics/b_field_phi_probe/position/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate locating a measurement position around the machine symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "magnetics/b_field_pol_probe/position/phi",
+     "sn_unit": "rad",
+     "sn_description": "Toroidal angular coordinate locating a measurement position around the machine symmetry axis in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "rad",
+     "dd_doc": "Toroidal angle (oriented counter-clockwise when viewing from above)",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "toroidal_vacuum_magnetic_field",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "core_profiles/vacuum_toroidal_field/b0",
+     "sn_unit": "T",
+     "sn_description": "Signed toroidal component of the current-free vacuum magnetic field at a reference major radius, defining the nominal externally generated field strength.",
+     "dd_unit": "T",
+     "dd_doc": "Vacuum toroidal field at R0 [T]; Positive sign means anti-clockwise when viewing from above. The product R0B0 must be consistent with the b_tor_vacuum_r field of the tf IDS.",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/vacuum_toroidal_field/b0",
+     "sn_unit": "T",
+     "sn_description": "Signed toroidal component of the current-free vacuum magnetic field at a reference major radius, defining the nominal externally generated field strength.",
+     "dd_unit": "T",
+     "dd_doc": "Vacuum toroidal field at R0 [T]; Positive sign means anti-clockwise when viewing from above. The product R0B0 must be consistent with the b_tor_vacuum_r field of the tf IDS.",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/b0/value",
+     "sn_unit": "T",
+     "sn_description": "Signed toroidal component of the current-free vacuum magnetic field at a reference major radius, defining the nominal externally generated field strength.",
+     "dd_unit": "T",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Vacuum toroidal field at R0. Positive sign means anti-clockwise when viewed from above. The product R0B0 must be consistent with the b_tor_vacuum_r field of the tf IDS."
+    }
+   ]
+  },
+  {
+   "name": "upper_photon_energy",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "hard_x_rays/channel/energy_band/upper_bound",
+     "sn_unit": "eV",
+     "sn_description": "High-energy boundary of an X-ray photon-acceptance band, defining the maximum photon energy included in a selected spectral window.",
+     "dd_unit": "eV",
+     "dd_doc": "Upper bound of the energy band",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/upper_bound",
+     "sn_unit": "eV",
+     "sn_description": "High-energy boundary of an X-ray photon-acceptance band, defining the maximum photon energy included in a selected spectral window.",
+     "dd_unit": "eV",
+     "dd_doc": "Upper bound of the energy band",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "soft_x_rays/channel/energy_band/upper_bound",
+     "sn_unit": "eV",
+     "sn_description": "High-energy boundary of an X-ray photon-acceptance band, defining the maximum photon energy included in a selected spectral window.",
+     "dd_unit": "eV",
+     "dd_doc": "Upper bound of the energy band",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_magnetic_axis",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/magnetic_axis/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical Z coordinate of the magnetic axis in the right-handed cylindrical (R, \u03c6, Z) frame, marking the interior extremum organizing nested magnetic flux surfaces.",
+     "dd_unit": "m",
+     "dd_doc": "Height of the magnetic axis",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/magnetic_axis_z/value",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical Z coordinate of the magnetic axis in the right-handed cylindrical (R, \u03c6, Z) frame, marking the interior extremum organizing nested magnetic flux surfaces.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Z position of the magnetic axis"
+    },
+    {
+     "path": "summary/local/magnetic_axis/position/z",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical Z coordinate of the magnetic axis in the right-handed cylindrical (R, \u03c6, Z) frame, marking the interior extremum organizing nested magnetic flux surfaces.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "volume_of_flux_surface",
+   "source_count": 3,
+   "bindings": [
+    {
+     "path": "core_profiles/profiles_1d/grid/volume",
+     "sn_unit": "m^3",
+     "sn_description": "Geometric volume contained within a nested magnetic flux surface, cumulative from the magnetic axis toward the outermost closed surface.",
+     "dd_unit": "m^3",
+     "dd_doc": "Volume enclosed inside the magnetic surface",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/volume",
+     "sn_unit": "m^3",
+     "sn_description": "Geometric volume contained within a nested magnetic flux surface, cumulative from the magnetic axis toward the outermost closed surface.",
+     "dd_unit": "m^3",
+     "dd_doc": "Total plasma volume",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/volume",
+     "sn_unit": "m^3",
+     "sn_description": "Geometric volume contained within a nested magnetic flux surface, cumulative from the magnetic axis toward the outermost closed surface.",
+     "dd_unit": "m^3",
+     "dd_doc": "Volume enclosed in the flux surface",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "atomic_mass",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "spectrometer_mass/channel/a",
+     "sn_unit": "u",
+     "sn_description": "Mass parameter assigned to a specified ion or neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.",
+     "dd_unit": "u",
+     "dd_doc": "Atomic mass measured by this channel",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "spectrometer_visible/channel/isotope_ratios/isotope/element/a",
+     "sn_unit": "u",
+     "sn_description": "Mass parameter assigned to a specified ion or neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.",
+     "dd_unit": "u",
+     "dd_doc": "Mass of atom",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "coolant_mass_flow_rate",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "calorimetry/cooling_loop/mass_flow",
+     "sn_unit": "kg.s^-1",
+     "sn_description": "Coolant mass throughput across a fluid-flow boundary, representing the rate at which coolant mass passes through a port or cooling loop.",
+     "dd_unit": "kg.s^-1",
+     "dd_doc": "Mass flow of the coolant going through the loop",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "calorimetry/group/component/mass_flow",
+     "sn_unit": "kg.s^-1",
+     "sn_description": "Coolant mass throughput across a fluid-flow boundary, representing the rate at which coolant mass passes through a port or cooling loop.",
+     "dd_unit": "kg.s^-1",
+     "dd_doc": "Mass flow of the coolant going through the component",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "coolant_temperature_at_inlet",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "calorimetry/cooling_loop/temperature_in",
+     "sn_unit": "K",
+     "sn_description": "Absolute thermodynamic temperature of coolant entering a cooling loop or plant component, establishing the upstream state for enthalpy-based heat-transfer balances.",
+     "dd_unit": "K",
+     "dd_doc": "Temperature of the coolant when entering the loop",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "calorimetry/group/component/temperature_in",
+     "sn_unit": "K",
+     "sn_description": "Absolute thermodynamic temperature of coolant entering a cooling loop or plant component, establishing the upstream state for enthalpy-based heat-transfer balances.",
+     "dd_unit": "K",
+     "dd_doc": "Temperature of the coolant when entering the component",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "coolant_temperature_at_outlet",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "calorimetry/cooling_loop/temperature_out",
+     "sn_unit": "K",
+     "sn_description": "Absolute thermodynamic temperature of coolant leaving a cooling component or loop, specifying the fluid\u2019s outlet thermal state for enthalpy-based heat balance.",
+     "dd_unit": "K",
+     "dd_doc": "Temperature of the coolant when exiting the loop",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "calorimetry/group/component/temperature_out",
+     "sn_unit": "K",
+     "sn_description": "Absolute thermodynamic temperature of coolant leaving a cooling component or loop, specifying the fluid\u2019s outlet thermal state for enthalpy-based heat balance.",
+     "dd_unit": "K",
+     "dd_doc": "Temperature of the coolant when exiting the component",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "effective_charge",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "core_profiles/global_quantities/z_eff_resistive",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless effective ionic charge of a plasma mixture, given by the second ionic charge moment divided by free-electron density and indicating impurity content.",
+     "dd_unit": "1",
+     "dd_doc": "Volume average plasma effective charge, estimated from the flux consumption in the ohmic phase",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "core_profiles/profiles_1d/zeff",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless effective ionic charge of a plasma mixture, given by the second ionic charge moment divided by free-electron density and indicating impurity content.",
+     "dd_unit": "1",
+     "dd_doc": "Effective charge",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "elongation_of_plasma_boundary",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/boundary/elongation",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless ratio of the plasma boundary\u2019s vertical half-height to its minor radius, quantifying the elongation of its cross-sectional shape.",
+     "dd_unit": "1",
+     "dd_doc": "Elongation of the plasma boundary",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/elongation/value",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless ratio of the plasma boundary\u2019s vertical half-height to its minor radius, quantifying the elongation of its cross-sectional shape.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Elongation of the plasma boundary"
+    }
+   ]
+  },
+  {
+   "name": "initial_polarization_ellipticity_of_polarimeter_beam",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "polarimeter/channel/ellipticity_initial",
+     "sn_unit": "m",
+     "sn_description": "Signed ratio of the minor to major semiaxes of the electric-field polarization ellipse of a polarimeter probing beam in its incident state, before plasma entry. It gives only the ellipticity component of the initial polarization vector, not the ellipse orientation.",
+     "dd_unit": "m",
+     "dd_doc": "Initial ellipticity before entering the plasma",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/polarization_initial",
+     "sn_unit": "m",
+     "sn_description": "Signed ratio of the minor to major semiaxes of the electric-field polarization ellipse of a polarimeter probing beam in its incident state, before plasma entry. It gives only the ellipticity component of the initial polarization vector, not the ellipse orientation.",
+     "dd_unit": "m",
+     "dd_doc": "Initial polarization vector before entering the plasma",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "launched_power_of_lower_hybrid_antenna",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "summary/heating_current_drive/lh/power/value",
+     "sn_unit": "W",
+     "sn_description": "Launched power of a lower-hybrid antenna is the net RF power entering the vacuum vessel after reflection at the antenna input reference plane.",
+     "dd_unit": "W",
+     "dd_doc": "Value",
+     "dd_doc_parent": "LH heating power coupled to the plasma from this launcher"
+    },
+    {
+     "path": "summary/heating_current_drive/power_lh/value",
+     "sn_unit": "W",
+     "sn_description": "Launched power of a lower-hybrid antenna is the net RF power entering the vacuum vessel after reflection at the antenna input reference plane.",
+     "dd_unit": "W",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Total LH power coupled to the plasma"
+    }
+   ]
+  },
+  {
+   "name": "line_averaged_effective_charge",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "bremsstrahlung_visible/channel/zeff_line_average",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless line-averaged effective ionic charge of a plasma mixture, obtained by averaging local effective charge along a prescribed plasma line of sight.",
+     "dd_unit": "1",
+     "dd_doc": "Average effective charge along the line of sight",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/line_average/zeff/value",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless line-averaged effective ionic charge of a plasma mixture, obtained by averaging local effective charge along a prescribed plasma line of sight.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Effective charge"
+    }
+   ]
+  },
+  {
+   "name": "line_averaged_electron_density",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "interferometer/channel/n_e_line_average",
+     "sn_unit": "m^-3",
+     "sn_description": "Number density of free electrons per physical volume averaged along a complete plasma propagation chord, equal to the path integral divided by chord length.",
+     "dd_unit": "m^-3",
+     "dd_doc": "Line average density, possibly obtained by a combination of multiple interferometry wavelengths. Corresponds to the density integrated along the full line-of-sight and then divided by the length of the line-of-sight",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/line_average/n_e/value",
+     "sn_unit": "m^-3",
+     "sn_description": "Number density of free electrons per physical volume averaged along a complete plasma propagation chord, equal to the path integral divided by chord length.",
+     "dd_unit": "m^-3",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Electron density"
+    }
+   ]
+  },
+  {
+   "name": "lower_triangularity_of_plasma_boundary",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/boundary/triangularity_lower",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless shaping parameter equal to the normalized inward radial displacement of the lower plasma-boundary extremum from the geometric center.",
+     "dd_unit": "1",
+     "dd_doc": "Lower triangularity of the plasma boundary",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/triangularity_lower/value",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless shaping parameter equal to the normalized inward radial displacement of the lower plasma-boundary extremum from the geometric center.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Lower triangularity of the plasma boundary"
+    }
+   ]
+  },
+  {
+   "name": "mhd_energy",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/energy_mhd",
+     "sn_unit": "J",
+     "sn_description": "Global plasma stored energy obtained from the volume integral of total kinetic pressure, including thermal and fast-particle pressure contributions.",
+     "dd_unit": "J",
+     "dd_doc": "Plasma energy content = 3/2 * int(p,dV) with p being the total pressure (thermal + fast particles) [J]. Time-dependent; Scalar",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/energy_mhd",
+     "sn_unit": "J",
+     "sn_description": "Global plasma stored energy obtained from the volume integral of total kinetic pressure, including thermal and fast-particle pressure contributions.",
+     "dd_unit": "J",
+     "dd_doc": "Plasma energy content = 3/2 * integral over the plasma volume of the total kinetic pressure (pressure determined by an equilibrium reconstruction code)",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "minor_radius_of_plasma_boundary",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/boundary/minor_radius",
+     "sn_unit": "m",
+     "sn_description": "Half the difference between the maximum and minimum major-radius coordinates of the last closed plasma-boundary contour, defining its horizontal cross-sectional size.",
+     "dd_unit": "m",
+     "dd_doc": "Minor radius of the plasma boundary (defined as (Rmax-Rmin) / 2 of the boundary)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/minor_radius/value",
+     "sn_unit": "m",
+     "sn_description": "Half the difference between the maximum and minimum major-radius coordinates of the last closed plasma-boundary contour, defining its horizontal cross-sectional size.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Minor radius of the plasma boundary (defined as (Rmax-Rmin) / 2 of the boundary)"
+    }
+   ]
+  },
+  {
+   "name": "net_power_due_to_ion_cyclotron_heating",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "ic_antennas/antenna/power_launched",
+     "sn_unit": "W",
+     "sn_description": "Net ion-cyclotron radio-frequency power launched into the vacuum vessel by a specified heating launcher before absorption by plasma particles.",
+     "dd_unit": "W",
+     "dd_doc": "Power launched from this antenna into the vacuum vessel",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/heating_current_drive/ic/power/value",
+     "sn_unit": "W",
+     "sn_description": "Net ion-cyclotron radio-frequency power launched into the vacuum vessel by a specified heating launcher before absorption by plasma particles.",
+     "dd_unit": "W",
+     "dd_doc": "Value",
+     "dd_doc_parent": "IC heating power coupled to the plasma from this launcher"
+    }
+   ]
+  },
+  {
+   "name": "normalized_plasma_internal_inductance",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/li_3",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless li_3 parameter measuring poloidal magnetic-field peaking through a plasma-volume integral normalized by total plasma current and a reference major radius.",
+     "dd_unit": "1",
+     "dd_doc": "Internal inductance",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/li_3/value",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless li_3 parameter measuring poloidal magnetic-field peaking through a plasma-volume integral normalized by total plasma current and a reference major radius.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Internal inductance. The li_3 definition is used, i.e. li_3 = 2/R0/mu0^2/Ip^2 * int(Bp^2 dV)."
+    }
+   ]
+  },
+  {
+   "name": "normalized_toroidal_flux_coordinate_at_measurement_position",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "ece/channel/position/rho_tor_norm",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless normalized toroidal-flux label that maps a physical measurement position onto a nested magnetic surface between the magnetic axis and equilibrium boundary.",
+     "dd_unit": "1",
+     "dd_doc": "Normalised toroidal flux coordinate",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "hard_x_rays/emissivity_profile_1d/peak_position",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless normalized toroidal-flux label that maps a physical measurement position onto a nested magnetic surface between the magnetic axis and equilibrium boundary.",
+     "dd_unit": "1",
+     "dd_doc": "Normalised toroidal flux coordinate position at which the emissivity peaks",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "poloidal_beta",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/beta_pol",
+     "sn_unit": "1",
+     "sn_description": "Poloidal beta is a dimensionless measure of total plasma pressure relative to the magnetic-pressure scale of the plasma-current-generated poloidal field.",
+     "dd_unit": "1",
+     "dd_doc": "Poloidal beta. Defined as betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/beta_pol_mhd/value",
+     "sn_unit": "1",
+     "sn_description": "Poloidal beta is a dimensionless measure of total plasma pressure relative to the magnetic-pressure scale of the plasma-current-generated poloidal field.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Poloidal beta estimated from the pressure determined by an equilibrium reconstruction code. Defined as betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]"
+    }
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_flux_at_flux_surface",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "core_profiles/profiles_1d/grid/psi",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux assigned to a nested magnetic surface, serving as the equilibrium label for its position in the plasma.",
+     "dd_unit": "Wb",
+     "dd_doc": "Poloidal magnetic flux",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/psi",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux assigned to a nested magnetic surface, serving as the equilibrium label for its position in the plasma.",
+     "dd_unit": "Wb",
+     "dd_doc": "Poloidal flux",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "poloidal_magnetic_flux_at_magnetic_axis",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "core_profiles/profiles_1d/grid/psi_magnetic_axis",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux evaluated at the magnetic axis, providing the inner reference value for normalized poloidal-flux coordinates.",
+     "dd_unit": "Wb",
+     "dd_doc": "Value of the poloidal magnetic flux at the magnetic axis (useful to normalize the psi array values when the radial grid doesn't go from the magnetic axis to the plasma boundary)",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/global_quantities/psi_axis",
+     "sn_unit": "Wb",
+     "sn_description": "Signed poloidal magnetic flux evaluated at the magnetic axis, providing the inner reference value for normalized poloidal-flux coordinates.",
+     "dd_unit": "Wb",
+     "dd_doc": "Poloidal flux at the magnetic axis",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "poloidal_plane_cross_sectional_area_of_flux_surface",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "core_profiles/profiles_1d/grid/area",
+     "sn_unit": "m^2",
+     "sn_description": "Geometric area enclosed by a closed magnetic-flux-surface contour in a fixed-toroidal-angle poloidal plane of the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m^2",
+     "dd_doc": "Cross-sectional area of the flux surface",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/area",
+     "sn_unit": "m^2",
+     "sn_description": "Geometric area enclosed by a closed magnetic-flux-surface contour in a fixed-toroidal-angle poloidal plane of the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m^2",
+     "dd_doc": "Cross-sectional area of the flux surface",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_geometric_axis",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/boundary/geometric_axis/r",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating the midpoint of the plasma boundary's radial extrema, thereby specifying the horizontal position of its geometric axis.",
+     "dd_unit": "m",
+     "dd_doc": "Major radius",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/geometric_axis_r/value",
+     "sn_unit": "m",
+     "sn_description": "Major-radius coordinate locating the midpoint of the plasma boundary's radial extrema, thereby specifying the horizontal position of its geometric axis.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "R position of the geometric axis (defined as (Rmax+Rmin) / 2 of the boundary)"
+    }
+   ]
+  },
+  {
+   "name": "radial_coordinate_of_strike_point",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "summary/boundary/strike_point_inner_r/value",
+     "sn_unit": "m",
+     "sn_description": "Major-radius location of an individual magnetic strike point where a separatrix leg intersects a divertor target, expressed in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "R position of the inner strike point"
+    },
+    {
+     "path": "summary/boundary/strike_point_outer_r/value",
+     "sn_unit": "m",
+     "sn_description": "Major-radius location of an individual magnetic strike point where a separatrix leg intersects a divertor target, expressed in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "R position of the outer strike point"
+    }
+   ]
+  },
+  {
+   "name": "safety_factor_at_magnetic_axis",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/q_axis",
+     "sn_unit": "1",
+     "sn_description": "Limiting signed field-line winding number on the innermost closed flux surface, giving toroidal turns per poloidal circuit at the magnetic axis.",
+     "dd_unit": "1",
+     "dd_doc": "q at the magnetic axis",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/local/magnetic_axis/q/value",
+     "sn_unit": "1",
+     "sn_description": "Limiting signed field-line winding number on the innermost closed flux surface, giving toroidal turns per poloidal circuit at the magnetic axis.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Safety factor"
+    }
+   ]
+  },
+  {
+   "name": "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/q_95",
+     "sn_unit": "1",
+     "sn_description": "Signed field-line winding number on the closed magnetic flux surface labeled by normalized poloidal magnetic flux 0.95, near but inside the plasma boundary.",
+     "dd_unit": "1",
+     "dd_doc": "q at the 95% poloidal flux surface",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/q_95/value",
+     "sn_unit": "1",
+     "sn_description": "Signed field-line winding number on the closed magnetic flux surface labeled by normalized poloidal magnetic flux 0.95, near but inside the plasma boundary.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "q at the 95% poloidal flux surface"
+    }
+   ]
+  },
+  {
+   "name": "surface_area_of_flux_surface",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/surface",
+     "sn_unit": "m^2",
+     "sn_description": "Geometric area of a closed toroidal magnetic flux surface formed by revolving its poloidal contour through one complete toroidal revolution in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m^2",
+     "dd_doc": "Surface area of the toroidal flux surface",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/surface",
+     "sn_unit": "m^2",
+     "sn_description": "Geometric area of a closed toroidal magnetic flux surface formed by revolving its poloidal contour through one complete toroidal revolution in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m^2",
+     "dd_doc": "Surface area of the toroidal flux surface",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "toroidal_beta",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/beta_tor",
+     "sn_unit": "1",
+     "sn_description": "Toroidal beta is a dimensionless equilibrium ratio of volume-averaged total perpendicular plasma pressure to the magnetic pressure of a reference toroidal field.",
+     "dd_unit": "1",
+     "dd_doc": "Toroidal beta, defined as the volume-averaged total perpendicular pressure divided by (B0^2/(2*mu0)), i.e. beta_toroidal = 2 mu0 int(p dV) / V / B0^2",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/global_quantities/beta_tor/value",
+     "sn_unit": "1",
+     "sn_description": "Toroidal beta is a dimensionless equilibrium ratio of volume-averaged total perpendicular plasma pressure to the magnetic pressure of a reference toroidal field.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Toroidal beta, defined as the volume-averaged total perpendicular pressure divided by (B0^2/(2*mu0)), i.e. beta_toroidal = 2 mu0 int(p dV) / V / B0^2"
+    }
+   ]
+  },
+  {
+   "name": "toroidal_flux_coordinate",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "core_profiles/profiles_1d/grid/rho_tor",
+     "sn_unit": "m",
+     "sn_description": "Non-negative, radius-like label of a nested magnetic flux surface, derived from enclosed toroidal magnetic flux using a positive reference vacuum toroidal field.",
+     "dd_unit": "m",
+     "dd_doc": "Toroidal flux coordinate. rho_tor = sqrt(b_flux_tor/(pi*b0)) ~ sqrt(pi*r^2*b0/(pi*b0)) ~ r [m]. The toroidal field used in its definition is indicated under vacuum_toroidal_field/b0",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "equilibrium/time_slice/profiles_1d/rho_tor",
+     "sn_unit": "m",
+     "sn_description": "Non-negative, radius-like label of a nested magnetic flux surface, derived from enclosed toroidal magnetic flux using a positive reference vacuum toroidal field.",
+     "dd_unit": "m",
+     "dd_doc": "Toroidal flux coordinate. The toroidal field used in its definition is indicated under vacuum_toroidal_field/b0",
+     "dd_doc_parent": null
+    }
+   ]
+  },
+  {
+   "name": "toroidal_magnetic_field_at_magnetic_axis",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi",
+     "sn_unit": "T",
+     "sn_description": "Toroidal magnetic field at the magnetic axis is the signed toroidal component of the total equilibrium magnetic field at the magnetic axis in the right-handed cylindrical (R, \u03c6, Z) frame. It includes externally applied vacuum-field and plasma-current-generated contributions.",
+     "dd_unit": "T",
+     "dd_doc": "Total toroidal magnetic field at the magnetic axis",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/local/magnetic_axis/b_field_tor/value",
+     "sn_unit": "T",
+     "sn_description": "Toroidal magnetic field at the magnetic axis is the signed toroidal component of the total equilibrium magnetic field at the magnetic axis in the right-handed cylindrical (R, \u03c6, Z) frame. It includes externally applied vacuum-field and plasma-current-generated contributions.",
+     "dd_unit": "T",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Toroidal magnetic field"
+    }
+   ]
+  },
+  {
+   "name": "upper_triangularity_of_plasma_boundary",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/boundary/triangularity_upper",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless shape parameter for the plasma-boundary poloidal cross-section, expressing the inward radial displacement of its upper extremum relative to the geometric center.",
+     "dd_unit": "1",
+     "dd_doc": "Upper triangularity of the plasma boundary",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/triangularity_upper/value",
+     "sn_unit": "1",
+     "sn_description": "Dimensionless shape parameter for the plasma-boundary poloidal cross-section, expressing the inward radial displacement of its upper extremum relative to the geometric center.",
+     "dd_unit": "1",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Upper triangularity of the plasma boundary"
+    }
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_geometric_axis",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "equilibrium/time_slice/boundary/geometric_axis/z",
+     "sn_unit": "m",
+     "sn_description": "Signed Z height of the plasma boundary\u2019s geometric axis, computed as the midpoint of its maximum and minimum vertical extents.",
+     "dd_unit": "m",
+     "dd_doc": "Height",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/boundary/geometric_axis_z/value",
+     "sn_unit": "m",
+     "sn_description": "Signed Z height of the plasma boundary\u2019s geometric axis, computed as the midpoint of its maximum and minimum vertical extents.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Z position of the geometric axis (defined as (Zmax+Zmin) / 2 of the boundary)"
+    }
+   ]
+  },
+  {
+   "name": "vertical_coordinate_of_strike_point",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "summary/boundary/strike_point_inner_z/value",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical (Z) coordinate of the inner divertor strike point, where the inner separatrix leg intersects the divertor target in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Z position of the inner strike point"
+    },
+    {
+     "path": "summary/boundary/strike_point_outer_z/value",
+     "sn_unit": "m",
+     "sn_description": "Signed vertical (Z) coordinate of the inner divertor strike point, where the inner separatrix leg intersects the divertor target in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "dd_unit": "m",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Z position of the outer strike point"
+    }
+   ]
+  },
+  {
+   "name": "volume_averaged_electron_density",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "interferometer/n_e_volume_average",
+     "sn_unit": "m^-3",
+     "sn_description": "Number density of free electrons per physical volume averaged over the plasma volume enclosed by the last closed flux surface, giving the global mean free-electron density.",
+     "dd_unit": "m^-3",
+     "dd_doc": "Volume average plasma density estimated from the line densities measured by the various channels",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "summary/volume_average/n_e/value",
+     "sn_unit": "m^-3",
+     "sn_description": "Number density of free electrons per physical volume averaged over the plasma volume enclosed by the last closed flux surface, giving the global mean free-electron density.",
+     "dd_unit": "m^-3",
+     "dd_doc": "Value",
+     "dd_doc_parent": "Electron density"
+    }
+   ]
+  },
+  {
+   "name": "wavelength_of_wave_beam",
+   "source_count": 2,
+   "bindings": [
+    {
+     "path": "interferometer/channel/wavelength/value",
+     "sn_unit": "m",
+     "sn_description": "Vacuum spatial period of a probing electromagnetic wave propagating as a diagnostic beam, defining its spectral wavelength.",
+     "dd_unit": "m",
+     "dd_doc": "Wavelength value",
+     "dd_doc_parent": null
+    },
+    {
+     "path": "polarimeter/channel/wavelength",
+     "sn_unit": "m",
+     "sn_description": "Vacuum spatial period of a probing electromagnetic wave propagating as a diagnostic beam, defining its spectral wavelength.",
+     "dd_unit": "m",
+     "dd_doc": "Wavelength used for polarimetry",
+     "dd_doc_parent": null
+    }
+   ]
+  }
+ ]
+}
