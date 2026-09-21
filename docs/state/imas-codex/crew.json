@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:30:04",
+  "updated": "2026-09-21T09:36:30",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -842,6 +842,15 @@
       },
       {
         "id": "cx-receiptparity",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
+      },
+      {
+        "id": "cx-receiptvisible",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -165007,6 +165016,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2419
+    "_version": 2420
   }
 }
