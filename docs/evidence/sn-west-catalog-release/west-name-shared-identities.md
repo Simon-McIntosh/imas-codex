@@ -618,3 +618,128 @@ inner normalization reference to group 12's outer one.
 `equilibrium/time_slice/profiles_1d/area`, both "Cross-sectional area of the
 flux surface". Inside the settled `*_of_flux_surface` family; not relitigated.
 
+### 41. `radial_coordinate_of_geometric_axis` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/boundary/geometric_axis/r` and
+`summary/boundary/geometric_axis_r/value`, the summary parent supplying the
+`(Rmax + Rmin)/2` definition the equilibrium leaf leaves as the bare "Major
+radius". One quantity.
+
+### 42. `radial_coordinate_of_strike_point` — **MUST-SPLIT** (2 bindings)
+
+`summary/boundary/strike_point_inner_r/value` (parent: "R position of the
+**inner** strike point") and `summary/boundary/strike_point_outer_r/value`
+(parent: "R position of the **outer** strike point"). The two divertor legs
+land at different major radii — on WEST roughly the inner and outer halves of
+the lower divertor — and carry different heat flux, different geometry and
+different control significance. Nothing in the name chooses between them.
+
+| binding | spelling |
+| --- | --- |
+| `summary/boundary/strike_point_inner_r/value` | **needs** `radial_coordinate_of_inner_strike_point` |
+| `summary/boundary/strike_point_outer_r/value` | **needs** `radial_coordinate_of_outer_strike_point` |
+
+**Neither binding keeps the existing spelling.** An unqualified strike point is
+not a locus a reader can resolve, so the existing name is retired rather than
+narrowed to one leg.
+
+**Confirms the prior reading.** `west-name-audit.md` row 72 rejects this
+spelling and proposes the same pair. Judged here independently from the group's
+own evidence, it is confirmed; counted once in the union.
+
+### 43. `safety_factor_at_magnetic_axis` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/q_axis` and
+`summary/local/magnetic_axis/q/value`, whose parent context is the magnetic
+axis. One quantity.
+
+### 44. `safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/q_95` and
+`summary/global_quantities/q_95/value`, identical text ("q at the 95% poloidal
+flux surface"). One quantity.
+
+### 45. `surface_area_of_flux_surface` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/surface` and
+`equilibrium/time_slice/profiles_1d/surface`, both "Surface area of the toroidal
+flux surface" — the global one being the profile evaluated at the boundary.
+Inside the settled `*_of_flux_surface` family; not relitigated.
+
+### 46. `toroidal_beta` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/beta_tor` and
+`summary/global_quantities/beta_tor/value`, word-for-word the same definition.
+One quantity.
+
+### 47. `toroidal_flux_coordinate` — **ONE-QUANTITY** (2 bindings)
+
+`core_profiles/profiles_1d/grid/rho_tor` and
+`equilibrium/time_slice/profiles_1d/rho_tor`. Both are
+`sqrt(Φ/(π B₀))` referred to the same `vacuum_toroidal_field/b0`, which group 17
+confirms is one shared value across the two IDSs. One quantity.
+
+### 48. `toroidal_magnetic_field_at_magnetic_axis` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/magnetic_axis/b_field_phi` ("Total
+toroidal magnetic field at the magnetic axis") and
+`summary/local/magnetic_axis/b_field_tor/value`, whose parent container is the
+magnetic axis. Both are the **total** toroidal field at that point, distinct
+from the vacuum field of group 17 — and the catalog keeps them as separate
+identities, which is the distinction being drawn correctly.
+
+### 49. `upper_triangularity_of_plasma_boundary` — **ONE-QUANTITY** (2 bindings)
+
+The upper partner of group 31, identical text on both bindings. One quantity.
+
+### 50. `vertical_coordinate_of_geometric_axis` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/boundary/geometric_axis/z` and
+`summary/boundary/geometric_axis_z/value`, the summary parent supplying the
+`(Zmax + Zmin)/2` definition. One quantity, and the Z partner of group 41.
+
+### 51. `vertical_coordinate_of_strike_point` — **MUST-SPLIT**, with a description note (2 bindings)
+
+`summary/boundary/strike_point_inner_z/value` (parent: "Z position of the
+**inner** strike point") and `summary/boundary/strike_point_outer_z/value`
+(parent: "Z position of the **outer** strike point") — the Z axis of group 42,
+and the same defect.
+
+| binding | spelling |
+| --- | --- |
+| `summary/boundary/strike_point_inner_z/value` | **needs** `vertical_coordinate_of_inner_strike_point` |
+| `summary/boundary/strike_point_outer_z/value` | **needs** `vertical_coordinate_of_outer_strike_point` |
+
+**Neither binding keeps the existing spelling**, for the reason given in group
+42.
+
+> **Narrower-description note, and it is worse than narrow.** The description
+> reads "Signed vertical (Z) coordinate of the **inner** divertor strike point,
+> where the **inner** separatrix leg intersects the divertor target". It names
+> one locus while the identity is bound to two, so half its bindings carry a
+> description that is not merely incomplete but **affirmatively false about
+> them**: a reader consulting the catalog entry for
+> `summary/boundary/strike_point_outer_z/value` is told it is the inner leg.
+> This is the only group of the 53 where the description asserts the wrong
+> member rather than an incomplete set.
+
+**Confirms the prior reading.** `west-name-audit.md`'s closing finding 3 reports
+this group and proposes the same pair. Judged independently here, confirmed;
+counted once in the union. The description defect is additional to that finding.
+
+### 52. `volume_averaged_electron_density` — **ONE-QUANTITY** (2 bindings)
+
+`interferometer/n_e_volume_average` ("Volume average plasma density estimated
+from the line densities measured by the various channels") and
+`summary/volume_average/n_e/value`. Same averaging operator over the same
+volume; the interferometer text describes how the average is obtained, which is
+provenance. One quantity — and the second precedent group 25 is judged against.
+
+### 53. `wavelength_of_wave_beam` — **ONE-QUANTITY** (2 bindings)
+
+`interferometer/channel/wavelength/value` and `polarimeter/channel/wavelength`
+("Wavelength used for polarimetry"). The vacuum wavelength of a probing beam is
+one quantity; which diagnostic launches the beam is the locus. Two instruments
+on WEST use different wavelengths, and that is exactly the case a shared
+identity is meant to cover — one quantity, many instruments.
+
