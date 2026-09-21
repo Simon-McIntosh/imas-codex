@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T11:07:40",
+  "updated": "2026-09-21T11:19:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -168873,6 +168873,306 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-a-bypassed-maintenance-pass-names-itself",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1193,
+                "cached_input_tokens": 491420,
+                "input_tokens": 492615,
+                "output_tokens": 3145,
+                "reasoning_output_tokens": 979,
+                "total_tokens": 495760,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm all three defects reproduce before repairing them, and quote each reproduction; an independent review of the landed scoped-bypass change found them and each is verbatim present at HEAD. First, the systemic one: _global_maintenance_call at imas_codex/standard_names/loop.py:1612 returns the caller's supplied default when skip_global_maintenance is true, with no log line and no marker of any kind, and thirteen sibling maintenance passes go through it at lines 1679, 1693, 1720, 1739, 1765, 1780, 1793, 1806, 1828, 1840, 1858, 1878 and 1898 -- the review named nine of the thirteen, so count them yourself and report the number. Each of those passes therefore reports an empty result indistinguishable from having run and found nothing: the provenance reconcile, the vocabulary-gap reconcile, the unit reconcile, the catalog-status reconcile and the rest. The repair is specified and does not change any of the thirteen return types. On bypass the helper logs one line at info level naming the bypassed function, and appends that function's name to a list the enclosing run holds; after the maintenance block, when that list is non-empty, the run logs one summary line giving the count and the names; and the list is carried in the mapping run_sn_pools returns so a reader holding the result knows which passes did not run. If that return shape cannot carry it, do not invent a second return value -- report it under follow_ons and let the log lines be the receipt, saying so in the manifest. Second, at imas_codex/standard_names/attachment_audit.py:2749 the except branch of gate_migrated_attachments returns a bare AttachmentAuditResult(), so an audit that RAISED is serialised as a clean, fully audited, all-zero receipt: measured by the reviewer against the landed code, a gc whose query raises RuntimeError yields audit_ran true, equality with a default result, an empty violation-row list and as_dict audit_ran true. The fail-open return itself is correct and must stay, exactly as that function's docstring requires -- a gate that raised would turn a recoverable bad edge into a lost rename -- so the repair is the one keyword audit_ran=False on that return and nothing else. Third, tests/standard_names/test_attachment_audit.py:3202, test_gate_survives_a_graph_failure, asserts result equals a default AttachmentAuditResult and so actively pins the equivalence between an audit that did not run and a clean audit; narrow it to the fields it actually means, no detachments and no rejections, plus an assertion that audit_ran is False. That test is in your write paths and updating it is part of this node rather than a scope problem. The done-when is that a new test under tests/standard_names/ proves the bypassed maintenance passes are named in the run's receipt and in the log rather than silently defaulting, and that the raising gate returns a not-run result, both failing against the declared negative control -- and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. Expect about twenty failures and three errors at the base that predate you. The negative-control log's first line must repeat the mutation you actually applied, in your own words, because that line is compared against the declaration. Do not widen any bypass and do not make a maintenance pass run where it is currently skipped: the scoped bypass is deliberate and this node makes its effect legible rather than reversing it. A guard that passes its own test by weakening itself is worse than no guard. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 2.0,
+          "goal": "make every bypassed maintenance pass name itself instead of returning a silent default",
+          "id": "n-a-bypassed-maintenance-pass-names-itself",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T07:16:19Z",
+            "read_at": "2026-09-21T07:16:20Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 9.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself/manifest.md",
+          "negative_control": "removed per-pass bypass naming and receipt recording from _global_maintenance_call",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/loop.py",
+            "imas_codex/standard_names/attachment_audit.py",
+            "tests/standard_names/test_attachment_audit.py",
+            "tests/standard_names/test_bypassed_maintenance_is_named.py",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html",
+            "tests/standard_names/test_defaulted_attributes_exist.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-maintreceipt",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T07:16:29Z",
+        "completed_at": "2026-09-21T09:18:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7329,
+        "stalled": true,
+        "time_budget": "55m",
+        "base_sha": "6f81dc04771d688d4ed81b8e59925469b37423e8",
+        "commits": [
+          "cd024030a4bfdcc4203cb73cf007ab31dc336540",
+          "a08c16ce03fc85adb6aecbcba260d6ab98a6c7a0"
+        ],
+        "changed_lines": {
+          "added": 163,
+          "removed": 64,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider the two touched test files at the merged head, with the pin's own structural control quoted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/maintenance-receipt-gate.log.delta",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "every bypassed maintenance pass is now accounted for and the pin can see a new one. The first attempt named 24 passes and an independent review showed seven more were bypassed by direct guards that never reached the shared helper, so the receipt claimed completeness it did not have; the correction routes or explicitly records every bypass and the census now reports 31 entries over 28 distinct maintenance functions. The fixed 24-name tuple, which a fifth direct guard would have left green, is replaced by an AST check over loop.py that requires every site testing skip_global_maintenance either to call the helper or to register its pass; planting an unreceipted guard in a scratch copy fails it by file and line, which is the evidence the pin has an aperture. 78 passed at the merged head and the worker's own suite delta, taken with logger lines excluded from the comparison, is 23 terminal ids at both ends",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c2d2-cd71-7021-b553-bdf7b13d800d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 25130112,
+            "cached_input_tokens_cumulative": 25130112,
+            "input_tokens": 25411459,
+            "input_tokens_cumulative": 25411459,
+            "output_tokens": 57923,
+            "output_tokens_cumulative": 57923,
+            "reasoning_output_tokens": 18809,
+            "reasoning_output_tokens_cumulative": 18809
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T09:18:38Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 13.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T09:18:38Z"
+            }
+          ],
+          "notional_cost_usd": 232.1244,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 3300,
+              "classification": "scoring",
+              "commits_beyond_base": 0,
+              "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+              "elapsed_seconds": 211,
+              "external_wait": null,
+              "lifting_condition": null,
+              "liveness_proven": true,
+              "log_age_seconds": 1182,
+              "log_fresh": false,
+              "manifest_commits": [
+                "a19188a6ee126b183d518a46fc5b3835139f42b6",
+                "87b443f3ba49c13b279cfc5c216241ab36b31f42"
+              ],
+              "manifest_derived": false,
+              "manifest_digest": "132c0c987b7b11de86a31d80893beeaa9e55b47b7267b372a25ff13e39684765",
+              "manifest_error": null,
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source/manifest.md",
+              "manifest_present": true,
+              "manifest_reported_status": "complete",
+              "manifest_status": "complete",
+              "marker": null,
+              "needs_help_complete": null,
+              "next_action": "reckon crew dispatch --project imas-codex --plan paid-identity-deletion-protection --section '' --role review --spec-level exact --node review-of-n-the-restore-receipt-names-its-expected-source --goal 'attach an independent review to run r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source' --done-when 'the review for r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source stores a parsed record scoring all 5 dimensions in the range 0..20' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source.json --time-budget 55m --session ship-s10-20260918 --local",
+              "node": "n-the-restore-receipt-names-its-expected-source",
+              "phase": "working",
+              "plan": "paid-identity-deletion-protection",
+              "process_alive": false,
+              "project": "imas-codex",
+              "recovery": "review",
+              "recovery_classification": "scoring",
+              "resets_at": null,
+              "review_error": null,
+              "review_present": false,
+              "review_status": null,
+              "run_id": "r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source",
+              "session": "ship-s10-20260918",
+              "terminal_age_seconds": 1213,
+              "terminal_at": "2026-09-21T06:56:10Z",
+              "wait_age_seconds": null,
+              "wait_condition_state": null,
+              "wait_key_defect": null,
+              "wait_observed": null,
+              "wait_overdue": null,
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-restore-receipt-names-its-expected-source"
+            }
+          ]
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 11,
+            "evidence": 15,
+            "fit": 15,
+            "goal_fidelity": 14,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 75
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 25130112,
+          "cumulative_input_tokens": 50541571,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 76732
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 4,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-a-bypassed-maintenance-pass-names-itself",
+          "session_id": "01a0c2d2-cd71-7021-b553-bdf7b13d800d",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T09:18:38Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.985,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.985,
+          "at_complete": 0.985,
+          "verdict": "waived",
+          "reason": "further nodes on this plan are still in flight and hold its HTML as a declared write path, so the coordinator advances impl once when the wave lands"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_attachment_audit.py",
+            "tests/standard_names/test_bypassed_maintenance_is_named.py",
+            "tests/standard_names/test_defaulted_attributes_exist.py"
+          ],
+          "declaration": "removed per-pass bypass naming and receipt recording from _global_maintenance_call",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself/negative-control.log"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 2,
+          "declared": 5,
+          "missing": [
+            "1270dd22caad3a314efbae8c3181d332e14e059b",
+            "87916b6e5c0ec68551c45885a064a8a45700cb21",
+            "9dd2289bb8463588c28d2cbf061bc5b0d0e0e86b"
+          ],
+          "message": "run 'r-20260921T071618226896-n-a-bypassed-maintenance-pass-names-itself' has a passing gate presenting 2 commit(s) of the 5 its manifest declares; missing: 1270dd22caad3a314efbae8c3181d332e14e059b, 87916b6e5c0ec68551c45885a064a8a45700cb21, 9dd2289bb8463588c28d2cbf061bc5b0d0e0e86b. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 87.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -169185,6 +169485,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2437
+    "_version": 2438
   }
 }
