@@ -989,6 +989,86 @@
     <strong>ea941879d</strong>, <strong>e7bc16fed</strong>,
     <strong>8de7c346c</strong>).</p>
   </section>
+  <section id="west-names-second-half">
+    <h2>The second half of the WEST name audit &mdash; eleven of fifty-one</h2>
+    <p><strong>Question.</strong> Are the accepted WEST bindings the every-fourth sample did not
+    reach physically correct, self-descriptive, and bound to paths whose data-dictionary text
+    describes what the name claims? Judged over <strong>indices 1&ndash;51</strong> of the 255-row
+    remainder in
+    <code>docs/evidence/sn-west-catalog-release/west-name-cohort-remainder.json</code>, a
+    contiguous block running from <code>bremsstrahlung_visible/channel/filter/wavelength_lower</code>
+    to <code>equilibrium/time_slice/boundary/geometric_axis/r</code>, in the same shape as the first
+    half so the two sum.</p>
+
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Rows judged</td><td><strong>51</strong> &mdash; remainder indices 1&ndash;51, contiguous</td></tr>
+        <tr><td>Correct</td><td>40</td></tr>
+        <tr><td>Incorrect, each with a proposed spelling beside the rejected one</td><td><strong>11</strong> (21.6 % of this range)</td></tr>
+        <tr><td>Running total across both halves</td><td><strong>21 of 137 judged &mdash; 15.3 %</strong> of the 341 accepted bindings now carry a judged verdict</td></tr>
+        <tr><td>Worst class &mdash; one name, two physical quantities</td><td><code>effective_charge</code> on both <code>profiles_1d/zeff</code> (local profile) and <code>global_quantities/z_eff_resistive</code> (volume-averaged scalar from ohmic flux consumption)</td></tr>
+        <tr><td>Description-only defects, carrying no incorrect verdict</td><td>3 &mdash; all one shape, a description written for one locus travelling with an identity bound to several</td></tr>
+        <tr><td>Rows whose identity is also bound outside the range</td><td>13, deferred to the whole-cohort collision sweep rather than judged here</td></tr>
+        <tr><td>Unit disagreements</td><td><strong>0</strong> &mdash; controlled, not asserted: the same comparison over all 255 remainder rows finds 3 (indices 152, 159, 198), all outside this range, and 14 distinct units appear across the 51</td></tr>
+        <tr><td>Graph queries issued</td><td><strong>0</strong> &mdash; every row already carries name, path, both units, DD text and description</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <svg viewBox="0 0 700 290" width="700" height="290" role="img"
+           aria-label="Two data-dictionary containers whose coordinate members do not all name the same object">
+        <text fill="#333" font-size="13" font-weight="bold" x="10" y="18">What a contiguous draw sees that an every-fourth sample cannot: one locus, two names</text>
+
+        <text fill="#555" font-size="11" x="10" y="42">camera_x_rays/aperture/centre &mdash; one point, three coordinates</text>
+        <rect fill="#e8f5ec" height="26" rx="5" stroke="#5f9e74" width="320" x="10" y="52"></rect>
+        <text fill="#2f5d44" font-size="11" x="22" y="69">phi &rarr; toroidal_coordinate_of_aperture &nbsp;(row 16, correct)</text>
+        <rect fill="#fdf1f1" height="26" rx="5" stroke="#c46a6a" width="320" x="10" y="82"></rect>
+        <text fill="#8a3a3a" font-size="11" x="22" y="99">r &nbsp;&rarr; radial_coordinate_of_measurement_position &nbsp;(17)</text>
+        <rect fill="#fdf1f1" height="26" rx="5" stroke="#c46a6a" width="320" x="10" y="112"></rect>
+        <text fill="#8a3a3a" font-size="11" x="22" y="129">z &nbsp;&rarr; vertical_coordinate_of_measurement_position &nbsp;(18)</text>
+        <text fill="#8a3a3a" font-size="11" x="10" y="156">2 of 3 name a plasma sample point; the object is a pinhole.</text>
+
+        <text fill="#555" font-size="11" x="370" y="42">ece/channel/position &mdash; one locus, six coordinates</text>
+        <rect fill="#e8f5ec" height="26" rx="5" stroke="#5f9e74" width="320" x="370" y="52"></rect>
+        <text fill="#2f5d44" font-size="11" x="382" y="69">phi, psi, rho_tor_norm, theta &rarr; *_measurement_position</text>
+        <rect fill="#e8f5ec" height="26" rx="5" stroke="#5f9e74" width="320" x="370" y="82"></rect>
+        <text fill="#2f5d44" font-size="11" x="382" y="99">r &nbsp;&rarr; radial_coordinate_of_measurement_position</text>
+        <rect fill="#fdf1f1" height="26" rx="5" stroke="#c46a6a" width="320" x="370" y="112"></rect>
+        <text fill="#8a3a3a" font-size="11" x="382" y="129">z &nbsp;&rarr; vertical_coordinate_of_ece_channel &nbsp;(row 48)</text>
+        <text fill="#8a3a3a" font-size="11" x="370" y="156">5 of 6 name the plasma position; 1 names the receiver.</text>
+
+        <line stroke="#ccc" x1="10" x2="690" y1="176" y2="176"></line>
+        <text fill="#333" font-size="12" x="10" y="198">Why the first half could not reach these</text>
+        <rect fill="#f4f7fb" height="72" rx="6" stroke="#6a8ec4" width="680" x="10" y="208"></rect>
+        <text fill="#456" font-size="11" x="24" y="228">An every-fourth draw takes at most one coordinate of any point, so a set that disagrees with itself</text>
+        <text fill="#456" font-size="11" x="24" y="246">reads as a single plausible row. The first half flagged both containers as pointing OUTSIDE its sample</text>
+        <text fill="#456" font-size="11" x="24" y="264">and could not judge them; a contiguous block holds the whole set and the disagreement is visible at once.</text>
+      </svg>
+      <figcaption>Three of the eleven rejections are of this kind, which is most of the gap between
+      this range's 21.6 % and the first half's 11.6 %: the block draw concentrates clustered defects
+      rather than sampling a different population. The figure is inline because
+      <code>docs/figures/</code> lies outside this node's write fence.</figcaption>
+    </figure>
+
+    <p><strong>The half that could have failed.</strong> The file was checked mechanically against
+    the JSON it judges rather than read for plausibility: <strong>51</strong> verdict sections,
+    indices 1&ndash;51 each exactly once, <strong>0</strong> name mismatches against the source rows,
+    <strong>0</strong> sections failing to quote their own source path, and all <strong>11</strong>
+    INCORRECT rows carrying a rejected/proposed table. The unit column was controlled the same way
+    &mdash; a uniform column is a claim about the instrument before it is a result, so the
+    comparison was shown finding three disagreements elsewhere in the same file before zero was
+    reported here.</p>
+
+    <p><strong>What this does not establish.</strong> This node judged 51 rows and repaired none; no
+    name was renamed and no graph was touched. Thirteen rows carry identities also bound outside the
+    range and those collisions are deferred rather than resolved. 204 rows of the remainder remain
+    unjudged. Per-name verdicts, each rejection's proposed spelling and the semantic distinction
+    behind it are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit-bremsstrahlung-to-equilibrium-boundary">the
+    second-half WEST name audit</a>, appended row by row as each name was judged and committed in
+    four parts.</p>
+  </section>
 </main>
 </body>
 </html>
