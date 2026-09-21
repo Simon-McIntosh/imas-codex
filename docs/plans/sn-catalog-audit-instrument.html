@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="11">
 </head>
 <body>
   <main class="plan-doc">
@@ -221,15 +221,29 @@
     </p>
 
     <p>
-      <strong>One observation the repair invites rather than settles.</strong> The
-      cap stayed at 30. At a 25-item batch that makes the guaranteed share
-      <code>30 // 25 = 1</code> — so no item is starved, which was the defect, but
-      each is guaranteed exactly one comparator plus a share of the five left
-      over. Whether one comparator is enough to make a composer reuse an
-      established spelling is precisely the kind of question this instrument
-      exists to answer, and it should be answered by measuring the defect rate
-      rather than by choosing a number. The calibration run is the natural place
-      to settle it.
+      <strong>That commit was the partial fix, and the baseline is the later
+      one.</strong> <code>064476e26</code> restored a per-item share only up to a
+      fixed cap of 30, while <code>name-only-batch-size</code> is <strong>50</strong>
+      — so a dense name-only batch still left twenty items with no comparator, and
+      neither landed test could see it because both used 25 items. The complete
+      repair is <code>f0a7c40b8</code> at <code>2026-09-21T07:57:59Z</code>, which
+      makes the cap a <em>floor</em>: <code>effective_cap = max(cap, len(items))</code>,
+      so the comparator block grows linearly with the batch. Measured here against
+      current <code>main</code> with distinct neighbours: <strong>zero items receive
+      zero comparators at n = 25, 30, 31, 50 and 200</strong>. <strong>Calibration
+      runs pin to <code>f0a7c40b8</code>, not to the 07:22:04Z commit.</strong>
+    </p>
+
+    <p>
+      The remaining question is not starvation but <em>sufficiency</em>, and it is
+      a real one for the calibration to answer. With heavily overlapping
+      neighbours the deduplicated list collapses to the shared set regardless of
+      batch size — correct behaviour, since identical neighbours are not several
+      comparators — but it means the number of <em>distinct</em> comparators a
+      composer sees is set by how much the cohort's neighbourhoods overlap, not by
+      the cap. Whether that is enough to make a composer reuse an established
+      spelling should be settled by measuring the defect rate at different
+      shares, not by choosing a number.
     </p>
 
     <h2 id="s3">§3 — What the instrument must gain</h2>
@@ -488,30 +502,30 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="calibration-floors" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="calibration-floors" data-choice="recall-90-precision-50" data-by="lead" data-when="2026-09-21T08:43:53+00:00">
     <p class="r-dec-q">What recall and precision against the 74-row fixture qualify the instrument as calibrated?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="recall-90-precision-50">recall ≥ 90%, precision ≥ 50%</button>
+      <button class="r-opt chosen" data-value="recall-90-precision-50">recall ≥ 90%, precision ≥ 50%</button>
       <button class="r-opt" data-value="recall-80-precision-70">recall ≥ 80%, precision ≥ 70%</button>
       <button class="r-opt" data-value="recall-only">recall floor only, precision measured and reported</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The cost is asymmetric: a missed defect ships a wrong name to a physicist and cannot be corrected after publication, while a false positive costs a reviewer a minute. At the measured 21.7 percent rate this flags roughly 150 of 341 for triage, affordable because the instrument runs on the free local lane. Precision is a floor, not a target: a first calibration landing materially under 50 percent is a finding about the instrument, to be reported rather than engineered around by loosening the recall gate.</p>
     </div>
-<div class="r-dec" data-key="grouped-review-surface" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="grouped-review-surface" data-choice="target-groups" data-by="lead" data-when="2026-09-21T08:43:53+00:00">
     <p class="r-dec-q">How should grouped review be exposed?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="target-groups">a third --target groups on sn review</button>
+      <button class="r-opt chosen" data-value="target-groups">a third --target groups on sn review</button>
       <button class="r-opt" data-value="sn-harmonize">a separate sn harmonize command over the existing module</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">One command, one cost ceiling, one dry run, and one place for the local-lane routing to be right. A whole-catalog audit stays a single invocation and shares the batching, concurrency and reviewer-profile machinery already present. harmonize.py&#x27;s family assembly and deterministic drift metric are wired underneath rather than duplicated, which also gives that module the CLI surface it has never had.</p>
     </div>
-<div class="r-dec" data-key="quarantine-on-red" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="quarantine-on-red" data-choice="read-only" data-by="lead" data-when="2026-09-21T08:43:53+00:00">
     <p class="r-dec-q">May the instrument write to the graph when it finds a red, or does it stay read-only and emit a worklist?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="read-only">read-only; emits a worklist only</button>
+      <button class="r-opt chosen" data-value="read-only">read-only; emits a worklist only</button>
       <button class="r-opt" data-value="flag-only">writes a review flag, never a name or a stage</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The method depends on re-running the instrument as a measurement, and a tool that mutates on each run changes what the next run measures, destroying the fixture&#x27;s independence. It also avoids repeating the origin-field incident, where a property written for one purpose later acted as a delete permission across 2096 rows. Findings leave as a worklist; applying them stays a separate authorised act through sn edit.</p>
     </div>
 </section>
 
