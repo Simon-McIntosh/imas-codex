@@ -1383,6 +1383,43 @@
     href="/imas-codex/evidence/sn-west-catalog-release/west-name-repair-worklist">the WEST name
     repair worklist</a>.</p>
   </section>
+  <section id="west-name-repair-worklist-ordinal-revision">
+    <h2>The worklist under the no-ordinal convention &mdash; 58 stand, 2 withdrawn, 1 reclassified</h2>
+    <p><strong>The convention, stated by the project lead:</strong> ordinal and index dimensions are
+    not carried in standard names. Inner and outer, main and secondary, primary, first and second,
+    upper and lower &mdash; <em>where they enumerate members of an array rather than name a physical
+    distinction</em> &mdash; are indices in the data structure, not name segments. The 61 repairs of
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-repair-worklist">the
+    deduplicated repair worklist</a> are re-read under that rule. No name is judged afresh against
+    the data dictionary and no defect is added that the records do not contain; the worklist and the
+    six records it aggregates are <strong>not edited</strong>, because a peer session has adopted the
+    worklist as an independent test fixture and amending it would destroy that independence.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Repairs re-read</td><td><strong>61</strong></td></tr>
+        <tr><td><strong>STANDS</strong></td><td>58</td></tr>
+        <tr><td><strong>WITHDRAWN</strong></td><td>2</td></tr>
+        <tr><td><strong>RECLASSIFIED</strong></td><td>1</td></tr>
+        <tr><td>The three classes, summed</td><td><strong>61</strong></td></tr>
+        <tr><td><strong>Revised repair total</strong></td><td><strong>59</strong> &mdash; 51 renames + <strong>8 splits</strong>, down from 10</td></tr>
+        <tr><td>What is withdrawn</td><td>Both strike-point splits. <code>radial_coordinate_of_strike_point</code> and <code>vertical_coordinate_of_strike_point</code> were each to be split into an <code>inner</code> and an <code>outer</code> half &mdash; two halves differing by nothing else, which is the signature the convention names. The legs are two members of the strike-point array, so the shared identity was the convention working rather than an ambiguity.</td></tr>
+        <tr><td><strong>The defect that survives the withdrawal</strong></td><td><strong>1 of the 61.</strong> <code>vertical_coordinate_of_strike_point</code>'s description reads "Signed vertical (Z) coordinate of the <strong>inner</strong> divertor strike point, where the <strong>inner</strong> separatrix leg intersects the divertor target" while the identity is bound to both legs &mdash; so for the outer binding it is not incomplete but <strong>affirmatively false</strong>. The remedy is a description repair, not a rename, and its radial twin already carries the replacement text: "an individual magnetic strike point where a separatrix leg intersects a divertor target".</td></tr>
+        <tr><td><strong>What is reclassified, and why it is the row that matters</strong></td><td><code>radial_coordinate_of_x_point</code>. The audit's finding holds &mdash; one container spells its R as <code>radial_coordinate_of_x_point</code> and its Z as <code>vertical_coordinate_of_primary_x_point</code>, so at most one is right &mdash; but the convention reverses which. The generic spelling wins, so the repair <strong>renames the sibling</strong> onto <code>vertical_coordinate_of_x_point</code> rather than adding <code>primary</code> to this one. Read as a filter the convention would have deleted this row; read as a rule it relocates the repair.</td></tr>
+        <tr><td>Existence verified, not assumed</td><td><strong>61 target spellings, one indexed single-row read each</strong> (<code>MATCH (sn:StandardName {id: $name}) RETURN sn.id, sn.name_stage</code>) &mdash; no scan, no traversal. Controls pass in both directions: <code>electron_temperature</code> returns <code>accepted</code>, a fabricated name returns empty. <strong>15 present, 46 absent.</strong> The reclassified row's target <code>vertical_coordinate_of_x_point</code> is <strong>present and accepted</strong>, so that repair mints nothing.</td></tr>
+        <tr><td>Two things the lookups surfaced that the worklist could not</td><td><strong>8 of the 15 present targets are <code>superseded</code>, not <code>accepted</code></strong> &mdash; those renames revive a retired identity rather than minting a new one, which is a lifecycle question, reported and not decided. And split row 56 resolves a binding onto <code>toroidal_angle_of_poloidal_magnetic_field_probe</code>, the identity rename row 40 is simultaneously emptying &mdash; a <strong>second order-dependent pair</strong> beside the one the worklist records.</td></tr>
+        <tr><td>Ordinal tokens, and the four that survive them</td><td>A token scan over all 61 proposals returns 10 occurrences across 8 spellings; 5 fall to the convention and 5 stand. The four judgements are written out individually: <code>upper_bound_photon_energy</code> (a band boundary), the inner-and-outer separatrix separation (names both endpoints, selects neither), <code>lower hybrid</code> (a wave resonance), and <code>radiative_temperature_at_innermost_ece_channel</code> &mdash; <strong>the closest call of the 61</strong>, where the data dictionary defines the channel by proximity to the magnetic axis rather than by a slot.</td></tr>
+      </tbody>
+    </table>
+    <p>The convention does not soften the worklist. Both withdrawals sit in the class the worklist
+    called the one that blocks publication, so reader-uncompensable defects fall from 10 to 8 &mdash;
+    but withdrawing the vertical strike-point split leaves a defect standing rather than clearing
+    one, and moves it from a rename a release can apply mechanically to a description someone has to
+    write. Per-row classification, the four borderline judgements and every lookup result are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-repair-worklist-ordinal-revision">the
+    ordinal-convention revision</a>, committed in two parts
+    (<strong>fdbda5da0</strong>, <strong>2bd62b514</strong>).</p>
+  </section>
 </main>
 </body>
 </html>
