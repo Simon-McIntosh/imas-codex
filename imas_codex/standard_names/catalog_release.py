@@ -2004,13 +2004,33 @@ def run_review_release(
             report.source_reconciliation = export_report.to_dict().get(
                 "source_reconciliation", {}
             )
-        if getattr(export_report, "all_gates_passed", True) is False:
+        try:
+            all_gates_passed = export_report.all_gates_passed
+        except AttributeError:
+            report.errors.append(
+                "Export report is missing required verdict attribute "
+                "'all_gates_passed'; release refused because export success was "
+                "not observed."
+            )
+            return report
+        if all_gates_passed is False:
+            try:
+                gate_results = export_report.gate_results
+            except AttributeError:
+                gate_results = ()
             failed_gates = [
                 gate.gate
-                for gate in getattr(export_report, "gate_results", ())
+                for gate in gate_results
                 if not gate.passed and not gate.skipped
             ]
-            failed_gate_names = ", ".join(failed_gates) or "unnamed export gate"
+            if not failed_gates:
+                report.errors.append(
+                    "Export report has all_gates_passed=False but names no failed "
+                    "export gates; release refused because the failure cause was "
+                    "not observed."
+                )
+                return report
+            failed_gate_names = ", ".join(failed_gates)
             report.errors.append(
                 f"Export quality gates failed: {failed_gate_names}. "
                 "Resolve the failed export before publishing."
