@@ -1167,6 +1167,80 @@ test_review_release_preview_link.py:61:    # Export gates are scaffolding; these
     job <code>1275229</code>.</p>
   </section>
 
+  <section id="settled-exclusion-producer">
+    <h2>A settled exclusion is waived only by an exact declared path</h2>
+    <p><strong>Defect 2 was satisfiable in principle and unsatisfiable in fact.</strong> The
+    mechanism set already carried <code>waived</code> and the generability fold already admitted
+    it, but the export leg assigned only <code>documented_non_nameable</code>,
+    <code>emitted</code> and <code>excluded</code>, so no row ever said <code>waived</code> and a
+    source the pipeline correctly refuses forever kept a cut permanently ungenerable. The
+    authority's declaration, <code>imas_codex/standard_names/waived_sources.yaml</code>, settles
+    which sources those are; nothing read it.</p>
+    <p><strong>The producer.</strong> <code>run_export</code> loads the declaration once per
+    export, before any staging output exists, and the disposition decision for each manifest row
+    consults the loaded set: a row is <code>waived</code> when its full <code>source_path</code>
+    is a member, and only then. The mechanism function and the generability fold are unchanged
+    &mdash; the gap was solely that no code set the disposition.</p>
+    <p><strong>Exact membership, never a pattern.</strong> A shared path segment, a refusal
+    reason, a category, a resemblance to a declared entry, an absent row and another disposition
+    all grant nothing. The declaration records four paths as deliberately <em>not</em> waived so a
+    later reader does not add them by resemblance; that list is treated as an assertion, and a
+    path in both lists refuses the load rather than letting the reader choose.</p>
+    <table>
+      <caption>The declaration and the disposition the export leg now produces for each path</caption>
+      <thead><tr><th>Declared path</th><th>Criterion</th><th>Disposition</th></tr></thead>
+      <tbody>
+        <tr><td><code>camera_x_rays/detector_humidity/time</code></td><td><code>coordinate_axis</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>camera_x_rays/detector_temperature/time</code></td><td><code>coordinate_axis</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>hard_x_rays/emissivity_profile_1d/time</code></td><td><code>coordinate_axis</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>camera_x_rays/frame/time</code></td><td><code>structure_timebase</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>core_profiles/profiles_1d/time</code></td><td><code>structure_timebase</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>equilibrium/time_slice/time</code></td><td><code>structure_timebase</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>equilibrium/time_slice/constraints/b_field_pol_probe/weight</code></td><td><code>reconstruction_artifact</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>equilibrium/time_slice/constraints/flux_loop/weight</code></td><td><code>reconstruction_artifact</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>equilibrium/time_slice/constraints/faraday_angle/weight</code></td><td><code>reconstruction_artifact</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>equilibrium/time_slice/constraints/n_e_line/weight</code></td><td><code>reconstruction_artifact</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>equilibrium/time_slice/convergence/iterations_n</code></td><td><code>reconstruction_artifact</code></td><td><code>waived</code></td></tr>
+        <tr><td><code>summary/disruption/time/value</code></td><td>declared <code>not_waived</code></td><td><code>documented_non_nameable</code></td></tr>
+        <tr><td><code>calorimetry/group/component/energy_total/data</code></td><td>declared <code>not_waived</code></td><td>unchanged</td></tr>
+        <tr><td><code>camera_x_rays/camera/camera_dimensions</code></td><td>declared <code>not_waived</code></td><td>unchanged</td></tr>
+        <tr><td><code>equilibrium/time_slice/contour_tree/node/z</code></td><td>declared <code>not_waived</code></td><td>unchanged</td></tr>
+      </tbody>
+    </table>
+    <p>No figure accompanies this record: the decision surface is exact path membership, and the
+    table states it without turning tabular data into an image.</p>
+    <p><strong>Fail closed in every direction.</strong> A missing, unreadable or unparseable
+    declaration refuses the load with the file named, rather than yielding an empty set a caller
+    could mistake for a declaration that waives nothing; the load runs before any staging output
+    exists, so it cannot truncate a partial export. An entry that omits its <code>path</code>,
+    <code>criterion</code> or <code>dd_evidence</code>, an entry citing a criterion the file does
+    not define, and a path listed as both waived and not waived each refuse, which is what stops
+    an entry being added without stating why and with what evidence.</p>
+    <p><strong>Both directions proven, and the counterfactual failed.</strong> The declared
+    negative control was <em>&ldquo;negative control: waiving a source by a shared path segment
+    rather than its full path must fail, because summary/disruption/time/value is a measured event
+    time that wants a standard name.&rdquo;</em> Under the mutation the focused file failed two
+    tests at exit 1 &mdash; the eleven declared paths are not all waived (the four
+    <code>weight</code>/<code>iterations_n</code> rows carry no <code>time</code> segment), and
+    the near-miss event time became <code>waived</code>. The mutation was reverted and the
+    restored file passes <strong>7</strong> (<code>logs/focused_restored.log</code>).</p>
+    <p><strong>The suite delta is zero.</strong> At base <code>cdf7fcaf7</code>, the full
+    <code>tests/standard_names/</code> surface on <code>all_debug</code> recorded 21 failed, 7,610
+    passed and 3 errors; at head <code>b764cec8e</code> it recorded 20 failed, 7,619 passed and 3
+    errors. Comparing only <code>FAILED</code> lines and <code>ERROR tests/</code> lines, the head
+    set is a subset of the base set and the added-failure count is <strong>zero</strong>. One id
+    appears at base alone, <code>test_export_determinism.py::test_no_commit_uses_stable_unversioned_timestamp</code>,
+    and it is the instrument rather than the code: the base revision was measured from a
+    <code>git archive</code> tree, which is not a checkout, so <code>SOURCE_DATE_EPOCH</code> had
+    to be set for the manifest timestamp to resolve, and that test asserts the opposite
+    environment. It passes at head, where the tree is a real checkout. The nine extra passes at head
+    reconcile as the seven new tests, that one test, and one the archive tree skipped
+    (skipped 9&nbsp;&rarr;&nbsp;8, failed 21&nbsp;&rarr;&nbsp;20, passed
+    7,610&nbsp;&rarr;&nbsp;7,619).</p>
+    <p class="r-meta">Worker: n-a-settled-exclusion-can-be-waived &middot; 2026-09-21 &middot;
+    commit <code>b764cec8e</code> &middot; host class <code>all_debug</code>.</p>
+  </section>
+
 </main>
 
 </body>

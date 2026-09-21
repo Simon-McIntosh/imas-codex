@@ -2661,6 +2661,128 @@ def _manifest_iso_timestamp(
 # =============================================================================
 
 
+# The declaration of sources whose exclusion from a cut is settled rather than
+# outstanding. It is an enumeration and never a pattern: a source resembling a
+# settled exclusion is a different row, and only an exact path match may waive
+# one. A pattern over paths ending in ``time`` would waive
+# ``summary/disruption/time/value``, an event time that should carry a name.
+_WAIVED_SOURCES_DECLARATION = Path(__file__).with_name("waived_sources.yaml")
+
+# Every waived entry must state why it is waived; an entry that omits one of
+# these cannot be checked by a reader and is refused rather than applied.
+_WAIVED_ENTRY_KEYS = ("path", "criterion", "dd_evidence")
+
+
+class WaivedSourceDeclarationError(ValueError):
+    """The settled-exclusion declaration is absent, unreadable or inconsistent."""
+
+
+def _load_waived_source_paths(declaration: Path) -> frozenset[str]:
+    """Return the exact source paths the declaration waives.
+
+    Fail closed in every direction: a declaration that is missing, unreadable,
+    unparseable, missing a required key, citing an undefined criterion, or
+    listing a path as both waived and not waived raises rather than yielding an
+    empty set. An empty set would be indistinguishable from a declaration that
+    waives nothing, and a caller could mistake one for the other and publish a
+    cut whose settled exclusions were silently never waived. Raising happens
+    before any staging output exists, so a broken declaration refuses the
+    export rather than truncating one.
+    """
+    try:
+        text = declaration.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise WaivedSourceDeclarationError(
+            f"waived-source declaration {declaration} could not be read: {exc}"
+        ) from exc
+    try:
+        document = yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise WaivedSourceDeclarationError(
+            f"waived-source declaration {declaration} is not valid YAML: {exc}"
+        ) from exc
+    if not isinstance(document, dict):
+        raise WaivedSourceDeclarationError(
+            f"waived-source declaration {declaration} must be a mapping"
+        )
+    criteria = document.get("criteria")
+    if not isinstance(criteria, dict) or not criteria:
+        raise WaivedSourceDeclarationError(
+            f"waived-source declaration {declaration} defines no criteria"
+        )
+    waived_entries = document.get("waived")
+    if not isinstance(waived_entries, list):
+        raise WaivedSourceDeclarationError(
+            f"waived-source declaration {declaration} has no waived list"
+        )
+    waived_paths: set[str] = set()
+    for index, entry in enumerate(waived_entries):
+        if not isinstance(entry, dict):
+            raise WaivedSourceDeclarationError(
+                f"waived-source declaration {declaration} entry {index} is not a mapping"
+            )
+        for key in _WAIVED_ENTRY_KEYS:
+            value = entry.get(key)
+            if not isinstance(value, str) or not value.strip():
+                raise WaivedSourceDeclarationError(
+                    f"waived-source declaration {declaration} entry {index} omits {key}"
+                )
+        if entry["criterion"] not in criteria:
+            raise WaivedSourceDeclarationError(
+                f"waived-source declaration {declaration} entry {index} cites "
+                f"undefined criterion {entry['criterion']!r}"
+            )
+        waived_paths.add(entry["path"])
+    not_waived_entries = document.get("not_waived", [])
+    if not isinstance(not_waived_entries, list):
+        raise WaivedSourceDeclarationError(
+            f"waived-source declaration {declaration} has a non-list not_waived"
+        )
+    not_waived_paths: set[str] = set()
+    for index, entry in enumerate(not_waived_entries):
+        if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
+            raise WaivedSourceDeclarationError(
+                f"waived-source declaration {declaration} not_waived entry {index} "
+                "omits its path"
+            )
+        not_waived_paths.add(entry["path"])
+    contested = sorted(waived_paths & not_waived_paths)
+    if contested:
+        raise WaivedSourceDeclarationError(
+            f"waived-source declaration {declaration} lists {contested} as both "
+            "waived and not_waived"
+        )
+    return frozenset(waived_paths)
+
+
+def _source_disposition(
+    *,
+    source_path: str,
+    waived_paths: frozenset[str],
+    non_nameable_reason: str,
+    standard_name_id: str | None,
+    exported_ids: set[str],
+    exclusion_reason: str | None,
+) -> tuple[str, str]:
+    """Classify one manifest source and name the reason its row carries.
+
+    ``waived`` is granted only by exact membership of the declaration's
+    enumerated set. It is never inferred from a refusal reason, a category, a
+    resemblance to a settled exclusion, an absent row, or another disposition.
+    """
+    if source_path in waived_paths:
+        return "waived", ""
+    if non_nameable_reason:
+        return "documented_non_nameable", non_nameable_reason
+    if standard_name_id in exported_ids:
+        return "emitted", ""
+    if exclusion_reason is not None:
+        return "excluded", exclusion_reason
+    if not standard_name_id:
+        return "excluded", "no_terminal_identity"
+    return "excluded", "identity_not_exported"
+
+
 def run_export(
     staging_dir: str | Path,
     *,
@@ -2744,6 +2866,10 @@ def run_export(
             len(manifest_sources) if manifest_sources is not None else None
         )
     )
+    # Read the declaration once per export, before any staging output exists, so
+    # a missing or inconsistent one refuses the export here rather than after a
+    # partial tree has been written.
+    waived_paths = _load_waived_source_paths(_WAIVED_SOURCES_DECLARATION)
 
     # ── 1. Fetch the upstream population and classify eligibility ──
     logger.info("Fetching accepted export population from graph...")
@@ -3277,22 +3403,15 @@ def run_export(
             terminal_stage = source.get("terminal_stage")
             source_status = source.get("source_status")
             non_nameable_reason = str(source.get("non_nameable_reason") or "")
-            if non_nameable_reason:
-                disposition = "documented_non_nameable"
-                reason = non_nameable_reason
-            elif standard_name_id in exported_ids:
-                disposition = "emitted"
-                reason = ""
-            else:
-                disposition = "excluded"
-                exclusion = exclusions_by_id.get(standard_name_id)
-                reason = (
-                    exclusion.reason
-                    if exclusion is not None
-                    else "no_terminal_identity"
-                    if not standard_name_id
-                    else "identity_not_exported"
-                )
+            exclusion = exclusions_by_id.get(standard_name_id)
+            disposition, reason = _source_disposition(
+                source_path=source_path,
+                waived_paths=waived_paths,
+                non_nameable_reason=non_nameable_reason,
+                standard_name_id=standard_name_id,
+                exported_ids=exported_ids,
+                exclusion_reason=exclusion.reason if exclusion is not None else None,
+            )
             report.source_disposition_records.append(
                 SourceDispositionRecord(
                     source_path=source_path,
