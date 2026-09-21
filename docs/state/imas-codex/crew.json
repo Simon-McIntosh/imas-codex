@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T14:07:31",
+  "updated": "2026-09-21T14:08:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -173535,6 +173535,238 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T102956857376-n-the-write-suppression-covers-every-write-method",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-the-write-suppression-covers-every-write-method",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2159,
+                "cached_input_tokens": 798154,
+                "input_tokens": 800315,
+                "output_tokens": 752,
+                "reasoning_output_tokens": 99,
+                "total_tokens": 801067,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "suppression covers every write-capable GraphClient method and a test enumerates them by introspection",
+          "estimated_hours": 0.5,
+          "goal": "Make the report-only write suppression cover every write-capable GraphClient method",
+          "id": "n-the-write-suppression-covers-every-write-method",
+          "lane_declaration": {
+            "backend": "clive",
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T10:29:59Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/write-aperture-1030/manifest.md",
+          "negative_control": "Narrow the suppression back to GraphClient.query alone; the aperture test must fail.",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "30m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_review_write_suppression.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "clive-audit-3",
+        "backend": "clive",
+        "local": false,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T10:30:35Z",
+        "completed_at": "2026-09-21T11:23:04.801Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3137,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3149,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "fe5012a136b11b7383a2617b6a3e7129c4ac62c8",
+        "commits": [
+          "dcc4c3d427401a9ce422429ff10793759d3ddf89",
+          "e713336fc4d0efd84676b8338d8337cca52c3746"
+        ],
+        "changed_lines": {
+          "added": 423,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 25,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run pytest -p no:cacheprovider tests/standard_names/test_review_write_suppression.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/write-aperture-1030/focused-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "Report-only write suppression moved to the GraphClient.session boundary, covering every write-capable client method rather than a named list: 79 mutating statements across 13 otherwise-unguarded methods receipted by the guard, none reaching the driver. Negative control reproduced independently by the coordinator against the predecessor's committed query-only aperture: 15 failed, 10 passed, matching the worker's figures. Independent opus review scored 86, SOUND, with two durability residuals in the classifier rather than the aperture.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/write-aperture-1030/manifest.md",
+        "scope_changed": false,
+        "session_id": "05907e20-56a1-413b-aa78-d9f533e39287",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 11927211,
+            "input_tokens_cumulative": 11927211,
+            "output_tokens": 45837,
+            "output_tokens_cumulative": 45837,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T11:23:04.801Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 14,
+            "evidence": 18,
+            "fit": 17,
+            "goal_fidelity": 19,
+            "scope_discipline": 18
+          },
+          "absent": [],
+          "total": 86
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 12081130,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 3144.06,
+          "generated_tokens": 53448,
+          "generation_seconds": 2925.262,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.8,
+          "machine_seconds": 218.798,
+          "peak_input_tokens": 152619,
+          "tokens_per_second": 18.27,
+          "wall_tokens_per_second": 17.0
+        },
+        "follow_on_paths": [
+          "GraphClient.session"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-the-write-suppression-covers-every-write-method",
+          "session_id": "05907e20-56a1-413b-aa78-d9f533e39287",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T11:23:04.801Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_review_write_suppression.py"
+          ],
+          "declaration": "Narrow the suppression back to GraphClient.query alone; the aperture test must fail.",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/write-aperture-1030/coordinator-negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/write-aperture-1030/coordinator-negative-control.log"
+        },
+        "tool_steps": 110.0,
+        "orientation_input_tokens": 3306650.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -173847,6 +174079,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2459
+    "_version": 2460
   }
 }
