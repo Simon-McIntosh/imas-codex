@@ -1,0 +1,43 @@
+{
+  "endpoint": "http://98dci4-gpu-0003:18802/v1",
+  "model": "deepseek-v4.1-flash",
+  "served_by": "sglang",
+  "max_model_len": 512000,
+  "payload": {
+    "kind": "review-sized",
+    "construction": "sn/review_names_system + sn/review_names_user rendered from the live templates via render_prompt over build_compose_context()",
+    "system_chars": 65166,
+    "prompt_tokens": 17173,
+    "completion_tokens_mean": 694,
+    "distinct_user_payloads": 40,
+    "source": "40 real StandardName identities read from the live graph"
+  },
+  "request_body": {
+    "max_tokens": 700,
+    "temperature": 0.0,
+    "chat_template_kwargs": {"thinking": true, "reasoning_effort": "medium"}
+  },
+  "criteria": {
+    "timeout_deadline_s": 900,
+    "timeout_deadline_source": "MODEL_TOKEN_LIMITS['local'|'hosted_vllm']['timeout'] in imas_codex/discovery/base/llm.py",
+    "starvation_deadline_s": 60,
+    "starvation_rationale": "8x the solo latency: a review request past 60 s is holding a slot without advancing, the mechanism the 32-replica incident exhibited"
+  },
+  "platform_note": "load generator is network-I/O bound (32-64 sockets, no local CPU work); run on the login node",
+  "levels": [
+    {"concurrency": 1,  "n_requests": 16, "wall_s": 105.33, "completed": 16, "errors": 0, "requests_per_min": 9.11,  "agg_completion_tok_per_s": 105.4, "lat_p50": 6.42,  "lat_p95": 7.68,  "lat_max": 7.68,  "starved_over_60s": 0,  "timeout_rate_900s": 0.0},
+    {"concurrency": 4,  "n_requests": 16, "wall_s": 45.04,  "completed": 16, "errors": 0, "requests_per_min": 21.32, "agg_completion_tok_per_s": 247.3, "lat_p50": 10.88, "lat_p95": 12.42, "lat_max": 12.42, "starved_over_60s": 0,  "timeout_rate_900s": 0.0},
+    {"concurrency": 8,  "n_requests": 16, "wall_s": 35.87,  "completed": 16, "errors": 0, "requests_per_min": 26.76, "agg_completion_tok_per_s": 312.2, "lat_p50": 17.79, "lat_p95": 20.03, "lat_max": 20.03, "starved_over_60s": 0,  "timeout_rate_900s": 0.0},
+    {"concurrency": 16, "n_requests": 24, "wall_s": 48.42,  "completed": 24, "errors": 0, "requests_per_min": 29.74, "agg_completion_tok_per_s": 346.9, "lat_p50": 28.62, "lat_p95": 34.16, "lat_max": 34.34, "starved_over_60s": 0,  "timeout_rate_900s": 0.0},
+    {"concurrency": 32, "n_requests": 32, "wall_s": 52.67,  "completed": 32, "errors": 0, "requests_per_min": 36.45, "agg_completion_tok_per_s": 425.2, "lat_p50": 50.71, "lat_p95": 52.32, "lat_max": 52.63, "starved_over_60s": 0,  "timeout_rate_900s": 0.0},
+    {"concurrency": 64, "n_requests": 64, "wall_s": 111.94, "completed": 64, "errors": 0, "requests_per_min": 34.30, "agg_completion_tok_per_s": 400.2, "lat_p50": 69.93, "lat_p95": null,  "lat_max": 111.93, "starved_over_60s": 43, "timeout_rate_900s": 0.0}
+  ],
+  "repeats": [
+    {"concurrency": 32, "n_requests": 32, "requests_per_min": 32.01, "agg_completion_tok_per_s": 373.4, "lat_p50": 56.92, "lat_max": 59.96, "note": "identical load to the level above; measures run-to-run spread at the knee"},
+    {"concurrency": 32, "n_requests": 32, "requests_per_min": 32.98, "agg_completion_tok_per_s": 384.3, "lat_p50": 55.13, "lat_max": 58.22, "note": "identical load to the level above"}
+  ],
+  "rejected_samples": [
+    {"concurrency": 64, "n_requests": 32, "requests_per_min": 26.13, "note": "FIRST c=64 attempt fired only 32 requests, so achieved concurrency was 32, not 64; the 26.13 reading is a low outlier of the c=32 distribution (three c=32 samples: 36.45, 32.01, 32.98). Superseded by the true c=64 run at 64 in flight. Not used in the curve."}
+  ],
+  "no_cost": "local-free endpoint; zero paid spend"
+}

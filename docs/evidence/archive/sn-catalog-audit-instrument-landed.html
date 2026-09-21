@@ -1058,6 +1058,90 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     <code>tests/standard_names/test_grouped_review_target.py</code>
     &middot; base revision <code>6f9a29f9f7aab13f722f3783f003382fb7ce6b77</code>.</p>
   </section>
+
+  <section id="local-lane-concurrency-knee">
+    <h2>The local-lane concurrency knee on review-sized payloads is 32, not 4</h2>
+
+    <p><strong>What was measured.</strong> The served endpoint
+    (<code>http://98dci4-gpu-0003:18802/v1</code>, sglang, <code>max_model_len</code>
+    512000, model <code>deepseek-v4.1-flash</code>) was driven with review-sized
+    payloads: the real <code>sn/review_names_system</code> and
+    <code>sn/review_names_user</code> templates rendered through
+    <code>render_prompt</code> over <code>build_compose_context()</code>, giving
+    <strong>17,173 prompt tokens</strong> and <strong>694 completion tokens</strong>
+    per request, at <code>reasoning_effort="medium"</code> and
+    <code>max_tokens=700</code>. Forty distinct user payloads were built from forty
+    real <code>StandardName</code> identities read from the live graph, so the
+    requests are not identical and the shared system prefix is the only cached
+    span — which is the production shape of a review pass.</p>
+
+    <p><strong>The result.</strong> Throughput rises through 32 concurrent requests
+    and then flattens: 9.11 req/min at 1, 21.32 at 4, 26.76 at 8, 29.74 at 16,
+    36.45 at 32, and 34.30 at 64 with all 64 genuinely in flight. Aggregate
+    completion throughput saturates near 400 tokens per second (105 → 247 → 312 →
+    347 → 425 → 400). The knee, as the lowest level beyond which throughput does
+    not rise, is <strong>32</strong>: the doubling to 64 buys +1.5% in the wrong
+    direction, inside the run-to-run spread.</p>
+
+    <p><strong>The spread is measured, not assumed, and it is why the criterion is
+    the plateau rather than a single point.</strong> Three c=32 samples with an
+    identical emitted load gave 36.45, 32.01 and 32.98 req/min — a 13% band. A
+    first attempt at c=64 dispatched only 32 requests, so its achieved concurrency
+    was 32 rather than 64 and its 26.13 req/min reading is a low outlier of the
+    c=32 distribution, not evidence of a collapse; it is recorded as a rejected
+    sample in the raw file. The c=64 point in the curve comes from a run with 64
+    requests in flight. Naming a knee from the un-replicated first pass would have
+    reported a 40% throughput loss above 32 that does not exist.</p>
+
+    <p><strong>Timeout rate.</strong> Zero of 184 requests across the sweep hit the
+    pipeline's own local-endpoint deadline of 900 s
+    (<code>MODEL_TOKEN_LIMITS</code> in <code>imas_codex/discovery/base/llm.py</code>),
+    and there were no errors at any level. That deadline is too loose to be the
+    instrument near this knee, so the starvation column records requests exceeding
+    60 s — eight times the solo latency, the shape a stalled slot takes. It is
+    zero through 32 and 43 of 64 at 64, matching the latency series (p50 6.42 s
+    solo, 50.7 s at 32, 69.9 s at 64).</p>
+
+    <p><strong>What this resolves and what it does not.</strong> The two prior
+    readings were both honest and neither governs this workload. The compose-path
+    probe found its knee at 4 because a compose batch <em>generates</em> ~18.5k
+    tokens, so it is decode-bound end to end; a review request generates ~694
+    tokens and is instead prompt-dominated, and the served variant adds
+    prefix caching over the shared system span. On review-sized payloads the knee
+    is 32, which confirms the lead's ~30 for this instrument rather than the
+    compose default of 4 — and it is the number the instrument's default should be
+    set from. The caution that survives is the shape above 4: each doubling past 4
+    buys 26%, 11% and 9% while per-request latency grows roughly in proportion,
+    so concurrency buys aggregate throughput at the cost of every individual
+    request's wall time.</p>
+
+    <figure>
+      <img src="/imas-codex/figures/sn-catalog-audit-instrument/local-lane-concurrency.svg"
+           alt="A throughput curve rising from 9.1 requests per minute at concurrency 1 to 36.5 at 32 and then flat at 34.3 at 64, with the two c=32 repeats plotted as orange points beside the knee, and a dashed per-request latency curve rising from 6.4 seconds to 69.9 seconds. A table below gives completed count, throughput, latency percentiles, starvation count and timeout rate per level.">
+      <figcaption>Throughput against concurrency on review-sized payloads, with the
+      c=32 repeats shown as the spread the knee sits inside. The raw per-level and
+      per-request values are beside it in <code>local-lane-concurrency-raw.json</code>
+      so the knee can be rederived.</figcaption>
+    </figure>
+
+    <p><strong>Instrument limits, stated.</strong> The load generator is
+    network-I/O bound and ran on the login node; it issues HTTP against the served
+    endpoint and performs no local CPU work. Neither <code>nvidia-smi</code> on the
+    serving node nor its <code>/metrics</code> gauge was reachable from here (SSH
+    key exchange is refused, <code>/metrics</code> answers empty through the
+    router), so no server-side concurrency gauge corroborates the client-side
+    in-flight count; achieved concurrency is asserted from the emitted request
+    counts plus the flat plateau, and the c=32 repeats are the control on that.
+    A concurrent worker on this lane would appear as spread of exactly the kind
+    measured, so the 13% band is the upper bound the conclusion is held to.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-local-lane-concurrency-knee-is-measured-not-assumed</code>
+    &middot; 2026-09-21 &middot; measure
+    <code>docs/figures/sn-catalog-audit-instrument/local-lane-concurrency.svg</code>
+    + raw at <code>local-lane-concurrency-raw.json</code>
+    &middot; base revision <code>9b4bd7bc8946162acca4592a444ee495f15b5338</code>.</p>
+  </section>
   </main>
 </body>
 </html>
