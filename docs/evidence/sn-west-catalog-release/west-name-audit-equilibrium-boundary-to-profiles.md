@@ -1,7 +1,7 @@
 # WEST cohort remainder, indices 52–102 — physical-correctness audit
 
-provisional: true — verdicts are being appended as they are judged; the result
-section is not yet closed.
+provisional: false — every one of the 51 rows carries a verdict and the
+result section is closed.
 
 Are the accepted standard names bound to WEST batch sources physically correct
 and self-descriptive? This file judges the 51 bindings whose `index` field lies
@@ -219,7 +219,7 @@ section says so rather than presenting a reading the text does not support.
 - name description: Normalized toroidal beta is a dimensionless whole-plasma equilibrium measure formed from volume-averaged total perpendicular pressure and toroidal magnetic and plasma-current scales.
 - The Troyon-normalised form is what the DD defines and what the name claims; `normalized` is load-bearing, since the unnormalised `toroidal_beta` is a separate identity the other half judged correct at the `beta_tor` sibling.
 
-### 68. `normalized_toroidal_beta` — **correct**, with a defect that is not in the name
+### 68. `normalized_toroidal_beta` — **correct**, with a duplicate producer binding
 
 - cohort index: 68
 - source path: `equilibrium/time_slice/global_quantities/beta_tor_norm`
@@ -339,3 +339,353 @@ section says so rather than presenting a reading the text does not support.
 - the cohort already fixes both spellings and already applies the distinction: `volume_of_plasma_boundary` is the accepted name for the same physical scalar at `summary/global_quantities/volume/value`, and in this very block `global_quantities/area` is spelled `..._of_plasma_boundary` (row 65) while `profiles_1d/area` is spelled `..._of_flux_surface` (row 80). The area pair is the positive control: the convention exists, is applied one container away, and this row is where it lapsed.
 - this does **not** reopen the settled `*_of_flux_surface` family adjudication. That adjudication fixed what the suffix *means* — the volume and area enclosed by the surface rather than of the surface — and it is taken as given here. The finding is about which locus the identity is attached to, not about its semantics.
 - the identity is correctly bound at `equilibrium/time_slice/profiles_1d/volume` and `core_profiles/profiles_1d/grid/volume`, both genuine per-surface profiles accepted in the other half; as with row 64 the repair detaches this locus rather than renaming the identity, and the collision itself belongs to the whole-cohort sweep.
+
+### 80. `poloidal_plane_cross_sectional_area_of_flux_surface` — **correct**
+
+- cohort index: 80
+- source path: `equilibrium/time_slice/profiles_1d/area`
+- unit: `m^2` (data dictionary: `m^2`)
+- data-dictionary text: Cross-sectional area of the flux surface
+- name description: Geometric area enclosed by a closed magnetic-flux-surface contour in a fixed-toroidal-angle poloidal plane of the right-handed cylindrical (R, φ, Z) frame.
+- The plane is named, which is what separates this from the toroidal surface area at the same unit. With row 65 this is the pair that shows the cohort distinguishes the per-surface profile from the global boundary scalar.
+- collision outside this range: also bound to `core_profiles/profiles_1d/grid/area`, the same per-surface quantity used as a grid label; deferred to the whole-cohort sweep.
+
+### 81. `flux_surface_averaged_magnetic_field_magnitude` — **correct**
+
+- cohort index: 81
+- source path: `equilibrium/time_slice/profiles_1d/b_field_average`
+- unit: `T` (data dictionary: `T`)
+- data-dictionary text: Flux surface averaged modulus of B (always positive, irrespective of the sign convention for the B-field direction).
+- name description: Flux-surface average of the local magnetic-field strength, retaining the pointwise modulus before averaging over each magnetic surface.
+- `magnitude` carries the DD's "modulus", and the description states the order of operations — modulus first, then average — which is the distinction that makes the result sign-convention independent as the DD says.
+
+### 82. `minimum_over_flux_surface_magnetic_field_magnitude` — **correct**
+
+- cohort index: 82
+- source path: `equilibrium/time_slice/profiles_1d/b_field_min`
+- unit: `T` (data dictionary: `T`)
+- data-dictionary text: Minimum(modulus(B)) on the flux surface (always positive, irrespective of the sign convention for the B-field direction)
+- name description: Smallest total magnetic-field strength attained along a specified nested magnetic flux surface, using the field magnitude rather than a signed component.
+- Every element of the DD text is in the name: the extremum, the domain it is taken over, and that it is the modulus being extremised.
+- note: this is the low-field-side counterpart of `b_field_max` in the same container, which the other half accepted as `maximum_magnetic_field_magnitude` — without the `over_flux_surface` segment, leaving the domain to its description ("a specified evaluation domain"). The minimum and the maximum of one container are therefore spelled asymmetrically, and only one of the two states the domain. This row is the better-specified of the pair and is correct on its own terms; the asymmetry is recorded as a cohort-consistency follow-on rather than as a defect here, since repairing it means changing the row the other half already accepted.
+
+### 83. `derivative_of_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate` — **correct**
+
+- cohort index: 83
+- source path: `equilibrium/time_slice/profiles_1d/darea_dpsi`
+- unit: `Wb^-1.m^2` (data dictionary: `Wb^-1.m^2`)
+- data-dictionary text: Radial derivative of the cross-sectional area of the flux surface with respect to psi
+- name description: Derivative of the poloidal cross-sectional area enclosed by a closed magnetic flux surface with respect to the signed poloidal magnetic flux coordinate. It is a flux-coordinate metric for how enclosed area changes between neighboring flux surfaces.
+- The differentiation variable is spelled out rather than compressed into "radial", which is the convention the other half held up when rejecting `radial_derivative_of_poloidal_magnetic_flux` at the neighbouring `dpsi_drho_tor`. The unit confirms the variable: `m^2` divided by `Wb`.
+- observation, because it could have come out otherwise: this is the exact spelling `the-flux-surface-area-derivative.md` records as the intended target for this source, back when the source had **no** standard name and the escalation to a vendor-diverse composer seat had failed with grammar-invalid output. The row shows an accepted binding carrying that target spelling, so the gap that file reports is closed, and closed on the intended name rather than on a near miss.
+
+### 84. `derivative_of_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate` — **correct**
+
+- cohort index: 84
+- source path: `equilibrium/time_slice/profiles_1d/darea_drho_tor`
+- unit: `m` (data dictionary: `m`)
+- name description: Radial rate of change of the poloidal cross-sectional area enclosed by a nested magnetic flux surface as the toroidal flux coordinate increases.
+- data-dictionary text: Radial derivative of the cross-sectional area of the flux surface with respect to rho_tor
+- The unit discriminates the differentiation variable and confirms the name: `m^2` per metre of `rho_tor` is `m`, which is only consistent with the dimensionful toroidal flux coordinate, not its normalized form. `toroidal_flux_coordinate` is the spelling row 102 fixes for `rho_tor`, so the pair is consistent.
+
+### 85. `derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate` — **correct**
+
+- cohort index: 85
+- source path: `equilibrium/time_slice/profiles_1d/dvolume_dpsi`
+- unit: `Wb^-1.m^3` (data dictionary: `Wb^-1.m^3`)
+- data-dictionary text: Radial derivative of the volume enclosed in the flux surface with respect to Psi
+- name description: Geometric rate of change of the cumulative volume enclosed by a nested magnetic flux surface as its signed poloidal flux coordinate varies.
+- `m^3` per `Wb` matches the stated derivative, and the enclosed-volume reading is the settled family convention, not reopened here.
+
+### 86. `derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate` — **correct**
+
+- cohort index: 86
+- source path: `equilibrium/time_slice/profiles_1d/dvolume_drho_tor`
+- unit: `m^2` (data dictionary: `m^2`)
+- data-dictionary text: Radial derivative of the volume enclosed in the flux surface with respect to Rho_Tor
+- name description: Geometric rate at which the cumulative volume enclosed by a nested magnetic flux surface changes with its dimensionful toroidal-flux coordinate.
+- `m^3` per metre is `m^2`, again consistent only with the dimensionful coordinate, which the description states in as many words. Rows 83 to 86 form a complete and internally consistent derivative family over two quantities and two coordinates.
+
+### 87. `elongation_of_flux_surface` — **correct**
+
+- cohort index: 87
+- source path: `equilibrium/time_slice/profiles_1d/elongation`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Elongation
+- name description: Ratio of the vertical to horizontal semi-axes of a nested magnetic flux surface’s poloidal cross-section, independent of its overall size.
+- The DD text is the bare word; the name supplies the surface the shape parameter belongs to, which is the whole reason a shape parameter needs a surface segment — the boundary elongation and a mid-radius elongation are different numbers and the catalog carries both.
+
+### 88. `flux_surface_averaged_inverse_of_square_of_major_radius` — **correct**
+
+- cohort index: 88
+- source path: `equilibrium/time_slice/profiles_1d/gm1`
+- unit: `m^-2` (data dictionary: `m^-2`)
+- data-dictionary text: Flux surface averaged 1/R^2
+- name description: Flux-surface average of reciprocal squared major radius, providing a geometric metric coefficient for parallel-gradient and neoclassical transport calculations.
+- The name reconstructs the DD formula exactly and replaces an opaque field spelling — `gm1` carries no meaning at all to a reader — with one that does. The unit confirms the reading.
+
+### 89. `flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius` — **correct**
+
+- cohort index: 89
+- source path: `equilibrium/time_slice/profiles_1d/gm2`
+- unit: `m^-2` (data dictionary: `m^-2`)
+- data-dictionary text: Flux surface averaged grad_rho^2/R^2
+- name description: Flux-surface-averaged magnetic-geometry coefficient measuring the squared toroidal-flux-coordinate gradient relative to the squared major radius.
+- Long, and every segment is load-bearing: numerator, denominator, that both are squared, and that the whole ratio is averaged rather than the average being ratioed. The unit is the check — a dimensionless squared gradient of the dimensionful `rho_tor` over `R^2` gives `m^-2`, which is what the row carries.
+
+### 90. `flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude` — **correct**, with a defect that is not in the name
+
+- cohort index: 90
+- source path: `equilibrium/time_slice/profiles_1d/gm3`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Flux surface averaged grad_rho^2
+- name description: Flux-surface average of the squared magnitude of the gradient of the normalized toroidal-flux radius. It is the averaged contravariant radial metric coefficient for the flux coordinate rho_tor.
+- The name is correct and consistent with rows 89, 92 and 93, which take the gradient of the same coordinate.
+- note: the **description contradicts itself and the unit.** Its first sentence says the gradient is of the *normalized* toroidal-flux radius; its second says the coordinate is `rho_tor`, which is the dimensionful one. The unit settles it: the gradient of the dimensionful coordinate is dimensionless, so its square is `1` as recorded, whereas the gradient of the normalized coordinate would carry `m^-1` and its square `m^-2`. The first sentence is the wrong one. A description defect, so not an incorrect verdict — but it is the kind that propagates, because a reader who trusts it will mis-dimension every transport coefficient built on this metric.
+
+### 91. `flux_surface_averaged_square_of_magnetic_field_magnitude` — **correct**
+
+- cohort index: 91
+- source path: `equilibrium/time_slice/profiles_1d/gm5`
+- unit: `T^2` (data dictionary: `T^2`)
+- data-dictionary text: Flux surface averaged B^2
+- name description: Flux-surface average of the squared magnitude of the total equilibrium magnetic field, providing a geometric coefficient for equilibrium and neoclassical transport relations.
+- Square-then-average, in that order, which is what the DD writes and what makes the quantity distinct from the square of row 81.
+
+### 92. `flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude` — **correct**
+
+- cohort index: 92
+- source path: `equilibrium/time_slice/profiles_1d/gm6`
+- unit: `T^-2` (data dictionary: `T^-2`)
+- data-dictionary text: Flux surface averaged grad_rho^2/B^2
+- name description: Flux-surface average of the squared toroidal-flux-coordinate gradient magnitude divided by the squared local magnetic-field magnitude, a metric coefficient for equilibrium geometry.
+- Same construction as row 89 with the denominator changed, and spelled the same way; the unit follows from a dimensionless numerator over `T^2`.
+
+### 93. `flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude` — **correct**
+
+- cohort index: 93
+- source path: `equilibrium/time_slice/profiles_1d/gm7`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Flux surface averaged grad_rho
+- name description: Geometric metric coefficient formed by averaging the local magnitude of the toroidal-flux-coordinate gradient over each nested magnetic flux surface.
+- The unsquared counterpart of row 90, spelled by dropping exactly the `square_of` segment, and dimensionless for the same reason.
+
+### 94. `flux_surface_averaged_inverse_of_major_radius` — **correct**
+
+- cohort index: 94
+- source path: `equilibrium/time_slice/profiles_1d/gm9`
+- unit: `m^-1` (data dictionary: `m^-1`)
+- data-dictionary text: Flux surface averaged 1/R
+- name description: Flux-surface average of reciprocal major radius, providing a geometric equilibrium coefficient for toroidal geometry in flux-coordinate equations.
+- The unsquared counterpart of row 88, spelled by dropping `square_of`. Rows 88 to 94 with the two the other half judged (`gm4`, `gm8`) form one family in which the name is always reconstructible from the DD formula and never from the field spelling.
+
+### 95. `flux_surface_averaged_parallel_current_density` — **correct**
+
+- cohort index: 95
+- source path: `equilibrium/time_slice/profiles_1d/j_parallel`
+- unit: `A.m^-2` (data dictionary: `A.m^-2`)
+- data-dictionary text: Flux surface averaged parallel current density = average(j.B) / B0, where B0 = Equilibrium/Global/Toroidal_Field/B0
+- name description: Flux-surface-averaged parallel current density is the signed scalar defined on each magnetic flux surface as the flux-surface average of the plasma current-density vector dotted with the magnetic-field vector, divided by a single global reference field B0.
+- The name is what the DD text calls the quantity, word for word.
+- note: the DD's own definition, `<j·B>/B0`, is not literally the flux-surface average of the parallel current density — that would be `<j·B/|B|>`, and the two differ by the variation of `|B|` over the surface, which on a tokamak flux surface is of order the inverse aspect ratio. The name inherits an imprecision that originates in the data dictionary rather than in the composition, and the description is the part that gets it right, spelling out the dot product and the single global normalising field. Correct against its source; the imprecision is recorded so that a later decision to depart from the DD wording is a decision rather than an accident.
+
+### 96. `flux_surface_averaged_toroidal_current_density` — **correct**
+
+- cohort index: 96
+- source path: `equilibrium/time_slice/profiles_1d/j_phi`
+- unit: `A.m^-2` (data dictionary: `A.m^-2`)
+- data-dictionary text: Flux surface averaged toroidal current density = average(j_tor/R) / average(1/R)
+- name description: Geometry-weighted flux-surface average of the net conventional toroidal current density driving the equilibrium poloidal magnetic-flux distribution.
+- The description carries the one thing the name cannot: that the average is `1/R`-weighted rather than plain. That is the right division of labour — the name states the quantity, the description states the convention.
+
+### 97. `toroidal_magnetic_flux` — **correct**
+
+- cohort index: 97
+- source path: `equilibrium/time_slice/profiles_1d/phi`
+- unit: `Wb` (data dictionary: `Wb`)
+- data-dictionary text: Toroidal flux
+- name description: Toroidal magnetic flux is the signed surface integral of the magnetic field over the poloidal cross-section enclosed by a nested magnetic flux surface.
+- The name expands the DD's bare "Toroidal flux" to say which field is being fluxed, which is the ambiguity worth removing in a catalog that also carries particle and heat fluxes.
+- note: this is a `profiles_1d` quantity — one value per flux surface — and the name carries no surface segment, while its poloidal counterpart in the same container is spelled `poloidal_magnetic_flux_at_flux_surface` (row 99). The two are the same kind of object named with and without their locus. Neither name is wrong, and the toroidal flux is arguably intrinsic to the surface that encloses it, but a reader meeting `toroidal_magnetic_flux` beside `poloidal_magnetic_flux_at_flux_surface` will reasonably infer a distinction that is not there. Recorded as a cohort-consistency follow-on.
+
+### 98. `total_plasma_pressure` — **correct**
+
+- cohort index: 98
+- source path: `equilibrium/time_slice/profiles_1d/pressure`
+- unit: `Pa` (data dictionary: `Pa`)
+- data-dictionary text: Pressure
+- name description: Total plasma pressure is the isotropic kinetic pressure summed over all represented plasma particle species and populations for equilibrium force balance.
+- The DD leaf text is the bare word `Pressure` and the container text was not captured, so the reading rests on the locus: the pressure profile of an equilibrium time slice is the one that enters force balance, and force balance is satisfied by the total kinetic pressure, not by any single species. The name's `total_` is therefore supported by where it is bound, and the description says exactly which sum is meant.
+- `total_` is used here in the same sense the cohort fixed in `total_electron_density` — summed over populations rather than restricted to the thermal one — which is the sense row 69's proposed spelling also reuses.
+
+### 99. `poloidal_magnetic_flux_at_flux_surface` — **correct**
+
+- cohort index: 99
+- source path: `equilibrium/time_slice/profiles_1d/psi`
+- unit: `Wb` (data dictionary: `Wb`)
+- data-dictionary text: Poloidal flux
+- name description: Signed poloidal magnetic flux assigned to a nested magnetic surface, serving as the equilibrium label for its position in the plasma.
+- The surface is named, which distinguishes this profile from the two scalars at rows 74 and 75 that take the same quantity at the axis and the boundary. The three together are spelled consistently on one pattern.
+- collision outside this range: also bound to `core_profiles/profiles_1d/grid/psi`, the same quantity used as a grid label; deferred to the whole-cohort sweep.
+
+### 100. `radial_coordinate_at_inboard_midplane` — **INCORRECT**
+
+- cohort index: 100
+- source path: `equilibrium/time_slice/profiles_1d/r_inboard`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Radial coordinate (major radius) on the inboard side of the magnetic axis
+- name description: Major-radius coordinate of a magnetic flux surface at its inboard midplane intersection, locating the high-field-side point relative to the toroidal symmetry axis.
+- **rejected spelling** `radial_coordinate_at_inboard_midplane` → **proposed spelling** `radial_coordinate_of_flux_surface_at_inboard_midplane`
+- why: the name never says what it is the inboard midplane radius **of**. Read without the path it is a machine geometry constant — the inner wall, the inner limiter, the vessel — and there are several such radii a tokamak catalog will eventually need to carry. What it actually is is a per-surface profile: the high-field-side intersection of each nested flux surface, one value per surface. The object is in the description and nowhere in the name, which is the self-descriptiveness test failing in the same way the other half's `faraday_angle` and `voltage_of_mass_spectrometer_channel` failed it.
+- the block itself shows the omission is an outlier rather than a convention: every other `profiles_1d` row here names its object — `elongation_of_flux_surface`, `poloidal_plane_cross_sectional_area_of_flux_surface`, `poloidal_magnetic_flux_at_flux_surface`, and the seven `flux_surface_averaged_*` metric coefficients. The proposed spelling is built from segments the cohort already uses, `..._of_flux_surface` and `..._at_<locus>`, and mints nothing new.
+- note, separately from the verdict: the DD text says "on the inboard side of the **magnetic axis**", so the midplane meant is the horizontal plane through the magnetic axis, not the machine equatorial plane. Those differ by the vertical position of the axis, which is a controlled and time-varying quantity carried at row 73. The description says only "midplane" and should say which one.
+
+### 101. `radial_coordinate_at_outboard_midplane` — **INCORRECT**
+
+- cohort index: 101
+- source path: `equilibrium/time_slice/profiles_1d/r_outboard`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Radial coordinate (major radius) on the outboard side of the magnetic axis
+- name description: Major-radius coordinate of the low-field-side intersection between a magnetic flux surface and the equatorial midplane.
+- **rejected spelling** `radial_coordinate_at_outboard_midplane` → **proposed spelling** `radial_coordinate_of_flux_surface_at_outboard_midplane`
+- why: the low-field-side counterpart of row 100 and defective in exactly the same way — the object whose midplane radius this is appears only in the description. The pair must be repaired together; repairing one would leave the inboard and outboard radii of one surface spelled on two different patterns, which is worse than the present state.
+- note: this row's description says "the equatorial midplane" where the DD text says the inboard/outboard side of the **magnetic axis**. Its inboard partner says only "midplane". So the two descriptions disagree with each other about which plane is meant, and the one that is specific is specific in the direction the DD does not support. A description defect in both, resolved by stating the axis-height plane in each.
+
+### 102. `toroidal_flux_coordinate` — **correct**
+
+- cohort index: 102
+- source path: `equilibrium/time_slice/profiles_1d/rho_tor`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Toroidal flux coordinate. The toroidal field used in its definition is indicated under vacuum_toroidal_field/b0
+- name description: Non-negative, radius-like label of a nested magnetic flux surface, derived from enclosed toroidal magnetic flux using a positive reference vacuum toroidal field.
+- The name is the DD's own phrase, and the unit `m` distinguishes it from the normalized form the other half accepted as `normalized_toroidal_flux_coordinate` at `rho_tor_norm`. Both spellings are the ones rows 84, 86, 89, 90, 92 and 93 refer to, so the coordinate is named once and used consistently.
+- collision outside this range: also bound to `core_profiles/profiles_1d/grid/rho_tor`, the same coordinate used as a grid label; deferred to the whole-cohort sweep.
+
+## Result
+
+| | count |
+| --- | --- |
+| rows judged (cohort indices 52–102, inclusive) | **51** |
+| judged **correct** | 43 |
+| judged **incorrect**, with a proposed spelling | **8** |
+| correct + incorrect | **51** |
+| incorrect as a percentage of rows judged | **15.7 %** |
+| notes on **correct** rows, counted separately | 6 |
+
+**8 of 51 — 15.7 % of this block — are not publishable as spelled.** Grouped
+into the five classes the first half of the cohort established, because the
+classes have different remedies:
+
+- **The name asserts more than the data supports** (0): none in this block.
+- **The name is bound to the wrong object** (2): `radial_coordinate_of_magnetic_axis`
+  on an indexed node of the flux map's contour tree (row 64);
+  `volume_of_flux_surface` on the global scalar the data dictionary calls the
+  total plasma volume (row 79). Both identities are *correct elsewhere*, so the
+  remedy is to detach the locus, not to rename.
+- **One name, two physically different quantities** (0): none in this block —
+  see the note below, because this is the class that nearly had members.
+- **Not self-descriptive** (5): `faraday_angle` (row 60), `mhd_energy` (row 69),
+  `minimum_safety_factor` (row 78), `radial_coordinate_at_inboard_midplane` and
+  `radial_coordinate_at_outboard_midplane` (rows 100–101).
+- **Minority spelling of a base the cohort already fixes** (1):
+  `line_integrated_electron_number_density` (row 63).
+
+Two of the five classes are empty here, and that is a property of the block
+rather than of the judging. Indices 52–102 are one contiguous region of one IDS
+— equilibrium boundary, constraints, global quantities and 1-D profiles — where
+almost every quantity arrives with an explicit formula in its data-dictionary
+text. The over-claim failure the other half found (`surface_temperature` for an
+apparent temperature, coupled power named as launched) needs a source whose text
+qualifies the measurement, and this block has few.
+
+**The empty two-quantity class was the one at risk.** Rows 58–63 bind single
+identities across `measured` and `reconstructed` loci, which is the exact shape
+of the split-required defect. They are judged correct because the difference is
+provenance rather than physics, and that is not an opinion of this audit: the
+repository encodes it in `provenance_verb_check`
+(`imas_codex/standard_names/audits.py:1215`), whose docstring states that
+standard names describe the physical quantity and not how it was obtained. The
+guard was made to refuse rather than assumed to work — `reconstructed_poloidal_magnetic_field`
+against a source path lacking the word returns
+`audit:provenance_verb_check: name contains 'reconstructed' but source path
+does not`, while the unqualified `poloidal_magnetic_field` returns clean at the
+same path. The guard also permits the verb when the path carries it, so the
+shared identity is permitted rather than compelled; that choice belongs to the
+collision sweep.
+
+### The six notes on correct rows
+
+Counted separately because none of them makes a name unpublishable:
+
+- **Description defects** (2): row 71, whose description identifies which
+  internal-inductance definition is meant only by echoing the data-dictionary
+  field spelling; row 90, whose description says the gradient is of the
+  *normalized* toroidal-flux radius in one sentence and of `rho_tor` in the
+  next, with the recorded unit `1` showing the first sentence is the wrong one.
+- **Cohort-consistency follow-ons** (2): row 82, the flux-surface minimum of
+  the field modulus, states the domain it extremises over while the maximum at
+  the same container — accepted in the other half — does not; row 97, the
+  toroidal flux, carries no surface segment while its poloidal counterpart in
+  the same container is spelled `..._at_flux_surface`.
+- **An imprecision inherited from the source** (1): row 95's name repeats the
+  data dictionary's own wording, under which `<j·B>/B0` is called the
+  flux-surface-averaged parallel current density though it is not literally
+  that average. Recorded so that departing from the DD wording later is a
+  decision rather than an accident.
+- **A duplicate producer binding** (1): row 68 is byte-identical to row 67 in
+  every field but `index`. It is the only duplicated `(name, path)` pair in the
+  255-row remainder, so the 341 accepted bindings comprise 340 distinct ones.
+  Invisible to a catalog reader; a graph-hygiene repair.
+
+Two further description defects sit on rows already judged incorrect and so are
+not counted again: rows 100 and 101 disagree with each other about which
+midplane is meant, and the specific one of the two — "the equatorial midplane"
+— is specific in the direction the data-dictionary text does not support, since
+that text says the inboard and outboard sides of the **magnetic axis**.
+
+### How this block relates to the rest of the cohort
+
+| | judged | incorrect | rate |
+| --- | --- | --- | --- |
+| every-fourth sample, `west-name-audit.md` | 86 | 10 | 11.6 % |
+| this block, cohort indices 52–102 | 51 | 8 | 15.7 % |
+| **both, summed** | **137** | **18** | **13.1 %** |
+
+The two halves are disjoint by construction — the remainder file contains
+exactly the 255 bindings the every-fourth sample did not judge — so the rows sum
+rather than needing to be reconciled. **The rates do not sum in the same sense.**
+The 11.6 % comes from a deterministic sample spread over 20 IDSs and is an
+estimate of the whole cohort; the 15.7 % here comes from one contiguous region
+of one IDS, so it estimates equilibrium geometry naming and nothing wider. The
+two figures are close enough that neither contradicts the other, and the
+combined 13.1 % over 137 of 341 bindings is the honest summary, but a
+cohort-wide rate should be taken from the sample rather than from this block.
+
+### What is deferred, and to whom
+
+**Twenty-three of the 51 rows** carry an identity that is also bound to at least
+one source path outside indices 52–102: rows 52, 57, 58, 59, 60, 61, 62, 63, 64,
+66, 67, 68, 69, 71, 72, 73, 74, 75, 76, 79, 80, 99 and 102, counted from the
+cohort file's own collision map. The sections above name the partner paths in
+place for the rows where the partner bears on the verdict. Every one is recorded
+and none is adjudicated here: the collisions belong to the node that owns the
+whole-cohort sweep, which is the only vantage from which a shared identity can
+be judged across all of its loci at once. Rows 64 and 79 are the two where the
+collision and the verdict interact — in both, the identity is sound and one of
+its bindings is not — so the sweep needs those verdicts before it can decide the
+detachment.
+
+All 51 rows carry a verdict, the counts above close, and the `provisional` line
+at the head of this file has been rewritten to `false`.
+
+### One thing this file would be better for and does not have
+
+A poloidal-cross-section figure would carry rows 64, 100 and 101 better than the
+prose does: nested flux surfaces with the magnetic axis and the contour tree's
+other critical points marked, and the inboard and outboard intersections drawn
+on the magnetic-axis plane beside the machine equatorial plane they are not. All
+three findings are about *where* something sits, which is the case a figure is
+for. It is not here because this node's write scope is the three files it was
+fenced to, and a figures directory for this plan is not one of them; writing one
+would also race the peer node judging the first half of the same cohort.
+Recorded as a follow-on rather than taken.
