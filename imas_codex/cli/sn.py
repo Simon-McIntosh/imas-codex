@@ -5948,6 +5948,47 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
         console.print(f"Compacted {len(safe)} unapproved candidates.")
 
 
+def _refuse_grouped_review_scoping(
+    *,
+    ids: str | None,
+    domain: str | None,
+    unreviewed: bool,
+    force: bool,
+) -> None:
+    """Reject scoping options that ``--target groups`` cannot honour.
+
+    Grouped review reports every drifting sibling family, so ``--ids``,
+    ``--physics-domain``, ``--stage``, ``--unreviewed`` and ``--force``
+    have no per-family meaning. Accepting one would produce a run whose
+    output looks scoped and is not, so each supplied option is named and
+    the invocation is refused.
+
+    ``--stage`` carries a default, so a value comparison cannot tell a
+    supplied ``--stage drafted`` from the default: the parameter source
+    is what distinguishes them.
+    """
+    supplied = []
+    if ids is not None:
+        supplied.append("--ids")
+    if domain is not None:
+        supplied.append("--physics-domain")
+
+    ctx = click.get_current_context(silent=True)
+    stage_source = ctx.get_parameter_source("stage_filter") if ctx is not None else None
+    if stage_source is not None and stage_source != click.core.ParameterSource.DEFAULT:
+        supplied.append("--stage")
+    if unreviewed:
+        supplied.append("--unreviewed")
+    if force:
+        supplied.append("--force")
+
+    if supplied:
+        raise click.UsageError(
+            "--target groups reports every sibling family and does not "
+            f"support scoping options: {', '.join(supplied)}"
+        )
+
+
 def _report_drifting_families(families: list[dict[str, Any]]) -> None:
     """Render the grouped-review worklist, one line per drifting family.
 
@@ -6152,6 +6193,18 @@ def sn_review(
         # Grouped review reads sibling families through harmonize's
         # read-only surface and emits them as a worklist. Nothing here
         # writes: the four harmonization apply helpers are never imported.
+        #
+        # The scoping options select individual identities, and grouped
+        # review has no per-family equivalent for any of them, so a
+        # supplied one would be accepted and silently discarded while the
+        # run reported every family. Refuse the whole invocation instead.
+        _refuse_grouped_review_scoping(
+            ids=ids,
+            domain=domain,
+            unreviewed=unreviewed,
+            force=force,
+        )
+
         from imas_codex.standard_names.harmonize import build_worklist
 
         _report_drifting_families(build_worklist())
