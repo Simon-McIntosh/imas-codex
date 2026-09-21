@@ -594,6 +594,27 @@
       inert only because this target never stamps; observing that compatibility
       needs the real graph, which belongs to the merged-result test node.
     </p>
+    <p>
+      <strong>Landed: the target refuses scoping it cannot honour.</strong> Grouped
+      review reports every sibling family, so the five scoping options &mdash;
+      <code>--ids</code>, <code>--physics-domain</code>, <code>--stage</code>,
+      <code>--unreviewed</code>, <code>--force</code> &mdash; have no per-family
+      meaning, and each was accepted and discarded, leaving a run whose output looked
+      scoped and was not. A guard on the <code>groups</code> branch now collects every
+      supplied option and raises a usage error naming all of them, before the worklist
+      is built; the branch is otherwise unchanged, so it still reaches no model and
+      still writes nothing. Because <code>--stage</code> carries a default, the guard
+      reads the click parameter source rather than the value: an explicitly supplied
+      <code>--stage drafted</code> is refused while the unsupplied default is not.
+      <strong>Evidence.</strong>
+      <code>tests/standard_names/test_grouped_review_target.py</code> gains a case per
+      option, a case naming two options in one invocation, and a case asserting the
+      bare command still renders; measured together, <strong>11 passed</strong>. The
+      negative control removes the guard call and turns 8 of the 11 red. Full record
+      and figure:
+      <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#grouped-scoping-refusal">the
+      grouped-scoping anchor</a> in the cumulative landing record.
+    </p>
 
     <h2 id="s4">§4 — Concurrency, cost, and the dry run</h2>
 

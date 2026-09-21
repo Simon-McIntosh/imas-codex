@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="440" viewBox="0 0 980 440" font-family="Helvetica,Arial,sans-serif">
+  <rect width="980" height="440" fill="#ffffff"/>
+  <text x="24" y="34" font-size="18" font-weight="bold" fill="#111">The grouped target refuses scoping it cannot honour</text>
+  <text x="24" y="56" font-size="12.5" fill="#555">Grouped review reports every sibling family. Before: five scoping options were accepted and discarded. After: each is named and the invocation is refused.</text>
+
+  <defs>
+    <marker id="a-ok" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+      <path d="M0,0 L7,3.2 L0,6 z" fill="#2e7d32"/>
+    </marker>
+    <marker id="a-bad" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+      <path d="M0,0 L7,3.2 L0,6 z" fill="#c62828"/>
+    </marker>
+  </defs>
+
+  <!-- BEFORE panel -->
+  <rect x="24" y="80" width="450" height="330" rx="6" fill="#fdf6f6" stroke="#c62828"/>
+  <text x="40" y="106" font-size="14" font-weight="bold" fill="#b71c1c">Before — accepted and ignored</text>
+
+  <rect x="40" y="122" width="418" height="28" rx="4" fill="#ffffff" stroke="#999"/>
+  <text x="52" y="141" font-size="12" fill="#333">sn review --target groups --ids equilibrium</text>
+
+  <g stroke="#c62828" stroke-width="1.6" fill="none" marker-end="url(#a-bad)">
+    <path d="M249 150 V178"/>
+  </g>
+  <text x="258" y="170" font-size="11.5" fill="#c62828">no check</text>
+
+  <rect x="40" y="180" width="418" height="28" rx="4" fill="#ffffff" stroke="#999"/>
+  <text x="52" y="199" font-size="12" fill="#333">groups branch ignores ids / domain / stage / flags</text>
+
+  <g stroke="#c62828" stroke-width="1.6" fill="none" marker-end="url(#a-bad)">
+    <path d="M249 208 V236"/>
+  </g>
+
+  <rect x="40" y="238" width="418" height="52" rx="4" fill="#ffffff" stroke="#c62828" stroke-width="1.6"/>
+  <text x="52" y="258" font-size="12" font-weight="bold" fill="#333">exit 0 — every family reported</text>
+  <text x="52" y="278" font-size="11.5" fill="#c62828">output looks scoped; the scope was discarded</text>
+
+  <text x="40" y="318" font-size="11.5" fill="#555">Reproduced on the base revision, five options, exit code:</text>
+  <g font-size="12">
+    <text x="40" y="342" fill="#333">--ids ………………… 0</text>
+    <text x="230" y="342" fill="#333">--physics-domain …… 2 *</text>
+    <text x="40" y="364" fill="#333">--stage ……………… 0</text>
+    <text x="230" y="364" fill="#333">--unreviewed ………… 0</text>
+    <text x="40" y="386" fill="#333">--force ……………… 0</text>
+    <text x="230" y="386" fill="#333">bare ………………… 0</text>
+  </g>
+  <text x="40" y="406" font-size="10.5" fill="#777">* that 2 is click's choice rejection of an unknown domain, not this target's</text>
+
+  <!-- AFTER panel -->
+  <rect x="506" y="80" width="450" height="330" rx="6" fill="#f4faf4" stroke="#2e7d32"/>
+  <text x="522" y="106" font-size="14" font-weight="bold" fill="#1b5e20">After — named and refused</text>
+
+  <rect x="522" y="122" width="418" height="28" rx="4" fill="#ffffff" stroke="#999"/>
+  <text x="534" y="141" font-size="12" fill="#333">sn review --target groups --ids equilibrium</text>
+
+  <g stroke="#2e7d32" stroke-width="1.6" fill="none" marker-end="url(#a-ok)">
+    <path d="M731 150 V178"/>
+  </g>
+  <text x="740" y="170" font-size="11.5" fill="#2e7d32">parameter source</text>
+
+  <rect x="522" y="180" width="418" height="28" rx="4" fill="#ffffff" stroke="#2e7d32"/>
+  <text x="534" y="199" font-size="12" fill="#333">guard collects every supplied scoping option</text>
+
+  <g stroke="#c62828" stroke-width="1.6" fill="none" marker-end="url(#a-bad)">
+    <path d="M731 208 V236"/>
+  </g>
+
+  <rect x="522" y="238" width="418" height="52" rx="4" fill="#ffffff" stroke="#c62828" stroke-width="1.6"/>
+  <text x="534" y="258" font-size="12" font-weight="bold" fill="#333">exit 2 — UsageError names --ids</text>
+  <text x="534" y="278" font-size="11.5" fill="#c62828">… does not support scoping options: --ids</text>
+
+  <text x="522" y="318" font-size="11.5" fill="#555">Same five options, plus the two-supplied case:</text>
+  <g font-size="12">
+    <text x="522" y="342" fill="#333">--ids ………………… 2</text>
+    <text x="712" y="342" fill="#333">--physics-domain …… 2</text>
+    <text x="522" y="364" fill="#333">--stage accepted …… 2</text>
+    <text x="712" y="364" fill="#333">--stage drafted ……… 2</text>
+    <text x="522" y="386" fill="#333">--unreviewed ………… 2</text>
+    <text x="712" y="386" fill="#333">--force ……………… 2</text>
+  </g>
+  <text x="522" y="406" font-size="10.5" fill="#777">bare groups still exits 0: the refusal is not a ban on the target</text>
+
+  <!-- the --stage note -->
+  <rect x="24" y="418" width="932" height="16" fill="none"/>
+  <text x="24" y="432" font-size="11" fill="#555">--stage carries a default, so the guard reads the parameter source: an explicitly supplied "--stage drafted" is refused while the unsupplied default is not.</text>
+</svg>

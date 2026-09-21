@@ -975,6 +975,89 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     <code>04b0794b4</code>; the figure under
     <code>docs/figures/sn-catalog-audit-instrument/</code>.</p>
   </section>
+
+  <section id="grouped-scoping-refusal">
+    <h2>The grouped target refused nothing, so a scoped invocation reported every family</h2>
+
+    <p><strong>The defect reproduced first, on the base revision.</strong> Five scoping
+    options select individual identities and grouped review has no per-family equivalent
+    for any of them, so each was accepted and discarded while the run reported the whole
+    catalog. Driven through <code>CliRunner</code> against a stand-in that serves only the
+    family query, <code>--ids equilibrium</code>, <code>--stage accepted</code>,
+    <code>--unreviewed</code> and <code>--force</code> each exited <strong>0</strong> and
+    rendered the worklist; the bare command also exited 0. A sixth reading needs care:
+    <code>--physics-domain magnetics</code> exits 2, but that is click's choice rejection
+    of an unknown domain, not this target's refusal — with a valid domain the option was
+    discarded like the others. The output looked scoped and was not, which is the
+    silent-discard shape this plan exists to catch.</p>
+
+    <p><strong>Repair.</strong> <code>_refuse_grouped_review_scoping</code> runs on the
+    <code>groups</code> branch before the worklist is built. It collects every supplied
+    option and raises <code>click.UsageError</code> naming all of them, so an invocation
+    carrying two is refused once and names both rather than stopping at the first. The
+    branch is otherwise unchanged: the refusal sits beside the read-only import, so the
+    target still reaches no model and still writes nothing.</p>
+
+    <p><strong>The one option a value comparison cannot see.</strong>
+    <code>--stage</code> declares <code>default="drafted"</code>, so
+    <code>--stage drafted</code> is a supplied option whose value equals the default. The
+    guard reads the click parameter source rather than the value, which is the only
+    reading that distinguishes the two: measured, <code>--stage accepted</code> and
+    <code>--stage drafted</code> both exit <strong>2</strong> when supplied, while the
+    unsupplied default leaves the bare run at exit <strong>0</strong>.</p>
+
+    <p><strong>Evidence.</strong>
+    <code>tests/standard_names/test_grouped_review_target.py</code> gains three cases
+    alongside the two that already cover the read-only ban: one parametrized over each of
+    the five options (including the supplied-default <code>--stage</code>), asserting exit
+    code 2, the option named in the output, and no rendered worklist; one over two
+    invocations carrying two options each, asserting both are named; and one asserting the
+    bare command still exits 0 and still renders. Measured together,
+    <strong>11 passed</strong>.</p>
+
+    <table>
+      <caption>Exit code by supplied option, base revision against the repair</caption>
+      <thead><tr><th>Invocation</th><th>Base</th><th>Repair</th><th>Refusal names it</th></tr></thead>
+      <tbody>
+        <tr><td><code>--target groups --ids equilibrium</code></td><td>0</td><td>2</td><td>yes</td></tr>
+        <tr><td><code>--target groups --physics-domain equilibrium</code></td><td>0</td><td>2</td><td>yes</td></tr>
+        <tr><td><code>--target groups --stage accepted</code></td><td>0</td><td>2</td><td>yes</td></tr>
+        <tr><td><code>--target groups --stage drafted</code> (value = default)</td><td>0</td><td>2</td><td>yes</td></tr>
+        <tr><td><code>--target groups --unreviewed</code></td><td>0</td><td>2</td><td>yes</td></tr>
+        <tr><td><code>--target groups --force</code></td><td>0</td><td>2</td><td>yes</td></tr>
+        <tr><td><code>--target groups</code> (bare)</td><td>0</td><td>0</td><td>n/a</td></tr>
+      </tbody>
+      <figcaption>Measured through <code>CliRunner</code> against the same family-graph
+      stand-in for both columns. The base column is the reproduction; the repair column is
+      the gate's claim.</figcaption>
+    </table>
+
+    <p><strong>Negative control.</strong> Declared mutation: remove the call to
+    <code>_refuse_grouped_review_scoping</code> from the groups branch of
+    <code>sn_review</code>, leaving the target accepting and ignoring supplied scoping
+    options. Measured, <strong>8 failed, 3 passed</strong>, exit 1 — the eight are the
+    refusal cases and the bare-run case still passes, which is what shows the red log is
+    caused by the missing guard rather than by a broken command.</p>
+
+    <figure>
+      <img src="/imas-codex/figures/sn-catalog-audit-instrument/grouped-scoping-refusal.svg"
+           alt="Two panels. Before: a scoped groups invocation reaches the branch with no check and exits 0 reporting every family. After: the guard reads the parameter source, collects the supplied scoping options and exits 2 with a usage error naming them, while the bare invocation still exits 0.">
+      <figcaption>Where the refusal sits on the grouped branch, and the exit code each of
+      the five options produces on either side of it.</figcaption>
+    </figure>
+
+    <p><strong>What the measure does not establish.</strong> The stand-in serves one
+    family, so these cases show the refusal is reached before the worklist is built and
+    that the bare invocation renders — not that a live graph produces families to render.
+    That compatibility belongs to the merged-result test node, as it did for the target
+    itself.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-grouped-target-refuses-scoping-it-cannot-honour</code>
+    &middot; 2026-09-21 &middot; gate
+    <code>tests/standard_names/test_grouped_review_target.py</code>
+    &middot; base revision <code>6f9a29f9f7aab13f722f3783f003382fb7ce6b77</code>.</p>
+  </section>
   </main>
 </body>
 </html>
