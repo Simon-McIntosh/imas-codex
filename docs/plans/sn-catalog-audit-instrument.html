@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -202,6 +202,34 @@
       denominator: an instrument cannot be scored against rows whose correct
       answer is unsettled. They are adjudication input for
       <code>sn-west-catalog-release</code>, not calibration input here.
+    </p>
+
+    <p>
+      <strong>The calibration now sits on the far side of the compose repair, and
+      the record must say so.</strong> The comparator starvation landed as
+      <code>064476e26</code> at <code>2026-09-21T07:22:04Z</code>, verified here
+      as an ancestor of <code>main</code>: both compose sites now call one
+      extracted <code>_collect_nearby_name_comparators</code>, which gives every
+      item <code>max(1, cap // len(items))</code> comparators in a first pass
+      before a second spends what is left. The node's own reproduction of the old
+      behaviour is the figure to quote — <strong>6 of 25 batch items contributed a
+      comparator</strong> at cap 30. The fixture does not move, because it is a
+      set of already-accepted identities and a generation change cannot reach
+      them; but every calibration run must record which side of this commit it
+      sits on, since a recall figure taken before and after measures two different
+      pipelines.
+    </p>
+
+    <p>
+      <strong>One observation the repair invites rather than settles.</strong> The
+      cap stayed at 30. At a 25-item batch that makes the guaranteed share
+      <code>30 // 25 = 1</code> — so no item is starved, which was the defect, but
+      each is guaranteed exactly one comparator plus a share of the five left
+      over. Whether one comparator is enough to make a composer reuse an
+      established spelling is precisely the kind of question this instrument
+      exists to answer, and it should be answered by measuring the defect rate
+      rather than by choosing a number. The calibration run is the natural place
+      to settle it.
     </p>
 
     <h2 id="s3">§3 — What the instrument must gain</h2>
@@ -436,6 +464,27 @@
     record, every finding with its file and line and a concrete triggering scenario:
     <a href="/imas-codex/evidence/sn-catalog-audit-instrument/review-pipeline-capability-gaps">the
     capability-gap review</a>.</p>
+
+    <p>
+      <strong>A second failure mode has emerged that this rule does not cover, and
+      the instrument should be aimed at it too.</strong> An independent review gate
+      run against the repairs themselves has examined two changes and found
+      something real in both — and in both, the defect was the same class as the
+      one being fixed, one call site or one test away. What it keeps finding is
+      <em>not</em> a wrong implementation. It is a <strong>missing guard on a
+      correct one</strong>: a precedence rule that a docstring states and no test
+      pins, so swapping the two branches leaves the whole suite green; an invariant
+      that holds at twelve construction sites and not the thirteenth. That is
+      structurally different from a fail-open, and a green gate cannot see it —
+      the behaviour is right today, and nothing would notice it becoming wrong.
+      <strong>A calibration that only measures whether the instrument reproduces
+      known defects will not measure this at all, because these are not defects
+      yet.</strong> It is the same shape as the suite that pinned "an audit that
+      did not run equals a clean audit" as correct: the test encodes the absence of
+      a guard as the contract. The cheapest instrument for it is an extension of
+      the rule above — require a check to declare that it ran, and a test to
+      declare which behaviour it pins.
+    </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
