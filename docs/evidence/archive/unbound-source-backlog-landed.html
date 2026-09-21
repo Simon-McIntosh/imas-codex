@@ -890,6 +890,46 @@
     <code>all_debug</code>.</p>
   </section>
 
+  <section id="release-export-double-requires-verdict">
+    <h2>The release export double requires its gate verdict at every call site</h2>
+    <p><strong>The file-scope double no longer supplies a verdict.</strong>
+    <code>_stub_exporter</code> took only a record dict and returned
+    <code>all_gates_passed=True</code> itself, so a test appended to
+    <code>tests/standard_names/test_review_release.py</code> later inherited a passing
+    export verdict without ever stating one. The verdict is now a required parameter with
+    no default, and all 22 call sites in the file pass it explicitly
+    (<code>all_gates_passed=True</code> at each, matching the outcome those tests already
+    assert). A grep over the file for a default value of the parameter returns nothing.</p>
+    <table>
+      <caption>Proof one &mdash; the file's passed count before and after the edit</caption>
+      <thead><tr><th>Revision</th><th>Command</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>base <code>fe5012a136b11b7383a2617b6a3e7129c4ac62c8</code></td><td><code>pytest tests/standard_names/test_review_release.py</code></td><td>52 passed, 1 deselected, exit 0</td></tr>
+        <tr><td>edited tree <code>8ac1b1b2f</code></td><td>same</td><td>52 passed, 1 deselected, exit 0</td></tr>
+      </tbody>
+    </table>
+    <p>The count is unchanged, which is the point: this is scaffolding, so no test's
+    meaning moved. A changed count would have meant a verdict the tests did not previously
+    exercise had started exercising one.</p>
+    <p><strong>The negative control is a call site that does not state a verdict.</strong>
+    Dropping the argument from one site (<code>test_review_release_full_flow</code>, the
+    <code>base_exporter = _stub_exporter(record, ...)</code> line) fails with
+    <code>TypeError: _stub_exporter() missing 1 required positional argument: 'all_gates_passed'</code>
+    &mdash; the refusal is at the call, not inside a shared helper, so no future test can
+    reach the double without writing a verdict. The mutation was reverted and the file's
+    SHA-256 returned to its pre-mutation digest
+    (<code>f0ef84f02c681aeb104336b6b88c8232539b44f7c301cbe64e60a960df6713df</code>).</p>
+    <p>Red log: <code>negative_control.log</code> (first line repeats the declared mutation
+    verbatim). Focused logs and the red log are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T103345050873-n-the-release-export-double-states-its-verdict-at-each-site/</code>.</p>
+    <p>No figure accompanies this result: the evidence is a three-row proof (before/after
+    counts, one red type error, 22 updated call sites), which the table communicates
+    without turning tabular data into an image.</p>
+    <p class="r-meta">Worker: n-the-release-export-double-states-its-verdict-at-each-site &middot;
+    2026-09-21 &middot; commit <code>8ac1b1b2f</code> &middot; focused gate on the login
+    host class.</p>
+  </section>
+
 </main>
 
 </body>
