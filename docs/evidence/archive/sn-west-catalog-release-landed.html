@@ -1280,6 +1280,109 @@
     <strong>df8054217</strong>, <strong>2b1a5ba90</strong>,
     <strong>8aeb49a2d</strong>, <strong>a914b094a</strong>).</p>
   </section>
+  <section id="west-name-repair-worklist">
+    <h2>One worklist for the whole cohort &mdash; 61 repairs close 74 defective bindings</h2>
+    <p><strong>Question.</strong> The seven landed records of the WEST cohort judge 341 accepted
+    bindings and reject 74 of them, but a repair acts on an identity rather than on a binding and
+    several records reject the same identity. How many repairs actually close the cohort, and where
+    do the records disagree with each other? Aggregation and reconciliation only &mdash; no name is
+    judged afresh here, no defect is added that the seven records do not contain, and no graph query
+    was issued.</p>
+
+    <table>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Accepted bindings judged</td><td>341, over <strong>340</strong> distinct name-and-path pairs (one duplicated pair, a graph-hygiene repair)</td></tr>
+        <tr><td>Bindings carrying an INCORRECT verdict</td><td><strong>74</strong> &mdash; 10 from the every-fourth audit, 64 across the five range records</td></tr>
+        <tr><td>Distinct identities among them</td><td><strong>61</strong></td></tr>
+        <tr><td>Shared identities in the cohort</td><td>53, of which <strong>10 MUST-SPLIT covering 24 bindings</strong></td></tr>
+        <tr><td><strong>Deduplicated repairs</strong></td><td><strong>61 = 51 renames + 10 splits</strong></td></tr>
+        <tr><td>Repairs a reader cannot compensate for</td><td><strong>10</strong> &mdash; a split resolves to two different physical objects</td></tr>
+        <tr><td>New names the catalog gains</td><td>12, not 20: eight of the ten splits keep the existing spelling on at least one binding</td></tr>
+        <tr><td>Rows needing a spelling invented here</td><td><strong>0</strong> &mdash; every rejection carries an explicit proposal in its source record</td></tr>
+        <tr><td>Contradictions between records, surfaced not resolved</td><td><strong>6</strong>, affecting 8 bindings, plus 1 order-dependent repair pair</td></tr>
+        <tr><td>Measured defect rate</td><td><strong>74 of 341 = 21.7 %</strong>, a census, against the sample's 11.6 % estimate</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <svg viewBox="0 0 700 300" width="700" height="300" role="img"
+           aria-label="How seventy-four defective bindings collapse into sixty-one repairs, split into fifty-one renames and ten splits">
+        <text fill="#333" font-size="13" font-weight="bold" x="10" y="18">74 defective bindings &rarr; 61 repairs &rarr; 10 that block publication</text>
+
+        <rect fill="#fdf1f1" height="40" rx="6" stroke="#c46a6a" width="150" x="10" y="40"></rect>
+        <text fill="#8a3a3a" font-size="20" font-weight="bold" x="24" y="66">74</text>
+        <text fill="#8a3a3a" font-size="11" x="58" y="58">defective</text>
+        <text fill="#8a3a3a" font-size="11" x="58" y="72">bindings</text>
+
+        <line stroke="#888" x1="160" x2="205" y1="60" y2="60" marker-end="url(#ar)"></line>
+        <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#888"></path></marker></defs>
+
+        <rect fill="#fff4e5" height="56" rx="6" stroke="#d8a24a" width="240" x="210" y="32"></rect>
+        <text fill="#7a5a1e" font-size="11" x="222" y="50">&minus;13 second and third sightings of an</text>
+        <text fill="#7a5a1e" font-size="11" x="222" y="66">identity already defective elsewhere</text>
+        <text fill="#7a5a1e" font-size="11" x="222" y="82">(9 identities; 10 of them are splits)</text>
+
+        <line stroke="#888" x1="455" x2="500" y1="60" y2="60" marker-end="url(#ar)"></line>
+
+        <rect fill="#f4f7fb" height="40" rx="6" stroke="#6a8ec4" width="190" x="505" y="40"></rect>
+        <text fill="#2c4a78" font-size="20" font-weight="bold" x="519" y="66">61</text>
+        <text fill="#2c4a78" font-size="11" x="553" y="58">deduplicated</text>
+        <text fill="#2c4a78" font-size="11" x="553" y="72">repairs</text>
+
+        <line stroke="#888" x1="600" x2="600" y1="84" y2="112" marker-end="url(#ar)"></line>
+        <line stroke="#888" x1="600" x2="300" y1="98" y2="98"></line>
+        <line stroke="#888" x1="300" x2="300" y1="98" y2="112" marker-end="url(#ar)"></line>
+
+        <rect fill="#e8f5ec" height="70" rx="6" stroke="#5f9e74" width="280" x="160" y="116"></rect>
+        <text fill="#2f5d44" font-size="18" font-weight="bold" x="174" y="140">51 renames</text>
+        <text fill="#2f5d44" font-size="11" x="174" y="158">one identity each; mechanical once adopted.</text>
+        <text fill="#2f5d44" font-size="11" x="174" y="174">A reader could in principle compensate.</text>
+
+        <rect fill="#fdf1f1" height="70" rx="6" stroke="#c46a6a" width="280" x="460" y="116"></rect>
+        <text fill="#8a3a3a" font-size="18" font-weight="bold" x="474" y="140">10 splits</text>
+        <text fill="#8a3a3a" font-size="11" x="474" y="158">24 bindings; the name resolves to two</text>
+        <text fill="#8a3a3a" font-size="11" x="474" y="174">different objects. A reader cannot.</text>
+
+        <line stroke="#ccc" x1="10" x2="690" y1="202" y2="202"></line>
+        <text fill="#333" font-size="12" x="10" y="222">Why the sample's 11.6 % missed half of it</text>
+        <rect fill="#f4f7fb" height="62" rx="6" stroke="#6a8ec4" width="680" x="10" y="230"></rect>
+        <text fill="#456" font-size="11" x="24" y="250">A one-in-four draw takes at most ONE binding of any multi-binding defect &mdash; and one binding of a split</text>
+        <text fill="#456" font-size="11" x="24" y="268">group is exactly what looks correct in isolation. The splits are defects that exist only BETWEEN bindings,</text>
+        <text fill="#456" font-size="11" x="24" y="286">so the per-row reading could not see them. Census 21.7 %; the sample saw what one row at a time can show.</text>
+      </svg>
+      <figcaption>The collapse is a flow rather than a tally, which is why it is drawn: the same 74
+      bindings are counted three ways and only the last of them sizes the work. The every-fourth
+      audit's own closing section is the evidence for the right-hand panel &mdash; it reported three
+      such collisions as findings it &ldquo;points at but does not contain&rdquo;, and all three are
+      in the split list. Inline because <code>docs/figures/</code> lies outside this write fence.</figcaption>
+    </figure>
+
+    <p><strong>Six contradictions, surfaced rather than resolved.</strong> Eight identities are
+    rejected in one record and accepted in another; six of the eight are the split groups, where the
+    identity is genuinely right on one binding and wrong on another, so the split row is the
+    resolution. The other two are open, and neither is a split group, so both records are judging the
+    same physical quantity: <code>volume_of_flux_surface</code> &mdash; rejected on
+    <code>equilibrium/time_slice/global_quantities/volume</code> for
+    <code>volume_of_plasma_boundary</code> while the every-fourth audit accepts it twice and the
+    shared-identities record judges it ONE-QUANTITY, three instruments and two answers on a family
+    the sprint had recorded as settled &mdash; and <code>toroidal_vacuum_magnetic_field</code>.
+    Three further conflicts sit on the <code>toroidal_angle_</code> versus
+    <code>toroidal_coordinate_</code> axis, one of them on a binding a split table says to
+    <em>keep</em>, and the same pair is filed under two different defect classes by two records. The
+    sixth is physics rather than spelling: launched versus coupled power on the lower-hybrid summary
+    nodes, quantities the every-fourth audit's row 80 puts 10&ndash;30 % apart.</p>
+
+    <p><strong>What this does not establish.</strong> This node repaired nothing: no name was
+    renamed, no identity split, no graph touched. The six contradictions are listed and none is
+    adjudicated here &mdash; they affect 8 bindings and must be settled before those names are
+    published. The worklist is a reading of the seven records and inherits whatever they got wrong;
+    it adds no independent judgement of any name. Full per-repair record, with every source path,
+    source record and defect class: <a
+    href="/imas-codex/evidence/sn-west-catalog-release/west-name-repair-worklist">the WEST name
+    repair worklist</a>.</p>
+  </section>
 </main>
 </body>
 </html>
