@@ -2761,7 +2761,11 @@ def run_export(
             {
                 "type": "null_catalog_status",
                 "name": candidate_id,
-                "manifest_size": report.manifest_input_size,
+                **(
+                    {"manifest_size": report.manifest_input_size}
+                    if report.manifest_input_size is not None
+                    else {}
+                ),
                 "detail": "graph catalog status is null",
             }
             for candidate_id in missing_status_ids
