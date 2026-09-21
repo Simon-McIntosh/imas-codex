@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:06:48",
+  "updated": "2026-09-21T09:11:43",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -163995,6 +163995,220 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T065324209848-n-west-names-ordinal-convention-revision",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-names-ordinal-convention-revision",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1400,
+                "cached_input_tokens": 435429,
+                "input_tokens": 436831,
+                "output_tokens": 651,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 437482,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-west-catalog-release/west-name-repair-worklist-ordinal-revision.md exists and carries one row for every one of the 61 repairs in docs/evidence/sn-west-catalog-release/west-name-repair-worklist.md, each classified as STANDS, WITHDRAWN or RECLASSIFIED under a naming convention the worklist did not have, and its closing table reports the three counts summing to 61 plus the revised repair total and how many of those are splits. The convention, stated by the project lead: ordinal and index dimensions are NOT carried in standard names. Inner and outer, main and secondary, primary, first and second, upper and lower where they enumerate array members rather than name a physical distinction -- these are indices in the data structure, not name segments. Two consequences decide most rows. A split whose two halves differ only by such a qualifier is invalid, so the shared identity binding both members was the convention working rather than an ambiguity, and the row is WITHDRAWN. A rename that ADDS such a qualifier to a name is invalid for the same reason and is also WITHDRAWN. Read the worklist and all six records it aggregates, listed in its own first section, before classifying anything. The third class is the one that matters most and must not be collapsed into the first: where the generic spelling is correct and a SIBLING binding carries the ordinal, the defect is real but inverted -- the repair strips the ordinal from the sibling and binds it to the generic identity, which frequently already exists and is accepted, rather than adding the ordinal to the generic one. Such a row is RECLASSIFIED, and it must name the surviving generic identity and state whether that identity exists. Verify existence rather than assuming it: for every target spelling any RECLASSIFIED or STANDS row proposes, run one indexed lookup through GraphClient of the form MATCH (sn:StandardName {id: $name}) RETURN sn.id, sn.name_stage, and record present or absent with the stage. That is at most a few dozen single-row reads over a named list and is the only graph access this node takes; issue no scan, no traversal and no unbounded query. A proposed spelling that does not exist and would mint a new identity for no reason is itself a finding and must be reported. The fourth thing to look for is the defect that SURVIVES a withdrawal, and it is a different axis: where the ruling makes a shared identity correct, its DESCRIPTION may still name one ordinal member as though the identity meant only that one. Check every WITHDRAWN row's identity description for exactly this, quote the offending sentence, and state that the remedy is a description repair rather than a rename. One instance is already known and is the model for the class: vertical_coordinate_of_strike_point is bound to the inner leg, the outer leg and a constraint path while its description reads as the inner divertor strike point specifically, and its radial twin documents the correct convention verbatim -- the same definition covering both legs without selecting one by the name. Report how many of the 61 carry this shape. Do NOT edit the worklist or any of the six records it aggregates: a peer session has adopted the worklist as an independent test fixture for a review instrument it is building, and amending it would destroy that independence. This file is the revision, and it links to the worklist rather than replacing it. Do not judge any name afresh against the data dictionary and do not add a defect the records do not contain; this node applies one convention to existing verdicts and reports what the convention changes. Open the file with a `provisional: true` line and have the closing pass rewrite it to `provisional: false`; append rows as they are classified rather than composing the file at the end.",
+          "estimated_hours": 1.5,
+          "goal": "reclassify the 61 WEST name repairs under the convention that standard names carry no ordinal dimension",
+          "id": "n-west-names-ordinal-convention-revision",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T06:30:22.885Z",
+            "read_at": "2026-09-21T06:53:25Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 68.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065324209848-n-west-names-ordinal-convention-revision/manifest.md",
+          "negative_control": "",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/west-name-repair-worklist-ordinal-revision.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "claude-opus-d",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T06:53:31Z",
+        "completed_at": "2026-09-21T07:05:16.655Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 697,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 705,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5e94c6268b13594c0639ec02ecf5a1307fd85c90",
+        "commits": [
+          "fdbda5da09009037c7fe36965a6a0475d6149b84",
+          "2bd62b5140c8e59a4103e2cc29490faab7ad8624",
+          "37f40cc63296a696edce7e4153cc5426aff700b8"
+        ],
+        "changed_lines": {
+          "added": 435,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "count the classified rows from the record's own tables at the merged head and reconcile every figure against its result table",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/ordinal-revision-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the no-ordinal naming convention reclassifies all 61 WEST repairs: 58 STANDS, 2 WITHDRAWN, 1 RECLASSIFIED, revising the total to 59 = 51 renames plus 8 splits and dropping reader-uncompensable defects from 10 to 8. Both withdrawals are strike-point splits whose halves differed only by inner against outer; the reclassified row inverts rather than disappearing, stripping the ordinal from a sibling and binding it to a generic identity the catalog already publishes. Two findings came only from looking targets up rather than assuming them new: 8 of the 15 existing targets are name_stage superseded, so those renames move a binding onto a retired spelling rather than minting, which is an unresolved lifecycle question; and a second order-dependent pair exists where a split feeds a binding into an identity a rename is simultaneously emptying. One of the 61 carries the description defect that survives a withdrawal, and the record names a second instance outside the repair list, predicting that the docs axis now holds the damage because the convention makes shared identities normal",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065324209848-n-west-names-ordinal-convention-revision/manifest.md",
+        "scope_changed": false,
+        "session_id": "f3bba442-0353-48a2-92fc-0c378df4bc73",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 82.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 105878,
+            "cache_creation_input_tokens_cumulative": 277989,
+            "cache_read_input_tokens": 11625949,
+            "cache_read_input_tokens_cumulative": 18664008,
+            "inference_geo": "not_available",
+            "input_tokens": 40,
+            "input_tokens_cumulative": 146,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 52121,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 13.415648999999998,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 20.4693185
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T07:05:16.655Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 25702067,
+          "cumulative_input_tokens": 26152419,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 701.582,
+          "generated_tokens": 124641,
+          "generation_seconds": 644.788,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 29.1,
+          "machine_seconds": 56.794,
+          "peak_input_tokens": 291021,
+          "tokens_per_second": 193.31,
+          "wall_tokens_per_second": 177.66
+        },
+        "follow_on_paths": [
+          "/"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-west-names-ordinal-convention-revision",
+          "session_id": "f3bba442-0353-48a2-92fc-0c378df4bc73",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T07:05:16.655Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.984,
+        "impl_move": {
+          "plan": "sn-west-catalog-release",
+          "at_dispatch": 0.984,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 72.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -164307,6 +164521,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2413
+    "_version": 2414
   }
 }
