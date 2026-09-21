@@ -147,6 +147,7 @@ class RunSummary:
     stranded_count: int | None = None
     stranded_by_state: dict[str, int] = field(default_factory=dict)
     stranded_ids: list[str] = field(default_factory=list)
+    bypassed_maintenance_passes: list[str] = field(default_factory=list)
 
 
 # ── Status mapping ────────────────────────────────────────────────────
@@ -197,6 +198,7 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
         "stranded_count": summary.stranded_count,
         "stranded_by_state": summary.stranded_by_state,
         "stranded_ids": summary.stranded_ids,
+        "bypassed_maintenance_passes": summary.bypassed_maintenance_passes,
     }
 
 
@@ -1617,6 +1619,16 @@ async def run_sn_pools(
     ) -> Any:
         """Run one graph-wide maintenance function unless explicitly bypassed."""
         if skip_global_maintenance:
+            function_name = (
+                getattr(fn, "__name__", None)
+                or getattr(fn, "_mock_name", None)
+                or type(fn).__name__
+            )
+            logger.info(
+                "run_sn_pools: global maintenance bypassed — %s",
+                function_name,
+            )
+            summary.bypassed_maintenance_passes.append(function_name)
             return default
         return await asyncio.to_thread(fn, *args, **kwargs)
 
@@ -2819,6 +2831,13 @@ async def run_sn_pools(
                 logger.warning("run_sn_pools: family restamp timed out (non-fatal)")
             except Exception as _fam_exc:  # noqa: BLE001
                 logger.warning("run_sn_pools: family restamp failed: %s", _fam_exc)
+
+        if summary.bypassed_maintenance_passes:
+            logger.info(
+                "run_sn_pools: bypassed global maintenance summary — count=%d names=%s",
+                len(summary.bypassed_maintenance_passes),
+                ", ".join(summary.bypassed_maintenance_passes),
+            )
 
         # Drain pending LLMCost graph writes.  Bounded by DRAIN_TIMEOUT
         # so a wedged writer cannot block finalize_sn_run.
