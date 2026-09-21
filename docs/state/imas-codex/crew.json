@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T07:45:12",
+  "updated": "2026-09-21T07:45:48",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -160707,6 +160707,234 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T052657915868-n-west-names-spectrometer-visible-to-wall",
+        "plan": "sn-west-catalog-release",
+        "section": "release-contract",
+        "node": "n-west-names-spectrometer-visible-to-wall",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1761,
+                "cached_input_tokens": 171060,
+                "input_tokens": 172823,
+                "output_tokens": 429,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 173252,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "docs/evidence/sn-west-catalog-release/west-name-audit-spectrometer-visible-to-wall.md exists and carries one numbered verdict section for every one of the 51 accepted-name bindings whose `index` field lies in the inclusive range 205 to 255 of the `bindings` list in docs/evidence/sn-west-catalog-release/west-name-cohort-remainder.json, and its closing result table reports rows_judged = 51, correct + incorrect = 51, and the incorrect count as a percentage of 51. Every row is already drawn from the live graph, so issue no graph query and open no database: the row carries `name`, `path`, `sn_unit`, `sn_description`, `dd_unit`, `dd_doc` and `dd_doc_parent` (the parent container's text, populated where the leaf's own documentation is empty or the literal \"Value\"), which is the whole evidence base for the judgement. Judge each name on three questions: does the data-dictionary text of the path it is bound to describe the quantity the name claims; do `sn_unit` and `dd_unit` agree, and where they differ which side is defensible; and is the name self-descriptive to a reader who does not have the source path in hand. Each section states the row index, the name in backticks, the source path, both units, the data-dictionary text and the name's description, and ends in a verdict of **correct** or **INCORRECT**. Every INCORRECT row shows the rejected spelling beside a proposed one and states the semantic distinction in plain language; a defect that lies in the description rather than in the name is recorded as a note on a **correct** row, never as an INCORRECT verdict, and the table counts notes separately. Group the incorrect rows in the result table into the five classes the first half of this cohort established: the name asserts more than the data supports; the name is bound to the wrong object; one name covers two physically different quantities; not self-descriptive; minority spelling of a base the cohort already fixes. Read docs/evidence/sn-west-catalog-release/west-name-audit.md first: it judged the other 86 rows of this same cohort in exactly this shape, and matching it is what lets the two halves be summed rather than compared. Reuse the spellings it accepted instead of minting parallel ones, and do not relitigate the adjudications it records as settled -- the `*_of_flux_surface` family including `volume_of_flux_surface` and `area_of_flux_surface`, `back_surface_distance_of_antenna_strap`, and the etendue `_detector` spelling. Where a row's identity is also bound to source paths outside this index range, say so and defer the collision itself to the node that owns the whole-cohort collision sweep rather than judging it here. Open the file with a `provisional: true` line and have the closing pass rewrite it to `provisional: false`; append each verdict to the file as it is judged rather than composing the file at the end, so an interrupted turn leaves a partial record instead of none.",
+          "estimated_hours": 1.5,
+          "goal": "judge the physical correctness of the 51 accepted WEST name bindings at cohort indices 205 to 255",
+          "id": "n-west-names-spectrometer-visible-to-wall",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T05:20:25Z",
+            "read_at": "2026-09-21T05:26:58Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 25.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T052657915868-n-west-names-spectrometer-visible-to-wall/manifest.md",
+          "negative_control": "",
+          "plan": "sn-west-catalog-release",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "documentation",
+          "section": "release-contract",
+          "spec_level": "guided",
+          "time_budget": "60m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-west-catalog-release/west-name-audit-spectrometer-visible-to-wall.md",
+            "docs/evidence/archive/sn-west-catalog-release-landed.html",
+            "docs/plans/sn-west-catalog-release.html"
+          ]
+        },
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "claude-opus-g",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T05:27:03Z",
+        "completed_at": "2026-09-21T05:40:18.871Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 790,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 795,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "b90b88f2acc801d5adbfcbda41f28260fc2ada66",
+        "commits": [
+          "d90a9bc29dd4536ddea09a0ef1c23f4a50400379"
+        ],
+        "changed_lines": {
+          "added": 36,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "gate_check": {
+          "command": "count numbered verdict sections and each verdict class in the evidence file at the merged head and reconcile against its own result table",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/west-names-spectrometer-visible-to-wall-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "51 WEST bindings at cohort indices 205-255 judged: 37 correct, 14 INCORRECT, covering the summary and wall subtrees",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T052657915868-n-west-names-spectrometer-visible-to-wall/manifest.md",
+        "scope_changed": false,
+        "session_id": "92171968-70cb-443a-9f97-25b72f8a3d35",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 42.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 162622,
+            "cache_creation_input_tokens_cumulative": 162622,
+            "cache_read_input_tokens": 4493722,
+            "cache_read_input_tokens_cumulative": 4493722,
+            "inference_geo": "not_available",
+            "input_tokens": 72,
+            "input_tokens_cumulative": 72,
+            "output_tokens": 67019,
+            "output_tokens_cumulative": 67019,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 5.548915999999999,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 5.548915999999999
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T05:40:18.871Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 4493722,
+          "cumulative_input_tokens": 4656416,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 792.329,
+          "generated_tokens": 67019,
+          "generation_seconds": 766.603,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 17.6,
+          "machine_seconds": 25.726,
+          "peak_input_tokens": 175654,
+          "tokens_per_second": 87.42,
+          "wall_tokens_per_second": 84.58
+        },
+        "follow_on_paths": [
+          "docs/figures/",
+          "equilibrium/time_slice/contour_tree/node/r",
+          "summary/local/divertor_target/power_flux_peak"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "documentation",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-west-names-spectrometer-visible-to-wall",
+          "session_id": "92171968-70cb-443a-9f97-25b72f8a3d35",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T05:40:18.871Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.984,
+        "impl_move": {
+          "plan": "sn-west-catalog-release",
+          "at_dispatch": 0.984,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "role-not-enforced:documentation"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "commit_list_shortfall": {
+          "kind": "presented_commits_subset_of_manifest",
+          "presented": 1,
+          "declared": 7,
+          "missing": [
+            "a36a3aa011e0837f4a64b676a3e9cd49db32bfbd",
+            "a3d252c538dbb228c4e2d0bd0fff3f2ea1ee2dfc",
+            "b32f0ade9c9eed2761dfad86ce6947579f2f4431",
+            "bf9a025e70947f071493fd6ad0ed05c578ac431e",
+            "c3d8401b12d787b711a247205b5c687739c8bc2d",
+            "ec2d73ba7a6a8e9c4ba9a1bf48952618e9000f0e"
+          ],
+          "message": "run 'r-20260921T052657915868-n-west-names-spectrometer-visible-to-wall' has a passing gate presenting 1 commit(s) of the 7 its manifest declares; missing: a36a3aa011e0837f4a64b676a3e9cd49db32bfbd, a3d252c538dbb228c4e2d0bd0fff3f2ea1ee2dfc, b32f0ade9c9eed2761dfad86ce6947579f2f4431, bf9a025e70947f071493fd6ad0ed05c578ac431e, c3d8401b12d787b711a247205b5c687739c8bc2d, ec2d73ba7a6a8e9c4ba9a1bf48952618e9000f0e. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal \u2014 present the full list, or the boundary check may not cover the node's work"
+        },
+        "tool_steps": 35.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -161019,6 +161247,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2389
+    "_version": 2390
   }
 }
