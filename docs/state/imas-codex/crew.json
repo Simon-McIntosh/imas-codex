@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:42:48",
+  "updated": "2026-09-21T09:46:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -165440,6 +165440,234 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share",
+        "plan": "sn-lifecycle-integrity",
+        "section": "",
+        "node": "n-every-batch-item-gets-a-comparator-share",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1202,
+                "cached_input_tokens": 438942,
+                "input_tokens": 440146,
+                "output_tokens": 2226,
+                "reasoning_output_tokens": 360,
+                "total_tokens": 442372,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm the defect reproduces before repairing it, and quote the reproduction. At imas_codex/standard_names/workers.py:5609 inside compose_batch, and again at line 3732 inside compose_worker, the nearby-name comparator list is built by iterating the batch, asking the embedding search for five results per item, and appending into one batch-level list capped at 30 -- and the cap check breaks the OUTER loop. With a batch of twenty-five items the first five or six items fill the thirty slots and every later item contributes nothing, so most of the batch is composed against comparators drawn only from the first few items' neighbourhoods. These comparators feed the sn/generate_name_dd prompt whose job is to make the composer reuse the cohort's established spelling instead of inventing one, so the items that get none are the ones most likely to be spelled inconsistently. Reproduce it by building a batch of twenty-five items with distinct descriptions, counting how many of them contribute at least one comparator, and showing that the count is far below twenty-five. The repair is specified and must be applied at BOTH sites, which carry the same shape. Give every item a guaranteed share: compute a per-item allowance of at most the cap divided by the batch length but never less than one, iterate every item taking up to its allowance from its own results, and break only the INNER loop when the total reaches the cap. Then, if the total is still below the cap after that first pass, make a second pass over the items' remaining unused results filling the list until the cap is reached, so the budget is never left unspent. Keep the cap at thirty and keep the existing deduplication by result id: the prompt size bound is deliberate and must not grow, and the fix is how the budget is shared rather than how large it is. An item whose search returns nothing contributes nothing and that is correct. The done-when is that a new test under tests/standard_names/ builds a twenty-five item batch, asserts every item with at least one search result contributes at least one comparator, asserts the total never exceeds thirty, asserts the dedup still holds, and fails against the declared negative control -- and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. The base is red: expect about twenty failures and three errors that predate you, and report added failures against that id set. Several existing test files exercise nearby comparators and prompt contents, among them test_review_names_context.py, test_compose_prompt_examples_round_trip.py and test_review_name_only.py. If changing the allocation makes one of them fail because it asserts the old truncation behaviour, STOP and report it as a blocker naming the file and the assertion rather than editing a file outside your write paths, and rather than reverting the repair to keep it green. The negative-control log's first line must repeat the mutation you actually applied, in your own words, because that line is compared against the declaration. A guard that passes its own test by weakening itself is worse than no guard. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 1.5,
+          "goal": "share the nearby-comparator budget across every batch item instead of spending it on the first few",
+          "id": "n-every-batch-item-gets-a-comparator-share",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T06:55:08Z",
+            "read_at": "2026-09-21T06:55:09Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 7.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share/manifest.md",
+          "negative_control": "set the per-item allowance to the full five-result search width, recreating first-six budget exhaustion",
+          "plan": "sn-lifecycle-integrity",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/workers.py",
+            "tests/standard_names/test_comparator_budget_share.py",
+            "docs/evidence/archive/sn-lifecycle-integrity-landed.html",
+            "docs/plans/sn-lifecycle-integrity.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-comparatorbudget",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T06:55:22Z",
+        "completed_at": "2026-09-21T07:15:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1227,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1227,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9c93e6a0ee654618e0c11774cbe30ea3487b3c0a",
+        "commits": [
+          "b085479688713da47089eefd304b367adcb0607a",
+          "172be6de77086bfba6e5f1d93415d24218c32e69"
+        ],
+        "changed_lines": {
+          "added": 159,
+          "removed": 36,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/ at the merged head, compared id-by-id against the same command on pristine main",
+          "exit_status": 1,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/comparator-gate.log.delta",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "the nearby-comparator budget is shared across batch items instead of spent on the first few: measured before the repair, 6 of 25 items contributed at cap 30 because the cap check broke the outer loop. One extracted helper replaces the duplicated inline loop at both compose sites. The independent opus review scored 83 with durability 14 and found the fix incomplete at the size production runs: pyproject sets name-only-batch-size to 50, where 20 of 50 items still contribute nothing, and neither landed test can see it because both use 25 items. It also found the max(1,...) floor decorative, held by statement order rather than the expression, and 50 synchronous vector searches on the async compose path with no to_thread. All three are confirmed at HEAD and dispatched as one follow-on",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c2bf-793b-7702-a7a8-9f4bb02c30c5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15248128,
+            "cached_input_tokens_cumulative": 15248128,
+            "input_tokens": 15466371,
+            "input_tokens_cumulative": 15466371,
+            "output_tokens": 34544,
+            "output_tokens_cumulative": 34544,
+            "reasoning_output_tokens": 11665,
+            "reasoning_output_tokens_cumulative": 11665
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T07:15:49Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 9.0,
+              "resets_at": 1790575133,
+              "observed_at": "2026-09-21T07:15:49Z"
+            }
+          ],
+          "notional_cost_usd": 62.5564,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 14,
+            "evidence": 17,
+            "fit": 15,
+            "goal_fidelity": 17,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 83
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 15248128,
+          "cumulative_input_tokens": 30714499,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 46209
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-every-batch-item-gets-a-comparator-share",
+          "session_id": "01a0c2bf-793b-7702-a7a8-9f4bb02c30c5",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T07:15:49Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.985,
+        "impl_move": {
+          "plan": "sn-lifecycle-integrity",
+          "at_dispatch": 0.985,
+          "at_complete": 0.985,
+          "verdict": "waived",
+          "reason": "further nodes on this plan are still in flight and hold its HTML as a declared write path, so the coordinator advances impl once when the wave lands rather than writing the plan under live workers"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_comparator_budget_share.py"
+          ],
+          "declaration": "set the per-item allowance to the full five-result search width, recreating first-six budget exhaustion",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share/negative-control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T065506584768-n-every-batch-item-gets-a-comparator-share/negative-control.log"
+        },
+        "tool_steps": 83.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -165752,6 +165980,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2424
+    "_version": 2425
   }
 }
