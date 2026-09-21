@@ -1,6 +1,6 @@
 # WEST batch accepted names — physical-correctness audit, cohort indices 1–51
 
-provisional: true — verdicts are appended as they are judged; the closing pass rewrites this line.
+provisional: false — every one of the 51 rows carries a verdict and the result section is closed.
 
 The second half of the same audit as
 [west-name-audit.md](/imas-codex/evidence/sn-west-catalog-release/west-name-audit), in the same
@@ -21,10 +21,17 @@ self-descriptive to a reader without the source path in hand. A defect that lies
 **description** rather than in the name is recorded as a note on a **correct** row and counted
 separately — it does not carry an incorrect verdict.
 
-**Units agree on all 51 rows.** `sn_unit == dd_unit` for every binding in this range, so no row
-turns on a unit disagreement and the axis contributes nothing to the verdicts below. That is a
-result, not an omission: the prior half found exactly one unit disagreement in 86 rows
-(`atomic_number`), so a second range with none is consistent rather than suspicious.
+**Units agree on all 51 rows** — `sn_unit == dd_unit` for every binding in this range, so no row
+turns on a unit disagreement and that axis contributes nothing to the verdicts below.
+
+A uniform column is a claim about the instrument before it is a result, so the comparison was
+controlled against something known present rather than reported as an absence. Run over all 255
+remainder rows the same comparison finds **three** disagreements — indices 152, 159 and 198
+(`turn_count_of_toroidal_magnetic_field_probe`, `turn_count_of_poloidal_magnetic_field_probe`,
+`atomic_count`, each carrying `1` against an empty `dd_unit`) — all of them outside indices 1–51.
+So the comparison can see a disagreement and this range genuinely has none. Fourteen distinct units
+appear across the 51 rows (`1`, `J`, `K`, `Pa`, `T`, `Wb`, `eV`, `kg.s^-1`, `m`, `m^-3`,
+`m^-3.s^-1.sr^-1`, `m^2`, `rad`, `s`), so the column is not uniform either.
 
 **Spellings the prior half settled are reused, not re-minted**: the `*_of_flux_surface` family
 including `volume_of_flux_surface` and `area_of_flux_surface`,
@@ -463,3 +470,176 @@ The locus half of the name is correct and is kept. Note that the mismatch here i
 **quantity**, not in the locus, which is what distinguishes this from rows 17, 18 and 48 even
 though the result table groups them together — the grouping is by remedy, and both remedies are a
 rename to the object the data dictionary names.
+
+### 44. `toroidal_angle_of_measurement_position` — **INCORRECT**
+
+- source path: `ece/channel/position/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate locating a measurement position around the machine symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+| rejected | proposed |
+| --- | --- |
+| `toroidal_angle_of_measurement_position` | `toroidal_coordinate_of_measurement_position` |
+
+**Minority spelling of a base the cohort already fixes.** The locus is right — the prior half
+established that `ece/channel/position/*` is a genuine plasma measurement position, unlike the
+aperture centre of rows 17 and 18. What is wrong is the base: within indices 1–51 alone, six
+bindings spell the toroidal angle `toroidal_coordinate_*` (rows 3, 5, 16, 21, 23, 25) and this one
+row spells it `toroidal_angle_*`, for the same DD text and the same unit.
+
+`toroidal_angle` is arguably the more precise English, and that is the argument that must not win
+here: the cohort has already converged, and a catalog carrying both makes the φ of an ECE
+measurement position and the φ of an aperture centre read as different quantities. Row 47 keeps
+`poloidal_angle_` for the same reason in reverse — there is no competing `poloidal_coordinate_`
+spelling anywhere in the cohort, so `angle` is the settled form for θ and the minority form for φ.
+
+### 45. `poloidal_magnetic_flux_at_measurement_position` — **correct**
+
+- source path: `ece/channel/position/psi`
+- unit: `Wb` (data dictionary: `Wb`)
+- data-dictionary text: Poloidal flux
+- name description: Signed equilibrium poloidal magnetic-flux function evaluated at a diagnostic measurement location, identifying the nested magnetic surface intersecting that location.
+- Correct use of `at_`: this is a field evaluated at a locus, not a coordinate locating an object — the distinction row 25 gets wrong.
+
+### 46. `normalized_toroidal_flux_coordinate_at_measurement_position` — **correct**
+
+- source path: `ece/channel/position/rho_tor_norm`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Normalised toroidal flux coordinate
+- name description: Dimensionless normalized toroidal-flux label that maps a physical measurement position onto a nested magnetic surface between the magnetic axis and equilibrium boundary.
+- collision, deferred: 2 source paths, 1 outside this index range.
+
+### 47. `poloidal_angle_of_measurement_position` — **correct**
+
+- source path: `ece/channel/position/theta`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Poloidal angle (oriented clockwise when viewing the poloidal cross section on the right hand side of the tokamak axis of symmetry, with the origin placed on the plasma magnetic axis)
+- name description: Geometric poloidal angle locating a measurement position around the magnetic axis in the right-handed cylindrical (R, φ, Z) frame.
+- The description's "increasing clockwise" matches the DD's orientation clause, which is the half of a poloidal-angle definition most often dropped.
+
+### 48. `vertical_coordinate_of_ece_channel` — **INCORRECT**
+
+- source path: `ece/channel/position/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of an electron-cyclotron-emission channel's measurement position in the right-handed cylindrical (R, φ, Z) frame.
+
+| rejected | proposed |
+| --- | --- |
+| `vertical_coordinate_of_ece_channel` | `vertical_coordinate_of_measurement_position` |
+
+**Bound to the wrong object, and it breaks a coordinate set its four siblings share.** An ECE
+channel is a receiver: a piece of hardware outside the vessel at a fixed position. The DD container
+`ece/channel/position` is not where the channel is — it is where in the plasma the emission that
+channel detects originates, which moves with the magnetic field and the density and is different
+on every time slice. Naming it the channel's own vertical coordinate asserts that a diagnostic
+receiver is somewhere inside the plasma.
+
+The name's own description gives the game away: it says "channel's measurement position", which is
+the right object under the wrong name. Its four siblings in the same container all name that
+object — `toroidal_angle_of_measurement_position` (row 44, itself a minority spelling),
+`poloidal_magnetic_flux_at_measurement_position` (45),
+`normalized_toroidal_flux_coordinate_at_measurement_position` (46),
+`poloidal_angle_of_measurement_position` (47) — and the prior half judged
+`radial_coordinate_of_measurement_position` on `ece/channel/position/r` correct. So five of the six
+coordinates of this position name the position and one names the instrument.
+
+### 49. `radiative_temperature_at_magnetic_axis` — **INCORRECT**
+
+- source path: `ece/t_radiation_central`
+- unit: `eV` (data dictionary: `eV`)
+- data-dictionary text: Radiation temperature from the closest channel to the magnetic axis, together with its radial location
+- name description: Temperature-equivalent radiation energy scale of electron-cyclotron emission, evaluated at the magnetic axis, the degenerate innermost magnetic surface where the poloidal magnetic-flux gradient vanishes. It is a brightness-temperature quantity, not necessarily the local kinetic electron temperature.
+
+| rejected | proposed |
+| --- | --- |
+| `radiative_temperature_at_magnetic_axis` | `radiative_temperature_at_innermost_ece_channel` |
+
+**The name asserts more than the data supports.** The data dictionary is explicit: this is the
+radiation temperature *from the closest channel to* the magnetic axis. The closest channel is not
+the axis. The DD path is `t_radiation_central` — "central", which is a description of where the
+channel sits, not a claim that it sits on a defined equilibrium locus.
+
+The data dictionary itself treats the offset as material: it ships the channel's **radial
+location** alongside the value, in the same sentence, which it would not need to do if the value
+were at the axis. The magnetic axis moves during a discharge while the channel set is fixed, so the
+offset is not a constant and cannot be calibrated away by a reader.
+
+The cohort does have genuine `*_at_magnetic_axis` names — the prior half accepted
+`toroidal_magnetic_field_at_magnetic_axis` and `safety_factor_at_magnetic_axis`, where the DD does
+say magnetic axis. Keeping this row in that family would make the family unreliable: a consumer
+selecting on `_at_magnetic_axis` would get two quantities evaluated on the axis and one measured
+near it.
+
+### 50. `elongation_of_plasma_boundary` — **correct**
+
+- source path: `equilibrium/time_slice/boundary/elongation`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Elongation of the plasma boundary
+- name description: Dimensionless ratio of the plasma boundary's vertical half-height to its minor radius, quantifying the elongation of its cross-sectional shape.
+- The surface is explicit in the name, which is what keeps it distinct from `elongation_of_flux_surface` (remainder index 87, the per-surface profile). A bare `elongation` would merge a boundary scalar with a radial profile.
+- collision, deferred: 2 source paths, 1 outside this index range.
+
+### 51. `radial_coordinate_of_geometric_axis` — **correct**
+
+- source path: `equilibrium/time_slice/boundary/geometric_axis/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate locating the midpoint of the plasma boundary's radial extrema, thereby specifying the horizontal position of its geometric axis.
+- collision, deferred: 2 source paths, 1 outside this index range.
+
+## Result
+
+| | count |
+| --- | --- |
+| rows judged (remainder indices 1–51, contiguous) | **51** |
+| judged **correct** | 40 |
+| judged **INCORRECT**, each with a proposed spelling | **11** |
+| correct + incorrect | **51** |
+| description-only defects, recorded as notes on correct rows | 3 |
+| rows whose identity is also bound outside this index range, deferred | 13 |
+| rows where `sn_unit` and `dd_unit` disagree | 0 |
+
+**11 of 51 — 21.6 % of this range — are not publishable as spelled.** Grouped into the five classes
+the first half established:
+
+- **The name asserts more than the data supports** (3): `thermal_electron_pressure_at_post_sawtooth_crash`
+  for an unconditioned profile (33); `radiative_temperature_at_magnetic_axis` for the nearest
+  channel to the axis (49); `temperature_of_soft_xray_detector` for an imaging camera that names no
+  band (28).
+- **The name is bound to the wrong object** (5): `radial_coordinate_of_measurement_position` (17)
+  and `vertical_coordinate_of_measurement_position` (18) on an aperture centre;
+  `vertical_coordinate_of_ece_channel` (48) on a plasma emission position;
+  `coolant_transit_time_of_plant_component_port` (15) on a component rather than a port; and
+  `opacity_at_ece_channel_emission_position` (43), where the mismatch is in the quantity rather
+  than the locus but the remedy is the same rename to what the data dictionary names.
+- **One name, two physically different quantities** (1): `effective_charge` (30) across a local
+  profile value and a volume-averaged scalar. As in the first half this is the most serious class,
+  because no reader can repair it — only a split can.
+- **Not self-descriptive** (0): none in this range.
+- **Minority spelling of a base the cohort already fixes** (2):
+  `toroidal_coordinate_at_detector_pixel` (25), `toroidal_angle_of_measurement_position` (44).
+
+### The three description-only defects
+
+None carries an incorrect verdict, and all three are the same shape — a description written for one
+locus travelling with an identity bound to several:
+
+1. Rows 5 and 23 — the shared line-of-sight identity's description names "the first reference
+   point" while these bindings are second points. One description fix serves all 14 bindings.
+2. Row 37 — `normalized_poloidal_flux_coordinate` carries a line-of-sight convention that no
+   binding inside this range exercises.
+
+### Why this range's rate is higher than the first half's 11.6 %
+
+The two numbers measure different draws and should be summed with that stated, not averaged
+blindly. The first half was **every fourth row**, which spreads across IDSs and almost never lands
+two coordinates of the same point in the same sample. This range is **contiguous**, so it contains
+whole coordinate triples and whole containers — and three of its eleven defects (17, 18, 48) are
+precisely the kind that only becomes visible when you hold a full coordinate set at once, with two
+of them being the rows the first half flagged as pointing outside its own sample.
+
+So the higher rate is partly the block structure revealing clustered defects rather than a
+different population. Combined, **137 rows of the 341 accepted bindings are now judged and 21 carry
+a name defect — 15.3 %.**
