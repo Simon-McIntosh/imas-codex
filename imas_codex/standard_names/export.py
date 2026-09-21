@@ -376,6 +376,7 @@ class ExportReport:
     source_disposition_records: list[SourceDispositionRecord] = field(
         default_factory=list
     )
+    manifest_input_size: int | None = None
     # Generability verdict for a manifest-driven cut, or None when the export
     # was not given a manifest at all. A cut with no manifest carries no source
     # obligation and is not asserted generable.
@@ -442,7 +443,11 @@ class ExportReport:
                 )
             ],
             "source_reconciliation": {
-                "manifest_size": len(self.source_disposition_records),
+                "manifest_size": (
+                    self.manifest_input_size
+                    if self.manifest_input_size is not None
+                    else len(self.source_disposition_records)
+                ),
                 "accounted": sum(source_counts.values()),
                 **source_counts,
                 "rows": [
@@ -904,6 +909,32 @@ def _classify_export_population(
             )
 
     return eligible, excluded
+
+
+def _export_population_issue(
+    *,
+    total_candidates: int,
+    remaining_candidates: int,
+    excluded: int,
+    manifest_size: int | None,
+    exclusion_stage: str,
+) -> dict[str, Any] | None:
+    """Describe an empty export population without inferring missing inputs."""
+    if total_candidates == 0:
+        return {
+            "type": "empty_input_population",
+            "manifest_size": manifest_size,
+            "detail": "the export input population is empty; there is nothing to publish",
+        }
+    if remaining_candidates == 0:
+        return {
+            "type": "fully_excluded_population",
+            "population_size": total_candidates,
+            "excluded": excluded,
+            "manifest_size": manifest_size,
+            "detail": f"every input identity was excluded {exclusion_stage}",
+        }
+    return None
 
 
 # =============================================================================
@@ -2708,7 +2739,11 @@ def run_export(
     ExportReport with gate results, counts, and divergence entries.
     """
     staging_path = Path(staging_dir)
-    report = ExportReport()
+    report = ExportReport(
+        manifest_input_size=(
+            len(manifest_sources) if manifest_sources is not None else None
+        )
+    )
 
     # ── 1. Fetch the upstream population and classify eligibility ──
     logger.info("Fetching accepted export population from graph...")
@@ -2726,6 +2761,11 @@ def run_export(
             {
                 "type": "null_catalog_status",
                 "name": candidate_id,
+                **(
+                    {"manifest_size": report.manifest_input_size}
+                    if report.manifest_input_size is not None
+                    else {}
+                ),
                 "detail": "graph catalog status is null",
             }
             for candidate_id in missing_status_ids
@@ -2791,23 +2831,14 @@ def run_export(
         len(eligibility_exclusions),
     )
 
-    population_issues: list[dict[str, Any]] = []
-    if report.total_candidates == 0:
-        population_issues.append(
-            {
-                "type": "empty_input_population",
-                "detail": "the export input population is empty; there is nothing to publish",
-            }
-        )
-    elif not candidates:
-        population_issues.append(
-            {
-                "type": "fully_excluded_population",
-                "population_size": report.total_candidates,
-                "excluded": len(report.exclusion_records),
-                "detail": "every input identity was excluded before export gates ran",
-            }
-        )
+    population_issue = _export_population_issue(
+        total_candidates=report.total_candidates,
+        remaining_candidates=len(candidates),
+        excluded=len(report.exclusion_records),
+        manifest_size=report.manifest_input_size,
+        exclusion_stage="before export gates ran",
+    )
+    population_issues = [population_issue] if population_issue is not None else []
     population_gate = GateResult(
         gate=GATE_EXPORT_POPULATION,
         passed=not population_issues,
@@ -3334,6 +3365,24 @@ def run_export(
             "Export blocked: exclusion accounting does not close over the "
             "accepted population"
         )
+        _write_export_report(staging_path, report)
+        return report
+
+    publication_issue = _export_population_issue(
+        total_candidates=report.total_candidates,
+        remaining_candidates=report.exported_count,
+        excluded=len(report.exclusion_records),
+        manifest_size=report.manifest_input_size,
+        exclusion_stage="before catalog manifest write",
+    )
+    if publication_issue is not None:
+        population_gate.passed = False
+        population_gate.issues = [publication_issue]
+        report.all_gates_passed = False
+        report.gate_failures = sum(
+            1 for gate in report.gate_results if not gate.passed and not gate.skipped
+        )
+        logger.error("Export blocked: %s", publication_issue["type"])
         _write_export_report(staging_path, report)
         return report
 
