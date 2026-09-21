@@ -371,3 +371,250 @@ different one. **This name is on the settled list** — the `*_of_flux_surface`
 family is adjudicated and is not relitigated here — and the sharing is
 consistent with that adjudication.
 
+### 21. `atomic_mass` — **ONE-QUANTITY** (2 bindings)
+
+`spectrometer_mass/channel/a` ("Atomic mass measured by this channel") and
+`spectrometer_visible/channel/isotope_ratios/isotope/element/a` ("Mass of
+atom"), both in `u`. The mass assigned to an atomic species is one quantity;
+whether it is what a mass-spectrometer channel is tuned to or what an isotope
+entry declares is a locus, not a second quantity.
+
+### 22. `coolant_mass_flow_rate` — **ONE-QUANTITY** (2 bindings)
+
+`calorimetry/cooling_loop/mass_flow` and `calorimetry/group/component/mass_flow`
+— the same quantity across a whole loop and across one component in it. One
+spelling; the source path says which boundary the flow crosses.
+
+### 23. `coolant_temperature_at_inlet` — **ONE-QUANTITY** (2 bindings)
+
+`calorimetry/cooling_loop/temperature_in` and
+`calorimetry/group/component/temperature_in`, loop and component inlet. Same
+quantity, two loci.
+
+### 24. `coolant_temperature_at_outlet` — **ONE-QUANTITY** (2 bindings)
+
+The outlet partner of group 23, on the same two containers.
+
+### 25. `effective_charge` — **MUST-SPLIT** (2 bindings)
+
+The two bindings differ by an **averaging operator**, which this catalog already
+treats as producing distinct identities:
+
+- `core_profiles/profiles_1d/zeff` — "Effective charge". A **local profile**
+  value, Z_eff at one flux surface.
+- `core_profiles/global_quantities/z_eff_resistive` — "**Volume average**
+  plasma effective charge, estimated from the flux consumption in the ohmic
+  phase". A single **volume-averaged scalar** for the discharge.
+
+These are different numbers with different physical content: a local Z_eff can
+be several times the volume average in an impurity-peaked or impurity-hollow
+profile, and the two are not interchangeable in any calculation. The catalog
+itself settles the principle, because it already carries
+`line_averaged_effective_charge` (group 29) as a separate identity from
+`effective_charge`, and `volume_averaged_electron_density` (group 52) as a
+separate identity from the local electron density. A volume average is a
+different quantity from the local field it averages.
+
+| binding | spelling |
+| --- | --- |
+| `core_profiles/profiles_1d/zeff` | keeps `effective_charge` |
+| `core_profiles/global_quantities/z_eff_resistive` | **needs** `volume_averaged_effective_charge` |
+
+The distinction in plain language: one is the impurity content *here*, on one
+flux surface; the other is the impurity content *of the whole plasma*, a single
+number per time. The proposed spelling completes an averaging family the catalog
+already spells two-thirds of, and deliberately omits "resistive" — how the
+average was obtained is provenance and does not belong in the name.
+
+### 26. `elongation_of_plasma_boundary` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/boundary/elongation` and
+`summary/boundary/elongation/value`, the summary parent repeating the
+equilibrium text verbatim. One shape parameter of one boundary.
+
+### 27. `initial_polarization_ellipticity_of_polarimeter_beam` — **MUST-SPLIT** (2 bindings)
+
+The two bindings are two different optical descriptors of the same beam, not one
+descriptor at two loci — they are siblings inside one `polarimeter/channel`, so
+a single discharge carries both simultaneously with different values:
+
+- `polarimeter/channel/ellipticity_initial` — "Initial ellipticity before
+  entering the plasma". The ratio of the polarization ellipse's semiaxes.
+- `polarimeter/channel/polarization_initial` — "Initial **polarization vector**
+  before entering the plasma". The polarization state itself, which is the
+  ellipse's orientation, not its shape.
+
+The name's own description contains the admission: it says it gives "**only the
+ellipticity component of the initial polarization vector, not the ellipse
+orientation**" — a sentence written to explain away a collision rather than to
+describe a quantity. A reader given the name alone would take
+`polarization_initial` for an ellipticity, which is exactly the component the
+description says it is not.
+
+| binding | spelling |
+| --- | --- |
+| `polarimeter/channel/ellipticity_initial` | keeps `initial_polarization_ellipticity_of_polarimeter_beam` |
+| `polarimeter/channel/polarization_initial` | **needs** `initial_polarization_of_polarimeter_beam` |
+
+The distinction in plain language: ellipticity is how round the polarization
+ellipse is; polarization is which way it is tilted. Faraday rotation changes the
+second and Cotton–Mouton the first, so a polarimeter analysis that confuses them
+attributes the wrong plasma effect to the signal.
+
+> **Unit note (both bindings, not a split driver).** Both carry `m` in both
+> `sn_unit` and `dd_unit`, so the unit comparator is silent — yet an ellipticity
+> and a polarization state are dimensionless. The two agree on a unit that is
+> wrong for either quantity, which is a defect the agreement check cannot see.
+> Recorded under follow-ons.
+
+### 28. `launched_power_of_lower_hybrid_antenna` — **MUST-SPLIT** (2 bindings)
+
+Both bindings are in `summary/heating_current_drive`, and they differ by
+**aggregation**:
+
+- `.../lh/power/value` — parent: "LH heating power coupled to the plasma **from
+  this launcher**". Per-launcher, indexed.
+- `.../power_lh/value` — parent: "**Total** LH power coupled to the plasma".
+  The machine total, summed over launchers.
+
+On WEST, with more than one lower-hybrid launcher, these are different numbers
+in the same time trace, and the total is the larger by construction. A reader
+given `launched_power_of_lower_hybrid_antenna` would attribute the whole
+system's power to a single antenna.
+
+| binding | spelling |
+| --- | --- |
+| `summary/heating_current_drive/lh/power/value` | keeps `launched_power_of_lower_hybrid_antenna` |
+| `summary/heating_current_drive/power_lh/value` | **needs** `total_launched_power_of_lower_hybrid_antennas` |
+
+The distinction in plain language: one antenna's contribution, against every
+antenna's contribution added up.
+
+> **Assertion note (shared by both bindings, so not the split driver).** The
+> name says **launched** while both data-dictionary parents say **coupled to the
+> plasma**. Launched power is what leaves the antenna; coupled power is what the
+> plasma absorbs, the difference being reflection at the launcher mouth — on a
+> lower-hybrid system a non-negligible fraction. `west-name-audit.md` makes the
+> same finding on the ion-cyclotron analogue. Because it applies equally to both
+> members here, it does not separate them; the corrected pair should read
+> `coupled_power_...` on both sides if the data-dictionary text is taken at its
+> word. Recorded under follow-ons.
+
+### 29. `line_averaged_effective_charge` — **ONE-QUANTITY** (2 bindings)
+
+`bremsstrahlung_visible/channel/zeff_line_average` ("Average effective charge
+along the line of sight") and `summary/line_average/zeff/value`. Same averaging
+operator, same quantity, one measured on a named chord and one published as the
+discharge's line average. This group is the precedent group 25 is judged
+against.
+
+### 30. `line_averaged_electron_density` — **ONE-QUANTITY** (2 bindings)
+
+`interferometer/channel/n_e_line_average` — explicitly the full-chord integral
+divided by chord length — and `summary/line_average/n_e/value`. Same operator,
+same quantity.
+
+### 31. `lower_triangularity_of_plasma_boundary` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/boundary/triangularity_lower` and
+`summary/boundary/triangularity_lower/value`, identical text. One quantity.
+
+### 32. `mhd_energy` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/energy_mhd` and
+`summary/global_quantities/energy_mhd`, both 3/2 ∫p dV with p the total kinetic
+pressure. The summary text adds that the pressure comes from an equilibrium
+reconstruction code, which is provenance. One quantity.
+
+### 33. `minor_radius_of_plasma_boundary` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/boundary/minor_radius` and
+`summary/boundary/minor_radius/value`, both carrying the same
+`(Rmax − Rmin)/2` definition. One quantity.
+
+### 34. `net_power_due_to_ion_cyclotron_heating` — **MUST-SPLIT** (2 bindings)
+
+Unlike group 28, the two bindings here are **both per-launcher** and differ in
+**which power** they are:
+
+- `ic_antennas/antenna/power_launched` — "Power **launched** from this antenna
+  into the vacuum vessel".
+- `summary/heating_current_drive/ic/power/value` — parent: "IC heating power
+  **coupled to the plasma** from this launcher".
+
+Launched and coupled power are separated by the reflected power at the antenna
+mouth. On an ion-cyclotron system the coupling resistance swings with the
+edge-density profile and with ELMs, so the two traces differ transiently by
+tens of percent and their ratio is itself a measured quantity. They cannot share
+a name: a reader computing a power balance from the coupled trace would
+double-count reflection if handed the launched one.
+
+| binding | spelling |
+| --- | --- |
+| `ic_antennas/antenna/power_launched` | keeps a launched spelling — `launched_power_of_ion_cyclotron_antenna` |
+| `summary/heating_current_drive/ic/power/value` | **needs** `coupled_power_of_ion_cyclotron_antenna` |
+
+Neither keeps `net_power_due_to_ion_cyclotron_heating` unchanged: "net" names
+neither side of the distinction, and the existing description ("launched into
+the vacuum vessel before absorption") matches only the first binding. The plain
+language: one is what the transmitter puts into the antenna's output, the other
+is what the plasma takes.
+
+> `west-name-audit.md` makes the launched-against-coupled finding on
+> `total_power_due_to_ion_cyclotron_heating` at a different source path. That
+> finding and this one are the same defect class on different identities; the
+> union counts two instances, not one.
+
+### 35. `normalized_plasma_internal_inductance` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/li_3` and
+`summary/global_quantities/li_3/value`, the summary parent giving the li_3
+definition the equilibrium leaf leaves implicit. Same definition, one quantity.
+
+### 36. `normalized_toroidal_flux_coordinate_at_measurement_position` — **MUST-SPLIT** (2 bindings)
+
+The two bindings locate **different kinds of thing** on the same coordinate:
+
+- `ece/channel/position/rho_tor_norm` — "Normalised toroidal flux coordinate".
+  Where a channel's measurement comes from: an instrument property, known from
+  the channel's frequency and the field.
+- `hard_x_rays/emissivity_profile_1d/peak_position` — "Normalised toroidal flux
+  coordinate position **at which the emissivity peaks**". Where a **feature of
+  an inverted profile** sits: a plasma property, an output of the inversion that
+  moves with the discharge.
+
+One is where the instrument looks; the other is where the plasma is brightest.
+A reader given the shared name would take an emissivity peak for a diagnostic
+sight position — and on a hard-X-ray system the peak migrates during current
+drive while the channel geometry does not move at all.
+
+| binding | spelling |
+| --- | --- |
+| `ece/channel/position/rho_tor_norm` | keeps `normalized_toroidal_flux_coordinate_at_measurement_position` |
+| `hard_x_rays/emissivity_profile_1d/peak_position` | **needs** `normalized_toroidal_flux_coordinate_of_emissivity_peak` |
+
+### 37. `poloidal_beta` — **ONE-QUANTITY** (2 bindings)
+
+`equilibrium/time_slice/global_quantities/beta_pol` and
+`summary/global_quantities/beta_pol_mhd/value`, both carrying
+`4∫p dV / (R₀ μ₀ Ip²)`. One quantity; the summary's `_mhd` qualifier names the
+pressure's provenance.
+
+### 38. `poloidal_magnetic_flux_at_flux_surface` — **ONE-QUANTITY** (2 bindings)
+
+`core_profiles/profiles_1d/grid/psi` and
+`equilibrium/time_slice/profiles_1d/psi` — the same flux-surface label used as
+the abscissa of two profile sets. One quantity.
+
+### 39. `poloidal_magnetic_flux_at_magnetic_axis` — **ONE-QUANTITY** (2 bindings)
+
+`core_profiles/profiles_1d/grid/psi_magnetic_axis` and
+`equilibrium/time_slice/global_quantities/psi_axis`. Same value, two IDSs; the
+inner normalization reference to group 12's outer one.
+
+### 40. `poloidal_plane_cross_sectional_area_of_flux_surface` — **ONE-QUANTITY** (2 bindings)
+
+`core_profiles/profiles_1d/grid/area` and
+`equilibrium/time_slice/profiles_1d/area`, both "Cross-sectional area of the
+flux surface". Inside the settled `*_of_flux_surface` family; not relitigated.
+
