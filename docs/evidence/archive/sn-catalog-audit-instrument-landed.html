@@ -568,6 +568,67 @@
     2026-09-21 &middot; implementation commit
     <code>dcc4c3d42</code>.</p>
   </section>
+
+  <section id="unit-comparator-terminal-cap">
+    <h2>The comparator neighbourhood's terminal cap is unreachable from the catalog route</h2>
+
+    <p><strong>The bound is the sum of the two channels' own caps, so no
+    catalog can carry the returned length past it.</strong> In
+    <code>build_neighborhood_context</code>
+    (<code>imas_codex/standard_names/review/enrichment.py</code>) the
+    unit-anchored channel holds at most <code>unit_cap = max(k, n)</code> and
+    the semantic channel at most
+    <code>min(max(k, n), 60)</code> — the same expression the semantic share
+    contributes to the terminal bound <code>unit_cap + semantic_cap</code>. The
+    concatenation of the two channels is therefore never above the bound, and
+    the terminal cap can never trim anything.</p>
+
+    <p><strong>The specified construction cannot fail at base.</strong> The
+    node brief asked for a catalog large enough that the deduplicated
+    neighbourhood would exceed <code>unit_cap + semantic_cap</code> without the
+    terminal cap, run against base <code>d31f8cb92</code> where the cap is
+    absent. Measured there: the existing bound-pinning case returns
+    <strong>30</strong>, and a 61-candidate case — unit channel filled to
+    <strong>61</strong>, semantic channel to <strong>60</strong> — returns
+    <strong>121</strong>, each exactly at its own bound. Removing the terminal
+    cap at HEAD leaves every catalog-driven case green: the three
+    catalog-driven tests pass with the cap and without it.</p>
+
+    <p><strong>What makes the guard observable is a channel above its own
+    share.</strong> The semantic channel is supplied at <strong>40</strong>
+    comparators against its share of <strong>15</strong>, so the concatenation
+    is <strong>55</strong> and the returned length must still be
+    <strong>30</strong>. That case reddens when the terminal cap is
+    removed (1 failed, 3 passed) and against base <code>d31f8cb92</code>
+    (2 failed, 2 passed; the second failure is the predecessor's allocation
+    case).</p>
+
+    <table>
+      <thead>
+        <tr><th>Tree</th><th>Catalog saturation (61 candidates)</th><th>Over-supplied channel (40 vs share 15)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>HEAD <code>ed94158e3</code> (terminal cap present)</td><td>121 &mdash; passed</td><td>30 &mdash; passed</td></tr>
+        <tr><td>HEAD with the cap removed</td><td>121 &mdash; passed</td><td><strong>55 &mdash; failed</strong></td></tr>
+        <tr><td>base <code>d31f8cb92</code> (cap absent)</td><td>121 &mdash; passed</td><td><strong>55 &mdash; failed</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Deviation from the brief.</strong> The catalog-driven saturation
+    case cannot carry the node's done-when, because the catalog route
+    provably cannot exceed the bound; the observable case supplies the semantic
+    channel above its share instead. Making the catalog able to exceed the
+    bound would mean tightening the semantic share below its own cap (for
+    instance <code>min(k, 60)</code> rather than <code>min(unit_cap, 60)</code>),
+    a source change outside this node's write fence; the alternative is to
+    delete the terminal cap as unreachable and keep the stated bound as
+    documentation.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-terminal-comparator-cap-has-a-test-that-fails-without-it</code>
+    &middot; 2026-09-21 &middot; tests only, no source change; logs under the run
+    directory <code>terminal-cap-guard/</code>.</p>
+  </section>
   </main>
 </body>
 </html>
