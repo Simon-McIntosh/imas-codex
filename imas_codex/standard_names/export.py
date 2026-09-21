@@ -2401,10 +2401,12 @@ def _write_manifest(
 #   terminal_identity_unusable  the chain ended in a name this cut cannot carry
 #   identity_not_carried        an identity resolved but was excluded from the cut
 #   composition_not_scheduled   no composition was ever attempted for the source
+#   waived                      an authority explicitly settled the exclusion
 #
 # The first two are where a vocabulary the grammar must close shows up, and the
 # third is a search genuinely spent -- the two reasons a cut may have to wait on
-# another repository. The last is scheduling, which waits on nothing.
+# another repository. Scheduling waits on nothing. A waiver is never inferred
+# from an absent row or another mechanism: the row itself must say ``waived``.
 _MANIFEST_GENERABILITY_MECHANISMS = (
     "recorded_refusal",
     "refusal_cause_not_recorded",
@@ -2412,6 +2414,7 @@ _MANIFEST_GENERABILITY_MECHANISMS = (
     "terminal_identity_unusable",
     "identity_not_carried",
     "composition_not_scheduled",
+    "waived",
 )
 
 # The sentinel the source's own projection writes when a refusal left no
@@ -2430,11 +2433,18 @@ def _manifest_source_mechanism(
     """
     if record.disposition == "emitted":
         return None
+    if record.disposition == "waived":
+        return "waived"
     if record.terminal_stage == "exhausted":
         return "attempt_budget_exhausted"
     if record.terminal_stage:
         return "terminal_identity_unusable"
     if record.disposition == "documented_non_nameable":
+        if (
+            record.reason == _UNRECORDED_REFUSAL_CAUSE
+            and record.source_status == "skipped"
+        ):
+            return "refusal_cause_not_recorded"
         if record.reason == _UNRECORDED_REFUSAL_CAUSE:
             return "composition_not_scheduled"
         return "recorded_refusal"
@@ -2449,10 +2459,12 @@ def describe_manifest_generability(
     """Account for every manifest source as carried or blocked by a mechanism.
 
     The invariant this reports is that every source in a manifest reaches a
-    name, so an uncarried source is a pipeline defect rather than a reporting
-    line: the mechanism named for it is the finding, and the uncarried list is
-    the defect count. A cut can refuse on ``generable`` instead of publishing a
-    count of exclusions it cannot act on.
+    name or carries an explicit waiver. An uncarried, unwaived source is a
+    pipeline defect rather than a reporting line: the mechanism named for it is
+    the finding. A waived source remains in the uncarried list and mechanism
+    counts, so the settled exclusion stays visible even though it does not block
+    the cut. A cut can refuse on ``generable`` instead of publishing a count of
+    exclusions it cannot act on.
 
     Mechanisms are derived from the disposition row alone -- the successor
     chain's terminal stage, the source's own status, and the refusal the
@@ -2486,7 +2498,7 @@ def describe_manifest_generability(
         "manifest_size": len(records),
         "carried": len(carried),
         "uncarried": len(uncarried),
-        "generable": not uncarried,
+        "generable": all(entry["mechanism"] == "waived" for entry in uncarried),
         "mechanism_counts": counts,
         "carried_sources": carried,
         "uncarried_sources": uncarried,
