@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T08:13:29",
+  "updated": "2026-09-21T08:32:40",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -162697,6 +162697,213 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T062106360381-n-the-review-pipeline-capability-gaps-are-named",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a71",
+        "node": "n-the-review-pipeline-capability-gaps-are-named",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 875,
+                "cached_input_tokens": 505302,
+                "input_tokens": 506179,
+                "output_tokens": 1287,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 507466,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "audit-s14-20260921T042900"
+          },
+          "done_when": "docs/evidence/sn-catalog-audit-instrument/review-pipeline-capability-gaps.md exists and, reading imas_codex/standard_names/review/pipeline.py, audits.py, consolidation.py, projection.py and enrichment.py plus the sn review CLI surface in imas_codex/cli/sn.py, reports: (1) each of the three layers, what it actually computes, and what it structurally CANNOT detect; (2) for each of these defect classes an independent opus audit found in the WEST cohort, whether the pipeline could detect it even in principle and through which layer -- a redundant spelling of a registered base (hard_xray_brightness against photon_radiance at the same unit), a name asserting more than the DD text supports (surface_temperature on a DD path reading 'apparent temperature'), a name bound to the wrong object (area_of_diagnostic_aperture on a detector/surface path), a physics error in the modifier (radial_derivative_of_poloidal_magnetic_flux on dpsi_drho_tor), and an identity bound to loci of different kinds; (3) every capability gap as a numbered finding with the file and line that would have to change. Two fail-open defects are already CONFIRMED in this pipeline and are context, not your findings to re-report: review/pipeline.py:1709 reads getattr(audit_report,'findings',[]) against a model declaring lint_findings/link_findings/duplicate_components so every Layer 1 finding is discarded; and workers.py near 5608 caps nearby_existing_names batch-level at 30 and breaks the OUTER loop, starving later items. Look for OTHER instances of the same shape: a lookup that returns empty or a default and a caller that proceeds as though it had looked. Verify each claim against the code, and mark each finding CONFIRMED or PLAUSIBLE. APPEND to the file as each finding lands and carry a provisional: true line the final pass clears.",
+          "estimated_hours": 1.25,
+          "goal": "Map what the sn review pipeline can and cannot detect, and name every capability gap between it and an independent physicist-grade audit",
+          "id": "n-the-review-pipeline-capability-gaps-are-named",
+          "lane_declaration": {
+            "backend": "claude-opus",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T05:57:05.943Z",
+            "read_at": "2026-09-21T06:21:07Z",
+            "resolved_backend": "claude-opus",
+            "utilisation_pct": 48.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-gaps-0640/manifest.md",
+          "negative_control": "",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "claude-opus",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a71",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "docs/evidence/sn-catalog-audit-instrument/review-pipeline-capability-gaps.md",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "claude-opus-a",
+        "backend": "claude-opus",
+        "local": false,
+        "agent": {
+          "alias": "opus 5",
+          "backend": "claude-opus",
+          "effort": "high",
+          "launch": "cli",
+          "model": "claude-opus-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T06:21:18Z",
+        "completed_at": "2026-09-21T06:26:53.868Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 325,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 335,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "409809bff7538002648a5fd42a324f52a864b74b",
+        "commits": [
+          "d958c6611a852ad7c451689e05bec6138a2d64ea"
+        ],
+        "changed_lines": {
+          "added": 120,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "not-run",
+        "gate_check": null,
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/review-gaps-0640/manifest.md",
+        "scope_changed": false,
+        "session_id": "95c3cb2b-db29-4adb-b658-de2c55867b67",
+        "budget": {
+          "headroom": "known",
+          "utilisation_pct": 66.0,
+          "rate_limit_type": "five_hour",
+          "rate_limit_period_minutes": null,
+          "resets_at": "2026-09-21T08:40:00Z",
+          "threshold_status": "allowed",
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 191570,
+            "cache_creation_input_tokens_cumulative": 268788,
+            "cache_read_input_tokens": 2009669,
+            "cache_read_input_tokens_cumulative": 6286757,
+            "inference_geo": "not_available",
+            "input_tokens": 4,
+            "input_tokens_cumulative": 50,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 25529,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 6.469733499999999,
+          "refusal": false,
+          "detail": "backend reports utilisation and reset time",
+          "cost_usd_cumulative": 13.772514000000001
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T06:26:53.868Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "missing_rollout"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": null,
+        "throughput": {
+          "cumulative_cached_input_tokens": 13572428,
+          "cumulative_input_tokens": 14047621,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+          "elapsed_seconds": 330.46,
+          "generated_tokens": 89406,
+          "generation_seconds": 312.854,
+          "input_budget_tokens": 1000000,
+          "input_utilisation_pct": 28.2,
+          "machine_seconds": 17.606,
+          "peak_input_tokens": 281820,
+          "tokens_per_second": 285.78,
+          "wall_tokens_per_second": 270.55
+        },
+        "follow_on_paths": [
+          "workers.py",
+          "layer/defect-class"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "dispatch",
+        "attempt": 1,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/audit-s14-20260921T042900/n-the-review-pipeline-capability-gaps-are-named",
+          "session_id": "95c3cb2b-db29-4adb-b658-de2c55867b67",
+          "session_source": "pointer",
+          "retained_at": "2026-09-21T06:26:53.868Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "gate-not-passing"
+        },
+        "negative_control": {
+          "verdict": "exempt",
+          "reason": "node-writes-no-test-path"
+        },
+        "tool_steps": 31.0,
+        "orientation_input_tokens": null,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -163009,6 +163216,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2405
+    "_version": 2406
   }
 }
