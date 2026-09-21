@@ -989,6 +989,69 @@
     <strong>ea941879d</strong>, <strong>e7bc16fed</strong>,
     <strong>8de7c346c</strong>).</p>
   </section>
+  <section id="west-name-audit-equilibrium-profiles-to-magnetics">
+    <h2>The second audit half &mdash; 34 of 51 correct across equilibrium profiles to magnetics</h2>
+    <p>The every-fourth sample judged 86 of the 341 accepted WEST bindings. This
+    record judges a further <strong>51</strong> &mdash; every binding at cohort
+    indices <strong>103 to 153</strong> of
+    <code>west-name-cohort-remainder.json</code>, a contiguous slice of the
+    path-ordered cohort running from the equilibrium 1-D profiles through
+    gas injection, hard X-rays, the ion-cyclotron antennas and the
+    interferometer to the magnetics probes. No graph query was issued: every
+    row's name, path, both units, both documentation strings and the name's own
+    description were already drawn from the live graph into the JSON, and that
+    is the whole evidence base.</p>
+    <table>
+      <thead>
+        <tr><th>Measure</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Rows judged</td><td><strong>51</strong> &mdash; every binding at cohort indices 103&ndash;153 inclusive</td></tr>
+        <tr><td>Correct</td><td>34</td></tr>
+        <tr><td>Incorrect, with a proposed spelling beside the rejected one</td><td><strong>17</strong> &mdash; 33.3 % of 51</td></tr>
+        <tr><td>Correct + incorrect</td><td>51, reconciling against the 51 rows in range</td></tr>
+        <tr><td>Notes on correct rows, counted apart from rejections</td><td>8</td></tr>
+        <tr><td>Unit disagreements</td><td><strong>1 of 51</strong> &mdash; <code>turn_count_of_toroidal_magnetic_field_probe</code> carries <code>1</code> against an empty DD unit; the standard name is the defensible side, a turn count being dimensionless</td></tr>
+        <tr><td>Rows whose identity also binds paths outside the range</td><td>22, of which 10 are the settled line-of-sight coordinate family; 4 genuine collisions are deferred to the whole-cohort sweep</td></tr>
+        <tr><td>The rate is not comparable with the first half's 11.6 %</td><td>This half is a <strong>contiguous slice</strong>, not a stratified draw, and it lands on the instrument-hardware containers: <strong>13 of the 17</strong> rejections sit in <code>hard_x_rays</code> (4 of 12), <code>ic_antennas</code> (5 of 12) and <code>magnetics</code> (4 of 8), against 1 of 5 in <code>equilibrium</code> and 3 of 13 in <code>interferometer</code></td></tr>
+      </tbody>
+    </table>
+    <p>Grouped into the five classes the first half established: <strong>the name
+    asserts more than the data supports</strong> (3) &mdash; a 1/R vacuum toroidal
+    field quoted without its radius, and two per-turn coil areas published as
+    probe areas, which differ from the effective area by a turn count the catalog
+    also publishes; <strong>bound to the wrong object</strong> (5) &mdash; an
+    emissivity-peak flux label named as a measurement position, a module current
+    named at the strap locus its own voltage sibling does not use, a tuning
+    capacitor named as the antenna's capacitance, and the radial and toroidal
+    coordinates of an installed probe named as a measurement position while the
+    vertical coordinate of the same point already carries the probe locus;
+    <strong>one name, two physical quantities</strong> (0 here, both candidates
+    deferred as cross-range collisions); <strong>not self-descriptive</strong> (6);
+    and <strong>minority spelling of a base the cohort already fixes</strong> (3).</p>
+    <p>No rejection in either half turns on a disputed physics claim. All 27 found
+    so far across 137 judged rows are about which object a name is attached to,
+    which of several sibling signals it denotes, or which of two spellings of one
+    base survives &mdash; which is why every one of them has a proposed spelling
+    rather than a question.</p>
+    <figure>
+      <img src="/imas-codex/figures/sn-west-catalog-release/west-name-verdicts-equilibrium-profiles-to-magnetics.png"
+           alt="Verdict for each of the 51 bindings plotted against cohort index, banded by IDS, with each rejected spelling labelled and coloured by defect class">
+      <figcaption>Each rejected spelling against its cohort index, banded by IDS.
+      The three instrument-hardware bands carry 13 of the 17 rejections.</figcaption>
+    </figure>
+    <p>Per-row verdicts, each rejection's proposed spelling and the semantic
+    distinction behind it are in
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit-equilibrium-profiles-to-magnetics">the
+    equilibrium-profiles-to-magnetics audit</a>, appended row by row as each name
+    was judged and committed in four parts
+    (<strong>36e7813b5</strong>, <strong>2b836506b</strong>,
+    <strong>a54f6a2b6</strong>, <strong>9f0db746c</strong>,
+    <strong>dd4860766</strong>). It is the second half of
+    <a href="/imas-codex/evidence/sn-west-catalog-release/west-name-audit">the
+    WEST name audit</a> and uses the same section shape and verdict vocabulary so
+    the two sum.</p>
+  </section>
 </main>
 </body>
 </html>
