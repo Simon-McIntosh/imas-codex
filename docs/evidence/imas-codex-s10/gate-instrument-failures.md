@@ -201,3 +201,41 @@ test never supplies the input that reaches a newly added branch. That was a true
 finding about the test's aperture rather than a failed control, but it cost two
 attempts, the first of which returned exit 2 from a malformed edit. A checkout
 of committed history has neither failure mode.
+
+## A third place evidence goes to die: relative paths inside a reclaimable worktree
+
+A worktree audit over this session's 25 trees found **zero holding unintegrated
+commits** — the fleet is clean — but two holding untracked directories, and one of
+those is cited evidence.
+
+`n-usb-the-producer-predicate-fails-closed` records its evidence in the manifest at
+**relative paths inside its own worktree**: `logs/gate_fail_closed.log`,
+`logs/gate_reverted_fails_closed.log`, `logs/surface_base.log` and four more. Two
+properties make that unreadable later, and neither is visible from the manifest:
+
+1. The paths resolve only from inside that worktree, so any reader elsewhere — a
+   later session, another login node, the ledger — cannot open them.
+2. The worktree is reclaimable. `crew gc` takes it as soon as its state reads
+   integrated, which it now does, and the evidence goes with it.
+
+`gate_reverted_fails_closed.log` is the **negative control for a fail-closed
+guard** — precisely the artifact a later reader would want, because it is the only
+thing showing the guard fires when reverted. The second tree held the script that
+produced a published evidence document's figures.
+
+Both preserved to `~/.local/share/imas-codex/gate-logs/<session>/<node>/`, 998 KB
+in total for the session.
+
+**Three variants of one defect now, all found in a single day:** a worker writing
+evidence to `/tmp` that was cleaned before verification; a coordinator citing
+`/run/user` scratch that dies with the session; and a worker citing a relative
+path inside a tree that gc will reclaim. In every case the manifest field accepted
+the path without complaint and the promote succeeded. **The field validates that a
+string was supplied, not that anyone else can open it** — which is the same defect
+as the git note that never leaves one clone, and the same shape as every other
+instrument in this record: it answers rather than erring.
+
+The check that would catch all three at promote time is a stat plus a location
+test: reject a cited path that does not exist, that resolves under `/tmp`,
+`/dev/shm` or `/run/user`, or that is relative to a worktree rather than to the
+run record.
