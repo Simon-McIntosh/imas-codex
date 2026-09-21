@@ -1356,6 +1356,64 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       failure:
       <a href="/imas-codex/evidence/sn-release-readiness/export-path-review">the export path review</a>.
     </p>
+  <h2 id="local-lane-code-review">The local lane's graph writes were reviewed line by line</h2>
+
+  <p>
+    The sprint diff <code>3f8c06fce..af0fb6e07</code>, restricted to the six files the
+    local lane touched, is <strong>493 insertions against 17 deletions</strong>. Each file
+    was read with <code>git diff</code> rather than opened; <code>graph_ops.py</code> was
+    never opened at all, because it exceeds the context window, and every reference to it
+    comes from a bounded <code>grep -n</code>.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>file</th><th>+</th><th>&minus;</th><th>finding</th><th>class</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>promote.py</code></td><td>96</td><td>0</td>
+        <td>a GitHub transport failure escapes the refusal notice and preempts the catalog correction</td>
+        <td>CONFIRMED</td></tr>
+      <tr><td><code>signed_manifest.py</code></td><td>151</td><td>3</td>
+        <td>the receipt drops a restored role the archive census does not name</td>
+        <td>CONFIRMED</td></tr>
+      <tr><td><code>signed_manifest.py</code></td><td>&mdash;</td><td>&mdash;</td>
+        <td>the parity table's <code>expected</code> disagrees with the guard that admitted the apply</td>
+        <td>CONFIRMED</td></tr>
+      <tr><td><code>provenance_lifecycle.py</code></td><td>108</td><td>6</td>
+        <td>the adjudicable binding conflict is masked whenever any other cohort row is malformed</td>
+        <td>CONFIRMED</td></tr>
+      <tr><td><code>orphan_sweep.py</code></td><td>28</td><td>5</td>
+        <td>the parking disposition is claimed atomic across two transactions, and its catch-up is gated on a fresh park</td>
+        <td>PLAUSIBLE</td></tr>
+      <tr><td><code>graph/client.py</code></td><td>65</td><td>1</td>
+        <td>none &mdash; precedence, gating and the deliberate non-swallow all read correctly</td>
+        <td>&mdash;</td></tr>
+      <tr><td><code>review/audits.py</code></td><td>45</td><td>2</td>
+        <td>none &mdash; adds no writes; the refusal is unconditional and is exercised by a test</td>
+        <td>&mdash;</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    The two checks the gate names explicitly both came back. <strong>No write that deletes
+    or retargets an existing binding without a guard was introduced</strong> by this diff:
+    the added Cypher is receipt construction and counting, and the one added Cypher
+    parameter prefix is validated with <code>isidentifier()</code> before interpolation.
+    One unguarded retarget does exist in a reviewed file, and it is present at the review
+    base, so it is reported rather than triaged. <strong>No guard that swallows its own
+    exception was introduced</strong> either; the two exception findings run the other way,
+    an exception escaping where the code says it is contained.
+  </p>
+
+  <p>
+    Neither of those two was reproduced live &mdash; driving a GitHub transport failure or
+    a mid-tick database disconnect needs an execution surface this node does not own &mdash;
+    so both carry the exact line and the exact exception class a test node needs, and the
+    review says so rather than implying a reproduction it did not perform. Every finding
+    with its inputs, its wrong resulting graph state and its confirmation class:
+    <a href="/imas-codex/evidence/sn-release-readiness/local-lane-code-review">the local-lane code review</a>.
+  </p>
 
   </main>
 </body>

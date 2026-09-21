@@ -520,6 +520,43 @@
   term, which is why this was counted by inspection rather than by pattern.
 </p>
 
+<p>
+  <strong>The local lane's graph-writing and release changes were reviewed, and five
+  defects are real.</strong> The sprint diff
+  <code>3f8c06fce..af0fb6e07</code> restricted to
+  <code>signed_manifest.py</code>, <code>promote.py</code>,
+  <code>provenance_lifecycle.py</code>, <code>orphan_sweep.py</code>,
+  <code>review/audits.py</code> and <code>graph/client.py</code> is 493 insertions
+  against 17 deletions. Four findings are CONFIRMED by reading the surrounding code and
+  one is PLAUSIBLE, held back only because confirming it needs
+  <code>graph_ops.py</code>, which cannot be opened whole.
+</p>
+<p>
+  The one that would reach a release first is in <code>promote.py</code>: the new
+  pull-request refusal notice states that a failed write is reported rather than raised,
+  and it delivers that only for a rejected write. A transport failure or an unresolvable
+  GitHub token escapes as an exception after the fold-back has already committed its
+  graph decisions, and it preempts <code>_commit_catalog_correction</code>, so the
+  catalog keeps the unapproved additions that the correction exists to remove. The notice
+  added to stop the catalog and the graph disagreeing silently opens a path to exactly
+  that. Two further findings sit in the archive reconstruction receipt &mdash; a restored
+  role the archive census does not name is dropped from the receipt, and the parity
+  table's <code>expected</code> column is computed differently from the guard that
+  admitted the apply, so a legitimate surplus prints as a mismatch. The parity
+  <em>guard</em> is not weakened: the rewritten comparison iterates the same role set the
+  previous dict equality did.
+</p>
+<p>
+  <strong>No unguarded binding delete or retarget was introduced by this diff.</strong>
+  One exists in a reviewed file and predates the review base: the source-migration apply
+  deletes a DD node's <code>HAS_STANDARD_NAME</code> edge to <em>any</em> standard name
+  rather than to the migration's predecessor, the anonymous end carrying no id predicate
+  where the <code>PRODUCED_NAME</code> line seven rows above it is bound. It is reported
+  rather than repaired, being outside this node's scope. The file, line, failure scenario
+  and confirmation class for every finding:
+  <a href="/imas-codex/evidence/sn-release-readiness/local-lane-code-review">the local-lane code review</a>.
+</p>
+
 <h2 id="s12a">&#167;12a &mdash; The six live ungrounded names are attachable, not disposable</h2>
 <p>
   <strong>Lead direction 2026-09-01: the DD paths exist, find them and reconnect.</strong>
