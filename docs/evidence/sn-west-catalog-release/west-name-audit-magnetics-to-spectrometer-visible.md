@@ -423,3 +423,299 @@ rejection is carried forward to the same identity here rather than re-argued.
   spelling differs, which makes the majority spelling the survivor. The
   difference is not cosmetic for a consumer that constructs the pair
   programmatically from the base name.
+
+### 182. `etendue_of_soft_xray_detector` — **correct**
+
+- source path: `soft_x_rays/channel/etendue`
+- unit: `m^2.sr` (data dictionary: `m^2.sr`)
+- data-dictionary text: Etendue (geometric extent) of the channel's optical system
+- name description: Geometric optical throughput of a soft X-ray detector channel, set by the collecting area and accepted solid angle of its optical system.
+- The `_detector` spelling of the etendue family is recorded as settled and is
+  not relitigated here. The row is consistent with the settled adjudication:
+  the DD text names the channel's optical system, the description names the
+  collecting area and solid angle whose product it is, and the unit `m^2.sr`
+  matches that product.
+
+### 183. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `soft_x_rays/channel/line_of_sight/first_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+- This is the one binding of the shared identity where the description's "first
+  reference point" is accurate, since the path is `first_point`.
+
+### 184. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `soft_x_rays/channel/line_of_sight/first_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+
+### 185. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `soft_x_rays/channel/line_of_sight/second_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+- note: The recorded description defect again — bound to the **second** point,
+  described as the first.
+
+### 186. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `soft_x_rays/channel/line_of_sight/second_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 187. `power_of_soft_xray_detector` — **INCORRECT**
+
+- source path: `soft_x_rays/channel/power`
+- unit: `W` (data dictionary: `W`)
+- data-dictionary text: Power received on the detector, in multiple energy bands if available from the detector
+- name description: Band-integrated radiant power received by a soft X-ray detector channel over its selected photon-energy band or bands.
+- **rejected spelling** `power_of_soft_xray_detector` → **proposed spelling** `incident_power_of_soft_xray_detector`
+- why: Not self-descriptive, and ambiguous in a way that matters for exactly
+  this instrument. "Power of a detector" reads first as the detector's own
+  electrical power — bias supply, preamplifier dissipation, cooling load — all
+  of which are real quantities for a soft X-ray diode array and all of which are
+  also in watts, so the unit does not disambiguate it. The DD text puts the
+  direction first ("Power **received on** the detector") and the name drops it,
+  leaving the description to carry the whole meaning. The repair reuses two
+  spellings the cohort already holds rather than minting one: `incident_` is
+  accepted at row 180 for this same channel's radiance, and `_of_soft_xray_detector`
+  is the settled object segment from row 182.
+
+### 188. `atomic_mass` — **correct**
+
+- source path: `spectrometer_mass/channel/a`
+- unit: `u` (data dictionary: `u`)
+- data-dictionary text: Atomic mass measured by this channel
+- name description: Mass parameter assigned to a specified ion or neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.
+- The identity is also bound to
+  `spectrometer_visible/channel/isotope_ratios/isotope/element/a` (row 197),
+  inside this range. Both are the atomic mass of a species, so the sharing is
+  legitimate reuse and needs no action from the collision sweep — the two
+  bindings differ in which instrument reports the mass, not in what the mass is.
+
+### 189. `ion_current_of_mass_spectrometer_channel` — **correct**
+
+- source path: `spectrometer_mass/channel/current`
+- unit: `A` (data dictionary: `A`)
+- data-dictionary text: Collected current
+- name description: Collected conventional electrical current carried by the ion population assigned to one mass-resolved channel.
+- The first half rejected `voltage_of_mass_spectrometer_channel` for naming a
+  channel that carries several distinct voltages. This row does not repeat that
+  defect: the `ion_` qualifier names which current is meant, and the DD channel
+  has exactly one current leaf, so the object segment resolves uniquely.
+
+### 190. `spectral_rate_of_spectrometer_channel` — **INCORRECT**
+
+- source path: `spectrometer_visible/channel/grating_spectrometer/intensity_spectrum`
+- unit: `s^-1` (data dictionary: `s^-1`)
+- data-dictionary text: Intensity spectrum (not calibrated), i.e. number of photoelectrons detected by unit time by a wavelength pixel of the channel, taking into account electronic gain compensation and channels relative calibration
+- name description: Detected photoelectron rate assigned to each wavelength pixel of a spectrometer channel after electronic gain compensation and relative calibration, but before absolute radiometric calibration.
+- **rejected spelling** `spectral_rate_of_spectrometer_channel` → **proposed spelling** `photoelectron_rate_of_spectrometer_channel`
+- why: Two defects, both of self-descriptiveness. The name states **no
+  measurand**: a rate of what is never said, and every other accepted name in
+  this cohort names its physical quantity — radiance, current, power,
+  wavelength, flux. The DD says what it is in one word, photoelectrons, and the
+  name's own description has to supply it. Second, `spectral_` is used here for
+  a quantity that is **not** a spectral density. In this same cohort
+  `spectral_photon_radiance` (row 193) is per unit wavelength and its unit
+  carries the extra inverse metre to prove it — `m^-3.s^-1.sr^-1` against the
+  per-line `m^-2.s^-1.sr^-1` of row 192. This row's unit is a bare `s^-1`: a
+  count rate in each wavelength pixel, with the pixel structure carried by the
+  array coordinate rather than by a division. Reading `spectral_` as the
+  cohort's own convention would make a consumer divide by a wavelength interval
+  that has already not been applied.
+
+### 191. `intensity_at_spectral_line` — **correct**
+
+- source path: `spectrometer_visible/channel/grating_spectrometer/processed_line/intensity`
+- unit: `s^-1` (data dictionary: `s^-1`)
+- data-dictionary text: Non-calibrated intensity (integrated over the spectrum for this line)
+- name description: Uncalibrated photoelectron detection rate obtained by integrating the measured emission signal across an identified spectral line.
+- The name names a measurand and a locus, and pairs with
+  `photon_radiance_at_spectral_line` (row 192) over the same DD `processed_line`
+  container, so the uncalibrated / calibrated distinction is carried by the
+  measurand word rather than left to the reader. That pairing is what separates
+  this row from row 190, which names no measurand at all.
+- note: `intensity` is used in the detector-signal sense — an uncalibrated count
+  rate at `s^-1` — not in the SI radiometric sense of radiant intensity, which
+  is W·sr⁻¹. The unit makes the intended reading unambiguous and the DD uses the
+  same word, so the verdict stands; the remark is recorded because `intensity`
+  is the most overloaded word in radiometry and the catalog should not let a
+  second, radiometric `intensity` base in beside it.
+
+### 192. `photon_radiance_at_spectral_line` — **correct**
+
+- source path: `spectrometer_visible/channel/grating_spectrometer/processed_line/radiance`
+- unit: `m^-2.s^-1.sr^-1` (data dictionary: `m^-2.s^-1.sr^-1`)
+- data-dictionary text: Calibrated, background subtracted radiance (integrated over the spectrum for this line)
+- name description: Photon-count radiance from an identified emission transition, integrated over its spectral line interval and resolved by projected area and viewing solid angle.
+- The unit is a photon rate per area per solid angle and the name says
+  `photon_radiance`; the first half cited this row by name as the spelling
+  `hard_xray_brightness` should have used.
+
+### 193. `spectral_photon_radiance` — **correct**
+
+- source path: `spectrometer_visible/channel/grating_spectrometer/radiance_spectral`
+- unit: `m^-3.s^-1.sr^-1` (data dictionary: `m^-3.s^-1.sr^-1`)
+- data-dictionary text: Calibrated spectral radiance (radiance per unit wavelength)
+- name description: Calibrated spectral photon radiance of plasma emission, giving photon rate per projected area, solid angle, and wavelength interval along a viewing direction.
+- `spectral_` is used correctly here and the unit proves it: `m^-3` against row
+  192's `m^-2` is the per-unit-wavelength division. The name carries no
+  instrument segment, which is right — a calibrated radiance is a property of
+  the emitting plasma along the view, not of the channel that measured it.
+
+### 194. `spectral_wavelength_of_optical_element` — **INCORRECT**
+
+- source path: `spectrometer_visible/channel/grating_spectrometer/wavelengths`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Measured wavelengths
+- name description: Photon vacuum wavelength values defining the spectral coordinate for a soft X-ray filter window's wavelength-dependent optical response.
+- **rejected spelling** `spectral_wavelength_of_optical_element` → **proposed spelling** `spectral_wavelength_of_spectrometer_channel`
+- why: Bound to the wrong object. The DD leaf is the **measured wavelength axis
+  of a visible grating spectrometer's spectrum** — the coordinate against which
+  `intensity_spectrum` and `radiance_spectral` (rows 190 and 193) are indexed.
+  The name instead assigns it to an "optical element", a component whose
+  transmission or reflectivity is tabulated against wavelength. Those are
+  opposite roles: one is the abscissa of a measurement, the other a property of
+  a piece of glass or foil. The description makes the misbinding explicit and
+  worse, naming "a **soft X-ray filter window's** wavelength-dependent optical
+  response" — an object that appears nowhere on this path, in this IDS, or in
+  this diagnostic. The identity is bound to this path alone in the cohort, so
+  there is no second binding for which the description would be correct: it is
+  wrong wherever it is read.
+
+### 195. `cold_neutral_fraction` — **correct**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/cold_neutrals_fraction`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Fraction of cold neutrals for this isotope (n_cold_neutrals/(n_cold_neutrals+n_hot_neutrals))
+- name description: Dimensionless fraction of the cold recycled component of a hydrogen-isotope neutral population relative to the total neutral atom population.
+- The isotope scoping is carried by the DD array index rather than the name,
+  which is the cohort's convention for per-species quantities, and the name
+  itself claims only what the DD gives: the cold share of a neutral population.
+- note: The description's denominator is loose. The DD formula is explicit that
+  the denominator is `n_cold + n_hot` **for this isotope**, whereas "the total
+  neutral atom population" invites a reading summed over all isotopes. The two
+  differ by the isotope's own abundance, which for a deuterium plasma with a
+  hydrogen minority is a factor of several. The defect is in the description,
+  not the name, so it carries no incorrect verdict.
+
+### 196. `ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope` — **INCORRECT**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/density_ratio`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Ratio of the density of neutrals of this isotope over the summed neutral densities of all other isotopes described in the ../isotope array
+- name description: Odds ratio of the neutral density of a selected hydrogen isotope to the summed neutral density of all other hydrogen isotopes, distinguishing composition odds from total isotope fraction.
+- **rejected spelling** `ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope` → **proposed spelling** `ratio_of_neutral_density_of_isotope_to_neutral_density_of_other_isotopes`
+- why: The name asserts more than the data supports. Its denominator is spelled
+  as a difference from the **total** neutral density, which claims a total over
+  all neutrals present. The DD is careful to claim less: the sum is over "all
+  other isotopes **described in the `../isotope` array**" — the isotopes the
+  diagnostic happens to resolve on this channel, which on WEST is typically
+  hydrogen and deuterium and never the impurity or helium neutrals also present
+  in the edge. Subtracting one isotope from a true total and subtracting it from
+  a two-element array sum give different numbers whenever anything outside the
+  array is neutral, and the name's arithmetic construction invites a consumer to
+  reconstruct the total by inverting it. The proposed spelling says what the DD
+  says, and is shorter by six segments — the original is 103 characters of
+  circumlocution for the phrase "all other isotopes" that the DD uses directly.
+
+### 197. `atomic_mass` — **correct**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/element/a`
+- unit: `u` (data dictionary: `u`)
+- data-dictionary text: Mass of atom
+- name description: Mass parameter assigned to a specified ion or neutral particle species, encoding its isotope or constituent composition for inertial and transport calculations.
+- The second binding of the identity judged at row 188, and legitimate for the
+  same reason.
+
+### 198. `atomic_count` — **correct**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/element/atoms_n`
+- unit: `1` (data dictionary: *empty*)
+- data-dictionary text: Number of atoms of this element in the molecule
+- name description: Stoichiometric multiplicity of a selected element within the chemical formula of an atomic or molecular species.
+- note: Two remarks, neither reaching an incorrect verdict. The units do not
+  agree — the DD declares no unit string and the standard name carries `1`; as
+  at row 159 the standard name is the defensible side, since a count is
+  dimensionless and `1` says so where an empty string says nothing. And
+  `atomic_count` sits one word from `atomic_number`, which this same cohort
+  publishes for the nuclear charge; the two are different quantities on the same
+  element, the descriptions carry the distinction, and the catalog should not
+  let the pair drift closer.
+
+### 199. `hot_neutral_fraction` — **correct**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_fraction`
+- unit: `1` (data dictionary: `1`)
+- data-dictionary text: Fraction of hot neutrals for this isotope (n_hot_neutrals/(n_cold_neutrals+n_hot_neutrals))
+- name description: Dimensionless fraction of the hot charge-exchange-born component of a hydrogen-isotope neutral population relative to the total neutral atom population.
+- The complement of row 195 and correct for the same reasons; the description
+  carries the same loose denominator, which is one defect observed on two rows
+  rather than two defects.
+
+### 200. `hot_neutral_temperature_at_plasma_boundary` — **INCORRECT**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/isotope/hot_neutrals_temperature`
+- unit: `eV` (data dictionary: `eV`)
+- data-dictionary text: Temperature of hot neutrals for this isotope
+- name description: Energy-equivalent translational temperature of hot neutral atoms at the plasma boundary, characterizing their random motion after removal of bulk flow.
+- **rejected spelling** `hot_neutral_temperature_at_plasma_boundary` → **proposed spelling** `hot_neutral_temperature`
+- why: The name asserts more than the data supports. The DD gives a temperature
+  of hot neutrals for an isotope and says nothing whatever about where. The name
+  pins it to the **plasma boundary**, a specific locus, and the plasma boundary
+  is a defined surface in this catalog — the same one `volume_of_plasma_boundary`
+  and the `*_of_flux_surface` family are built on. A visible spectrometer's
+  isotope-ratio channel views along a chord and reports a line-of-sight quantity
+  weighted by emissivity; where along that chord the hot neutrals it sees are
+  born is a modelling result, not a datum, and on WEST the charge-exchange-born
+  population extends well inside the separatrix. The repair is the cohort's own
+  convention rather than a minted one: the two sibling leaves in the same DD
+  container, rows 195 and 199, are spelled `cold_neutral_fraction` and
+  `hot_neutral_fraction` — bare, with no locus and no isotope segment.
+
+### 201. `spectral_signal_to_noise_ratio_of_spectrometer_channel` — **correct**
+
+- source path: `spectrometer_visible/channel/isotope_ratios/signal_to_noise`
+- unit: `dB` (data dictionary: `dB`)
+- data-dictionary text: Log10 of the ratio of the powers in two bands, one with the spectral lines of interest (signal) the other without spectral lines (noise).
+- name description: Spectrometer-channel spectral signal-to-noise ratio is the scalar comparison of spectral power integrated over a selected signal wavelength interval with spectral power integrated over a line-free reference interval for the same channel. It names the shared signal/reference comparison; scale-specific child names define the numerical mapping.
+- The name names its measurand, its two intervals and its object, and
+  `spectral_` is legitimate here in its band sense: the comparison is between
+  two wavelength bands. A signal-to-noise ratio in decibels is a valid base.
+- note: The data dictionary contradicts itself by a factor of ten, and the
+  standard name cannot repair it. The text defines the quantity as
+  `log10(P_signal / P_noise)`, which is a ratio in **bels**; the declared unit
+  is `dB`, which is `10 log10` of the same ratio. The standard name inherits the
+  declared unit, so `sn_unit` and `dd_unit` agree and neither is independently
+  wrong — the disagreement is internal to the DD leaf and must be resolved
+  there. A consumer that trusts the text and a consumer that trusts the unit
+  will differ by 10× on every value.
+
+### 202. `radial_coordinate_of_line_of_sight` — **correct**
+
+- source path: `spectrometer_visible/channel/line_of_sight/first_point/r`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Major radius
+- name description: Major-radius coordinate of a specified geometric point associated with a line of sight, measured from the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.
+
+### 203. `vertical_coordinate_of_line_of_sight` — **correct**
+
+- source path: `spectrometer_visible/channel/line_of_sight/first_point/z`
+- unit: `m` (data dictionary: `m`)
+- data-dictionary text: Height
+- name description: Signed vertical coordinate of a designated point defining a diagnostic line of sight in the right-handed cylindrical (R, φ, Z) frame.
+
+### 204. `toroidal_coordinate_of_line_of_sight` — **correct**
+
+- source path: `spectrometer_visible/channel/line_of_sight/second_point/phi`
+- unit: `rad` (data dictionary: `rad`)
+- data-dictionary text: Toroidal angle (oriented counter-clockwise when viewing from above)
+- name description: Toroidal angular coordinate of the first reference point on a diagnostic line of sight, locating that point around the machine symmetry axis.
+- note: The recorded description defect a fourth time — bound to the **second**
+  point, described as the first.
