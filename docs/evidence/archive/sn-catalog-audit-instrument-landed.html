@@ -348,6 +348,69 @@
     <code>n-the-reviewer-sees-the-catalog-it-is-judging-against</code> &middot;
     2026-09-21 &middot; implementation commit <code>0e9218080</code>.</p>
   </section>
+
+  <section id="unit-comparator-budget">
+    <h2>The unit-anchored comparator budget is shared per candidate and the returned neighbourhood states its bound</h2>
+
+    <p><strong>The defect reproduced before repair.</strong> The unit-anchored
+    channel appended eligible matches first-come and broke both loops at the
+    cap, so one candidate on a common unit absorbed the whole budget. Three
+    candidates on units <code>m</code>, <code>s</code> and <code>eV</code>
+    against a catalog of forty cross-base names on <code>m</code> plus three
+    each on <code>s</code> and <code>eV</code>, at <code>unit_cap = 10</code>,
+    gave the first candidate all ten slots and the other two none, though each
+    had three eligible comparators present
+    (<code>AssertionError: {'m': 10}</code>).</p>
+
+    <table>
+      <caption>Unit-anchored comparators per candidate, three-unit batch, unit_cap 10</caption>
+      <thead>
+        <tr><th>Allocation</th><th>candidate on <code>m</code></th><th>candidate on <code>s</code></th><th>candidate on <code>eV</code></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>first-come (before)</td><td>10</td><td>0</td><td>0</td></tr>
+        <tr><td>share-then-spend (after)</td><td><strong>4</strong></td><td><strong>3</strong></td><td><strong>3</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Implementation.</strong> The per-candidate match lists are built
+    first and then allocated with the same share-then-spend pass the semantic
+    channel uses: every candidate receives
+    <code>max(1, unit_cap // batch_size)</code> before the remainder is spent.
+    The deduplication pass regained its terminal cap, sized at the sum of the
+    two internally capped channels — <code>unit_cap + semantic_cap</code>,
+    where <code>unit_cap = max(k, batch_size)</code> and the semantic channel
+    is capped at <code>min(max(k, batch_size), 60)</code>. At the defaults
+    <code>k=10</code> over a 15-item batch the returned neighbourhood holds at
+    most <strong>30</strong> comparators; at the helper's 60-item ceiling,
+    <strong>120</strong>. The docstring previously called <code>k</code> a cap
+    while neither channel was capped at <code>k</code>.</p>
+
+    <p><strong>Evidence that could have failed.</strong> Two focused tests in
+    <code>tests/standard_names/test_review_comparator_budget.py</code> pin the
+    returned list: one asserts the per-candidate allocation above, one asserts
+    the returned length equals the stated bound at saturation. The negative
+    control replaced
+    <code>per_candidate_allowance = max(1, unit_cap // len(batch_names))</code>
+    with <code>per_candidate_allowance = unit_cap</code>, restoring the
+    first-come budget; the allocation test then failed with
+    <code>{'m': 10}</code> while the bound test still passed, so the two tests
+    discriminate. On <code>all_debug</code>, the full
+    <code>tests/standard_names/</code> suite recorded <strong>zero added
+    failures</strong> against base revision <code>d31f8cb92</code>: 34
+    failures/errors at base, 23 at head, none introduced. The eleven that pass
+    at head are export and manifest tests importing neither
+    <code>review/enrichment</code> nor <code>review/pipeline</code>, and the
+    comparison is asymmetric in the base's disfavour — the base suite ran from
+    a <code>/dev/shm</code> extraction outside the repository (no
+    <code>.env</code>) while the head suite ran inside the worktree. That
+    asymmetry can only make the base look worse, never better, so it cannot
+    manufacture the zero-added result.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-unit-comparator-budget-is-shared-and-bounded</code> &middot;
+    2026-09-21 &middot; implementation commit <code>93614e077</code>.</p>
+  </section>
   </main>
 </body>
 </html>
