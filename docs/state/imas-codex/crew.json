@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T19:30:54",
+  "updated": "2026-09-21T20:08:19",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -181532,6 +181532,244 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T165030562995-n-grouped-review-reads-families-without-writing-them",
+        "plan": "sn-catalog-audit-instrument",
+        "section": "\u00a73",
+        "node": "n-grouped-review-reads-families-without-writing-them",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 1688,
+                "cached_input_tokens": 563877,
+                "input_tokens": 565567,
+                "output_tokens": 732,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 566299,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "4bf5b126-db09-40d9-9efc-41e6a3c8e413",
+            "session_id": "instrument-20260921T0925"
+          },
+          "done_when": "sn review accepts --target groups and reports one entry per family that harmonize.build_worklist returns, each carrying its parent, member count, drift and anchor; a test with GraphClient patched asserts those fields reach the output, and asserts the target writes nothing by patching mark_members_for_regen, stamp_harmonized, mark_families_for_regen and restamp_harmonized_families to raise and showing the command still succeeds",
+          "estimated_hours": 1.2,
+          "goal": "Add a grouped review target that reports drifting name families from the existing harmonize surface without mutating the graph",
+          "id": "n-grouped-review-reads-families-without-writing-them",
+          "lane_declaration": {
+            "backend": null,
+            "headroom": null,
+            "metered": false,
+            "observed_at": null,
+            "read_at": "2026-09-21T16:50:32Z",
+            "resolved_backend": "clive",
+            "utilisation_pct": null
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "lane document carries no 'binding_observed'",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/grouped-review-target/manifest.md",
+          "negative_control": "call harmonize.mark_families_for_regen() from the groups branch of sn_review",
+          "plan": "sn-catalog-audit-instrument",
+          "requested_backend": "clive",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/cli/sn.py",
+            "tests/standard_names/test_grouped_review_target.py",
+            "docs/evidence/archive/sn-catalog-audit-instrument-landed.html",
+            "docs/figures/sn-catalog-audit-instrument",
+            "docs/plans/sn-catalog-audit-instrument.html"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "clive-audit-2",
+        "backend": "clive",
+        "local": true,
+        "agent": {
+          "alias": "dsv4.1-flash",
+          "backend": "clive",
+          "effort": "high",
+          "launch": "cli",
+          "local": true,
+          "model": "deepseek-v4.1-flash",
+          "sandbox": "worktree-full",
+          "usable_input_window": 480000
+        },
+        "dispatched_at": "2026-09-21T16:50:58Z",
+        "completed_at": "2026-09-21T17:31:43.511Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2431,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2445,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3c48626de8badf6fda2168be6d507c87302b171c",
+        "commits": [
+          "04b0794b416d6d02c56c69bca38592c73373a397",
+          "728c2581c68e2215095af0834f4d007d88456d0b",
+          "f2c8f86df778042d5db696ebb002635562694c29"
+        ],
+        "changed_lines": {
+          "added": 404,
+          "removed": 5,
+          "files": 5
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "gate_check": {
+          "command": "uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_grouped_review_target.py",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/grouped-review-target/sn-grouped/focused_green.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/grouped-review-target/manifest.md",
+        "scope_changed": false,
+        "session_id": "56de2db0-6a64-46e4-8029-a58c9f581ac2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 9630679,
+            "input_tokens_cumulative": 9630679,
+            "output_tokens": 37700,
+            "output_tokens_cumulative": 37700,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": null,
+          "cost_usd_imputed": true
+        },
+        "lane_receipt": {
+          "quota_state": "unmeasured",
+          "observed_at": "2026-09-21T17:31:43.511Z",
+          "effective_context_window": "unmeasured",
+          "quota_windows": [],
+          "notional_cost_usd": "unmeasured",
+          "rate_basis": "unmeasured",
+          "unmeasured": {
+            "effective_context_window": "missing_rollout",
+            "notional_cost_usd": "missing_rollout",
+            "rate_basis": "missing_rollout",
+            "quota_windows": "unmetered"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "15m",
+          "requested": true,
+          "waived_runs": []
+        },
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 16,
+            "evidence": 17,
+            "fit": 18,
+            "goal_fidelity": 16,
+            "scope_discipline": 18
+          },
+          "absent": [],
+          "total": 85
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 0,
+          "cumulative_input_tokens": 11010583,
+          "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 480000",
+          "elapsed_seconds": 2041.872,
+          "generated_tokens": 53145,
+          "generation_seconds": 1754.45,
+          "input_budget_tokens": 480000,
+          "input_utilisation_pct": 31.3,
+          "machine_seconds": 287.422,
+          "peak_input_tokens": 150341,
+          "tokens_per_second": 30.29,
+          "wall_tokens_per_second": 26.03
+        },
+        "follow_on_paths": [
+          "harmonize.py"
+        ],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        },
+        "attempt_kind": "resume",
+        "attempt": 2,
+        "duration_measurement": null,
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/instrument-20260921T0925/n-grouped-review-reads-families-without-writing-them",
+          "session_id": "56de2db0-6a64-46e4-8029-a58c9f581ac2",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T17:31:43.511Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "impl_move": {
+          "plan": "sn-catalog-audit-instrument",
+          "at_dispatch": null,
+          "at_complete": null,
+          "verdict": "exempt",
+          "reason": "no-impl-recorded-at-dispatch"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "test_paths": [
+            "tests/standard_names/test_grouped_review_target.py"
+          ],
+          "declaration": "call harmonize.mark_families_for_regen() from the groups branch of sn_review",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/grouped-review-target/sn-grouped/negative_control.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/grouped-review-target/sn-grouped/negative_control.log"
+        },
+        "tool_steps": 21.0,
+        "orientation_input_tokens": 1413234.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -181844,6 +182082,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2489
+    "_version": 2490
   }
 }
