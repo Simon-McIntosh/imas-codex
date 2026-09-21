@@ -568,6 +568,76 @@
     2026-09-21 &middot; implementation commit
     <code>dcc4c3d42</code>.</p>
   </section>
+  <section id="mutation-classifier-boundaries">
+    <h2>The mutation classifier reads clauses, not the parts of an identifier</h2>
+
+    <p><strong>The recorded defect reproduced before the repair.</strong> The
+    report-only guard decides whether a statement mutates the graph by
+    tokenising it on non-letter characters and testing each token against a
+    keyword set. Underscores are non-letters, so an identifier is split at its
+    underscores and each part is tested <em>as if it were a clause</em>. Fed the
+    read-only protection query at
+    <code>imas_codex/standard_names/protection.py:100</code>, the classifier
+    returned <code>MERGE</code>. The query is a pure read &mdash;
+    <code>MATCH</code>, <code>OPTIONAL MATCH</code>, <code>RETURN</code> &mdash;
+    and the keyword comes from the property
+    <code>sn.catalog_merge_commit_sha</code>, whose middle segment is
+    <code>merge</code>. A report-only run would therefore have suppressed its
+    own protection read and reported a mutation that no statement contained.</p>
+
+    <figure>
+      <svg height="150" role="img" viewBox="0 0 700 150" width="700"
+           xmlns="http://www.w3.org/2000/svg">
+        <text fill="#333" font-size="12" font-weight="bold" x="10" y="22">sn.catalog_merge_commit_sha</text>
+        <text fill="#555" font-size="11" x="10" y="44">split on non-letters &rarr; catalog | merge | commit | sha</text>
+        <rect fill="#fdf1f1" height="22" rx="4" stroke="#c46a6a" width="120" x="10" y="54"></rect>
+        <text fill="#8a3a3a" font-size="11" font-weight="bold" x="16" y="69">&ldquo;merge&rdquo; matches MERGE</text>
+        <text fill="#8a3a3a" font-size="11" x="140" y="69">&rarr; read-only query reported as a mutation</text>
+
+        <line stroke="#ccc" x1="10" x2="690" y1="90" y2="90"></line>
+
+        <text fill="#333" font-size="12" font-weight="bold" x="10" y="110">word-boundary match over the same string</text>
+        <text fill="#555" font-size="11" x="10" y="130">catalog_merge_commit_sha &mdash; no &#92;b falls inside an identifier, because _ and digits are word characters</text>
+        <rect fill="#e8f5ec" height="22" rx="4" stroke="#5f9e74" width="150" x="530" y="118"></rect>
+        <text fill="#2f5d44" font-size="11" font-weight="bold" x="536" y="133">no clause reported</text>
+      </svg>
+      <figcaption>Where the boundary falls is the whole defect: a segment of an
+      identifier is not a clause. Inline because <code>docs/figures/</code> lies
+      outside this node's write fence.</figcaption>
+    </figure>
+
+    <p><strong>The repair.</strong> Commit <code>78d5cbef0</code> replaces the
+    token sweep with a single case-insensitive word-boundary match,
+    <code>\b(?:CREATE|DELETE|DROP|MERGE|REMOVE|SET)\b</code>, over the
+    literal- and comment-stripped statement, and returns the first keyword it
+    finds in document order. Because <code>_</code> and digits are word
+    characters, no boundary falls between them and a letter, so a keyword cannot
+    be read out of the middle of an identifier &mdash; while a clause standing
+    alone is still matched. The literal/comment stripper is unchanged, so a
+    keyword inside a string literal or a backticked identifier is still not a
+    clause.</p>
+
+    <p><strong>Evidence that could have failed.</strong> The focused gate
+    <code>tests/standard_names/test_cypher_mutation_classifier.py</code> asserts
+    the protection query classifies as <code>None</code> (with a fixture guard
+    asserting <code>catalog_merge_commit_sha</code> is still present, so the test
+    cannot pass because the query changed rather than the reader); asserts an
+    underscore-named identifier part is not a mutation; and asserts each of
+    <code>CREATE</code>, <code>MERGE</code>, <code>SET</code>,
+    <code>DELETE</code>, <code>REMOVE</code> and <code>DROP</code> still returns
+    its own clause. Run with the sibling report-only suite,
+    <strong>12 passed</strong> (9 new, 3 existing). <strong>Negative control:</strong>
+    restoring the old tokenisation
+    (<code>next(token for token in re.findall(r"[A-Za-z]+", executable.upper()) if token in _CYPHER_MUTATION_KEYWORDS)</code>)
+    fails the first assertion with
+    <code>AssertionError: assert 'MERGE' is None</code> &mdash; the declared
+    mutation verbatim, closing the loop that the repaired reader is what turns
+    the test green.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-the-mutation-classifier-respects-identifier-boundaries</code> &middot;
+    2026-09-21 &middot; implementation commit <code>78d5cbef0</code>.</p>
+  </section>
   </main>
 </body>
 </html>
