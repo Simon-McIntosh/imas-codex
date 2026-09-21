@@ -860,6 +860,52 @@
     (<code>review/pipeline.py:1720</code>) predates <code>0ba05e980</code>; it is reported here
     because it is the exact surface that change declares, and it lies outside this node's fence.</p>
   </section>
+
+  <section id="audit-findings-reach-the-reviewer">
+    <h2>Deterministic audit findings reach the reviewer</h2>
+    <p><strong>The loss reproduced before repair.</strong> At base
+    <code>80bcb6419</code>, a real <code>AuditReport</code> carrying one error-severity
+    <code>LintFinding</code>, one <code>LinkFinding</code>, and one
+    <code>DuplicateComponent</code> for names in the batch returned
+    <code>[]</code> from <code>_extract_audit_findings</code>. The report exposes
+    <code>lint_findings</code>, <code>link_findings</code>, and
+    <code>duplicate_components</code>; the extractor instead iterated a nonexistent generic
+    <code>findings</code> collection and looked for nonexistent
+    <code>affected_names</code>, <code>message</code>, and <code>category</code> fields. The
+    empty default therefore hid every finding while the operator-facing count still reported
+    that findings existed.</p>
+
+    <table>
+      <thead><tr><th>Report collection</th><th>Batch key</th><th>Reviewer summary</th></tr></thead>
+      <tbody>
+        <tr><td><code>lint_findings</code></td><td><code>name_id</code></td>
+          <td>severity, finding type, name and detail</td></tr>
+        <tr><td><code>link_findings</code></td><td><code>name_id</code></td>
+          <td>finding type, source name, target and detail</td></tr>
+        <tr><td><code>duplicate_components</code></td><td>intersection with <code>names</code></td>
+          <td>component names and maximum similarity</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The three concrete collections now form the prompt input.</strong> Commit
+    <code>92ba5e6c0</code> reads each collection through the fields its model declares,
+    filters it to the current batch, and preserves the existing maximum of twenty summary
+    lines. A finding for <code>outside_batch</code> is explicitly absent from the returned
+    summaries. The stale model comment was replaced with the mechanism: each collection has
+    its own affected-name field and prompt summary.</p>
+
+    <p><strong>Counterfactual and package gate.</strong> With the pre-repair generic traversal
+    retained, the two new tests both fail: the expected three summaries are <code>[]</code> and
+    the cap assertion observes zero rather than twenty. With the repair, both pass. The full
+    <code>tests/standard_names/</code> gate ran twice on <code>all_debug</code> with the same
+    command and environment: base was <strong>20 failed, 3 errors, 7497 passed</strong>; after
+    was <strong>20 failed, 3 errors, 7499 passed</strong>. The terminal-id sets are identical,
+    so the change adds <strong>zero failures</strong>; the existing export-accounting failures
+    remain outside this node's write scope. Logs are retained in
+    <code>~/.config/reckon/crew/runs/r-20260921T055932398834-n-audit-findings-reach-the-reviewer/</code>.
+    This gate measures this node's own change; verification at the merged revision remains a
+    separately dispatched test node.</p>
+  </section>
   </main>
 </body>
 </html>
