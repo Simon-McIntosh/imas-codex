@@ -1253,6 +1253,45 @@ Usage: imas-codex graph start [OPTIONS]</code></pre>
       <a href="/imas-codex/evidence/sn-release-readiness/graph-client-slurm-resolution">the resolution record</a>.
     </p>
 
+  <section>
+    <h2 id="quarantine-orphan-census">Where quarantined and orphan identities leave the path to the WEST batch</h2>
+
+    <p>
+      Live census 2026-09-21 through <code>GraphClient</code>. The quarantine
+      count reproduces exactly at <strong>660</strong>; the orphan figure of 170
+      reproduces under none of ten definitions measured, the live population
+      being 2,341 unsourced overall, 21 non-terminal and 9 at an exportable
+      stage. Both classes survive as far as the WEST-bound step and both reach
+      zero at batch resolution.
+    </p>
+
+    <img src="/imas-codex/figures/quarantine-orphan-census/west-batch-exclusion-funnel.svg"
+         alt="Funnel showing 660 quarantined and 2,341 orphan identities at the whole-label step, 46 and 9 at accepted stage, 3 and 105 bound to a WEST manifest source and all terminal, and zero of each in the 230-name resolved WEST batch and export candidate set"
+         style="max-width:100%;height:auto"/>
+
+    <p>
+      The two zeros on the lower rows each carry a positive control: the same
+      <code>sn.id IN $ids</code> predicate without the status clause returns
+      <code>seen: 230</code>, so the query sees every row it was asked about.
+      The near misses on the third row are terminal in every case &mdash; 3
+      quarantined identities bound by <code>PRODUCED_NAME</code> to a manifest
+      source (2 exhausted, 1 superseded) and 105 orphans reached by a manifest
+      uri in <code>source_paths</code> or by <code>HAS_STANDARD_NAME</code>, all
+      superseded.
+    </p>
+
+    <p>
+      The classification verdict is the half that is not clean. Re-running
+      <code>validate_name_candidate</code> &mdash; the gate that writes the
+      status, not <code>run_audits</code> &mdash; over all 46 accepted
+      quarantines clears <strong>23</strong> of them, including every one of the
+      18 whose <code>validation_issues</code> list is empty. Counts, queries,
+      the cleared identities and the ten orphan definitions:
+      <a href="/imas-codex/evidence/sn-release-readiness/quarantine-orphan-census">the census record</a>.
+    </p>
+
+  </section>
+
   </main>
 </body>
 </html>
