@@ -1,0 +1,5 @@
+This merge commit additionally carries an unrelated change that its subject does not describe: docs/evidence/archive/sn-lifecycle-integrity-landed.html, +10/-3, correcting the parked-source classifier's published branch count from five terminating branches to six terminating returns at five top-level positions.
+
+That file appears in neither of the two commits this merge brings in (658df1631, 7e3736c30), which touch imas_codex/cli/sn.py, tests/standard_names/test_review_write_suppression.py and the catalog-audit-instrument records. It was staged by a concurrent coordinator session whose own commit was refused because this checkout was mid-merge at the time, and the staged path was then swept into this commit — git commit commits the whole index, not the paths a given session added.
+
+No content was lost and nothing here is wrong; the commit is misdescribed rather than incorrect. Recorded as a note rather than by amending, because this commit belongs to another session's work and was already pushed.
