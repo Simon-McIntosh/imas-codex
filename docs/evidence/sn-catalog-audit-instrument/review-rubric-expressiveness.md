@@ -1,6 +1,6 @@
 # Can the reviewer rubric express the defects the audit found?
 
-provisional: true — findings are appended as they land; the closing pass clears this line.
+provisional: false — all three questions are answered, every quoted line is verified against the file it names, and the result table is closed.
 
 The WEST name audit found 74 defective bindings over 61 identities that the review pipeline had
 already scored and accepted. Before asking why the reviewer missed them, this asks a prior
@@ -20,7 +20,7 @@ in `imas_codex/standard_names/models.py` the reviewer must fill.
 The name-only path — the one the WEST cut ran — scores **four dimensions, 0–20 each, normalised
 over 80** (`StandardNameQualityScoreNameOnly`, `models.py:1371`). The full path adds
 `documentation` and `compliance` for six over 120 (`StandardNameQualityScore`, `models.py:1268`).
-The numeric total is the decision, stated in the prompt at `review_names_system.md:172`:
+The numeric total is the decision, stated in the prompt at `review_names_system.md:173`:
 
 > The numeric score is the decision — downstream code accepts when `score >= min_score`. **Do not**
 > add a separate accept/reject vote.
@@ -67,7 +67,7 @@ has no representation at all — not a weak one, none. The reviewer's only optio
 `issues` or `reasoning`, which no downstream consumer parses.
 
 **A suggestion that does not parse is silently deleted.** `_clear_unparseable_suggestion`
-(`models.py:1444`) runs `compose(parse(suggested_name).ir)` and on any exception sets both
+(`models.py:1445`) runs `compose(parse(suggested_name).ir)` and on any exception sets both
 `suggested_name` and `suggestion_justification` to `None`, logging a warning. So a reviewer who
 correctly identifies that the right name needs a token the grammar does not have loses the
 suggestion entirely — the mechanism the prompt provides for that case is a `vocab_gap`, but
@@ -204,3 +204,86 @@ the list, the parent text of each names its own leg. The rubric would then let i
 there; the instruction that would make the reviewer look is not, and the instruction that is there
 points the other way.** So this class is not a rubric gap but a prompt gap, and it is a one-line
 change with a dimension already waiting for it.
+
+## 4. Does the rubric encode that ordinal dimensions are not carried in names?
+
+**Yes, on the name path, and it is the most forcefully stated rule in the whole prompt set.**
+`review_names_system.md:20-38` carries it under its own heading, flagged HARD:
+
+> ## Positional samples never enter Standard Name identity — HARD
+>
+> Never emit, propose, approve, or refine a Standard Name that encodes an ordered sample or
+> endpoint. Positional words such as **first, second, third, start, end** and equivalent
+> sample-position labels remain in the DD path and source description as provenance, never in the
+> identity. Apply this rule only when the source structure proves that the word indexes a point or
+> sample; do not strip a registered semantic token such as `first_wall`, or `start`/`end` when it
+> names a state or process rather than sample position.
+
+The block is well-built in three ways a reviewer needs. It **names the verbs** — "approve, or
+refine" — so it binds the reviewer and not only the generator. It **carves out the false
+positives** (`first_wall`, a `start` that names a state), which is the failure a blunter rule would
+cause. And it **says what to do instead**, closing the loop the rubric otherwise leaves open
+(`:31-38`):
+
+> Dropping the positional label must preserve the exact quantity, owner, carrier, geometry
+> representation, axis, mechanism, and locus. If the same non-ordinal identity needs an unavailable
+> carrier or locus token, emit a `vocab_gap` for that exact token. Never borrow `line_of_sight` or
+> another object's identity. Thus `radial_coordinate_of_arc_of_circle_start_point` is forbidden …
+
+It is also **backed in code rather than only asserted in prose**, which is unusual for a prompt
+rule: `_is_ordinal_point_sample` (`imas_codex/standard_names/workers.py:2685`) recognises the shape
+structurally — "the DD's `point`/`points` sampling noun and/or an ordinal position word, rather
+than by an exhaustive path list" — and distinguishes it from a genuine second field of a device
+(`camera/direction` vs `camera/up`).
+
+**Two gaps, both in reach rather than in content.**
+
+*The block sits on the name path only.* Of the ten reviewer prompt files, three carry it —
+`review_names_system.md`, `review_names.md:50` and `review.md:48` — and **seven do not**:
+`review_names_user.md`, `review_docs.md`, `review_docs_system.md`, `review_docs_user.md`,
+`review_docs_parent_system.md`, `review_description_system.md`, `review_description_user.md`. A
+docs reviewer writing `revised_documentation` for a line-of-sight identity has no instruction that
+"the first reference point" is provenance rather than identity — and the WEST audit's most-repeated
+description defect is exactly that: a shared line-of-sight description naming "the first reference
+point" while the identity is bound to second and third points across 14 bindings.
+
+*Nothing scores it.* The rule is stated HARD but lands on no dimension. `grammar` is a parse
+question and an ordinal-qualified name parses; `convention` is style; `semantic` would take it under
+"cross-name consistency" only by a reviewer's own choice. So a reviewer following the rule has no
+told place to put the dock, and a reviewer proposing an ordinal-qualified `suggested_name` is not
+refused by the model validator either — `_clear_unparseable_suggestion` (`models.py:1445`) only
+rejects what fails a grammar parse, and `radial_coordinate_of_arc_of_circle_start_point` parses
+cleanly. **The one rule with a code-level recogniser has no code-level enforcement at the review
+boundary**, so an ordinal-qualified suggestion reaches downstream intact and must be rejected by
+hand later.
+
+## Result
+
+| question | answer |
+| --- | --- |
+| scoring dimensions on the path the WEST cut ran | **4** (`grammar`, `semantic`, `convention`, `completeness`), 0–20 each over 80 |
+| dimensions on the full path | 6 over 120; `physics_accuracy` exists on the **docs** rubric only |
+| defect classes expressible with both a dimension and a correction field | **4 of 6** |
+| classes with **no** dimension and **no** field | **1** — bindings spanning loci of different kinds |
+| classes with dimension and field but an instruction pointing away | **1** — documentation contradicting its own bindings |
+| classes expressible but not separable from style after scoring | **1** — a wrong modifier that is a physics error |
+| reviewer prompt files carrying the ordinal rule | **3 of 10** |
+| dimensions the ordinal rule can be scored on | **0** — stated HARD, docked nowhere |
+| correction fields able to carry more than one name | **0** |
+
+**The headline is the last row.** Four of the six classes are expressible and the rubric's language
+for two of them is sharper than the audit's own — it calls source-fidelity "the **#1 silent
+failure**" and uses a WEST strike-point path as its worked example. So for most of what the audit
+found, *a correct reviewer had somewhere to put it*, and the reason the defects shipped is upstream
+of the rubric: in the comparators the reviewer is shown, and in the fact that a per-identity review
+never holds two members of a container at once.
+
+The genuine expressiveness gap is narrow and specific: **a review model whose only correction slots
+are two single strings cannot propose a split**, and a split is the repair for the one class the
+audit called unrepairable by a reader. Widening that is not a prompt edit — it needs a field, and
+the natural shape is a per-binding list rather than a second string.
+
+The second finding is cheaper and sharper: the docs prompt tells the reviewer to **dock the output
+for citing the source paths** while the name prompt calls the same field the **authoritative
+bound-source cohort**. One of those two sentences is wrong about what bindings are for, and the
+measured strike-point documentation defect is what the disagreement costs.
