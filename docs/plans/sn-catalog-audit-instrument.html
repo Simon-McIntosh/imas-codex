@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -75,13 +75,11 @@
           <line x1="192" y1="75" x2="292" y2="75" stroke="#333" stroke-width="1"/>
           <line x1="468" y1="75" x2="568" y2="75" stroke="#333" stroke-width="1"/>
 
-          <line x1="228" y1="58" x2="256" y2="92" stroke="#b00" stroke-width="2"/>
-          <line x1="256" y1="58" x2="228" y2="92" stroke="#b00" stroke-width="2"/>
-          <text x="242" y="126" text-anchor="middle" fill="#b00">every finding dropped</text>
-          <text x="242" y="143" text-anchor="middle" fill="#b00">getattr(report, "findings")</text>
+          <text x="242" y="126" text-anchor="middle" fill="#555">findings reached it:</text>
+          <text x="242" y="143" text-anchor="middle" fill="#555">repaired 2026-09-21</text>
 
-          <text x="380" y="126" text-anchor="middle" fill="#b00">comparators exhausted</text>
-          <text x="380" y="143" text-anchor="middle" fill="#b00">after ~6 of 25 items</text>
+          <text x="380" y="126" text-anchor="middle" fill="#b00">one batch-level query,</text>
+          <text x="380" y="143" text-anchor="middle" fill="#b00">from 3 of 25 descriptions</text>
           <line x1="380" y1="104" x2="380" y2="114" stroke="#b00" stroke-width="2"/>
 
           <text x="656" y="126" text-anchor="middle" fill="#555">reports what reached it</text>
@@ -102,24 +100,60 @@
       <code>lint_findings</code>, <code>link_findings</code> and
       <code>duplicate_components</code> — <strong>there is no
       <code>findings</code> field</strong>, verified against the live model, so
-      the expression returns the empty default on every call. Layer 1 runs, and
-      one hundred percent of what it produces is discarded before the reviewer
-      prompt is built. No test anywhere referenced the attribute, so nothing
+      the expression returned the empty default on every call. Layer 1 ran, and
+      one hundred percent of what it produced was discarded before the reviewer
+      prompt was built. No test anywhere referenced the attribute, so nothing
       failed.
     </p>
 
     <p>
-      <strong>Layer 2's catalog comparators are exhausted part-way through each
-      batch.</strong> In <code>workers.py</code> near line 5608 the name-review
-      path builds <code>nearby_existing_names</code> by embedding search,
-      <code>k=5</code> per item, appending into one batch-level list capped at
-      30 — and on reaching the cap it breaks the <em>outer</em> loop. With
-      <code>sn-compose</code> batch-size 25 (50 for names-only), the first six or
-      so items consume the entire budget and <strong>every later item contributes
-      nothing</strong>. Worse, the list is rendered batch-level, so all 25
-      candidates are judged against comparators drawn from the neighbourhoods of
-      the first six. The reviewer prompt instructs the model to flag a redundant
-      spelling; for most of the batch it has nothing to flag against.
+      <strong>This one is repaired.</strong> A concurrent session landed the fix
+      on 2026-09-21 and it is on <code>main</code>: <code>_extract_audit_findings</code>
+      now reads <code>audit_report.lint_findings</code> and
+      <code>audit_report.link_findings</code> directly. The plan keeps the account
+      because the shape recurs — the same session found further sites and is
+      landing a static check that refuses any three-argument <code>getattr</code>
+      whose literal attribute the target model does not declare. What this plan
+      still owes is the calibration that would have caught it: a whole layer
+      producing nothing reached no gate, because no gate asked whether the layer
+      had executed.
+    </p>
+
+    <p>
+      <strong>The catalog comparators are starved, and correcting where that
+      happens makes it worse rather than better.</strong> This was first recorded
+      here as a review-path defect. It is not: <code>workers.py:5609</code> sits
+      inside <code>compose_batch</code> and <code>:3732</code> inside
+      <code>compose_worker</code>, both of which render
+      <code>sn/generate_name_dd</code>. The starved list feeds <strong>name
+      generation</strong>, not review. Each builds
+      <code>nearby_existing_names</code> at <code>k=5</code> per item into one
+      batch-level list capped at 30, and on reaching the cap breaks the
+      <em>outer</em> loop, so with a 25-item batch the first six or so items
+      consume the whole budget and every later item composes against comparators
+      drawn from other items' neighbourhoods. Those comparators exist to make the
+      composer reuse the cohort's established spelling, and <em>minority spelling
+      of a base the cohort already fixes</em> is one of the five defect classes,
+      present in every block of the census. So this is a <strong>mechanism that
+      produces the defect</strong>, not merely a detection limit — a stronger and
+      more useful finding than the one it replaces.
+    </p>
+
+    <p>
+      <strong>The review path has its own, different blindness.</strong> It does
+      not share the compose builder. <code>build_neighborhood_context</code>
+      (<code>review/enrichment.py</code>) issues <strong>one query for the whole
+      batch</strong>, assembled from the cluster label plus the first three
+      descriptions, and returns <code>k=10</code> neighbours — so a batch is never
+      searched per item at all, and every candidate is judged against a
+      neighbourhood derived from at most three of its peers. Its
+      <code>all_names</code> parameter, the full catalog, is documented in its own
+      docstring as <em>"unused in current impl"</em>. And the standalone path sets
+      <code>"existing_names": []</code> at <code>review/pipeline.py:1952</code>
+      with the comment <em>"not needed for standalone review"</em>, while the
+      compose path passes up to 200. The tool this plan means to calibrate is
+      therefore the one with the least catalog awareness of any surface in the
+      pipeline.
     </p>
 
     <p>
