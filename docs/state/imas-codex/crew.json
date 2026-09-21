@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T09:19:45",
+  "updated": "2026-09-21T09:29:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -164457,6 +164457,235 @@
         "store_write": {
           "status": "written"
         }
+      },
+      {
+        "run_id": "r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source",
+        "plan": "paid-identity-deletion-protection",
+        "section": "",
+        "node": "n-the-restore-receipt-names-its-expected-source",
+        "node_definition": {
+          "coordinator": {
+            "authoring_turn": {
+              "source": "claude-code-session-transcript",
+              "status": "measured",
+              "tokens": {
+                "cache_creation_input_tokens": 2924,
+                "cached_input_tokens": 321172,
+                "input_tokens": 324098,
+                "output_tokens": 678,
+                "reasoning_output_tokens": 0,
+                "total_tokens": 324776,
+                "uncached_input_tokens": 2
+              }
+            },
+            "harness": "claude-code",
+            "runtime_session_id": "bf3cd1d0-e50a-4abd-a42e-6dc2f18d5126",
+            "session_id": "ship-s10-20260918"
+          },
+          "done_when": "Confirm the defect reproduces before repairing it, and quote the reproduction: _archive_role_parity in imas_codex/standard_names/signed_manifest.py builds each role's `expected` as archived.get(role, closure.get(role, 0)) while iterating sorted(_ARCHIVE_PARITY_ROLES | set(archived)), so a registry role that neither the archive census nor the reconstruction closure names is reported as expected 0 while `observed` carries the live count read inside the transaction. A correct restore therefore prints expected 0 against observed 1 and reads as a parity failure. Build an authority whose archive_roles and edges mention no EVIDENCED_BY while the live graph holds one, show the receipt printing expected 0 and observed 1, then repair it, then show the same input reporting the role without asserting a false expectation. The repair is specified: every parity row must state which source its expected count came from, as a third field naming the archive census, the reconstruction closure, or neither, and a row whose source is neither must not present 0 as an expectation -- report it as unestablished rather than as zero. Do not change which side governs the refusal. That adjudication is already settled and must be preserved: the reconstruction closure governs the refusal and the archive census governs the receipt, because EVIDENCED_BY is held inbound from PromotionCandidate and no reconstruction edge can carry it, so making the census govern the refusal would make every archived identity that ever carried one unrestorable. A second recorded defect in the same surface is in scope and must be confirmed independently: the observed count reported at the site that composes the applied receipt is emitted without reading the graph in one branch, so a receipt can state observed 0 for a role it never looked at. Where that is already correct, verify it and add the missing test rather than reimplementing a working guard. The done-when is that a test under tests/standard_names/ constructs an authority exercising each of the three expected-count sources, asserts the source field on every row, asserts a neither-source row does not read as zero, and fails against the declared negative control -- and that UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run pytest -p no:cacheprovider tests/standard_names/ runs on a debug SLURM partition with its exit status, failure count and failure ids recorded against the same measurement at your base revision, so added failures rather than absolute green is the verdict. A guard that passes its own test by weakening itself is worse than no guard. Report any defect outside these write paths under follow_ons.",
+          "estimated_hours": 1.5,
+          "goal": "stop the restore receipt presenting an unestablished expectation as zero",
+          "id": "n-the-restore-receipt-names-its-expected-source",
+          "lane_declaration": {
+            "backend": "codex",
+            "headroom": "known",
+            "metered": true,
+            "observed_at": "2026-09-21T06:05:59Z",
+            "read_at": "2026-09-21T06:06:00Z",
+            "resolved_backend": "codex",
+            "utilisation_pct": 1.0
+          },
+          "lane_reading": {
+            "age_seconds": null,
+            "binding_observed": "unknown",
+            "detail": "backend declares no lane document",
+            "headroom": "unknown",
+            "mean_context": "unknown",
+            "observed_at": null,
+            "state": "unknown",
+            "suggested_shelf_life_seconds": null
+          },
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source/manifest.md",
+          "negative_control": "replace the source-selecting expected computation with \"expected = archived.get(role, closure.get(role, 0))\" and remove the \"expected_source\" field from each parity row; leave the observed lookup unchanged",
+          "plan": "paid-identity-deletion-protection",
+          "requested_backend": "codex",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "token_budget": null,
+          "write_paths": [
+            "imas_codex/standard_names/signed_manifest.py",
+            "tests/standard_names/test_archive_parity_receipt.py",
+            "docs/evidence/archive/paid-identity-deletion-protection-landed.html",
+            "docs/plans/paid-identity-deletion-protection.html",
+            "tests/standard_names/test_restore_receipt_parity.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "cx-receiptparity",
+        "backend": "codex",
+        "local": false,
+        "agent": {
+          "alias": "sol5.6",
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-09-21T06:06:11Z",
+        "completed_at": "2026-09-21T06:56:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3030,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3030,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "9a5e40f4ba6ed89ebe44ef7606d0eb6db4010236",
+        "commits": [
+          "a19188a6ee126b183d518a46fc5b3835139f42b6",
+          "87b443f3ba49c13b279cfc5c216241ab36b31f42"
+        ],
+        "changed_lines": {
+          "added": 186,
+          "removed": 19,
+          "files": 5
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "gate_check": {
+          "command": "srun --partition=all_debug pytest -p no:cacheprovider tests/standard_names/test_archive_parity_receipt.py tests/standard_names/test_restore_receipt_parity.py at the merged head, with both per-repair negative-control logs quoted",
+          "exit_status": 0,
+          "log_path": "/home/ITER/mcintos/.cache/imas-codex-west-audit/receipt-parity-gate.log",
+          "log_digest": null
+        },
+        "suite_delta": null,
+        "failure_classification": null,
+        "outcome": "each archive parity row names whether its expected count came from the archive census, the reconstruction closure or neither, carrying null instead of a fabricated zero when neither establishes it, so a correct restore no longer reads as expected 0 against observed 1. Which side governs the refusal is unchanged. Four pre-existing tests were migrated to the three-field shape rather than relaxed. The node first ran one control on the observed side leaving the expected-side guard unproven; resumed, it ran both, one per repair. The independent opus review scored 86 SOUND and found two gaps outside the fence: the archive-census-before-closure precedence its own docstring states is pinned by no test, so inverting the branches leaves the whole suite green because every landed test places a role in exactly one source; and cli/sn.py:8466 prints only expected and observed, so a 67-identity restore emits roughly 2,345 lines reading expected None observed 0 with no way to tell an unestablished count from a recorded null",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0c292-71f2-74e1-92c4-a3055f4d0603",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 24726272,
+            "cached_input_tokens_cumulative": 24726272,
+            "input_tokens": 25046333,
+            "input_tokens_cumulative": 25046333,
+            "output_tokens": 46131,
+            "output_tokens_cumulative": 46131,
+            "reasoning_output_tokens": 13545,
+            "reasoning_output_tokens_cumulative": 13545
+          },
+          "cost_usd": null,
+          "refusal": false,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lane_receipt": {
+          "quota_state": "measured",
+          "observed_at": "2026-09-21T06:56:41Z",
+          "effective_context_window": 380000,
+          "quota_windows": [
+            {
+              "window_minutes": 10080,
+              "used_percent": 7.0,
+              "resets_at": 1790575134,
+              "observed_at": "2026-09-21T06:56:41Z"
+            }
+          ],
+          "notional_cost_usd": 118.6851,
+          "rate_basis": {
+            "model_identifier": "gpt-5.6-sol",
+            "input_per_million": 4.0,
+            "output_per_million": 20.0,
+            "as_of": "2026-09-09"
+          }
+        },
+        "lineage": null,
+        "shadow_controlled": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "review": {
+          "status": "parsed",
+          "scores": {
+            "durability": 15,
+            "evidence": 17,
+            "fit": 16,
+            "goal_fidelity": 18,
+            "scope_discipline": 20
+          },
+          "absent": [],
+          "total": 86
+        },
+        "throughput": {
+          "cumulative_cached_input_tokens": 24726272,
+          "cumulative_input_tokens": 49772605,
+          "detail": "turn tokens recorded, but no span was supplied to rate them",
+          "generated_tokens": 59676
+        },
+        "follow_on_paths": [],
+        "dispute_count": 0,
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "uv run pytest -p",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        },
+        "attempt_kind": "resume",
+        "attempt": 3,
+        "duration_measurement": {
+          "status": "underivable",
+          "reason": "model_span_unavailable_at_promotion"
+        },
+        "scope_acceptances": null,
+        "no_commit": null,
+        "commit_resolution": null,
+        "worktree_retention": {
+          "classification": "retained-for-resume",
+          "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/ship-s10-20260918/n-the-restore-receipt-names-its-expected-source",
+          "session_id": "01a0c292-71f2-74e1-92c4-a3055f4d0603",
+          "session_source": "stream",
+          "retained_at": "2026-09-21T06:56:41Z"
+        },
+        "boundary_waiver": null,
+        "resume_waiver": null,
+        "watch_override": null,
+        "plan_impl_at_dispatch": 0.72,
+        "impl_move": {
+          "plan": "paid-identity-deletion-protection",
+          "at_dispatch": 0.72,
+          "at_complete": 0.86,
+          "verdict": "moved"
+        },
+        "negative_control": {
+          "verdict": "matched",
+          "reason": "node-writes-no-test-path",
+          "test_paths": [
+            "tests/standard_names/test_archive_parity_receipt.py",
+            "tests/standard_names/test_restore_receipt_parity.py"
+          ],
+          "declaration": "replace the source-selecting expected computation with \"expected = archived.get(role, closure.get(role, 0))\" and remove the \"expected_source\" field from each parity row; leave the observed lookup unchanged",
+          "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source/negative-control-expected-source.log",
+          "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T060558075748-n-the-restore-receipt-names-its-expected-source/negative-control-expected-source.log"
+        },
+        "tool_steps": 38.0,
+        "orientation_input_tokens": 7161898.0,
+        "store_write": {
+          "status": "written"
+        }
       }
     ],
     "holds": [
@@ -164769,6 +164998,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2417
+    "_version": 2418
   }
 }
