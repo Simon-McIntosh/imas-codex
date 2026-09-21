@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-21T10:43:22",
+  "updated": "2026-09-21T10:43:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -165,6 +165,15 @@
       },
       {
         "id": "claude-opus-rev-4",
+        "harness": "claude-opus",
+        "role": "review",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-09-21"
+      },
+      {
+        "id": "claude-opus-rev-5",
         "harness": "claude-opus",
         "role": "review",
         "session_id": null,
@@ -166330,6 +166339,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2428
+    "_version": 2429
   }
 }
