@@ -454,3 +454,54 @@ could share one cached parse — or to raise the limit for these two explicitly 
 what else the cluster is doing, because a phantom failure spends a coordinator's
 attention on code that never changed. This one cost a diff, a traceback read and
 a retraction of the suspicion that documentation commits had moved a test.
+
+### Correction to the section above: the second test was never near the limit
+
+**The claim that `test_declared_attribute_access` sits 1.7 s from a 30 s timeout is
+wrong, and so is the sentence attributing the flake half to it.** A peer session
+checked the file and found what this session did not:
+
+```python
+tests/standard_names/test_declared_attribute_access.py:443
+@pytest.mark.timeout(300)
+def test_three_argument_getattr_names_a_declared_attribute() -> None:
+```
+
+The marker is on exactly the whole-package walk — the one call to
+`assert_declared_attribute_access()` with no root. Its 28.32 s runs against a
+**300 s** ceiling, not the 30 s default, so it is nowhere near timing out. The
+other eight tests in that file take `tmp_path` and scan scratch trees.
+
+The correction is appended rather than applied in place, because the wrong reading
+was published and a reader deserves to see what the record said. Two sentences
+above are retracted: *"Both walk the whole package … and both sit at 28–30 s
+against a 30 s per-test timeout"* — only one does — and *"Half of this is
+self-inflicted … the improvement and the flake arrived together"*, which
+attributed a phantom failure to the only test on this surface that declares its
+own cost. The self-blame was not humility, it was an unchecked assumption; the
+file was never opened.
+
+**The real exposure is larger than the one first recorded.** Censused on
+2026-09-23 over `tests/standard_names/`:
+
+| | files |
+|---|---|
+| use `ast.parse` | **16** |
+| carry a `pytest.mark.timeout` | **1** |
+| carry none, running under the 30 s default | **15** |
+
+The single marked file is `test_declared_attribute_access.py`. The timeout that
+prompted this whole section came from `test_cost_ledger_augments_only.py`, which is
+in the unmarked fifteen. (A peer's independent census reported 15 and 14; this one
+finds one more file, and the discrepancy is not resolved — it is likely a file
+using `ast.parse` only inside a helper. The direction is the same either way.)
+
+So the finding is not *two tests near a limit*. It is **one test over the limit and
+a class of fifteen whole-package AST walkers running under a default none of them
+declares**, any of which can emit a phantom `FAILED` naming a real test as soon as
+the node is contended. The reading rule stands unchanged — separate
+`Failed: Timeout` from assertion failures before attributing either — but the
+durable fix is that a test which walks the package should say so with a marker,
+which is what the one marked file already does and what the other fifteen could
+copy. That is a mechanical, behaviour-preserving sweep and therefore its own
+commit, sequenced when no session holds uncommitted work in the affected files.
