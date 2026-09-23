@@ -27,8 +27,8 @@
   <title>Catalog Audit Instrument: What Landed | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-09-21">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-09-23">
+<meta name="plan-version" content="4">
 <meta name="plan-status" content="active">
 </head>
 <body>
@@ -1083,6 +1083,26 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     347 → 425 → 400). The knee, as the lowest level beyond which throughput does
     not rise, is <strong>32</strong>: the doubling to 64 falls 5.9% against the
     same 36.45 the curve plots at 32, so the curve flattens rather than rises.</p>
+
+    <p><strong>Why it flattens where it does, established after the fact.</strong>
+    Every concurrency in this record is <em>requested</em> &mdash; what the client
+    held outstanding &mdash; and the engine does not run that many. Its launch
+    carries <code>max_running_requests=36</code>, confirmed for this engine and for
+    its predecessor from both launch lines, with
+    <code>schedule_policy='fcfs'</code>, <code>max_total_tokens=4000000</code> and
+    <code>hicache_ratio=2.0</code>. So the requested c=64 row ran <strong>36 in the
+    engine with about 28 queued inside it</strong>, not 64 concurrently, and the
+    knee at 32 is the last level that fits under that cap. The flattening is
+    therefore the cap asserting itself rather than the GPUs saturating, which is a
+    stronger statement than the curve alone supports: asking for more than 36 does
+    not buy throughput because the engine will not run more than 36.</p>
+
+    <p>That also re-reads the starvation figure. The <strong>43 of 64</strong>
+    requests past the 60&nbsp;s deadline at c=64 are largely the internally queued
+    population waiting behind a full running set under first-come ordering, not
+    requests thrashing against the GPUs. A queue ordered by cached prefix rather
+    than arrival is exactly what would move that number, so this row is the one to
+    compare against any future scheduling change.</p>
 
     <p><strong>The spread is measured, not assumed, and it is why the criterion is
     the plateau rather than a single point.</strong> Four samples in the record
