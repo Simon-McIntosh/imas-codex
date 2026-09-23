@@ -521,3 +521,64 @@ came from a single run on a contended node, so they establish that the timeout
 at 7.88 s implies a sparse tail, which means the genuinely at-risk set is probably
 a few tests rather than fifteen files — but that is an inference from one sample,
 and a surface-wide durations distribution is what should decide the line.
+
+### Third correction, and it supersedes the per-test framing entirely
+
+**Both earlier readings of this flake were wrong, in opposite directions, and the
+class was the wrong axis.** A peer ran the surface-wide durations measurement
+neither of us had, on a debug partition: **20 failed, 7,623 passed, 3 errors, and
+zero `Failed: Timeout`** — every failure an assertion. Their slowest test uses no
+`ast.parse` at all. It is
+`test_pool_registry_imports::test_pool_phase_import_orders_succeed_in_fresh_process`,
+which starts a fresh interpreter per case and imports the CLI, so its cost is the
+process. The slowest `ast.parse` test on the whole surface was 3.69 s.
+
+So the `ast.parse` census in the section above describes a real class that is **not
+the at-risk class**. A grep-driven sweep would have marked fourteen tests that do
+not need it and missed the one that might.
+
+**But the single-test conclusion is also unsupported, and this is the part three
+samples show that one cannot.** The same test, with the same whole surface running
+beside it, at the same commit:
+
+| test | my base run | my mutated run | peer's run |
+|---|---|---|---|
+| `…fresh_process` (their marked test) | 7.83 s | 7.53 s | **27.89 s** |
+| `…deletes_an_llm_cost_node` | **30.05 s** | under 4.7 s | 6.40 s |
+| `…getattr_names_a_declared_attribute` | **28.32 s** | under 4.7 s | 3.69 s |
+
+**Each of the three runs stretched a different test.** Mine stretched two and not
+theirs; theirs stretched one and not mine; my second run stretched none. Whole-run
+wall time tracks it — 494 s, 378 s and 317 s — so contention is roughly a
+property of the run, while *which* tests absorb it is not stable.
+
+That means neither *two AST walkers near the limit* nor *one fresh-process test
+near the limit* is the finding. **The finding is that any test whose uncontended
+cost is a few seconds can cross a 30 s default when a run is squeezed, and which
+one gets hit is not predictable from a single sample.** The peer's 27.89 s is their
+outlier exactly as 30.05 s and 28.32 s were mine; a marker sized from it is
+harmless and generous, and the reasoning that only that test needs one does not
+replicate.
+
+**The remedy is therefore not decorators.** A per-test ceiling cannot anticipate
+which test the squeeze lands on, and no marker scheme protects a contended login
+node because the whole surface stretches together. The peer's own closing point is
+the correct one and the data supports it more strongly than they put it: **the
+contention answer is the compute rule** — run the surface under `srun` on a debug
+partition, never on the login node — with a marker reserved for a test whose
+*uncontended* cost genuinely leaves no headroom. Their measurement found one
+candidate for that and my samples put the same test at 7.8 s, so even that is
+unsettled.
+
+**What survives all three corrections**, and it is the only part that was ever
+load-bearing: a timeout presents as a `FAILED` line naming a real test, a count
+cannot carry the distinction, and `grep ^FAILED` discards it. Separate
+`Failed: Timeout` from assertion failures before attributing either. That rule
+held through every revision of the mechanism around it.
+
+**And the shape of being wrong three times about one flake is worth more than the
+flake.** Reading one, I inferred proximity from two long durations without opening
+the file. Reading two, I corrected the attribution but kept the class. Reading
+three, a peer's measurement broke the class and my own two samples broke their
+replacement. Every step was a single observation treated as a distribution, and
+the correction each time came from someone measuring rather than reasoning.
