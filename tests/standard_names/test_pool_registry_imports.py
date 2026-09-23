@@ -10,6 +10,14 @@ from pathlib import Path
 import pytest
 
 
+# Each case starts a fresh interpreter and imports the CLI, so the cost is the
+# process rather than the assertion. Measured on a debug partition: 6.98 s for
+# the slowest case run alone, but 27.89 s for that same case when the whole
+# standard-names surface runs beside it — which is the condition a gate uses,
+# and 93% of the suite's 30 s default. A contended login node stretches it far
+# further; one such run was still going after thirteen minutes. The ceiling is
+# sized for the surface-run figure with room above it, not for the solo one.
+@pytest.mark.timeout(300)
 @pytest.mark.parametrize(
     "imports",
     [
