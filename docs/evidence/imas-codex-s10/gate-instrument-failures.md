@@ -582,3 +582,29 @@ the file. Reading two, I corrected the attribution but kept the class. Reading
 three, a peer's measurement broke the class and my own two samples broke their
 replacement. Every step was a single observation treated as a distribution, and
 the correction each time came from someone measuring rather than reasoning.
+
+### The shape all five errors share: a small check inherits no scrutiny
+
+Across two independent sessions this one flake produced five wrong readings, and
+they are the same error rather than five:
+
+| error | the small step that went unexamined |
+|---|---|
+| inferring proximity from two long durations | never opened the file to see the existing 300 s marker |
+| attributing the flake to the test I had authored | self-blame read as rigour, so it was exempt from checking |
+| reading a repair as half-done from two grep hits | the hits matched a quoted correction, not a live claim |
+| verifying a marker on the login node at load 118.66 | the verification was one test, so the compute rule felt inapplicable |
+| generalising one run into "the condition a gate uses" | stated while correcting someone else's single-sample error |
+
+**Each time the cheap step inherited none of the discipline the expensive one
+got.** The surface-wide durations run went to a debug partition correctly, and the
+one-test check to verify its result did not. The three-revision correction of a
+census was careful, and the glance at a durations table that started it was not.
+The last row is the sharpest: the single-sample error was committed inside the
+message that diagnosed single-sample errors.
+
+The remedy is not more care in general, which is what every one of these
+already felt like. It is that **a check small enough to feel exempt is exactly the
+one to run under the rule** — the partition, the second sample, the opened file.
+Cost is not a proxy for consequence: four of the five wrong readings above cost
+one command to prevent, and two of them were published before anyone caught them.
