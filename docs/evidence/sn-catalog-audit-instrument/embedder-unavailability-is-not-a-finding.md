@@ -87,6 +87,48 @@ A test that patches the embedder to raise and asserts the report carries an
 unavailability finding would have covered the whole of the outage window that
 prompted this.
 
+### The obvious repair is worse than the fail-open
+
+**The unavailability signal must not be emitted inside the
+`audit:<critical-check>:` namespace.** Quarantine is decided by substring, with
+no severity field:
+
+```python
+def has_critical_audit_failure(issues: list[str]) -> bool:
+    for issue in issues:
+        for check in CRITICAL_CHECKS:
+            if f"audit:{check}:" in issue:
+                return True
+```
+
+`semantic_similarity_check` is a member of that set. So an issue string reading
+`audit:semantic_similarity_check: embedder unavailable` would **quarantine every
+name the outage touched** — on 2026-09-23 that is the whole review population —
+not because any name is defective but because a GPU job was cancelled.
+
+The current fail-open returns `(None, [])`, a silent pass. Emitting a finding in
+that namespace converts it into a **silent mass demotion**, and the second is far
+harder to undo than the first. The repository has the precedent: a property
+written for one purpose later acted as a delete permission across 2,096 rows.
+**A string meaning *this name is defective* must not be reachable by *I could not
+tell*.**
+
+The distinction the code lacks is **check failed** versus **check could not
+run**. Two shapes hold it, and the choice belongs to whoever takes the repair:
+keep the unavailability signal outside the critical namespace so it reports
+without demoting, or refuse before any name is judged — which fits
+`EmbeddingReport` having no state to branch on, and is closer to stopping rather
+than grading. Locked as a decision on the owning plan.
+
+### Measure what the fail-open was holding up, before writing the change
+
+Making one guard in this repository raise instead of swallow exposed **38
+failures and 5 setup errors across 13 files**, none of them regressions — every
+one green only because the guard had been switching itself off. Expect that shape
+here: flip it closed in a scratch copy and count first, so the number is in the
+brief rather than discovered by the worker, and split the node if it cannot
+absorb what it exposes. Never widen the swallow to reach green.
+
 ## Exposure, measured rather than assumed
 
 The embedding server had been up 8 days 11 hours when it was cancelled at

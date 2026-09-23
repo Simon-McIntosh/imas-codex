@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-23">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 </head>
 <body>
   <main class="plan-doc">
@@ -777,6 +777,10 @@
       <button class="r-opt" data-value="flag-only">writes a review flag, never a name or a stage</button>
       </p>
     <p class="r-dec-rat">The method depends on re-running the instrument as a measurement, and a tool that mutates on each run changes what the next run measures, destroying the fixture&#x27;s independence. It also avoids repeating the origin-field incident, where a property written for one purpose later acted as a delete permission across 2096 rows. Findings leave as a worklist; applying them stays a separate authorised act through sn edit.</p>
+    </div>
+<div class="r-dec" data-key="embedder-unavailability-must-not-reach-the-critical-namespace" data-choice="An unreachable embedder is reported outside the audit:&lt;critical-check&gt;: namespace, or the run refuses before any name is judged. It is never emitted as an issue string in a CRITICAL_CHECKS namespace." data-by="smc" data-when="2026-09-23T04:56:15+00:00">
+    <p class="r-dec-q">embedder-unavailability-must-not-reach-the-critical-namespace</p>
+    <p class="r-dec-rat">has_critical_audit_failure (audits.py:3672) decides quarantine by substring — `if f&quot;audit:{check}:&quot; in issue` over every member of CRITICAL_CHECKS — with no severity field. semantic_similarity_check is a member, so an unavailability issue written in its namespace would quarantine every name the outage touched; on 2026-09-23 that was the whole review population, not because any name is defective but because a GPU job was cancelled. The current fail-open returns (None, []), a silent pass; the obvious repair would convert it into a silent mass demotion, which is far harder to undo. This repository has the precedent: a property written for one purpose later acted as a delete permission across 2,096 rows. A string meaning `this name is defective` must not be reachable by `I could not tell`. The missing distinction is check failed versus check could not run.</p>
     </div>
 </section>
 
