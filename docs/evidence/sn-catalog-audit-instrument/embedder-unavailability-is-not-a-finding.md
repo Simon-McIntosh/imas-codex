@@ -146,3 +146,82 @@ stay off `imas_codex/standard_names/review/audits.py`. Sites 2 and 3 are this
 session's, found while verifying site 1. The original finding lived as a plan
 comment with no followup id, so nothing in pending work would have surfaced it —
 which is why this record is paired with one.
+
+## Measured: what the suite was resting on
+
+Closing all four swallow points in a scratch tree at `243ccef6c` and running
+`tests/standard_names/` at base and mutated, both on `all_debug`, both with
+`SOURCE_DATE_EPOCH` fixed, both with a totals line asserted:
+
+| | failed | passed | errors | ids |
+|---|---|---|---|---|
+| base | 22 | 7,620 | 3 | 25 |
+| fail-opens closed | 24 | 7,618 | 3 | 27 |
+
+**Exposure: 3 tests.** Each mutation was asserted to have applied exactly once
+before the run, because a mutation that silently fails to apply would make the
+exposure read as zero — the same defect class being measured.
+
+```
+FAILED tests/standard_names/test_audits.py::TestSemanticSimilarityCheck::test_embed_failure_returns_none
+FAILED tests/standard_names/test_review_pipeline.py::test_audit_embedding_preflight
+FAILED tests/standard_names/test_budget_lease_release.py::test_review_name_releases_lease_on_happy_path
+```
+
+One id present at base disappeared when mutated —
+`test_no_production_statement_deletes_an_llm_cost_node` — which is the
+load-dependent timeout flake recorded separately, not an effect of the mutation.
+The base log carries one `Failed: Timeout` and the mutated log none.
+
+**The prediction registered before the run was zero, and it was wrong.** The
+reasoning was that a mocked embedder does not raise, so the `except` branches
+would never execute. Three tests do construct embed failures. Recording the wrong
+prediction because the error is instructive: the fail-open was *more* covered than
+expected, not less, and what the coverage asserts is the problem.
+
+### The fail-open is a tested, documented contract — not an oversight
+
+```python
+def test_embed_failure_returns_none(self):
+    """If embed server is down, should return None gracefully."""
+```
+
+The test patches `embed_descriptions_batch` to raise `ConnectionError` and asserts
+the graceful return. **So the repair is a deliberate contract change, not a bug
+fix**, and that distinction belongs to whoever owns the behaviour rather than to
+the worker who implements it.
+
+The contract is defensible in general and indefensible here, and the difference is
+which check it applies to. Degrading gracefully when an optional enrichment is
+unavailable is reasonable. Degrading gracefully when the check's silence means
+*this name passed a critical audit* is not, because `semantic_similarity_check` is
+a member of `CRITICAL_CHECKS` and its verdict gates quarantine. The contract was
+written for the first reading and the check now serves the second.
+
+### Site 3's swallow is load-bearing for lease release
+
+Closing the caller's handler breaks a test that has nothing to do with embeddings:
+
+```
+test_review_name_releases_lease_on_happy_path
+E   RuntimeError: EXPOSURE PROBE: embedder unavailable
+```
+
+The refusal propagates out of the review path and **the budget lease is never
+released**. So site 3 is not only converting a refusal into silence, it is also
+the thing that keeps a lease from leaking when the check fails. A repair that
+makes the check raise without moving lease release to a path that runs regardless
+trades a silent clean report for a leaked lease on every embedder outage.
+
+That is the concrete constraint the brief owes the worker, and it is exactly what
+a worker would otherwise discover by breaking it.
+
+### What the brief must therefore carry
+
+- Exposure is **3 tests**, not a large number — the node can absorb it.
+- One of the three **asserts the behaviour being removed** and must be rewritten
+  to assert the new contract, not merely fixed.
+- Lease release must survive the refusal; prove it with that test rather than
+  around it.
+- Exclude the timeout-boundary id from any failure-set diff on this surface, or
+  separate timeout failures from assertion failures before attributing either.
