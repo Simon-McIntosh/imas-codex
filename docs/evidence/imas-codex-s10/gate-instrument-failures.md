@@ -396,3 +396,61 @@ The manifest rule the fleet already carries is *write it incrementally so a part
 result is recoverable*. This is its missing half: **append, never rewrite.** An
 incrementally-written manifest that a later turn truncates is no safer than one composed
 at the end.
+
+## Two whole-package AST walks sit inside 2 s of the per-test timeout
+
+**A gate on `tests/standard_names/` can report a phantom failure under cluster
+contention, and the mechanism is a timeout rather than an assertion.** Measured
+2026-09-23 while taking a base reading for an unrelated exposure measurement: the
+surface came back at 22 failed against a merged-head reading of 21 taken hours
+earlier, with nothing but documentation and plan state committed in between.
+
+The extra failure was not a regression:
+
+```
+FAILED tests/standard_names/test_cost_ledger_augments_only.py::test_no_production_statement_deletes_an_llm_cost_node
+E   Failed: Timeout (>30.0s) from pytest-timeout.
+```
+
+Its traceback ends inside `ast.parse(path.read_text())`. The durations table
+explains the rest:
+
+| test | duration | limit |
+|---|---|---|
+| `test_no_production_statement_deletes_an_llm_cost_node` | **30.05 s** | 30 s |
+| `test_declared_attribute_access.py::test_three_argument_getattr_names_a_declared_attribute` | **28.32 s** | 30 s |
+| next slowest on the surface | 7.88 s | 30 s |
+
+Both walk the whole package with `rglob("*.py")` and `ast.parse` every file —
+`_llm_cost_deletions(package)` in the first, and the tree-derived aperture in the
+second. Nothing else on the surface is within 20 s of the limit, so the boundary
+is occupied by exactly these two and the gap to third place is four-fold.
+
+**Half of this is self-inflicted.** The declared-attribute test is one this
+session authored, and its aperture is deliberately derived by walking the tree
+rather than from a hand-maintained list — which is the right design and is also
+what puts it 1.7 s from the timeout. A latent flake was introduced along with a
+real improvement, and only a loaded node revealed it.
+
+**Why it matters more than one flaky test.** Every conclusion in this document
+rests on comparing failure-id sets between two revisions. A load-dependent
+timeout injects an id into one set and not the other, and it presents exactly as
+a regression: a `FAILED` line naming a real test, in a file the change plausibly
+touched. The correct reading requires opening the traceback to see
+`Failed: Timeout` rather than an assertion — a distinction a count cannot carry
+and a `grep ^FAILED` deliberately discards.
+
+**So a failure-set diff needs one more discrimination than it has been getting:**
+separate timeout failures from assertion failures before attributing either.
+
+```bash
+grep -E "^FAILED " "$LOG" | sort -u > ids
+grep -B1 "Failed: Timeout" "$LOG" | grep -oE "^_+ [^_]+ _+$"   # which ids are timeouts
+```
+
+The durable fix is to stop parsing the package twice per run — the two tests
+could share one cached parse — or to raise the limit for these two explicitly via
+`@pytest.mark.timeout`. Either is preferable to a gate whose verdict depends on
+what else the cluster is doing, because a phantom failure spends a coordinator's
+attention on code that never changed. This one cost a diff, a traceback read and
+a retraction of the suspicion that documentation commits had moved a test.
