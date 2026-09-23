@@ -11,12 +11,20 @@ import pytest
 
 
 # Each case starts a fresh interpreter and imports the CLI, so the cost is the
-# process rather than the assertion. Measured on a debug partition: 6.98 s for
-# the slowest case run alone, but 27.89 s for that same case when the whole
-# standard-names surface runs beside it — which is the condition a gate uses,
-# and 93% of the suite's 30 s default. A contended login node stretches it far
-# further; one such run was still going after thirteen minutes. The ceiling is
-# sized for the surface-run figure with room above it, not for the solo one.
+# process rather than the assertion: 6.98 s for the slowest case run alone on a
+# debug partition, the highest floor on this surface.
+#
+# Under a full-surface run the figure does not replicate. Three samples of this
+# same case gave 7.83 s, 7.53 s and 27.89 s, and across those runs a different
+# test absorbed the stretch each time while whole-run wall time tracked it
+# (317 s, 378 s, 494 s). So contention is a property of the run rather than of
+# any test, and no per-test ceiling can anticipate where the squeeze lands — a
+# contended login node put this case past thirteen minutes, which is why heavy
+# runs belong on a partition rather than behind a bigger number here.
+#
+# The ceiling is therefore cheap insurance for the case with the highest floor,
+# not a claim that this is the test at risk. The samples do not support that
+# claim and it should not be repeated from this comment.
 @pytest.mark.timeout(300)
 @pytest.mark.parametrize(
     "imports",
