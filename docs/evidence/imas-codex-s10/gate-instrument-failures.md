@@ -505,3 +505,19 @@ durable fix is that a test which walks the package should say so with a marker,
 which is what the one marked file already does and what the other fifteen could
 copy. That is a mechanical, behaviour-preserving sweep and therefore its own
 commit, sequenced when no session holds uncommitted work in the affected files.
+
+**The sweep must be duration-driven, not grep-driven.** The table above counts
+files that *use* `ast.parse`, and most tests in them parse small `tmp_path`
+fixtures in milliseconds. Marking all fifteen would make `pytest.mark.timeout`
+mean *this file mentions ast* rather than *this test declares its cost*, and the
+next reader of a marker would learn nothing from it. Mark only tests whose
+measured duration is a meaningful fraction of the limit, and put the measured
+figure in the commit body so a later reader can judge whether the marker is still
+justified.
+
+**One caveat on the two figures this section rests on.** The 30.05 s and 28.32 s
+came from a single run on a contended node, so they establish that the timeout
+*fired* and do not characterise the margin. The next-slowest test on the surface
+at 7.88 s implies a sparse tail, which means the genuinely at-risk set is probably
+a few tests rather than fifteen files — but that is an inference from one sample,
+and a surface-wide durations distribution is what should decide the line.
