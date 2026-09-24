@@ -23,7 +23,7 @@ artifact today; the other nine are latent.
 | Surface | Findings | The one that already shows damage |
 |---|---|---|
 | reckon crew and plan layer | 2 | `catalog_release.py` mints `minted_from` as an **absolute reckon-worktree path**, and **twelve committed manifests already carry it — all twelve already dangling** (see below) |
-| local lane and router | 2 | the SN pipeline's lane choice and retry loop **bypass the router admission gate**, so the guard that protects the lane under load is not in the path |
+| local lane and router | 2 | **the headline finding here did not survive checking** — see below. The surviving residue is `get_vllm_port()` |
 | fleet and SLURM placement | 3 | `srun`/`sbatch`/`squeue`/`scancel` issued outside the ledger in `cli/compute.py` and `cli/services.py` |
 | imas-python data access | 2 | `ids/assembler.py:439-440` opens `imas.DBEntry` with **no pinned DD version** |
 | GPFS paths and state files | 2 | `graph/neo4j_ops.py` hand-rolls a lock with a 5 s alarm around `fcntl.lockf` on GPFS |
@@ -31,9 +31,26 @@ artifact today; the other nine are latent.
 **No `h5py` access to IMAS data was found**, which is the one negative result
 worth stating rather than omitting.
 
-The router-admission-gate finding in surface 2 is **this repository's reading of
-another team's surface and is unverified from the router's own view**. It is
-recorded as a lead to confirm, not as a measured fact.
+## The router-admission-gate finding was checked and does not hold
+
+The survey reported that the SN pipeline's lane choice and retry loop bypass the
+router's admission gate. It was passed to the router's owners marked as this
+repository's unverified reading of another team's surface, and **they checked it
+from the router side: it does not hold at the configuration level. The configured
+`api-base` is the router.** The claim is withdrawn rather than softened.
+
+**One real residue survives on our side**, and it is a different defect from the
+one claimed: `get_vllm_port()` (`imas_codex/settings.py:719`, with
+`VLLM_PORT = 18800` at `:716`) is called at `imas_codex/cli/tunnel.py:227` and
+`:1178` and forwards **18800**, an older lane, rather than the router's 18802.
+Verified in the tree at the revision this record was written against.
+
+Worth stating how that verification went, because it is the method this whole
+record depends on: a first grep for the port numbers inside `tunnel.py` returned
+nothing and looked like a refutation. The constant lives in `settings.py`; the
+call sites are in `tunnel.py`. **An absence found by an instrument aimed at the
+wrong file is not an absence** — the claim held, and reporting the empty grep
+would have discarded a true finding.
 
 ## `minted_from` is not a risk, it is realised damage
 
