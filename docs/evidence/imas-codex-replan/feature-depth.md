@@ -88,14 +88,29 @@ invisible for the same reason the roster was.
   variable):** rendering both templates with markers in three context keys gives
 
   ```
-  sn/review_names len 32249 | roster True  | nearby True  | audit False
-  sn/review_docs  len  6869 | roster True  | nearby True  | audit False
+  sn/review_names len 32044 | roster True | nearby True | audit False
+  sn/review_docs  len  6669 | roster True | nearby True | audit False
   ```
 
   The roster and nearby markers render; the audit marker does not. The positive
   controls prove the probe sees a read template, so the absence is specific to
   `audit_findings`, exactly the shape the plan records for the roster
   (`review_names.md`/`review_docs.md` read `existing_names` after `95366b716`).
+  The probe is recorded at
+  `~/.config/reckon/crew/runs/r-20260924T123309301493-n-feature-depth-is-classified-against-the-code/negative-control.log`.
+
+  **The control itself has a trap, and it caught the first attempt.** The
+  nearby block iterates objects and prints `{{ name.id }}`
+  (`review_names.md:273`), so a marker passed as a plain string renders empty
+  and the probe reports `nearby False` — an absence produced by the probe's own
+  input shape, not by the template. Passing the object shape the template reads
+  turns it True. The first attempt is worth recording because it is the same
+  false-absence the check exists to prevent: a control must be shaped like what
+  the healthy path supplies.
+
+- The only other two references to the key in the tree, `benchmark.py:693` and
+  `promote.py:717`, both **write** an empty list into a context. Nothing reads
+  it.
 
 - The test named `test_real_audit_findings_reach_the_batch_prompt`
   (`tests/standard_names/test_audit_findings_reach_the_prompt.py:12`) asserts only
