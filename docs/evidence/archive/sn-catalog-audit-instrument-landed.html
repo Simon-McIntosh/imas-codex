@@ -1267,6 +1267,84 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     + figure at <code>docs/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg</code>
     &middot; base revision <code>69a2fb2df0f6fbaf158f327ca5d54a690254c5b8</code>.</p>
   </section>
+
+  <section id="feature-depth">
+    <h2>Every feature of the instrument is now classified deep or shallow against the code, and the reviewer prompt is still missing the Layer 1 findings</h2>
+
+    <p>The plan's feature inventory is classified one row per feature in
+    <a href="/imas-codex/evidence/imas-codex-replan/feature-depth.md"><code>feature-depth.md</code></a>:
+    the module and site, whether a real non-test call site reaches it, whether a
+    test exercises it, and a one-line verdict with <code>file:line</code> for the
+    evidence. Twenty-five rows cover every feature the plan names.</p>
+
+    <p><strong>The headline.</strong> Routing the deterministic Layer 1 findings
+    into the reviewer prompt is <strong>shallow</strong>. The extraction shipped
+    and is correct — <code>_extract_audit_findings</code> reads the three lists
+    <code>AuditReport</code> actually declares and the result is set on the render
+    context (<code>review/pipeline.py:1714</code>, <code>:550</code>,
+    <code>:1964</code>). <strong>No template names it.</strong> A search of every
+    prompt file finds no <code>audit_findings</code>, and a render probe injecting
+    markers into three keys gives</p>
+
+    <pre>sn/review_names len 32044 | roster True | nearby True | audit False
+sn/review_docs  len  6669 | roster True | nearby True | audit False</pre>
+
+    <p>— the roster and nearby markers render, so the probe is not blind, and the
+    audit marker does not appear in either template. (The first attempt shaped
+    the nearby marker as a plain string and reported <code>nearby False</code>:
+    that block prints <code>{{ name.id }}</code>, so the control has to be shaped
+    like what the healthy path supplies or it manufactures its own absence —
+    the exact defect the control exists to catch.) This is the same
+    produced-then-discarded shape the roster had before <code>95366b716</code>,
+    and it is why the plan's highest-value change reads as landed while the
+    reviewer still sees nothing. The test that covers it
+    (<code>test_audit_findings_reach_the_prompt.py:12</code>) asserts on the
+    extractor's return value and never renders a prompt, so it passes on a prompt
+    that carries nothing.</p>
+
+    <figure>
+      <img src="/imas-codex/figures/sn-catalog-audit-instrument/review-context-keys.svg"
+           alt="The seven context keys the review pipeline builds, six of which have a read edge into a rendered template, and audit_findings which dead-ends because no template names it; below, the render probe showing roster True and nearby True while audit is False in both templates.">
+      <figcaption>Every context key the pipeline builds, and whether a rendered template reads it. The six green edges are the roster/nearby path; <code>audit_findings</code> is built and discarded.</figcaption>
+    </figure>
+
+    <p><strong>Four more shallow findings of the same shape.</strong> Comparators
+    are searched per candidate but attached to the batch as one pooled list
+    (<code>pipeline.py:1963</code>), so the per-item routing the plan asks for is
+    absent. The grouped target calls <code>build_worklist()</code> with defaults
+    (<code>cli/sn.py:6210</code>), leaving the shared-<code>physical_base</code>
+    bucket — which the renderer supports (<code>cli/sn.py:6014</code>) —
+    unreachable. The terminal comparator cap is trimmed to the sum of two terms
+    each already capped at its own share (<code>enrichment.py:401-405</code>), so
+    no catalog can make it fire; the test that exercises it must over-supply a
+    channel to do so. And the two static attribute checks
+    (<code>test_declared_attribute_access.py</code>,
+    <code>test_defaulted_attributes_exist.py</code>) are enforcement the product
+    never runs — they live entirely in <code>tests/</code>.</p>
+
+    <p><strong>Also shallow, because named and not shipped:</strong> the
+    manifest-scoped release-batch selector, scoring a description against the
+    bindings its identity holds, the §1a refuse-when-a-channel-did-not-load rule,
+    the §4 expanded dry run (concurrency, model, projected spend, cost-limit
+    refusal — the dry run prints the cohort and batch plan only,
+    <code>cli/sn.py:6328-6393</code>), and a concurrency default derived from the
+    measured knee (still the literal <code>8</code>,
+    <code>cli/sn.py:6098</code>).</p>
+
+    <p><strong>What is deep.</strong> The three layers, the per-candidate and
+    unit-anchored comparator searches, the share-then-spend allocation, the
+    catalog roster's render path, the grouped target and its scoping refusal, the
+    mutation classifier, the consumable suppressed-write result, the
+    session-boundary report-only guard, and the reviewer-profile resolution —
+    each with a non-test caller and a test.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-feature-depth-is-classified-against-the-code</code>
+    &middot; 2026-09-24 &middot; classification
+    <code>docs/evidence/imas-codex-replan/feature-depth.md</code>
+    + figure <code>docs/figures/sn-catalog-audit-instrument/review-context-keys.svg</code>
+    &middot; base revision <code>4960f699620b7c76a73f60e0f249021a0e4e6831</code>.</p>
+  </section>
   </main>
 </body>
 </html>

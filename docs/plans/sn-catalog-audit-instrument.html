@@ -165,6 +165,82 @@
       The pipeline's own review had passed all of them.
     </p>
 
+    <h3 id="s1-feature-depth">Classified: every feature of the instrument, deep or shallow against the code</h3>
+    <p>
+      §1 says the extraction of Layer 1 findings "is repaired". The extraction
+      is — and the <em>route into the reviewer prompt is not</em>. Each feature
+      this plan names is now classified in
+      <a href="/imas-codex/evidence/imas-codex-replan/feature-depth.md">feature-depth.md</a>
+      (25 rows, each with the module and site, whether a real non-test call site
+      reaches it, whether a test exercises it, and a one-line verdict with
+      <code>file:line</code>). The rule the classification applies: a feature is
+      <strong>deep</strong> only when a non-test caller reaches it <em>and</em> a
+      test exercises it; a feature with no non-test caller is shallow however
+      fully it is tested.
+    </p>
+    <p>
+      <strong>The headline.</strong> <code>_extract_audit_findings</code> reads
+      the three lists <code>AuditReport</code> actually declares
+      (<code>review/pipeline.py:1714</code>) and the result reaches the render
+      context (<code>:550</code>, <code>:1964</code>) — <strong>and no template
+      names it</strong>. A search of every prompt file finds no
+      <code>audit_findings</code>, and rendering both templates with markers in
+      three keys prints <code>roster True | nearby True | audit False</code> for
+      each of <code>sn/review_names</code> and <code>sn/review_docs</code>. The
+      two positive controls show the probe is not blind, so the absence is
+      specific: this is the produced-then-discarded shape the roster had before
+      <code>95366b716</code>, still open one step later in the same path. The
+      test that covers it asserts on the extractor's return value and never
+      renders a prompt, which is why a green suite says nothing here.
+    </p>
+    <figure>
+      <img src="/imas-codex/figures/sn-catalog-audit-instrument/review-context-keys.svg"
+           alt="The seven context keys the review pipeline builds, six with a read edge into a rendered template and audit_findings dead-ending because no template names it, with the render probe below.">
+      <figcaption>Every context key the pipeline builds, and whether a rendered template reads it.</figcaption>
+    </figure>
+    <p>
+      <strong>Four more shallow findings of the same three shapes.</strong>
+      Comparators are searched per candidate and attached to the batch as one
+      pooled list (<code>pipeline.py:1963</code>), so the per-item routing §3 asks
+      for is absent. The grouped target calls <code>build_worklist()</code> with
+      defaults (<code>cli/sn.py:6210</code>), leaving the
+      shared-<code>physical_base</code> bucket unreachable although the renderer
+      handles it (<code>cli/sn.py:6014</code>). The terminal comparator cap is
+      trimmed to the sum of two terms each already capped at its own share
+      (<code>enrichment.py:401-405</code>), so no catalog can make it fire. The
+      two static attribute checks live entirely in <code>tests/</code> —
+      enforcement the product never runs. Named and not shipped: the
+      manifest-scoped release-batch selector, the description-against-bindings
+      axis, the refuse-when-a-channel-did-not-load rule, and the §4 expanded dry
+      run (the dry run still prints the cohort and batch plan only,
+      <code>cli/sn.py:6328-6393</code>; <code>--concurrency</code> still defaults
+      to the literal <code>8</code>, <code>cli/sn.py:6098</code>).
+    </p>
+    <p>
+      <strong>What is deep.</strong> The three layers, the per-candidate and
+      unit-anchored comparator searches, the share-then-spend allocation, the
+      catalog roster's render path, the grouped target and its scoping refusal,
+      the mutation classifier, the consumable suppressed-write result, the
+      session-boundary report-only guard, and reviewer-profile resolution. Two
+      carry a stated limit rather than a bare verdict: Layer 3's detectors are
+      variance-based, and §1a already measures what a uniform column does to
+      them; and the grouped target is verified against a
+      <code>GraphClient</code> stand-in, so live-graph behaviour belongs to the
+      merged-result test node.
+    </p>
+    <p>
+      <strong>Gate.</strong> Focused receipt at
+      <code>4960f6996</code> over the fourteen test files this classification
+      cites, run from the worktree against the main checkout's environment
+      (<strong>1 failed, 618 passed</strong> in 152.61s). The one failure is
+      <code>test_review_pipeline.py::test_audit_embedding_preflight</code> — a
+      <code>pytest-timeout</code> inside <code>import torch</code>, unrelated to
+      this change (this node adds a document and a figure and edits no code) and
+      reported under the node's follow-ons. Full record:
+      <a href="/imas-codex/evidence/archive/sn-catalog-audit-instrument-landed#feature-depth">the
+      feature-depth anchor</a> in the cumulative landing record.
+    </p>
+
     <h2 id="s2">§2 — The calibration fixture already exists, and it is the point</h2>
 
     <p>
