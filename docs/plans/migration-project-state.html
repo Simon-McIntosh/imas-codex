@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="migration-project-state">
+  <meta name="plan-title" content="What imas-codex Actually Is, Measured Before The Handover">
+  <meta name="plan-summary" content="A truthful state assessment for successor sessions: which features are deep, where plan status overstates the code, and which couplings to shared machinery should become thin interfaces">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="4.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint" content="S15">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="handover">
+  <title>What imas-codex Actually Is, Measured Before The Handover | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-informs" content="unbound-source-backlog,sn-catalog-audit-instrument">
+</head>
+<body>
+  <main class="plan-doc">
+<h1>What imas-codex Actually Is, Measured Before The Handover</h1>
+
+<p>Successor sessions receive this repository entirely through the planning layer.
+Anything that exists only in a retiring session's conversation is lost. This plan
+holds the measurements a successor needs and cannot re-derive cheaply: which
+features are reachable from real call sites, where a plan's <code>impl</code>
+overstates its code, and which couplings to shared machinery should be reduced to
+thin interfaces.</p>
+
+<p><strong>The standing hazard this plan exists against.</strong> A plan figure is an
+assertion by its author, not a measurement of the code. Four open sprints, 47 plans
+and an aggregate <code>implementation_pct</code> of 69.1 are the state as
+<em>declared</em>. Every number a successor acts on should carry the path and line
+that establishes it, because this repository has repeatedly found features that were
+documented, tested, and reached from nothing.</p>
+
+<section id="s1" data-reckon="section" data-status="implementable">
+<h2 id="s1">§1 · Implementation depth, per feature</h2>
+<p>For each pending plan, is the feature <strong>deep</strong> — implemented, covered
+by a test that would fail if it broke, and reachable from a call site production code
+takes — or <strong>shallow</strong>: a module nothing imports, a function no call site
+reaches, a flag nothing reads, or documentation describing behaviour the code does not
+have? The discriminator that earns this section its keep is whether a symbol's only
+references are its own definition and its own tests.</p>
+</section>
+
+<section id="s2" data-reckon="section" data-status="implementable">
+<h2 id="s2">§2 · Where plan status disagrees with the code</h2>
+<p>Plans whose declared <code>status</code> or <code>impl</code> is not what the code
+supports, in either direction. Both directions matter: an overstated plan sends a
+successor to work that is done, and an understated one hides landed capability.</p>
+</section>
+
+<section id="s3" data-reckon="section" data-status="implementable">
+<h2 id="s3">§3 · Thin interfaces to shared machinery</h2>
+<p>Where this repository reimplements or couples tightly to machinery it does not own
+— the reckon crew and plan layer, the local lane and router, fleet and SLURM
+placement, imas-python data access, and GPFS paths and state files. For each, the
+refactor that would reduce it to a thin interface, and what that refactor would let a
+successor stop maintaining.</p>
+</section>
+
+<section id="s4" data-reckon="section" data-status="implementable">
+<h2 id="s4">§4 · Critical next steps</h2>
+<p>What a successor should do first, in order, with what gates what. Distinguishes
+work that is blocked on a ruling from work that is merely unstarted.</p>
+</section>
+
+  </main>
+</body>
+</html>
