@@ -126,3 +126,33 @@ and keep the `IMAS_CODEX_VLLM_PORT` override.
 the engine directly and the engine binds `0.0.0.0`, so any consumer resolving the
 lane through that document rather than through its own configured router address
 bypasses both the gate and a declared pause. This repository is not such a consumer.
+
+### The provenance repair is tracked twice; `f-mps-provenance-is-repo-relative` is the survivor
+
+Two followups were raised for one repair within a minute of each other, by a
+coordinator and a member working the same finding:
+
+| followup | plan | done-when |
+|---|---|---|
+| `f-srr-minted-from-names-a-directory-that-is-gone` | `sn-release-readiness` | repo-relative storage, a test from outside the main checkout, repair of the twelve, a negative control |
+| **`f-mps-provenance-is-repo-relative`** | `migration-project-state` | **the same, plus a test asserting a minted value contains no absolute path at all** |
+
+**The second is the survivor, and the reason is the extra clause rather than the
+location.** `sn-release-readiness` is the better home — it owns
+`catalog_release.py` — but a stronger done-when beats a better filing. Asserting
+that a minted value contains *no absolute path* is what keeps the repair correct;
+rewriting the twelve existing values and adding a test for the known case leaves a
+correct implementation with nothing preventing the next absolute path. That is the
+defect class this sprint kept hitting once the obvious fail-opens closed, and it is
+precisely why the original defect survived three weeks unnoticed.
+
+A successor should implement `f-mps-provenance-is-repo-relative` and treat the
+`sn-release-readiness` followup as its duplicate.
+
+**One citation hazard this collision exposed, worth more than the duplication.** A
+`git push` in a shared checkout reports a range whose endpoint is **the branch tip,
+not your commit**. Two sessions committing seconds apart both see a range ending at
+whichever landed last. A coordinator read that tip as its own SHA and cited a peer's
+commit in an upward report. The commit that is yours is the one `git log` attributes
+to your subject line, not the one the push range ends at — and an index-lock
+collision between the two `git add` calls is the only reason anyone looked.
