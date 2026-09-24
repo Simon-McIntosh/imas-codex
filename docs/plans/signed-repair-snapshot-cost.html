@@ -117,10 +117,10 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
       <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-srsc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship signed-repair-snapshot-cost" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-srsc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-build signed-repair-snapshot-cost" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Measure the snapshot cost, then choose between digesting server-side and narrowing to owned dimensions</h4>
     <div class="r-fu-body"><p>Time a representative signed repair as it stands, so the baseline is a number. Then implement whichever approach the measurement favours and time it again on the same repair. Keep the existing collateral guard tests passing and add one proving the changed snapshot still catches a genuine out-of-scope write. Answer the concurrency question explicitly: can a peer session writing an unrelated axis still fail a clean repair?</p></div>
-    <pre class="r-fu-prompt">/reckon-ship signed-repair-snapshot-cost</pre>
+    <pre class="r-fu-prompt">/reckon-build signed-repair-snapshot-cost</pre>
     </article>
     </section>
   </main>

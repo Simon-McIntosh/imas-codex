@@ -413,16 +413,16 @@ SKIPPED [1] tests/docs/test_documentation_layout.py:5: reckon is not installed</
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-hsf-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship hidden-suite-failures" data-resolved-at="2026-09-01T21:12:14+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-hsf-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-09-01" data-recommends-skill="/reckon-build hidden-suite-failures" data-resolved-at="2026-09-01T21:12:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Triage the 49, and decide the optional-dependency posture before repairing any of them</h4>
     <div class="r-fu-body"><p>The census in §2 is measured and does not need re-deriving; §3 says what each cluster needs and from whom. Start with triage rather than repair, because two clusters need a decision first and one — the twenty SN edit failures following commit 9c4403db — belongs to that commit's author, who has been notified. The deliverable that matters most is the last one: the defect was never the broken import, it was that an exit-2 collection error read as an environment quirk for a week.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship hidden-suite-failures</pre>
+    <pre class="r-fu-prompt">/reckon-build hidden-suite-failures</pre>
     <p class="r-fu-outcome">Landed 2026-09-01 in six promoted nodes. Triage: 28 environmental (unprovisioned test extra), 1 wrong premise, 0 defects. Decisions locked and applied: provision-the-extra with one loud conftest preflight (289ed276); main CI runs keep their conclusion (37296b5b). Graph-marker premise repaired (abe01f53). Closing whole-tree figure 12,070 passed / 3 failed / 142 skipped / 1 xfailed (a97ce967); the 3 were shared-.venv worktree artifacts and were closed at root cause with four Cypher properties declared in LinkML (fcb22e07). Cumulative evidence: docs/evidence/archive/hidden-suite-failures-landed.html. The consequence gate is reckon's; see the pointer followup.</p>
     </article>
-<article class="r-fu" data-id="f-hsf-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-ship reckon:promotion-consequence-gate" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-hsf-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-01" data-recommends-skill="/reckon-build reckon:promotion-consequence-gate" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Pointer: the promotion-consequence gate is owned by reckon</h4>
     <div class="r-fu-body"><p>foreign-owner. The half of the recurrence guard that turns a red or cancelled <code>main</code> into a refused promotion lives in reckon's <code>promotion-consequence-gate</code> plan (commit 28b789d there). Nothing executes from here; this row exists so the split recorded in §2f is visible from this plan. It carries the one correctness constraint the two halves share: a cancelled CI run is absence of evidence, never a pass.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship reckon:promotion-consequence-gate</pre>
+    <pre class="r-fu-prompt">/reckon-build reckon:promotion-consequence-gate</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

@@ -281,7 +281,7 @@ RETURN count(*)  -- 3423 edges · 1522 names · 3348 DD nodes</pre>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sdac-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship sn-dd-attachment-completeness §3" data-resolved-at="2026-07-23T13:35:26+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-sdac-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-build sn-dd-attachment-completeness §3" data-resolved-at="2026-07-23T13:35:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Reconcile HAS_STANDARD_NAME from provenance (3423 derivable edges)</h4>
     <div class="r-fu-body"><p>Materialize the DD-side edge as a projection of the per-source provenance (<code>PRODUCED_NAME</code> + <code>FROM_DD_PATH</code>), gated on DD-eligibility + <code>units_agree</code> — symmetric with the existing <code>source_paths</code> reconcile. The <code>units_agree</code> gate has already shipped (<code>7d9648e7</code>). Decisions <code>edge-model</code>, <code>where-it-runs</code>, and <code>units-disagree</code> are locked; honour them.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex

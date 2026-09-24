@@ -125,7 +125,7 @@
         <code>reconcile_grammar_segments</code> self-heal restoration; then the remaining
         nine failures. Finish with the proof-of-life scoped run. No new machinery — every
         item is a repair or a revert to a form that already worked.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §2</pre>
+    <pre class="r-fu-prompt">/reckon-build sn-pipeline-recovery §2</pre>
     <p class="r-fu-outcome">§2 landed — merges 1634d0b0 + 6709bd29. Pricing restored (3 paid reviewer seats price), collection repaired, grammar self-heal back (231 names realigned live), suite 11,992 passed / 0 failed, dd-tools contract collision + 36x removals query fixed at source (14/0 graph-backed from main). Proof of life: SNRun spent $0.94 of $2.00 cap, stop time_limit_reached.</p>
     </article>
 <article class="r-fu" data-id="f-spr-002" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T10:03:58+00:00" data-resolved-by="reckon-ship">
@@ -135,7 +135,7 @@
         <code>grammar_segment_reconciliation</code> before quarantining it; verify with the
         naming-hygiene pre-stage checks; remove the 36 verified-merged worktrees; keep the
         default suite green throughout.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §3</pre>
+    <pre class="r-fu-prompt">/reckon-build sn-pipeline-recovery §3</pre>
     <p class="r-fu-outcome">§3 landed — merge 7e88e02c: typed dispatch + preflight/audit + docs-admission deleted (−26,273 net lines), 7 modules (9,650 LOC) quarantined outside the package, _west_source_ids lifted to protected_sources.py, manifests renamed by content, 6 reconcile verbs deregistered, reviewer-profile env leak fixed (ContextVar), suite 11,574 passed / 0 failed with no deselects, 36 leftover worktrees removed.</p>
     </article>
 <article class="r-fu" data-id="f-spr-003" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T15:17:09+00:00" data-resolved-by="reckon-ship">
@@ -143,25 +143,25 @@
     <div class="r-fu-body"><p>Execute §4 after §2 lands and the budget decision is locked. Existing pools
         only, hard cost cap, outcomes recorded in this plan; exhausted-on-variance names go
         through <code>sn rescore</code>.</p></div>
-    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
+    <pre class="r-fu-prompt">/reckon-build sn-pipeline-recovery §4</pre>
     <p class="r-fu-outcome">§4 landed — three tranches spent $196.19 of the $200 authorization: edits 255→142 open (+117 applied), docs-accepted +534, names-accepted +172, drafted backlog 318→24. Ladder caught+fixed reservation accountancy (typical-bill admission, fidelity 0.80-1.50x, hold $176.84→$22.41; merges 25722901/ff05fd91/5ed709d0). Remainder is standing work bounded by the exhausted authorization.</p>
     </article>
 <article class="r-fu" data-id="f-spr-004" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T15:46:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Drain the residual backlog under a fresh authorization</h4>
     <div class="r-fu-body">142 open edit proposals and 1,513 docs-pending names remain — standing work with no defect, bounded only by the exhausted $200 authorization. With typical-bill admission a full drain projects to roughly $60-90. Agree a fresh cap with the lead, then one sn run --flush per tranche. Watch overspend&gt;0 rows on LLMCost as the genuine at-cap signal, and the startup quorum-sizing warning for underfunded caps.</div>
-    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
+    <pre class="r-fu-prompt">/reckon-build sn-pipeline-recovery §4</pre>
     <p class="r-fu-outcome">Tranche 4 ran under the fresh +$100 authorization (sn run --flush -c 120): $55.01 spent, stopped stalled with $65 unspent — funding was not the constraint (0 budget-refused seats, 0 overspend). generate_docs/review_docs pending hit 0; $54.7 went to refine_name churn for +1 acceptance. The flush drain has CONVERGED; the residual tail (77 refine-pending names, 142 open edits, 349 exhausted) cycles review→refine without clearing and needs sn rescore + quality triage, not flush money.</p>
     </article>
 <article class="r-fu" data-id="f-spr-005" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T19:13:40+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Triage the non-converging refine tail through sn rescore</h4>
     <div class="r-fu-body">The flush drain converged: further spend converts to refine churn, not acceptances. The residual population — 349 exhausted names, 77 refine-pending, 142 open edit proposals, 40 refine-docs — needs the standing recovery rule (sn rescore for quorum-variance exhaustion) and per-item quality triage (vocab gaps, hint quality). This is the recovery-triage scope of the sn-benchmark-evolution plan, now unblocked.</div>
-    <pre class="r-fu-prompt">/reckon-ship sn-benchmark-evolution</pre>
+    <pre class="r-fu-prompt">/reckon-build sn-benchmark-evolution</pre>
     <p class="r-fu-outcome">Superseded by the landed churn RCA: the tail was not quorum variance but a deterministic successor-collision loop with a dead attempt counter. Fixed by the attempt budget (5b4d1254), attach-time pairing guard (1d637118), and ISN locus typing (55352a83). Live validation: the 837-call/$54.74 tail completed in 23 calls/$2.75 with 10 successor_collision + 4 attempts_exhausted parks, all with queryable reasons; the worklist rename accepted at 0.869.</p>
     </article>
 <article class="r-fu" data-id="f-spr-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Resolve the dual-bound sources and the parked semantic worklist</h4>
     <div class="r-fu-body">Route through sn-graph-wide-integrity: (1) 362 StandardNameSource nodes bound to >1 live name block retargets and underlie the fold pairs (atomic_count_of_ion_state shares 39/76 sources with accepted atomic_count) — needs the one-live-name-per-source dedup; (2) propose the include_accepted detach pass for the 41 gated inconsistent attachments plus the proven mis-attachments (faraday_angle→polarimeter, wavelength_bragg stale edge, electrons-path on the renamed particle source); (3) the deferred stricter locus rule (ISN entity typing: 189 flags vs shipped 17, ~172 new write-time refusals) needs per-family review before adoption; (4) ISN vocab gap: a locus token for a wave-diagnostic receiver channel (ECE/reflectometer/refractometer); (5) electron_source_rate stale s^-1 unit scalar + contradicting docs; (6) synthetic score=0.0 'skipped reviewer LLM call' on thermal_radiative_power_of_divertor_target.</div>
-    <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    <pre class="r-fu-prompt">/reckon-build sn-graph-wide-integrity</pre>
     </article>
 </section>
   </main>
