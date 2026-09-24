@@ -10,6 +10,8 @@ This is a survey of the code as it stands at the dispatch base; it changes no
 behaviour. Line numbers are from
 `69a2fb2df0f6fbaf158f327ca5d54a690254c5b8`.
 
+![Every coupling site sits below the thin-interface boundary, reimplementing a capability the shared facility already owns](/imas-codex/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg)
+
 | Surface | Sites | Coupling class |
 |---|---|---|
 | reckon crew and plan layer | 2 | records a transient worktree root; reaches plan state through a foreign static server |
