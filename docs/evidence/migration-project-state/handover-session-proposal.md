@@ -97,3 +97,32 @@ repeated here, because one record is better than two that can disagree. A succes
 should treat all four as open: the graph checkpoint cadence, whether the WEST review
 PR ships, which contract `semantic_similarity_check` is under, and worktree
 back-pressure.
+
+## Lane admission: how this repository actually resolves the local lane
+
+Checked 2026-09-24 in answer to a direct question from the imas-ambix coordinator,
+because a claim that this repository bypasses the router's admission gate was raised
+by a member survey and **does not hold at the configuration level**. The configured
+route is the router itself — `pyproject.toml:310`, `api-base =
+"http://98dci4-gpu-0003:18802/v1"` — so this project's LLM traffic is admitted by the
+gate and observes a declared pause.
+
+Two specific resolution paths were asked about. Both measured:
+
+| path | result |
+|---|---|
+| any code reading `~/public/imas-ambix/endpoints.json` | **none** — zero references anywhere under `imas_codex/` |
+| a hardcoded port constant | `VLLM_PORT = 18800` at `settings.py:716`, exposed by `get_vllm_port()` at `:719` |
+
+**The port constant is live, not dead**, which is the part worth a successor's
+attention. `get_vllm_port()` is called at **`imas_codex/cli/tunnel.py:227`** and
+**`imas_codex/cli/tunnel.py:1178`**, so the tunnel CLI forwards **18800** — an older
+lane — rather than the router's **18802**. That is not an LLM-traffic bypass, because
+the model calls go through the configured `api-base`; it is a stale forwarding target
+in the tunnel path. A successor pointing it at the router should change the default
+and keep the `IMAS_CODEX_VLLM_PORT` override.
+
+**The engine-level exposure is upstream and not ours.** The lane document advertises
+the engine directly and the engine binds `0.0.0.0`, so any consumer resolving the
+lane through that document rather than through its own configured router address
+bypasses both the gate and a declared pause. This repository is not such a consumer.
