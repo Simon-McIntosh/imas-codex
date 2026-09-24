@@ -751,6 +751,61 @@
       declare which behaviour it pins.
     </p>
 
+    <section id="shared-infrastructure-coupling">
+      <h2>The five shared surfaces this repository reaches around instead of through</h2>
+
+      <p>A review of the instrument is also a review of what the instrument is built on,
+      and imas-codex reaches around five shared facilities rather than through them. The
+      survey names the coupling at each site — the file and line, the facility that
+      already owns the capability, the concrete failure the coupling causes or risks, and
+      a one-sentence refactor to a thin interface.</p>
+
+      <figure>
+        <img src="/imas-codex/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg"
+             alt="Five rows: imas-codex coupling sites on the left, the shared facility that owns the capability on the right, each joined by an arrow across a thin-interface boundary.">
+        <figcaption>Each arrow is a capability the left column implements itself instead
+        of calling the right column across the boundary.</figcaption>
+      </figure>
+
+      <table>
+        <caption>The five surfaces, with the coupling class found on each</caption>
+        <thead><tr><th>Surface</th><th>Findings</th><th>Coupling class</th></tr></thead>
+        <tbody>
+          <tr><td>reckon crew and plan layer</td><td>2</td><td>a committed manifest records a transient worktree root; plan state is reached through a foreign static server's port</td></tr>
+          <tr><td>local lane and router</td><td>2</td><td>lane selection and admission re-derived from env vars; endpoint and job-name constants stand in for the live topology</td></tr>
+          <tr><td>fleet and SLURM placement</td><td>3</td><td>jobs submitted and cancelled outside the placement ledger; the fleet re-probed by SSH; a per-node tool cache outside provisioning</td></tr>
+          <tr><td>imas-python data access</td><td>2</td><td>IDS opened with a literal mode and no pinned DD version; the shared IMAS pattern table redefined in a remote script</td></tr>
+          <tr><td>GPFS paths or state files</td><td>2</td><td>a hand-rolled lock with an alarm around a known-hanging fcntl on GPFS; absolute machine paths in generated artifacts and path rules</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Two couplings carry a directly verifiable artifact.</strong> Twelve
+      committed review manifests record an absolute <code>.reckon-worktrees/…</code> path
+      as their <code>minted_from</code> provenance
+      (<code>catalog_release.py:2068,2209,2219</code> → the frozen record at
+      <code>:1615</code>), so the artifact's own "reproducible batch identity" resolves to
+      a directory the worktree cleanup removes. And the IDS writer opens with a literal
+      create mode and no DD version (<code>ids/assembler.py:439-440</code>
+      <code>imas.DBEntry(uri, "x")</code>), so a file can be written in a Data Dictionary
+      the graph does not resolve against. The rest are latent couplings: correct today,
+      wrong the moment the shared layer moves.</p>
+
+      <p><strong>What this does not establish.</strong> The survey changes no code and
+      runs no gate; the refactors are one-sentence directions rather than landed repairs.
+      No h5py-on-IMAS-data access was found — the binding imas-python rule holds today,
+      and the only risk there is the duplicated pattern table keeping two classifiers
+      apart. Full record, every finding with its file and line:
+      <a href="/imas-codex/evidence/imas-codex-replan/shared-infrastructure-coupling">the
+      shared-infrastructure coupling survey</a>.</p>
+
+      <p class="r-meta">Worker:
+      <code>n-shared-infrastructure-coupling-is-named-with-its-refactor</code>
+      &middot; 2026-09-24 &middot; survey
+      <code>docs/evidence/imas-codex-replan/shared-infrastructure-coupling.md</code>
+      + figure at <code>docs/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg</code>
+      &middot; base revision <code>69a2fb2df0f6fbaf158f327ca5d54a690254c5b8</code>.</p>
+    </section>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="calibration-floors" data-choice="recall-90-precision-50" data-by="lead" data-when="2026-09-21T08:43:53+00:00">

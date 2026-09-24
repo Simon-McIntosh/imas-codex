@@ -1221,6 +1221,52 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
     + raw at <code>local-lane-concurrency-raw.json</code>
     &middot; base revision <code>8beb1c4ee9ebbdb76e1cf83f6c1e834950ef96ef</code>.</p>
   </section>
+
+  <section id="shared-infrastructure-coupling">
+    <h2>Every shared surface the repository reaches around instead of through</h2>
+
+    <p>An instrument review is also a review of what the instrument is built on, and
+    imas-codex reaches around five shared facilities rather than through them. The
+    survey names the coupling at each site — the file and line, the facility that
+    already owns the capability, the concrete failure the coupling causes or risks, and
+    a one-sentence refactor to a thin interface. It changes no code and runs no gate.</p>
+
+    <table>
+      <caption>The five surfaces and what was found on each</caption>
+      <thead><tr><th>Surface</th><th>Findings</th><th>Coupling class</th></tr></thead>
+      <tbody>
+        <tr><td>reckon crew and plan layer</td><td>2</td><td>a committed manifest records a transient worktree root (<code>catalog_release.py:2068,2209,2219</code>, twelve files carrying it); plan state reached through a foreign static server's port (<code>settings.py:737-760</code>)</td></tr>
+        <tr><td>local lane and router</td><td>2</td><td>lane choice and a retry loop re-derived locally (<code>discovery/base/llm.py:1956-2007</code>, <code>:2129-2239</code>); endpoint and job-name constants stand in for the live topology (<code>settings.py:704-731</code>, <code>cli/services.py:41-42</code>)</td></tr>
+        <tr><td>fleet and SLURM placement</td><td>3</td><td><code>srun</code>/<code>sbatch</code>/<code>squeue</code>/<code>scancel</code> issued outside the placement ledger (<code>cli/compute.py:251-289,427-447,509-519</code>, <code>cli/services.py:565,593,620,434</code>); the fleet re-probed by SSH (<code>cli/host.py:357-487</code>); a per-node <code>/tmp</code> tool cache outside provisioning (<code>remote/ssh_worker.py:539-546</code>)</td></tr>
+        <tr><td>imas-python data access</td><td>2</td><td>IDS opened with a literal create mode and no pinned DD version (<code>ids/assembler.py:439-440</code>); the shared IMAS pattern table redefined in a remote script (<code>remote/scripts/enrich_directories.py:73-95</code> vs <code>discovery/base/imas_patterns.py</code>)</td></tr>
+        <tr><td>GPFS paths or state files</td><td>2</td><td>a hand-rolled lock with a 5&nbsp;s alarm around a known-hanging <code>fcntl.lockf</code> on GPFS (<code>graph/neo4j_ops.py:36,828-856</code>); absolute <code>/home/ITER/…</code> paths in generated artifacts and path rules (<code>config/models.py:93,967</code>, <code>discovery/paths/users.py:41-42</code>)</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>Two couplings carry a directly verifiable artifact.</strong> Twelve
+    committed review manifests record an absolute <code>.reckon-worktrees/…</code> path as
+    their <code>minted_from</code> provenance, so the artifact's own "reproducible batch
+    identity" resolves to a directory the worktree cleanup removes
+    (<code>rg -l 'minted_from:.*\.reckon-worktrees'</code> → 12 files). And the IDS
+    writer opens <code>imas.DBEntry(uri, "x")</code> with a literal create mode and no DD
+    version, so a file can be written in a Data Dictionary the graph does not resolve
+    against. The rest are latent couplings: correct today, wrong the moment the shared
+    layer moves.</p>
+
+    <p><strong>What this does not establish.</strong> The refactors are one-sentence
+    directions rather than landed repairs, and the census is grep-derived over
+    <code>imas_codex/</code>, <code>docs/</code> and <code>agents/</code> — a coupling
+    expressed only in a YAML, a shell template or a docs tool was not swept. No
+    h5py-on-IMAS-data access was found; the binding imas-python rule holds today, and the
+    only risk there is the duplicated pattern table keeping two classifiers apart.</p>
+
+    <p class="r-meta">Worker:
+    <code>n-shared-infrastructure-coupling-is-named-with-its-refactor</code>
+    &middot; 2026-09-24 &middot; survey
+    <code>docs/evidence/imas-codex-replan/shared-infrastructure-coupling.md</code>
+    + figure at <code>docs/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg</code>
+    &middot; base revision <code>69a2fb2df0f6fbaf158f327ca5d54a690254c5b8</code>.</p>
+  </section>
   </main>
 </body>
 </html>
