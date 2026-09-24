@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-impl" content="0.56">
 </head>
 <body>
@@ -1013,6 +1013,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260924T124630803249-review-of-n-shared-infrastructure-coupling-is-named-with-its-refactor" data-who="reckon-ship" data-when="2026-09-24T13:07:07.729Z">
     <div class="r-comment-body"><p>stored the independent review for r-20260924T123408552142 scoring all five dimensions: scope 20, fit 19, evidence 16, goal 16, durability 8, total 79. Its manifest read complete and both declared record paths were written. Reconciled after the run it reviewed was promoted on the strength of that record.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260924T123309301493-n-feature-depth-is-classified-against-the-code" data-who="reckon-ship" data-when="2026-09-24T12:58:34.445Z">
+    <div class="r-comment-body"><p>25 features classified deep or shallow with file:line verdicts - 14 deep, 11 shallow - plan impl set to the derived 0.56 (14/25 on the strict criterion that a feature counts only when a real non-test call site reaches it); independent review 95 (goal 20, scope 20, durability 19, evidence 18, fit 18). Merged at 728dea95b. Headline: the Layer 1 audit findings are extracted, set on the reviewer&#x27;s render context, and read by no prompt template - built every review and discarded - established by a render probe carrying its own control and confirmed by nothing under imas_codex/llm naming the key; tracked as f-scai-audit-findings-reach-no-template. Classified infrastructure-failure rather than pre-existing because 618 of 619 tests passed and the single failure is a 30s pytest-timeout whose last frame is inside torch&#x27;s import on the login node; the node edits no code, and whether the base revision also fails was NOT measured, so pre-existing would be an unverified claim. The true exit status is recorded rather than rounded to passed.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T062322979058-n-the-rubric-can-express-the-defects-we-found" data-who="reckon-ship" data-when="2026-09-21T06:30:22.885Z">
     <div class="r-comment-body"><p>no suite: a rubric map. 4 of 6 classes expressible, 1 not expressible (per-binding correction field absent), 1 not reachable (docs and name prompts disagree on what bindings are for). Ordinal convention encoded but in 3 of 10 prompts and on zero dimensions</p></div>
