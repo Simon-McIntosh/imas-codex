@@ -11,8 +11,10 @@ from imas_codex.cli.tunnel import (
     _installed_service_supports_request,
     _is_remote_clipboard_active,
     _probe_reverse_ssh_forward,
+    _resolve_reverse_nodes,
     _reverse_forward_answers,
     _service_selected_services,
+    _supervised_links,
     _terminate_tunnel_process,
     tunnel,
 )
@@ -306,6 +308,98 @@ class TestTunnelServiceHelpers:
                 llm_only=False,
                 docs_only=True,
             )
+
+
+class TestReverseNodes:
+    """Reverse forwards held on every login node a shell can land on.
+
+    A reverse forward binds only on the node its ssh session reached, while the
+    gateway places an interactive shell on any login node, so a clipboard bound
+    on one node is invisible from the others.
+    """
+
+    SSH_CONFIG = {
+        "hostname": "98dci4-srv-1006.iter.org",
+        "proxyjump": "sdcc-login.iter.org",
+        "user": "mcintos",
+    }
+    NODES = [f"98dci4-srv-100{i}" for i in range(1, 7)]
+
+    def test_all_expands_to_known_nodes_minus_the_primary(self):
+        with (
+            patch(
+                "imas_codex.cli.tunnel._ssh_client_config",
+                return_value=self.SSH_CONFIG,
+            ),
+            patch("imas_codex.cli.tunnel._known_login_nodes", return_value=self.NODES),
+        ):
+            nodes = _resolve_reverse_nodes("iter", ["all"])
+
+        names = [name for name, _ in nodes]
+        assert "98dci4-srv-1006.iter.org" not in names
+        assert names == [f"98dci4-srv-100{i}.iter.org" for i in range(1, 6)]
+        assert nodes[2][1] == (
+            "-o",
+            "ProxyJump=sdcc-login.iter.org",
+            "-l",
+            "mcintos",
+            "98dci4-srv-1003.iter.org",
+        )
+
+    def test_named_node_is_deduplicated_and_needs_no_jump_when_direct(self):
+        config = {"hostname": "98dci4-srv-1006.iter.org", "proxyjump": "none"}
+        with patch("imas_codex.cli.tunnel._ssh_client_config", return_value=config):
+            nodes = _resolve_reverse_nodes(
+                "iter", ["98dci4-srv-1003", "98dci4-srv-1003.iter.org"]
+            )
+
+        assert nodes == [("98dci4-srv-1003.iter.org", ("98dci4-srv-1003.iter.org",))]
+
+    def test_no_nodes_requested_resolves_nothing(self):
+        with patch("imas_codex.cli.tunnel._ssh_client_config") as config:
+            assert _resolve_reverse_nodes("iter", []) == []
+        config.assert_not_called()
+
+    def test_extra_nodes_carry_only_the_reverse_forwards(self):
+        ports = [
+            (8765, 8765, "docs", "127.0.0.1", "L"),
+            (2490, 2490, "wsl-clip", "localhost", "R"),
+            (2222, 22, "wsl-ssh", "localhost", "R"),
+        ]
+        node = ("98dci4-srv-1003.iter.org", ("98dci4-srv-1003.iter.org",))
+
+        links = _supervised_links("iter", ports, [node])
+
+        assert links[0] == ("iter", "iter", ports)
+        assert links[1] == (node[0], node[1], ports[1:])
+
+    def test_no_extra_links_without_reverse_forwards(self):
+        ports = [(8765, 8765, "docs", "127.0.0.1", "L")]
+        node = ("98dci4-srv-1003.iter.org", ("98dci4-srv-1003.iter.org",))
+
+        assert _supervised_links("iter", ports, [node]) == [("iter", "iter", ports)]
+
+    def test_tunnel_command_ends_with_the_node_destination(self):
+        target = ("-o", "ProxyJump=gw", "-l", "me", "node.example")
+        with patch(
+            "imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
+        ):
+            command, _env = _build_foreground_tunnel_command(
+                target, [(2490, 2490, "wsl-clip", "localhost", "R")]
+            )
+
+        assert command[-5:] == list(target)
+
+    def test_service_unit_passes_reverse_nodes_to_the_supervisor(self):
+        with patch("imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/uv"):
+            content = _build_systemd_service_content(
+                "iter", False, False, False, reverse_nodes=("all",)
+            )
+
+        exec_start = next(
+            line for line in content.splitlines() if line.startswith("ExecStart=")
+        )
+        assert exec_start.endswith("service-run iter --reverse-node all")
 
 
 class TestTunnelStart:

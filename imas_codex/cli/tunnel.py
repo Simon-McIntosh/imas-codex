@@ -28,11 +28,21 @@ import shutil
 import signal
 import subprocess
 import time
+from collections.abc import Sequence
 from pathlib import Path
 
 import click
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+
+# An ssh destination: an alias from the client's ssh config, or the argument
+# list that reaches a node the config has no alias for (options, then host).
+SshTarget = str | tuple[str, ...]
+
+# Reverse forwards on the extra login nodes are probed less often than those on
+# the primary connection: each probe is an ssh round trip through the gateway,
+# and there is one per forward per node.
+_REVERSE_NODE_CHECK_INTERVAL = 60.0
 
 # ============================================================================
 # Helpers
@@ -103,6 +113,87 @@ def _resolve_host(host: str | None) -> str:
         "No HOST specified and the active graph profile has no remote host.\n"
         "Provide a host: imas-codex tunnel start <host>"
     )
+
+
+def _ssh_destination(target: SshTarget) -> list[str]:
+    return [target] if isinstance(target, str) else list(target)
+
+
+def _ssh_client_config(host: str) -> dict[str, str]:
+    """Return the ssh client settings in force for ``host`` (``ssh -G``)."""
+    try:
+        result = subprocess.run(
+            ["ssh", "-G", host],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    config: dict[str, str] = {}
+    for line in result.stdout.splitlines():
+        key, _, value = line.partition(" ")
+        config.setdefault(key.lower(), value.strip())
+    return config
+
+
+def _known_login_nodes(host: str) -> list[str]:
+    from imas_codex.discovery.base.facility import get_facility
+
+    try:
+        nodes = get_facility(host).get("known_login_nodes") or []
+    except Exception as exc:
+        raise click.ClickException(
+            f"--reverse-node all reads known_login_nodes for facility '{host}': {exc}"
+        ) from exc
+    if not nodes:
+        raise click.ClickException(
+            f"--reverse-node all: facility '{host}' has no known_login_nodes"
+        )
+    return list(nodes)
+
+
+def _resolve_reverse_nodes(
+    host: str, nodes: Sequence[str]
+) -> list[tuple[str, SshTarget]]:
+    """Resolve extra login nodes to carry the reverse forwards.
+
+    A reverse forward binds only on the node its ssh session reached, while a
+    load-balanced gateway can place an interactive shell on any login node. So
+    a forward that must be reachable wherever the user lands needs a connection
+    to every node. Each extra node is reached the way ``host`` is — the same
+    user and jump host — so no ssh alias is needed per node. The node ``host``
+    itself resolves to is skipped: the primary connection already binds there.
+
+    ``all`` expands to the facility's ``known_login_nodes``. Short names take
+    the domain of ``host``'s own hostname.
+    """
+    if not nodes:
+        return []
+    names: list[str] = []
+    for node in nodes:
+        names.extend(_known_login_nodes(host) if node == "all" else [node])
+
+    config = _ssh_client_config(host)
+    primary = config.get("hostname", host)
+    domain = primary.partition(".")[2]
+    jump = config.get("proxyjump", "none")
+    user = config.get("user", "")
+
+    resolved: list[tuple[str, SshTarget]] = []
+    for name in dict.fromkeys(names):
+        fqdn = name if "." in name or not domain else f"{name}.{domain}"
+        if fqdn == primary or any(fqdn == seen for seen, _ in resolved):
+            continue
+        target: list[str] = []
+        if jump != "none":
+            target += ["-o", f"ProxyJump={jump}"]
+        if user:
+            target += ["-l", user]
+        target.append(fqdn)
+        resolved.append((fqdn, tuple(target)))
+    return resolved
 
 
 def _get_tunnel_ports(
@@ -400,7 +491,7 @@ def _run_systemctl_user(
 
 
 def _build_foreground_tunnel_command(
-    host: str,
+    host: SshTarget,
     ports: list[tuple[int, int, str, str, str]],
 ) -> tuple[list[str], dict[str, str]]:
     autossh = shutil.which("autossh")
@@ -441,7 +532,7 @@ def _build_foreground_tunnel_command(
         "-N",
         *SSH_TUNNEL_OPTS,
         *forward_args,
-        host,
+        *_ssh_destination(host),
     ]
     env = {
         **os.environ,
@@ -471,7 +562,7 @@ def _terminate_tunnel_process(child: subprocess.Popen | None) -> None:
         pass
 
 
-def _is_remote_clipboard_active(host: str, port: int) -> bool:
+def _is_remote_clipboard_active(host: SshTarget, port: int) -> bool:
     """Return whether the reverse-forwarded clipboard bridge responds remotely."""
     try:
         result = subprocess.run(
@@ -481,7 +572,7 @@ def _is_remote_clipboard_active(host: str, port: int) -> bool:
                 "BatchMode=yes",
                 "-o",
                 "ConnectTimeout=5",
-                host,
+                *_ssh_destination(host),
                 "curl",
                 "-fsS",
                 "--max-time",
@@ -498,7 +589,7 @@ def _is_remote_clipboard_active(host: str, port: int) -> bool:
     return result.returncode == 0 and result.stdout.strip() == "ok"
 
 
-def _probe_reverse_ssh_forward(host: str, port: int) -> str:
+def _probe_reverse_ssh_forward(host: SshTarget, port: int) -> str:
     """Classify the reverse ssh forward on ``host`` as up, stale or down.
 
     A bound port is not evidence of a working tunnel. When a client drops, its
@@ -521,7 +612,15 @@ def _probe_reverse_ssh_forward(host: str, port: int) -> str:
     )
     try:
         result = subprocess.run(
-            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", host, probe],
+            [
+                "ssh",
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "ConnectTimeout=5",
+                *_ssh_destination(host),
+                probe,
+            ],
             check=False,
             capture_output=True,
             text=True,
@@ -537,7 +636,7 @@ def _probe_reverse_ssh_forward(host: str, port: int) -> str:
     )
 
 
-def _reverse_forward_answers(host: str, label: str, remote_port: int) -> bool:
+def _reverse_forward_answers(host: SshTarget, label: str, remote_port: int) -> bool:
     """Return whether a reverse forward carries traffic back to the client.
 
     Every reverse forward needs its own instrument, because each terminates at
@@ -554,6 +653,26 @@ def _reverse_forward_answers(host: str, label: str, remote_port: int) -> bool:
     return True
 
 
+def _supervised_links(
+    host: str,
+    ports: list[tuple[int, int, str, str, str]],
+    reverse_nodes: list[tuple[str, SshTarget]],
+) -> list[tuple[str, SshTarget, list[tuple[int, int, str, str, str]]]]:
+    """Return each connection the supervisor holds, as (name, target, ports).
+
+    The primary connection to ``host`` carries every forward. Each extra login
+    node carries only the reverse forwards, since a forward tunnel needs one
+    listener on the client and the primary already provides it.
+    """
+    links: list[tuple[str, SshTarget, list[tuple[int, int, str, str, str]]]] = [
+        (host, host, ports)
+    ]
+    reverse_ports = [port for port in ports if port[4] == "R"]
+    if reverse_ports:
+        links.extend((name, target, reverse_ports) for name, target in reverse_nodes)
+    return links
+
+
 def _run_service_supervisor(
     host: str,
     neo4j_only: bool,
@@ -563,13 +682,14 @@ def _run_service_supervisor(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    reverse_nodes: Sequence[str] = (),
 ) -> None:
     from imas_codex.remote.tunnel import is_tunnel_active
 
     stop_requested = False
-    child: subprocess.Popen | None = None
-    current_signature: tuple[tuple[int, int, str], ...] | None = None
-    last_reverse_check = 0.0
+    children: dict[str, subprocess.Popen | None] = {}
+    signatures: dict[str, tuple[tuple[int, int, str], ...]] = {}
+    last_reverse_check: dict[str, float] = {}
 
     def _handle_signal(_signum, _frame) -> None:
         nonlocal stop_requested
@@ -578,53 +698,76 @@ def _run_service_supervisor(
     signal.signal(signal.SIGTERM, _handle_signal)
     signal.signal(signal.SIGINT, _handle_signal)
 
+    extra_nodes = _resolve_reverse_nodes(host, reverse_nodes)
+    if extra_nodes:
+        click.echo(
+            f"Reverse forwards also held on: {', '.join(n for n, _ in extra_nodes)}"
+        )
+
+    def _current_ports() -> list[tuple[int, int, str, str, str]]:
+        return _get_tunnel_ports(
+            host,
+            neo4j_only,
+            embed_only,
+            llm_only,
+            vllm_only,
+            docs_only,
+            ink_only,
+            clipboard_only,
+            emit_status=False,
+        )
+
+    def _signature(
+        ports: list[tuple[int, int, str, str, str]],
+    ) -> tuple[tuple[int, int, str], ...]:
+        return tuple(
+            (remote_port, local_port, bind_addr)
+            for remote_port, local_port, _label, bind_addr, _dir in ports
+        )
+
+    def _stop(name: str) -> None:
+        _terminate_tunnel_process(children.get(name))
+        children[name] = None
+
     try:
         while not stop_requested:
-            ports = _get_tunnel_ports(
-                host,
-                neo4j_only,
-                embed_only,
-                llm_only,
-                vllm_only,
-                docs_only,
-                ink_only,
-                clipboard_only,
-                emit_status=False,
-            )
+            ports = _current_ports()
             if not ports:
                 raise click.ClickException("No services selected for tunneling.")
+            links = _supervised_links(host, ports, extra_nodes)
 
-            signature = tuple(
-                (remote_port, local_port, bind_addr)
-                for remote_port, local_port, _label, bind_addr, _dir in ports
-            )
-
-            if (
-                child is None
-                or child.poll() is not None
-                or signature != current_signature
-            ):
-                if current_signature is None:
-                    click.echo(f"Starting persistent tunnel supervisor for {host}")
-                elif signature != current_signature:
-                    click.echo(f"Tunnel targets changed for {host}; restarting autossh")
+            for name, target, link_ports in links:
+                child = children.get(name)
+                signature = _signature(link_ports)
+                if (
+                    child is not None
+                    and child.poll() is None
+                    and signature == signatures.get(name)
+                ):
+                    continue
+                if name not in signatures:
+                    click.echo(f"Starting persistent tunnel supervisor for {name}")
+                elif signature != signatures[name]:
+                    click.echo(f"Tunnel targets changed for {name}; restarting autossh")
                 else:
-                    click.echo(f"autossh exited for {host}; restarting")
-
+                    click.echo(f"autossh exited for {name}; restarting")
                 _terminate_tunnel_process(child)
-                cmd, env = _build_foreground_tunnel_command(host, ports)
-                child = subprocess.Popen(
+                cmd, env = _build_foreground_tunnel_command(target, link_ports)
+                children[name] = subprocess.Popen(
                     cmd,
                     env=env,
                     start_new_session=True,
                 )
-                current_signature = signature
+                signatures[name] = signature
 
             for _ in range(15):
                 if stop_requested:
                     break
                 time.sleep(2)
-                if child is None or child.poll() is not None:
+                if any(
+                    children.get(name) is None or children[name].poll() is not None
+                    for name, _target, _ports in links
+                ):
                     break
                 missing_ports = [
                     local_port
@@ -637,46 +780,36 @@ def _run_service_supervisor(
                         + ", ".join(str(port) for port in missing_ports)
                         + "; restarting autossh"
                     )
-                    _terminate_tunnel_process(child)
-                    child = None
+                    _stop(host)
                     break
-                now = time.monotonic()
-                if now - last_reverse_check >= 15:
-                    last_reverse_check = now
+                restarted = False
+                for name, target, link_ports in links:
+                    interval = 15 if name == host else _REVERSE_NODE_CHECK_INTERVAL
+                    now = time.monotonic()
+                    if now - last_reverse_check.get(name, 0.0) < interval:
+                        continue
+                    last_reverse_check[name] = now
                     missing_reverse_ports = [
                         remote_port
-                        for remote_port, _local, label, _bind, direction in ports
+                        for remote_port, _local, label, _bind, direction in link_ports
                         if direction == "R"
-                        and not _reverse_forward_answers(host, label, remote_port)
+                        and not _reverse_forward_answers(target, label, remote_port)
                     ]
                     if missing_reverse_ports:
                         click.echo(
-                            f"Remote tunnel listeners missing for {host}: "
+                            f"Remote tunnel listeners missing for {name}: "
                             + ", ".join(str(port) for port in missing_reverse_ports)
                             + "; restarting autossh"
                         )
-                        _terminate_tunnel_process(child)
-                        child = None
-                        break
-                latest_ports = _get_tunnel_ports(
-                    host,
-                    neo4j_only,
-                    embed_only,
-                    llm_only,
-                    vllm_only,
-                    docs_only,
-                    ink_only,
-                    clipboard_only,
-                    emit_status=False,
-                )
-                latest_signature = tuple(
-                    (remote_port, local_port, bind_addr)
-                    for remote_port, local_port, _label, bind_addr, _dir in latest_ports
-                )
-                if latest_signature != current_signature:
+                        _stop(name)
+                        restarted = True
+                if restarted:
+                    break
+                if _signature(_current_ports()) != signatures.get(host):
                     break
     finally:
-        _terminate_tunnel_process(child)
+        for name in children:
+            _terminate_tunnel_process(children[name])
 
 
 def _build_systemd_service_content(
@@ -688,6 +821,7 @@ def _build_systemd_service_content(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    reverse_nodes: Sequence[str] = (),
 ) -> str:
     uv = shutil.which("uv")
     if not uv:
@@ -708,6 +842,8 @@ def _build_systemd_service_content(
         flag_args.append("--ink")
     if clipboard_only:
         flag_args.append("--clipboard")
+    for node in reverse_nodes:
+        flag_args.extend(["--reverse-node", node])
     flags = " ".join(flag_args)
 
     services = _requested_services(
@@ -1312,6 +1448,16 @@ def tunnel_status() -> None:
     is_flag=True,
     help="Reverse-tunnel clipboard port (wsl-clip-server on WSL → Windows)",
 )
+@click.option(
+    "--reverse-node",
+    "reverse_nodes",
+    multiple=True,
+    metavar="NODE",
+    help=(
+        "Also bind the reverse forwards (clipboard, wsl-ssh) on this login "
+        "node; repeatable. 'all' means every known_login_nodes entry."
+    ),
+)
 def tunnel_service(
     action: str,
     host: str | None,
@@ -1322,12 +1468,18 @@ def tunnel_service(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    reverse_nodes: tuple[str, ...] = (),
 ) -> None:
     """Manage persistent SSH tunnels via systemd + autossh.
 
     Installs a systemd user service that maintains reconnecting SSH
     tunnels to the specified HOST for Neo4j, embedding, LLM, vLLM,
     docs-server, and/or wsl-clip-server clipboard services.
+
+    A reverse forward binds only on the login node the connection reached.
+    When the gateway can place a shell on any login node, --reverse-node all
+    holds the reverse forwards on every one of them, so the clipboard reaches
+    whichever node the shell is on.
 
     \b
     Examples:
@@ -1339,6 +1491,8 @@ def tunnel_service(
       imas-codex tunnel service install iter --docs    # Just docs-server
       imas-codex tunnel service install iter --ink     # Just ink display
       imas-codex tunnel service install iter --clipboard # Clipboard reverse tunnel
+      imas-codex tunnel service install iter --reverse-node all
+      imas-codex tunnel service install iter --reverse-node 98dci4-srv-1003
       imas-codex tunnel service start iter
       imas-codex tunnel service status iter
       imas-codex tunnel service logs iter
@@ -1384,6 +1538,7 @@ def tunnel_service(
             docs_only,
             ink_only,
             clipboard_only,
+            reverse_nodes,
         )
         service_dir.mkdir(parents=True, exist_ok=True)
         service_file.write_text(service_content)
@@ -1402,6 +1557,12 @@ def tunnel_service(
                 click.echo(
                     f"    {label}: localhost:{local_port} → {bind_addr}:{remote_port}"
                 )
+        if reverse_nodes and any(p[4] == "R" for p in ports):
+            nodes = _resolve_reverse_nodes(target, reverse_nodes)
+            click.echo(
+                "  Reverse forwards also on: "
+                + (", ".join(name for name, _ in nodes) or "(none beyond host)")
+            )
         click.echo(f"  Log: {log_dir / f'autossh-{target}.log'}")
         click.echo(f"  Service started: imas-codex tunnel service logs {target}")
 
@@ -1481,6 +1642,16 @@ def tunnel_service(
     is_flag=True,
     help="Reverse-tunnel clipboard port",
 )
+@click.option(
+    "--reverse-node",
+    "reverse_nodes",
+    multiple=True,
+    metavar="NODE",
+    help=(
+        "Also bind the reverse forwards (clipboard, wsl-ssh) on this login "
+        "node; repeatable. 'all' means every known_login_nodes entry."
+    ),
+)
 def tunnel_service_run(
     host: str | None,
     neo4j_only: bool,
@@ -1490,6 +1661,7 @@ def tunnel_service_run(
     docs_only: bool = False,
     ink_only: bool = False,
     clipboard_only: bool = False,
+    reverse_nodes: tuple[str, ...] = (),
 ) -> None:
     """Run the persistent systemd tunnel supervisor in the foreground."""
     target = _resolve_host(host)
@@ -1502,4 +1674,5 @@ def tunnel_service_run(
         docs_only,
         ink_only,
         clipboard_only,
+        reverse_nodes,
     )
