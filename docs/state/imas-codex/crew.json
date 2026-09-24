@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-24T08:21:51",
+  "updated": "2026-09-24T14:31:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -5459,40 +5459,6 @@
           "gpt-5.6-sol": "01a05ea1-b94c-7d13-8acd-40449befb07a"
         },
         "created": "2026-09-01"
-      },
-      {
-        "id": "session-3df31341bd3780a83b96",
-        "harness": "claude-opus",
-        "role": "implement",
-        "session_id": "002b8d09-eb19-45d6-976d-5584b3503cdb",
-        "session_model": "claude-opus-5",
-        "sessions": {
-          "{\"alias\":\"opus 5\",\"backend\":\"claude-opus\",\"effort\":\"high\",\"launch\":\"cli\",\"model\":\"claude-opus-5\",\"sandbox\":\"worktree-full\"}": "002b8d09-eb19-45d6-976d-5584b3503cdb"
-        },
-        "created": "2026-09-21"
-      },
-      {
-        "id": "session-4994115311a2b7a92ac8",
-        "harness": "clive",
-        "role": "review",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
-        "created": "2026-09-21"
-      },
-      {
-        "id": "session-db8c4f36c218aafa61a9",
-        "harness": "clive",
-        "role": "review",
-        "session_id": "9b2163f1-de49-4250-81c4-b875060ea24f",
-        "session_model": "deepseek-v4.1-flash",
-        "sessions": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "9b2163f1-de49-4250-81c4-b875060ea24f"
-        },
-        "created": "2026-09-21",
-        "session_owners": {
-          "{\"alias\":\"dsv4.1-flash\",\"backend\":\"clive\",\"effort\":\"xhigh\",\"launch\":\"cli\",\"local\":true,\"model\":\"deepseek-v4.1-flash\",\"sandbox\":\"read-only\",\"usable_input_window\":480000}": "instrument-20260921T0925"
-        }
       },
       {
         "id": "son-graphbase",
@@ -186293,6 +186259,6 @@
         "resumption_fired": false
       }
     ],
-    "_version": 2508
+    "_version": 2509
   }
 }
