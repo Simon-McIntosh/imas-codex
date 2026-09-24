@@ -793,6 +793,14 @@ def get_wsl_clip_port() -> int:
 
 WSL_SSH_BASE_PORT = 2222
 
+# The port the client's own sshd listens on, which is what the remote port
+# above must be forwarded to. The two are different numbers and forwarding the
+# remote port to itself is silent: the remote sshd accepts the connection on
+# its listener before the channel to the client is opened, so a dead local
+# target presents as a connection that opens and then sends no banner, which
+# reads like an sshd that is down rather than a forward aimed at nothing.
+WSL_SSHD_LOCAL_PORT = 22
+
 
 def get_wsl_ssh_port() -> int:
     """Get the port the login node uses to reach the client's sshd.
@@ -805,6 +813,19 @@ def get_wsl_ssh_port() -> int:
     if port:
         return int(port)
     return WSL_SSH_BASE_PORT
+
+
+def get_wsl_sshd_local_port() -> int:
+    """Get the port the client's own sshd listens on locally.
+
+    Priority: IMAS_CODEX_WSL_SSHD_LOCAL_PORT env → [wsl-ssh].sshd_port → 22.
+    """
+    if env := os.getenv("IMAS_CODEX_WSL_SSHD_LOCAL_PORT"):
+        return int(env)
+    port = _get_section("wsl-ssh").get("sshd_port")
+    if port:
+        return int(port)
+    return WSL_SSHD_LOCAL_PORT
 
 
 # ─── ink display server settings ───────────────────────────────────────────

@@ -258,14 +258,19 @@ def _get_tunnel_ports(
         ports.append((clip_port, clip_port, "wsl-clip", "localhost", "R"))
 
     if all_services:
-        from imas_codex.settings import get_wsl_ssh_port
+        from imas_codex.settings import get_wsl_ssh_port, get_wsl_sshd_local_port
 
         ssh_port = get_wsl_ssh_port()
         # Reverse forward to the client's own sshd, so a session on the login
         # node can inspect the client when diagnosing a connection fault. Part
         # of the default set rather than a flag of its own: it is wanted
         # whenever the full tunnel set is, and never on its own.
-        ports.append((ssh_port, ssh_port, "wsl-ssh", "localhost", "R"))
+        #
+        # The local target is the port sshd listens on, not the port the remote
+        # dials. Unlike wsl-clip, whose bridge does listen on the same number
+        # both sides, these differ — and aiming the forward at the remote's own
+        # number fails silently, as a connection that opens and never answers.
+        ports.append((ssh_port, get_wsl_sshd_local_port(), "wsl-ssh", "localhost", "R"))
 
     return ports
 
@@ -418,23 +423,23 @@ def _build_foreground_tunnel_command(
                 ["-L", local_forward_spec(local_port, bind_addr, remote_port)]
             )
 
-    # A rejected reverse bind otherwise leaves ssh running without the remote
-    # listener.  autossh then sees a healthy connection and never retries,
-    # while the clipboard bridge remains unreachable until a manual restart.
-    # Place this after the shared options so it overrides their permissive
-    # default when this connection owns a reverse forward.
-    reverse_forward_options = (
-        ["-o", "ExitOnForwardFailure=yes"]
-        if any(direction == "R" for *_rest, direction in ports)
-        else []
-    )
+    # ExitOnForwardFailure stays permissive, from the shared options, even when
+    # this connection owns a reverse forward. A rejected reverse bind then
+    # leaves ssh running without the remote listener, and the supervisor is
+    # what notices and restarts — it probes each reverse forward end to end,
+    # which also catches a bind that succeeded onto a dead local target. Exiting
+    # here instead would take the forward tunnels down with it, for a remote
+    # listener that a departed client can hold for over two hours.
+    #
+    # An option repeated on an ssh command line keeps its FIRST value, so
+    # appending a stricter one after the shared options would not override them
+    # in any case; `ssh -G` prints what is actually in force.
     cmd = [
         autossh,
         "-M",
         "0",
         "-N",
         *SSH_TUNNEL_OPTS,
-        *reverse_forward_options,
         *forward_args,
         host,
     ]
@@ -502,11 +507,17 @@ def _probe_reverse_ssh_forward(host: str, port: int) -> str:
     nothing traverses it, and the next tunnel silently fails to rebind. So the
     question worth asking the remote is not whether a port is bound but whether
     anything answers through it.
+
+    The traversal test reads the server banner rather than completing a login,
+    so the verdict describes the forward and not which keys the client happens
+    to authorise. The supervisor restarts the tunnel on this verdict, and a
+    login test would make an authorised_keys change look like a broken forward
+    and drive a restart loop over a tunnel that was working.
     """
     probe = (
-        f"ss -tlnH 'sport = :{port}' 2>/dev/null | grep -q . || exit 3; "
-        f"timeout 6 ssh -p {port} -o BatchMode=yes -o ConnectTimeout=5 "
-        f"-o StrictHostKeyChecking=no localhost true >/dev/null 2>&1 || exit 4"
+        f'ss -tlnH "sport = :{port}" 2>/dev/null | grep -q . || exit 3; '
+        f'timeout 6 bash -c "exec 3<>/dev/tcp/127.0.0.1/{port}; head -c 4 <&3" '
+        f'2>/dev/null | grep -q "^SSH-" || exit 4'
     )
     try:
         result = subprocess.run(
@@ -524,6 +535,23 @@ def _probe_reverse_ssh_forward(host: str, port: int) -> str:
     return {0: "up", 3: "down", 4: "stale", 255: "unreachable"}.get(
         result.returncode, "unknown"
     )
+
+
+def _reverse_forward_answers(host: str, label: str, remote_port: int) -> bool:
+    """Return whether a reverse forward carries traffic back to the client.
+
+    Every reverse forward needs its own instrument, because each terminates at
+    a different kind of server. An unrecognised label is reported as answering:
+    restarting a tunnel on a check that was never written for it would repair
+    nothing and drop the forward tunnels sharing the connection.
+    """
+    if label == "wsl-clip":
+        return _is_remote_clipboard_active(host, remote_port)
+    if label == "wsl-ssh":
+        # "unreachable" and "unknown" say the probe could not reach the remote,
+        # which is not evidence against the forward.
+        return _probe_reverse_ssh_forward(host, remote_port) not in {"down", "stale"}
+    return True
 
 
 def _run_service_supervisor(
@@ -619,8 +647,7 @@ def _run_service_supervisor(
                         remote_port
                         for remote_port, _local, label, _bind, direction in ports
                         if direction == "R"
-                        and label == "wsl-clip"
-                        and not _is_remote_clipboard_active(host, remote_port)
+                        and not _reverse_forward_answers(host, label, remote_port)
                     ]
                     if missing_reverse_ports:
                         click.echo(

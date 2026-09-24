@@ -10,6 +10,8 @@ from imas_codex.cli.tunnel import (
     _get_tunnel_ports,
     _installed_service_supports_request,
     _is_remote_clipboard_active,
+    _probe_reverse_ssh_forward,
+    _reverse_forward_answers,
     _service_selected_services,
     _terminate_tunnel_process,
     tunnel,
@@ -37,7 +39,15 @@ class TestTunnelServiceHelpers:
         assert command[forward_index + 1] == "127.0.0.1:8765:127.0.0.1:8765"
         assert command.count("ExitOnForwardFailure=yes") == 0
 
-    def test_reverse_forward_failure_terminates_ssh_for_autossh_retry(self):
+    def test_reverse_forward_keeps_the_connection_on_a_rejected_bind(self):
+        """A rejected reverse bind must not take the forward tunnels down.
+
+        The supervisor probes each reverse forward end to end and restarts on a
+        real failure, which also catches a bind that succeeded onto a dead local
+        target — something exiting on bind failure could never see. A repeated
+        ssh option keeps its first value, so a stricter one appended after the
+        shared options would be inert rather than an override.
+        """
         with patch(
             "imas_codex.cli.tunnel.shutil.which", return_value="/usr/bin/autossh"
         ):
@@ -46,11 +56,44 @@ class TestTunnelServiceHelpers:
                 [(2490, 2490, "wsl-clip", "localhost", "R")],
             )
 
-        assert command.index("ExitOnForwardFailure=no") < command.index(
-            "ExitOnForwardFailure=yes"
-        )
+        assert "ExitOnForwardFailure=no" in command
+        assert "ExitOnForwardFailure=yes" not in command
         reverse_index = command.index("-R")
         assert command[reverse_index + 1] == "2490:localhost:2490"
+
+    def test_reverse_ssh_forward_health_ignores_an_unreachable_remote(self):
+        """Failing to reach the remote is not evidence against the forward.
+
+        Treating it as a failure would restart the tunnel — and drop every
+        forward sharing the connection — whenever the remote is briefly away.
+        """
+        with patch("imas_codex.cli.tunnel._probe_reverse_ssh_forward") as probe:
+            probe.return_value = "unreachable"
+            assert _reverse_forward_answers("iter", "wsl-ssh", 2222)
+            probe.return_value = "up"
+            assert _reverse_forward_answers("iter", "wsl-ssh", 2222)
+            probe.return_value = "stale"
+            assert not _reverse_forward_answers("iter", "wsl-ssh", 2222)
+            probe.return_value = "down"
+            assert not _reverse_forward_answers("iter", "wsl-ssh", 2222)
+
+    def test_reverse_forward_health_reads_a_banner_not_a_login(self):
+        """The verdict must describe the forward, not the client's keys.
+
+        A login test reports a working forward as broken whenever the client
+        stops authorising the remote's key, and the supervisor restarts on this
+        verdict.
+        """
+        completed = MagicMock(returncode=0)
+        with patch(
+            "imas_codex.cli.tunnel.subprocess.run", return_value=completed
+        ) as run:
+            _probe_reverse_ssh_forward("iter", 2222)
+
+        probe = run.call_args[0][0][-1]
+        assert "/dev/tcp/127.0.0.1/2222" in probe
+        assert "SSH-" in probe
+        assert "BatchMode" not in probe
 
     def test_unreapable_tunnel_child_does_not_wedge_supervisor(self):
         child = MagicMock()
@@ -159,6 +202,30 @@ class TestTunnelServiceHelpers:
             emit_status=False,
         )
         assert ports == [(8765, 8765, "docs", "127.0.0.1", "L")]
+
+    def test_reverse_ssh_forward_targets_the_local_sshd_port(self):
+        """The remote dial port and the client's sshd port are different numbers.
+
+        Forwarding the remote port to itself lands on a port nothing listens on,
+        and the remote sshd accepts the connection on its own listener before
+        the channel to the client is opened — so the failure presents as a
+        connection that opens and sends no banner, indistinguishable from an
+        sshd that is down.
+        """
+        with (
+            patch("imas_codex.cli.tunnel._discover_compute_node", return_value=None),
+            patch("imas_codex.cli.tunnel._discover_vllm_node", return_value=None),
+        ):
+            ports = _get_tunnel_ports(
+                "iter",
+                neo4j=False,
+                embed=False,
+                llm=False,
+                emit_status=False,
+            )
+
+        reverse_ssh = [entry for entry in ports if entry[2] == "wsl-ssh"]
+        assert reverse_ssh == [(2222, 22, "wsl-ssh", "localhost", "R")]
 
     def test_installed_service_rejects_docs_when_absent(self, tmp_path):
         service_file = tmp_path / "imas-codex-tunnel-iter.service"
