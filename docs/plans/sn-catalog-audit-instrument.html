@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-09-24">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-impl" content="0.56">
 </head>
 <body>
@@ -1007,6 +1007,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260921T062106360381-n-the-review-pipeline-capability-gaps-are-named" data-who="reckon-ship" data-when="2026-09-21T06:26:53.868Z">
     <div class="r-comment-body"><p>no suite: a capability map. Of 5 WEST defect classes 1 is detectable, 2 only via a single channel that can vanish silently, 2 unreachable. 7 findings, 4 confirmed; Layer 3 is a variance detector so systematic blindness produces no warning</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260924T123408552142-n-shared-infrastructure-coupling-is-named-with-its-refactor" data-who="reckon-ship" data-when="2026-09-24T12:45:13.546Z">
+    <div class="r-comment-body"><p>11 couplings named across all five required surfaces with file:line sites, the failure each risks, and a one-sentence refactor; independent review 79 (scope 20, fit 19, evidence 16, goal 16, durability 8). Merged to main at 79419367c. One finding is realised damage rather than risk: catalog_release.py mints minted_from as an absolute reckon-worktree path and twelve of fourteen committed manifests carry one, all twelve already dangling, the oldest about three weeks old in released artifacts - tracked as f-mps-provenance-is-repo-relative with a done-when that requires a test asserting no absolute path, not only that the twelve are rewritten. One finding did NOT survive checking: the router-admission-gate bypass was passed to the router&#x27;s owners marked unverified and they refuted it at the configuration level, so it is withdrawn in the committed record; the surviving residue is get_vllm_port forwarding 18800 rather than the router&#x27;s 18802 at cli/tunnel.py:227 and :1178. No h5py access to IMAS data found. The node surveys and does not repair, so none of the 11 refactors are landed. Its gate log is in /tmp, which is node-local and does not survive the fleet move.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260921T062322979058-n-the-rubric-can-express-the-defects-we-found" data-who="reckon-ship" data-when="2026-09-21T06:30:22.885Z">
     <div class="r-comment-body"><p>no suite: a rubric map. 4 of 6 classes expressible, 1 not expressible (per-binding correction field absent), 1 not reachable (docs and name prompts disagree on what bindings are for). Ordinal convention encoded but in 3 of 10 prompts and on zero dimensions</p></div>
