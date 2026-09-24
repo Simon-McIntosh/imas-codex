@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="sprint">
+  <meta name="reckon-id" content="S15">
+  <meta name="reckon-version" content="1">
+  <title>The lead can see every agent process and what it costs | sprint</title>
+</head>
+<body>
+<main class="reckon-resource" data-type="sprint" data-id="S15">
+  <ol data-reckon="sprint-items">
+  <li data-slug="host-dashboard-covers-every-agent-process" data-item="{&quot;done_when&quot;: &quot;One pane shows every process of the lead&#x27;s uid on the login and fleet nodes, grouped by owning session. CPU is a percentage of the slice quota with the throttled fraction beside it, memory a percentage of the slice limit, and filesystem a GPFS-blocked share with a stat-latency multiple. The orphan flag is raised only for a dead recorded owner, long-running background work is flagged, host kill acts only on listed pids, and a report over the sample record names the incident&#x27;s owners.&quot;, &quot;slug&quot;: &quot;host-dashboard-covers-every-agent-process&quot;, &quot;why_now&quot;: &quot;The panel misreported the storage event as CPU saturation and hid every process that caused it, and the lead has asked for it to become the dashboard that watches agent runs.&quot;}">host-dashboard-covers-every-agent-process</li>
+  </ol>
+  <script type="application/json" id="reckon-resource-state">{"description":"On 2026-09-23 to 24 the login node reached load 143 while its CPU sat 97% idle. The cause was agent processes blocked on GPFS, and imas-codex host showed it as 100% CPU while listing none of them. This sprint makes the host command the lead's agent dashboard. It shows every process of the lead's uid on the login and fleet nodes, attributed to its owning session, with CPU, memory and filesystem each reported as a correct percentage of its own limit, and it keeps a record that answers who loaded the node after the fact.","ends":"","id":"S15","items":[{"done_when":"One pane shows every process of the lead's uid on the login and fleet nodes, grouped by owning session. CPU is a percentage of the slice quota with the throttled fraction beside it, memory a percentage of the slice limit, and filesystem a GPFS-blocked share with a stat-latency multiple. The orphan flag is raised only for a dead recorded owner, long-running background work is flagged, host kill acts only on listed pids, and a report over the sample record names the incident's owners.","slug":"host-dashboard-covers-every-agent-process","why_now":"The panel misreported the storage event as CPU saturation and hid every process that caused it, and the lead has asked for it to become the dashboard that watches agent runs."}],"starts":"","status":"open","summary":"","theme":"The lead can see every agent process and what it costs","type":"sprint","version":1}</script>
+</main>
+</body>
+</html>

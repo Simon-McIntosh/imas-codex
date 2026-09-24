@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="host-dashboard-covers-every-agent-process">
+  <meta name="plan-title" content="The host dashboard covers every agent process">
+  <meta name="plan-summary" content="imas-codex host becomes the agent dashboard: every process on the login and fleet nodes, grouped by owner, with correct CPU, memory and filesystem percentages.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S15">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="agent-fleet,host-dashboard">
+  <meta name="plan-informs" content="reckon:a-cutover-is-measured-against-its-baseline,imas-ambix:slurm-hosted-agent-fleet">
+  <title>The host dashboard covers every agent process | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-09-24">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">&sect;1 &mdash; What the panel shows today, and how it misled</h2>
+    <p>On the night of 2026-09-23 to 24 the lead read the login-node panel from
+    <code>imas-codex host iter</code>. It showed <code>98dci4-srv-1006</code> at 100% CPU,
+    while <code>vmstat</code> read 95&ndash;98% idle. The node was at load 143 because dozens
+    of agent processes were blocked on GPFS, and a single <code>stat</code> took 8.5 s. The
+    events are recorded in imas-ambix's research note <code>login-node-storage-contention</code>.
+    Every number the panel draws needs checking, not only the one that failed:</p>
+    <table>
+      <thead><tr><th>What the panel shows</th><th>Where it comes from (<code>imas_codex/cli/host.py</code>)</th><th>What is wrong with it</th></tr></thead>
+      <tbody>
+        <tr><td>CPU bar</td><td><code>_format_load_row</code>: <code>os.getloadavg()[0] / cpu_count</code></td><td>Load average counts tasks in uninterruptible wait as well as runnable ones. On a node blocked on storage it reads full while the CPU is idle.</td></tr>
+        <tr><td>Per-process CPU</td><td><code>ps -eo %cpu</code></td><td><code>ps</code> reports CPU time divided by the process's lifetime, a lifetime average. A producer three days old that has just started spinning reads near its historical mean.</td></tr>
+        <tr><td>Memory</td><td><code>MemAvailable</code> from <code>/proc/meminfo</code></td><td>Correct for the node, but the lead's processes are capped by their own user slice: <code>memory.max</code> 64 GiB, with <code>memory.current</code> at 33 GiB (52%) on 2026-09-24.</td></tr>
+        <tr><td>Processes</td><td><code>_CODEX_RE</code> filter</td><td>Only imas-codex processes. The orphaned reckon followers, producers and searches that loaded the node were invisible.</td></tr>
+        <tr><td>Filesystem</td><td>nothing</td><td>No signal at all, and the filesystem was the resource that failed.</td></tr>
+        <tr><td>Other nodes</td><td>ssh survey of login nodes</td><td>Blind to the interactive fleet node the agent fleet is moving to.</td></tr>
+      </tbody>
+    </table>
+    <p><code>host kill</code> selects processes by an include or exclude pattern and signals
+    whatever matches at that moment. That is the kill-by-pattern form the workstation's agent
+    rules ban. A pattern re-evaluated at kill time can also match a process that was not in
+    the preview.</p>
+
+    <h2 id="s2">&sect;2 &mdash; Three resources, three honest percentages</h2>
+    <p>Every figure is a rate over a sampling interval, read from <code>/proc</code> and the
+    cgroup files, never from a walk of any filesystem. Each is labelled with its
+    denominator.</p>
+    <ul>
+      <li><strong>CPU.</strong> Node: busy over total from successive <code>/proc/stat</code>
+      readings. The lead's slice: the change in <code>usage_usec</code> from
+      <code>cpu.stat</code>, divided by the interval times the quota in <code>cpu.max</code>
+      (four cores on the login node today), giving a percentage of what the lead may use. Beside
+      it, the throttled fraction: the change in <code>nr_throttled</code> over the change in
+      <code>nr_periods</code>. That is the quantity reckon's cutover plan reports against its
+      0.3366 baseline, so both read the same counter. Per process: the change in
+      <code>utime + stime</code> over the interval. Load average is still shown, labelled as
+      load, beside the count of tasks in <code>D</code> state, so a reader sees the split
+      instead of inferring it.</li>
+      <li><strong>Memory.</strong> The slice's <code>memory.current</code> over
+      <code>memory.max</code>, the node's <code>MemAvailable</code>, and per-process RSS.</li>
+      <li><strong>Filesystem.</strong> GPFS offers no utilisation counter to a client, and
+      <code>io.pressure</code> is not supported on this kernel's user slice, so the measure is
+      built from two direct observations. <em>Blocked share</em>: each of the lead's processes
+      is sampled twice a second, and the fraction of samples it spends in <code>D</code> with
+      wait channel <code>cxiWaitEventWait</code> is its GPFS-blocked share. It is summed per
+      owner and shown as the percentage of the lead's non-idle processes that are blocked on
+      storage. <em>Latency</em>: an in-process <code>stat</code> on one fixed file in home and one
+      in <code>/work</code>, shown against the healthy value measured on 2026-09-24 (about
+      250 &micro;s) as a multiple. The scratch sampler in the incident
+      (<code>fsload.py</code>, imas-ambix session scratchpad) is the reference
+      implementation.</li>
+    </ul>
+    <p>The dashboard's own cost is a row in its own table. A monitor that walks the filesystem
+    it is watching repeats the incident.</p>
+    <p><strong>Done when</strong> each figure has a unit test over recorded
+    <code>/proc</code> and cgroup fixtures. One fixture is a node whose load average is 140
+    with idle CPU, and the CPU bar must read idle there. A mutation that restores
+    <code>getloadavg() / cpu_count</code> must fail.</p>
+
+    <h2 id="s3">&sect;3 &mdash; Every process the lead owns, grouped by who started it</h2>
+    <p>The filter becomes the lead's uid, not a name pattern. Each process is attributed to an
+    owner and a role.</p>
+    <ul>
+      <li><strong>Owner</strong> is the nearest ancestor that is a Claude session. Its pid is
+      the name of its socket under <code>/run/user/&lt;uid&gt;/cc-socks/</code>, which also
+      gives the peer name other sessions message it by.</li>
+      <li>Where reckon records the crew session id and owning pid in the process environment
+      (<code>reckon:a-crew-process-ends-with-its-owner</code> &sect;6), that recorded owner is
+      used instead, because it survives reparenting to init.</li>
+      <li><strong>Role</strong> is one of session, follower, producer, dispatch or complete
+      loop, worker, search, service or other. It is read from the command line of a process
+      whose owner is already established, never used to establish ownership.</li>
+    </ul>
+    <p>Columns: pid, owner, role, age, CPU %, RSS, GPFS-blocked %, state and wait channel,
+    working directory. Rows fold by owner, and each owner row carries its totals.</p>
+    <p><strong>Done when</strong> the live login node renders every process of the lead's
+    uid. A test over a recorded process table holding two sessions, a follower reparented to
+    init with a recorded owner, and a zellij server shows each attributed correctly. The
+    zellij server is never attributed to a session.</p>
+
+    <h2 id="s4">&sect;4 &mdash; Orphans and long-running background work are flagged, never selected for a kill</h2>
+    <p>ppid 1 does not mark an orphan: live workers, zellij servers and system services all
+    have it, and one coordinator's ppid-1 list held 16 processes, none of them orphans. The
+    orphan flag is raised only when the recorded owner is dead. It waits on reckon's census
+    (gated below). Until then the column reads "owner unknown", not "orphan".</p>
+    <p>A second flag marks background work that has outlived its attention: any process in a
+    session's tree running longer than ten minutes that is not a follower, producer or
+    worker. That is what a backgrounded tool call becomes, and the harness says nothing about
+    it between its two-minute boundary and its death. The <code>bfs</code> over
+    <code>/work/projects/imas_gpu</code> ran for 13 h 50 min that way, and a
+    <code>find /</code> for 10 h 49 min.</p>
+    <p><code>host kill</code> is reshaped to act on a pid list the operator has read: it takes
+    pids, re-checks that each still has the same start time and owner, prints what it
+    signals, and prints what it spared. The pattern options are removed.</p>
+    <p><strong>Done when</strong> a test shows the orphan flag raised for a dead-owner stub
+    and not for a live worker with ppid 1. A background search stub older than ten minutes is
+    flagged. <code>host kill</code> refuses a pid whose start time changed since it was
+    listed.</p>
+
+    <h2 id="s5">&sect;5 &mdash; Two nodes in one pane</h2>
+    <p>The survey keeps its ssh reach to the login nodes and gains the interactive fleet
+    node whenever the fleet allocation is held. It resolves that node from reckon's published
+    reservation rather than from a hostname, and samples it through a step in that allocation,
+    so it reads the same cgroup the fleet runs in. The <code>stat</code> latency probe runs on
+    both nodes at the same moment. The research note could not tell how much of the night's
+    contention was local to the login node's GPFS daemon and how much was cluster-wide,
+    because only one node was probed. Two simultaneous probes separate the two.</p>
+    <p><strong>Done when</strong> with the fleet allocation held, the pane shows both nodes,
+    each with its own three percentages and latency probe, and the fleet node's row names the
+    job id it sampled through.</p>
+
+    <h2 id="s6">&sect;6 &mdash; An evidence record, and a report built from it</h2>
+    <p>A live pane is forgotten the moment it scrolls. Each sample is appended to a
+    JSON-lines record, one small line per owner per interval, holding the three percentages,
+    the latency probes and the flags. <code>imas-codex host report --since &lt;time&gt;</code>
+    reads that record back and gives, per owner and per node: CPU-seconds against quota,
+    memory peak against limit, GPFS-blocked process-hours, orphan and long-running flags
+    raised, and the worst latency interval. That is the evidence cycle for the next incident:
+    one command answers "who loaded the node, with what, and when", without a live
+    reconstruction.</p>
+    <p>GPU and serving figures are not re-scraped here. imas-ambix's
+    <code>serve-telemetry-spine</code> &sect;10 moves <code>gpu-watch</code> onto the serve
+    recorder as <code>imas-ambix agent watch</code>, and the report reads that recorder's
+    figures for the same window instead of keeping a second scraper that can drift.</p>
+    <p><strong>Done when</strong> a report over a recorded day of samples reproduces the
+    per-owner totals computed by hand from the same records. A report run against the
+    2026-09-24 incident window, from records taken while it happened, names the owners the
+    research note names.</p>
+
+    <h2 id="s7">&sect;7 &mdash; Done when, for the plan</h2>
+    <p>&sect;2&ndash;&sect;6 have each met their own done-when. The lead can open one pane and
+    read, for every agent process on the login and fleet nodes: who owns it, what it is, and
+    what share of CPU quota, memory limit and storage it is taking. The same figures are
+    available afterwards from the report.</p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-hdcea-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-09-24" data-recommends-skill="/reckon-ship" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the host pane correct, complete and recorded</h4>
+    <div class="r-fu-body"><p>§2 (metrics) comes first, because §3–§6 display its figures. §3 and §5 can then run in parallel. §4 is gated on reckon's census (<code>a-crew-process-ends-with-its-owner</code> §6), because its orphan flag reads the owner that census records; it runs once that lands. §6 follows §2 and §3. The heavy gate for any node that samples a real node for longer than a few seconds runs on <code>all_debug</code>, never on the login node.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship host-dashboard-covers-every-agent-process</pre>
+    </article>
+</section>
+  <section data-reckon="gates" id="gates" class="r-gates">
+<h2><span class="sec">§</span> Evidence gates</h2>
+<div class="r-gate" data-id="g-hdcea-1" data-section="s4" data-gated-sections="s4" data-status="open" data-verdict="">
+    <h4 class="r-gate-measure">The orphan flag reads a recorded owner from the process environment, so reckon must record the crew session id and owning pid in every process it starts, and its census must exist to agree with.</h4>
+    <p class="r-gate-required-evidence">reckon:a-crew-process-ends-with-its-owner#s6</p>
+    </div>
+</section>
+</main>
+</body>
+</html>
