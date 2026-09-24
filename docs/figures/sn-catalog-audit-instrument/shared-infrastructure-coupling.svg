@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 620" font-family="ui-sans-serif, system-ui, sans-serif">
+  <rect width="980" height="620" fill="#ffffff"/>
+
+  <text x="24" y="40" font-size="21" font-weight="700" fill="#111827">Shared-infrastructure coupling in imas-codex</text>
+  <text x="24" y="66" font-size="13" fill="#4b5563">Left: the imas-codex site that reimplements the capability. Right: the shared facility that already owns it.</text>
+
+  <!-- interface line -->
+  <line x1="560" y1="96" x2="560" y2="586" stroke="#9ca3af" stroke-width="2" stroke-dasharray="7 6"/>
+  <text x="560" y="90" font-size="12" font-weight="600" fill="#6b7280" text-anchor="middle">thin-interface boundary</text>
+
+  <text x="30" y="118" font-size="12" font-weight="700" fill="#374151">imas-codex coupling site</text>
+  <text x="600" y="118" font-size="12" font-weight="700" fill="#374151">shared facility that owns it</text>
+
+  <!-- rows -->
+  <!-- 1 -->
+  <rect x="24" y="134" width="510" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="38" y="158" font-size="13" font-weight="700" fill="#991b1b">1 · reckon crew &amp; plan layer</text>
+  <text x="38" y="180" font-size="12" fill="#3f3f46">catalog_release.py:2068  minted_from = absolute worktree path</text>
+  <text x="38" y="198" font-size="12" fill="#3f3f46">settings.py:737-760  plan state via docs-server port 8765</text>
+  <rect x="596" y="134" width="360" height="76" rx="7" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="610" y="158" font-size="12" fill="#166534">reckon worktree (transient) +</text>
+  <text x="610" y="176" font-size="12" fill="#166534">plan-state interface (MCP read_plan)</text>
+  <text x="610" y="198" font-size="11" fill="#15803d">12 committed manifests point at a path that will not exist</text>
+  <line x1="534" y1="172" x2="590" y2="172" stroke="#dc2626" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- 2 -->
+  <rect x="24" y="222" width="510" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="38" y="246" font-size="13" font-weight="700" fill="#991b1b">2 · local lane &amp; router</text>
+  <text x="38" y="268" font-size="12" fill="#3f3f46">discovery/base/llm.py:1956-2007  lane choice by env var; :2129 retry loop</text>
+  <text x="38" y="286" font-size="12" fill="#3f3f46">settings.py:704-731  VLLM_PORT / job-name constants</text>
+  <rect x="596" y="222" width="360" height="76" rx="7" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="610" y="246" font-size="12" fill="#166534">local router: lane selection +</text>
+  <text x="610" y="264" font-size="12" fill="#166534">admission gate + published topology</text>
+  <text x="610" y="286" font-size="11" fill="#15803d">direct-endpoint branch bypasses admission; N workers oversubscribe</text>
+  <line x1="534" y1="260" x2="590" y2="260" stroke="#dc2626" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- 3 -->
+  <rect x="24" y="310" width="510" height="88" rx="7" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="38" y="334" font-size="13" font-weight="700" fill="#991b1b">3 · fleet &amp; SLURM placement</text>
+  <text x="38" y="356" font-size="12" fill="#3f3f46">cli/compute.py:251-289,427-447,509-519  srun / sbatch / scancel</text>
+  <text x="38" y="374" font-size="12" fill="#3f3f46">cli/services.py:565,593,620,434  #SBATCH, squeue -n, scancel</text>
+  <text x="38" y="392" font-size="12" fill="#3f3f46">cli/host.py:357-487  fleet re-probed by SSH;  ssh_worker.py:539  /tmp cache</text>
+  <rect x="596" y="310" width="360" height="88" rx="7" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="610" y="334" font-size="12" fill="#166534">placement layer / crew ledger +</text>
+  <text x="610" y="352" font-size="12" fill="#166534">host dashboard + node provisioning</text>
+  <text x="610" y="376" font-size="11" fill="#15803d">jobs cancelled outside the ledger; two node surveys disagree;</text>
+  <text x="610" y="391" font-size="11" fill="#15803d">per-node /tmp tool copy is invisible to provisioning</text>
+  <line x1="534" y1="354" x2="590" y2="354" stroke="#dc2626" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- 4 -->
+  <rect x="24" y="410" width="510" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="38" y="434" font-size="13" font-weight="700" fill="#991b1b">4 · imas-python data access</text>
+  <text x="38" y="456" font-size="12" fill="#3f3f46">ids/assembler.py:439-440  imas.DBEntry(uri, "x") — no pinned DD</text>
+  <text x="38" y="474" font-size="12" fill="#3f3f46">remote/scripts/enrich_directories.py:73-95  duplicate IMAS pattern table</text>
+  <rect x="596" y="410" width="360" height="76" rx="7" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="610" y="434" font-size="12" fill="#166534">imas.DBEntry with explicit DD version +</text>
+  <text x="610" y="452" font-size="12" fill="#166534">discovery/base/imas_patterns (one source of truth)</text>
+  <text x="610" y="474" font-size="11" fill="#15803d">file written in a DD the graph does not resolve against</text>
+  <line x1="534" y1="448" x2="590" y2="448" stroke="#dc2626" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- 5 -->
+  <rect x="24" y="498" width="510" height="76" rx="7" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="38" y="522" font-size="13" font-weight="700" fill="#991b1b">5 · GPFS paths &amp; state files</text>
+  <text x="38" y="544" font-size="12" fill="#3f3f46">graph/neo4j_ops.py:36,828-856  hand-rolled lock; alarm around fcntl on GPFS</text>
+  <text x="38" y="562" font-size="12" fill="#3f3f46">config/models.py:93 · discovery/paths/users.py:41  absolute /home/ITER paths</text>
+  <rect x="596" y="498" width="360" height="76" rx="7" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="610" y="522" font-size="12" fill="#166534">shared claim/lock interface +</text>
+  <text x="610" y="540" font-size="12" fill="#166534">repo-relative paths + per-site path rules</text>
+  <text x="610" y="562" font-size="11" fill="#15803d">stale cross-node lock and liveness disagree; recovery is a manual rm</text>
+  <line x1="534" y1="536" x2="590" y2="536" stroke="#dc2626" stroke-width="2" marker-end="url(#a)"/>
+
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <text x="24" y="604" font-size="11" fill="#6b7280">Base 69a2fb2df0f6fbaf158f327ca5d54a690254c5b8 · each arrow is a capability the left column implements instead of calling the right column through the boundary.</text>
+</svg>
