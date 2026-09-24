@@ -1233,13 +1233,13 @@ AttributeError: 'list' object has no attribute 'single'</code></pre>
 
     <table>
       <caption>The five surfaces and what was found on each</caption>
-      <thead><tr><th>Surface</th><th>Sites</th><th>Coupling class</th></tr></thead>
+      <thead><tr><th>Surface</th><th>Findings</th><th>Coupling class</th></tr></thead>
       <tbody>
         <tr><td>reckon crew and plan layer</td><td>2</td><td>a committed manifest records a transient worktree root (<code>catalog_release.py:2068,2209,2219</code>, twelve files carrying it); plan state reached through a foreign static server's port (<code>settings.py:737-760</code>)</td></tr>
         <tr><td>local lane and router</td><td>2</td><td>lane choice and a retry loop re-derived locally (<code>discovery/base/llm.py:1956-2007</code>, <code>:2129-2239</code>); endpoint and job-name constants stand in for the live topology (<code>settings.py:704-731</code>, <code>cli/services.py:41-42</code>)</td></tr>
         <tr><td>fleet and SLURM placement</td><td>3</td><td><code>srun</code>/<code>sbatch</code>/<code>squeue</code>/<code>scancel</code> issued outside the placement ledger (<code>cli/compute.py:251-289,427-447,509-519</code>, <code>cli/services.py:565,593,620,434</code>); the fleet re-probed by SSH (<code>cli/host.py:357-487</code>); a per-node <code>/tmp</code> tool cache outside provisioning (<code>remote/ssh_worker.py:539-546</code>)</td></tr>
         <tr><td>imas-python data access</td><td>2</td><td>IDS opened with a literal create mode and no pinned DD version (<code>ids/assembler.py:439-440</code>); the shared IMAS pattern table redefined in a remote script (<code>remote/scripts/enrich_directories.py:73-95</code> vs <code>discovery/base/imas_patterns.py</code>)</td></tr>
-        <tr><td>GPFS paths or state files</td><td>3</td><td>a hand-rolled lock with a 5&nbsp;s alarm around a known-hanging <code>fcntl.lockf</code> on GPFS (<code>graph/neo4j_ops.py:36,828-856</code>); absolute <code>/home/ITER/…</code> paths in generated artifacts and path rules (<code>config/models.py:93,967</code>, <code>discovery/paths/users.py:41-42</code>)</td></tr>
+        <tr><td>GPFS paths or state files</td><td>2</td><td>a hand-rolled lock with a 5&nbsp;s alarm around a known-hanging <code>fcntl.lockf</code> on GPFS (<code>graph/neo4j_ops.py:36,828-856</code>); absolute <code>/home/ITER/…</code> paths in generated artifacts and path rules (<code>config/models.py:93,967</code>, <code>discovery/paths/users.py:41-42</code>)</td></tr>
       </tbody>
     </table>
 

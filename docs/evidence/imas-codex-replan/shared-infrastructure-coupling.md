@@ -12,13 +12,13 @@ behaviour. Line numbers are from
 
 ![Every coupling site sits below the thin-interface boundary, reimplementing a capability the shared facility already owns](/imas-codex/figures/sn-catalog-audit-instrument/shared-infrastructure-coupling.svg)
 
-| Surface | Sites | Coupling class |
+| Surface | Findings | Coupling class |
 |---|---|---|
 | reckon crew and plan layer | 2 | records a transient worktree root; reaches plan state through a foreign static server |
 | local lane and router | 2 | re-derives lane selection and admission locally; hardcodes endpoint constants |
 | fleet and SLURM placement | 3 | submits and cancels jobs outside the placement ledger; re-probes the fleet; per-node tool cache |
 | imas-python data access | 2 | opens IDS without a pinned DD version; duplicates the shared IMAS pattern table |
-| GPFS paths or state files | 3 | hand-rolled lock on GPFS; absolute machine paths in generated artifacts and path rules |
+| GPFS paths or state files | 2 | hand-rolled lock on GPFS; absolute machine paths in generated artifacts and path rules |
 
 ## 1. The reckon crew and plan layer
 
