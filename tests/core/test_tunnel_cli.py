@@ -1,16 +1,20 @@
 import subprocess
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.tunnel import (
     SERVICE_MANIFEST_PREFIX,
     _build_foreground_tunnel_command,
     _build_systemd_service_content,
+    _end_dropped_session,
     _get_tunnel_ports,
     _installed_service_supports_request,
     _is_remote_clipboard_active,
     _probe_reverse_ssh_forward,
+    _reclaim_reverse_forwards,
     _resolve_reverse_nodes,
     _reverse_forward_answers,
     _service_selected_services,
@@ -473,3 +477,199 @@ class TestTunnelProcessInspection:
             )
 
         assert _ssh_forwarded_local_ports(tmp_path) == {8765, 17687}
+
+
+# Stands in for the login node under the real reclaim script: each function
+# shadows the command of the same name, and the node's state lives in files
+# under $STATE so a test can set it up and read back what was signalled.
+_FAKE_LOGIN_NODE = r"""
+id() { echo 1000; }
+sleep() { :; }
+ss() {
+    local port=${!#}; port=${port##*:}
+    [ -f "$STATE/bound/$port" ] || return 0
+    local scope; scope=$(command cat "$STATE/bound/$port")
+    case "$1" in
+        *e*) echo "LISTEN 0 128 127.0.0.1:$port 0.0.0.0:* uid:1000 cgroup:$scope <->" ;;
+        *) echo "LISTEN 0 128 127.0.0.1:$port 0.0.0.0:*" ;;
+    esac
+}
+curl() {
+    local port=${!#}; port=${port##*:}; port=${port%%/*}
+    [ -f "$STATE/answers/$port" ] && echo ok
+}
+timeout() {
+    local port=${!#}; port=${port##*/dev/tcp/127.0.0.1/}; port=${port%%;*}
+    [ -f "$STATE/answers/$port" ] && printf SSH-
+}
+ps() { command cat "$STATE/ps/${!#}" 2>/dev/null; }
+cat() {
+    case "$1" in
+        /sys/fs/cgroup/*) command cat "$STATE/cgroup${1#/sys/fs/cgroup}" ;;
+        *) command cat "$@" ;;
+    esac
+}
+kill() {
+    echo "$2" >> "$STATE/signalled"
+    local scope; scope=$(command cat "$STATE/scope-of/$2")
+    local held
+    for held in "$STATE"/bound/*; do
+        [ "$(command cat "$held")" = "$scope" ] && rm "$held"
+    done
+    return 0
+}
+"""
+
+_SCOPE = "/user.slice/user-1000.slice/session-7.scope"
+_FORWARDS = [(2490, "wsl-clip"), (2222, "wsl-ssh")]
+
+
+@pytest.fixture
+def login_node(tmp_path, monkeypatch):
+    """A login node where a session holds both reverse forwards.
+
+    The session is the privileged sshd (root), the user's sshd, and a shell of
+    the user's that must never be signalled.
+    """
+    state = tmp_path / "node"
+    for sub in ("bound", "answers", "ps", "scope-of"):
+        (state / sub).mkdir(parents=True)
+    for port, _label in _FORWARDS:
+        (state / "bound" / str(port)).write_text(_SCOPE)
+    procs = state / "cgroup" / _SCOPE.lstrip("/") / "cgroup.procs"
+    procs.parent.mkdir(parents=True)
+    procs.write_text("100\n101\n102\n")
+    for pid, line in {
+        "100": "0 00:12:31 sshd: someone [priv]",
+        "101": "1000 00:12:31 sshd: someone",
+        "102": "1000 00:12:30 -bash",
+    }.items():
+        (state / "ps" / pid).write_text(line + "\n")
+        (state / "scope-of" / pid).write_text(_SCOPE)
+    env_file = tmp_path / "fake-login-node.sh"
+    env_file.write_text(_FAKE_LOGIN_NODE)
+    monkeypatch.setenv("STATE", str(state))
+    monkeypatch.setenv("BASH_ENV", str(env_file))
+    return state
+
+
+def _signalled(state: Path) -> list[str]:
+    path = state / "signalled"
+    return path.read_text().split() if path.exists() else []
+
+
+class TestReclaimDroppedSession:
+    def test_a_session_nothing_answers_through_is_ended(self, login_node):
+        status, lines = _reclaim_reverse_forwards(None, _FORWARDS)
+
+        assert _signalled(login_node) == ["101"]
+        assert status == 0
+        assert ":2490 freed" in lines
+        assert ":2222 freed" in lines
+
+    def test_a_session_that_still_reaches_the_client_is_left_alone(self, login_node):
+        """A silent clipboard beside an answering ssh-back is a down bridge.
+
+        The client is still on the other end of that session, so ending it
+        would drop a working tunnel and repair nothing.
+        """
+        (login_node / "answers" / "2222").touch()
+
+        status, lines = _reclaim_reverse_forwards(None, _FORWARDS)
+
+        assert _signalled(login_node) == []
+        assert status == 0
+        assert ":2490 wsl-clip bound, nothing answers" in lines
+        assert "session-7.scope still reaches the client; left alone" in lines
+
+    def test_dry_run_names_the_session_and_signals_nothing(self, login_node):
+        status, lines = _reclaim_reverse_forwards(None, _FORWARDS, dry_run=True)
+
+        assert _signalled(login_node) == []
+        assert status == 0
+        assert (
+            "would end dropped session-7.scope: sshd 101, up 00:12:31 (sshd: someone)"
+            in lines
+        )
+
+    def test_free_ports_need_nothing(self, login_node):
+        for port, _label in _FORWARDS:
+            (login_node / "bound" / str(port)).unlink()
+
+        status, lines = _reclaim_reverse_forwards(None, _FORWARDS)
+
+        assert _signalled(login_node) == []
+        assert status == 0
+        assert lines == [":2490 wsl-clip not bound", ":2222 wsl-ssh not bound"]
+
+    def test_a_hold_with_no_sshd_of_ours_is_reported_not_forced(self, login_node):
+        (login_node / "ps" / "101").write_text("0 00:12:31 sshd: someone\n")
+
+        status, lines = _reclaim_reverse_forwards(None, _FORWARDS)
+
+        assert _signalled(login_node) == []
+        assert status == 1
+        assert any("has no sshd of ours to end" in line for line in lines)
+
+    def test_a_login_node_runs_the_same_script_over_ssh(self):
+        completed = subprocess.CompletedProcess([], 0, ":2490 wsl-clip not bound\n", "")
+        with patch(
+            "imas_codex.cli.tunnel.subprocess.run", return_value=completed
+        ) as run:
+            status, lines = _reclaim_reverse_forwards("iter", _FORWARDS)
+
+        command = run.call_args.args[0]
+        assert command[0] == "ssh"
+        assert command[-6:] == [
+            "iter",
+            "bash",
+            "-s",
+            "--",
+            "2490:wsl-clip",
+            "2222:wsl-ssh",
+        ]
+        assert "kill -TERM" in run.call_args.kwargs["input"]
+        assert (status, lines) == (0, [":2490 wsl-clip not bound"])
+
+    def test_an_unreachable_login_node_is_not_a_verdict(self):
+        completed = subprocess.CompletedProcess(
+            [], 255, "", "ssh: connect to host iter port 22: timed out\n"
+        )
+        with patch("imas_codex.cli.tunnel.subprocess.run", return_value=completed):
+            status, lines = _reclaim_reverse_forwards("iter", _FORWARDS)
+
+        assert status is None
+        assert lines == [
+            "reclaim did not reach the node: ssh: connect to host iter port 22: timed out"
+        ]
+
+    def test_the_supervisor_reclaims_only_the_reverse_forwards(self):
+        ports = [
+            (7687, 17687, "neo4j-bolt", "gpu-node", "L"),
+            (2490, 2490, "wsl-clip", "localhost", "R"),
+            (2222, 22, "wsl-ssh", "localhost", "R"),
+        ]
+        with (
+            patch(
+                "imas_codex.cli.tunnel._reclaim_reverse_forwards",
+                return_value=(0, [":2490 freed"]),
+            ) as reclaim,
+            patch("imas_codex.cli.tunnel.click.echo") as echo,
+        ):
+            _end_dropped_session("98dci4-srv-1001", "target", ports)
+
+        reclaim.assert_called_once_with(
+            "target", [(2490, "wsl-clip"), (2222, "wsl-ssh")]
+        )
+        echo.assert_called_once_with("reclaim on 98dci4-srv-1001: :2490 freed")
+
+    def test_reclaim_command_reports_and_fails_on_an_unfreed_hold(self):
+        with patch(
+            "imas_codex.cli.tunnel._reclaim_reverse_forwards",
+            return_value=(1, [":2490 still held by session-7.scope"]),
+        ) as reclaim:
+            result = CliRunner().invoke(tunnel, ["reclaim", "--dry-run"])
+
+        assert result.exit_code == 1
+        assert ":2490 still held by session-7.scope" in result.output
+        assert reclaim.call_args.kwargs == {"dry_run": True}

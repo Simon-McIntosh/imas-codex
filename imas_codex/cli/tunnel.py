@@ -20,6 +20,7 @@ Usage::
     imas-codex tunnel start [HOST] --docs    # Just docs-server port
     imas-codex tunnel stop [HOST]
     imas-codex tunnel status
+    imas-codex tunnel reclaim                 # On a login node: free a dropped session's ports
     imas-codex tunnel service install [HOST]  # Persistent autossh via systemd
 """
 
@@ -653,6 +654,167 @@ def _reverse_forward_answers(host: SshTarget, label: str, remote_port: int) -> b
     return True
 
 
+# Frees the reverse-forward ports a dropped tunnel session still holds on a
+# login node. A client that vanishes without closing its connection (a laptop
+# that sleeps, a VPN that reconnects) leaves its sshd holding every port it
+# forwarded until the server gives up on it, which takes minutes, and every
+# reconnect in that window is refused the bind. The holder is found through the
+# cgroup its listening socket reports, because ss attributes no pid to an
+# sshd's forwarded listener.
+#
+# A session is ended only when nothing answers through ANY forward it holds. One
+# forward that answers proves the client is still on the other end, and a silent
+# sibling then means a service behind it is down, which ending the session would
+# not repair. Only sshd processes owned by the caller are signalled, each named
+# with its age before the signal, so the output records what was ended and why.
+#
+# Arguments: an optional --dry-run, then one PORT:LABEL per reverse forward.
+_RECLAIM_SCRIPT = r"""
+set -u
+dry=0
+if [ "${1:-}" = --dry-run ]; then dry=1; shift; fi
+uid=$(id -u)
+holder() {
+    ss -tlnHe "sport = :$1" 2>/dev/null | grep -oP 'cgroup:\K\S+' | head -1
+}
+answers() {
+    case "$2" in
+        wsl-clip)
+            curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$1/health" \
+                2>/dev/null | grep -qx ok ;;
+        wsl-ssh)
+            timeout 6 bash -c "exec 3<>/dev/tcp/127.0.0.1/$1; head -c 4 <&3" \
+                2>/dev/null | grep -q '^SSH-' ;;
+        *) return 0 ;;
+    esac
+}
+declare -A live=() silent=()
+for spec in "$@"; do
+    port=${spec%%:*}; label=${spec#*:}
+    if [ -z "$(ss -tlnH "sport = :$port" 2>/dev/null)" ]; then
+        echo ":$port $label not bound"; continue
+    fi
+    scope=$(holder "$port")
+    if [ -z "$scope" ]; then
+        echo ":$port $label bound by a holder ss does not attribute; left alone"
+        continue
+    fi
+    if answers "$port" "$label"; then
+        echo ":$port $label answers"; live[$scope]=1
+    else
+        echo ":$port $label bound, nothing answers"
+        silent[$scope]="${silent[$scope]:-} $port"
+    fi
+done
+status=0
+for scope in "${!silent[@]}"; do
+    session=${scope##*/}
+    if [ -n "${live[$scope]:-}" ]; then
+        echo "$session still reaches the client; left alone"; continue
+    fi
+    ended=0
+    for pid in $(cat "/sys/fs/cgroup$scope/cgroup.procs" 2>/dev/null); do
+        read -r owner age args < <(ps -o uid=,etime=,args= -p "$pid" 2>/dev/null) \
+            || continue
+        [ "$owner" = "$uid" ] && [ "${args#sshd:}" != "$args" ] || continue
+        if [ "$dry" = 1 ]; then
+            echo "would end dropped $session: sshd $pid, up $age ($args)"
+        else
+            echo "ending dropped $session: sshd $pid, up $age ($args)"
+            kill -TERM "$pid" && ended=$((ended + 1))
+        fi
+    done
+    [ "$dry" = 1 ] && continue
+    if [ "$ended" -eq 0 ]; then
+        echo "$session holds${silent[$scope]} but has no sshd of ours to end"
+        status=1; continue
+    fi
+    for port in ${silent[$scope]}; do
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+            [ "$(holder "$port")" = "$scope" ] || break
+            sleep 0.5
+        done
+        if [ "$(holder "$port")" = "$scope" ]; then
+            echo ":$port still held by $session"; status=1
+        else
+            echo ":$port freed"
+        fi
+    done
+done
+exit $status
+"""
+
+
+def _reclaim_reverse_forwards(
+    host: SshTarget | None,
+    forwards: Sequence[tuple[int, str]],
+    *,
+    dry_run: bool = False,
+) -> tuple[int | None, list[str]]:
+    """End a dropped session's hold on reverse-forward ports.
+
+    ``host`` None runs on this machine; otherwise the same script runs on that
+    login node over ssh. ``forwards`` pairs each remote port with its label,
+    which selects the instrument that tests whether anything answers through
+    it. Returns the script's exit status (None when it could not be run) and
+    the lines it reported.
+    """
+    command = ["bash", "-s", "--"]
+    if dry_run:
+        command.append("--dry-run")
+    command.extend(f"{port}:{label}" for port, label in forwards)
+    if host is not None:
+        command = [
+            "ssh",
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "ConnectTimeout=5",
+            *_ssh_destination(host),
+            *command,
+        ]
+    try:
+        result = subprocess.run(
+            command,
+            input=_RECLAIM_SCRIPT,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return None, [f"reclaim did not run: {exc}"]
+    if host is not None and result.returncode == 255:
+        detail = result.stderr.strip().splitlines()
+        return None, [
+            f"reclaim did not reach the node: {detail[-1] if detail else 'ssh failed'}"
+        ]
+    return result.returncode, result.stdout.splitlines()
+
+
+def _end_dropped_session(
+    name: str, target: SshTarget, ports: list[tuple[int, int, str, str, str]]
+) -> None:
+    """Free the reverse ports a dropped session still holds on ``target``.
+
+    Run after the supervisor has stopped its own connection to that node, so a
+    holder that remains belongs to a session that is no longer this one. Without
+    it, the reconnect that follows a network drop is refused its bind for as
+    long as the server keeps the dead session, and the clipboard stays
+    unreachable through every restart in that window.
+    """
+    forwards = [
+        (remote_port, label)
+        for remote_port, _local, label, _bind, direction in ports
+        if direction == "R"
+    ]
+    if not forwards:
+        return
+    _status, lines = _reclaim_reverse_forwards(target, forwards)
+    for line in lines:
+        click.echo(f"reclaim on {name}: {line}")
+
+
 def _supervised_links(
     host: str,
     ports: list[tuple[int, int, str, str, str]],
@@ -802,6 +964,7 @@ def _run_service_supervisor(
                             + "; restarting autossh"
                         )
                         _stop(name)
+                        _end_dropped_session(name, target, link_ports)
                         restarted = True
                 if restarted:
                     break
@@ -1099,6 +1262,7 @@ def tunnel() -> None:
       imas-codex tunnel start HOST --keyring   D-Bus socket for keyring
       imas-codex tunnel stop [HOST]            Stop tunnels
       imas-codex tunnel status                 Show active tunnels
+      imas-codex tunnel reclaim                Free a dropped session's reverse ports (login node)
       imas-codex tunnel keyring HOST           Forward keyring D-Bus socket
       imas-codex tunnel service install        Persistent autossh via systemd
     """
@@ -1409,7 +1573,10 @@ def tunnel_status() -> None:
         state = _probe_reverse_ssh_forward(reverse_host, wsl_ssh_port)
         detail = {
             "up": "reachable",
-            "stale": "PORT BOUND BUT NOTHING ANSWERS - reclaim it",
+            "stale": (
+                "PORT BOUND BUT NOTHING ANSWERS - on that node run: "
+                "imas-codex tunnel reclaim"
+            ),
             "down": "not bound",
             "unreachable": f"could not reach {reverse_host} to check",
             "unknown": "probe failed",
@@ -1421,6 +1588,41 @@ def tunnel_status() -> None:
     dbus_sock = _get_dbus_forward_status()
     if dbus_sock:
         click.echo(f"\nD-Bus keyring forward: {dbus_sock}")
+
+
+@tunnel.command("reclaim")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Name the sessions that would be ended without signalling them.",
+)
+def tunnel_reclaim(dry_run: bool) -> None:
+    """Free reverse-forward ports a dropped tunnel session holds on this host.
+
+    Run on the login node, not on the client. When the client's network
+    drops, the server keeps the dead session and its ports for minutes, so
+    the reconnecting tunnel cannot bind the clipboard (wsl-clip) or ssh-back
+    (wsl-ssh) forwards here until they are freed. This ends the sessions whose
+    forwards all go unanswered; one that still reaches the client is left
+    alone. The tunnel service rebinds at its next check, and does this itself
+    whenever a reverse forward stops answering.
+
+    \b
+    Examples:
+      imas-codex tunnel reclaim
+      imas-codex tunnel reclaim --dry-run
+    """
+    from imas_codex.settings import get_wsl_clip_port, get_wsl_ssh_port
+
+    status, lines = _reclaim_reverse_forwards(
+        None,
+        [(get_wsl_clip_port(), "wsl-clip"), (get_wsl_ssh_port(), "wsl-ssh")],
+        dry_run=dry_run,
+    )
+    for line in lines:
+        click.echo(line)
+    if status != 0:
+        raise SystemExit(1)
 
 
 # ============================================================================
