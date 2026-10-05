@@ -23,9 +23,11 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
-<meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d">
+<meta name="plan-impl" content="0.167">
+<meta name="plan-version" content="13">
+<meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
   <main class="plan-doc">
@@ -263,13 +265,19 @@
       facility-aware layer (<code>imas_codex/remote/tools.py</code>, which already resolves
       <code>ssh_host</code> and the nice level from facility config) merges the block with a
       data system's own keys and passes the result down to the executor as parameters; the
-      executor itself stays facility-agnostic, as its contract states. The facility tool
-      probe that already exists (<code>check_all_tools</code>, surfaced as
-      <code>imas-codex tools status &lt;facility&gt;</code>, with <code>min_version</code>
-      floors and <code>missing_required</code> / <code>version_too_old</code> verdicts) gains
-      the interpreter floor and the importability of the libraries each scanner needs
-      (numpy and the EDDB wrapper here; MDSplus or UDA elsewhere), so one probe owns the
-      facility-environment truth and no new CLI command is added; <code>discover
+      executor itself stays facility-agnostic, as its contract states. The facility probe
+      that already exists is extended, not duplicated: <code>imas_codex/remote/python.py</code>
+      owns remote interpreter detection (<code>get_python_status</code>) and the version floor
+      (<code>PythonVersion.meets_minimum</code>, <code>MIN_PYTHON</code>), and
+      <code>imas-codex tools status &lt;facility&gt;</code> already prints that status beside
+      <code>check_all_tools</code> (<code>min_version</code> floors, <code>missing_required</code>
+      / <code>version_too_old</code>). The one gap is that <code>get_python_status</code> probes
+      the login shell's interpreter and cannot see a module-loaded one, so it learns to run
+      under the facility block's setup commands and to report the block's floor through
+      <code>meets_minimum</code>, and <code>check_all_tools</code> gains only the importability
+      of the libraries each scanner needs (numpy and the EDDB wrapper here; MDSplus or UDA
+      elsewhere). One probe owns the facility-environment truth and no new CLI command is
+      added; <code>discover
       signals</code> and <code>discover code</code> run that check before a remote scan and
       refuse when the floor is not met, so an unmet environment is a finding with the fix
       command, not a traceback. Done-when: the block exists in the facility schema and in
@@ -354,7 +362,7 @@
     <div class="r-comment-body"><p>document-failure-classes — document pipeline recovers 'No module named' failures by prior state and defers unloadable-image/dead-link/type-mismatch inputs with a stated reason; gate 94 passed exit 0 (base green at b98b02a39).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261005T060334986821-review-of-document-failure-classes" data-who="reckon-build" data-when="2026-10-05T06:11:06.244Z">
-    <div class="r-comment-body"><p>review of r-20261005T055224634951-document-failure-classes — parsed record, 5/5 dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 19, durability 18, fit 18), total 91, verdict SOUND WITH FINDINGS, one follow-on finding on the reviewed gate log&#x27;s revision header; reviewed_base_sha b98b02a39, reviewed_head_sha 737830b4f.</p></div>
+    <div class="r-comment-body"><p>review of r-20261005T055224634951-document-failure-classes — parsed record, 5/5 dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 19, durability 18, fit 18), total 91, verdict SOUND WITH FINDINGS, one follow-on finding on the reviewed gate log's revision header; reviewed_base_sha b98b02a39, reviewed_head_sha 737830b4f.</p></div>
 </div>
 </section>
 </main>
