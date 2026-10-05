@@ -836,15 +836,16 @@ def _supervised_links(
     return links
 
 
-def _listener_missing_is_failure(started_at: float | None, now: float) -> bool:
-    """Return whether an absent local listener means the tunnel has failed.
+def _past_connection_grace(started_at: float | None, now: float) -> bool:
+    """Return whether a link has had long enough to establish its forwards.
 
     A fresh ssh session through a jump host spends several seconds in key
-    exchange and authentication before OpenSSH binds its ``-L`` listeners
-    (measured 5 s to ITER through the SDCC gateway on 2026-10-05). Inside the
-    grace window an absent listener is a connection still being established,
-    so restarting autossh there kills a healthy session on every cycle and the
-    tunnel never comes up. After the window a missing listener is a failure.
+    exchange and authentication before OpenSSH binds its ``-L`` listeners and
+    its ``-R`` remote forwards (measured 5 s to ITER through the SDCC gateway
+    on 2026-10-05). Inside the grace window an absent listener or an
+    unanswered reverse forward is a connection still being established, so
+    restarting autossh there kills a healthy session on every cycle and the
+    tunnel never comes up. After the window a missing forward is a failure.
     """
     if started_at is None:
         return True
@@ -954,7 +955,7 @@ def _run_service_supervisor(
                     for _remote, local_port, _label, _bind, direction in ports
                     if direction == "L" and not is_tunnel_active(local_port)
                 ]
-                if missing_ports and _listener_missing_is_failure(
+                if missing_ports and _past_connection_grace(
                     started.get(host), time.monotonic()
                 ):
                     click.echo(
@@ -966,6 +967,8 @@ def _run_service_supervisor(
                     break
                 restarted = False
                 for name, target, link_ports in links:
+                    if not _past_connection_grace(started.get(name), time.monotonic()):
+                        continue
                     interval = 15 if name == host else _REVERSE_NODE_CHECK_INTERVAL
                     now = time.monotonic()
                     if now - last_reverse_check.get(name, 0.0) < interval:

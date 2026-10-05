@@ -17,7 +17,7 @@ from imas_codex.cli.tunnel import (
     _get_tunnel_ports,
     _installed_service_supports_request,
     _is_remote_clipboard_active,
-    _listener_missing_is_failure,
+    _past_connection_grace,
     _probe_reverse_ssh_forward,
     _reclaim_reverse_forwards,
     _resolve_reverse_nodes,
@@ -682,15 +682,18 @@ class TestReclaimDroppedSession:
 
 
 class TestListenerGraceWindow:
-    """A listener absent while ssh is still connecting is not a failure."""
+    """A forward absent while ssh is still connecting is not a failure."""
 
-    def test_missing_listener_inside_grace_is_not_a_failure(self):
-        assert not _listener_missing_is_failure(100.0, 105.0)
-        assert _listener_missing_is_failure(100.0, 100.0 + _LISTENER_GRACE_SECONDS)
-        assert _listener_missing_is_failure(None, 0.0)
+    def test_a_link_inside_the_grace_window_is_still_connecting(self):
+        assert not _past_connection_grace(100.0, 105.0)
+        assert _past_connection_grace(100.0, 100.0 + _LISTENER_GRACE_SECONDS)
+        assert _past_connection_grace(None, 0.0)
 
     def _run_supervisor(self, monotonic_values, sleeps_before_stop=4):
-        ports = [(7687, 17687, "neo4j-bolt", "gpu-node", "L")]
+        ports = [
+            (7687, 17687, "neo4j-bolt", "gpu-node", "L"),
+            (2490, 2490, "wsl-clip", "localhost", "R"),
+        ]
         child = MagicMock()
         child.pid = 42
         child.poll.return_value = None
@@ -717,6 +720,10 @@ class TestListenerGraceWindow:
                 ) as popen,
                 patch("imas_codex.cli.tunnel._terminate_tunnel_process"),
                 patch("imas_codex.remote.tunnel.is_tunnel_active", return_value=False),
+                patch(
+                    "imas_codex.cli.tunnel._reverse_forward_answers", return_value=False
+                ),
+                patch("imas_codex.cli.tunnel._end_dropped_session"),
                 patch(
                     "imas_codex.cli.tunnel.time.sleep",
                     side_effect=stop_after_a_few_sleeps,
