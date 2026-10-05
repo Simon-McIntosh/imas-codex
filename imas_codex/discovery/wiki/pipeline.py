@@ -33,7 +33,6 @@ from typing import TYPE_CHECKING, Any, TypedDict
 from imas_codex.graph import GraphClient
 from imas_codex.graph.models import WikiPageStatus
 from imas_codex.ingestion.chunkers import chunk_text as _chunk_text
-from imas_codex.settings import get_embedding_dimension
 
 from .graph_ops import mark_document_failed_or_deferred
 from .monitor import WikiProgressMonitor, set_current_monitor
@@ -1643,40 +1642,18 @@ class WikiIngestionPipeline:
 
 
 def ensure_wiki_vector_index() -> bool:
-    """Ensure Neo4j vector index exists for WikiChunk embeddings.
+    """Ensure the Neo4j vector index for WikiChunk embeddings exists.
 
-    Creates the index if it doesn't exist. Safe to call multiple times.
-    Dimension is determined by the configured embedding model.
+    The index DDL is owned by GraphClient.ensure_vector_indexes, which
+    derives the wiki chunk index from the schema. Safe to call multiple
+    times.
 
     Returns:
-        True if index was created, False if it already existed.
+        True once the index has been reconciled with the schema.
     """
     with GraphClient() as gc:
-        # Check if index already exists
-        existing = gc.query(
-            "SHOW INDEXES YIELD name WHERE name = 'wiki_chunk_embedding' RETURN name"
-        )
-        if existing:
-            logger.debug("wiki_chunk_embedding index already exists")
-            return False
-
-        # Get dimension from configured embedding model
-        dim = get_embedding_dimension()
-        gc.query(
-            f"""
-            CREATE VECTOR INDEX wiki_chunk_embedding IF NOT EXISTS
-            FOR (c:WikiChunk) ON c.embedding
-            OPTIONS {{
-                indexConfig: {{
-                    `vector.dimensions`: {dim},
-                    `vector.similarity_function`: 'cosine',
-                    `vector.quantization.enabled`: true
-                }}
-            }}
-            """
-        )
-        logger.info(f"Created wiki_chunk_embedding vector index ({dim} dims)")
-        return True
+        gc.ensure_vector_indexes()
+    return True
 
 
 def get_wiki_stats(facility_id: str) -> dict:

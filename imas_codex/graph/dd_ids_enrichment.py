@@ -430,7 +430,7 @@ def embed_ids_nodes(
     """
     from imas_codex.embeddings.config import EncoderConfig
     from imas_codex.embeddings.encoder import Encoder
-    from imas_codex.settings import get_embedding_dimension, get_embedding_model
+    from imas_codex.settings import get_embedding_model
 
     stats = {"updated": 0, "cached": 0}
 
@@ -449,21 +449,10 @@ def embed_ids_nodes(
         logger.info("No enriched IDS nodes to embed")
         return stats
 
-    dim = get_embedding_dimension()
     model_name = get_embedding_model()
 
-    # Ensure vector index exists
-    client.query(f"""
-        CREATE VECTOR INDEX ids_embedding IF NOT EXISTS
-        FOR (n:IDS) ON n.embedding
-        OPTIONS {{
-            indexConfig: {{
-                `vector.dimensions`: {dim},
-                `vector.similarity_function`: 'cosine',
-                `vector.quantization.enabled`: true
-            }}
-        }}
-    """)
+    # The vector index DDL is owned by GraphClient.ensure_vector_indexes.
+    client.ensure_vector_indexes()
 
     # Compute text and hashes, filter to IDS needing re-embedding
     to_embed = []

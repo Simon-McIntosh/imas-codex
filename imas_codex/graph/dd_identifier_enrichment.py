@@ -329,7 +329,7 @@ def embed_identifier_schemas(
     """
     from imas_codex.embeddings.config import EncoderConfig
     from imas_codex.embeddings.encoder import Encoder
-    from imas_codex.settings import get_embedding_dimension, get_embedding_model
+    from imas_codex.settings import get_embedding_model
 
     stats = {"updated": 0, "cached": 0}
 
@@ -348,21 +348,10 @@ def embed_identifier_schemas(
         logger.info("No enriched identifier schemas to embed")
         return stats
 
-    dim = get_embedding_dimension()
     model_name = get_embedding_model()
 
-    # Ensure vector index exists
-    client.query(f"""
-        CREATE VECTOR INDEX identifier_schema_embedding IF NOT EXISTS
-        FOR (n:IdentifierSchema) ON n.embedding
-        OPTIONS {{
-            indexConfig: {{
-                `vector.dimensions`: {dim},
-                `vector.similarity_function`: 'cosine',
-                `vector.quantization.enabled`: true
-            }}
-        }}
-    """)
+    # The vector index DDL is owned by GraphClient.ensure_vector_indexes.
+    client.ensure_vector_indexes()
 
     # Compute text and hashes, filter to schemas needing re-embedding
     to_embed = []
@@ -678,7 +667,7 @@ def embed_identifier_nodes(
         compute_embedding_hash,
         generate_embedding_text,
     )
-    from imas_codex.settings import get_embedding_dimension, get_embedding_model
+    from imas_codex.settings import get_embedding_model
 
     stats: dict[str, int] = {"updated": 0, "cached": 0}
 
@@ -700,20 +689,9 @@ def embed_identifier_nodes(
 
     total = len(results)
     model_name = get_embedding_model()
-    dim = get_embedding_dimension()
 
-    # Ensure vector index exists for IMASNode (may already exist)
-    client.query(f"""
-        CREATE VECTOR INDEX imas_node_embedding IF NOT EXISTS
-        FOR (n:IMASNode) ON n.embedding
-        OPTIONS {{
-            indexConfig: {{
-                `vector.dimensions`: {dim},
-                `vector.similarity_function`: 'cosine',
-                `vector.quantization.enabled`: true
-            }}
-        }}
-    """)
+    # The vector index DDL is owned by GraphClient.ensure_vector_indexes.
+    client.ensure_vector_indexes()
 
     # Compute embedding texts, filter cached
     to_embed = []
