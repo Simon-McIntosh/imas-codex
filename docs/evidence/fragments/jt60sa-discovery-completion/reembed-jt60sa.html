@@ -1,0 +1,65 @@
+<section id="reembed-jt60sa-record">
+  <h3>Re-embed the jt-60sa rows left embed-failed by compute-node runs</h3>
+  <p id="reembed-jt60sa-goal">
+    Operational node, no source change. Rows that failed to embed while the fleet
+    node addressed a loopback tunnel were reclaimed and re-embedded through the
+    pipeline's own writer against the server made reachable by §8.
+  </p>
+
+  <h4 id="reembed-jt60sa-reclaim">Reclaim path</h4>
+  <p id="reembed-jt60sa-reclaim-detail">
+    The pipeline's fetch predicate excludes failed rows — <code>_fetch_unembedded</code>
+    in <code>imas_codex/discovery/base/embed_worker.py</code> requires
+    <code>embed_failed_at IS NULL</code> — and no reset command clears that flag:
+    <code>SIGNAL_RESET_SPECS["discovered"]</code> omits it and would also clear the
+    enrichment (<code>description</code>, <code>physics_domain</code>), destroying the
+    USD&nbsp;1.32 of enrichment already carried. The module's own remedy is
+    "To retry, clear the property manually", so the reclaim is a scoped
+    <code>REMOVE n.embed_failed_at</code> — it writes no embedding. Embeddings
+    themselves were written only by the pipeline's <code>embed_batch_sync</code> →
+    <code>_persist_embeddings</code>.
+  </p>
+  <pre id="reembed-jt60sa-reset-query">MATCH (n:FacilitySignal {facility_id:'jt-60sa'}) WHERE n.embed_failed_at IS NOT NULL REMOVE n.embed_failed_at
+MATCH (n:CodeChunk     {facility_id:'jt-60sa'}) WHERE n.embed_failed_at IS NOT NULL REMOVE n.embed_failed_at</pre>
+
+  <h4 id="reembed-jt60sa-control">Encoder positive control</h4>
+  <pre id="reembed-jt60sa-control-out">get_embed_remote_url() = http://98dci4-gpu-0002:18765
+backend = EmbeddingBackend.REMOTE
+is_using_remote = True
+current_source = iter-titan
+vector shape = (1, 256)</pre>
+
+  <h4 id="reembed-jt60sa-counts">Before / after (Cypher)</h4>
+  <table id="reembed-jt60sa-counts-table">
+    <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>FacilitySignal jt-60sa, <code>embed_failed_at</code> set</td><td>697</td><td>0</td></tr>
+      <tr><td>FacilitySignal jt-60sa, enriched with <code>embedding IS NULL</code></td><td>764</td><td>0</td></tr>
+      <tr><td>FacilitySignal jt-60sa, <code>embedding IS NOT NULL</code></td><td>0</td><td>6298</td></tr>
+      <tr><td>CodeChunk <code>/analysis/src/</code>, null or failed embedding</td><td>157</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="reembed-jt60sa-counts-note">
+    Reclaim cleared 697 signal and 157 chunk failure flags. The facility-scoped
+    predicate then embedded 6298 FacilitySignals (the 764 enriched plus 5534 that
+    carry only the raw EDDB catalogue description) and 157 CodeChunks, in 64 and 8
+    batches respectively, on the local lane at USD 0.00. After-counts re-measured
+    from a fresh process.
+  </p>
+
+  <h4 id="reembed-jt60sa-command">Command</h4>
+  <pre id="reembed-jt60sa-command-out">UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync python logs/run_reembed.py
+# driver: REMOVE embed_failed_at, then embed_batch_sync("FacilitySignal", "jt-60sa",
+#         text_field="description") and embed_batch_sync("CodeChunk", "jt-60sa",
+#         text_field="text") — the same function the CLI embed workers call.</pre>
+
+  <h4 id="reembed-jt60sa-search">Vector search</h4>
+  <pre id="reembed-jt60sa-search-out">_search_signals('plasma current', 'jt-60sa', k=5)
+## Signals (5 matches)
+### jt-60sa:general/psrc_calip (score: 7.94) — plasma current Ip, Domain: equilibrium
+### jt-60sa:general/psrc_ip    (score: 7.55) — observed plasma current Ip
+### jt-60sa:general/psrc_comip (score: 6.93) — commanded plasma current reference
+### jt-60sa:general/fame_ttcu  (score: 6.67) — total plasma current from equilibrium reconstruction
+### jt-60sa:general/mdac_currcip3 (score: 6.58) — Rogowski channel 3 current</pre>
+</section>
