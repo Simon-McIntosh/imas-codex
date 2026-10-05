@@ -1,0 +1,33 @@
+<section>
+  <h2 id="chunk-source-live-pin">The chunk-source renderer is pinned against the live HAS_CHUNK edge</h2>
+  <p id="chunk-source-live-pin-result">
+    <code>tests/graph/test_chunk_source_resolution.py</code> (under
+    <code>pytestmark = pytest.mark.graph</code>) binds one
+    <code>CodeChunk</code> reached from its owning <code>CodeExample</code> over
+    an inbound <code>HAS_CHUNK</code> (<code>LIMIT 1</code>, skipped cleanly
+    when the graph is unreachable or no such chunk exists), splices
+    <code>render_chunk_source("cc", "source_file")</code> after that match, and
+    asserts the resolved value is non-null and equals the owning example's
+    <code>source_file</code>. A second case splices the same clause under a
+    different output name (<code>resolved_path</code>) to pin the
+    parameterisation. The owner is bound forward in the base match, so the
+    expectation is the schema's own edge direction and the rendered clause
+    re-binds it as <code>ce</code>. The docstring records that
+    <code>source_facility</code> is read from the chunk's own
+    <code>facility_id</code>, which the chunk writer in
+    <code>imas_codex/ingestion/pipeline.py</code> stamps and writes
+    <code>AT_FACILITY</code> from, so no join to the file is needed.
+  </p>
+  <p id="chunk-source-live-pin-evidence">
+    Gate <code>uv run --no-sync pytest -p no:cacheprovider -m graph
+    tests/graph/test_chunk_source_resolution.py</code> exits <strong>0</strong>
+    (2 passed) against the live graph; <code>pytest tests/graph/test_query_builder.py</code>
+    exits <strong>0</strong> (25 passed). No source file changed. Negative
+    control: with the renderer's <code>OPTIONAL MATCH</code> direction reversed
+    in a scratch copy of the composed query, the live <code>ce</code> goes null
+    and the equality assertion fails — a real path
+    (<code>/analysis/src/SAselene_v2.0_forPSRC/eqequb.f</code>) against a null
+    owner — exit 1. Logs under
+    <code>runs/r-20261005T170657702843-chunk-source-live-pin/</code>.
+  </p>
+</section>
