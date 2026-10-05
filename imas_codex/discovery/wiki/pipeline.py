@@ -322,9 +322,7 @@ def _is_header_only_form(text: str) -> bool:
                 return bool(_TABLE_SEPARATOR_RE.match(lines[offset]))
         return False
 
-    headers = {
-        cells for index, cells in rows if cells and followed_by_separator(index)
-    }
+    headers = {cells for index, cells in rows if cells and followed_by_separator(index)}
     if not headers:
         return False
     previous_is_header = False
@@ -335,17 +333,16 @@ def _is_header_only_form(text: str) -> bool:
     return True
 
 
-def detect_dynamic_page(
-    text: str, fronts_database: list[str] | None = None
-) -> bool:
+def detect_dynamic_page(text: str, fronts_database: list[str] | None = None) -> bool:
     """True when a page is a dynamic table fronting at least one database.
 
     A page whose extracted text is only table headers and a search form carries
-    no content of its own; it is a catalogue table a plugin fills at render
-    time. It is treated as dynamic only when a database it fronts is known —
-    without one there is nothing to name in its stub and nothing to link.
+    no content of its own; an empty page carries none either, which is the same
+    page whose table rendered nothing at all. It is treated as dynamic only when
+    a database it fronts is known — without one there is nothing to name in its
+    stub and nothing to link.
     """
-    if not _is_header_only_form(text):
+    if text.strip() and not _is_header_only_form(text):
         return False
     return bool(fronts_database)
 
@@ -365,9 +362,7 @@ def dynamic_page_stub(databases: list[str]) -> str:
     )
 
 
-def fronts_databases_for_topic(
-    facility_id: str, topic_name: str, linking_texts: list[str]
-) -> list[str]:
+def fronts_databases_for_topic(topic_name: str, linking_texts: list[str]) -> list[str]:
     """Databases linked to ``topic_name`` by ``?db=`` links in other pages.
 
     The links that reach a dynamic topic carry the database it fronts; the
@@ -393,67 +388,64 @@ def _chunk_rows(gc: GraphClient, facility_id: str) -> list[dict]:
     )
 
 
-def apply_dynamic_page_rule(
-    facility_id: str, page_ids: list[str]
-) -> dict[str, list[str]]:
-    """Mark dynamic handbook pages and stub their empty-header chunks.
+def _dynamic_page_databases(
+    topic_name: str, page_texts: list[str], linking_texts: list[str]
+) -> list[str]:
+    """Databases a dynamic topic fronts: the links that reach it, else its own form."""
+    return fronts_databases_for_topic(topic_name, linking_texts) or (
+        fronts_databases_for_topic(topic_name, page_texts)
+    )
 
-    For each named page: derive the databases it fronts from the ``?db=`` links
-    that reach it, set ``WikiPage.fronts_database``, and replace the text of any
-    chunk that is only table headers and a search form with a one-line stub.
-    The page keeps status 'ingested' so its chunk anchors the DOCUMENTS edges.
+
+def mark_dynamic_handbook_pages(facility_id: str) -> dict[str, list[str]]:
+    """Mark every dynamic handbook table topic the linking ``?db=`` links name.
+
+    This is the pipeline's own application of the dynamic-page rule to pages
+    already stored in the graph, so a page whose body was empty or skipped when
+    it was first ingested is still marked. For each topic a linking chunk names:
+    set ``WikiPage.fronts_database``, replace any header-only chunk with the
+    one-line stub and recompute its embedding, and create and embed a stub chunk
+    for a page that carries none. The page keeps status 'ingested' so its chunk
+    anchors the DOCUMENTS edges.
 
     Args:
         facility_id: Facility to process.
-        page_ids: WikiPage ids to evaluate.
 
     Returns:
-        Mapping of page id to the databases that were recorded (empty omitted).
+        Mapping of WikiPage id to the databases that were recorded.
     """
     applied: dict[str, list[str]] = {}
+    embed = get_embed_model()
     with GraphClient() as gc:
-        linking_texts = [row["text"] for row in _chunk_rows(gc, facility_id)]
-        for page_id in page_ids:
-            topic_name = page_id.split(":", 1)[1] if ":" in page_id else page_id
+        linking_texts = [row["text"] or "" for row in _chunk_rows(gc, facility_id)]
+        topics: dict[str, list[str]] = {}
+        for text in linking_texts:
+            for topic, databases in extract_database_links(text).items():
+                topics.setdefault(topic, [])
+                for database in databases:
+                    if database not in topics[topic]:
+                        topics[topic].append(database)
+        for topic_name, databases in topics.items():
+            page_id = f"{facility_id}:{topic_name}"
             rows = gc.query(
                 """
-                MATCH (p:WikiPage {id: $page_id})-[:HAS_CHUNK]->(c:WikiChunk)
-                RETURN p.id AS page_id, c.id AS chunk_id, c.chunk_index AS idx,
-                       c.text AS text
-                ORDER BY c.chunk_index
+                MATCH (p:WikiPage {id: $page_id})
+                OPTIONAL MATCH (p)-[:HAS_CHUNK]->(c:WikiChunk)
+                RETURN p.fronts_database AS fronts,
+                       collect({id: c.id, text: c.text}) AS chunks
                 """,
                 page_id=page_id,
             )
             if not rows:
                 continue
-            texts = [row["text"] or "" for row in rows]
-            # A header-only chunk with no database to name keeps its text.
-            if not any(_is_header_only_form(text) for text in texts):
-                continue
-            databases = fronts_databases_for_topic(
-                facility_id, topic_name, linking_texts
-            )
-            if not databases:
-                # No inbound link carries a parameter: fall back to the page's
-                # own form, which names the database it is rendered from.
-                databases = fronts_databases_for_topic(
-                    facility_id, topic_name, texts
-                )
-            if not databases:
-                # A header-only chunk with no database to name keeps its text.
+            fronts = rows[0]["fronts"]
+            chunks = [c for c in rows[0]["chunks"] if c["id"]]
+            texts = [c["text"] or "" for c in chunks]
+            # A topic the links name but which carries its own content is not a
+            # dynamic table, unless it was already marked.
+            if not fronts and not detect_dynamic_page("\n".join(texts), databases):
                 continue
             stub = dynamic_page_stub(databases)
-            for row in rows:
-                if not _is_header_only_form(row["text"] or ""):
-                    continue
-                gc.query(
-                    """
-                    MATCH (c:WikiChunk {id: $chunk_id})
-                    SET c.text = $text
-                    """,
-                    chunk_id=row["chunk_id"],
-                    text=stub,
-                )
             gc.query(
                 """
                 MATCH (p:WikiPage {id: $page_id})
@@ -462,6 +454,48 @@ def apply_dynamic_page_rule(
                 page_id=page_id,
                 databases=databases,
             )
+            if not chunks:
+                # A table whose topic file held no rows still fronts the
+                # database: give it a stub chunk to anchor the DOCUMENTS edges.
+                gc.query(
+                    """
+                    MERGE (c:WikiChunk {id: $chunk_id})
+                    SET c.wiki_page_id = $page_id, c.facility_id = $facility_id,
+                        c.chunk_index = 0, c.text = $text,
+                        c.embedding = $embedding, c.content_hash = $hash
+                    WITH c
+                    MATCH (p:WikiPage {id: $page_id})
+                    MERGE (p)-[:HAS_CHUNK]->(c)
+                    WITH c
+                    MATCH (f:Facility {id: $facility_id})
+                    MERGE (c)-[:AT_FACILITY]->(f)
+                    """,
+                    chunk_id=f"{page_id}:chunk_0",
+                    page_id=page_id,
+                    facility_id=facility_id,
+                    text=stub,
+                    embedding=embed.embed_texts([stub])[0].tolist(),
+                    hash=hashlib.sha256(stub.encode()).hexdigest()[:16],
+                )
+                applied[page_id] = databases
+                continue
+            for chunk in chunks:
+                text = chunk["text"] or ""
+                # A header-only form, or an already-stubbed chunk whose vector
+                # predates the stub: rewrite the text and recompute the vector.
+                if not _is_header_only_form(text) and text != stub:
+                    continue
+                gc.query(
+                    """
+                    MATCH (c:WikiChunk {id: $chunk_id})
+                    SET c.text = $text, c.embedding = $embedding,
+                        c.content_hash = $hash
+                    """,
+                    chunk_id=chunk["id"],
+                    text=stub,
+                    embedding=embed.embed_texts([stub])[0].tolist(),
+                    hash=hashlib.sha256(stub.encode()).hexdigest()[:16],
+                )
             applied[page_id] = databases
     return applied
 
@@ -1205,6 +1239,26 @@ class WikiIngestionPipeline:
 
         # Generate embeddings in batch - BLOCKING HTTP, run in thread pool
         chunk_texts = [chunk.text for chunk in text_chunks]
+
+        # A handbook table topic renders only headers and a search form, so its
+        # extracted text carries no rows of its own. Mark it with the database
+        # its inbound ?db= links name and stub the header-only chunks before
+        # embedding, so a fresh ingest marks the page and embeds the stub in the
+        # one write rather than leaving an operator to apply the rule by hand.
+        topic_name = page_id.split(":", 1)[1] if ":" in page_id else page_id
+        with GraphClient() as gc:
+            linking_texts = [
+                row["text"] or "" for row in _chunk_rows(gc, self.facility_id)
+            ]
+        page_fronts = _dynamic_page_databases(topic_name, chunk_texts, linking_texts)
+        if page_fronts and detect_dynamic_page("\n".join(chunk_texts), page_fronts):
+            stub = dynamic_page_stub(page_fronts)
+            chunk_texts = [
+                stub if _is_header_only_form(text) else text for text in chunk_texts
+            ]
+        else:
+            page_fronts = []
+
         embeddings_array = await asyncio.to_thread(
             self.embed_model.embed_texts, chunk_texts
         )
@@ -1215,8 +1269,8 @@ class WikiIngestionPipeline:
         all_mdsplus: set[str] = set()
         all_imas: set[str] = set()
 
-        for i, chunk in enumerate(text_chunks):
-            chunk_text_str: str = chunk.text
+        for i in range(len(text_chunks)):
+            chunk_text_str: str = chunk_texts[i]
 
             # Extract entities using facility-aware extractor
             entities = extractor.extract(chunk_text_str)
@@ -1263,7 +1317,10 @@ class WikiIngestionPipeline:
                     p.chunk_count = $chunk_count,
                     p.mdsplus_paths_found = $mdsplus_paths,
                     p.imas_paths_found = $imas_paths,
-                    p.conventions_found = $conventions
+                    p.conventions_found = $conventions,
+                    p.fronts_database = CASE WHEN size($fronts_database) > 0
+                                             THEN $fronts_database
+                                             ELSE p.fronts_database END
                 WITH p
                 MATCH (f:Facility {id: $facility_id})
                 MERGE (p)-[:AT_FACILITY]->(f)
@@ -1277,6 +1334,7 @@ class WikiIngestionPipeline:
                 mdsplus_paths=len(page.mdsplus_paths) if page.mdsplus_paths else 0,
                 imas_paths=len(page.imas_paths) if page.imas_paths else 0,
                 conventions=len(page.conventions) if page.conventions else 0,
+                fronts_database=page_fronts,
             )
 
             # Batch persist chunks using UNWIND
@@ -1488,6 +1546,19 @@ class WikiIngestionPipeline:
         finally:
             monitor.finish()
             set_current_monitor(None)
+
+        # A dynamic handbook table is named by the ?db= links a sibling page
+        # carries, so the table's own ingest cannot always see them. Re-apply the
+        # rule to the stored pages once the batch has written every chunk, so the
+        # marking does not depend on which page of the batch was ingested first.
+        try:
+            applied = await asyncio.to_thread(
+                mark_dynamic_handbook_pages, self.facility_id
+            )
+            if applied:
+                logger.info("Marked dynamic handbook pages: %s", applied)
+        except Exception:
+            logger.warning("Dynamic handbook marking failed", exc_info=True)
 
         report(len(page_names), len(page_names), "Ingestion complete")
         return total_stats
@@ -2699,7 +2770,6 @@ __all__ = [
     "ProgressCallback",
     "DocumentPipeline",
     "WikiIngestionPipeline",
-    "apply_dynamic_page_rule",
     "clear_facility_wiki",
     "detect_dynamic_page",
     "dynamic_page_stub",
@@ -2714,6 +2784,7 @@ __all__ = [
     "get_wiki_stats",
     "html_to_text",
     "link_chunks_to_entities",
+    "mark_dynamic_handbook_pages",
     "mark_wiki_page_status",
     "persist_chunks_batch",
 ]

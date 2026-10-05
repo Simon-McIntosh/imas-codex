@@ -340,6 +340,167 @@ class TestLinkChunksToEntitiesDatabaseMerge:
         assert stats["database_signals_linked"] == 0
 
 
+class TestIngestMarksDynamicPage:
+    """Ingesting a dynamic table marks it without an operator applying the rule."""
+
+    HEADER_ONLY_HTML = (
+        "<html><body><h2>Category Information</h2>"
+        "<p>The categories the database exposes.</p>"
+        "<table><tr><th>Category</th><th>Description</th><th>RO</th></tr></table>"
+        "</body></html>"
+    )
+    LINK_TEXT = "| [[CategoryInformation?db=EDDB][Experiment database (EDDB)]] |"
+    STUB = (
+        "Dynamic table rendered from the EDDB catalogue; "
+        "the rows are the FacilitySignals linked to this page."
+    )
+
+    def _run(self, monkeypatch):
+        from unittest.mock import MagicMock
+
+        from imas_codex.discovery.wiki import pipeline as pl
+        from imas_codex.discovery.wiki.scraper import WikiPage
+
+        class _Vec(list):
+            def tolist(self):
+                return list(self)
+
+        class _Arr(list):
+            def tolist(self):
+                return list(self)
+
+        class _Embed:
+            def embed_texts(self, texts):
+                return _Arr([_Vec([0.1, 0.2, 0.1]) for _ in texts])
+
+        gc = MagicMock()
+
+        def _query(cypher, **kwargs):
+            if "CONTAINS '?db='" in cypher:
+                return [{"text": self.LINK_TEXT}]
+            return []
+
+        gc.query.side_effect = _query
+        gc_cls = MagicMock()
+        gc_cls.return_value.__enter__.return_value = gc
+        monkeypatch.setattr(pl, "GraphClient", gc_cls)
+
+        pipeline = pl.WikiIngestionPipeline("jt-60sa", use_rich=False)
+        pipeline._embed_model = _Embed()
+        page = WikiPage(
+            url="ssh://jt-60sa/var/www/html/twiki/data/Main/CategoryInformation.txt",
+            title="Category Information",
+            content_html=self.HEADER_ONLY_HTML,
+        )
+        import asyncio
+
+        stats = asyncio.run(
+            pipeline.ingest_page(page, page_id="jt-60sa:CategoryInformation")
+        )
+
+        calls = gc.query.call_args_list
+        page_merges = [c for c in calls if "MERGE (p:WikiPage {id: $id})" in c.args[0]]
+        assert page_merges, "the page persist must set fronts_database"
+        assert page_merges[0].kwargs["fronts_database"] == ["EDDB"]
+        chunk_persist = [c for c in calls if "UNWIND $chunks AS chunk" in c.args[0]]
+        assert chunk_persist[0].kwargs["chunks"][0]["text"] == self.STUB
+        return stats
+
+    def test_ingest_marks_dynamic_page(self, monkeypatch):
+        stats = self._run(monkeypatch)
+        assert stats["chunks"] == 1
+
+
+class TestMarkDynamicHandbookPages:
+    """The bulk rule marks stored pages, including one whose body was empty."""
+
+    def _fake_gc(self, page):
+        from unittest.mock import MagicMock
+
+        gc = MagicMock()
+
+        def _query(cypher, **kwargs):
+            if "CONTAINS '?db='" in cypher:
+                return [
+                    {"text": "| [[CategoryInformation?db=EDDB][EDDB]] |"},
+                    {"text": "| [[CategoryInformation2?db=LCDB][LCDB]] |"},
+                ]
+            if "OPTIONAL MATCH (p)-[:HAS_CHUNK]" in cypher:
+                if kwargs["page_id"] in page:
+                    return [page[kwargs["page_id"]]]
+                return []
+            return []
+
+        gc.query.side_effect = _query
+        return gc
+
+    def test_marks_page_and_embeds_stub_chunk(self, monkeypatch):
+        from unittest.mock import MagicMock
+
+        from imas_codex.discovery.wiki import pipeline as pl
+
+        class _Vec(list):
+            def tolist(self):
+                return list(self)
+
+        class _Arr(list):
+            def tolist(self):
+                return list(self)
+
+        class _Embed:
+            def embed_texts(self, texts):
+                return _Arr([_Vec([0.5, 0.5]) for _ in texts])
+
+        page = {
+            "fronts": None,
+            "chunks": [],  # a skipped page whose topic file held no rows
+        }
+        gc = self._fake_gc({"jt-60sa:CategoryInformation2": page})
+        gc_cls = MagicMock()
+        gc_cls.return_value.__enter__.return_value = gc
+        monkeypatch.setattr(pl, "GraphClient", gc_cls)
+        monkeypatch.setattr(pl, "get_embed_model", lambda: _Embed())
+
+        applied = pl.mark_dynamic_handbook_pages("jt-60sa")
+
+        assert applied["jt-60sa:CategoryInformation2"] == ["LCDB"]
+        creates = [
+            c for c in gc.query.call_args_list if "MERGE (c:WikiChunk" in c.args[0]
+        ]
+        assert creates, "an empty page gets a stub chunk"
+        assert (
+            creates[0].kwargs["text"].startswith("Dynamic table rendered from the LCDB")
+        )
+        assert creates[0].kwargs["embedding"], "the stub chunk carries an embedding"
+
+
+@pytest.mark.graph
+class TestDatabaseMergeGraph:
+    """The fourth DOCUMENTS merge parses against the live graph, not a mock."""
+
+    def test_database_merge_statement_parses(self):
+        from imas_codex.discovery.wiki import pipeline as pl
+        from imas_codex.graph import GraphClient
+
+        query = """
+            MATCH (p:WikiPage {facility_id: $facility_id})-[:HAS_CHUNK]->(c:WikiChunk)
+            WHERE p.fronts_database IS NOT NULL
+            UNWIND p.fronts_database AS database
+            WITH c, $database_sources[database] AS source
+            WHERE source IS NOT NULL
+            MATCH (fs:FacilitySignal {facility_id: $facility_id})
+            WHERE fs.data_source_name = source
+            MERGE (c)-[:DOCUMENTS]->(fs)
+            RETURN count(*) AS linked
+        """
+        with GraphClient() as gc:
+            gc.query(
+                "EXPLAIN " + query,
+                facility_id="jt-60sa",
+                database_sources=pl.DATABASE_SIGNAL_SOURCES,
+            )
+
+
 class TestPipelineInit:
     """Tests for pipeline initialization."""
 
