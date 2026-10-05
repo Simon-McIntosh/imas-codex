@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="jt60sa-discovery-completion-landed">
+  <meta name="plan-title" content="JT-60SA Discovery Completion — landed record">
+  <meta name="plan-summary" content="Closure synthesis for JT-60SA Discovery Completion: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="jt60sa-discovery-completion">
+  <meta name="plan-verdict" content="qualified">
+  <title>JT-60SA Discovery Completion — landed record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>JT-60SA Discovery Completion — landed record</h1>
+  <p>Closure synthesis for JT-60SA Discovery Completion: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s6">
+    <h2>§6 — remote environment contract landed</h2>
+    <p>Two nodes. <code>remote-environment-block</code> (commit <code>8f50f6642</code>, review 93/100): a facility-level <code>remote_environment</code> block in <code>facility_config.yaml</code>, one resolver <code>resolve_remote_environment</code> in <code>imas_codex/remote/environment.py</code> (facility default, data-system override, caller argument), passed down by the facility-aware tools wrapper and the signals scanner config builder, adopted by jt-60sa, iter and tcv, <code>data_access_patterns.setup_commands</code> retired; live reading on nakasvr26 returned ncats=73. <code>tools-status-environment-floor</code> (commit <code>b47967a65</code>, review 90/100): <code>get_python_status</code> judges the block's interpreter against the block's floor through <code>PythonVersion.meets_minimum</code>, <code>check_all_tools</code> carries per-module importability, <code>tools status</code> renders both and exits non-zero on an unmet floor, <code>discover signals</code> and <code>discover code</code> refuse before a remote scan; live: Python 3.12.9 with numpy and eddb_pwrapper importable, and the unconfigured path exits 1 naming the 3.12 floor and the module recipe. Fragments: <code>docs/evidence/fragments/jt60sa-discovery-completion/remote-environment-block.html</code> and <code>tools-status-environment-floor.html</code>. Follow-ons carried to §9: one probe per <code>tools status</code> call; the executor's runner uses an f-string so a 3.5 interpreter reports a transport error rather than its version.</p>
+  </section>
+
+  <section id="s7">
+    <h2>§7 — DataAccess written before signal ingest</h2>
+    <p>Commit <code>a212437fd</code> (review 94/100): <code>seed_worker</code> MERGEs the scanner's DataAccess node before ingesting the scanned signals, so the ingest's edge phase finds it on a facility's first scan; a recording-stub test asserts the order and the negative control (old order) fails with events <code>['signal_ingest','data_access_write']</code>; 41 passed. The live first-pass proof awaits the next facility's first scan (JT-60SA's edges were created on its second pass before this fix). The review's design note, that the DataAccess write now sits in three places and belongs to <code>ingest_discovered_signals</code>, is carried to §9.</p>
+  </section>
+
+</main>
+</body>
+</html>
