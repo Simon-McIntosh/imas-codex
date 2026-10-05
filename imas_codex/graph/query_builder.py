@@ -65,6 +65,31 @@ def _parse_filter_key(key: str) -> tuple[str, str]:
     return key, "eq"
 
 
+def render_chunk_source(alias: str, output: str = "source_file") -> str:
+    """Render the clause that resolves a chunk's source path through its owner.
+
+    A chunk stores a denormalised ``source_file`` and reaches the file it came
+    from through its owning ``CodeExample``, joined by the ``HAS_CHUNK`` edge
+    the writer materialises. This renders the optional join plus the coalesce
+    of the owning example's ``source_file`` with the chunk's own, so every
+    reader resolves a chunk's source through the one edge the schema declares
+    rather than a reversed or undeclared one. The chunk alias and the output
+    name are parameterised so callers splice the clause into their own query.
+
+    Args:
+        alias: Variable bound to the chunk in the calling query.
+        output: Variable the coalesced source path is bound to.
+
+    Returns:
+        Two Cypher lines: the ``OPTIONAL MATCH`` and a ``WITH`` binding the
+        coalesced value to ``output``.
+    """
+    return (
+        f"OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]->({alias})\n"
+        f"WITH *, coalesce(ce.source_file, {alias}.source_file) AS {output}"
+    )
+
+
 def graph_search(
     label: str,
     *,

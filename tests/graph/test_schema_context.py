@@ -296,6 +296,106 @@ class TestVectorIndexFilters:
         assert "`vector.similarity_function`: 'cosine'" in ddl
 
 
+# =============================================================================
+# inverse_of slot annotation
+# =============================================================================
+
+
+class TestInverseOfAnnotation:
+    """A slot annotated ``inverse_of`` derives no relationship; bad ones raise."""
+
+    @pytest.fixture(scope="class")
+    def schemas_dir(self):
+        return Path(__file__).parent.parent.parent / "imas_codex" / "schemas"
+
+    def _mutated_schema(self, schemas_dir, tmp_path, mutate):
+        """Copy the schemas dir, apply ``mutate`` to facility.yaml, return its path.
+
+        facility.yaml imports sibling schemas by relative path, so the mutated
+        copy must sit beside them for SchemaView to resolve the imports.
+        """
+        import shutil
+
+        dest = tmp_path / "schemas"
+        shutil.copytree(schemas_dir, dest)
+        with open(dest / "facility.yaml") as f:
+            doc = yaml.safe_load(f)
+        mutate(doc)
+        (dest / "facility.yaml").write_text(yaml.safe_dump(doc))
+        return dest / "facility.yaml"
+
+    def test_inverse_of_slot_derives_no_relationship(self, schemas_dir):
+        """The three stored-foreign-key page slots derive no Relationship."""
+        from imas_codex.graph.schema import GraphSchema
+
+        schema = GraphSchema(schemas_dir / "facility.yaml")
+        derived = {(rel.from_class, rel.slot_name) for rel in schema.relationships}
+        for cls, slot in (
+            ("CodeChunk", "code_example_id"),
+            ("WikiChunk", "wiki_page_id"),
+            ("WikiChunk", "document_id"),
+        ):
+            assert (cls, slot) not in derived
+
+    def test_owning_has_chunks_slots_still_derive(self, schemas_dir):
+        """The multivalued owner slots keep deriving HAS_CHUNK."""
+        from imas_codex.graph.schema import GraphSchema
+
+        schema = GraphSchema(schemas_dir / "facility.yaml")
+        owners = {
+            (rel.from_class, rel.slot_name): rel.cypher_type
+            for rel in schema.relationships
+        }
+        for cls in ("CodeExample", "WikiPage", "Document"):
+            assert owners[(cls, "has_chunks")] == "HAS_CHUNK"
+
+    def test_inverse_of_naming_missing_slot_raises(self, schemas_dir, tmp_path):
+        """An inverse_of naming no slot on the target class refuses at load."""
+
+        def mutate(doc):
+            doc["classes"]["CodeChunk"]["attributes"]["code_example_id"]["annotations"][
+                "inverse_of"
+            ] = "no_such_slot"
+
+        from imas_codex.graph.schema import GraphSchema
+
+        path = self._mutated_schema(schemas_dir, tmp_path, mutate)
+        with pytest.raises(ValueError, match="no_such_slot"):
+            _ = GraphSchema(path).relationships
+
+    def test_inverse_of_wrong_owner_range_raises(self, schemas_dir, tmp_path):
+        """An inverse_of whose owner range is not the annotating class refuses."""
+
+        def mutate(doc):
+            # facility_id on CodeExample ranges Facility, not CodeChunk.
+            doc["classes"]["CodeChunk"]["attributes"]["code_example_id"]["annotations"][
+                "inverse_of"
+            ] = "facility_id"
+
+        from imas_codex.graph.schema import GraphSchema
+
+        path = self._mutated_schema(schemas_dir, tmp_path, mutate)
+        with pytest.raises(ValueError, match="facility_id"):
+            _ = GraphSchema(path).relationships
+
+    def test_generated_context_excludes_retired_names(self, tmp_path):
+        """The generated context carries none of the three retired edge names."""
+        import importlib.util
+
+        from scripts.gen_schema_context import generate_schema_context
+
+        output = tmp_path / "schema_context_data.py"
+        generate_schema_context(output_path=output, force=True)
+
+        spec = importlib.util.spec_from_file_location("schema_context_data", output)
+        loaded = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(loaded)
+
+        retired = {"CODE_EXAMPLE_ID", "WIKI_PAGE_ID", "DOCUMENT_ID"}
+        emitted = {rel[1] for rel in loaded.RELATIONSHIPS}
+        assert retired.isdisjoint(emitted), sorted(retired & emitted)
+
+
 class _FakeNeo4jSession:
     """Records Cypher run against a fake session, modelling live index state."""
 
@@ -507,6 +607,17 @@ class TestSchemaFor:
         result = schema_for(task="overview")
         assert isinstance(result, str)
         assert len(result) > 0
+
+    def test_code_example_resolves_source_through_has_chunk(self):
+        """The shipped code example embeds the one rendered resolution."""
+        from imas_codex.graph.schema_context import _EXAMPLE_PATTERNS
+
+        code_example = _EXAMPLE_PATTERNS["code"][0]
+        assert "OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]->(node)" in code_example
+        assert (
+            "coalesce(ce.source_file, node.source_file) AS source_file" in code_example
+        )
+        assert "CodeFile" not in code_example
 
     def test_schema_for_signals_task(self):
         from imas_codex.graph.schema_context import schema_for

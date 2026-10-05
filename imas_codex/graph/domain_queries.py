@@ -15,6 +15,7 @@ from typing import Any
 
 from imas_codex.core.node_categories import SEARCHABLE_CATEGORIES
 from imas_codex.graph.client import GraphClient
+from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.vector_search import build_vector_search
 
 # ---------------------------------------------------------------------------
@@ -462,7 +463,8 @@ def find_code(
     # facility_id is registered on code_chunk_embedding, so its predicate
     # renders inside SEARCH and pre-filters the ANN cut. The CodeFile join the
     # block used to carry existed only to filter by facility, so it goes with
-    # it; the CodeExample OPTIONAL MATCH below still supplies source_file.
+    # it; render_chunk_source below supplies source_file through the owning
+    # CodeExample's HAS_CHUNK edge.
     prefilter_clauses = ["cc.facility_id = $facility"] if facility is not None else None
     if facility is not None:
         params["facility"] = facility
@@ -477,10 +479,10 @@ def find_code(
 
     cypher = (
         f"{search_block}\n"
-        "OPTIONAL MATCH (cc)-[:CODE_EXAMPLE_ID]->(ce:CodeExample)\n"
+        f"{render_chunk_source('cc', 'source_file')}\n"
         "RETURN substring(cc.text, 0, 500) AS text, "
         "cc.function_name AS function_name, "
-        "coalesce(ce.source_file, cc.source_file) AS source_file, score "
+        "source_file, score "
         "ORDER BY score DESC"
     )
 

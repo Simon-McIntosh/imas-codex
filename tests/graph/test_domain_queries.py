@@ -280,6 +280,22 @@ class TestFindCode:
         assert open_idx < pred_idx < close_idx, cypher
         assert "CodeFile" not in cypher
 
+    def test_renders_source_through_has_chunk_edge(self, mock_gc, mock_embed):
+        """find_code resolves source_file via the writer's HAS_CHUNK edge."""
+        find_code(query="test", gc=mock_gc, embed_fn=mock_embed)
+        cypher = mock_gc.query.call_args[0][0]
+        assert (
+            "OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]->(cc)\n"
+            "WITH *, coalesce(ce.source_file, cc.source_file) AS source_file"
+        ) in cypher
+
+    def test_retired_edge_names_absent(self, mock_gc, mock_embed):
+        """The dead reversed and undeclared edges are gone."""
+        find_code(query="test", gc=mock_gc, embed_fn=mock_embed)
+        cypher = mock_gc.query.call_args[0][0]
+        assert "CODE_EXAMPLE_ID" not in cypher
+        assert "CodeFile" not in cypher
+
 
 class TestFindDataNodes:
     """Test find_data_nodes domain query."""

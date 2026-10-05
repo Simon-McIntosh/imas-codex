@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from imas_codex.graph.query_builder import graph_search
+from imas_codex.graph.query_builder import graph_search, render_chunk_source
 
 
 @pytest.fixture
@@ -257,3 +257,19 @@ class TestGraphSearchFilterOps:
         cypher = mock_gc.query.call_args[0][0]
         assert ">=" in cypher
         assert "<>" in cypher
+
+
+class TestRenderChunkSource:
+    """The rendered chunk-source resolution is pinned so readers cannot diverge."""
+
+    def test_pins_rendered_text(self):
+        assert render_chunk_source("cc") == (
+            "OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]->(cc)\n"
+            "WITH *, coalesce(ce.source_file, cc.source_file) AS source_file"
+        )
+
+    def test_parameterises_alias_and_output(self):
+        assert render_chunk_source("node", "src") == (
+            "OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]->(node)\n"
+            "WITH *, coalesce(ce.source_file, node.source_file) AS src"
+        )

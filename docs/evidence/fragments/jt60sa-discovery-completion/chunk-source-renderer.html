@@ -1,0 +1,48 @@
+<section>
+  <h2 id="chunk-source-renderer">Chunk source resolves through the owning HAS_CHUNK edge</h2>
+  <p id="chunk-source-renderer-landing">
+    A new slot annotation, <code>inverse_of</code>, names the multivalued slot on
+    a target class that owns an edge. <code>GraphSchema.relationships</code> in
+    <code>imas_codex/graph/schema.py</code> derives no <code>Relationship</code>
+    for such a slot and fails closed at schema load when the named owner is
+    absent on the target class or does not range back to the annotating class.
+    It is applied to <code>CodeChunk.code_example_id</code>,
+    <code>WikiChunk.wiki_page_id</code> and <code>WikiChunk.document_id</code> in
+    <code>imas_codex/schemas/facility.yaml</code>; their owning
+    <code>has_chunks</code> slots still derive <code>HAS_CHUNK</code>. The
+    generated context (<code>imas_codex/graph/schema_context_data.py</code>)
+    now carries none of <code>CODE_EXAMPLE_ID</code>, <code>WIKI_PAGE_ID</code>
+    or <code>DOCUMENT_ID</code> after <code>build-models --force</code>.
+  </p>
+  <p id="chunk-source-renderer-renderer">
+    <code>render_chunk_source(alias, output)</code> in
+    <code>imas_codex/graph/query_builder.py</code> renders the one resolution —
+    the <code>OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]-&gt;(chunk)</code>
+    over the writer's edge plus the
+    <code>coalesce(ce.source_file, chunk.source_file)</code>. <code>find_code</code>
+    in <code>imas_codex/graph/domain_queries.py</code> and the shipped code
+    example in <code>imas_codex/graph/schema_context.py</code> embed it,
+    retiring the dead reversed <code>CODE_EXAMPLE_ID</code> join and the
+    undeclared <code>CodeFile-[:HAS_CHUNK]</code> join. Both rendered queries
+    <code>EXPLAIN</code> cleanly on the live graph.
+  </p>
+  <table id="chunk-source-renderer-counts">
+    <caption>Live graph, 2026-10-05</caption>
+    <tr><th>measure</th><th>before</th><th>after</th></tr>
+    <tr><td>CODE_EXAMPLE_ID edges</td><td>142,472</td><td>0</td></tr>
+    <tr><td>chunks carrying the reversed edge alone</td><td>0</td><td>0</td></tr>
+    <tr><td>CodeChunk rows</td><td>271,661</td><td>271,661</td></tr>
+    <tr><td>CodeChunk rows lacking inbound HAS_CHUNK</td><td>0</td><td>0</td></tr>
+    <tr><td>jt-60sa CodeChunk rows (lacking HAS_CHUNK)</td><td>201 (0)</td><td>201 (0)</td></tr>
+  </table>
+  <p id="chunk-source-renderer-evidence">
+    The 142,472 reversed edges were removed in fifteen batches of 10,000,
+    guarded by the pairing check reading 0 before the first delete. The gate
+    <code>pytest tests/graph/test_schema_context.py tests/graph/test_query_builder.py
+    tests/graph/test_domain_queries.py</code> exits <strong>0</strong>
+    (109 passed). Negative control — disabling the inverse_of validation — fails
+    the two guard tests with <code>DID NOT RAISE</code>, exit 1. Live
+    <code>find_code(query, facility="jt-60sa")</code> renders a non-null source
+    path for 3 of 3 returned chunks.
+  </p>
+</section>
