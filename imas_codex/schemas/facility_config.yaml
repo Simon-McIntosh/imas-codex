@@ -310,6 +310,18 @@ classes:
           run_script_via_stdin() calls to this host are wrapped with nice.
           Applied automatically via the per-host nice registry in executor.py.
         range: integer
+      remote_environment:
+        description: >-
+          Host-wide interpreter and shell environment for every remote script
+          the facility runs. One home for the recipe each host needs before a
+          remote Python call: ordered setup_commands (module loads, env
+          sourcing, virtualenv activation), the python_command valid after
+          them, the minimum interpreter version the scripts require, and the
+          modules every remote script requires. A data system may override its
+          own python_command and setup_commands for its scripts. Resolved by
+          the facility-aware layer, which passes the result to the executor as
+          parameters; the executor itself stays facility-agnostic.
+        range: RemoteEnvironmentConfig
       compute:
         description: >-
           Compute infrastructure available at this facility. Describes job
@@ -327,6 +339,53 @@ classes:
   # -------------------------------------------------------------------------
   # Nested Config Types
   # -------------------------------------------------------------------------
+
+  RemoteEnvironmentModule:
+    description: >-
+      A Python module every remote script for a facility must be able to
+      import. The facility environment probe checks each one; a module that
+      ships outside the interpreter's default path carries the directory that
+      must be added to sys.path.
+    class_uri: fc:RemoteEnvironmentModule
+    attributes:
+      name:
+        description: Importable module name (e.g., "numpy", "eddb_pwrapper").
+        required: true
+      path:
+        description: >-
+          Directory added to sys.path before importing the module, for a
+          module that is not installed into the interpreter's environment
+          (e.g., "/analysis/src/eddb" for eddb_pwrapper).
+
+  RemoteEnvironmentConfig:
+    description: >-
+      Host-wide interpreter and shell recipe for remote script execution.
+      Holds the environment a facility's remote scripts depend on, so code
+      scans, path scans and signal scans on one host share one recipe instead
+      of each falling back to a bare interpreter.
+    class_uri: fc:RemoteEnvironmentConfig
+    attributes:
+      setup_commands:
+        description: >-
+          Ordered shell commands run before a remote Python call: module
+          unloads and loads, sourcing an environment file, virtualenv
+          activation.
+        multivalued: true
+      python_command:
+        description: >-
+          Python interpreter valid after setup_commands. A bare command name
+          or a full path. Default: "python3".
+      min_python_version:
+        description: >-
+          Minimum interpreter version the remote scripts require, as a dotted
+          string (e.g., "3.12"). The facility environment probe reports a
+          version below this floor.
+      required_modules:
+        description: >-
+          Python modules every remote script for this facility requires. The
+          facility environment probe verifies each one imports.
+        multivalued: true
+        range: RemoteEnvironmentModule
 
   DiscoveryRootConfig:
     description: >-
@@ -1102,12 +1161,6 @@ classes:
           MDSplus trees that must be opened on independent connections
           (not shared with the main connection tree). Used by the signal
           checking pipeline to manage per-tree connection state.
-        multivalued: true
-      setup_commands:
-        description: >-
-          Shell commands for data access environment setup.
-          E.g., ["source /etc/profile.d/mdsplus.sh"].
-          Supplements per-data-system setup_commands.
         multivalued: true
 
   PortForwardsConfig:

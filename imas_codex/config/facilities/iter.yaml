@@ -42,6 +42,17 @@ local_hosts:
 # Lower the priority of codex SSH workloads on the shared SDCC hosts.
 nice_level: 10
 
+# Host-wide remote environment: the shell setup every remote script on this
+# host needs before it runs. IMAS is the facility's native data format and is
+# exposed through the module system; the recipe sources lmod and loads the
+# IMAS module, so a remote script can `import imas`.
+remote_environment:
+  setup_commands:
+    - source /etc/profile.d/z00_lmod.sh
+    - module load IMAS
+  required_modules:
+    - name: imas
+
 # Compute sub-locations — SLURM partitions addressable as service locations.
 # When pyproject.toml sets location = "titan", the code looks up this table
 # to derive: facility=iter, scheduler=slurm, partition=titan.

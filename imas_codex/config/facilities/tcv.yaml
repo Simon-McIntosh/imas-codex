@@ -15,6 +15,17 @@ ssh_host: tcv
 # Lower the priority of codex SSH workloads on the shared analysis host.
 nice_level: 19
 
+# Host-wide remote environment: the shell setup every remote script on this
+# host needs before it runs. MDSplus is TCV's data layer and its Python
+# bindings come from the profile sourced here, so any remote script that
+# touches the trees imports MDSplus. The MDSplus data system repeats this
+# source as its own override.
+remote_environment:
+  setup_commands:
+    - source /etc/profile.d/mdsplus.sh
+  required_modules:
+    - name: MDSplus
+
 # Discovery root paths for path discovery pipeline
 # These are seeded as starting points for directory scanning
 discovery_roots:
@@ -267,9 +278,6 @@ data_access_patterns:
   independent_trees:
     - static
     - vsystem
-  # Environment setup required for MDSplus data access
-  setup_commands:
-    - "source /etc/profile.d/mdsplus.sh"
 
 # Wiki/documentation sites
 # Direct HTTP access via Tequila SSO (EPFL authentication)

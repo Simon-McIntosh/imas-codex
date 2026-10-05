@@ -1090,9 +1090,14 @@ def run_python_script(
         ssh_host: SSH host to connect to (None = local)
         timeout: Command timeout in seconds
         python_command: Python interpreter to use (default: "python3").
-            Can be full path (e.g., "/path/to/python3").
+            Can be full path (e.g., "/path/to/python3"). Supplied by the
+            facility-aware layer (imas_codex.remote.tools) from the facility
+            ``remote_environment`` block; this executor performs no facility
+            lookup.
         setup_commands: Shell commands to run before Python (e.g., module loads).
-            Only used for remote (SSH) execution.
+            Only used for remote (SSH) execution. Supplied by the
+            facility-aware layer from the facility ``remote_environment``
+            block.
 
     Returns:
         Script output (stdout)
@@ -1236,9 +1241,13 @@ async def async_run_python_script(
         ssh_host: SSH host to connect to (None = local)
         timeout: Command timeout in seconds
         python_command: Python interpreter to use (default: "python3").
-            Can be full path (e.g., "/path/to/python3").
+            Can be full path (e.g., "/path/to/python3"). Supplied by the
+            facility-aware layer from the facility ``remote_environment``
+            block; this executor performs no facility lookup.
         setup_commands: Shell commands to run before Python (e.g., module loads).
-            Only used for remote (SSH) execution.
+            Only used for remote (SSH) execution. Supplied by the
+            facility-aware layer from the facility ``remote_environment``
+            block.
 
     Returns:
         Script output (stdout)

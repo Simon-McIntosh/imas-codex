@@ -696,7 +696,11 @@ async def get_worker_pool(
     Args:
         ssh_host: SSH host alias
         max_workers: Maximum concurrent workers
-        setup_commands: Shell commands to run before Python on remote
+        setup_commands: Shell commands to run before Python on remote,
+            supplied as a parameter by the facility-aware layer
+            (imas_codex.remote.tools) from the facility
+            ``remote_environment`` block. This module performs no facility
+            lookup.
         start_timeout: Timeout for worker startup
 
     Returns:

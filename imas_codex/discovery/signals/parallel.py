@@ -54,6 +54,7 @@ from imas_codex.discovery.base.supervision import (
 )
 from imas_codex.graph import GraphClient
 from imas_codex.graph.models import FacilitySignalStatus
+from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import run_python_script
 
 if TYPE_CHECKING:
@@ -62,6 +63,27 @@ if TYPE_CHECKING:
     from imas_codex.discovery.base.supervision import SupervisedWorkerGroup
 
 logger = logging.getLogger(__name__)
+
+
+def _facility_scanner_config(facility_config: dict, scanner_type: str) -> dict:
+    """Build a scanner's config with the facility remote environment merged in.
+
+    The data system's own ``python_command`` / ``setup_commands`` are the
+    override; where it declares none the facility ``remote_environment`` block
+    supplies them, so a scanner reads one resolved environment through its
+    existing ``config.get(...)`` calls.
+    """
+    systems = facility_config.get("data_systems", {}) or {}
+    scanner_config = systems.get(scanner_type, {})
+    if not isinstance(scanner_config, dict):
+        scanner_config = {}
+
+    environment = resolve_remote_environment(facility_config, scanner_type)
+    merged = dict(scanner_config)
+    merged.setdefault("python_command", environment.python_command)
+    merged.setdefault("setup_commands", list(environment.setup_commands))
+    return merged
+
 
 # Claim timeout - signals claimed longer than this are reclaimed
 CLAIM_TIMEOUT_SECONDS = 300  # 5 minutes
@@ -2505,9 +2527,7 @@ async def seed_worker(
             logger.warning("Scanner '%s' not registered, skipping", scanner_type)
             continue
 
-        scanner_config = data_systems.get(scanner_type, {})
-        if not isinstance(scanner_config, dict):
-            scanner_config = {}
+        scanner_config = _facility_scanner_config(facility_config, scanner_type)
 
         if state.signal_limit:
             scanner_config = {**scanner_config, "_scan_limit": state.signal_limit}
@@ -4642,9 +4662,7 @@ async def check_worker(
 
             try:
                 scanner = get_scanner(scanner_type)
-                scanner_config = data_systems.get(scanner_type, {})
-                if not isinstance(scanner_config, dict):
-                    scanner_config = {}
+                scanner_config = _facility_scanner_config(facility_config, scanner_type)
 
                 # Build FacilitySignal model instances for scanner.check()
                 signal_models = [

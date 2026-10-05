@@ -34,10 +34,12 @@ from typing import Any
 import yaml
 
 # Import low-level executor (no circular import risk)
+from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import (
     configure_host_nice,
     is_local_host,
     run_command,
+    run_python_script as _executor_run_python_script,
     run_script_via_stdin,
 )
 
@@ -132,6 +134,83 @@ def is_local_facility(facility: str | None) -> bool:
 
     ssh_host = _resolve_ssh_host(facility)
     return is_local_host(ssh_host)
+
+
+def _facility_config(facility: str | None) -> dict[str, Any]:
+    """Load a facility's public configuration, or an empty mapping.
+
+    Args:
+        facility: Facility ID, None, or the "local" pseudo-facility.
+
+    Returns:
+        Loaded facility configuration, or {} when there is none.
+    """
+    if facility is None or facility.lower() == "local":
+        return {}
+
+    # Import here to avoid circular import at module load time
+    from imas_codex.discovery.base.facility import get_facility
+
+    try:
+        return get_facility(facility)
+    except ValueError:
+        return {}
+
+
+def run_python_script(
+    script_name: str,
+    input_data: dict | list | None = None,
+    facility: str | None = None,
+    data_system: str | None = None,
+    ssh_host: str | None = None,
+    timeout: int = 60,
+    python_command: str | None = None,
+    setup_commands: list[str] | None = None,
+) -> str:
+    """Run a remote/scripts Python script with the facility's environment.
+
+    Facility-aware wrapper over
+    :func:`imas_codex.remote.executor.run_python_script`. It resolves the
+    facility's ``remote_environment`` block, with the named data system's own
+    ``python_command`` / ``setup_commands`` as the override, and passes the
+    result to the executor as parameters. An explicit ``python_command`` or
+    ``setup_commands`` argument wins over both.
+
+    Args:
+        script_name: Script filename (e.g., "scan_directories.py").
+        input_data: Dict/list passed as JSON on stdin.
+        facility: Facility ID used to resolve the environment and SSH host.
+        data_system: Data system whose override applies (e.g., "edas").
+        ssh_host: SSH host; defaults to the facility's ssh_host.
+        timeout: Command timeout in seconds.
+        python_command: Explicit interpreter, overriding the resolved one.
+        setup_commands: Explicit setup commands, overriding the resolved list.
+
+    Returns:
+        Script output (stdout)
+    """
+    resolved = (
+        resolve_remote_environment(_facility_config(facility), data_system)
+        if facility is not None and facility.lower() != "local"
+        else None
+    )
+
+    if python_command is None:
+        python_command = resolved.python_command if resolved else None
+    if setup_commands is None:
+        setup_commands = list(resolved.setup_commands) if resolved else None
+
+    if ssh_host is None and facility is not None:
+        ssh_host = _resolve_ssh_host(facility)
+
+    return _executor_run_python_script(
+        script_name,
+        input_data,
+        ssh_host=ssh_host,
+        timeout=timeout,
+        python_command=python_command or "python3",
+        setup_commands=setup_commands,
+    )
 
 
 # PATH prefix to ensure tools in ~/bin are accessible via SSH
