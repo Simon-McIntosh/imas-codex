@@ -30,24 +30,24 @@
     imas_codex/graph</code> is empty. From compute node
     <code>98dci4-clu-2018</code> (SLURM job 1277272),
     <code>GraphClient().uri</code> resolves <code>bolt://98dci4-gpu-0002:7687</code>.
-    <code>pytest tests/graph/test_client_address_resolution.py</code> exits 0, 6
-    passed, including an end-to-end case that drives the real shared owner to a
-    discovered service node and an unreadable-location case that asserts the
-    raise. The full named gate
+    The named gate
     <code>pytest tests/graph/test_client_address_resolution.py tests/remote
-    tests/embeddings</code> reports <strong>2 failed, 255 passed</strong>: the two
-    failures are the cases in <code>tests/remote/test_locations_resolution.py</code>
-    that pin the client's now-deleted SLURM delegation, and that file lies outside
-    this node's write scope (recorded under follow-ons).
+    tests/embeddings</code> exits <strong>0</strong>, 255 passed, 1 skipped. The
+    reworked <code>tests/graph/test_client_address_resolution.py</code> passes 6
+    cases, including an end-to-end case that drives the real shared owner to a
+    discovered service node and an unreadable-location case that asserts the
+    raise. Negative control — wrapping <code>_resolve_graph_uri</code> so it
+    swallows the unreadable location — fails that case with
+    <code>DID NOT RAISE</code>.
   </p>
   <p id="delete-graph-client-slurm-duplicate-followon">
-    Follow-on: <code>tests/remote/test_locations_resolution.py</code> still holds
-    two cases — <code>test_graph_client_resolves_a_bolt_uri_from_a_compute_node</code>
+    The two cases in <code>tests/remote/test_locations_resolution.py</code> that
+    pinned the deleted delegation — <code>test_graph_client_resolves_a_bolt_uri_from_a_compute_node</code>
     and <code>test_graph_client_obtains_its_bolt_uri_from_the_shared_owner</code> —
-    that patch <code>client_module._resolve_graph_uri</code> and assert the client
-    performs its own SLURM delegation. That delegation is what this change deletes,
-    so both cases must be removed (their coverage is re-expressed against the
-    profile layer in <code>tests/graph/test_client_address_resolution.py</code>).
-    The file is outside this node's granted write paths.
+    are removed. The claim they protected is kept in
+    <code>test_graph_and_embedding_jobs_may_sit_on_different_nodes</code>, which
+    asserts <code>resolve_service_url</code> directly, and the client's address is
+    asserted against the profile layer in
+    <code>tests/graph/test_client_address_resolution.py</code>.
   </p>
 </section>
