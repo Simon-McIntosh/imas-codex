@@ -50,6 +50,14 @@ logger = logging.getLogger(__name__)
     help="Focus on specific signal patterns (e.g., 'equilibrium')",
 )
 @click.option(
+    "--category",
+    "categories",
+    type=str,
+    default=None,
+    help="Comma-separated signal categories to enrich and check, matched on "
+    "the leading path segment of the signal's source path (e.g. 'MAG,PSRC').",
+)
+@click.option(
     "--scan-only",
     is_flag=True,
     help="Only scan for signals, skip enrichment",
@@ -105,6 +113,7 @@ def signals(
     signal_limit: int | None,
     scanners: str | None,
     focus: str | None,
+    categories: str | None,
     scan_only: bool,
     enrich_only: bool,
     enrich_workers: int,
@@ -235,6 +244,11 @@ def signals(
         log_print(f"  Time limit: {time_limit} min")
     if focus:
         log_print(f"  Focus: {focus}")
+    category_list = (
+        [c.strip() for c in categories.split(",") if c.strip()] if categories else None
+    )
+    if category_list:
+        log_print(f"  Categories: {', '.join(category_list)}")
     if rescan:
         log_print("  Mode: rescan")
     if reset_to:
@@ -364,6 +378,7 @@ def signals(
                 cost_limit=cost_limit,
                 signal_limit=signal_limit,
                 focus=focus,
+                categories=category_list,
                 discover_only=scan_only,
                 enrich_only=enrich_only,
                 deadline=deadline,

@@ -294,10 +294,14 @@ class EDASScanner:
         if not shot_str.startswith("E"):
             shot_str = f"E{ref_shot:06d}"
 
-        # Parse category/data_name from signal name
+        # The EDDB catalogue keys a signal by "<category>/<data name>". Read
+        # that from data_source_path, which keeps the catalogue path for the
+        # life of the row; fall back to name only when the path is absent,
+        # since enrichment may replace name with a human-readable label.
         batch = []
         for s in signals:
-            parts = (s.name or "").split("/")
+            source = s.data_source_path or s.name or ""
+            parts = source.split("/")
             if len(parts) == 2:
                 data_class = EDDB_LETTER_BY_DATA_CLASS.get(
                     getattr(s.data_class, "value", s.data_class), ""

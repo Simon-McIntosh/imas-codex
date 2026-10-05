@@ -776,6 +776,115 @@ class TestPromoteWorker:
 # ── Full Pipeline E2E Tests ──────────────────────────────────────────────
 
 
+class TestCategoryScope:
+    """Category filter bounds claims and pending-work checks.
+
+    A signal's source path is ``<category>/<data name>``; the filter restricts
+    the claim to the leading path segment so a run enriches and checks only the
+    categories it was asked for. The source path is used rather than the name
+    because enrichment rewrites the name.
+    """
+
+    PREDICATE = "split(coalesce(s.data_source_path, s.name), '/')[0] IN $categories"
+
+    def _claim_query_calls(self, mock_gc, predicate):
+        return [
+            call for call in mock_gc.query.call_args_list if predicate in call.args[0]
+        ]
+
+    def test_enrichment_claim_filters_by_category(self):
+        from imas_codex.discovery.signals.parallel import claim_signals_for_enrichment
+
+        with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+            mock_gc = gc_class.return_value.__enter__.return_value
+            claim_signals_for_enrichment(FACILITY, categories=["MAG", "PSRC"])
+
+        filtered = self._claim_query_calls(mock_gc, self.PREDICATE)
+        assert filtered, "enrichment claim query carries no category predicate"
+        for call in filtered:
+            assert call.kwargs["categories"] == ["MAG", "PSRC"]
+
+    def test_check_claim_filters_by_category(self):
+        from imas_codex.discovery.signals.parallel import claim_signals_for_check
+
+        with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+            mock_gc = gc_class.return_value.__enter__.return_value
+            claim_signals_for_check(FACILITY, categories=["MMSYS"])
+
+        filtered = self._claim_query_calls(mock_gc, self.PREDICATE)
+        assert filtered, "check claim query carries no category predicate"
+        for call in filtered:
+            assert call.kwargs["categories"] == ["MMSYS"]
+
+    def test_pending_work_predicates_filter_by_category(self):
+        from imas_codex.discovery.signals.parallel import (
+            has_pending_check_work,
+            has_pending_enrich_work,
+        )
+
+        for fn in (has_pending_enrich_work, has_pending_check_work):
+            with patch("imas_codex.discovery.signals.parallel.GraphClient") as gc_class:
+                mock_gc = gc_class.return_value.__enter__.return_value
+                mock_gc.query.return_value = [{"has_work": False}]
+                fn(FACILITY, categories=["FAME"])
+
+            call = mock_gc.query.call_args
+            assert self.PREDICATE in call.args[0]
+            assert call.kwargs["categories"] == ["FAME"]
+
+    def test_cli_category_routes_to_pipeline(self):
+        from click.testing import CliRunner
+
+        from imas_codex.cli.discover.signals import signals
+
+        captured_kwargs = {}
+
+        async def mock_pipeline(**kwargs):
+            captured_kwargs.update(kwargs)
+            return {
+                "scanned": 0,
+                "discovered": 0,
+                "enriched": 0,
+                "checked": 0,
+                "cost": 0.0,
+                "elapsed_seconds": 0.1,
+            }
+
+        with (
+            patch("imas_codex.cli.rich_output.should_use_rich", return_value=False),
+            patch("imas_codex.cli.logging.configure_cli_logging"),
+            patch(
+                "imas_codex.discovery.base.facility.get_facility",
+                return_value=FACILITY_CONFIG,
+            ),
+            patch(
+                "imas_codex.discovery.signals.scanners.base.get_scanners_for_facility",
+                return_value=[MagicMock(scanner_type="mdsplus")],
+            ),
+            patch(
+                "imas_codex.discovery.signals.scanners.base.list_scanners",
+                return_value=["mdsplus"],
+            ),
+            patch(
+                "imas_codex.discovery.signals.parallel.run_parallel_data_discovery",
+                side_effect=mock_pipeline,
+            ),
+            patch(
+                "imas_codex.cli.shutdown.safe_asyncio_run",
+                side_effect=lambda coro: asyncio.run(coro),
+            ),
+            patch("imas_codex.cli.shutdown.install_shutdown_handlers"),
+        ):
+            result = CliRunner().invoke(
+                signals,
+                [FACILITY, "-s", "mdsplus", "--category", "MAG,PSRC"],
+                catch_exceptions=False,
+            )
+
+        assert result.exit_code == 0, f"CLI failed: {result.output}"
+        assert captured_kwargs["categories"] == ["MAG", "PSRC"]
+
+
 class TestPipelineE2E:
     """Full pipeline E2E tests with mocked infrastructure."""
 
@@ -1231,6 +1340,7 @@ class TestPipelineE2E:
             batch_size=5,
             reference_shot=None,
             scanner_types=None,
+            categories=None,
         ):
             claim_calls.append(
                 {
@@ -1238,6 +1348,7 @@ class TestPipelineE2E:
                     "batch_size": batch_size,
                     "reference_shot": reference_shot,
                     "scanner_types": scanner_types,
+                    "categories": categories,
                 }
             )
             state.stop_requested = True
@@ -1258,6 +1369,7 @@ class TestPipelineE2E:
                 "batch_size": 20,
                 "reference_shot": 5000,
                 "scanner_types": ["ppf"],
+                "categories": None,
             }
         ]
 
