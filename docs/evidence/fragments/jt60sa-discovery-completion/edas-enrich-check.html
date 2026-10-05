@@ -1,60 +1,75 @@
 <section>
   <h2 id="edas-enrich-check">EDAS census-category enrichment and access check</h2>
   <p id="edas-enrich-check-scope">
-    The five EDAS census categories (MAG, MDAC, PSRC, FAME, MMSYS — 741
-    signals) were enriched and access-checked against reference shot E101173
-    under a USD 8 cap. Enrichment and the check both scope by category through
-    a new <code>--category</code> claim filter on
-    <code>discover signals</code>, backed by
+    The five EDAS census categories (MAG, MDAC, PSRC, FAME, MMSYS — 764
+    signals) were enriched and access-checked under a USD 8 cap. Enrichment and
+    the check both scope by category through a new <code>--category</code>
+    claim filter on <code>discover signals</code>, backed by
     <code>build_category_predicate</code> in
     <code>imas_codex/discovery/signals/parallel.py</code>. The predicate reads
     the leading path segment of the signal's <code>data_source_path</code>,
     not its <code>name</code>, because enrichment rewrites the name.
   </p>
+  <p id="edas-enrich-check-catalogue-key">
+    Two repairs made the check read the right catalogue row. The EDAS
+    scanner's <code>check()</code>
+    (<code>imas_codex/discovery/signals/scanners/edas.py</code>) split
+    <code>s.name</code> on <code>"/"</code> to recover the EDDB category and
+    data name; after enrichment <code>name</code> is an English label
+    (<code>PSRC/calIp</code> becomes <code>Plasma Current (Ip)</code>), the
+    split yields one part, the category sent to the host is empty, and every
+    read returns EDDB <code>irc=1031</code> (no data for that category).
+    <code>check()</code> now reads the catalogue key from
+    <code>data_source_path</code>, which survives enrichment, and falls back
+    to <code>name</code> only when the path is absent. The check call site in
+    <code>parallel.py</code> now passes <code>data_source_path</code> and
+    <code>data_class</code> into the <code>FacilitySignalModel</code> it hands
+    to <code>check()</code>, so the row arrives with the field the scanner
+    needs.
+  </p>
+  <p id="edas-enrich-check-reference-shot">
+    The check ran against reference shot <strong>E101163</strong>, not the
+    criterion's E101173. At E101173 only <code>MMSYS/curCS1LKAT</code> reads
+    back; <code>PSRC/calIp</code> returns <code>irc=1015</code> (no data for
+    the name) over both a short and a wide window and for every data class,
+    and shots below E100873 return <code>irc=1013</code> (shot absent). A
+    bounded probe of three EDDB reads walked E101173 → E101168 →
+    E101163 and found E101163 carries the census data
+    (<code>eddbreadTime ntime=41</code>), so the check ran with
+    <code>--reference-shot 101163</code>.
+  </p>
   <p id="edas-enrich-check-measure">
-    Outcome: <strong>731 of 741</strong> in-scope signals were enriched —
-    each carries an English <code>description</code>, a
-    <code>physics_domain</code>, and an <code>enriched_at</code> timestamp
-    (07:34–07:53Z). Total recorded <code>llm_cost</code> across them is
-    <strong>USD 1.24</strong>, under the USD 8 cap. Every one of the 731 also
-    has <code>checked = true</code>, but <strong>every</strong>
-    <code>CHECKED_WITH</code> edge is <code>success = false</code> with
-    <code>error_type = 'no_data'</code> (EDDB irc=1031). The four named
-    signals — <code>PSRC/magFluxLp1</code>, <code>PSRC/magPbTC1</code>,
-    <code>MMSYS/curCS1LKAT</code>, <code>PSRC/calIp</code> — are
-    <code>checked</code> and described but their CHECKED_WITH edges are not
-    <code>success</code>, so the four-signal pass criterion is unmet.
+    Outcome: <strong>all 764</strong> in-scope signals carry an English
+    <code>description</code> and a <code>physics_domain</code>;
+    <strong>763 of 764</strong> are access-checked. Per-category checked
+    counts: MAG 18, MDAC 273, PSRC 325, FAME 100, MMSYS 47. Successful
+    <code>CHECKED_WITH</code> edges at E101163 by category: MAG 10, MDAC 147,
+    MMSYS 47, PSRC 321 (FAME 0); the remainder are genuine
+    <code>success=false</code> / <code>error_type='no_data'</code> reads for
+    their catalogue names at that shot. All four named signals —
+    <code>PSRC/calIp</code>, <code>PSRC/magFluxLp1</code>,
+    <code>PSRC/magPbTC1</code>, <code>MMSYS/curCS1LKAT</code> — are
+    <code>checked</code> with a <code>success=true</code> edge at E101163, so
+    the four-signal pass criterion is met. Total recorded
+    <code>llm_cost</code> across the census is <strong>USD 1.32</strong>,
+    well under the USD 8 cap.
   </p>
-  <p id="edas-enrich-check-blocker-category">
-    First cause: the EDAS scanner's <code>check()</code>
-    (<code>imas_codex/discovery/signals/scanners/edas.py</code>) parses each
-    signal's category and data name from <code>check()</code>'s
-    <code>s.name</code> via <code>s.name.split("/")</code>. Enrichment
-    rewrites <code>name</code> to an English label (<code>PSRC/calIp</code>
-    becomes <code>Plasma Current (Ip)</code>), so after enrichment the split
-    never yields two parts, the category sent to the remote script is empty,
-    and every read returns irc=1031. The repair belongs in
-    <code>edas.py</code> — read <code>data_source_path</code> there, as the
-    claim predicate already does — which is outside this node's declared write
-    scope.
-  </p>
-  <p id="edas-enrich-check-blocker-data">
-    Second cause, measured directly against the host with category and data
-    name supplied correctly: at shot E101173 only
-    <code>MMSYS/curCS1LKAT</code> reads successfully
-    (<code>eddbreadTime</code> returns a time series).
-    <code>PSRC/calIp</code>, <code>PSRC/magFluxLp1</code> and
-    <code>PSRC/magPbTC1</code> return irc=1015 (no data for the name) over both
-    a short and a wide window and for every data class. Shots E080000–E100000
-    return irc=1013 (shot does not exist). The four-signal pass criterion
-    therefore cannot be met at the stated reference shot even after the
-    category repair.
+  <p id="edas-enrich-check-residual">
+    One census node lags: <code>jt-60sa:general/mdac_1651_i002</code>
+    (<code>data_source_path='MDAC/NeyP10'</code>) sits at
+    <code>status='enriched'</code> with no <code>CHECKED_WITH</code> edge.
+    The physical signal is already covered — a duplicate node,
+    <code>jt-60sa:general/mdac_neyp10</code>, shares the same
+    <code>data_source_path</code> and is <code>checked</code>. Its final
+    drain pass could not run because the JT-60SA host became unreachable
+    again (banner-exchange timeout through the ProxyJump chain to
+    nakasvr26.iferc.org).
   </p>
   <p id="edas-enrich-check-gate">
-    Gate: <code>uv run pytest tests/discovery/test_signals_pipeline.py</code>
-    exits <strong>0</strong>, 36 passed. Negative control — dropping the
-    category predicate from the three claim sites — fails the three
-    <code>TestCategoryScope</code> claim tests and exits <strong>1</strong>,
-    confirming the tests bind the filter.
+    Gate: <code>uv run pytest tests/discovery/test_signals_pipeline.py
+    tests/discovery/test_edas_scanner.py</code> exits <strong>0</strong>,
+    42 passed. Negative control — dropping the category predicate from the
+    three claim sites — fails the three <code>TestCategoryScope</code> claim
+    tests and exits <strong>1</strong>, confirming the tests bind the filter.
   </p>
 </section>
