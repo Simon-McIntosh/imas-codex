@@ -1,153 +1,166 @@
-"""Address resolution for the default graph client inside a SLURM step.
+"""Address resolution for the default graph client.
+
+The bolt address a default :class:`GraphClient` connects to is resolved by the
+profile layer, which obtains SLURM service addresses from the shared owner in
+:mod:`imas_codex.remote.locations` (``resolve_service_url`` /
+``_service_url_for_slurm``). The client holds no discovery of its own.
 
 Locality in the profile layer is decided from the facility's login-node
-hostname patterns, which a SLURM compute node does not match, so profile
-resolution takes its remote branch there and returns a loopback tunnel
-endpoint that nothing is listening on. These tests pin the client-side
-resolution to the reachable service address, and pin the branches that
-must not change.
+hostname patterns, which a SLURM compute node does not match, so the profile
+layer would otherwise take its remote branch and return a loopback tunnel
+endpoint that nothing is listening on. These tests pin that the client
+inherits the shared owner's answer for a compute node rather than holding a
+discovery copy of its own, and that an unreadable location surfaces instead of
+being swallowed into a fallback address.
 """
 
 from __future__ import annotations
 
-import socket
-from dataclasses import dataclass
+from unittest.mock import patch
 
 import pytest
 
-from imas_codex.graph import client as client_module
-from imas_codex.graph.client import GraphClient, _resolve_graph_uri, _slurm_service_uri
+from imas_codex.graph import client as client_module, profiles as profiles_module
+from imas_codex.remote import locations as loc
+from imas_codex.remote.locations import LocationInfo
 
-PROFILE_URI = "bolt://localhost:17687"
 DIRECT_URI = "bolt://98dci4-gpu-0002:7687"
-STEP_HOST = "98dci4-clu-3141"
+GPU_NODE = "98dci4-gpu-0002"
+COMPUTE_CALLER = "98dci4-clu-2018"
 EXPLICIT_URI = "bolt://example.invalid:1"
 
 
-@dataclass
-class Info:
-    scheduler: str
-    service_job_name: str = "codex-neo4j"
+def _slurm_location() -> LocationInfo:
+    return LocationInfo(
+        name="titan",
+        facility="iter",
+        ssh_host="iter",
+        scheduler="slurm",
+        partition="titan",
+        service_job_name="codex-neo4j",
+        is_compute=True,
+    )
 
 
-def pin(monkeypatch, *, scheduler, node, host=STEP_HOST, port=7687, uri=PROFILE_URI):
-    monkeypatch.setattr(
-        client_module, "resolve_neo4j", lambda **_: type("P", (), {"bolt_port": port})()
-    )
-    monkeypatch.setattr(client_module, "get_graph_uri", lambda: uri)
-    monkeypatch.setattr("imas_codex.graph.profiles.get_graph_location", lambda: "iter")
-    monkeypatch.setattr(
-        "imas_codex.remote.locations.resolve_location", lambda _l: Info(scheduler)
-    )
-    monkeypatch.setattr(
-        "imas_codex.remote.tunnel.discover_compute_node_local", lambda **_: node
-    )
-    monkeypatch.setattr(socket, "gethostname", lambda: host + ".iter.org")
+def _plain_location() -> LocationInfo:
+    return LocationInfo(name="iter", facility="iter", ssh_host="iter", scheduler="none")
 
 
 @pytest.fixture(autouse=True)
-def resolver_environment_isolated(monkeypatch):
-    """Start every case from neither environment input the resolver reads.
+def resolver_state_isolated(monkeypatch):
+    """Start every case from un-cached resolution and a clean environment.
 
-    ``_resolve_graph_uri`` consults ``NEO4J_URI`` and ``SLURM_JOB_ID`` from
-    the process environment, so a shell that exports either -- CI, or an
-    operator using the documented escape hatch -- would decide what these
-    cases observe instead of the code under test. A case that exercises one
-    of them sets it explicitly; the ambient value never reaches the resolver.
+    The profile layer caches resolved URIs and the locations layer caches
+    service URLs, so a prior case's address would decide what this one
+    observes. ``NEO4J_URI`` is the documented escape hatch and is applied by
+    the profile layer last, so an ambient value would outrank the address
+    under test; it is cleared unless a case sets it explicitly.
     """
+    profiles_module._resolved_uri_cache.clear()
+    loc._service_url_cache.clear()
     monkeypatch.delenv("NEO4J_URI", raising=False)
     monkeypatch.delenv("SLURM_JOB_ID", raising=False)
+    yield
+    profiles_module._resolved_uri_cache.clear()
+    loc._service_url_cache.clear()
 
 
-def test_direct_address_outside_a_slurm_step(monkeypatch):
-    """The profile URI stands, and no node discovery is attempted."""
-    monkeypatch.delenv("SLURM_JOB_ID", raising=False)
-    monkeypatch.setattr(client_module, "get_graph_uri", lambda: PROFILE_URI)
-    monkeypatch.setattr(
-        client_module, "_slurm_service_uri", lambda: pytest.fail("must not resolve")
-    )
-    assert _resolve_graph_uri() == PROFILE_URI
+def _pin_slurm(monkeypatch) -> None:
+    """Send the profile layer down its SLURM-scheduled branch for a compute node."""
+    monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "titan")
+    monkeypatch.setattr(loc, "resolve_location", lambda _l: _slurm_location())
+    monkeypatch.setattr("imas_codex.remote.executor.is_local_host", lambda _h: False)
 
 
-def test_peer_service_node_yields_its_direct_address(monkeypatch):
-    pin(monkeypatch, scheduler="slurm", node="98dci4-gpu-0002")
-    assert _slurm_service_uri() == DIRECT_URI
+def test_client_address_is_the_shared_owners_answer_inside_a_slurm_step(monkeypatch):
+    """The client's bolt address is the shared owner's answer, never its own.
 
-
-def test_service_node_on_this_node_yields_localhost(monkeypatch):
-    pin(monkeypatch, scheduler="slurm", node=STEP_HOST)
-    assert _slurm_service_uri() == "bolt://localhost:7687"
-
-
-def test_no_service_node_returns_none(monkeypatch):
-    """No invented address: the caller keeps whatever it had."""
-    pin(monkeypatch, scheduler="slurm", node=None)
-    monkeypatch.setattr(
-        "imas_codex.remote.locations._resolve_compute_host", lambda *_a, **_k: None
-    )
-    assert _slurm_service_uri() is None
-
-
-def test_the_fallback_is_read_from_the_module_it_is_imported_from(monkeypatch):
-    """A patch on the client module cannot reach the fallback.
-
-    ``_resolve_compute_host`` is imported inside the function body from
-    ``imas_codex.remote.locations``, so it is that module's attribute the
-    function calls. Answering from there is what shows which one is live.
+    A compute node matches no login-node pattern, so the profile layer's
+    hostname test would leave it on a loopback endpoint. The address the client
+    connects to is the one the profile layer obtains from the shared SLURM
+    owner; the client contributes no discovery of its own.
     """
-    pin(monkeypatch, scheduler="slurm", node=None)
-    monkeypatch.setattr(
-        "imas_codex.remote.locations._resolve_compute_host",
-        lambda *_a, **_k: "98dci4-gpu-0002",
-    )
-    assert _slurm_service_uri() == DIRECT_URI
+    _pin_slurm(monkeypatch)
+    with patch.object(loc, "_service_url_for_slurm", return_value=DIRECT_URI) as owner:
+        uri = client_module._resolve_graph_uri()
+
+    assert uri == DIRECT_URI
+    owner.assert_called_once()
+    kwargs = owner.call_args.kwargs
+    assert kwargs["protocol"] == "bolt"
+    assert kwargs["service_job_name"] == "codex-neo4j"
 
 
 def test_explicit_neo4j_uri_wins_inside_a_slurm_step(monkeypatch):
     """The documented escape hatch outranks the scheduled address.
 
-    ``resolve_neo4j`` applies ``NEO4J_URI`` last, so the URI the client
-    starts from is already the explicit one; the SLURM branch must leave it
-    alone rather than replacing it with an address it discovered.
+    The profile layer applies ``NEO4J_URI`` last, so the operator who sets it
+    has named an address that the shared owner's discovery is not entitled to
+    replace.
     """
-    monkeypatch.setenv("SLURM_JOB_ID", "12345")
     monkeypatch.setenv("NEO4J_URI", EXPLICIT_URI)
-    pin(monkeypatch, scheduler="slurm", node="98dci4-gpu-0002", uri=EXPLICIT_URI)
-    assert _resolve_graph_uri() == EXPLICIT_URI
+    _pin_slurm(monkeypatch)
+    with patch.object(loc, "_service_url_for_slurm", return_value=DIRECT_URI):
+        assert client_module._resolve_graph_uri() == EXPLICIT_URI
+
+
+def test_the_client_default_uri_factory_is_the_profile_resolver(monkeypatch):
+    """The dataclass default, not a bare profile URI, is what a client gets.
+
+    Pins ``field(default_factory=_resolve_graph_uri)``: with the profile URI as
+    the factory the repair is inert for a default ``GraphClient()``, which is
+    how the loopback endpoint reached the SLURM step at all.
+    """
+    _pin_slurm(monkeypatch)
+    with patch.object(loc, "_service_url_for_slurm", return_value=DIRECT_URI):
+        factory = client_module.GraphClient.__dataclass_fields__["uri"].default_factory
+        assert factory is client_module._resolve_graph_uri
+        assert factory() == DIRECT_URI
 
 
 def test_an_unreadable_location_is_not_swallowed(monkeypatch):
-    """A failed location read surfaces instead of restoring the tunnel.
+    """A failed location read surfaces instead of restoring a fallback address.
 
-    Swallowing it returns ``None``, which leaves the profile's loopback
-    tunnel endpoint in place -- the address this module exists to avoid
-    inside a SLURM step, put back silently.
+    Swallowing it would silently restore the loopback tunnel endpoint this
+    resolution exists to avoid inside a SLURM step.
     """
-    monkeypatch.setenv("SLURM_JOB_ID", "12345")
-    pin(monkeypatch, scheduler="slurm", node="98dci4-gpu-0002")
+    monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "titan")
 
     def unreadable(_location):
         raise RuntimeError("location config unreadable")
 
-    monkeypatch.setattr("imas_codex.remote.locations.resolve_location", unreadable)
+    monkeypatch.setattr(loc, "resolve_location", unreadable)
     with pytest.raises(RuntimeError):
-        _slurm_service_uri()
+        client_module._resolve_graph_uri()
 
 
-def test_the_client_default_uri_is_the_slurm_aware_resolver(monkeypatch):
-    """The dataclass default, not the profile URI, is what a client gets.
+def test_a_compute_step_reaches_the_discovered_service_node(monkeypatch):
+    """The end-to-end client address is the discovered service node's.
 
-    Pins ``field(default_factory=_resolve_graph_uri)``: with the profile URI
-    as the factory the whole repair is inert for a default ``GraphClient()``,
-    which is how the loopback endpoint reached the SLURM step at all.
+    Exercises the real shared owner rather than a stubbed return: with squeue
+    answering the service node and the caller on a different compute node, the
+    client's address is that node's, not the loopback the profile layer's
+    hostname test would choose.
     """
-    pin(monkeypatch, scheduler="slurm", node="98dci4-gpu-0002")
-    monkeypatch.setenv("SLURM_JOB_ID", "12345")
-    factory = GraphClient.__dataclass_fields__["uri"].default_factory
-    assert factory is _resolve_graph_uri
-    assert factory() == DIRECT_URI
+    _pin_slurm(monkeypatch)
+    monkeypatch.setattr(loc, "_resolve_compute_host", lambda *a, **k: None)
+    monkeypatch.setattr(loc.socket, "gethostname", lambda: COMPUTE_CALLER)
+    monkeypatch.setattr(
+        "imas_codex.remote.tunnel.discover_compute_node_local", lambda **_: GPU_NODE
+    )
+
+    expected = f"bolt://{GPU_NODE}:{profiles_module._convention_bolt_port('titan')}"
+    assert client_module._resolve_graph_uri() == expected
 
 
-def test_non_slurm_location_returns_none(monkeypatch):
-    pin(monkeypatch, scheduler="none", node="98dci4-gpu-0002")
-    assert _slurm_service_uri() is None
+def test_non_slurm_location_uses_the_direct_loopback(monkeypatch):
+    """A local, non-scheduled location never consults the SLURM owner."""
+    monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "iter")
+    monkeypatch.setattr(loc, "resolve_location", lambda _l: _plain_location())
+    monkeypatch.setattr("imas_codex.remote.executor.is_local_host", lambda _h: True)
+
+    with patch.object(loc, "_service_url_for_slurm") as owner:
+        uri = client_module._resolve_graph_uri()
+
+    assert uri.startswith("bolt://localhost:")
+    owner.assert_not_called()
