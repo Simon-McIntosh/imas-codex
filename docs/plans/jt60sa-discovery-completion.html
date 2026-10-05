@@ -26,7 +26,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -388,13 +388,16 @@
     <div class="r-comment-body"><p>EDAS scan for shot E101173 produced 6240 FacilitySignals across 73 categories with data_class/shot_range/alias and 6240 DATA_ACCESS edges to jt-60sa:edas:eddb, meeting the census floor exactly (MAG 18, MDAC 264, PSRC 312, FAME 100, MMSYS 47; 741) at $0.00; fragment docs/evidence/fragments/jt60sa-discovery-completion/edas-scan.html committed at 7bd3714029e6b4629d76c7ef25dca9291476aa62</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261005T063752248677-review-of-edas-scan" data-who="reckon-build" data-when="2026-10-05T06:47:27.035Z">
-    <div class="r-comment-body"><p>review of r-20261005T061226180725-edas-scan — parsed record, 5/5 dimensions scored (goal_fidelity 19, evidence 17, scope_discipline 20, durability 17, fit 19), total 92, verdict SOUND WITH FINDINGS, two follow-on findings (the first-scan DATA_ACCESS edge drop in imas_codex/discovery/signals/parallel.py, and the re-run&#x27;s &quot;12480 scanned&quot; baseline double-count); reviewed_base_sha edb4bab9d, reviewed_head_sha 7bd3714, added_failure_count unmeasured because the scan-only run names no baseline/after gate arm.</p></div>
+    <div class="r-comment-body"><p>review of r-20261005T061226180725-edas-scan — parsed record, 5/5 dimensions scored (goal_fidelity 19, evidence 17, scope_discipline 20, durability 17, fit 19), total 92, verdict SOUND WITH FINDINGS, two follow-on findings (the first-scan DATA_ACCESS edge drop in imas_codex/discovery/signals/parallel.py, and the re-run's "12480 scanned" baseline double-count); reviewed_base_sha edb4bab9d, reviewed_head_sha 7bd3714, added_failure_count unmeasured because the scan-only run names no baseline/after gate arm.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261005T055224634951-document-failure-classes" data-who="reckon-build" data-when="2026-10-05T06:02:58.677Z">
     <div class="r-comment-body"><p>document-failure-classes — document pipeline recovers 'No module named' failures by prior state and defers unloadable-image/dead-link/type-mismatch inputs with a stated reason; gate 94 passed exit 0 (base green at b98b02a39).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261005T060334986821-review-of-document-failure-classes" data-who="reckon-build" data-when="2026-10-05T06:11:06.244Z">
     <div class="r-comment-body"><p>review of r-20261005T055224634951-document-failure-classes — parsed record, 5/5 dimensions scored (goal_fidelity 18, evidence 18, scope_discipline 19, durability 18, fit 18), total 91, verdict SOUND WITH FINDINGS, one follow-on finding on the reviewed gate log's revision header; reviewed_base_sha b98b02a39, reviewed_head_sha 737830b4f.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261005T061235195800-document-reingest" data-who="reckon-build" data-when="2026-10-05T06:44:30.739Z">
+    <div class="r-comment-body"><p>recovery applied by the merged code at the first CLI start (516 pypdf failures back to scored, 14 non-transient failures deferred with reasons, failed 0), but no document can be fetched: 576 URLs point at the retired nakasvr23 web server and 471 ssh paths under /var/www/html/twiki/pub no longer exist on nakasvr26; the jt-60sa-23 hop closes at kex. The drain waits on a path to the old server (lead decision).</p></div>
 </div>
 </section>
 </main>
