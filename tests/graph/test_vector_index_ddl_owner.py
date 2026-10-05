@@ -2,28 +2,29 @@
 
 ``GraphClient.ensure_vector_indexes`` is the one place that composes a
 ``CREATE VECTOR INDEX`` statement.  Every other module that needs a vector
-index must delegate to it rather than repeat the option block, so the index
-shape (dimensions, similarity function, quantization, registered filter
-properties) has exactly one definition.
+index must delegate to it rather than repeat the statement, so the index shape
+(dimensions, similarity function, quantization, registered filter properties)
+has exactly one definition.
 
 Two properties are pinned here:
 
-1. No Python source outside ``imas_codex/graph/client.py`` composes a
-   ``CREATE VECTOR INDEX`` statement.  A statement is recognised by its DDL
-   form -- ``CREATE VECTOR INDEX ... IF NOT EXISTS`` -- which prose that
-   merely names the grammar does not carry.
+1. No Python source outside ``imas_codex/graph/client.py`` carries a
+   ``CREATE VECTOR INDEX`` string literal.  The scan walks every string
+   constant in the package -- not just the DDL form that carries
+   ``IF NOT EXISTS`` -- so a statement of any shape is caught.  Prose that
+   merely names the grammar is excluded by *being a docstring*: a docstring is
+   text describing the code, while a string built to be sent to the database is
+   a composition of the DDL.  The exclusion keys on that structural fact, never
+   on any wording inside the string.
 2. The modules that used to hand-write the statement call the owner instead.
 """
 
-import re
+import ast
 from pathlib import Path
 
 import pytest
 
-# A DDL statement always carries ``IF NOT EXISTS``; both the owner and every
-# former hand-written copy placed it on the CREATE line.
-STATEMENT = re.compile(r"CREATE\s+VECTOR\s+INDEX\b[^\n]*IF\s+NOT\s+EXISTS")
-
+MARKER = "CREATE VECTOR INDEX"
 OWNER = Path("graph") / "client.py"
 
 # Modules that previously composed the statement themselves and must now
@@ -35,6 +36,15 @@ DELEGATING_MODULES = [
     "imas_codex.discovery.wiki.pipeline",
 ]
 
+# A docstring is the first statement of a module, class or function; those
+# string constants describe the code rather than compose a statement.
+_DOCSTRING_OWNERS = (
+    ast.Module,
+    ast.ClassDef,
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+)
+
 
 def _package_root() -> Path:
     import imas_codex
@@ -42,17 +52,49 @@ def _package_root() -> Path:
     return Path(imas_codex.__file__).resolve().parent
 
 
+def _docstring_constants(tree: ast.AST) -> set[int]:
+    """Ids of the ``ast.Constant`` nodes that are docstrings."""
+    ids: set[int] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, _DOCSTRING_OWNERS):
+            continue
+        body = getattr(node, "body", [])
+        if (
+            body
+            and isinstance(body[0], ast.Expr)
+            and isinstance(body[0].value, ast.Constant)
+            and isinstance(body[0].value.value, str)
+        ):
+            ids.add(id(body[0].value))
+    return ids
+
+
 def _ddl_bearing_files() -> list[Path]:
+    """Package-relative paths holding a ``CREATE VECTOR INDEX`` string.
+
+    A string constant carrying the marker anywhere but in a docstring counts;
+    the shape of the statement (its ``IF NOT EXISTS`` clause, its options) is
+    irrelevant to whether it is a hand-written copy.
+    """
     root = _package_root()
-    return [
-        path.relative_to(root)
-        for path in root.rglob("*.py")
-        if STATEMENT.search(path.read_text(encoding="utf-8"))
-    ]
+    files: list[Path] = []
+    for path in sorted(root.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        docstrings = _docstring_constants(tree)
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Constant)
+                and isinstance(node.value, str)
+                and MARKER in node.value
+                and id(node) not in docstrings
+            ):
+                files.append(path.relative_to(root))
+                break
+    return files
 
 
 def test_only_the_owner_composes_vector_index_ddl():
-    files = sorted(_ddl_bearing_files())
+    files = _ddl_bearing_files()
     assert files == [OWNER], (
         "CREATE VECTOR INDEX statements must be composed only by "
         f"GraphClient.ensure_vector_indexes in {OWNER}; found {files}"

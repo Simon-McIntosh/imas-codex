@@ -45,17 +45,22 @@
     A source-scan test
     (<code>tests/graph/test_vector_index_ddl_owner.py</code>) pins the property:
     it walks every <code>.py</code> under the package and requires the only file
-    carrying a <code>CREATE VECTOR INDEX &hellip; IF NOT EXISTS</code> statement
-    to be <code>graph/client.py</code>, and it asserts each former site calls
-    <code>ensure_vector_indexes</code>. A statement is recognised by its DDL
-    form, so prose that merely names the grammar does not count — the same
-    carve-out the plan applies to <code>imas_codex/graph/AGENTS.md</code>. The
-    docstrings in <code>graph/schema.py</code> and
-    <code>graph/vector_search.py</code> still name the phrase in prose; they are
-    documentation of the grammar, not a copy of the DDL, and they are outside
-    this node's write scope. Under the plan's literal form
-    <code>rg 'CREATE VECTOR INDEX'</code> those two prose hits remain, so the
-    binding measure here is the statement scan the test performs.
+    carrying a <code>CREATE VECTOR INDEX</code> string literal to be
+    <code>graph/client.py</code>, and it asserts each former site calls
+    <code>ensure_vector_indexes</code>. The scan is written over the parsed
+    module, so it matches a statement of <em>any</em> shape — a hand-written
+    copy that omits the <code>IF NOT EXISTS</code> clause, or the options block,
+    is caught just the same. The one exclusion is a docstring, identified by
+    being the first statement of a module, class or function, never by its
+    wording: prose that names the grammar is documentation, a string built for
+    the database is a composition of the DDL. That structural exclusion is what
+    the plan applies to <code>imas_codex/graph/AGENTS.md</code>. The docstrings
+    in <code>graph/schema.py</code> and <code>graph/vector_search.py</code>
+    still name the phrase in prose; they are documentation of the grammar, not a
+    copy of the DDL, and they remain outside this node's write scope. Under the
+    plan's literal form <code>rg 'CREATE VECTOR INDEX'</code> those two prose
+    hits remain, so the binding measure is the parsed-statement scan the test
+    performs.
   </p>
   <p id="vector-index-ddl-owner-live">
     Against the live graph, <code>SHOW INDEXES</code> lists all five indexes
