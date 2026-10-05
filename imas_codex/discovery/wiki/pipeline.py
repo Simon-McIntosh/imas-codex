@@ -31,6 +31,7 @@ from html.parser import HTMLParser
 from typing import TYPE_CHECKING, Any, TypedDict
 
 from imas_codex.graph import GraphClient
+from imas_codex.graph.models import WikiPageStatus
 from imas_codex.ingestion.chunkers import chunk_text as _chunk_text
 from imas_codex.settings import get_embedding_dimension
 
@@ -255,6 +256,21 @@ def persist_chunks_batch(chunks: list[dict]) -> int:
 # a scanner; an unmapped database simply links to nothing yet.
 DATABASE_SIGNAL_SOURCES: dict[str, str] = {"EDDB": "edas"}
 
+# The fourth DOCUMENTS merge in link_chunks_to_entities: a dynamic handbook page
+# documents every signal of the catalogue it fronts. Held as a module constant so
+# the live-graph gate EXPLAINs the statement the code actually runs, not a copy.
+FRONTS_DATABASE_DOCUMENTS_MERGE = """
+MATCH (p:WikiPage {facility_id: $facility_id})-[:HAS_CHUNK]->(c:WikiChunk)
+WHERE p.fronts_database IS NOT NULL
+UNWIND p.fronts_database AS database
+WITH c, $database_sources[database] AS source
+WHERE source IS NOT NULL
+MATCH (fs:FacilitySignal {facility_id: $facility_id})
+WHERE fs.data_source_name = source
+MERGE (c)-[:DOCUMENTS]->(fs)
+RETURN count(*) AS linked
+"""
+
 # A TWiki link that names a catalogue parameter: [[Topic?db=EDDB][label]].
 _DB_LINK_RE = re.compile(
     r"\[\[\s*([^\[\]?\s]+)\s*\?db=([A-Za-z0-9_]+)(?:\]\[[^\]]*)?\]\]"
@@ -403,10 +419,11 @@ def mark_dynamic_handbook_pages(facility_id: str) -> dict[str, list[str]]:
     This is the pipeline's own application of the dynamic-page rule to pages
     already stored in the graph, so a page whose body was empty or skipped when
     it was first ingested is still marked. For each topic a linking chunk names:
-    set ``WikiPage.fronts_database``, replace any header-only chunk with the
-    one-line stub and recompute its embedding, and create and embed a stub chunk
-    for a page that carries none. The page keeps status 'ingested' so its chunk
-    anchors the DOCUMENTS edges.
+    set ``WikiPage.fronts_database`` and status 'ingested', replace any
+    header-only chunk with the one-line stub and recompute its embedding, and
+    create and embed a stub chunk for a page that carries none. The page's status
+    becomes 'ingested' in the same write so a topic the ingest skipped for lack
+    of content is not left 'skipped' while marked.
 
     Args:
         facility_id: Facility to process.
@@ -449,10 +466,12 @@ def mark_dynamic_handbook_pages(facility_id: str) -> dict[str, list[str]]:
             gc.query(
                 """
                 MATCH (p:WikiPage {id: $page_id})
-                SET p.fronts_database = $databases
+                SET p.fronts_database = $databases,
+                    p.status = $ingested
                 """,
                 page_id=page_id,
                 databases=databases,
+                ingested=WikiPageStatus.ingested.value,
             )
             if not chunks:
                 # A table whose topic file held no rows still fronts the
@@ -587,17 +606,7 @@ def link_chunks_to_entities(facility_id: str) -> dict[str, int]:
         # front. The database -> scanner source map is small and lives beside
         # this function; an unmapped database yields no edges (source IS NULL).
         result = gc.query(
-            """
-            MATCH (p:WikiPage {facility_id: $facility_id})-[:HAS_CHUNK]->(c:WikiChunk)
-            WHERE p.fronts_database IS NOT NULL
-            UNWIND p.fronts_database AS database
-            WITH c, $database_sources[database] AS source
-            WHERE source IS NOT NULL
-            MATCH (fs:FacilitySignal {facility_id: $facility_id})
-            WHERE fs.data_source_name = source
-            MERGE (c)-[:DOCUMENTS]->(fs)
-            RETURN count(*) AS linked
-            """,
+            FRONTS_DATABASE_DOCUMENTS_MERGE,
             facility_id=facility_id,
             database_sources=DATABASE_SIGNAL_SOURCES,
         )
@@ -1551,14 +1560,11 @@ class WikiIngestionPipeline:
         # carries, so the table's own ingest cannot always see them. Re-apply the
         # rule to the stored pages once the batch has written every chunk, so the
         # marking does not depend on which page of the batch was ingested first.
-        try:
-            applied = await asyncio.to_thread(
-                mark_dynamic_handbook_pages, self.facility_id
-            )
-            if applied:
-                logger.info("Marked dynamic handbook pages: %s", applied)
-        except Exception:
-            logger.warning("Dynamic handbook marking failed", exc_info=True)
+        # A failure here is raised, not swallowed: the run must not report a
+        # complete ingestion while the dynamic-page guarantee did not hold.
+        applied = await asyncio.to_thread(mark_dynamic_handbook_pages, self.facility_id)
+        if applied:
+            logger.info("Marked dynamic handbook pages: %s", applied)
 
         report(len(page_names), len(page_names), "Ingestion complete")
         return total_stats
@@ -2767,6 +2773,7 @@ class DocumentPipeline:
 __all__ = [
     "DocumentIngestionStats",
     "DEFAULT_MAX_ARTIFACT_SIZE_MB",
+    "FRONTS_DATABASE_DOCUMENTS_MERGE",
     "ProgressCallback",
     "DocumentPipeline",
     "WikiIngestionPipeline",

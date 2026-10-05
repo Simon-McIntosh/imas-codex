@@ -473,6 +473,34 @@ class TestMarkDynamicHandbookPages:
         )
         assert creates[0].kwargs["embedding"], "the stub chunk carries an embedding"
 
+        # A marked page is set to status 'ingested' in the same write, so a topic
+        # whose ingest was skipped for lack of content is not left 'skipped'.
+        marks = [
+            c
+            for c in gc.query.call_args_list
+            if "SET p.fronts_database = $databases" in c.args[0]
+        ]
+        assert marks, "the marker writes fronts_database"
+        assert marks[0].kwargs["ingested"] == "ingested"
+
+
+class TestIngestPagesSurfacesMarkerFailure:
+    """A failing dynamic-page marker is raised out of the run, not logged away."""
+
+    def test_raising_marker_is_surfaced(self, monkeypatch):
+        from imas_codex.discovery.wiki import pipeline as pl
+
+        def _boom(facility_id):
+            raise RuntimeError("dynamic-page marking failed")
+
+        monkeypatch.setattr(pl, "mark_dynamic_handbook_pages", _boom)
+        pipeline = pl.WikiIngestionPipeline("jt-60sa", use_rich=False)
+
+        import asyncio
+
+        with pytest.raises(RuntimeError, match="dynamic-page marking failed"):
+            asyncio.run(pipeline.ingest_pages([], rate_limit=0))
+
 
 @pytest.mark.graph
 class TestDatabaseMergeGraph:
@@ -482,20 +510,12 @@ class TestDatabaseMergeGraph:
         from imas_codex.discovery.wiki import pipeline as pl
         from imas_codex.graph import GraphClient
 
-        query = """
-            MATCH (p:WikiPage {facility_id: $facility_id})-[:HAS_CHUNK]->(c:WikiChunk)
-            WHERE p.fronts_database IS NOT NULL
-            UNWIND p.fronts_database AS database
-            WITH c, $database_sources[database] AS source
-            WHERE source IS NOT NULL
-            MATCH (fs:FacilitySignal {facility_id: $facility_id})
-            WHERE fs.data_source_name = source
-            MERGE (c)-[:DOCUMENTS]->(fs)
-            RETURN count(*) AS linked
-        """
+        # EXPLAIN the statement the pipeline actually runs, not a copy of it, so a
+        # change to the production Cypher is what this gate parses.
+        assert "fronts_database" in pl.FRONTS_DATABASE_DOCUMENTS_MERGE
         with GraphClient() as gc:
             gc.query(
-                "EXPLAIN " + query,
+                "EXPLAIN " + pl.FRONTS_DATABASE_DOCUMENTS_MERGE,
                 facility_id="jt-60sa",
                 database_sources=pl.DATABASE_SIGNAL_SOURCES,
             )
