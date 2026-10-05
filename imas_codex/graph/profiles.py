@@ -406,6 +406,25 @@ def resolve_neo4j(
     password = graph_section.get("password", DEFAULT_PASSWORD)
     location = get_graph_location()
 
+    # Env var escape hatches (always win). NEO4J_URI names the address
+    # outright, so it is applied before any location resolution: an operator
+    # who set it never pays for an unreadable location file, and never has a
+    # resolved address overridden behind their back. The host and port fields
+    # are left at their defaults because they describe a location this URI
+    # bypasses.
+    if env_uri := os.getenv("NEO4J_URI"):
+        return Neo4jProfile(
+            name=name,
+            location=location,
+            host=None,
+            uri=env_uri,
+            username=os.getenv("NEO4J_USERNAME", username),
+            password=os.getenv("NEO4J_PASSWORD", password),
+            bolt_port=BOLT_BASE_PORT,
+            http_port=HTTP_BASE_PORT,
+            data_dir=ACTIVE_LINK,
+        )
+
     from imas_codex.remote.locations import resolve_location
 
     loc_info = resolve_location(location)
@@ -420,9 +439,7 @@ def resolve_neo4j(
     else:
         uri = f"bolt://localhost:{bolt_port}"
 
-    # Env var escape hatches (always win)
-    if env_uri := os.getenv("NEO4J_URI"):
-        uri = env_uri
+    # Non-URI env escape hatches (always win)
     if env_user := os.getenv("NEO4J_USERNAME"):
         username = env_user
     if env_pass := os.getenv("NEO4J_PASSWORD"):

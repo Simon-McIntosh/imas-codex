@@ -53,8 +53,8 @@ def resolver_state_isolated(monkeypatch):
     The profile layer caches resolved URIs and the locations layer caches
     service URLs, so a prior case's address would decide what this one
     observes. ``NEO4J_URI`` is the documented escape hatch and is applied by
-    the profile layer last, so an ambient value would outrank the address
-    under test; it is cleared unless a case sets it explicitly.
+    the profile layer before resolution, so an ambient value would outrank the
+    address under test; it is cleared unless a case sets it explicitly.
     """
     profiles_module._resolved_uri_cache.clear()
     loc._service_url_cache.clear()
@@ -94,14 +94,36 @@ def test_client_address_is_the_shared_owners_answer_inside_a_slurm_step(monkeypa
 def test_explicit_neo4j_uri_wins_inside_a_slurm_step(monkeypatch):
     """The documented escape hatch outranks the scheduled address.
 
-    The profile layer applies ``NEO4J_URI`` last, so the operator who sets it
-    has named an address that the shared owner's discovery is not entitled to
-    replace.
+    The profile layer applies ``NEO4J_URI`` before location resolution, so the
+    operator who sets it has named an address that the shared owner's discovery
+    is not entitled to replace.
     """
     monkeypatch.setenv("NEO4J_URI", EXPLICIT_URI)
     _pin_slurm(monkeypatch)
     with patch.object(loc, "_service_url_for_slurm", return_value=DIRECT_URI):
         assert client_module._resolve_graph_uri() == EXPLICIT_URI
+
+
+def test_explicit_neo4j_uri_survives_an_unreadable_location(monkeypatch):
+    """The escape hatch is applied before anything is read.
+
+    An operator who sets ``NEO4J_URI`` has named the bolt address outright, so
+    an unreadable location file must not raise and must not cost them the
+    address they set. Resolution would otherwise read the location first and
+    fail there, taking the override down with it.
+    """
+    monkeypatch.setenv("NEO4J_URI", EXPLICIT_URI)
+    monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "titan")
+
+    def unreadable(_location):
+        raise RuntimeError("location config unreadable")
+
+    monkeypatch.setattr(loc, "resolve_location", unreadable)
+    client = client_module.GraphClient()
+    try:
+        assert client.uri == EXPLICIT_URI
+    finally:
+        client.close()
 
 
 def test_the_client_default_uri_factory_is_the_profile_resolver(monkeypatch):
