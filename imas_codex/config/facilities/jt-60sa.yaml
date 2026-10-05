@@ -213,8 +213,9 @@ user_info:
 # Port convention: base 88xx for jt-60sa, last digit = wiki site index
 # wiki_sites[0] -> port 8800, wiki_sites[1] -> port 8801, etc.
 #
-# The reverse tunnel (iter-reverse-tunnel.service) exposes these ports to ITER
-# workers via RemoteForward, allowing discovery from both workstation and ITER.
+# These forwards terminate on the workstation only. JT-60SA services are never
+# exposed toward ITER: no connection between JT-60SA and ITER is permitted, so
+# JT-60SA discovery runs from the workstation, not from ITER workers.
 
 port_forwards:
   port_base: 8800
@@ -245,7 +246,7 @@ port_forwards:
 # Browser URLs - Localhost access with active port forwards
 # =============================================================================
 # These URLs work when the jt-60sa-twiki-forward.service is running.
-# From ITER workers, use the same URLs (iter-reverse-tunnel exposes them).
+# Workstation-only: there is no path from ITER workers to these services.
 
 browser:
   services:
