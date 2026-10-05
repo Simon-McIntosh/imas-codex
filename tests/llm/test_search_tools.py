@@ -285,8 +285,28 @@ class TestSearchSignals:
         else:
             pytest.fail("No facility_signal_desc_embedding vector search call found")
 
-    def test_no_overfetch(self, mock_gc, mock_encoder):
-        """The ANN cut uses the requested k, not a max(k*2, 50) over-fetch."""
+    def test_overfetch_survives_non_facility_postfilter(self, mock_gc, mock_encoder):
+        """A diagnostic or domain post-filter keeps the widened ANN cut."""
+        _search_signals(
+            query="plasma current",
+            facility="jt-60sa",
+            physics_domain="magnetics",
+            k=10,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "facility_signal_desc_embedding" in cypher:
+                assert call[1]["k"] == 50, call[1]
+                assert call[1]["limit"] == 10, call[1]
+                assert "LIMIT $k" in cypher
+                break
+        else:
+            pytest.fail("No facility_signal_desc_embedding vector search call found")
+
+    def test_no_overfetch_without_postfilter(self, mock_gc, mock_encoder):
+        """With the facility pre-filter as the only filter, the cut is k."""
         _search_signals(
             query="plasma current",
             facility="jt-60sa",
@@ -723,8 +743,30 @@ class TestSearchDocs:
         else:
             pytest.fail("No wiki_chunk_embedding vector search call found")
 
-    def test_wiki_no_overfetch(self, mock_gc, mock_encoder):
-        """The wiki ANN cut uses the requested k, not a max(k*2, 50) over-fetch."""
+    def test_wiki_overfetch_survives_non_facility_postfilter(
+        self, mock_gc, mock_encoder
+    ):
+        """A WikiPage post-filter keeps the widened ANN cut."""
+        _search_docs(
+            query="plasma current",
+            facility="jt-60sa",
+            physics_domain="magnetics",
+            k=10,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "wiki_chunk_embedding" in cypher:
+                assert call[1]["k"] == 50, call[1]
+                assert call[1]["limit"] == 10, call[1]
+                assert "LIMIT $k" in cypher
+                break
+        else:
+            pytest.fail("No wiki_chunk_embedding vector search call found")
+
+    def test_wiki_no_overfetch_without_postfilter(self, mock_gc, mock_encoder):
+        """With the facility pre-filter as the only filter, the cut is k."""
         _search_docs(
             query="plasma current",
             facility="jt-60sa",

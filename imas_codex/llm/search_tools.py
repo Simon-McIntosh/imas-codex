@@ -453,7 +453,9 @@ def _vector_search_signals(
     additional vector index property, so the ANN cut is taken over the
     facility's own signals rather than over a global candidate set that a
     small facility's signals would not survive. ``diagnostic`` and
-    ``physics_domain`` stay as post-filters over the returned signals.
+    ``physics_domain`` stay as post-filters over the returned signals, so the
+    ANN limit is widened to ``max(k*2, 50)`` when either is present; with no
+    post-filter the cut is the requested ``k``.
     """
     prefilter_parts = ["s.facility_id = $facility"]
     where_parts: list[str] = []
@@ -470,6 +472,12 @@ def _vector_search_signals(
     if physics_domain is not None:
         where_parts.append("s.physics_domain = $physics_domain")
         params["physics_domain"] = physics_domain
+
+    # diagnostic/physics_domain discard rows after the ANN cut, so the cut is
+    # widened to keep the requested k reachable; with no such post-filter the
+    # facility pre-filter alone bounds the cut and the over-fetch is retired.
+    if where_parts:
+        params["k"] = max(k * 2, 50)
 
     cypher = (
         build_vector_search(
@@ -810,7 +818,9 @@ def _vector_search_wiki_chunks(
     ``wiki_chunk_embedding`` registers ``facility_id`` as an additional
     vector index property, so the ANN cut is taken over the facility's own
     chunks rather than a global candidate set. Site, physics-domain and
-    score filters stay as a post-filter over the joined WikiPage.
+    score filters stay as a post-filter over the joined WikiPage, so the ANN
+    limit is widened to ``max(k*2, 50)`` when any is present; with no
+    post-filter the cut is the requested ``k``.
     """
     # Build dynamic WHERE clauses for WikiPage join
     page_filters: list[str] = []
@@ -832,6 +842,12 @@ def _vector_search_wiki_chunks(
         dim = "".join(c for c in dim if c.isalnum() or c == "_")
         page_filters.append(f"p.{dim} >= $min_score")
         params["min_score"] = min_score
+
+    # The WikiPage post-filters discard rows after the ANN cut, so the cut is
+    # widened to keep the requested k reachable; with no such post-filter the
+    # facility pre-filter alone bounds the cut and the over-fetch is retired.
+    if page_filters:
+        params["k"] = max(k * 2, 50)
 
     search_block = build_vector_search(
         "wiki_chunk_embedding",
