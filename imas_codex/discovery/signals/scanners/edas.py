@@ -34,6 +34,7 @@ from imas_codex.graph.models import (
     DataAccess,
     FacilitySignal,
     FacilitySignalStatus,
+    SignalDataClass,
 )
 
 logger = logging.getLogger(__name__)
@@ -173,15 +174,37 @@ class EDASScanner:
             units = raw.get("units", "")
             description = raw.get("description", "")
 
-            signal_id = f"{facility}:general/{cat.lower()}_{dname.lower()}"
-            eddb_class = raw.get("data_class", "")
-            if eddb_class == "O":
-                accessor = f"eddbreadOne('{shot_str}', '{cat}', '{dname}', None, 0, 0)"
+            # A PID-keyed one-point row is its own signal group: EDDB addresses
+            # it by the nine-character PID No. rather than by the catalogue
+            # data name, so the PID is the signal's name within the scheme.
+            pid_keyed = bool(raw.get("pid_keyed"))
+            pid = (raw.get("udp_id") or "").strip()
+            if pid_keyed:
+                source_dname = raw.get("source_dname") or dname
+                signal_id = (
+                    f"{facility}:general/{cat.lower()}_{pid.lower().replace(' ', '_')}"
+                )
+                accessor = (
+                    f"eddbreadOne('{shot_str}', '{cat}', '{source_dname}', "
+                    f"'{pid}', 0, 0)"
+                )
+                # The PID pass enumerates the one-point and condition data, so
+                # its data class is one_point whether or not the catalogue row
+                # also carried an EDDB letter.
+                data_class = SignalDataClass.one_point
             else:
-                accessor = f"eddbreadTime('{shot_str}', '{cat}', '{dname}', t1, t2)"
-            data_class = DATA_CLASS_BY_EDDB_LETTER.get(eddb_class)
-            if eddb_class and data_class is None:
-                unknown_data_classes.add(eddb_class)
+                source_dname = dname
+                signal_id = f"{facility}:general/{cat.lower()}_{dname.lower()}"
+                eddb_class = raw.get("data_class", "")
+                if eddb_class == "O":
+                    accessor = (
+                        f"eddbreadOne('{shot_str}', '{cat}', '{dname}', None, 0, 0)"
+                    )
+                else:
+                    accessor = f"eddbreadTime('{shot_str}', '{cat}', '{dname}', t1, t2)"
+                data_class = DATA_CLASS_BY_EDDB_LETTER.get(eddb_class)
+                if eddb_class and data_class is None:
+                    unknown_data_classes.add(eddb_class)
 
             signals.append(
                 FacilitySignal(
@@ -189,11 +212,11 @@ class EDASScanner:
                     facility_id=facility,
                     status=FacilitySignalStatus.discovered,
                     physics_domain="general",  # Enriched by LLM
-                    name=f"{cat}/{dname}",
+                    name=f"{cat}/{pid if pid_keyed else dname}",
                     accessor=accessor,
                     data_access=data_access.id,
                     data_source_name="edas",
-                    data_source_path=f"{cat}/{dname}",
+                    data_source_path=f"{cat}/{source_dname}",
                     unit=units,
                     description=description,  # May be Japanese
                     data_class=data_class,

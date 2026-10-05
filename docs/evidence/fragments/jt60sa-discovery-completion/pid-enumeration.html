@@ -1,0 +1,24 @@
+<section id="pid-enumeration-landing">
+  <h2 id="pid-enumeration-heading">PID-keyed one-point data of E101173</h2>
+  <p id="pid-enumeration-what">
+    The PID-keyed one-point and condition data are enumerated as their own
+    <code>FacilitySignal</code> group, each row carrying <code>pid</code> (nine
+    characters, four digits then five) and <code>data_class</code>
+    <code>one_point</code>, produced by the EDAS scanner's second pass.
+    <code>imas-codex discover signals jt-60sa -s edas --scan-only --rescan</code>
+    took the graph from 6240 to 6298 signals; 58 have <code>pid</code>, all
+    matching <code>\d{4}.{5}</code>.
+  </p>
+  <p id="pid-enumeration-answer">
+    The open question is answered: <code>eddbreadOne(shot, cat, dname, '')</code>
+    with an <em>empty PID</em> on a valid one-point data name returns irc 0 and
+    enumerates the category's whole PID-keyed block. The irc 1031 in the plan
+    came from an empty/invalid data name, not from the empty PID;
+    <code>eddbreadPara</code> returns irc 1014 and does not enumerate.
+  </p>
+  <p id="pid-enumeration-measure">
+    Gate: <code>pytest tests/discovery/test_edas_scanner.py
+    tests/discovery/test_scanners.py tests/discovery/test_signal_checking.py</code>
+    &rarr; 61 passed (59 baseline + 2 new).
+  </p>
+</section>
