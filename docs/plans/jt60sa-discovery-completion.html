@@ -4,25 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="jt60sa-discovery-completion">
-  <meta name="plan-title"     content="JT-60SA Discovery Completion">
-  <meta name="plan-summary"   content="Finish JT-60SA discovery: run the repaired EDAS signal scanner, ingest the handbook tables from EDDB, recover the failed document ingest, and discover the equilibrium code">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="jt60sa-discovery-completion">
+  <meta name="plan-title" content="JT-60SA Discovery Completion">
+  <meta name="plan-summary" content="Finish JT-60SA discovery: run the repaired EDAS signal scanner, ingest the handbook tables from EDDB, recover the failed document ingest, and discover the equilibrium code">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="30.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S16">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="jt-60sa,signals,discovery,wiki">
-  <meta name="plan-blocks"    content="imas-ambix:jt60sa-machine-map">
-  <meta name="plan-informs"   content="jt60sa-eddb-census">
+  <meta name="plan-sprint" content="S16">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="jt-60sa,signals,discovery,wiki">
+  <meta name="plan-blocks" content="imas-ambix:jt60sa-machine-map">
+  <meta name="plan-informs" content="jt60sa-eddb-census">
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
   <main class="plan-doc">
@@ -159,11 +161,14 @@
       node directly; no tunnel is involved.
     </p>
     <p>
-      <strong>Network policy, binding.</strong> No connection between JT-60SA and ITER is
-      permitted in either direction. The EDAS scan, the check stage and the code scan reach
-      nakasvr26 over <code>ssh jt-60sa</code> from the workstation only, so the remote halves
-      of §2 and §3 run from the workstation and write to the ITER graph through the codex
-      tunnel, while enrichment, embedding and document ingest run on ITER. The facility
+      <strong>Network policy, binding.</strong> No direct connection between JT-60SA and ITER is
+      permitted in either direction. The permitted path is through the workstation:
+      ITER's ssh config carries <code>Host jt-60sa</code> with <code>ProxyJump laptop</code>, and
+      the laptop's reverse ssh forward is bound on the login nodes (port 2222, measured
+      2026-10-05), so <code>ssh jt-60sa</code> from ITER reaches nakasvr26 via the laptop. Every
+      node of this plan therefore runs from the ITER host, the EDAS scan and the code scan
+      included, provided the workstation's codex tunnel unit is up; enrichment, embedding and
+      document ingest need nothing beyond ITER. The facility
       config comments were corrected to say so (commit c84a855fc). The TWiki host on the
       nakasvr23 segment is unreachable from nakasvr26; the wiki content in the graph predates
       the server migration.
@@ -200,6 +205,18 @@
       same facts from the map's side.
     </p>
 
+    <p>
+      <strong>Order of execution.</strong> The interactive census is already done and recorded in
+      <code>jt60sa-eddb-census</code>; it is the floor the scan is checked against, not a step to
+      repeat. Run §2 first as scan-only, compare counts per category with the census, then the
+      check stage, then enrichment under a cost cap; run the code scan before enrichment so
+      enrichment has code context. §4 is independent of §2 and runs in parallel on ITER. §3
+      follows §2 because it links the scanned signals to the handbook pages. §6 is independent
+      and may land first if the remote interpreter recipe needs generalising before §2 is
+      dispatched. The ambix map's extractor and mirror (<code>imas-ambix:jt60sa-machine-map</code>
+      §3) do not wait on this plan; its §5 census is gated on §2 here.
+    </p>
+
     <h2 id="s6">§6 — A remote environment contract per facility</h2>
     <p>
       Every remote step codex runs at a facility — signal enumeration, data checks, code
@@ -228,75 +245,61 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="signal-metadata-slots" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Do data class, shot range and PID become typed FacilitySignal slots now, or stay in keywords for this plan?</p>
-        <p class="r-dec-ctx">Typed slots need a schema change and model regeneration across the fleet; keywords work today but are not queryable by type.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="typed-slots-now">Add typed slots in §2 before the scan</button>
-          <button class="r-opt" data-value="keywords-then-migrate">Scan with keywords, migrate to slots in a follow-on section</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="dynamic-page-handling" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How are CGI-rendered handbook tables represented?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="dynamic-status-plus-signal-links">Mark the page dynamic and link FacilitySignals to it</button>
-          <button class="r-opt" data-value="synthesised-table-chunks">Synthesise table chunks from EDDB into the page</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="signal-metadata-slots" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Do data class, shot range and PID become typed FacilitySignal slots now, or stay in keywords for this plan?</p>
+    <p class="r-dec-ctx">Typed slots need a schema change and model regeneration across the fleet; keywords work today but are not queryable by type.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="typed-slots-now">Add typed slots in §2 before the scan</button>
+      <button class="r-opt" data-value="keywords-then-migrate">Scan with keywords, migrate to slots in a follow-on section</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="dynamic-page-handling" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How are CGI-rendered handbook tables represented?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="dynamic-status-plus-signal-links">Mark the page dynamic and link FacilitySignals to it</button>
+      <button class="r-opt" data-value="synthesised-table-chunks">Synthesise table chunks from EDDB into the page</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-jdc-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="orchestrator"
-               data-written-by="reckon-create" data-written-at="2026-10-05"
-               data-recommends-skill="/reckon-build jt60sa-discovery-completion §2">
-        <h4 class="r-fu-title">Run the repaired EDAS scan for E101173 from the workstation and verify the graph</h4>
-        <div class="r-fu-body">
-          Set the remote Python in the facility config first (§5), then scan-only, inspect
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-jdc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-10-05" data-recommends-skill="/reckon-build jt60sa-discovery-completion §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the repaired EDAS scan for E101173 from the workstation and verify the graph</h4>
+    <div class="r-fu-body">Set the remote Python in the facility config first (§5), then scan-only, inspect
           counts per category against the census floor, then check and enrich under a cost cap.
-          The scan must originate from the workstation because only it may reach nakasvr26.
-        </div>
-        <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §2</pre>
-      </article>
-      <article class="r-fu" data-id="f-jdc-002" data-status="open"
-               data-capability-version="1.0" data-capability-class="general"
-               data-written-by="reckon-create" data-written-at="2026-10-05"
-               data-recommends-skill="/reckon-build jt60sa-discovery-completion §4">
-        <h4 class="r-fu-title">Sync pypdf on the ITER checkout and re-ingest the 516 failed PDFs</h4>
-        <div class="r-fu-body">
-          Reset the pypdf failures to discovered, run document ingest on ITER under a cost cap,
-          and mark WMF files and dead links unsupported with the reason.
-        </div>
-        <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §4</pre>
-      </article>
-    </section>
+          The scan must originate from the workstation because only it may reach nakasvr26.</div>
+    <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §2</pre>
+    </article>
+<article class="r-fu" data-id="f-jdc-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-10-05" data-recommends-skill="/reckon-build jt60sa-discovery-completion §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Sync pypdf on the ITER checkout and re-ingest the 516 failed PDFs</h4>
+    <div class="r-fu-body">Reset the pypdf failures to discovered, run document ingest on ITER under a cost cap,
+          and mark WMF files and dead links unsupported with the reason.</div>
+    <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §4</pre>
+    </article>
+</section>
 
     <section data-reckon="questions" id="questions" class="r-questions">
-      <h2><span class="sec">§</span> Open questions</h2>
-      <div class="r-q" data-id="remote-python" data-section="s2"
-           data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-10-05"
-           data-resolved-at="2026-10-05" data-resolved-by="Simon McIntosh">
-        <p class="r-q-body">Which Python on nakasvr26 runs the remote scripts together with the EDDB wrapper and numpy, and should it be pinned in data_systems.edas.python_command or via setup_commands?</p>
-        <p class="r-q-resolution">Resolved 2026-10-05: <code>module unload python/3.5.6; module load python/3.12</code> then the module's <code>python</code> (3.12.9, numpy 2.4.2). Pinned in <code>data_systems.edas</code> as <code>python_command</code> plus <code>setup_commands</code> for now; §6 makes it a facility-level contract.</p>
-      </div>
-      <div class="r-q" data-id="pid-enumeration" data-section="s3"
-           data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-10-05">
-        <p class="r-q-body">eddbreadOne with an empty PID returned irc 1031 for E101173; which call enumerates the one-point data with PIDs for a shot (eddbreadPara, or eddbreadOne with a category)?</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="remote-python" data-section="s2" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-10-05" data-resolved-at="2026-10-05" data-resolved-by="Simon McIntosh">
+    <p class="r-q-body">Which Python on nakasvr26 runs the remote scripts together with the EDDB wrapper and numpy, and should it be pinned in data_systems.edas.python_command or via setup_commands?</p>
+    <p class="r-q-resolution">Resolved 2026-10-05: <code>module unload python/3.5.6; module load python/3.12</code> then the module's <code>python</code> (3.12.9, numpy 2.4.2). Pinned in <code>data_systems.edas</code> as <code>python_command</code> plus <code>setup_commands</code> for now; §6 makes it a facility-level contract.</p>
+    </div>
+<div class="r-q" data-id="pid-enumeration" data-section="s3" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-10-05" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">eddbreadOne with an empty PID returned irc 1031 for E101173; which call enumerates the one-point data with PIDs for a shot (eddbreadPara, or eddbreadOne with a category)?</p>
+    </div>
+</section>
 
     <section data-reckon="research" id="research" class="r-research-list">
-      <h2><span class="sec">§</span> Research</h2>
-      <div class="r-research" data-id="r-census" data-type="doc" data-url="/imas-codex/research/jt60sa-eddb-census">
-        <span class="r-research-title">JT-60SA EDDB signal census, shot E101173</span>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="r-census" data-type="doc" data-source="" data-added-by="" data-when="" data-url="/imas-codex/research/jt60sa-eddb-census">
+    <span class="r-research-title"><a href="/imas-codex/research/jt60sa-eddb-census">JT-60SA EDDB signal census, shot E101173</a></span></div>
+</section>
 
-    <section data-reckon="comments" id="comments" class="r-comments"></section>
+    
   </main>
 </body>
 </html>
