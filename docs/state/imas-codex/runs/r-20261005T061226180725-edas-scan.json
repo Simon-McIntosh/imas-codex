@@ -1,0 +1,595 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "edb4bab9d1f7a441b9afd36090e753f64dfbca79",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T061226180725-edas-scan/brief.md",
+    "sha256": "9bea3ce46f2883f2994ad1c7ea4f7de1b58375b2fcea3553dca9010584f9a322"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3561279,
+      "input_tokens_cumulative": 3561279,
+      "output_tokens": 21572,
+      "output_tokens_cumulative": 21572,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 126,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "7bd3714029e6b4629d76c7ef25dca9291476aa62"
+  ],
+  "completed_at": "2026-10-05T06:36:43.122Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-05T06:12:30Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "parallel.py",
+    "~/.ssh/config;",
+    "discover-signals_jt-60sa.log",
+    "T.m",
+    "V.S"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run imas-codex discover signals jt-60sa -s edas --scan-only",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T061226180725-edas-scan/scan-attempt-3-success.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-05T06:52:26.513237+00:00",
+    "horizon_seconds": 2400,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-05T06:12:26Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 3,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 14,
+    "mean_context": 140000,
+    "observed_at": "2026-10-05T06:12:23Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 3,
+      "aggregate_tokens_per_second": 204.131,
+      "detail": "",
+      "mean_tokens_per_second": 127.582,
+      "observed_at": "2026-10-05T06:12:23Z",
+      "runs": 1.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-05T06:36:43.122Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T061226180725-edas-scan/manifest.md",
+  "member": "disposable-r-20261005T061226180725-edas-scan",
+  "negative_control": {
+    "declaration": "none: this node runs the live scan and edits the scanner only if the scan exposes a defect; any such fix adds a test whose own mutation is named in the manifest, and a scan cannot be mutated without disabling it",
+    "reason": "this node runs the live scan and edits the scanner only if the scan exposes a defect; any such fix adds a test whose own mutation is named in the manifest, and a scan cannot be mutated without disabling it",
+    "test_paths": [
+      "tests/discovery/test_edas_scanner.py"
+    ],
+    "verdict": "none-recorded"
+  },
+  "no_commit": null,
+  "node": "edas-scan",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-jt60sa-briefs/edas-scan.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T061226180725-edas-scan/brief.md",
+    "brief_sha256": "9bea3ce46f2883f2994ad1c7ea4f7de1b58375b2fcea3553dca9010584f9a322",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 5488,
+          "cached_input_tokens": 499436,
+          "input_tokens": 504926,
+          "output_tokens": 2685,
+          "reasoning_output_tokens": 315,
+          "total_tokens": 507611,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "imas-codex discover signals jt-60sa -s edas --scan-only completes; Cypher count of FacilitySignal {facility_id:'jt-60sa', data_source_name:'edas'} is >= 741 with per-category counts MAG>=18 MDAC>=264 PSRC>=312 FAME>=100 MMSYS>=47, zero rows with a class:/shots:/udpid: keyword, zero rows with shot_range null, and one DataAccess jt-60sa:edas:eddb; the three spot-check names carry their slots in the fragment",
+    "estimated_hours": 1.0,
+    "goal": "One FacilitySignal per EDDB (category, data name) of shot E101173 in the live jt-60sa graph with data_class, shot_range and alias carried, at or above the census floor per category",
+    "id": "edas-scan",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-05T06:12:26Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 3,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 14,
+      "mean_context": 140000,
+      "observed_at": "2026-10-05T06:12:23Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 3,
+        "aggregate_tokens_per_second": 204.131,
+        "detail": "",
+        "mean_tokens_per_second": 127.582,
+        "observed_at": "2026-10-05T06:12:23Z",
+        "runs": 1.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T061226180725-edas-scan/manifest.md",
+    "negative_control": "none: this node runs the live scan and edits the scanner only if the scan exposes a defect; any such fix adds a test whose own mutation is named in the manifest, and a scan cannot be mutated without disabling it",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "40m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/discovery/signals/scanners/edas.py",
+      "tests/discovery/test_edas_scanner.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/edas-scan.html",
+      "docs/figures/jt60sa-discovery-completion/edas-scan"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 6631549.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "edas-scan",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-05T06:12:27.361535+00:00",
+    "score": 0.71875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.84,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 463.972,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 640.681,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 18,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 60
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.87,
+      "codex": 0.11,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "hold": 0.02
+    },
+    "rendered_token_estimate": 998,
+    "usage": {
+      "cost": 0.00012726,
+      "input_tokens": 3030,
+      "output_tokens": 89
+    }
+  },
+  "plan": null,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "7bd3714029e6b4629d76c7ef25dca9291476aa62",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "edb4bab9d1f7a441b9afd36090e753f64dfbca79",
+    "reviewed_head_sha": "7bd3714029e6b4629d76c7ef25dca9291476aa62",
+    "scores": {
+      "durability": 17,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261005T061226180725-edas-scan",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "80f5e031-0a19-4e82-b63b-2bf518a821a1",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 7963576,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 383.641,
+    "generated_tokens": 47845,
+    "generation_seconds": 274.745,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 74.0,
+    "machine_seconds": 108.896,
+    "peak_input_tokens": 170334,
+    "tokens_per_second": 174.14,
+    "wall_tokens_per_second": 124.71
+  },
+  "time_budget": "40m",
+  "tool_steps": 48.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1453,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-05T06:36:49Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-05T06:30:18Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261005T061226180725-edas-scan",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8540,
+    "worker_pid": 31495
+  },
+  "worker_seconds": 1436,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
