@@ -266,6 +266,63 @@ class TestSearchSignals:
         else:
             pytest.fail("No vector search call found")
 
+    def test_facility_filter_inside_search(self, mock_gc, mock_encoder):
+        """Facility predicate is an in-index pre-filter, inside SEARCH."""
+        _search_signals(
+            query="plasma current",
+            facility="jt-60sa",
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "facility_signal_desc_embedding" in cypher:
+                open_idx = cypher.index("SEARCH")
+                close_idx = cypher.index(") SCORE AS")
+                pred_idx = cypher.index("s.facility_id = $facility")
+                assert open_idx < pred_idx < close_idx, cypher
+                break
+        else:
+            pytest.fail("No facility_signal_desc_embedding vector search call found")
+
+    def test_overfetch_survives_non_facility_postfilter(self, mock_gc, mock_encoder):
+        """A diagnostic or domain post-filter keeps the widened ANN cut."""
+        _search_signals(
+            query="plasma current",
+            facility="jt-60sa",
+            physics_domain="magnetics",
+            k=10,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "facility_signal_desc_embedding" in cypher:
+                assert call[1]["k"] == 50, call[1]
+                assert call[1]["limit"] == 10, call[1]
+                assert "LIMIT $k" in cypher
+                break
+        else:
+            pytest.fail("No facility_signal_desc_embedding vector search call found")
+
+    def test_no_overfetch_without_postfilter(self, mock_gc, mock_encoder):
+        """With the facility pre-filter as the only filter, the cut is k."""
+        _search_signals(
+            query="plasma current",
+            facility="jt-60sa",
+            k=10,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "facility_signal_desc_embedding" in cypher:
+                assert call[1]["k"] == 10, call[1]
+                assert "LIMIT $k" in cypher
+                break
+        else:
+            pytest.fail("No facility_signal_desc_embedding vector search call found")
+
     def test_no_data_nodes_section_omitted(self, mock_gc, mock_encoder):
         """When data node search returns empty, section is omitted."""
         mock_gc.query.side_effect = _route_query(
@@ -670,6 +727,62 @@ class TestSearchDocs:
         assert "tcv:magnetics/ip" in result
         assert "magnetics.ip.0d[:].value" in result
 
+    def test_wiki_facility_filter_inside_search(self, mock_gc, mock_encoder):
+        """Wiki-chunk facility predicate is an in-index pre-filter, inside SEARCH."""
+        _search_docs(
+            query="plasma current", facility="jt-60sa", gc=mock_gc, encoder=mock_encoder
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "wiki_chunk_embedding" in cypher:
+                open_idx = cypher.index("SEARCH")
+                close_idx = cypher.index(") SCORE AS")
+                pred_idx = cypher.index("c.facility_id = $facility")
+                assert open_idx < pred_idx < close_idx, cypher
+                break
+        else:
+            pytest.fail("No wiki_chunk_embedding vector search call found")
+
+    def test_wiki_overfetch_survives_non_facility_postfilter(
+        self, mock_gc, mock_encoder
+    ):
+        """A WikiPage post-filter keeps the widened ANN cut."""
+        _search_docs(
+            query="plasma current",
+            facility="jt-60sa",
+            physics_domain="magnetics",
+            k=10,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "wiki_chunk_embedding" in cypher:
+                assert call[1]["k"] == 50, call[1]
+                assert call[1]["limit"] == 10, call[1]
+                assert "LIMIT $k" in cypher
+                break
+        else:
+            pytest.fail("No wiki_chunk_embedding vector search call found")
+
+    def test_wiki_no_overfetch_without_postfilter(self, mock_gc, mock_encoder):
+        """With the facility pre-filter as the only filter, the cut is k."""
+        _search_docs(
+            query="plasma current",
+            facility="jt-60sa",
+            k=10,
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "wiki_chunk_embedding" in cypher:
+                assert call[1]["k"] == 10, call[1]
+                assert "LIMIT $k" in cypher
+                break
+        else:
+            pytest.fail("No wiki_chunk_embedding vector search call found")
+
     def test_embedding_unavailable(self, mock_gc):
         """When encoder is unavailable, return helpful message."""
         from imas_codex.embeddings.encoder import EmbeddingBackendError
@@ -840,6 +953,46 @@ class TestSearchCode:
                 break
         else:
             pytest.fail("No code_chunk_embedding vector search call found")
+
+    def test_code_example_facility_filter_inside_search(self, mock_gc, mock_encoder):
+        """Code-example facility predicate is an in-index pre-filter, inside SEARCH."""
+        from imas_codex.llm.search_tools import _vector_search_code_examples
+
+        _vector_search_code_examples(mock_gc, [0.1] * 1024, facility="jt-60sa", k=10)
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "code_example_desc_embedding" in cypher:
+                open_idx = cypher.index("SEARCH")
+                close_idx = cypher.index(") SCORE AS")
+                pred_idx = cypher.index("ce.facility_id = $facility")
+                assert open_idx < pred_idx < close_idx, cypher
+                break
+        else:
+            pytest.fail("No code_example_desc_embedding vector search call found")
+
+    def test_code_example_missing_index_returns_empty(self, mock_gc):
+        """A missing/unavailable index yields no examples rather than failing."""
+        from neo4j.exceptions import ClientError
+
+        from imas_codex.llm.search_tools import _vector_search_code_examples
+
+        mock_gc.query.side_effect = ClientError("no such index")
+        assert (
+            _vector_search_code_examples(
+                mock_gc, [0.1] * 1024, facility="jt-60sa", k=10
+            )
+            == []
+        )
+
+    def test_code_example_programming_error_propagates(self, mock_gc):
+        """A non-client error is not swallowed by the narrowed except."""
+        from imas_codex.llm.search_tools import _vector_search_code_examples
+
+        mock_gc.query.side_effect = ValueError("boom")
+        with pytest.raises(ValueError):
+            _vector_search_code_examples(
+                mock_gc, [0.1] * 1024, facility="jt-60sa", k=10
+            )
 
     def test_no_facility_filter(self, mock_gc, mock_encoder):
         """Without facility, no facility filter in vector query."""

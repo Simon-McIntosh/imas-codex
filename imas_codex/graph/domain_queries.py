@@ -127,30 +127,32 @@ def _find_signals_semantic(
     """Semantic search branch for find_signals."""
     embedding = embed_fn(query)
 
-    # Pre-filters: property-based, pushed into SEARCH block
-    pre_filter_parts: list[str] = []
+    # facility_id is registered on facility_signal_desc_embedding, so its
+    # predicate renders inside SEARCH and pre-filters the ANN cut.
+    # diagnostic/physics_domain/checked are not index properties and stay as
+    # post-filters over the returned signals.
+    pre_filter_parts = ["s.facility_id = $facility"]
+    where_parts: list[str] = []
     params: dict[str, Any] = {
         "facility": facility,
         "k": limit,
         "embedding": embedding,
     }
     if diagnostic is not None:
-        pre_filter_parts.append("s.diagnostic = $diagnostic")
+        where_parts.append("s.diagnostic = $diagnostic")
         params["diagnostic"] = diagnostic
     if physics_domain is not None:
-        pre_filter_parts.append("s.physics_domain = $physics_domain")
+        where_parts.append("s.physics_domain = $physics_domain")
         params["physics_domain"] = physics_domain
     if has_data is not None:
-        pre_filter_parts.append("s.checked = $has_data")
+        where_parts.append("s.checked = $has_data")
         params["has_data"] = has_data
-
-    # Facility relationship filter consolidated into where_clauses
-    pre_filter_parts.append("(s)-[:AT_FACILITY]->(:Facility {id: $facility})")
 
     search_block = build_vector_search(
         "facility_signal_desc_embedding",
         "FacilitySignal",
-        where_clauses=pre_filter_parts,
+        prefilter_clauses=pre_filter_parts,
+        where_clauses=where_parts or None,
         node_alias="s",
         score_alias="score",
     )
@@ -271,11 +273,13 @@ def _find_wiki_semantic(
     embedding = embed_fn(query)
     params: dict[str, Any] = {"k": k, "embedding": embedding}
 
-    # Build pre-filter conditions: both property and relationship filters
-    # go into where_clauses with the new builder (WHERE is after SEARCH).
+    # facility_id is registered on wiki_chunk_embedding, so its predicate
+    # renders inside SEARCH and pre-filters the ANN cut. text_contains is not
+    # an index property and stays a post-filter.
+    pre_filters: list[str] = []
     where_filters: list[str] = []
     if facility is not None:
-        where_filters.append("(c)-[:AT_FACILITY]->(:Facility {id: $facility})")
+        pre_filters.append("c.facility_id = $facility")
         params["facility"] = facility
     if text_contains is not None:
         where_filters.append("toLower(c.text) CONTAINS toLower($text_kw)")
@@ -284,6 +288,7 @@ def _find_wiki_semantic(
     search_block = build_vector_search(
         "wiki_chunk_embedding",
         "WikiChunk",
+        prefilter_clauses=pre_filters or None,
         where_clauses=where_filters or None,
         node_alias="c",
         score_alias="score",
@@ -454,33 +459,30 @@ def find_code(
 
     params: dict[str, Any] = {"k": limit, "embedding": embedding}
 
-    # No pre-filters: facility is accessed via CodeFile join, not a property on CodeChunk
+    # facility_id is registered on code_chunk_embedding, so its predicate
+    # renders inside SEARCH and pre-filters the ANN cut. The CodeFile join the
+    # block used to carry existed only to filter by facility, so it goes with
+    # it; the CodeExample OPTIONAL MATCH below still supplies source_file.
+    prefilter_clauses = ["cc.facility_id = $facility"] if facility is not None else None
+    if facility is not None:
+        params["facility"] = facility
+
     search_block = build_vector_search(
         "code_chunk_embedding",
         "CodeChunk",
+        prefilter_clauses=prefilter_clauses,
         node_alias="cc",
         score_alias="score",
     )
 
-    facility_filter = ""
-    if facility is not None:
-        facility_filter = (
-            "MATCH (cf:CodeFile) WHERE cf.id = ce.source_file "
-            "AND cf.facility_id = $facility\n"
-        )
-        params["facility"] = facility
-
     cypher = (
         f"{search_block}\n"
         "OPTIONAL MATCH (cc)-[:CODE_EXAMPLE_ID]->(ce:CodeExample)\n"
-        f"{facility_filter}"
         "RETURN substring(cc.text, 0, 500) AS text, "
         "cc.function_name AS function_name, "
-        "ce.source_file AS source_file, score "
+        "coalesce(ce.source_file, cc.source_file) AS source_file, score "
         "ORDER BY score DESC"
     )
-
-    return gc.query(cypher, **params)
 
     return gc.query(cypher, **params)
 

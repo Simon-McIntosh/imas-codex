@@ -1,0 +1,97 @@
+<section>
+  <h2 id="facility-prefilter-sibling-indexes">Signal, wiki-chunk and code-example vector searches pre-filter by facility</h2>
+  <p id="facility-prefilter-sibling-indexes-landing">
+    The three remaining <code>imas_codex/llm/search_tools.py</code> vector
+    searches now select candidates <em>inside</em> their index rather than
+    discarding them afterwards. A <code>vector_index_filters: facility_id</code>
+    annotation on the <code>FacilitySignal.embedding</code>,
+    <code>WikiChunk.embedding</code> and <code>CodeExample.embedding</code> slots
+    (<code>imas_codex/schemas/facility.yaml</code>) registers
+    <code>facility_id</code> on the
+    <code>facility_signal_desc_embedding</code>, <code>wiki_chunk_embedding</code>
+    and <code>code_example_desc_embedding</code> indexes. Each search passes its
+    facility predicate as <code>prefilter_clauses</code> to
+    <code>build_vector_search</code>, which renders it as a <code>WHERE</code>
+    inside <code>SEARCH</code>, so the ANN cut is taken over the facility's own
+    rows. <code>_vector_search_code_examples</code> now catches only
+    <code>(ClientError, DatabaseError)</code>, so a programming error surfaces
+    instead of reading as an empty result. Commits:
+    <code>3072c2f07</code>.
+  </p>
+  <p id="facility-prefilter-sibling-indexes-overfetch">
+    The over-fetch is retired only where the facility predicate was the sole
+    post-filter. <code>_vector_search_signals</code> and
+    <code>_vector_search_wiki_chunks</code> passed
+    <code>k = max(k * 2, 50)</code> as the ANN limit to compensate for the
+    post-cut facility filter. Moving that filter inside <code>SEARCH</code>
+    makes the widened cut unnecessary when it is the only filter, but the
+    <code>diagnostic</code> and <code>physics_domain</code> signal predicates,
+    and the wiki site/domain/score predicates, still discard rows after the
+    cut because their properties are not on the index. Each search therefore
+    widens the cut to <code>max(k*2, 50)</code> exactly when one of those
+    post-filters is present, and passes the requested <code>k</code> when the
+    facility pre-filter is alone. The tests assert both arms: the widened cut
+    survives beside a non-facility post-filter, and is absent without one.
+    Commit: <code>16d1948fa</code>.
+  </p>
+  <p id="facility-prefilter-sibling-indexes-rebuild">
+    The three live indexes were rebuilt through the owner's option-mismatch path
+    (<code>GraphClient.ensure_vector_indexes</code>, which drops an index whose
+    live dimension or property set differs from the schema). <code>SHOW
+    INDEXES</code> after the rebuild:
+  </p>
+  <table id="facility-prefilter-sibling-indexes-indexes">
+    <tr><th>index</th><th>state</th><th>properties</th></tr>
+    <tr><td>facility_signal_desc_embedding</td><td>ONLINE</td><td>embedding, facility_id</td></tr>
+    <tr><td>wiki_chunk_embedding</td><td>ONLINE</td><td>embedding, facility_id</td></tr>
+    <tr><td>code_example_desc_embedding</td><td>ONLINE</td><td>embedding, facility_id</td></tr>
+  </table>
+  <p id="facility-prefilter-sibling-indexes-live">
+    Against the rebuilt indexes at the default <code>k = 10</code>:
+    <code>_search_signals(query="divertor IR camera", facility="jt-60sa")</code>
+    returns 10 <code>jt-60sa</code> signals
+    (<code>jt-60sa:general/cam_divirmp15r0</code>, <code>…r2</code>,
+    <code>…r4</code>, …), and
+    <code>_search_docs(query="JT-60SA data analysis server software", facility="jt-60sa")</code>
+    returns 10 <code>jt-60sa</code> handbook chunks from three
+    <code>JT-60SA Data Analysis Server</code> pages. Both are the facility's own
+    rows; before the filter moved inside the index a small facility's rows could
+    not survive the global top-k cut.
+  </p>
+  <p id="facility-prefilter-sibling-indexes-code">
+    <code>find_code</code> in <code>imas_codex/graph/domain_queries.py</code>
+    filtered facility through a <code>CodeFile</code> join on the
+    <code>CodeExample</code>'s <code>source_file</code> after the ANN cut — a
+    predicate the <code>code_chunk_embedding</code> index cannot evaluate
+    inside <code>SEARCH</code>. It now pre-filters on
+    <code>cc.facility_id</code> (registered on that index by the
+    <code>CodeChunk.embedding</code> annotation) via
+    <code>prefilter_clauses</code>. The join existed only to carry the filter,
+    so it is removed; the <code>CodeExample</code> <code>OPTIONAL MATCH</code>
+    remains and the <code>RETURN</code> coalesces its
+    <code>source_file</code> with the <code>CodeChunk</code>'s denormalized
+    copy. That copy is load-bearing for jt-60sa: none of its 201
+    <code>CodeChunk</code>s carries a <code>CODE_EXAMPLE_ID</code> link, so the
+    old join matched nothing and facility-scoped code search returned no rows;
+    it now returns the facility's own chunks with usable file paths. Commit:
+    <code>34c7f90c1</code>.
+  </p>
+  <p id="facility-prefilter-sibling-indexes-gate">
+    <code>pytest tests/search tests/llm tests/graph/test_schema_context.py
+    tests/graph/test_vector_search.py tests/graph/test_domain_queries.py</code>
+    → <strong>732 passed, 10 skipped, 66 deselected</strong>, exit 0 at
+    <code>16d1948fa</code> (base <code>b5c36b0a2</code> → 684 passed, 10
+    skipped, exit 0; the added tests are the in-SEARCH predicate,
+    no-over-fetch and narrowed-except cases across the signal, wiki-chunk,
+    code-example, domain-signal, domain-wiki and find_code searches). The
+    declared negative controls turn the corresponding test red while the head
+    arms do not: the signal facility predicate as a post-filter
+    (<code>TestSearchSignals::test_facility_filter_inside_search</code>), the
+    domain signal predicate as a post-filter
+    (<code>TestFindSignals::test_facility_predicate_inside_search</code>), and
+    the find_code predicate as a post-filter
+    (<code>TestFindCode::test_facility_predicate_inside_search</code>), and
+    the ANN cut left unwidened beside a domain post-filter
+    (<code>TestSearchSignals::test_overfetch_survives_non_facility_postfilter</code>).
+  </p>
+</section>

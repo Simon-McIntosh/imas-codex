@@ -68,6 +68,22 @@ class TestFindSignals:
         assert len(result) == 1
         assert result[0]["id"] == "tcv:ip"
 
+    def test_facility_predicate_inside_search(self, mock_gc, mock_embed):
+        """Facility predicate is an in-index pre-filter, inside SEARCH."""
+        find_signals(
+            query="plasma current",
+            facility="jt-60sa",
+            gc=mock_gc,
+            embed_fn=mock_embed,
+        )
+        cypher = mock_gc.query.call_args[0][0]
+        assert "facility_signal_desc_embedding" in cypher
+        open_idx = cypher.index("SEARCH")
+        close_idx = cypher.index(") SCORE AS")
+        pred_idx = cypher.index("s.facility_id = $facility")
+        assert open_idx < pred_idx < close_idx, cypher
+        assert "AT_FACILITY" not in cypher
+
     def test_requires_facility(self, mock_gc, mock_embed):
         with pytest.raises(ValueError, match="facility"):
             find_signals(gc=mock_gc, embed_fn=mock_embed)
@@ -117,6 +133,19 @@ class TestFindWiki:
         find_wiki(query="test", gc=mock_gc, embed_fn=mock_embed)
         cypher = mock_gc.query.call_args[0][0]
         assert "WikiPage" in cypher
+
+    def test_facility_predicate_inside_search(self, mock_gc, mock_embed):
+        """Wiki facility predicate is an in-index pre-filter, inside SEARCH."""
+        find_wiki(
+            query="equilibrium", facility="jt-60sa", gc=mock_gc, embed_fn=mock_embed
+        )
+        cypher = mock_gc.query.call_args[0][0]
+        assert "wiki_chunk_embedding" in cypher
+        open_idx = cypher.index("SEARCH")
+        close_idx = cypher.index(") SCORE AS")
+        pred_idx = cypher.index("c.facility_id = $facility")
+        assert open_idx < pred_idx < close_idx, cypher
+        assert "AT_FACILITY" not in cypher
 
     def test_text_contains_keyword_only(self, mock_gc, mock_embed):
         """Keyword-only search without semantic query."""
@@ -234,6 +263,22 @@ class TestFindCode:
         find_code(query="test", facility="tcv", gc=mock_gc, embed_fn=mock_embed)
         cypher = mock_gc.query.call_args[0][0]
         assert "facility_id" in cypher
+
+    def test_facility_predicate_inside_search(self, mock_gc, mock_embed):
+        """Code facility predicate is an in-index pre-filter, inside SEARCH."""
+        find_code(
+            query="equilibrium reconstruction",
+            facility="jt-60sa",
+            gc=mock_gc,
+            embed_fn=mock_embed,
+        )
+        cypher = mock_gc.query.call_args[0][0]
+        assert "code_chunk_embedding" in cypher
+        open_idx = cypher.index("SEARCH")
+        close_idx = cypher.index(") SCORE AS")
+        pred_idx = cypher.index("cc.facility_id = $facility")
+        assert open_idx < pred_idx < close_idx, cypher
+        assert "CodeFile" not in cypher
 
 
 class TestFindDataNodes:
