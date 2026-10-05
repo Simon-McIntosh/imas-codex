@@ -18,7 +18,6 @@ Example:
 """
 
 import logging
-import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -88,64 +87,17 @@ except (ImportError, SyntaxError):
     EXPECTED_RELATIONSHIP_TYPES = set()
 
 
-def _slurm_service_uri() -> str | None:
-    """Return the bolt URI of the graph service running on this cluster.
-
-    SLURM service-node discovery is delegated to the shared owner in
-    :mod:`imas_codex.remote.locations`, so the graph and embedding paths
-    cannot diverge: a compute node, whose hostname matches no login-node
-    pattern, is served the service node's own address there rather than a
-    workstation-style loopback tunnel endpoint that nothing is listening on.
-
-    Returns ``None`` when the active location is not SLURM-scheduled or no
-    service node can be discovered, leaving the profile's resolution in
-    place.  An unreadable location is not among those cases: it is raised,
-    because returning ``None`` here would restore the loopback tunnel
-    endpoint this function exists to replace.
-    """
-    from imas_codex.graph.profiles import get_graph_location
-    from imas_codex.remote.locations import (
-        _service_url_for_slurm,
-        resolve_location,
-    )
-
-    info = resolve_location(get_graph_location())
-
-    if info.scheduler != "slurm":
-        return None
-
-    bolt_port = resolve_neo4j(auto_tunnel=False).bolt_port
-    return _service_url_for_slurm(
-        info,
-        bolt_port,
-        protocol="bolt",
-        service_job_name=info.service_job_name,
-        local=False,
-    )
-
-
 def _resolve_graph_uri() -> str:
     """Resolve the bolt URI for the active graph.
 
-    Outside a SLURM step this is the profile's own resolution.  Inside one,
-    the profile layer's fallback to a loopback tunnel endpoint is replaced by
-    the reachable address of the node running the service -- see
-    :func:`_slurm_service_uri`.
-
-    An explicit ``NEO4J_URI`` outranks both: it is the documented escape
-    hatch, and the operator who sets it has named an address that the
-    discovery below is not entitled to replace.
+    Resolution is owned by the profile layer, which decides between the
+    local, SLURM-scheduled and remote branches: inside a SLURM step it reaches
+    the scheduled service node rather than the loopback tunnel endpoint its
+    hostname test would otherwise choose, so this module carries no discovery
+    of its own.  ``NEO4J_URI`` is the documented escape hatch and the profile
+    resolution applies it last.
     """
-    if explicit := os.environ.get("NEO4J_URI"):
-        return explicit
-    uri = get_graph_uri()
-    if not os.environ.get("SLURM_JOB_ID"):
-        return uri
-    direct = _slurm_service_uri()
-    if direct:
-        logger.info("SLURM step: resolving graph directly at %s", direct)
-        return direct
-    return uri
+    return get_graph_uri()
 
 
 @dataclass
