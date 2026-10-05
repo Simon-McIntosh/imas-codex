@@ -670,40 +670,24 @@ def get_embed_scheduler() -> str:
 def get_embed_host() -> str | None:
     """Get the hostname where the embedding server runs.
 
-    For compute locations (e.g. ``"titan"``), reads the GPU node hostname
-    from the facility's compute config.  For direct facility locations,
-    returns ``None`` (server on login node / localhost).
+    Reads the host from the resolved remote URL, so SLURM service-node
+    discovery has a single owner (:func:`resolve_service_url`).  Returns
+    None when the resolved URL is loopback (the server runs on this node)
+    or when no remote URL is configured.
 
     Override: IMAS_CODEX_EMBED_HOST env var (escape hatch).
     """
     if env := os.getenv("IMAS_CODEX_EMBED_HOST"):
         return env or None
-    if get_embed_scheduler() != "slurm":
+    from urllib.parse import urlsplit
+
+    url = get_embed_remote_url()
+    if not url:
         return None
-    return _embed_host_from_facility()
-
-
-def _embed_host_from_facility() -> str | None:
-    """Discover the compute node running the embedding server via SLURM.
-
-    Resolves the facility from the embedding location (e.g. ``"titan"`` →
-    ``"iter"``), then uses ``squeue`` to find the active service job's
-    compute node.
-    """
-    try:
-        from imas_codex.remote.locations import resolve_location
-        from imas_codex.remote.tunnel import discover_compute_node_local
-
-        location = get_embedding_location()
-        info = resolve_location(location)
-        if info.facility == "local":
-            return None
-        return discover_compute_node_local(
-            service_job_name="codex-embed",
-        )
-    except Exception:
-        pass
-    return None
+    host = urlsplit(url).hostname
+    if host in (None, "localhost", "127.0.0.1"):
+        return None
+    return host
 
 
 # ─── LLM proxy settings ────────────────────────────────────────────────────

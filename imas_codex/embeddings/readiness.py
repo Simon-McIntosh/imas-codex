@@ -23,7 +23,6 @@ Usage::
 from __future__ import annotations
 
 import logging
-import re
 import socket
 import subprocess
 import time
@@ -64,24 +63,6 @@ def _is_on_login_node() -> bool:
         return result.returncode == 0 or "running" in result.stdout
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return False
-
-
-def _resolve_url_for_compute(url: str) -> str:
-    """On facility nodes, redirect localhost URLs to the embed server host.
-
-    The embedding server runs on a compute node (e.g. Titan).  When the
-    resolved URL contains localhost, replace it with the actual compute
-    host so facility nodes can reach it directly.
-    """
-    if not url:
-        return url
-    embed_host = _get_embed_host()
-    if not embed_host:
-        return url
-    resolved = re.sub(r"localhost|127\.0\.0\.1", embed_host, url)
-    if resolved != url:
-        logger.info("Redirecting %s → %s", url, resolved)
-    return resolved
 
 
 def _try_start_service() -> bool:
@@ -167,9 +148,6 @@ def ensure_embedding_ready(
     remote_url = get_embed_remote_url()
     if not remote_url:
         return False, "Remote embedding URL not configured (embed-remote-url)"
-
-    # On compute nodes, localhost URLs must point to the login node
-    remote_url = _resolve_url_for_compute(remote_url)
 
     port = get_embed_server_port()
     client = RemoteEmbeddingClient(remote_url)

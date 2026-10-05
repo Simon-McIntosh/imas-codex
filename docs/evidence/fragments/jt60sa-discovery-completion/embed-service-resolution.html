@@ -1,0 +1,150 @@
+<section id="embed-service-resolution">
+  <h2>One owner for SLURM service-node discovery</h2>
+  <p>
+    <code>resolve_service_url</code> in <code>imas_codex/remote/locations.py</code>
+    is now the single owner of SLURM service-node discovery. It decides by
+    discovery rather than by whether the caller's hostname counts as local:
+    <code>squeue</code> answers only from inside the cluster, which is exactly
+    the reachability test, so a compute node is served the service node's
+    address directly instead of falling through to a loopback URL behind a
+    tunnel it cannot open. The three other discovery copies — the settings
+    helpers, the readiness loopback rewrite, and the graph client's branch —
+    are routed through it or removed.
+  </p>
+</section>
+
+<section id="embed-service-resolution-deliverable">
+  <h2>What landed</h2>
+  <ul>
+    <li>
+      <strong>Owner decides by discovery.</strong>
+      <code>_resolve_service_url_uncached</code> no longer gates its SLURM
+      branch on <code>if local and info.scheduler == "slurm"</code>; the branch
+      runs for any SLURM location and collapses to the loopback only when the
+      caller <em>is</em> the discovered node. Discovery lives in the shared
+      <code>_discover_slurm_compute_node</code> (squeue, then the recorded
+      host), and <code>_service_url_for_slurm</code> returns
+      <code>None</code> to mean "undiscoverable here — fall through to the
+      remote branch", so the graph client can keep its tunnel.
+    </li>
+    <li>
+      <strong>Graph client delegates.</strong> <code>profiles.py</code>'s
+      <code>_resolve_uri_uncached</code> calls
+      <code>_service_url_for_slurm</code> for the SLURM branch and keeps its
+      remote auto-tunnel branch (<code>IMAS_CODEX_TUNNEL_BOLT_&lt;HOST&gt;</code>,
+      <code>ensure_tunnel</code>, tunnel-port URL) untouched; its docstring is
+      now true.
+    </li>
+    <li>
+      <strong>Settings helpers routed.</strong> <code>get_embed_host</code>
+      reads the host from the resolved URL, so it carries no discovery of its
+      own; <code>_embed_host_from_facility</code> is retired.
+    </li>
+    <li>
+      <strong>Readiness rewrite removed.</strong>
+      <code>_resolve_url_for_compute</code> and its call site are deleted —
+      the URL now arrives resolved, so no post-hoc loopback rewrite remains.
+    </li>
+  </ul>
+</section>
+
+<section id="embed-service-resolution-evidence">
+  <h2>Evidence</h2>
+  <p>
+    The four caller cases are covered by a stubbed <code>squeue</code> in
+    <code>tests/remote/test_locations_resolution.py</code> (new):
+  </p>
+  <table>
+    <thead>
+      <tr><th>Caller</th><th>Stub</th><th>Resolved URL</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>compute node (<code>98dci4-clu-2018</code>)</td>
+        <td>squeue → <code>98dci4-gpu-0002</code></td>
+        <td><code>http://98dci4-gpu-0002:18765</code></td>
+      </tr>
+      <tr>
+        <td>service node itself</td>
+        <td>squeue → same host</td>
+        <td><code>http://localhost:18765</code></td>
+      </tr>
+      <tr>
+        <td>login node, undiscovered</td>
+        <td>squeue → none, no recorded host</td>
+        <td><code>http://localhost:18765</code></td>
+      </tr>
+      <tr>
+        <td>off-cluster, undiscovered</td>
+        <td>squeue → none, no recorded host</td>
+        <td><code>http://localhost:18765</code> (tunnel)</td>
+      </tr>
+      <tr>
+        <td>non-SLURM local location</td>
+        <td>squeue not called</td>
+        <td><code>http://localhost:18765</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>pytest tests/remote tests/graph/test_schema_context.py</code></td>
+        <td>exit 0 &mdash; 106 passed (base <code>tests/remote</code> at
+            <code>192c3a462</code>: 81 passed; the 6-case
+            <code>test_locations_resolution.py</code> is new)</td>
+      </tr>
+      <tr>
+        <td>Negative control: restore the <code>local and</code> gate on the
+            SLURM branch</td>
+        <td>exit 1 &mdash;
+            <code>test_compute_node_caller_reaches_discovered_service_node</code>
+            fails</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="embed-service-resolution-live">
+  <h2>Live measure on fleet node 98dci4-clu-2018</h2>
+  <p>
+    From the worktree on the fleet compute node, with the embedding server
+    (SLURM job <code>codex-embed</code>) serving on
+    <code>98dci4-gpu-0002:18765</code> and no tunnel:
+  </p>
+  <pre>uv run python -c "from imas_codex.settings import get_embed_remote_url; print(get_embed_remote_url())"
+http://98dci4-gpu-0002:18765</pre>
+  <pre>uv run imas-codex embed status
+Server (http://98dci4-gpu-0002:18765):
+  ✓ Healthy
+  Model: Qwen/Qwen3-Embedding-0.6B
+  Location: titan (98dci4-gpu-0002.iter.org)
+  Uptime: 290.8h</pre>
+  <p>
+    Before this change the same call resolved to
+    <code>http://localhost:18765</code> from the compute node, which is the
+    loopback the original report timed out against.
+  </p>
+</section>
+
+<section id="embed-service-resolution-follow-ons">
+  <h2>Follow-ons</h2>
+  <ul>
+    <li>
+      <code>imas_codex/graph/client.py</code> (<code>_slurm_service_uri</code>,
+      ~line 114) holds a fifth copy of the same
+      <code>discover_compute_node_local</code> + recorded-host pattern, outside
+      this node's write scope. It can now call
+      <code>_service_url_for_slurm</code>.
+    </li>
+    <li>
+      <code>tests/embeddings/test_readiness.py</code> tests the two removed
+      internals it shouldn't have: <code>TestResolveUrlForCompute</code> (5
+      tests) and
+      <code>TestEmbeddingHostDiscovery::test_graph_and_embedding_jobs_may_run_on_different_nodes</code>.
+      They need deletion in that file, which is outside this node's write
+      scope.
+    </li>
+  </ul>
+</section>
