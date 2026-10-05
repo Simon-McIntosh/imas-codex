@@ -32,7 +32,12 @@ import logging
 import re
 from dataclasses import dataclass
 
-from imas_codex.remote.tools import check_tool, install_tool, run
+from imas_codex.remote.tools import (
+    check_tool,
+    install_tool,
+    probe_remote_environment,
+    run,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +88,11 @@ class PythonStatus:
     has_modern_python: bool
     venv_path: str | None
     venv_python: PythonVersion | None
+    # Remote environment block probe (None when the facility declares none)
+    environment: dict | None = None
+    active_python: PythonVersion | None = None
+    min_python_version: str | None = None
+    meets_floor: bool | None = None
 
 
 def _parse_python_version(
@@ -143,7 +153,12 @@ def _parse_uv_python_list(output: str) -> list[PythonVersion]:
     return versions
 
 
-def get_python_status(facility: str | None = None) -> PythonStatus:
+def get_python_status(
+    facility: str | None = None,
+    *,
+    python_command: str | None = None,
+    setup_commands: list[str] | None = None,
+) -> PythonStatus:
     """Get comprehensive Python environment status for a facility.
 
     Checks:
@@ -151,10 +166,16 @@ def get_python_status(facility: str | None = None) -> PythonStatus:
     - uv availability and version
     - uv-managed Python installations
     - Existing imas-codex venv
+    - The ``remote_environment`` block's interpreter, probed under its setup
+      commands and judged against its floor
     - Recommended action
 
     Args:
         facility: Facility ID (None = local)
+        python_command: Override the interpreter probed for the remote
+            environment (for showing the unconfigured path).
+        setup_commands: Override the setup commands probed for the remote
+            environment; an empty list probes without the block's setup.
 
     Returns:
         PythonStatus with complete environment info
@@ -235,6 +256,28 @@ def get_python_status(facility: str | None = None) -> PythonStatus:
     else:
         recommended_action = "create_venv"
 
+    # Probe the facility's declared remote environment: the interpreter a scan
+    # actually uses, judged against the block's floor.
+    environment = None
+    active_python = None
+    min_python_version = None
+    meets_floor = None
+    if facility is not None and str(facility).lower() != "local":
+        environment = probe_remote_environment(
+            facility,
+            python_command=python_command,
+            setup_commands=setup_commands,
+        )
+        if environment.get("declared"):
+            version_output = environment.get("python_version")
+            if version_output:
+                active_python = _parse_python_version(
+                    version_output, source="remote_environment"
+                )
+            min_python_version = environment.get("floor") or MIN_PYTHON
+            if active_python is not None:
+                meets_floor = active_python.meets_minimum(min_python_version)
+
     return PythonStatus(
         facility=facility_name,
         uv_available=uv_available,
@@ -245,6 +288,10 @@ def get_python_status(facility: str | None = None) -> PythonStatus:
         has_modern_python=has_modern,
         venv_path=venv_path,
         venv_python=venv_python,
+        environment=environment,
+        active_python=active_python,
+        min_python_version=min_python_version,
+        meets_floor=meets_floor,
     )
 
 

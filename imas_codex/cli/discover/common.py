@@ -438,6 +438,62 @@ def use_rich_output() -> bool:
     return should_use_rich()
 
 
+def ensure_remote_environment(facility_config: dict) -> None:
+    """Refuse a remote scan when the facility's declared environment is unmet.
+
+    Probes the same ``remote_environment`` block ``imas-codex tools status``
+    reports, through the facility-aware layer, and raises a
+    :class:`click.ClickException` naming the interpreter floor and the setup
+    commands that satisfy it. A facility that declares no block, or has no
+    ``ssh_host``, is left alone.
+
+    Args:
+        facility_config: Loaded facility configuration mapping.
+    """
+    if not facility_config.get("ssh_host"):
+        return
+    if not facility_config.get("remote_environment"):
+        return
+
+    from imas_codex.remote.tools import probe_remote_environment
+
+    facility = facility_config.get("id") or facility_config.get("facility")
+    environment = probe_remote_environment(facility, facility_config=facility_config)
+    if environment.get("status") != "declared":
+        return
+
+    problems: list[str] = []
+    if environment.get("meets_floor") is not True:
+        version = environment.get("python_version") or "(unprobed)"
+        problems.append(
+            f"remote interpreter {version} does not meet the declared floor "
+            f"{environment.get('floor')}"
+        )
+    unimportable = [
+        module.get("name")
+        for module in environment.get("modules", [])
+        if not module.get("importable")
+    ]
+    if unimportable:
+        problems.append(
+            "required module(s) not importable: " + ", ".join(unimportable)
+        )
+    if environment.get("error"):
+        problems.append(environment["error"])
+
+    if not problems:
+        return
+
+    message = "; ".join(problems)
+    fix = environment.get("fix") or []
+    if fix:
+        message += (
+            "\nThe remote_environment block's setup commands satisfy it:\n  "
+            + "\n  ".join(fix)
+        )
+    raise click.ClickException(message)
+
+
 # =============================================================================
 # Service Monitor Factory
 # =============================================================================

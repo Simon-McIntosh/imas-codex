@@ -143,6 +143,7 @@ def code(
     """
     from imas_codex.cli.discover.common import (
         DiscoveryConfig,
+        ensure_remote_environment,
         make_log_print,
         run_discovery,
         setup_logging,
@@ -168,6 +169,8 @@ def code(
     if not ssh_host:
         log_print(f"[red]No SSH host configured for {facility}[/red]")
         raise SystemExit(1)
+
+    ensure_remote_environment(facility_config)
 
     if rescan:
         from imas_codex.discovery.code.graph_ops import set_files_scan_after

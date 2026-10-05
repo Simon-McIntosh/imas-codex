@@ -547,14 +547,126 @@ def check_tool(
     }
 
 
-def check_all_tools(facility: str | None = None) -> dict[str, Any]:
+def probe_remote_environment(
+    facility: str | None,
+    facility_config: dict[str, Any] | None = None,
+    python_command: str | None = None,
+    setup_commands: list[str] | None = None,
+) -> dict[str, Any]:
+    """Probe the interpreter and module importability of a facility's environment.
+
+    Runs the stdlib-only ``probe_environment.py`` through the facility-aware
+    layer, so it executes under the ``remote_environment`` block's setup
+    commands and interpreter — the same environment a remote scan uses. The
+    block's floor is judged with :meth:`PythonVersion.meets_minimum` and a
+    module that fails to import is reported with its error text.
+
+    Args:
+        facility: Facility ID (None or "local" probes nothing).
+        facility_config: Loaded facility config, avoiding a fresh lookup.
+        python_command: Override the resolved interpreter.
+        setup_commands: Override the resolved setup commands; an empty list
+            probes without the block's setup.
+
+    Returns:
+        Dict with ``status`` (``declared`` or ``not_declared``), ``floor``,
+        ``python_version``, ``meets_floor``, ``modules`` (each with
+        ``importable`` and ``error``) and ``fix`` (the setup commands that
+        satisfy the environment). A facility that declares no block probes
+        nothing and reports ``not_declared``.
+    """
+    import json
+
+    if facility is None or str(facility).lower() == "local":
+        return {"status": "not_declared", "declared": False, "fix": [], "modules": []}
+
+    config = (
+        facility_config if facility_config is not None else _facility_config(facility)
+    )
+    resolved = resolve_remote_environment(config)
+    declared = bool(
+        resolved.setup_commands
+        or resolved.min_python_version
+        or resolved.required_modules
+    )
+    if not declared:
+        return {
+            "status": "not_declared",
+            "declared": False,
+            "floor": None,
+            "python_version": None,
+            "meets_floor": None,
+            "modules": [],
+            "fix": [],
+            "python_command": resolved.python_command,
+            "setup_commands": [],
+        }
+
+    result: dict[str, Any] = {
+        "status": "declared",
+        "declared": True,
+        "floor": resolved.min_python_version,
+        "python_command": python_command or resolved.python_command,
+        "setup_commands": list(
+            setup_commands if setup_commands is not None else resolved.setup_commands
+        ),
+        "fix": list(resolved.setup_commands),
+        "python_version": None,
+        "meets_floor": None,
+        "modules": [],
+        "error": None,
+    }
+
+    modules = [{"name": m.name, "path": m.path} for m in resolved.required_modules]
+    try:
+        output = run_python_script(
+            "probe_environment.py",
+            {"modules": modules},
+            facility=facility,
+            python_command=python_command,
+            setup_commands=setup_commands,
+        )
+        payload = json.loads(output)
+    except Exception as e:
+        result["error"] = str(e)[:500]
+        result["meets_floor"] = False
+        return result
+
+    result["python_version"] = payload.get("python_version")
+    result["modules"] = payload.get("modules", [])
+
+    from imas_codex.remote.python import _parse_python_version
+
+    active = (
+        _parse_python_version(result["python_version"], source="remote_environment")
+        if result["python_version"]
+        else None
+    )
+    if active is not None and resolved.min_python_version:
+        result["meets_floor"] = active.meets_minimum(resolved.min_python_version)
+
+    return result
+
+
+def check_all_tools(
+    facility: str | None = None,
+    *,
+    python_command: str | None = None,
+    setup_commands: list[str] | None = None,
+) -> dict[str, Any]:
     """Check availability of all remote tools.
 
     Args:
         facility: Facility ID (None = local)
+        python_command: Override the interpreter probed for the remote
+            environment (does not affect tool checks).
+        setup_commands: Override the setup commands probed for the remote
+            environment; an empty list probes without the block's setup.
 
     Returns:
-        Dict with tool statuses and summary
+        Dict with tool statuses, summary and an ``environment`` entry carrying
+        the remote interpreter floor and per-module importability
+        (``not_declared`` when the facility declares no block).
     """
     config = load_remote_tools()
     results: dict[str, Any] = {
@@ -587,6 +699,12 @@ def check_all_tools(facility: str | None = None) -> dict[str, Any]:
             )
             if status.get("required"):
                 results["required_ok"] = False
+
+    results["environment"] = probe_remote_environment(
+        facility,
+        python_command=python_command,
+        setup_commands=setup_commands,
+    )
 
     return results
 

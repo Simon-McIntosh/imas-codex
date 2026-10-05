@@ -1,0 +1,114 @@
+<section id="tools-status-environment-floor">
+  <h2>Remote interpreter floor in the tool probe</h2>
+  <p>
+    The existing facility probe now reports the facility's declared remote
+    interpreter and the importability of each required module, and
+    <code>discover signals</code> / <code>discover code</code> refuse before a
+    remote scan when the declared floor is unmet. No new CLI command: the
+    environment is a section of <code>imas-codex tools status</code>.
+  </p>
+</section>
+
+<section id="tools-status-environment-floor-deliverable">
+  <h2>What landed</h2>
+  <ul>
+    <li>
+      <strong>Interpreter floor.</strong>
+      <code>get_python_status</code> (<code>imas_codex/remote/python.py</code>)
+      runs the <code>remote_environment</code> block's interpreter under its
+      setup commands through <code>run_python_script</code>, records it as
+      <code>active_python</code>, and judges it with
+      <code>PythonVersion.meets_minimum</code> against the block's
+      <code>min_python_version</code>. No second comparison is introduced.
+    </li>
+    <li>
+      <strong>Module importability.</strong>
+      <code>check_all_tools</code> gains an <code>environment</code> entry
+      carrying per-module <code>importable</code> verdicts (with import error
+      text) and the block's <code>fix</code> setup commands, produced by one
+      stdlib-only remote script
+      <code>imas_codex/remote/scripts/probe_environment.py</code> (Python
+      3.5-safe; the failing case is the old interpreter it reports).
+      <code>probe_remote_environment()</code> in
+      <code>imas_codex/remote/tools.py</code> is the one prober.
+    </li>
+    <li>
+      <strong>CLI override and exit.</strong>
+      <code>tools status</code> renders the environment section and exits
+      non-zero when the floor is unmet (or a required module unimportable),
+      with <code>--python-command</code> / <code>--no-setup</code> to show the
+      unconfigured path without editing committed config. Tool failures keep
+      their existing exit behaviour.
+    </li>
+    <li>
+      <strong>Scan gate.</strong> <code>ensure_remote_environment</code> in
+      <code>imas_codex/cli/discover/common.py</code> raises
+      <code>click.ClickException</code> naming the floor and the fix; called by
+      <code>discover signals</code> and <code>discover code</code> before their
+      pipelines when the facility has an <code>ssh_host</code> and a block.
+      Paths and wiki are untouched (follow-on).
+    </li>
+  </ul>
+</section>
+
+<section id="tools-status-environment-floor-evidence">
+  <h2>Evidence</h2>
+  <table>
+    <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>pytest tests/remote tests/cli/test_tools_status_environment.py</code></td>
+        <td>exit 0 &mdash; 81 passed (base arm
+            <code>tests/remote</code> at <code>887486007</code>: 66 passed;
+            <code>test_tools_environment.py</code> and
+            <code>test_tools_status_environment.py</code> are new)</td>
+      </tr>
+      <tr>
+        <td>Negative control: make <code>get_python_status</code> judge against
+            <code>MIN_PYTHON</code> only</td>
+        <td>exit 1 &mdash;
+            <code>TestGetPythonStatusFloor::test_floor_is_the_blocks_not_the_global_minimum</code>
+            fails (log
+            <code>/tmp/jt60sa-toolsenv-negative.log</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="tools-status-environment-floor-live">
+  <h2>Live measure on jt-60sa (nakasvr26)</h2>
+  <p>
+    Both commands ran with a <code>ssh -F "$HOME/.ssh/config"</code> wrapper
+    first on <code>PATH</code> (the sandbox's system include
+    <code>/etc/ssh/ssh_config.d/50-redhat.conf</code> reads
+    <code>nobody</code>-owned, which bare <code>ssh</code> rejects); the
+    executor's ssh invocation was not changed.
+  </p>
+  <pre>uv run imas-codex tools status jt-60sa; echo EXIT=$?
+EXIT=0
+  ...
+Remote Environment
+  ✓ interpreter: Python 3.12.9 (floor 3.12)
+  ✓ module numpy
+  ✓ module eddb_pwrapper
+  ...</pre>
+  <pre>uv run imas-codex tools status jt-60sa --no-setup --python-command python3; echo EXIT=$?
+EXIT=1
+  ...
+Remote Environment
+  ✗ interpreter: not probed (floor 3.12)
+      Command 'probe_environment.py' returned non-zero exit status 1.
+  Fix:
+    module unload python/3.5.6
+    module load python/3.12
+  ...</pre>
+  <p>
+    Full outputs: <code>/tmp/jt60sa-toolsenv-live-pass.log</code> and
+    <code>/tmp/jt60sa-toolsenv-live-fail.log</code>. With the recipe applied
+    the probe reports Python 3.12.9 with <code>numpy</code> and
+    <code>eddb_pwrapper</code> importable; with <code>--no-setup
+    --python-command python3</code> the login shell's bare <code>python3</code>
+    is 3.5.6, below the 3.12 floor, and the command names the floor and the
+    module recipe while exiting non-zero.
+  </p>
+</section>
