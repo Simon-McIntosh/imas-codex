@@ -26,7 +26,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac,7bd3714029e6b4629d76c7ef25dca9291476aa62,a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f,b47967a659fd7e631ce24e41a26cd47437afc19c">
 <meta name="plan-impl" content="0.4">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -355,6 +355,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261005T073314446582-handbook-dynamic-pages" data-who="reckon-build" data-when="2026-10-05T08:05:11.062Z">
     <div class="r-comment-body"><p>imas-codex:jt60sa-discovery-completion §3 — Handbook table topics carry fronts_database, keep a one-line stub chunk, and reach every FacilitySignal of the database they front through the existing WikiChunk DOCUMENTS edge, applied to the live jt-60sa graph</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261005T080612927124-review-of-handbook-dynamic-pages" data-who="reckon-build" data-when="2026-10-05T08:16:14.884Z">
+    <div class="r-comment-body"><p>review of run r-20261005T073314446582-handbook-dynamic-pages (imas-codex:jt60sa-discovery-completion §3) — SOUND WITH FINDINGS, total 76/100, zero added failures; five findings (unintegrated rule with no production call site, two of seven handbook tables unmarked, MCP follow-through asserted not shown, unused parameter, mock-only merge Cypher).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261005T0554-s6-review" data-who="reckon-build" data-when="2026-10-05T05:54:00+00:00">
     <div class="r-comment-body">Design review (run r-20261005T053355179905, findings thin_wrapper-1, duplicate_owner-2, interface_budget-1) acted on: remote_environment is resolved in the facility-aware layer (imas_codex/remote/tools.py and the pipelines that build each data system's scanner config) and passed to the executor as parameters, leaving the executor facility-agnostic; the interpreter floor and module importability extend check_tool/check_all_tools and surface through the existing imas-codex tools status command, so no discover preflight command is added. Nodes: remote-environment-block (schema, resolver, YAML, pass-down) then tools-status-environment-floor (probe extension and the discover gate).</div>
