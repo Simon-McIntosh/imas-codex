@@ -1,0 +1,73 @@
+<section>
+  <h2 id="vector-index-ddl-owner">Vector index DDL has one owner</h2>
+  <p id="vector-index-ddl-owner-landing">
+    <code>GraphClient.ensure_vector_indexes</code>
+    (<code>imas_codex/graph/client.py</code>) is now the only Python source that
+    composes a <code>CREATE VECTOR INDEX</code> statement. The five statements
+    that repeated the owner's option block by hand were each replaced by a call
+    to that owner: <code>build_dd.py</code> (one statement for the two cluster
+    indexes), <code>dd_identifier_enrichment.py</code> (two —
+    <code>identifier_schema_embedding</code> and
+    <code>imas_node_embedding</code>), <code>dd_ids_enrichment.py</code> (one),
+    and <code>discovery/wiki/pipeline.py</code> (one). The option block
+    (dimensions, similarity function, quantization, and the filter properties
+    §12 added) therefore has a single definition, so the copies can no longer
+    drift from it.
+  </p>
+  <table id="vector-index-ddl-owner-sites">
+    <caption>Hand-written statements removed, and their replacement call.</caption>
+    <thead>
+      <tr><th>Module</th><th>Index</th><th>Replaced by</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>imas_codex/graph/build_dd.py</td><td>cluster_label_embedding, cluster_description_embedding</td><td>client.ensure_vector_indexes() (line 4690)</td></tr>
+      <tr><td>imas_codex/graph/dd_identifier_enrichment.py</td><td>identifier_schema_embedding</td><td>client.ensure_vector_indexes() (line 354)</td></tr>
+      <tr><td>imas_codex/graph/dd_identifier_enrichment.py</td><td>imas_node_embedding</td><td>client.ensure_vector_indexes() (line 694)</td></tr>
+      <tr><td>imas_codex/graph/dd_ids_enrichment.py</td><td>ids_embedding</td><td>client.ensure_vector_indexes() (line 455)</td></tr>
+      <tr><td>imas_codex/discovery/wiki/pipeline.py</td><td>wiki_chunk_embedding</td><td>gc.ensure_vector_indexes() (line 1655)</td></tr>
+    </tbody>
+  </table>
+  <p id="vector-index-ddl-owner-schema-coverage">
+    No schema change was needed: all five indexes are already schema-derived.
+    Enumerating <code>GraphSchema().vector_indexes</code> returns every one of
+    them — <code>cluster_description_embedding</code> (IMASSemanticCluster
+    <code>description_embedding</code>), <code>identifier_schema_embedding</code>
+    (IdentifierSchema <code>embedding</code>),
+    <code>imas_node_embedding</code> (IMASNode <code>embedding</code>),
+    <code>ids_embedding</code> (IDS <code>embedding</code>) and
+    <code>wiki_chunk_embedding</code> (WikiChunk <code>embedding</code>) — so the
+    owner derives each one and the calls above reconcile the live index shape
+    rather than inventing a parallel one. The only registered filter is
+    <code>code_chunk_embedding: facility_id</code>, contributed by the
+    schema-section work; none of the five carry a filter.
+  </p>
+  <p id="vector-index-ddl-owner-check">
+    A source-scan test
+    (<code>tests/graph/test_vector_index_ddl_owner.py</code>) pins the property:
+    it walks every <code>.py</code> under the package and requires the only file
+    carrying a <code>CREATE VECTOR INDEX</code> string literal to be
+    <code>graph/client.py</code>, and it asserts each former site calls
+    <code>ensure_vector_indexes</code>. The scan is written over the parsed
+    module, so it matches a statement of <em>any</em> shape — a hand-written
+    copy that omits the <code>IF NOT EXISTS</code> clause, or the options block,
+    is caught just the same. The one exclusion is a docstring, identified by
+    being the first statement of a module, class or function, never by its
+    wording: prose that names the grammar is documentation, a string built for
+    the database is a composition of the DDL. That structural exclusion is what
+    the plan applies to <code>imas_codex/graph/AGENTS.md</code>. The docstrings
+    in <code>graph/schema.py</code> and <code>graph/vector_search.py</code>
+    still name the phrase in prose; they are documentation of the grammar, not a
+    copy of the DDL, and they remain outside this node's write scope. Under the
+    plan's literal form <code>rg 'CREATE VECTOR INDEX'</code> those two prose
+    hits remain, so the binding measure is the parsed-statement scan the test
+    performs.
+  </p>
+  <p id="vector-index-ddl-owner-live">
+    Against the live graph, <code>SHOW INDEXES</code> lists all five indexes
+    <code>ONLINE</code> as <code>VECTOR</code> with
+    <code>vector.dimensions = 256</code> unchanged:
+    <code>cluster_description_embedding</code>,
+    <code>identifier_schema_embedding</code>, <code>imas_node_embedding</code>,
+    <code>ids_embedding</code> and <code>wiki_chunk_embedding</code>.
+  </p>
+</section>

@@ -4685,22 +4685,9 @@ def _embed_cluster_text(
     dim = get_embedding_dimension()
     model_name = get_embedding_model()
 
-    # Ensure vector indexes exist
-    for index_name, prop_name in [
-        ("cluster_label_embedding", "label_embedding"),
-        ("cluster_description_embedding", "description_embedding"),
-    ]:
-        client.query(f"""
-            CREATE VECTOR INDEX {index_name} IF NOT EXISTS
-            FOR (n:IMASSemanticCluster) ON n.{prop_name}
-            OPTIONS {{
-                indexConfig: {{
-                    `vector.dimensions`: {dim},
-                    `vector.similarity_function`: 'cosine',
-                    `vector.quantization.enabled`: true
-                }}
-            }}
-        """)
+    # The vector index DDL is owned by GraphClient.ensure_vector_indexes, which
+    # derives the cluster label/description indexes from the schema.
+    client.ensure_vector_indexes()
 
     # Compute text hashes and filter to clusters needing re-embedding
     clusters_to_embed = []
