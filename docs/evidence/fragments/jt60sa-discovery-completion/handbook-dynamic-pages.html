@@ -54,6 +54,9 @@
     Applied to the live graph through the pipeline's own functions
     (<code>apply_dynamic_page_rule</code> for the handbook topics, then
     <code>link_chunks_to_entities("jt-60sa")</code>), not through hand Cypher.
+    The rule reads the linking page's stored chunk text rather than a fresh
+    fetch, because the JT-60SA wiki host is not reachable from the compute node
+    this ran on; the derivation is from the same markup the ingest stored.
     <code>CategoryInformation</code> now carries
     <code>fronts_database = ['EDDB', 'PMDB']</code> and
     <code>DataInformation</code> carries
