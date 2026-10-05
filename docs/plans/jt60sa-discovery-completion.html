@@ -26,7 +26,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac,7bd3714029e6b4629d76c7ef25dca9291476aa62,a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f,b47967a659fd7e631ce24e41a26cd47437afc19c,f10be0595b4528c88b7affb2e14c9af7126315a6,c120c1285846f28ce0d2d23abc2f6b141798bcca,c5a0b064e31c5dc753e9b768c11df98bdf797f0c,386d33e54dc2888363a5d2afa11633d48e43c43e,4a30fab9dd0235c395a2649c73fec2fb3ea4accd">
 <meta name="plan-impl" content="0.62">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -437,7 +437,10 @@
     <div class="r-comment-body"><p>review-of-embed-resolution-residue: run r-20261005T074717216467-embed-resolution-residue reviewed at base c120c1285846f28ce0d2d23abc2f6b141798bcca head c5a0b064e31c5dc753e9b768c11df98bdf797f0c is SOUND WITH FINDINGS (95/100 — goal_fidelity 19, evidence 19, scope_discipline 20, durability 18, fit 19); the graph client delegates its SLURM bolt discovery to remote.locations._service_url_for_slurm and graph/ carries no discover_compute_node_local/_resolve_compute_host call, the six retired readiness tests are removed with the different-nodes claim re-expressed, the reviewer reproduced the head arm (274 passed, 1 skipped, EXIT=0) and the red negative control (EXIT=1), and one follow-on is recorded (the leftover _slurm_service_uri duplication blocked by an out-of-scope pinning test).</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261005T084026008625-delete-graph-client-slurm-duplicate" data-who="reckon-build" data-when="2026-10-05T09:12:56.573Z">
-    <div class="r-comment-body"><p>Deleted the graph client&#x27;s SLURM duplicate (_slurm_service_uri + the SLURM branch of _resolve_graph_uri) so the profile layer is the only path to the compute-node bolt address; named gate tests/graph/test_client_address_resolution.py tests/remote tests/embeddings EXIT=0, 255 passed, 1 skipped at ca823b29b, rg condition empty, GraphClient().uri=bolt://98dci4-gpu-0002:7687 on 98dci4-clu-2018.</p></div>
+    <div class="r-comment-body"><p>Deleted the graph client's SLURM duplicate (_slurm_service_uri + the SLURM branch of _resolve_graph_uri) so the profile layer is the only path to the compute-node bolt address; named gate tests/graph/test_client_address_resolution.py tests/remote tests/embeddings EXIT=0, 255 passed, 1 skipped at ca823b29b, rg condition empty, GraphClient().uri=bolt://98dci4-gpu-0002:7687 on 98dci4-clu-2018.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261005T091323183650-review-of-delete-graph-client-slurm-duplicate" data-who="reckon-build" data-when="2026-10-05T09:21:56.413Z">
+    <div class="r-comment-body"><p>Independent review of r-20261005T084026008625-delete-graph-client-slurm-duplicate stored: SOUND WITH FINDINGS, total 109 over six dimensions (goal_fidelity 19, evidence 18, scope_discipline 18, durability 16, fit 18, reuse 20); two follow-on findings, no blocking; added_failure_count 0, added_failure_ids [] derived from the reviewed run&#x27;s own baseline_suite and after_suite gate logs (both EXIT=0, 0 failures); reviewed_base_sha c323401f933fc08cf81dfe30899a23825227dce1, reviewed_head_sha ca823b29b1bb1e47198c9e62dfeb7fb68c53296a.</p></div>
 </div>
 </section>
 </main>
