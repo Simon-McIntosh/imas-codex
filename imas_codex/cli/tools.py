@@ -54,7 +54,22 @@ def tools_list() -> None:
 @tools.command("status")
 @click.argument("target", default="local")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
-def tools_status(target: str, as_json: bool) -> None:
+@click.option(
+    "--python-command",
+    default=None,
+    help="Override the interpreter used to probe the remote environment.",
+)
+@click.option(
+    "--no-setup",
+    is_flag=True,
+    help="Probe the remote environment without the facility's setup commands.",
+)
+def tools_status(
+    target: str,
+    as_json: bool,
+    python_command: str | None,
+    no_setup: bool,
+) -> None:
     """Show complete environment status on a target.
 
     TARGET can be 'local' or a facility name (e.g., 'tcv', 'iter').
@@ -63,12 +78,15 @@ def tools_status(target: str, as_json: bool) -> None:
     - Fast CLI tools (rg, fd, git, gh, uv, etc.)
     - Python versions (system and uv-managed)
     - imas-codex venv status
+    - The facility's declared remote environment (interpreter floor and
+      required-module importability)
     - Recommended next action
 
     Examples:
         imas-codex tools status local
         imas-codex tools status tcv
         imas-codex tools status jet --json
+        imas-codex tools status jt-60sa --no-setup --python-command python3
     """
     import json as json_module
 
@@ -76,12 +94,29 @@ def tools_status(target: str, as_json: bool) -> None:
     from imas_codex.remote.tools import check_all_tools
 
     facility = None if target == "local" else target
+    setup_commands = [] if no_setup else None
 
     # Get tool status
-    tool_status = check_all_tools(facility=facility)
+    tool_status = check_all_tools(
+        facility=facility,
+        python_command=python_command,
+        setup_commands=setup_commands,
+    )
 
     # Get Python status
-    python_status = get_python_status(facility=facility)
+    python_status = get_python_status(
+        facility=facility,
+        python_command=python_command,
+        setup_commands=setup_commands,
+    )
+
+    environment = python_status.environment or {}
+    environment_ok = environment.get("declared") and python_status.meets_floor is True
+    if environment.get("declared"):
+        environment_ok = environment_ok and all(
+            m.get("importable", False) for m in environment.get("modules", [])
+        )
+        environment_ok = environment_ok and not environment.get("error")
 
     if as_json:
         data = {
@@ -102,12 +137,16 @@ def tools_status(target: str, as_json: bool) -> None:
                 if python_status.venv_python
                 else None,
             },
+            "environment": environment,
+            "environment_ok": bool(environment_ok),
             "ready": (
                 tool_status.get("required_ok", False)
                 and python_status.venv_python is not None
             ),
         }
         click.echo(json_module.dumps(data, indent=2))
+        if environment.get("declared") and not environment_ok:
+            raise SystemExit(1)
         return
 
     console.print(f"\n[bold]Environment Status: {target}[/bold]\n")
@@ -166,6 +205,44 @@ def tools_status(target: str, as_json: bool) -> None:
 
     console.print()
 
+    # === Remote Environment Section ===
+    console.print("[bold]Remote Environment[/bold]")
+    if not environment.get("declared"):
+        console.print("  [dim]not declared for this facility[/dim]")
+    else:
+        floor = environment.get("floor")
+        version = environment.get("python_version")
+        if environment.get("error"):
+            console.print(
+                f"  [red]✗[/red] interpreter: not probed [red](floor {floor})[/red]"
+            )
+            console.print(f"      [dim]{environment['error']}[/dim]")
+        elif python_status.meets_floor:
+            console.print(
+                f"  [green]✓[/green] interpreter: Python {version} (floor {floor})"
+            )
+        else:
+            console.print(
+                f"  [red]✗[/red] interpreter: Python {version} "
+                f"[red](below floor {floor})[/red]"
+            )
+
+        for module in environment.get("modules", []):
+            if module.get("importable"):
+                console.print(f"  [green]✓[/green] module {module.get('name')}")
+            else:
+                console.print(
+                    f"  [red]✗[/red] module {module.get('name')}: "
+                    f"[red]{module.get('error')}[/red]"
+                )
+
+        if environment.get("fix") and not environment_ok:
+            console.print("  [yellow]Fix:[/yellow]")
+            for command in environment["fix"]:
+                console.print(f"    [dim]{command}[/dim]")
+
+    console.print()
+
     # === Summary ===
     all_required_ok = tool_status.get("required_ok", False)
     venv_ready = python_status.venv_python is not None
@@ -184,6 +261,9 @@ def tools_status(target: str, as_json: bool) -> None:
             console.print("  [dim]venv not created[/dim]")
 
     console.print()
+
+    if environment.get("declared") and not environment_ok:
+        raise SystemExit(1)
 
 
 @tools.command("install")
