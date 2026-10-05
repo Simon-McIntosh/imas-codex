@@ -220,6 +220,126 @@ class TestTwikiMarkupToHtml:
         assert "code here" in html
 
 
+class TestDynamicPageDetector:
+    """A page that is only table headers and a search form is a dynamic table."""
+
+    HEADER_ONLY = (
+        "Category Information\n"
+        "## Category Information\n"
+        "| Category | Description | RO |\n"
+        "| --- | --- | --- |\n"
+        "\nSearch\nCategory\nDescription\nRO\n"
+    )
+
+    DATA_ROWS = (
+        "| DataName | PID No. | Unit |\n"
+        "| --- | --- | --- |\n"
+        "| psrc_magfluxlp1 | 1234A | mWb |\n"
+        "| psrc_magfluxlp2 | 1235A | mWb |\n"
+    )
+
+    def test_header_only_form_is_dynamic(self):
+        from imas_codex.discovery.wiki.pipeline import detect_dynamic_page
+
+        assert detect_dynamic_page(self.HEADER_ONLY, ["EDDB"]) is True
+
+    def test_header_only_without_database_is_not_dynamic(self):
+        from imas_codex.discovery.wiki.pipeline import detect_dynamic_page
+
+        # Nothing to name in the stub and nothing to link, so the page is left
+        # as it is rather than stubbed with an unnamed database.
+        assert detect_dynamic_page(self.HEADER_ONLY, []) is False
+
+    def test_table_with_data_rows_is_not_dynamic(self):
+        from imas_codex.discovery.wiki.pipeline import detect_dynamic_page
+
+        assert detect_dynamic_page(self.DATA_ROWS, ["EDDB"]) is False
+
+
+class TestDynamicPageStub:
+    """The stub names the database(s) the page is rendered from."""
+
+    def test_single_database(self):
+        from imas_codex.discovery.wiki.pipeline import dynamic_page_stub
+
+        assert dynamic_page_stub(["EDDB"]) == (
+            "Dynamic table rendered from the EDDB catalogue; "
+            "the rows are the FacilitySignals linked to this page."
+        )
+
+    def test_multiple_databases(self):
+        from imas_codex.discovery.wiki.pipeline import dynamic_page_stub
+
+        assert dynamic_page_stub(["PMDB", "EDDB"]) == (
+            "Dynamic table rendered from the EDDB and PMDB catalogues; "
+            "the rows are the FacilitySignals linked to this page."
+        )
+
+
+class TestExtractDatabaseLinks:
+    """The ?db= parameters of the links that reach a topic name its database."""
+
+    def test_handbook_links(self):
+        from imas_codex.discovery.wiki.pipeline import extract_database_links
+
+        text = (
+            "| [[CategoryInformation?db=EDDB][Experiment database (EDDB)]] |\n"
+            "| [[DataInformation?db=UDDB][Unprocessed database (UDDB)]] |\n"
+            "| [[CategoryInformation?db=PMDB][Plant database (PMDB)]] |\n"
+        )
+        assert extract_database_links(text) == {
+            "CategoryInformation": ["EDDB", "PMDB"],
+            "DataInformation": ["UDDB"],
+        }
+
+    def test_link_without_parameter_ignored(self):
+        from imas_codex.discovery.wiki.pipeline import extract_database_links
+
+        assert extract_database_links("[[SomeTopic][A topic without a database]]") == {}
+
+
+class TestLinkChunksToEntitiesDatabaseMerge:
+    """The fourth DOCUMENTS merge is keyed on fronts_database via the source map."""
+
+    def test_database_merge_emitted_with_source_map(self):
+        from unittest.mock import MagicMock, patch
+
+        from imas_codex.discovery.wiki import pipeline as pl
+
+        gc = MagicMock()
+        gc.query.return_value = [{"linked": 7}]
+        with patch.object(pl, "GraphClient") as gc_cls:
+            gc_cls.return_value.__enter__.return_value = gc
+            stats = pl.link_chunks_to_entities("jt-60sa")
+
+        db_calls = [
+            call
+            for call in gc.query.call_args_list
+            if "fronts_database" in call.args[0]
+        ]
+        assert len(db_calls) == 1
+        query = db_calls[0].args[0]
+        assert "DOCUMENTS" in query
+        assert "WHERE p.fronts_database IS NOT NULL" in query
+        assert db_calls[0].kwargs["database_sources"] == {"EDDB": "edas"}
+        assert stats["database_signals_linked"] == 7
+
+    def test_database_merge_absent_from_scope_without_fronts(self):
+        from unittest.mock import MagicMock, patch
+
+        from imas_codex.discovery.wiki import pipeline as pl
+
+        # A page with no fronts_database cannot produce the database merge: the
+        # query's own guard is the filter, so it is emitted but matches nothing.
+        gc = MagicMock()
+        gc.query.return_value = [{"linked": 0}]
+        with patch.object(pl, "GraphClient") as gc_cls:
+            gc_cls.return_value.__enter__.return_value = gc
+            stats = pl.link_chunks_to_entities("jt-60sa")
+
+        assert stats["database_signals_linked"] == 0
+
+
 class TestPipelineInit:
     """Tests for pipeline initialization."""
 

@@ -3698,6 +3698,15 @@ classes:
       chunk_count:
         description: Number of WikiChunk nodes created from this page
         range: integer
+      fronts_database:
+        description: >-
+          Databases whose CGI-rendered table this page fronts. Set when a page's
+          extracted text is only table headers and a search form — a dynamic page
+          a plugin fills from a catalogue at render time — instead of page
+          content. The page keeps status 'ingested' so its chunk can carry
+          DOCUMENTS edges to the catalogue's FacilitySignals. E.g. ["EDDB"] for
+          the EDDB category table.
+        multivalued: true
       error:
         description: Error message if status is failed
 
