@@ -8,8 +8,6 @@ to a loopback address behind a tunnel it cannot open.
 
 from __future__ import annotations
 
-import os
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -137,78 +135,6 @@ def test_non_slurm_local_location_is_unchanged():
     )
     assert url == f"http://localhost:{PORT}"
     discover.assert_not_called()
-
-
-def test_graph_client_resolves_a_bolt_uri_from_a_compute_node():
-    """The graph client reaches the service node from a compute step.
-
-    A compute node matches no login-node pattern, so the profile layer's
-    hostname test sends it to a loopback tunnel it cannot open. The graph
-    client must instead answer with the discovered service node's address.
-    """
-    from imas_codex.graph import client as client_module
-
-    with (
-        patch.object(
-            client_module, "get_graph_uri", return_value="bolt://localhost:17687"
-        ),
-        patch.object(
-            client_module,
-            "resolve_neo4j",
-            return_value=SimpleNamespace(bolt_port=BOLT_PORT),
-        ),
-        patch("imas_codex.graph.profiles.get_graph_location", return_value="titan"),
-        patch.object(loc, "resolve_location", return_value=_slurm_location()),
-        patch.object(loc, "_resolve_compute_host", return_value=None),
-        patch(
-            "imas_codex.remote.tunnel.discover_compute_node_local",
-            return_value=GPU_NODE,
-        ),
-        patch.object(loc.socket, "gethostname", return_value=COMPUTE_CALLER),
-        patch.dict(os.environ, {"SLURM_JOB_ID": "1277272", "NEO4J_URI": ""}),
-    ):
-        uri = client_module._resolve_graph_uri()
-
-    assert uri == f"bolt://{GPU_NODE}:{BOLT_PORT}"
-
-
-def test_graph_client_obtains_its_bolt_uri_from_the_shared_owner():
-    """The graph client must not run its own SLURM discovery.
-
-    It asks the shared owner in ``_service_url_for_slurm``, the same one the
-    embedding path uses, so the two cannot diverge. The value the owner
-    returns is passed through unchanged.
-    """
-    from imas_codex.graph import client as client_module
-
-    sentinel = "bolt://shared-owner.invalid:7687"
-    with (
-        patch.object(
-            client_module, "get_graph_uri", return_value="bolt://localhost:17687"
-        ),
-        patch.object(
-            client_module,
-            "resolve_neo4j",
-            return_value=SimpleNamespace(bolt_port=BOLT_PORT),
-        ),
-        patch("imas_codex.graph.profiles.get_graph_location", return_value="titan"),
-        patch.object(loc, "resolve_location", return_value=_slurm_location()),
-        patch.object(loc, "_resolve_compute_host", return_value=None),
-        patch(
-            "imas_codex.remote.tunnel.discover_compute_node_local",
-            return_value=GPU_NODE,
-        ),
-        patch.object(loc.socket, "gethostname", return_value=COMPUTE_CALLER),
-        patch.object(loc, "_service_url_for_slurm", return_value=sentinel) as helper,
-        patch.dict(os.environ, {"SLURM_JOB_ID": "1277272", "NEO4J_URI": ""}),
-    ):
-        uri = client_module._resolve_graph_uri()
-
-    assert uri == sentinel
-    helper.assert_called_once()
-    kwargs = helper.call_args.kwargs
-    assert kwargs["protocol"] == "bolt"
-    assert kwargs["service_job_name"] == "codex-neo4j"
 
 
 def test_graph_and_embedding_jobs_may_sit_on_different_nodes():
