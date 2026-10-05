@@ -154,3 +154,70 @@ class TestEdasCheckReadsSlot:
         sent = captured["payload"]["signals"][0]
         assert sent["data_class"] == "O"
         assert results[0]["valid"] is True
+
+
+class TestEdasCheckReadsCategoryFromSourcePath:
+    """check() keys the catalogue off data_source_path, not a rewritten name."""
+
+    async def test_enriched_name_still_sends_source_path_category(self):
+        scanner = EDASScanner()
+        # Enrichment replaced name with a human-readable label; the catalogue
+        # path survives on data_source_path.
+        signal = FacilitySignal(
+            id="jt-60sa:general/edas_plasma_current",
+            facility_id="jt-60sa",
+            accessor="eddbreadTime('E101173', 'PSRC', 'calIp', '0', '0.01')",
+            name="Plasma Current (Ip)",
+            data_source_path="PSRC/calIp",
+            data_class=SignalDataClass.time_series,
+        )
+
+        captured: dict = {}
+
+        async def fake_run(script, payload, **kwargs):
+            captured["payload"] = payload
+            return json.dumps(
+                {"results": [{"id": signal.id, "success": True, "dtype": "f8"}]}
+            )
+
+        with patch("imas_codex.remote.executor.async_run_python_script", fake_run):
+            await scanner.check(
+                facility="jt-60sa",
+                ssh_host="nakasvr26",
+                signals=[signal],
+                config=CONFIG,
+            )
+
+        sent = captured["payload"]["signals"][0]
+        assert sent["category"] == "PSRC"
+        assert sent["data_name"] == "calIp"
+
+    async def test_name_fallback_when_source_path_absent(self):
+        scanner = EDASScanner()
+        signal = FacilitySignal(
+            id="jt-60sa:general/edas_status",
+            facility_id="jt-60sa",
+            accessor="eddbreadOne('E101173', 'MDAC', 'Status', None, 0, 0)",
+            name="MDAC/Status",
+            data_class=SignalDataClass.one_point,
+        )
+
+        captured: dict = {}
+
+        async def fake_run(script, payload, **kwargs):
+            captured["payload"] = payload
+            return json.dumps(
+                {"results": [{"id": signal.id, "success": True, "dtype": "f8"}]}
+            )
+
+        with patch("imas_codex.remote.executor.async_run_python_script", fake_run):
+            await scanner.check(
+                facility="jt-60sa",
+                ssh_host="nakasvr26",
+                signals=[signal],
+                config=CONFIG,
+            )
+
+        sent = captured["payload"]["signals"][0]
+        assert sent["category"] == "MDAC"
+        assert sent["data_name"] == "Status"
