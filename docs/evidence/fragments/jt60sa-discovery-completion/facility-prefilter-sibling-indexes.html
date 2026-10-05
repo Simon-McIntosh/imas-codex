@@ -19,13 +19,20 @@
     <code>3072c2f07</code>.
   </p>
   <p id="facility-prefilter-sibling-indexes-overfetch">
-    The over-fetch the in-index filter made unnecessary is retired.
-    <code>_vector_search_signals</code> and <code>_vector_search_wiki_chunks</code>
-    passed <code>k = max(k * 2, 50)</code> as the ANN limit behind a post-filter
-    facility predicate; both now pass the requested <code>k</code>. The
+    The over-fetch is retired only where the facility predicate was the sole
+    post-filter. <code>_vector_search_signals</code> and
+    <code>_vector_search_wiki_chunks</code> passed
+    <code>k = max(k * 2, 50)</code> as the ANN limit to compensate for the
+    post-cut facility filter. Moving that filter inside <code>SEARCH</code>
+    makes the widened cut unnecessary when it is the only filter, but the
     <code>diagnostic</code> and <code>physics_domain</code> signal predicates,
-    and the wiki site/domain/score predicates, stay as post-filters over the
-    returned rows, since their properties are not on the index.
+    and the wiki site/domain/score predicates, still discard rows after the
+    cut because their properties are not on the index. Each search therefore
+    widens the cut to <code>max(k*2, 50)</code> exactly when one of those
+    post-filters is present, and passes the requested <code>k</code> when the
+    facility pre-filter is alone. The tests assert both arms: the widened cut
+    survives beside a non-facility post-filter, and is absent without one.
+    Commit: <code>16d1948fa</code>.
   </p>
   <p id="facility-prefilter-sibling-indexes-rebuild">
     The three live indexes were rebuilt through the owner's option-mismatch path
@@ -72,8 +79,8 @@
   <p id="facility-prefilter-sibling-indexes-gate">
     <code>pytest tests/search tests/llm tests/graph/test_schema_context.py
     tests/graph/test_vector_search.py tests/graph/test_domain_queries.py</code>
-    → <strong>730 passed, 10 skipped, 66 deselected</strong>, exit 0 at
-    <code>34c7f90c1</code> (base <code>b5c36b0a2</code> → 684 passed, 10
+    → <strong>732 passed, 10 skipped, 66 deselected</strong>, exit 0 at
+    <code>16d1948fa</code> (base <code>b5c36b0a2</code> → 684 passed, 10
     skipped, exit 0; the added tests are the in-SEARCH predicate,
     no-over-fetch and narrowed-except cases across the signal, wiki-chunk,
     code-example, domain-signal, domain-wiki and find_code searches). The
@@ -83,6 +90,8 @@
     domain signal predicate as a post-filter
     (<code>TestFindSignals::test_facility_predicate_inside_search</code>), and
     the find_code predicate as a post-filter
-    (<code>TestFindCode::test_facility_predicate_inside_search</code>).
+    (<code>TestFindCode::test_facility_predicate_inside_search</code>), and
+    the ANN cut left unwidened beside a domain post-filter
+    (<code>TestSearchSignals::test_overfetch_survives_non_facility_postfilter</code>).
   </p>
 </section>
