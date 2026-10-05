@@ -1,0 +1,5069 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5210957,
+      "input_tokens_cumulative": 5210957,
+      "output_tokens": 14929,
+      "output_tokens_cumulative": 14929,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 451,
+    "files": 7,
+    "removed": 138
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 3218,
+        "name": "enrich_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 3858
+    },
+    {
+      "existing_function": {
+        "line": 605,
+        "name": "test_static_signal_gets_all_version_check_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4588,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4634
+    },
+    {
+      "existing_function": {
+        "line": 651,
+        "name": "test_subtree_signal_gets_connection_tree_shots",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4588,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4634
+    },
+    {
+      "existing_function": {
+        "line": 687,
+        "name": "test_tdi_function_gets_reference_shot_only",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 4588,
+        "name": "check_worker",
+        "path": "imas_codex/discovery/signals/parallel.py"
+      },
+      "window_line": 4634
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "_declared",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 24
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "quiet_python",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 41
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 202,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 47
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 80,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 81
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 80,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 81
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 100,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 101
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 100,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 101
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 100,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 106
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 125,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 126
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 125,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 126
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_status_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 125,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 160,
+        "name": "test_status_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 165
+    },
+    {
+      "existing_function": {
+        "line": 247,
+        "name": "test_signed_archive_reconstruction_creates_allowlisted_counterparts",
+        "path": "tests/standard_names/test_archive_reconstruction.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "test_discover_preflight_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 190
+    },
+    {
+      "existing_function": {
+        "line": 594,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "test_discover_preflight_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 190
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "test_discover_preflight_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 191
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_public_refresh_restamps_raw_convergence_without_steering",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "test_discover_preflight_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 191
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_duplicate_requested_ids_are_reconciled_once",
+        "path": "tests/standard_names/test_structural_edge_reconcile_graph.py"
+      },
+      "run_function": {
+        "line": 179,
+        "name": "test_discover_preflight_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 191
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_declared_below_floor_interpreter_is_refused",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 202,
+        "name": "test_install_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 279,
+        "name": "pending_fn",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 107,
+        "name": "_mock_claim_version",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 114
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "test_seed_dynamic_tree_with_reference_shot",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 270,
+        "name": "test_seed_static_versions",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 272
+    },
+    {
+      "existing_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 270,
+        "name": "test_seed_static_versions",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 274
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_mdsplus_branch_routes_through_persist_data_access",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 270,
+        "name": "test_seed_static_versions",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 272
+    },
+    {
+      "existing_function": {
+        "line": 270,
+        "name": "test_seed_static_versions",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 320,
+        "name": "test_seed_dynamic_tree_with_reference_shot",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 322
+    },
+    {
+      "existing_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 320,
+        "name": "test_seed_dynamic_tree_with_reference_shot",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 324
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_mdsplus_branch_routes_through_persist_data_access",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 320,
+        "name": "test_seed_dynamic_tree_with_reference_shot",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 322
+    },
+    {
+      "existing_function": {
+        "line": 270,
+        "name": "test_seed_static_versions",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "test_seed_dynamic_tree_with_reference_shot",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_data_access_written_without_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 384
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_images_persisted_to_graph",
+        "path": "tests/wiki/test_workers.py"
+      },
+      "run_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 452
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_unfetchable_images_become_failed_nodes",
+        "path": "tests/wiki/test_workers.py"
+      },
+      "run_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 452
+    },
+    {
+      "existing_function": {
+        "line": 424,
+        "name": "test_successful_ingestion",
+        "path": "tests/wiki/test_workers.py"
+      },
+      "run_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 452
+    },
+    {
+      "existing_function": {
+        "line": 516,
+        "name": "test_successful_persistence",
+        "path": "tests/wiki/test_workers.py"
+      },
+      "run_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 452
+    },
+    {
+      "existing_function": {
+        "line": 365,
+        "name": "test_data_access_written_before_signal_ingest",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 467,
+        "name": "test_data_access_written_without_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 479
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_mdsplus_branch_routes_through_persist_data_access",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 467,
+        "name": "test_data_access_written_without_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 506
+    },
+    {
+      "existing_function": {
+        "line": 270,
+        "name": "test_seed_static_versions",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 535,
+        "name": "test_mdsplus_branch_routes_through_persist_data_access",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 541
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "test_seed_dynamic_tree_with_reference_shot",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 535,
+        "name": "test_mdsplus_branch_routes_through_persist_data_access",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 541
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_data_access_written_without_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 535,
+        "name": "test_mdsplus_branch_routes_through_persist_data_access",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 543
+    },
+    {
+      "existing_function": {
+        "line": 464,
+        "name": "test_cycle2_reservation_refused_defers",
+        "path": "tests/standard_names/test_rd_quorum_integrity.py"
+      },
+      "run_function": {
+        "line": 535,
+        "name": "test_mdsplus_branch_routes_through_persist_data_access",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 551
+    },
+    {
+      "existing_function": {
+        "line": 707,
+        "name": "test_parse_limiter_file_with_segment_header",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_real_world_compose_error_pattern",
+        "path": "tests/discovery/test_llm_kwargs.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "temp_log_dir",
+        "path": "tests/discovery/test_logging_utils.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_cluster_labels_unique_within_scope",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 798,
+        "name": "test_cluster_path_counts_match_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 884,
+        "name": "test_cluster_embedding_dimensions_consistent",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 942,
+        "name": "test_cocos_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 975,
+        "name": "test_physics_clusters_have_members",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 146,
+        "name": "test_load_recovery_map_reads_sources_from_a_git_ref",
+        "path": "tests/standard_names/test_provenance_rebuild.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_isn_invalid_operator_token_is_terminal",
+        "path": "tests/standard_names/test_refine_failure_classification.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "catalog_root",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "additive_repo",
+        "path": "tests/standard_names/test_sn_approve_tag.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 348,
+        "name": "test_set_ssh_hostname_roundtrip",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_meta_field_empty_body",
+        "path": "tests/wiki/test_pipeline.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_full_page",
+        "path": "tests/wiki/test_twiki_raw_adapter.py"
+      },
+      "run_function": {
+        "line": 618,
+        "name": "test_scan_flags_a_second_merge",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 621
+    },
+    {
+      "existing_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 636,
+        "name": "test_epoch_detects_dynamic_tree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 640
+    },
+    {
+      "existing_function": {
+        "line": 755,
+        "name": "test_epoch_skips_static_trees",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 636,
+        "name": "test_epoch_detects_dynamic_tree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 640
+    },
+    {
+      "existing_function": {
+        "line": 783,
+        "name": "test_epoch_skips_non_mdsplus",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 636,
+        "name": "test_epoch_detects_dynamic_tree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 638
+    },
+    {
+      "existing_function": {
+        "line": 636,
+        "name": "test_epoch_detects_dynamic_tree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 708
+    },
+    {
+      "existing_function": {
+        "line": 755,
+        "name": "test_epoch_skips_static_trees",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 704
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_refine_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_similarity_gate_persists_only_the_measured_dimension",
+        "path": "tests/standard_names/test_gate_verdict_provenance.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_worker_uses_language_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_review_names_processes_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 494,
+        "name": "test_review_docs_independent_from_names",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 837,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 833,
+        "name": "test_worker_uses_canonical_model",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_valid_status_still_calls_llm",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 732
+    },
+    {
+      "existing_function": {
+        "line": 636,
+        "name": "test_epoch_detects_dynamic_tree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 755,
+        "name": "test_epoch_skips_static_trees",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 769
+    },
+    {
+      "existing_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 755,
+        "name": "test_epoch_skips_static_trees",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 765
+    },
+    {
+      "existing_function": {
+        "line": 636,
+        "name": "test_epoch_detects_dynamic_tree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 783,
+        "name": "test_epoch_skips_non_mdsplus",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 785
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 783,
+        "name": "test_epoch_skips_non_mdsplus",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 787
+    },
+    {
+      "existing_function": {
+        "line": 891,
+        "name": "test_promote_creates_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 783,
+        "name": "test_epoch_skips_non_mdsplus",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 787
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "_patch_sn_status",
+        "path": "tests/cli/test_sn_status_cli.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 54,
+        "name": "test_extraction_returned_error_calls_mark_failed",
+        "path": "tests/discovery/test_mdsplus_worker_errors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 862
+    },
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "test_ssh_exception_calls_release_claim",
+        "path": "tests/discovery/test_mdsplus_worker_errors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 862
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_successful_extraction_marks_extracted",
+        "path": "tests/discovery/test_mdsplus_worker_errors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 862
+    },
+    {
+      "existing_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 783,
+        "name": "test_epoch_skips_non_mdsplus",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 810
+    },
+    {
+      "existing_function": {
+        "line": 891,
+        "name": "test_promote_creates_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 810
+    },
+    {
+      "existing_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 1499,
+        "name": "test_score_with_reviewer_docs_target",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 870
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_refine_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_builds_plan_without_catalog_audit",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 280,
+        "name": "test_worker_enriches_parent_with_children",
+        "path": "tests/standard_names/test_enrich_parents.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 870
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_similarity_gate_persists_only_the_measured_dimension",
+        "path": "tests/standard_names/test_gate_verdict_provenance.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_worker_uses_language_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 236,
+        "name": "test_compose_domain_context_from_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 321,
+        "name": "test_compose_stop_event_short_circuits",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_review_names_processes_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 870
+    },
+    {
+      "existing_function": {
+        "line": 494,
+        "name": "test_review_docs_independent_from_names",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 870
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_batch_processor_releases_claims_on_exception",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 870
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 870
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "_patch_compose_deps",
+        "path": "tests/standard_names/test_pool_compose_retry.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "test_reconcile_runs_before_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "test_restart_clears_stale_claims",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 421,
+        "name": "test_finalize_interrupted_on_stop_event",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 521,
+        "name": "test_finalize_completed_on_natural_drain",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "test_create_sn_run_open_receives_invocation",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "_worker_dependencies",
+        "path": "tests/standard_names/test_refine_scope_continuity.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 837,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 833,
+        "name": "test_worker_uses_canonical_model",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_valid_status_still_calls_llm",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "_patch_compose_deps",
+        "path": "tests/standard_names/test_self_refine.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "test_write_sweeps_only_its_unowned_placeholder_endpoints",
+        "path": "tests/standard_names/test_skeleton_placeholder_cleanup_graph.py"
+      },
+      "run_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 871
+    },
+    {
+      "existing_function": {
+        "line": 783,
+        "name": "test_epoch_skips_non_mdsplus",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 891,
+        "name": "test_promote_creates_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 895
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 891,
+        "name": "test_promote_creates_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 895
+    },
+    {
+      "existing_function": {
+        "line": 292,
+        "name": "test_finalize_batch_carries_exact_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 891,
+        "name": "test_promote_creates_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 927
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_len_1_models_single_review",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 891,
+        "name": "test_promote_creates_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 927
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "test_blind_cycle_1_no_primary_context",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 891,
+        "name": "test_promote_creates_signals",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 927
+    },
+    {
+      "existing_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1024
+    },
+    {
+      "existing_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1024
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_review_name_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1031
+    },
+    {
+      "existing_function": {
+        "line": 224,
+        "name": "test_review_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1031
+    },
+    {
+      "existing_function": {
+        "line": 699,
+        "name": "test_inadmissible_accepted_derived_parent_is_deleted",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1031
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_similarity_gate_persists_only_the_measured_dimension",
+        "path": "tests/standard_names/test_gate_verdict_provenance.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_review_names_processes_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1031
+    },
+    {
+      "existing_function": {
+        "line": 494,
+        "name": "test_review_docs_independent_from_names",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1031
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1031
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1031
+    },
+    {
+      "existing_function": {
+        "line": 797,
+        "name": "test_failed_release_keeps_drafted",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 837,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 833,
+        "name": "test_worker_uses_canonical_model",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 935,
+        "name": "test_failed_release_reverts_drafted",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 981,
+        "name": "test_quarantined_skips_llm_and_persists_zero_score",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_valid_status_still_calls_llm",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1032
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1010
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1012
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1012
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1014
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1013
+    },
+    {
+      "existing_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1059,
+        "name": "_build_patches",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1067
+    },
+    {
+      "existing_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1266
+    },
+    {
+      "existing_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1265
+    },
+    {
+      "existing_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1265
+    },
+    {
+      "existing_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1270
+    },
+    {
+      "existing_function": {
+        "line": 1059,
+        "name": "_build_patches",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1338
+    },
+    {
+      "existing_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1383
+    },
+    {
+      "existing_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1383
+    },
+    {
+      "existing_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1383
+    },
+    {
+      "existing_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1394
+    },
+    {
+      "existing_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1553
+    },
+    {
+      "existing_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1554
+    },
+    {
+      "existing_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1553
+    },
+    {
+      "existing_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1558
+    },
+    {
+      "existing_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1584
+    },
+    {
+      "existing_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1585
+    },
+    {
+      "existing_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1584
+    },
+    {
+      "existing_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1589
+    },
+    {
+      "existing_function": {
+        "line": 1258,
+        "name": "test_discover_only_static_and_dynamic",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1628
+    },
+    {
+      "existing_function": {
+        "line": 1312,
+        "name": "test_discover_only_static_trees_only",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1637
+    },
+    {
+      "existing_function": {
+        "line": 1546,
+        "name": "test_signal_counts_50_paths",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1628
+    },
+    {
+      "existing_function": {
+        "line": 1580,
+        "name": "test_deadline_stops_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1610,
+        "name": "test_stop_event_triggers_shutdown",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1628
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_schedule_dry_run_prints_login_node_units",
+        "path": "tests/cli/test_graph_offsite_push.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "test_cli_help",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1662
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "test_schedule_dry_run_prints_units_without_writing_or_systemctl",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "test_cli_help",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1662
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_release_refine_claim_help_describes_fenced_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "test_cli_help",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1662
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "test_help_works_without_graph",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "test_cli_help",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1662
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_reset_to_drafted_dry_run",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1677
+    },
+    {
+      "existing_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1684
+    },
+    {
+      "existing_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1676
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_refine_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_similarity_gate_persists_only_the_measured_dimension",
+        "path": "tests/standard_names/test_gate_verdict_provenance.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_worker_uses_language_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_review_names_processes_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 494,
+        "name": "test_review_docs_independent_from_names",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 837,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 833,
+        "name": "test_worker_uses_canonical_model",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_valid_status_still_calls_llm",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1680
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_reset_to_drafted_dry_run",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1725
+    },
+    {
+      "existing_function": {
+        "line": 681,
+        "name": "test_epoch_seeds_per_subtree",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_extract_claims_and_processes",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 1003,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1732
+    },
+    {
+      "existing_function": {
+        "line": 1669,
+        "name": "test_cli_unknown_scanner_exits",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1724
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_refine_docs_releases_lease_on_happy_path",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "test_similarity_gate_persists_only_the_measured_dimension",
+        "path": "tests/standard_names/test_gate_verdict_provenance.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_worker_uses_language_model",
+        "path": "tests/standard_names/test_generate_docs.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 399,
+        "name": "test_review_names_processes_batch",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 494,
+        "name": "test_review_docs_independent_from_names",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 733,
+        "name": "test_review_name_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 791,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_deferred_quorum_releases_and_skips_persist",
+        "path": "tests/standard_names/test_rd_quorum_integrity.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1740
+    },
+    {
+      "existing_function": {
+        "line": 837,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_docs_stages.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 833,
+        "name": "test_worker_uses_canonical_model",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 881,
+        "name": "test_worker_streams_per_item",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_valid_status_still_calls_llm",
+        "path": "tests/standard_names/test_review_name_stages.py"
+      },
+      "run_function": {
+        "line": 1700,
+        "name": "test_cli_scan_only_invokes_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1728
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 1010,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1710
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1712
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1712
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1717
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1710,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1713
+    },
+    {
+      "existing_function": {
+        "line": 1829,
+        "name": "test_detect_groups_below_threshold",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1793,
+        "name": "test_detect_signal_sources",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1808
+    },
+    {
+      "existing_function": {
+        "line": 1793,
+        "name": "test_detect_signal_sources",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1829,
+        "name": "test_detect_groups_below_threshold",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "window_line": 1843
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_declared",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 27,
+        "name": "_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 34
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "quiet_python",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 51
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_adds_module_path_before_import",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "test_reports_version_and_names_unimportable_module",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 68
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "test_reports_version_and_names_unimportable_module",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 87,
+        "name": "test_adds_module_path_before_import",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 92
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 168,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 168,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 185
+    },
+    {
+      "existing_function": {
+        "line": 202,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 168,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 169
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 202,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 202,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "test_no_block_leaves_floor_unset",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 202,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 219
+    },
+    {
+      "existing_function": {
+        "line": 202,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 260,
+        "name": "test_no_block_leaves_floor_unset",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 264
+    },
+    {
+      "existing_function": {
+        "line": 202,
+        "name": "test_install_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 283,
+        "name": "test_declared_below_floor_interpreter_is_refused",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 285
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "90cfdb5a216ee8deddc93b859bcd2615db144509",
+    "d3643e2db7036d94baadf3fd42d598f316fcbd9c",
+    "e14edf6d231f40c96493200a833a30f8acdce5a3"
+  ],
+  "completed_at": "2026-10-05T12:34:17.978Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-05T11:27:59Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/remote",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "discovery/mdsplus/graph_ops.py",
+    "discovery/code/graph_ops.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/remote tests/cli/test_tools_status_environment.py tests/discovery/test_signals_pipeline.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112754675095-one-probe-one-writer/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.67,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-05T12:27:55.215259+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-05T11:27:55Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 28,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 11,
+    "mean_context": 160000,
+    "observed_at": "2026-10-05T11:27:27Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 28,
+      "aggregate_tokens_per_second": 129.925,
+      "detail": "",
+      "mean_tokens_per_second": 108.271,
+      "observed_at": "2026-10-05T11:27:27Z",
+      "runs": 1.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-05T12:34:17.978Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112754675095-one-probe-one-writer/manifest.md",
+  "member": "disposable-r-20261005T112754675095-one-probe-one-writer",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/cli/test_tools_status_environment.py::test_status_probes_the_environment_once"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/cli/test_tools_status_environment.py::test_status_probes_the_environment_once"
+    ],
+    "declaration": "restore the second probe in get_python_status: the one-probe-per-invocation count test fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112754675095-one-probe-one-writer/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112754675095-one-probe-one-writer/negative-control.log",
+    "test_paths": [
+      "tests/cli/test_tools_status_environment.py",
+      "tests/discovery/test_signals_pipeline.py",
+      "tests/remote"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "one-probe-one-writer",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 511,
+          "cached_input_tokens": 508663,
+          "input_tokens": 509206,
+          "output_tokens": 913,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 510119,
+          "uncached_input_tokens": 32
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "a test counts exactly one probe_remote_environment call across a tools status run and one across a discover preflight; rg 'MERGE \\(.*:DataAccess' imas_codex/discovery/signals/parallel.py finds exactly one statement inside persist_data_access; a test passes a ScanResult with data_access and no signals through seed_worker and asserts the node is written; a test asserts the MDSplus branch calls persist_data_access; the DataAccess-before-ingest ordering test still passes; pytest tests/remote tests/cli/test_tools_status_environment.py tests/discovery/test_signals_pipeline.py exits 0 (base at 8736d628d)",
+    "estimated_hours": null,
+    "goal": "tools status probes the remote environment once and feeds both renderers, and one persist_data_access function is the only DataAccess MERGE in signals discovery, reachable from the non-MDSplus branch with zero signals and from the bespoke MDSplus branch",
+    "id": "one-probe-one-writer",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-05T11:27:55Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 28,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 11,
+      "mean_context": 160000,
+      "observed_at": "2026-10-05T11:27:27Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 28,
+        "aggregate_tokens_per_second": 129.925,
+        "detail": "",
+        "mean_tokens_per_second": 108.271,
+        "observed_at": "2026-10-05T11:27:27Z",
+        "runs": 1.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112754675095-one-probe-one-writer/manifest.md",
+    "negative_control": "restore the second probe in get_python_status: the one-probe-per-invocation count test fails",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§9",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/remote/tools.py",
+      "imas_codex/remote/python.py",
+      "imas_codex/cli/tools.py",
+      "imas_codex/cli/discover/common.py",
+      "imas_codex/discovery/signals/parallel.py",
+      "tests/remote",
+      "tests/cli/test_tools_status_environment.py",
+      "tests/discovery/test_signals_pipeline.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/one-probe-one-writer.html",
+      "docs/figures/jt60sa-discovery-completion/one-probe-one-writer"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1974089.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "one-probe-one-writer",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-05T11:27:56.614183+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.73,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 466.493,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 704.61,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 43
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": null,
+        "burn_multiple": 1.5115241863634201,
+        "congestion": null,
+        "days_to_reset": 4.406589826956019,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.407535655437996,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 56.00000000000001,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": null,
+        "burn_multiple": 1.5115241863634201,
+        "congestion": null,
+        "days_to_reset": 4.406589826956019,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.407535655437996,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 56.00000000000001,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": null,
+        "burn_multiple": 1.5115241863634201,
+        "congestion": null,
+        "days_to_reset": 4.406589826956019,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.407535655437996,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 56.00000000000001,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.77,
+      "codex": 0.15000000000000002,
+      "codex-astra": 0.01,
+      "codex-luna": 0.01,
+      "hold": 0.06
+    },
+    "rendered_token_estimate": 1123,
+    "usage": {
+      "cost": 0.000139062,
+      "input_tokens": 3311,
+      "output_tokens": 89
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.67,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "e14edf6d231f40c96493200a833a30f8acdce5a3",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "d3643e2db7036d94baadf3fd42d598f316fcbd9c",
+    "reviewed_head_sha": "e14edf6d231f40c96493200a833a30f8acdce5a3",
+    "scores": {
+      "durability": 19,
+      "evidence": 20,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 119
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261005T112754675095-one-probe-one-writer",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§9",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "52dbab40-dbec-45f6-8cc0-3e3de37d31d2",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 13,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 25897134,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 546.116,
+    "generated_tokens": 107246,
+    "generation_seconds": 315.644,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.3,
+    "machine_seconds": 230.472,
+    "peak_input_tokens": 177844,
+    "tokens_per_second": 339.77,
+    "wall_tokens_per_second": 196.38
+  },
+  "time_budget": "60m",
+  "tool_steps": 95.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: JT-60SA target nakasvr26.iferc.org:22 unreachable from this node from 10:46Z onward — kex_exchange_identification: Connection closed by remote host; then Connection timed out during banner exchange across 6 backoff probes (13 min). From the jump host ping shows 100% packet loss and TCP/22 does not complete; an alternate route (98dci4-srv-1003 -> nakasvr26) also times out. Jump hosts laptop (FR-IWL-MCINTOS1) and 98dci4-srv-1003 are healthy.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 3048,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-05T11:04:43Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-05T10:37:38Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261005T103700585487-equilibrium-source-paths",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4208,
+          "worker_pid": 1187934
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "JT-60SA target nakasvr26.iferc.org:22 unreachable from this node from 10:46Z onward — kex_exchange_identification: Connection closed by remote host; then Connection timed out during banner exchange across 6 backoff probes (13 min). From the jump host ping shows 100% packet loss and TCP/22 does not complete; an alternate route (98dci4-srv-1003 -> nakasvr26) also times out. Jump hosts laptop (FR-IWL-MCINTOS1) and 98dci4-srv-1003 are healthy.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-05T11:04:43Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1394,
+        "log_fresh": false,
+        "manifest_commits": [
+          "1bcad7df3"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "9b610fbb6218aa63aaafb45dd5a2f6aa488b6e0f89a80df1f5611d5330dd143e",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T103700585487-equilibrium-source-paths/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T103700585487-equilibrium-source-paths/manifest.md; resolve the blocker before resuming the run",
+        "node": "equilibrium-source-paths",
+        "phase": "blocked",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261005T103700585487-equilibrium-source-paths",
+        "session": "jt60sa-20261005",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261005T103700585487-equilibrium-source-paths",
+          "session_id": "16d15311-2b94-4d7d-a134-8237a859fee8",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 1463,
+        "terminal_at": "2026-10-05T11:03:32Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/equilibrium-source-paths"
+      }
+    ]
+  },
+  "wall_seconds": 3978,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-05T12:34:20Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-05T12:25:07Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261005T112754675095-one-probe-one-writer",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 16430,
+    "worker_pid": 1531979
+  },
+  "worker_seconds": 3962,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
