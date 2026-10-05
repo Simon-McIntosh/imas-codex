@@ -459,33 +459,30 @@ def find_code(
 
     params: dict[str, Any] = {"k": limit, "embedding": embedding}
 
-    # No pre-filters: facility is accessed via CodeFile join, not a property on CodeChunk
+    # facility_id is registered on code_chunk_embedding, so its predicate
+    # renders inside SEARCH and pre-filters the ANN cut. The CodeFile join the
+    # block used to carry existed only to filter by facility, so it goes with
+    # it; the CodeExample OPTIONAL MATCH below still supplies source_file.
+    prefilter_clauses = ["cc.facility_id = $facility"] if facility is not None else None
+    if facility is not None:
+        params["facility"] = facility
+
     search_block = build_vector_search(
         "code_chunk_embedding",
         "CodeChunk",
+        prefilter_clauses=prefilter_clauses,
         node_alias="cc",
         score_alias="score",
     )
 
-    facility_filter = ""
-    if facility is not None:
-        facility_filter = (
-            "MATCH (cf:CodeFile) WHERE cf.id = ce.source_file "
-            "AND cf.facility_id = $facility\n"
-        )
-        params["facility"] = facility
-
     cypher = (
         f"{search_block}\n"
         "OPTIONAL MATCH (cc)-[:CODE_EXAMPLE_ID]->(ce:CodeExample)\n"
-        f"{facility_filter}"
         "RETURN substring(cc.text, 0, 500) AS text, "
         "cc.function_name AS function_name, "
-        "ce.source_file AS source_file, score "
+        "coalesce(ce.source_file, cc.source_file) AS source_file, score "
         "ORDER BY score DESC"
     )
-
-    return gc.query(cypher, **params)
 
     return gc.query(cypher, **params)
 
