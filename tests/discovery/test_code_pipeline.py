@@ -9,7 +9,7 @@ from code evidence; and static tree routing / recheck with code-evidence shots.
 from __future__ import annotations
 
 import hashlib
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -1448,3 +1448,176 @@ class TestNormalizationEdgeCases:
             normalize_mdsplus_path("results::top.equil_1.results:psi")
             == "\\RESULTS::TOP.EQUIL_1.RESULTS:PSI"
         )
+
+
+# =============================================================================
+# Path-prefix scoping of the scan claim
+# =============================================================================
+
+
+class TestPathPrefixScan:
+    """Scoped scanning: the claim and has-work predicate honour --path-prefix.
+
+    Without prefixes a scan claims an arbitrary sample of scored paths, so a
+    run cannot target a named set of source trees. These tests pin that the
+    prefix predicate appears in the Cypher only when prefixes are supplied and
+    that the value threads from the CLI down to the claim.
+    """
+
+    def test_claim_query_includes_prefix_predicate_when_given(self):
+        from imas_codex.discovery.code.graph_ops import claim_paths_for_file_scan
+
+        mock_gc = MagicMock()
+        mock_gc.query.side_effect = [[], []]
+
+        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            MockGC.return_value.__exit__ = MagicMock(return_value=False)
+
+            claim_paths_for_file_scan(
+                "jt-60sa", path_prefixes=["/analysis/src/SAselene"]
+            )
+
+        cypher, kwargs = mock_gc.query.call_args_list[0]
+        query_text = cypher[0]
+        assert "STARTS WITH pre" in query_text
+        assert kwargs["prefixes"] == ["/analysis/src/SAselene"]
+
+    def test_claim_query_omits_prefix_predicate_without_prefixes(self):
+        from imas_codex.discovery.code.graph_ops import claim_paths_for_file_scan
+
+        mock_gc = MagicMock()
+        mock_gc.query.side_effect = [[], []]
+
+        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            MockGC.return_value.__exit__ = MagicMock(return_value=False)
+
+            claim_paths_for_file_scan("jt-60sa")
+
+        query_text, kwargs = mock_gc.query.call_args_list[0]
+        assert "STARTS WITH" not in query_text[0]
+        assert "prefixes" not in kwargs
+
+    def test_has_pending_scan_work_carries_prefix_predicate(self):
+        from imas_codex.discovery.code.graph_ops import has_pending_scan_work
+
+        mock_gc = MagicMock()
+        mock_gc.query.return_value = [{"has_work": True}]
+
+        with patch("imas_codex.discovery.code.graph_ops.GraphClient") as MockGC:
+            MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            MockGC.return_value.__exit__ = MagicMock(return_value=False)
+
+            assert (
+                has_pending_scan_work(
+                    "jt-60sa", path_prefixes=["/analysis/src/SAeqread"]
+                )
+                is True
+            )
+
+        cypher, kwargs = mock_gc.query.call_args
+        assert "STARTS WITH pre" in cypher[0]
+        assert kwargs["prefixes"] == ["/analysis/src/SAeqread"]
+
+    def test_scan_facility_files_forwards_prefixes(self):
+        from imas_codex.discovery.code.scanner import scan_facility_files
+
+        with patch(
+            "imas_codex.discovery.code.graph_ops.claim_paths_for_file_scan",
+            return_value=[],
+        ) as claim:
+            stats = scan_facility_files(
+                "jt-60sa", min_score=0.75, path_prefixes=["/analysis/src/edas2"]
+            )
+
+        assert stats["total_paths"] == 0
+        assert claim.call_args.kwargs["path_prefixes"] == ["/analysis/src/edas2"]
+
+    def test_code_cli_forwards_path_prefixes(self):
+        import asyncio
+
+        from click.testing import CliRunner
+
+        from imas_codex.cli.discover.code import code
+
+        def fake_run_discovery(_config, async_main):
+            return asyncio.run(async_main(asyncio.Event(), None))
+
+        with (
+            patch(
+                "imas_codex.discovery.base.facility.get_facility",
+                return_value={"ssh_host": "jt-60sa"},
+            ),
+            patch("imas_codex.cli.discover.common.ensure_remote_environment"),
+            patch("imas_codex.cli.discover.common.use_rich_output", return_value=False),
+            patch("imas_codex.cli.discover.common.setup_logging"),
+            patch(
+                "imas_codex.cli.discover.common.make_log_print",
+                return_value=lambda *a, **k: None,
+            ),
+            patch("imas_codex.cli.discover.common.DiscoveryConfig"),
+            patch(
+                "imas_codex.cli.discover.common.run_discovery",
+                side_effect=fake_run_discovery,
+            ),
+            patch("imas_codex.settings.get_discovery_threshold", return_value=0.9),
+            patch(
+                "imas_codex.discovery.code.parallel.run_parallel_code_discovery",
+                new_callable=AsyncMock,
+                return_value={},
+            ) as run_parallel,
+        ):
+            result = CliRunner().invoke(
+                code,
+                [
+                    "jt-60sa",
+                    "--path-prefix",
+                    "/analysis/src/SAselene",
+                    "--path-prefix",
+                    "/analysis/src/edas2",
+                    "--scan-only",
+                ],
+            )
+
+        assert result.exit_code == 0, result.output
+        assert run_parallel.call_args.kwargs["path_prefixes"] == [
+            "/analysis/src/SAselene",
+            "/analysis/src/edas2",
+        ]
+
+    def test_scan_uses_facility_remote_environment(self):
+        """The remote scan runs under the facility's resolved interpreter.
+
+        A facility whose default ``python`` is older than the executor's
+        bootstrap (jt-60sa defaults to 3.5.6) cannot parse the inline runner,
+        so the scan must pass the facility ``remote_environment`` interpreter
+        and setup commands to the executor rather than the default.
+        """
+        from imas_codex.discovery.code import scanner
+
+        config = {
+            "ssh_host": "jt-60sa",
+            "remote_environment": {
+                "python_command": "python",
+                "setup_commands": ["module load python/3.12"],
+            },
+        }
+        with (
+            patch(
+                "imas_codex.discovery.base.facility.get_facility",
+                return_value=config,
+            ),
+            patch(
+                "imas_codex.remote.executor.run_python_script",
+                return_value="[]",
+            ) as run_script,
+        ):
+            scanner._scan_remote_paths_batch(
+                "jt-60sa", ["/analysis/src/SAeqread"], ssh_host="jt-60sa"
+            )
+
+        assert run_script.call_args.kwargs["python_command"] == "python"
+        assert run_script.call_args.kwargs["setup_commands"] == [
+            "module load python/3.12"
+        ]

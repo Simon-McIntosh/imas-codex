@@ -19,6 +19,7 @@ from typing import Any
 from imas_codex.discovery.base.facility import get_facility
 from imas_codex.discovery.paths.enrichment import PATTERN_REGISTRY
 from imas_codex.graph import GraphClient
+from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import async_run_python_script
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,8 @@ async def _run_enrich_batch(
     file_paths: list[str],
     patterns: dict[str, str],
     timeout: int,
+    python_command: str = "python3",
+    setup_commands: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Run one remote enrichment batch and parse the JSON response."""
     result = await async_run_python_script(
@@ -60,6 +63,8 @@ async def _run_enrich_batch(
         },
         ssh_host=ssh_host,
         timeout=timeout,
+        python_command=python_command,
+        setup_commands=setup_commands,
     )
     if isinstance(result, str):
         parsed = json.loads(result)
@@ -108,11 +113,21 @@ async def enrich_files(
 
     config = get_facility(facility)
     ssh_host = config.get("ssh_host", facility)
+    environment = resolve_remote_environment(config)
+    python_command = environment.python_command
+    setup_commands = list(environment.setup_commands)
 
     patterns = _build_flat_patterns()
 
     try:
-        return await _run_enrich_batch(ssh_host, file_paths, patterns, timeout)
+        return await _run_enrich_batch(
+            ssh_host,
+            file_paths,
+            patterns,
+            timeout,
+            python_command=python_command,
+            setup_commands=setup_commands,
+        )
     except Exception as e:
         logger.error(
             "File enrichment batch failed for %d files at %s: %s",
@@ -131,7 +146,14 @@ async def enrich_files(
         chunk = file_paths[start : start + chunk_size]
         try:
             recovered.extend(
-                await _run_enrich_batch(ssh_host, chunk, patterns, timeout)
+                await _run_enrich_batch(
+                    ssh_host,
+                    chunk,
+                    patterns,
+                    timeout,
+                    python_command=python_command,
+                    setup_commands=setup_commands,
+                )
             )
             continue
         except Exception as chunk_error:
@@ -144,7 +166,14 @@ async def enrich_files(
 
         for path in chunk:
             try:
-                single = await _run_enrich_batch(ssh_host, [path], patterns, timeout)
+                single = await _run_enrich_batch(
+                    ssh_host,
+                    [path],
+                    patterns,
+                    timeout,
+                    python_command=python_command,
+                    setup_commands=setup_commands,
+                )
                 recovered.extend(single)
             except Exception as single_error:
                 logger.error(

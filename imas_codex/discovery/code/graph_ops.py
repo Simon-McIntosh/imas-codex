@@ -95,6 +95,7 @@ def claim_paths_for_file_scan(
     facility: str,
     min_score: float | None = None,
     limit: int = 100,
+    path_prefixes: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Atomically claim scored FacilityPaths for file scanning.
 
@@ -113,6 +114,10 @@ def claim_paths_for_file_scan(
         facility: Facility ID
         min_score: Minimum path score to include
         limit: Maximum paths to claim
+        path_prefixes: When given, restrict the claim to FacilityPaths whose
+            ``path`` starts with any of these prefixes. Scoping the claim this
+            way selects a named set of source trees rather than an arbitrary
+            sample of scored paths.
 
     Returns:
         List of dicts with ``id``, ``path``, ``score``, ``purpose``, ``files_scanned``
@@ -123,22 +128,34 @@ def claim_paths_for_file_scan(
         min_score = get_discovery_threshold()
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
     claim_token = str(uuid.uuid4())
+    prefix_clause = ""
+    params: dict[str, Any] = {
+        "facility": facility,
+        "min_score": min_score,
+        "limit": limit,
+        "cutoff": cutoff,
+        "token": claim_token,
+    }
+    if path_prefixes:
+        prefix_clause = "AND ANY(pre IN $prefixes WHERE p.path STARTS WITH pre)"
+        params["prefixes"] = list(path_prefixes)
     with GraphClient() as gc:
         # Step 1: Claim with random ordering and unique token
         gc.query(
-            """
-            MATCH (p:FacilityPath {facility_id: $facility})
+            f"""
+            MATCH (p:FacilityPath {{facility_id: $facility}})
             WHERE p.status IN ['scored', 'explored']
               AND coalesce(p.score_composite, 0) >= $min_score
               AND p.path IS NOT NULL
+              {prefix_clause}
               AND (p.files_claimed_at IS NULL
                    OR p.files_claimed_at < datetime() - duration($cutoff))
               AND coalesce(p.vcs_remote_accessible, false) = false
-              AND NOT EXISTS {
+              AND NOT EXISTS {{
                 MATCH (p)-[:INSTANCE_OF]->(r:SoftwareRepo)
                 WHERE r.source_type IN ['github', 'gitlab', 'bitbucket']
-              }
-            OPTIONAL MATCH (f:Facility {id: $facility})
+              }}
+            OPTIONAL MATCH (f:Facility {{id: $facility}})
             WITH p, f
             WHERE p.last_file_scan_at IS NULL
                OR (f.files_scan_after IS NOT NULL
@@ -148,11 +165,7 @@ def claim_paths_for_file_scan(
             LIMIT $limit
             SET p.files_claimed_at = datetime(), p.files_claim_token = $token
             """,
-            facility=facility,
-            min_score=min_score,
-            limit=limit,
-            cutoff=cutoff,
-            token=claim_token,
+            **params,
         )
 
         # Step 2: Read back only paths WE successfully claimed
@@ -532,33 +545,46 @@ def release_file_score_claims(file_ids: list[str]) -> None:
 # ---------------------------------------------------------------------------
 
 
-def has_pending_scan_work(facility: str, min_score: float | None = None) -> bool:
-    """Check if there are FacilityPaths remaining to scan for files."""
+def has_pending_scan_work(
+    facility: str,
+    min_score: float | None = None,
+    path_prefixes: list[str] | None = None,
+) -> bool:
+    """Check if there are FacilityPaths remaining to scan for files.
+
+    When ``path_prefixes`` is given, only paths whose ``path`` starts with one
+    of the prefixes count, so the predicate matches the scoped claim.
+    """
     if min_score is None:
         from imas_codex.settings import get_discovery_threshold
 
         min_score = get_discovery_threshold()
+    prefix_clause = ""
+    params: dict[str, Any] = {"facility": facility, "min_score": min_score}
+    if path_prefixes:
+        prefix_clause = "AND ANY(pre IN $prefixes WHERE p.path STARTS WITH pre)"
+        params["prefixes"] = list(path_prefixes)
     with GraphClient() as gc:
         result = gc.query(
-            """
-            MATCH (p:FacilityPath {facility_id: $facility})
+            f"""
+            MATCH (p:FacilityPath {{facility_id: $facility}})
             WHERE p.status IN ['scored', 'explored']
               AND coalesce(p.score_composite, 0) >= $min_score
               AND p.path IS NOT NULL
+              {prefix_clause}
               AND coalesce(p.vcs_remote_accessible, false) = false
-              AND NOT EXISTS {
+              AND NOT EXISTS {{
                 MATCH (p)-[:INSTANCE_OF]->(r:SoftwareRepo)
                 WHERE r.source_type IN ['github', 'gitlab', 'bitbucket']
-              }
-            OPTIONAL MATCH (f:Facility {id: $facility})
+              }}
+            OPTIONAL MATCH (f:Facility {{id: $facility}})
             WITH p, f
             WHERE p.last_file_scan_at IS NULL
                OR (f.files_scan_after IS NOT NULL
                    AND p.last_file_scan_at < f.files_scan_after)
             RETURN count(p) > 0 AS has_work
             """,
-            facility=facility,
-            min_score=min_score,
+            **params,
         )
         return result[0]["has_work"] if result else False
 

@@ -99,18 +99,19 @@ def _scan_remote_paths_batch(
         Dict mapping path -> list of file info dicts with enrichment data
     """
     from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.remote.environment import resolve_remote_environment
     from imas_codex.remote.executor import run_python_script
 
     if not remote_paths:
         return {}
 
-    host = ssh_host
-    if not host:
-        try:
-            config = get_facility(facility)
-            host = config.get("ssh_host", facility)
-        except ValueError:
-            host = facility
+    try:
+        config = get_facility(facility)
+    except ValueError:
+        config = {}
+
+    host = ssh_host or config.get("ssh_host") or facility
+    environment = resolve_remote_environment(config)
 
     input_data = {
         "paths": remote_paths,
@@ -127,6 +128,8 @@ def _scan_remote_paths_batch(
             input_data=input_data,
             ssh_host=host,
             timeout=timeout,
+            python_command=environment.python_command,
+            setup_commands=list(environment.setup_commands),
         )
     except subprocess.TimeoutExpired:
         logger.warning(
@@ -382,6 +385,7 @@ def scan_facility_files(
     max_depth: int = 5,
     ssh_host: str | None = None,
     progress_callback: ProgressCallback | None = None,
+    path_prefixes: list[str] | None = None,
 ) -> dict[str, int]:
     """Scan scored FacilityPaths for source code files.
 
@@ -396,6 +400,8 @@ def scan_facility_files(
         max_depth: Maximum directory depth per path
         ssh_host: SSH host override
         progress_callback: Optional progress callback
+        path_prefixes: When given, only FacilityPaths whose ``path`` starts
+            with one of these prefixes are claimed.
 
     Returns:
         Dict with total_files, total_paths, new_files, skipped_files
@@ -418,7 +424,12 @@ def scan_facility_files(
         logger.info("[%d/%d] %s", current, total, msg)
 
     # Claim paths atomically (parallel-safe)
-    paths = claim_paths_for_file_scan(facility, min_score=min_score, limit=max_paths)
+    paths = claim_paths_for_file_scan(
+        facility,
+        min_score=min_score,
+        limit=max_paths,
+        path_prefixes=path_prefixes,
+    )
     if not paths:
         report(0, 0, "No scored paths to scan (or all claimed by another worker)")
         return stats

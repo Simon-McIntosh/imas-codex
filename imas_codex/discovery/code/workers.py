@@ -67,6 +67,7 @@ async def scan_worker(
             state.facility,
             min_score=state.min_score,
             limit=batch_size,
+            path_prefixes=state.path_prefixes,
         )
 
         if not paths:
