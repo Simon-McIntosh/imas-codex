@@ -289,26 +289,50 @@ def extract_database_links(text: str) -> dict[str, list[str]]:
     return result
 
 
-def _is_header_only_form(text: str) -> bool:
-    """True when text is a table of headers and a search form, with no data rows.
+def _cells(line: str) -> tuple[str, ...]:
+    """Pipe-separated cell values of a table row, trailing empties dropped."""
+    values = [value.strip() for value in line.strip().strip("|").split("|")]
+    while values and values[-1] == "":
+        values.pop()
+    return tuple(values)
 
-    A data row is any table row that is neither a separator nor a header row
-    (a row immediately followed by a separator). A dynamic table renders as
-    headers plus a search form when the CGI plugin has nothing to fill in at
-    fetch time, so every row that survives is a header.
+
+def _is_header_only_form(text: str) -> bool:
+    """True when text is a table page with no data row beneath any header.
+
+    A dynamic handbook table renders as its column headers and a search form
+    when the plugin has no rows to fill in at fetch time, so the page keeps
+    only table headers and the form's own labels. A row that survives is a
+    header; a data row is a table row that sits under a header separator and
+    is not one of the header rows the empty table repeats.
     """
     lines = text.splitlines()
-    saw_header = False
-    for index, line in enumerate(lines):
-        if not _TABLE_ROW_RE.match(line) or _TABLE_SEPARATOR_RE.match(line):
-            continue
-        next_line = lines[index + 1] if index + 1 < len(lines) else ""
-        if _TABLE_SEPARATOR_RE.match(next_line):
-            saw_header = True
-            continue
-        # A populated row (not a header, not a separator) is real content.
+    rows = [
+        (index, _cells(line))
+        for index, line in enumerate(lines)
+        if _TABLE_ROW_RE.match(line) and not _TABLE_SEPARATOR_RE.match(line)
+    ]
+    if not rows:
         return False
-    return saw_header and "search" in text.lower()
+
+    def followed_by_separator(index: int) -> bool:
+        """True when the next non-blank line closes this row: it is a header."""
+        for offset in range(index + 1, len(lines)):
+            if lines[offset].strip():
+                return bool(_TABLE_SEPARATOR_RE.match(lines[offset]))
+        return False
+
+    headers = {
+        cells for index, cells in rows if cells and followed_by_separator(index)
+    }
+    if not headers:
+        return False
+    previous_is_header = False
+    for index, cells in rows:
+        if previous_is_header and cells and cells not in headers:
+            return False
+        previous_is_header = followed_by_separator(index)
+    return True
 
 
 def detect_dynamic_page(
