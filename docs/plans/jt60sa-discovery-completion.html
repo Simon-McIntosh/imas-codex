@@ -23,10 +23,10 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
-<meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac,7bd3714029e6b4629d76c7ef25dca9291476aa62,a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f,b47967a659fd7e631ce24e41a26cd47437afc19c,f10be0595b4528c88b7affb2e14c9af7126315a6,c120c1285846f28ce0d2d23abc2f6b141798bcca,c5a0b064e31c5dc753e9b768c11df98bdf797f0c,386d33e54dc2888363a5d2afa11633d48e43c43e,4a30fab9dd0235c395a2649c73fec2fb3ea4accd">
-<meta name="plan-impl" content="0.62">
-<meta name="plan-version" content="57">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s12&quot;:&quot;implementable&quot;,&quot;s13&quot;:&quot;implementable&quot;,&quot;s14&quot;:&quot;implementable&quot;}">
+<meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac,7bd3714029e6b4629d76c7ef25dca9291476aa62,a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f,b47967a659fd7e631ce24e41a26cd47437afc19c,f10be0595b4528c88b7affb2e14c9af7126315a6,c120c1285846f28ce0d2d23abc2f6b141798bcca,c5a0b064e31c5dc753e9b768c11df98bdf797f0c,386d33e54dc2888363a5d2afa11633d48e43c43e,4a30fab9dd0235c395a2649c73fec2fb3ea4accd,6effe4d74ffa62d7b9e6d7dcef5db65d73f8e5fe,103604f02f255cabedb88903b00cc88dd64d4010,f4640db8214347fa9d0c271eea1c74fa3f861f4a,8f84859aa11d2670a83106c9469f99af6ce5e407,30597f7376426dff20c5d1614c5817d49c75e017,c2e8b3dd4d8bb6b280518f97625dadce947620dd,ca823b29b1bb1e47198c9e62dfeb7fb68c53296a,76bf7bb55c14276ced936f68fe113d7a6ed19755,ee5da909fd1d85f9c95b5936c8f79d218ebd4876,44dbb21c11a7abad66921aad466e51cc041fdc14,5ca3a81e86f8ee2db74147dc8150c6c5b4a0c0e1,711cfe87a14f6d693f56aa88900441f96c39bf4f,990339648fbbb7ed7069b0f787f1a3c156d1535e">
+<meta name="plan-impl" content="0.67">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -109,58 +109,11 @@
       ITER host on the local lane, never on a login node.
     </p>
 
-    <h2 id="s3">§3 — The handbook tables are CGI forms: ingest them from EDDB, and mark dynamic pages</h2>
-    <p>
-      The JT-60SA Data Handbook page links seven per-database tables
-      (<code>CategoryInformation?db=EDDB</code>, <code>DataInformation?db=EQDB</code>, FAME,
-      LCDB, MBDB, PMDB, UDDB). Each is a TWiki topic whose body is a search form and an empty
-      table that a CGI plugin fills from the database at render time. The twiki_raw adapter
-      reads the topic source over ssh, so each landed as a one-chunk page containing only
-      column headers (<em>Category, DataName, PID No., Unit, Description, Shot, State</em>) and
-      a form. The rendered page cannot be fetched either: the TWiki host 157.111.10.188 is on
-      the nakasvr23 segment, unreachable from nakasvr26 (HTTP 000 through the tunnel and from
-      the server itself on 2026-10-05), and the topic files are not present on nakasvr26.
-    </p>
-    <p>
-      The content those tables render is the EDDB catalogue itself, which the §2 scanner
-      reads directly with the same columns, so the fix is structural rather than a scrape:
-      (a) the §2 scan is the ingestion of the handbook tables, and the handbook page reaches
-      its rows through the graph's existing signal-documentation linkage: the page's single
-      chunk carries a <code>DOCUMENTS</code> edge (<code>WikiChunk.documents_signals</code>) to
-      every FacilitySignal of the database it fronts, so <code>search_signals</code> and
-      <code>search_docs</code> walk the one linkage the MCP tools already follow rather than
-      a second edge with a second owner. The read path has one owner, <code>imas_codex/llm/search_tools.py</code>: <code>_fetch_wiki_page</code> renders a page's chunks through <code>format_fetch_report</code> and gains one bounded query for the fronted signals (<code>(p)-[:HAS_CHUNK]-&gt;()-[:DOCUMENTS]-&gt;(s)</code>, grouped by category, first fifteen names per category); <code>_enrich_signals</code> already collects <code>wiki_mentions</code> through <code>(wc:WikiChunk)-[:DOCUMENTS]-&gt;(s)</code> and its formatter names the page; <code>_enrich_wiki_chunks</code> behind <code>_search_docs</code> caps the <code>DOCUMENTS</code> collection per chunk so a stub chunk cannot drag the whole catalogue into a report. No new MCP tool or parameter; the edges are written by the existing writer,
-      <code>link_chunks_to_entities</code> in <code>imas_codex/discovery/wiki/pipeline.py</code>,
-      which keys its <code>DOCUMENTS</code> merge on chunk path mentions today and gains the
-      page's <code>fronts_database</code> as one more key, rather than a second edge-writer; (b) the wiki scorer gains a dynamic-page rule — a
-      page whose rendered text is only table headers and form labels is marked with the
-      database it fronts (a <code>fronts_database</code> property on WikiPage) rather than
-      treated as content; <code>WikiPageStatus</code> stays a closed enum, the page keeps
-      <code>ingested</code> so its chunk can anchor the edges, and the chunk's text becomes
-      a one-line stub naming the database instead of the empty form. Interface accounting:
-      <code>fronts_database</code> is the one new graph property this section adds and it
-      retires nothing, because no existing WikiPage property records the database a
-      rendered page is backed by; (c)
-      the one-point and condition data keyed by PID No. (a nine-character key, four digits
-      then five characters, read through <code>eddbreadOne</code> and
-      <code>eddbreadPara</code> with an empty PID to enumerate) is enumerated as its own
-      FacilitySignal group so the PID column is present in the graph; the owner is the
-      existing EDAS scanner (<code>imas_codex/discovery/signals/scanners/edas.py</code>, which
-      already writes <code>pid</code> and the <code>eddbreadOne</code> accessor) and its remote
-      script <code>enumerate_edas.py</code>, extended with a PID pass, not a sibling scanner.
-    </p>
-    <p>
-      Done-when: the seven handbook table pages carry a <code>fronts_database</code> value;
-      every FacilitySignal from §2 is reached from its database's handbook page through a
-      <code>DOCUMENTS</code> edge from that page's chunk; a PID-keyed one-point
-      enumeration for E101173 is in the graph with its PIDs; and the MCP tools follow the
-      edges in both directions — <code>search_docs</code> and <code>fetch_content</code> on a
-      dynamic page return the signals it fronts (name, class, unit, PID, access template)
-      instead of the empty form, and <code>search_signals</code> cites the handbook page —
-      proved by <code>search_docs("flux loop", facility="jt-60sa")</code> returning the PSRC
-      flux-loop signals beside the EDDB manual chunks and by <code>fetch_content</code> of the
-      EDDB Category Information page listing its categories.
-    </p>
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-05</span>
+    <h2 id="s3">§3 — The handbook tables are CGI forms: ingest them from EDDB, and mark dynamic pages</h2></header>
+  <p class="landed-summary">Landed in four nodes. <code>WikiPage.fronts_database</code> plus a stub chunk and a fourth <code>DOCUMENTS</code> merge in <code>link_chunks_to_entities</code> (386d33e54); the EDAS scanner enumerates the PID-keyed one-point records through <code>eddbreadOne(shot, cat, dname, '')</code> (f10be0595, 58 rows); the wiki ingest path marks dynamic handbook tables itself with failures surfaced (44dbb21c1; three jt-60sa topics marked, status ingested, stubs embedded); the MCP tools follow the edges both ways (990339648): fetch_content lists a fronted catalogue grouped by data class, search_signals cites the fronting page, search_docs returns PSRC flux-loop signals beside the manual chunks. A swallowed TypeError that had silently disabled every signal and code fulltext search was found and repaired on the way. <a href="s3-handbook-tables">full record</a></p>
+</section>
 
     <h2 id="s4">§4 — Document ingest: a missing dependency, then the queue</h2>
     <p>
@@ -280,9 +233,28 @@
 <section data-reckon="section" data-id="s9" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
 <p>Two design notes from the §6 and §7 reviews, both small and both in files this plan already touched. (a) <code>imas-codex tools status</code> opens the remote environment probe twice: once inside <code>check_all_tools</code>, whose <code>results["environment"]</code> nothing renders, and once inside <code>get_python_status</code>, whose result <code>cli/tools.py</code> renders. <code>check_all_tools</code> keeps the probe and is the only caller of <code>probe_remote_environment</code>; <code>get_python_status</code> loses its own probe and takes the probed environment as an argument (<code>environment=</code>, already-resolved, optional only for the one call path that has no facility), so the interpreter floor is judged from the single probe and <code>cli/tools.py</code> renders the one result. (b) The DataAccess node write now sits in three places in <code>imas_codex/discovery/signals/parallel.py</code>: the MDSplus branch constructs its node inline, the non-MDSplus branch in <code>seed_worker</code> merges it before signal ingest (the §7 ordering fix, deliberately placed so a scanner that returns access metadata with zero signals still writes it), and the phase-2 edge merge in <code>ingest_discovered_signals</code> depends on it. The one writer is therefore a function of its own, <code>persist_data_access(data_access)</code>, that <code>seed_worker</code> calls as soon as a <code>ScanResult</code> carries <code>data_access</code>, before and independently of <code>if result.signals</code>, and that <code>ingest_discovered_signals</code> relies on rather than repeats. The MDSplus branch stops constructing its node inline and populates <code>ScanResult.data_access</code> like every other scanner, so the single writer is reachable from every branch. Moving the write inside <code>ingest_discovered_signals</code> is rejected: that function returns early on an empty signal list and its only caller gates on <code>result.signals</code>, which would silently lose the thin-client write §7 landed.</p><p>Done-when: one probe per <code>tools status</code> invocation (a test counts calls to <code>probe_remote_environment</code>); <code>rg 'MERGE \(.*:DataAccess' imas_codex/discovery/signals/parallel.py</code> finds exactly one statement, inside <code>persist_data_access</code>; a test passes a <code>ScanResult</code> with <code>data_access</code> and no signals through <code>seed_worker</code> and asserts the DataAccess node is written; a test asserts the MDSplus branch produces <code>ScanResult.data_access</code>; the §7 ordering test still passes; <code>pytest tests/remote tests/cli/test_tools_status_environment.py tests/discovery/test_signals_pipeline.py</code> exits 0.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-05</span>
     <h2 id="s10">§10 — Delete the graph client&#x27;s SLURM duplicate</h2>
-<section data-reckon="section" data-id="s10" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>After §8, <code>imas_codex/graph/client.py::_slurm_service_uri</code> and the SLURM branch of <code>_resolve_graph_uri</code> duplicate what <code>profiles.py</code> Mode 2 already answers through <code>resolve_service_url</code>; they survive only because <code>tests/graph/test_client_address_resolution.py</code> imports and pins them. Delete both, rework that test module to assert the client's address through <code>resolve_service_url</code> (the delegation case and the different-nodes case in <code>tests/remote/test_locations_resolution.py</code> are the pattern), and keep the raise-on-unreadable-location behaviour that returning <code>None</code> would have lost. Done when <code>rg '_slurm_service_uri|discover_compute_node_local|_resolve_compute_host' imas_codex/graph</code> is empty, <code>pytest tests/graph/test_client_address_resolution.py tests/remote tests/embeddings</code> exits 0, and <code>GraphClient().uri</code> from a compute node still resolves <code>bolt://98dci4-gpu-0002:7687</code>.</p>
+<section data-reckon="section" data-id="s10" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed (30597f737, c2e8b3dd4, ca823b29b; review 109). <code>_slurm_service_uri</code> and the SLURM branch of <code>_resolve_graph_uri</code> are deleted; the client's bolt address comes only from the profile layer, which reaches the scheduled service node through <code>resolve_service_url</code>. The two remote-resolution tests that pinned the deleted delegation are gone; 255 tests pass; <code>GraphClient().uri</code> from the compute node is <code>bolt://98dci4-gpu-0002:7687</code>. Residue carried to §11: <code>NEO4J_URI</code> is now applied after location resolution. <a href="s10-graph-client-duplicate">full record</a></p>
+</section>
+
+    <h2 id="s11">§11 — NEO4J_URI outranks location resolution</h2>
+<section data-reckon="section" data-id="s11" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>After §10, <code>GraphClient</code> obtains its address from <code>resolve_neo4j</code> in <code>imas_codex/graph/profiles.py</code>, which calls <code>resolve_location</code> (line ~399) before it applies the <code>NEO4J_URI</code> escape hatch (line ~424). The deleted wrapper returned the env value first, so an operator who set <code>NEO4J_URI</code> never paid for an unreadable location file; now that case raises. Move the env check ahead of location resolution in <code>resolve_neo4j</code> so the documented escape hatch is applied before anything is read, keeping the raise for the no-override case. Done when a test sets <code>NEO4J_URI</code> with an unreadable location pinned and <code>GraphClient().uri</code> equals the env value, the existing unreadable-location raise still holds without the env, and <code>pytest tests/graph/test_client_address_resolution.py tests/remote tests/embeddings</code> exits 0 (base 255 passed at 82c623117).</p>
+
+    <h2 id="s12">§12 — search_code selects candidates per facility</h2>
+<section data-reckon="section" data-id="s12" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>The vector branch of <code>_search_code</code> in <code>imas_codex/llm/search_tools.py</code> takes the top-k neighbours over the whole 222,154-chunk index and only then filters on <code>facility_id</code>, so a small facility's chunks never survive the cut: <code>_search_code('SELENE equilibrium reconstruction', facility='jt-60sa')</code> returns nothing at the default k and the SAselene chunk only at k=10000. Make the candidate selection facility-aware where the index is queried: pass the facility into the vector query so the neighbour search is restricted to that facility's chunks (the same shape the signal search already uses when it scopes by facility), rather than widening k. Interface budget zero: no new tool, option or parameter. Done when the SELENE query above returns the <code>/analysis/src/SAselene_v2.0_forPSRC/eqequb.f</code> chunk at the default k, a test pins that a facility-scoped vector query carries the facility predicate inside the candidate selection, and <code>pytest tests/search tests/llm</code> exits 0 (base 630 passed at 0a5d02993).</p>
+
+    <h2 id="s13">§13 — The wiki-chunk fulltext search binds its parameter correctly</h2>
+<section data-reckon="section" data-id="s13" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p><code>_text_search_wiki_chunks</code> in <code>imas_codex/llm/search_tools.py</code> still binds its query text to a Cypher parameter named <code>query</code>, the collision §3 repaired in the signal and code-chunk searches: <code>GraphClient.query(query, **params)</code> raises <code>TypeError</code>, the function swallows it, and every documentation prose search has run on the <code>CONTAINS</code> fallback at score zero. Repairing it changes which chunks a documentation search ranks (BM25 hits displace vector-matched EDDB manual chunks in the §3 live proof), which is why it was deferred. Rename the parameter, narrow the swallow to the Neo4j client errors as §3 did, re-baseline the doc-search expectations in <code>tests/llm</code> and <code>tests/search</code> against the now-working fulltext branch, and re-run the §3 live proof so <code>search_docs("flux loop", "jt-60sa")</code> still returns the PSRC flux-loop signals beside the EDDB manual chunks. Done when a regression test drives the wiki-chunk branch through a stub with the real <code>query(query, **params)</code> signature, the live proof holds, and <code>pytest tests/search tests/llm</code> exits 0. Depends on §12 landing first because both edit the same module.</p>
+
+    <h2 id="s14">§14 — The equilibrium source trees get FacilityPath rows</h2>
+<section data-reckon="section" data-id="s14" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>The §2 code scan found that <code>/analysis/src/client_eqdbms.EQ32.Rev1</code> and <code>/analysis/src/SAeqfame</code> exist on nakasvr26 but have no <code>FacilityPath</code> rows, and <code>/analysis/src/SAeqread</code> produced no chunks for the same reason, so no code scan can reach the EQDBMS record layout. Run the paths discovery pipeline (<code>imas-codex discover paths jt-60sa</code>, scoped to <code>/analysis/src</code> with the existing scoping option) so those trees are discovered and scored, then re-run the scoped code scan with the three prefixes. Done when Cypher shows scored <code>FacilityPath</code> rows under each of the three trees, <code>CodeChunk</code> rows exist under SAeqread and client_eqdbms, <code>_search_code('EQDBMS record layout', 'jt-60sa')</code> returns a chunk from one of them, and spend is at or under USD 5. Needs the JT-60SA hop; wait for it to answer before dispatch.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -423,6 +395,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261005T085056330578-review-of-equilibrium-code-scan" data-who="reckon-build" data-when="2026-10-05T09:07:29.917Z">
     <div class="r-comment-body"><p>review of r-20261005T072100267340-equilibrium-code-scan stored: SOUND WITH FINDINGS, total 84/100 (goal_fidelity 15, evidence 17, scope_discipline 17, durability 17, fit 18), added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261005T0945-s2-code-scan" data-who="reckon-build" data-when="2026-10-05T09:45:00Z">
+    <div class="r-comment-body">equilibrium-code-scan landed (6effe4d74, 103604f02, f4640db82, 8f84859aa; review SOUND WITH FINDINGS 84, 0 added failures): discover code gains a repeatable --path-prefix claim scope, and the scan and enrichment stages run under the facility remote environment. The scoped run wrote 201 CodeChunk nodes for jt-60sa (13 under /analysis/src/SAselene, 188 under /analysis/src/edas2) for USD 1.22 after the coordinator added jt-60sa to the graph facility allowlist. Two gaps carried to sections: search_code reaches the SAselene chunk only at k=10000 because facility_id is post-filtered after the ANN cut over a 222,154-chunk index (§12); client_eqdbms.EQ32.Rev1, SAeqfame and SAeqread have no FacilityPath rows so no code scan can reach them (§14). edas-enrich-check is blocked on a JT-60SA host outage since 08:44Z with 282 of 764 census rows checked at E101163.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261005T055224634951-document-failure-classes" data-who="reckon-build" data-when="2026-10-05T06:02:58.677Z">
     <div class="r-comment-body"><p>document-failure-classes — document pipeline recovers 'No module named' failures by prior state and defers unloadable-image/dead-link/type-mismatch inputs with a stated reason; gate 94 passed exit 0 (base green at b98b02a39).</p></div>
