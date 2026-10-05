@@ -25,7 +25,10 @@ from imas_codex.llm.search_formatters import (
     format_signals_report,
 )
 from imas_codex.llm.search_tools import (
+    _CHUNK_DOCUMENTS_CAP,
+    _enrich_wiki_chunks,
     _fetch,
+    _fetch_wiki_page,
     _search_code,
     _search_docs,
     _search_signals,
@@ -1711,3 +1714,179 @@ class TestSchemaGuard:
                 # CodeChunk matched via related_ids property
                 assert "CodeChunk" in cypher
                 break
+
+
+# ---------------------------------------------------------------------------
+# Dynamic handbook pages (WikiPage.fronts_database) and the DOCUMENTS edges
+# ---------------------------------------------------------------------------
+
+
+class TestHandbookDocumentEdges:
+    """The MCP tools follow the dynamic handbook page -> signal edges both ways."""
+
+    @pytest.fixture()
+    def mock_gc(self):
+        gc = MagicMock()
+        gc.query = MagicMock(side_effect=_route_query({}))
+        return gc
+
+    @pytest.fixture()
+    def mock_encoder(self):
+        enc = MagicMock()
+        enc.embed_texts = MagicMock(return_value=[[0.1] * 1024])
+        return enc
+
+    def test_fronts_database_page_lists_signals(self, mock_gc):
+        """fetch of a dynamic page renders the catalogue it fronts, capped."""
+        page_chunks = [
+            {
+                "source_type": "wiki_page",
+                "title": "Category Information",
+                "url": "https://wiki.jt60sa.org/CategoryInformation",
+                "source_id": "jt-60sa:CategoryInformation",
+                "fronts_database": ["EDDB"],
+                "section": None,
+                "text": "Dynamic table rendered from the EDDB catalogue.",
+                "chunk_index": 0,
+                "mdsplus_paths": None,
+                "imas_paths": None,
+            }
+        ]
+        fronted_rows = [
+            {
+                "category": "parameter",
+                "total": 6298,
+                "samples": [
+                    {
+                        "name": "PSRC/magFluxLp1",
+                        "unit": "Wb",
+                        "pid": None,
+                        "access": "ok, rtn = db.eddbreadTime('{shot}', ...)",
+                    }
+                ],
+            }
+        ]
+        mock_gc.query.side_effect = _route_query(
+            {
+                "RETURN 'wiki_page' AS source_type": page_chunks,
+                "p.id IN $page_ids": fronted_rows,
+            }
+        )
+
+        result = _fetch_wiki_page(mock_gc, "jt-60sa:CategoryInformation")
+
+        assert "Fronted signal catalogue (EDDB)" in result
+        assert "**parameter** — 6298 signals" in result
+        assert "PSRC/magFluxLp1" in result
+        # The stub text is still shown above the catalogue listing.
+        assert "Dynamic table rendered" in result
+
+    def test_signal_shows_documented_page_citation(self):
+        """A signal reached by DOCUMENTS cites the page that fronts its catalogue."""
+        sig = dict(
+            _SIGNAL_ENRICHMENT_IP,
+            documented_pages=[
+                {"title": "Category Information", "id": "jt-60sa:CategoryInformation"}
+            ],
+        )
+        result = format_signals_report([sig], [], {"tcv:magnetics/ip": 0.9})
+
+        assert (
+            'Documented in: "Category Information" (jt-60sa:CategoryInformation)'
+            in result
+        )
+
+    def test_stub_chunk_enrichment_query_is_capped(self, mock_gc):
+        """The chunk enrichment caps its DOCUMENTS collection per chunk.
+
+        A dynamic stub chunk documents a whole catalogue, so the query returns
+        a bounded sample plus the true count rather than every signal id.
+        """
+        _enrich_wiki_chunks(mock_gc, ["jt-60sa:chunk:stub"])
+
+        cypher = mock_gc.query.call_args[0][0]
+        kwargs = mock_gc.query.call_args[1]
+        assert "size(all_signals) AS signal_count" in cypher
+        assert "all_signals[..$documents_cap]" in cypher
+        assert kwargs.get("documents_cap") == _CHUNK_DOCUMENTS_CAP
+
+    def test_stub_chunk_report_shows_count_not_full_list(self):
+        """A capped chunk renders a total and a sample, not thousands of ids."""
+        rows = [
+            {
+                "id": "jt-60sa:chunk:stub",
+                "text": "Dynamic table rendered from the EDDB catalogue.",
+                "section": None,
+                "page_id": "jt-60sa:CategoryInformation",
+                "page_title": "Category Information",
+                "page_url": None,
+                "signal_count": 6298,
+                "linked_signals": ["jt-60sa:general/psrc_magfluxlp1"],
+                "linked_data_nodes": [],
+                "imas_refs": [],
+                "tool_mentions": None,
+            }
+        ]
+        result = format_docs_report(rows, [], {})
+
+        assert "Fronts 6298 signals; e.g. jt-60sa:general/psrc_magfluxlp1" in result
+
+    def test_docs_report_lists_matching_signals(self):
+        """Documentation search names the signal family it reaches.
+
+        The signals section sits beside the wiki/document prose, so a search
+        that names a signal family returns the signals and the pages together.
+        """
+        signals = [
+            {
+                "id": "jt-60sa:general/psrc_magfluxlp1",
+                "name": "PSRC/magFluxLp1",
+                "description": "Observation of Flux Loop (1-7)",
+            }
+        ]
+        result = format_docs_report([], [], {}, signals=signals)
+
+        assert "## Signals (1 matches)" in result
+        assert "PSRC/magFluxLp1" in result
+        assert "jt-60sa:general/psrc_magfluxlp1" in result
+
+    def test_search_docs_includes_matching_signals(self, mock_gc, mock_encoder):
+        """search_docs surfaces signals whose name/description match the query."""
+        mock_gc.query.side_effect = _route_query(
+            {
+                "wiki_chunk_embedding": [{"id": "c1", "score": 0.9}],
+                "WikiChunk {id: cid}": [
+                    {
+                        "id": "c1",
+                        "text": "EDDB manual table excerpt",
+                        "section": "General",
+                        "page_title": "EDDB Manual",
+                        "page_url": None,
+                        "linked_signals": [],
+                        "linked_data_nodes": [],
+                        "imas_refs": [],
+                    }
+                ],
+                "facility_signal_text": [
+                    {"id": "jt-60sa:general/psrc_magfluxlp1", "score": 6.5}
+                ],
+                "FacilitySignal {id: sid}": [
+                    {
+                        "id": "jt-60sa:general/psrc_magfluxlp1",
+                        "name": "PSRC/magFluxLp1",
+                        "description": "Observation of Flux Loop (1-7)",
+                    }
+                ],
+            }
+        )
+
+        result = _search_docs(
+            query="flux loop",
+            facility="jt-60sa",
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+
+        assert "EDDB manual table excerpt" in result
+        assert "## Signals" in result
+        assert "PSRC/magFluxLp1" in result

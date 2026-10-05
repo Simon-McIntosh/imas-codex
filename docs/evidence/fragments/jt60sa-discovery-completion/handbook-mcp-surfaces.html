@@ -1,0 +1,27 @@
+<section>
+  <h2 id="handbook-mcp-surfaces-1">The MCP search tools follow the handbook DOCUMENTS edges in both directions</h2>
+
+  <p id="handbook-mcp-surfaces-landed">
+    <code>fetch_content</code> of a <code>fronts_database</code> page now lists
+    the catalogue the page fronts — signals grouped by data class with counts
+    and a bounded sample (name, unit, pid) and the read call — instead of the
+    empty stub alone. <code>search_signals</code> cites the page that fronts a
+    signal it returns (<code>Documented in: "Category Information"
+    (jt-60sa:CategoryInformation)</code>). <code>search_docs</code> names the
+    signal family a query reaches beside the prose that documents it, so
+    <code>search_docs("flux loop", "jt-60sa")</code> returns the PSRC
+    flux-loop signals next to the EDDB manual chunks. A stub chunk's
+    <code>DOCUMENTS</code> collection is capped in the enrichment query
+    (bounded sample plus the true count) so a page fronting a whole catalogue
+    cannot swamp a report.
+  </p>
+
+  <p id="handbook-mcp-surfaces-defect">
+    The signal-side text search's fulltext branch never ran: it bound its query
+    text to a Cypher parameter named <code>query</code>, which collides with
+    <code>Session.run()</code>'s own <code>query</code> argument, so every
+    fulltext call raised and fell back to a <code>CONTAINS</code> scan. The
+    parameter is now <code>search_query</code> in the signal, wiki-chunk and
+    code-chunk text searches.
+  </p>
+</section>

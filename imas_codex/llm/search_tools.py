@@ -38,6 +38,17 @@ _EMBEDDING_UNAVAILABLE_MSG = (
     "for property-based queries."
 )
 
+# A dynamic handbook page fronts a whole catalogue (thousands of signals), so
+# its stub chunk gathers a capped sample plus the true count rather than the
+# full DOCUMENTS collection, which would swamp a search report.
+_CHUNK_DOCUMENTS_CAP = 10
+
+# Sample size per data class when listing a dynamic page's fronted catalogue.
+_FRONTED_SIGNAL_CAP = 15
+
+# Cap on the signal family a documentation search names beside its prose.
+_DOC_SIGNAL_CAP = 16
+
 
 def _neo4j_error_message(e: Exception) -> str:
     """Format Neo4j errors with helpful instructions."""
@@ -494,13 +505,13 @@ def _text_search_signals(
     # Try fulltext index first (BM25 scoring)
     try:
         cypher = """
-            CALL db.index.fulltext.queryNodes('facility_signal_text', $query)
+            CALL db.index.fulltext.queryNodes('facility_signal_text', $search_query)
             YIELD node AS s, score
             WHERE s.facility_id = $facility
             RETURN s.id AS id, score
             LIMIT $limit
         """
-        results = gc.query(cypher, query=query, facility=facility, limit=k * 2)
+        results = gc.query(cypher, search_query=query, facility=facility, limit=k * 2)
         if results:
             return results
     except Exception:
@@ -520,6 +531,29 @@ def _text_search_signals(
         LIMIT $limit
     """
     return gc.query(cypher, facility=facility, query_lower=query_lower, limit=k * 2)
+
+
+def _signal_briefs(
+    gc: GraphClient,
+    signal_ids: list[str],
+) -> list[dict[str, Any]]:
+    """Load a compact name/description view for matched signal IDs.
+
+    Used where a documentation search wants to name the signals a query
+    reaches without pulling their full enrichment (access templates,
+    diagnostics) into the report.
+    """
+    if not signal_ids:
+        return []
+    cypher = """
+        UNWIND $signal_ids AS sid
+        MATCH (s:FacilitySignal {id: sid})
+        RETURN s.id AS id, s.name AS name, s.description AS description,
+               s.data_class AS data_class, s.unit AS unit
+    """
+    rows = gc.query(cypher, signal_ids=signal_ids)
+    order = {sid: i for i, sid in enumerate(signal_ids)}
+    return sorted(rows, key=lambda r: order.get(r.get("id"), len(order)))
 
 
 def _enrich_signals(
@@ -545,6 +579,8 @@ def _enrich_signals(
         OPTIONAL MATCH (s)-[:HAS_UNIT]->(su:Unit)
         OPTIONAL MATCH (s)-[:MEMBER_OF]->(fsgrp:SignalSource)
         OPTIONAL MATCH (wc:WikiChunk)-[:DOCUMENTS]->(s)
+        OPTIONAL MATCH (wp:WikiPage)-[:HAS_CHUNK]->(wc)
+        WHERE wp.fronts_database IS NOT NULL
         WITH s, tn, su, fsgrp,
              collect(DISTINCT diag.name) AS diagnostic_names,
              head(collect(DISTINCT diag.category)) AS diagnostic_category,
@@ -558,7 +594,8 @@ def _enrich_signals(
                imas_docs: ip.documentation,
                imas_unit: u.symbol
              }) AS access_methods,
-             collect(DISTINCT wc.section) AS wiki_mentions
+             collect(DISTINCT wc.section) AS wiki_mentions,
+             collect(DISTINCT {title: wp.title, id: wp.id}) AS documented_pages
         RETURN s.id AS id, s.name AS name, s.description AS description,
                s.physics_domain AS physics_domain, s.unit AS unit,
                s.keywords AS keywords, s.aliases AS aliases,
@@ -578,6 +615,7 @@ def _enrich_signals(
                fsgrp.description AS signal_source_description,
                fsgrp.member_count AS signal_source_member_count,
                wiki_mentions,
+               documented_pages,
                access_methods
     """
     return gc.query(cypher, signal_ids=signal_ids)
@@ -704,7 +742,15 @@ def _search_docs(
         )
         scores.update(document_scores)
 
-        if not chunk_ids and not document_results:
+        # Step 2b: signals whose name or description matches the query, so a
+        # documentation search that names a signal family surfaces it beside
+        # the prose that documents it (e.g. "flux loop" → the flux-loop signals).
+        signal_hits = _text_search_signals(gc, query, facility, k)
+        signal_rows = _signal_briefs(
+            gc, [r["id"] for r in signal_hits][:_DOC_SIGNAL_CAP]
+        )
+
+        if not chunk_ids and not document_results and not signal_rows:
             return (
                 f"No documentation found for '{query}' at {facility}. "
                 "Try search_signals() or search_code() instead."
@@ -728,7 +774,9 @@ def _search_docs(
                     scores[cid] = min(1.0, scores[cid] + 0.1 * overlap)
 
         # Step 4: Format
-        return format_docs_report(enriched_chunks, document_results, scores)
+        return format_docs_report(
+            enriched_chunks, document_results, scores, signals=signal_rows
+        )
 
     except ServiceUnavailable:
         return NEO4J_NOT_RUNNING_MSG
@@ -819,12 +867,14 @@ def _enrich_wiki_chunks(
         OPTIONAL MATCH (c)-[:DOCUMENTS]->(tn:SignalNode)
         OPTIONAL MATCH (c)-[:MENTIONS_IMAS]->(ip:IMASNode)
         WITH c, p,
-             collect(DISTINCT sig.id) AS rel_signals,
+             collect(DISTINCT sig.id) AS all_signals,
              collect(DISTINCT tn.path) AS rel_data_nodes,
              collect(DISTINCT ip.id) AS rel_imas
         RETURN c.id AS id, c.text AS text, c.section AS section,
                p.id AS page_id, p.title AS page_title, p.url AS page_url,
-               CASE WHEN size(rel_signals) > 0 THEN rel_signals
+               size(all_signals) AS signal_count,
+               CASE WHEN size(all_signals) > 0
+                    THEN all_signals[..$documents_cap]
                     ELSE coalesce(c.ppf_paths_mentioned, []) END AS linked_signals,
                CASE WHEN size(rel_data_nodes) > 0 THEN rel_data_nodes
                     ELSE coalesce(c.mdsplus_paths_mentioned, []) END AS linked_data_nodes,
@@ -832,7 +882,7 @@ def _enrich_wiki_chunks(
                     ELSE coalesce(c.imas_paths_mentioned, []) END AS imas_refs,
                c.tool_mentions AS tool_mentions
     """
-    return gc.query(cypher, chunk_ids=chunk_ids)
+    return gc.query(cypher, chunk_ids=chunk_ids, documents_cap=_CHUNK_DOCUMENTS_CAP)
 
 
 def _text_search_wiki_chunks(
@@ -849,13 +899,13 @@ def _text_search_wiki_chunks(
     # Try fulltext index first (BM25 scoring)
     try:
         cypher = """
-            CALL db.index.fulltext.queryNodes('wiki_chunk_text', $query)
+            CALL db.index.fulltext.queryNodes('wiki_chunk_text', $search_query)
             YIELD node AS c, score
             WHERE c.facility_id = $facility
             RETURN c.id AS id, score
             LIMIT $limit
         """
-        results = gc.query(cypher, query=query, facility=facility, limit=k * 2)
+        results = gc.query(cypher, search_query=query, facility=facility, limit=k * 2)
         if results:
             return results
     except Exception:
@@ -1015,6 +1065,7 @@ def _fetch_wiki_page(gc: GraphClient, resource: str) -> str | None:
         "   OR toLower(p.title) CONTAINS toLower($resource) "
         "RETURN 'wiki_page' AS source_type, "
         "p.title AS title, p.url AS url, p.id AS source_id, "
+        "p.fronts_database AS fronts_database, "
         "c.section AS section, c.text AS text, "
         "c.chunk_index AS chunk_index, "
         "c.mdsplus_paths_mentioned AS mdsplus_paths, "
@@ -1024,7 +1075,69 @@ def _fetch_wiki_page(gc: GraphClient, resource: str) -> str | None:
     )
     if not chunks:
         return None
-    return format_fetch_report(chunks)
+    report = format_fetch_report(chunks)
+    databases = chunks[0].get("fronts_database")
+    if databases:
+        fronted = _format_fronted_signals(gc, chunks[0].get("source_id"), databases)
+        if fronted:
+            report = f"{report}\n\n{fronted}"
+    return report
+
+
+def _format_fronted_signals(
+    gc: GraphClient,
+    page_id: str | None,
+    databases: list[str],
+) -> str | None:
+    """Render the catalogue a dynamic handbook page fronts.
+
+    A page marked ``fronts_database`` renders its table from a catalogue at
+    request time, so its extracted text is only headers. Its stub chunk carries
+    ``DOCUMENTS`` edges to every signal of that catalogue; this gathers them
+    grouped by data class with a bounded sample, keeping the fetch report small.
+    """
+    if not page_id:
+        return None
+    rows = gc.query(
+        """
+        MATCH (p:WikiPage)-[:HAS_CHUNK]->(c:WikiChunk)-[:DOCUMENTS]->(s:FacilitySignal)
+        WHERE p.id IN $page_ids
+        WITH DISTINCT s, coalesce(s.data_class, 'unclassified') AS dc
+        WITH dc, collect(s) AS sigs
+        WITH dc, sigs, size(sigs) AS total
+        RETURN dc AS category, total,
+               [x IN sigs[..$cap] | {
+                 name: x.name, unit: x.unit, pid: x.pid,
+                 access: head([(x)-[:DATA_ACCESS]->(da:DataAccess) | da.data_template])
+               }] AS samples
+        ORDER BY total DESC
+        """,
+        page_ids=[page_id],
+        cap=_FRONTED_SIGNAL_CAP,
+    )
+    if not rows:
+        return None
+    lines = [f"### Fronted signal catalogue ({', '.join(databases)})"]
+    for row in rows:
+        category = row.get("category") or "unclassified"
+        total = row.get("total") or 0
+        lines.append(f"- **{category}** — {total} signals")
+        for sample in row.get("samples") or []:
+            detail = _sample_detail(sample)
+            lines.append(f"    - {sample.get('name')}{detail}")
+        access = next(
+            (s.get("access") for s in row.get("samples") or [] if s.get("access")),
+            None,
+        )
+        if access:
+            lines.append(f"    read call: {access.splitlines()[0]}")
+    return "\n".join(lines)
+
+
+def _sample_detail(sample: dict[str, Any]) -> str:
+    """Compact unit/pid suffix for a fronted-signal sample."""
+    bits = [b for b in (sample.get("unit"), sample.get("pid")) if b]
+    return f" ({', '.join(bits)})" if bits else ""
 
 
 def _fetch_wiki_document(gc: GraphClient, resource: str) -> str | None:
@@ -1528,21 +1641,23 @@ def _text_search_code_chunks(
     try:
         if facility is not None:
             cypher = """
-                CALL db.index.fulltext.queryNodes('code_chunk_text', $query)
+                CALL db.index.fulltext.queryNodes('code_chunk_text', $search_query)
                 YIELD node AS cc, score
                 WHERE cc.facility_id = $facility
                 RETURN cc.id AS id, score
                 LIMIT $limit
             """
-            results = gc.query(cypher, query=query, facility=facility, limit=k * 2)
+            results = gc.query(
+                cypher, search_query=query, facility=facility, limit=k * 2
+            )
         else:
             cypher = """
-                CALL db.index.fulltext.queryNodes('code_chunk_text', $query)
+                CALL db.index.fulltext.queryNodes('code_chunk_text', $search_query)
                 YIELD node AS cc, score
                 RETURN cc.id AS id, score
                 LIMIT $limit
             """
-            results = gc.query(cypher, query=query, limit=k * 2)
+            results = gc.query(cypher, search_query=query, limit=k * 2)
         if results:
             return results
     except Exception:
