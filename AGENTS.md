@@ -74,6 +74,32 @@ message. They are `imas_codex/graph/models.py`, `imas_codex/graph/dd_models.py`,
 `agents/schema-reference.md` — the same set the never-stage rule below names.
 Copy each one (`cp -n`), never symlink, for the write-through reason above.
 
+**A fenced worker cannot run bare `ssh`, so every brief that reaches a facility
+host carries the wrapper below before its first remote call.** Inside the
+bwrap user namespace reckon's fence creates, the root-owned system include
+`/etc/ssh/ssh_config.d/50-redhat.conf` appears owned by `nobody` and OpenSSH
+refuses to parse its configuration at all: `Bad owner or permissions on
+/etc/ssh/ssh_config.d/50-redhat.conf`. Every subprocess that resolves `ssh` from
+`PATH` then fails — `imas_codex/remote/executor.py`, the wiki scraper's document
+fetch (which surfaces as `curl failed: Bad owner …`) and a plain `ssh <host>` —
+and the symptom reads like a remote outage. Measured 2026-10-05 by three
+independent nodes on `98dci4-clu-2018`. The wrapper loads only the user's own
+config, so hosts, ports, jump hops and identities are exactly the ones
+`~/.ssh/config` already defines; it changes nothing about how a facility sees
+the connection:
+
+```bash
+mkdir -p /tmp/sshwrap && printf '#!/bin/sh\nexec /usr/bin/ssh -F "$HOME/.ssh/config" "$@"\n' > /tmp/sshwrap/ssh \
+  && chmod +x /tmp/sshwrap/ssh && export PATH=/tmp/sshwrap:$PATH
+ssh -o BatchMode=yes <host> hostname     # positive control before any remote work
+```
+
+The executor must not drop the system config to suit one sandbox, so the
+durable fix is reckon's fence (plan `a-worker-cannot-write-your-home`); until
+it lands, a worker reporting "the tunnel is down" is checked from the
+coordinator's own shell first, because a genuine hop outage looks identical
+from inside the worker (both happened on 2026-10-05).
+
 **Checkpointing:** one verified checkpoint protects a body of work, taken from the
 main checkout; there is no recurring backup discipline. It stops the database, so
 every graph-touching worker must be at rest. A bare export lands in `EXPORTS_DIR`;
