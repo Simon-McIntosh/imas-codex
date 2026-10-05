@@ -11,7 +11,11 @@
     operator call. The page-id-keyed <code>apply_dynamic_page_rule</code> is
     replaced by <code>mark_dynamic_handbook_pages</code>, applied at the end of
     <code>ingest_pages</code>, which reads the stored linking chunks and so
-    marks a topic whose own ingest was skipped for lack of content.
+    marks a topic whose own ingest was skipped for lack of content. A failure
+    of that marker is raised out of the run, not logged away, so a complete
+    ingestion is never reported while the dynamic-page guarantee did not hold;
+    the marker also sets the page's <code>status</code> to
+    <code>ingested</code> in the same write.
   </p>
 
   <p id="handbook-rule-in-pipeline-marked">
@@ -27,21 +31,27 @@
     <code>DataInformation</code> &rarr; <code>['UDDB', 'EQDB', 'FAME']</code>;
     <code>CategoryInformation2</code> &rarr; <code>['LCDB', 'MBDB']</code>. Each
     carries one stub chunk, and all three stub chunks have a non-null
-    <code>embedding</code> (Cypher count: <strong>3</strong>). The EDDB-fronting
-    page reaches <strong>12,596</strong> <code>FacilitySignal</code> nodes
-    through <code>DOCUMENTS</code>.
+    <code>embedding</code> (Cypher count: <strong>3</strong>). All three now
+    carry <code>status=ingested</code> rather than the <code>skipped</code> a
+    content-less ingest left behind. The EDDB-fronting page reaches
+    <strong>12,596</strong> <code>FacilitySignal</code> nodes through
+    <code>DOCUMENTS</code>.
   </p>
 
   <p id="handbook-rule-in-pipeline-measure">
     Gate: <code>pytest tests/wiki/test_pipeline.py tests/wiki/test_graph_ops_unit.py
-    tests/wiki/test_workers.py</code> exits 0 with 105 passed (base 103 at the
+    tests/wiki/test_workers.py</code> exits 0 with 106 passed (base 103 at the
     landed handbook-dynamic-pages node), the added
     <code>TestIngestMarksDynamicPage</code> showing a header-only form ingested
     with inbound <code>?db=</code> links is marked without an operator;
     <code>pytest -m graph tests/wiki/test_pipeline.py -k database_merge</code>
     exits 0, EXPLAINing the fourth <code>DOCUMENTS</code> merge against the live
-    graph. Negative control: removing the detector call from the ingest path
-    fails <code>TestIngestMarksDynamicPage::test_ingest_marks_dynamic_page</code>
+    graph — the statement is the module constant
+    <code>FRONTS_DATABASE_DOCUMENTS_MERGE</code> that
+    <code>link_chunks_to_entities</code> runs, so the gate parses the production
+    Cypher and not a copy. Negative control: removing the detector call from the
+    ingest path fails
+    <code>TestIngestMarksDynamicPage::test_ingest_marks_dynamic_page</code>
     with exit 1.
   </p>
 
