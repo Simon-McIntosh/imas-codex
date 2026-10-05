@@ -16,7 +16,10 @@ No live infrastructure needed — all graph/SSH/LLM calls are mocked.
 
 from __future__ import annotations
 
+import ast
 import asyncio
+import re
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -563,6 +566,67 @@ class TestSeedWorker:
         written_access = mock_persist.call_args.args[0]
         assert written_access.id == f"{FACILITY}:mdsplus:tree_tdi"
         assert written_access.facility_id == FACILITY
+
+
+_DATA_ACCESS_MERGE = re.compile(r"MERGE \(.*:DataAccess")
+
+
+def _data_access_merge_sites(src: str) -> list[tuple[int, str]]:
+    """Return ``(lineno, text)`` for every DataAccess MERGE statement."""
+    return [
+        (i + 1, line.strip())
+        for i, line in enumerate(src.splitlines())
+        if _DATA_ACCESS_MERGE.search(line)
+    ]
+
+
+def _enclosing_function_name(src: str, lineno: int) -> str | None:
+    """Name the innermost function containing ``lineno``, or None."""
+    tree = ast.parse(src)
+    owner: ast.FunctionDef | ast.AsyncFunctionDef | None = None
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            end = node.end_lineno or node.lineno
+            if node.lineno <= lineno <= end and (
+                owner is None or node.lineno > owner.lineno
+            ):
+                owner = node
+    return owner.name if owner is not None else None
+
+
+class TestSingleDataAccessWriter:
+    """The signals pipeline writes every DataAccess through one function."""
+
+    def test_one_data_access_merge_inside_persist_data_access(self):
+        """Exactly one DataAccess MERGE, inside persist_data_access."""
+        from imas_codex.discovery.signals import parallel as parallel_mod
+
+        src_path = Path(parallel_mod.__file__)
+        src = src_path.read_text(encoding="utf-8")
+        sites = _data_access_merge_sites(src)
+        assert len(sites) == 1, (
+            f"expected exactly one DataAccess MERGE in signals discovery, "
+            f"found {len(sites)}: {sites}"
+        )
+        line_no, _ = sites[0]
+        owner = _enclosing_function_name(src, line_no)
+        assert owner == "persist_data_access", (
+            f"the DataAccess MERGE at line {line_no} is not inside "
+            f"persist_data_access (owner={owner})"
+        )
+
+    def test_scan_flags_a_second_merge(self):
+        """Self-test: a planted second MERGE is reported, not silently allowed."""
+        synthetic = (
+            "def persist_data_access(data_access):\n"
+            "    gc.query('MERGE (da:DataAccess {id: $id})')\n"
+            "\n"
+            "def seed_worker(state):\n"
+            "    gc.query('MERGE (da:DataAccess {id: other})')\n"
+        )
+        sites = _data_access_merge_sites(synthetic)
+        assert len(sites) == 2, sites
+        assert _enclosing_function_name(synthetic, sites[1][0]) == "seed_worker"
 
 
 class TestEpochWorker:

@@ -35,6 +35,7 @@ from dataclasses import dataclass
 from imas_codex.remote.tools import (
     check_tool,
     install_tool,
+    probe_remote_environment,
     run,
 )
 
@@ -152,6 +153,19 @@ def _parse_uv_python_list(output: str) -> list[PythonVersion]:
     return versions
 
 
+def _probe_facility_environment(facility: str | None) -> dict | None:
+    """Probe a remote facility's declared environment once.
+
+    Returns the probe mapping for a remote facility and None for the local
+    path, which has no remote environment to open. Callers that resolve a
+    facility pass this to :func:`get_python_status` so a single probe judges
+    the interpreter floor for the whole invocation.
+    """
+    if facility is None or str(facility).lower() == "local":
+        return None
+    return probe_remote_environment(facility)
+
+
 def get_python_status(
     facility: str | None = None,
     *,
@@ -173,8 +187,9 @@ def get_python_status(
             returned by :func:`imas_codex.remote.tools.probe_remote_environment`
             (or carried on ``check_all_tools``'s ``environment`` entry). Passed
             in rather than probed here so one CLI invocation opens the remote
-            environment exactly once; omitted only on the local path, which has
-            no facility to probe.
+            environment exactly once; every facility-resolving caller supplies
+            it, and it is None only on the local path, which has no facility to
+            probe.
 
     Returns:
         PythonStatus with complete environment info
@@ -471,8 +486,10 @@ def create_venv(
             "error": "uv not installed. Run 'imas-codex tools install <facility> --tool uv' first.",
         }
 
-    # Check available Pythons
-    status = get_python_status(facility=facility)
+    # Check available Pythons, judging the facility's declared remote
+    # environment from a single probe of this invocation.
+    environment = _probe_facility_environment(facility)
+    status = get_python_status(facility=facility, environment=environment)
 
     # Determine which Python to use
     python_arg = ""
@@ -598,7 +615,22 @@ def setup_python_env(
         )
 
     # Step 2: Check/install Python
-    status = get_python_status(facility=facility)
+    environment = _probe_facility_environment(facility)
+    status = get_python_status(facility=facility, environment=environment)
+
+    # A facility whose declared remote interpreter is below its floor is
+    # refused before any install: the block's own setup commands raise the
+    # interpreter, and building a venv under a below-floor interpreter would
+    # report success while scans keep running the unmet one.
+    if environment and environment.get("declared") and status.meets_floor is False:
+        results["success"] = False
+        results["environment"] = environment
+        results["error"] = (
+            f"declared remote interpreter {environment.get('python_version')} "
+            f"is below the floor {environment.get('floor')}"
+        )
+        return results
+
     needs_python = not status.has_modern_python
 
     if needs_python or force:

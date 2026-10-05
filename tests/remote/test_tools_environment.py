@@ -277,3 +277,33 @@ class TestGetPythonStatusFloor:
         assert status.environment is None
         assert status.meets_floor is None
         assert status.active_python is None
+
+
+class TestSetupPythonEnvFloor:
+    def test_declared_below_floor_interpreter_is_refused(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Setup refuses a facility whose declared interpreter is below its floor.
+
+        The interpreter the block declares is the one scans run under; building
+        a venv beneath it would report success while scans keep using the
+        unmet interpreter, so setup stops and names the floor.
+        """
+        monkeypatch.setattr(
+            remote_python,
+            "check_tool",
+            lambda key, facility=None: {
+                "available": key == "uv",
+                "version": "1.0" if key == "uv" else None,
+            },
+        )
+        monkeypatch.setattr(remote_python, "run", lambda *a, **k: "")
+        monkeypatch.setattr(
+            remote_python,
+            "probe_remote_environment",
+            lambda facility, **kw: _declared("3.10.6", "3.12", [], SETUP),
+        )
+        result = remote_python.setup_python_env("jt-60sa")
+        assert result["success"] is False
+        assert "3.12" in result["error"]
+        assert all(step["step"] != "create_venv" for step in result["steps"])
