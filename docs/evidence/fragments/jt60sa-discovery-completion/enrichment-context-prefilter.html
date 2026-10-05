@@ -43,6 +43,19 @@
     been returning no rows at all. With the threshold behind the join and
     <code>WITH</code>, the rebuilt query plans and returns three jt-60sa chunks.
   </p>
+  <p id="enrichment-context-prefilter-handler">
+    The code-context query also dropped its broad
+    <code>except Exception</code>, which logged a failure at debug level and
+    returned no chunks — making a planner error indistinguishable from a
+    facility genuinely having no relevant code, and hiding exactly the failure
+    above. The query now runs in a <code>_fetch_code_chunks</code> helper that
+    catches only a <code>ClientError</code> carrying
+    <code>Neo.ClientError.Schema.IndexNotFound</code>, the one condition under
+    which enrichment can proceed without code context. Any other Neo4j failure
+    propagates. <code>TestCodeContextLookupErrors</code> pins both: a
+    <code>DatabaseError</code> and an unrelated <code>ClientError</code> raise,
+    while the absent-index case returns empty.
+  </p>
   <p id="enrichment-context-prefilter-gate">
     Tests pin both in-<code>SEARCH</code> predicates
     (<code>tests/discovery/test_scanners.py</code>,
