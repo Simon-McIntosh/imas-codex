@@ -2,7 +2,8 @@
 """Validate JT-60SA EDAS signals return data for a reference shot.
 
 This script runs on the JT-60SA host where eddb_pwrapper is available.
-It calls eddbreadOne() for each signal to verify data exists.
+It reads each signal for the shot: eddbreadTime for a time series,
+eddbreadOne for a one-point datum.
 
 Requirements:
 - Python 3.8+ (stdlib only except eddb_pwrapper)
@@ -121,27 +122,31 @@ def main():
     results = []
     for sig in signals:
         try:
-            # Use eddbreadTable to check if the signal exists in the catalog
-            # eddbreadTable returns (rtn_bool, rtn_data)
-            tbl_ok, tbl_data = db.eddbreadTable(
-                shot=ref_shot,
-                cat=sig["category"],
-                dname=sig["data_name"],
-            )
-            if tbl_ok and tbl_data and tbl_data.get("count", 0) > 0:
-                results.append(
-                    {
-                        "id": sig["id"],
-                        "success": True,
-                        "dtype": "edas_table",
-                    }
+            # A check reads data, not the catalogue: a time series through
+            # eddbreadTime over a short window (string bounds), a one-point
+            # datum through eddbreadOne. A catalogue hit says a name is
+            # registered, not that the shot carries it.
+            if sig.get("data_class") == "O":
+                ok, rtn = db.eddbreadOne(
+                    ref_shot, sig["category"], sig["data_name"], None, 0, 0
                 )
+                count = (rtn or {}).get("count", 0) if ok else 0
+                dtype = "one_point"
             else:
+                ok, rtn = db.eddbreadTime(
+                    ref_shot, sig["category"], sig["data_name"], "0", "0.01"
+                )
+                count = (rtn or {}).get("ntime", 0) if ok else 0
+                dtype = "time_series"
+            if ok and count:
+                results.append({"id": sig["id"], "success": True, "dtype": dtype})
+            else:
+                irc = (rtn or {}).get("irc") if isinstance(rtn, dict) else None
                 results.append(
                     {
                         "id": sig["id"],
                         "success": False,
-                        "error": "not found in eddbreadTable",
+                        "error": f"no data for {ref_shot} (irc={irc})",
                     }
                 )
         except Exception as e:

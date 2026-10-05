@@ -144,8 +144,10 @@ class EDASScanner:
                 f"db = eddbWrapper('{lib_path}')\n"
                 "db.eddbOpen()"
             ),
+            # eddbreadTime takes its time bounds as strings; omitting both
+            # returns the whole record (measured 740,900 points for a coil current).
             data_template=(
-                "ok, rtn = db.eddbreadTime('{shot}', '{category}', '{data_name}', 0, 99)\n"
+                "ok, rtn = db.eddbreadTime('{shot}', '{category}', '{data_name}', '0', '99')\n"
                 "data = rtn['data'] if ok else None"
             ),
             cleanup_template="db.eddbClose()",
@@ -161,7 +163,22 @@ class EDASScanner:
             description = raw.get("description", "")
 
             signal_id = f"{facility}:general/{cat.lower()}_{dname.lower()}"
-            accessor = f"eddbreadTime('{shot_str}', '{cat}', '{dname}', t1, t2)"
+            data_class = raw.get("data_class", "")
+            if data_class == "O":
+                accessor = f"eddbreadOne('{shot_str}', '{cat}', '{dname}', None, 0, 0)"
+            else:
+                accessor = f"eddbreadTime('{shot_str}', '{cat}', '{dname}', t1, t2)"
+            keywords = [
+                k
+                for k in (
+                    f"class:{data_class}" if data_class else "",
+                    f"shots:{raw.get('shot_range', '')}"
+                    if raw.get("shot_range")
+                    else "",
+                    f"udpid:{raw.get('udp_id', '')}" if raw.get("udp_id") else "",
+                )
+                if k
+            ]
 
             signals.append(
                 FacilitySignal(
@@ -176,6 +193,8 @@ class EDASScanner:
                     data_source_path=f"{cat}/{dname}",
                     unit=units,
                     description=description,  # May be Japanese
+                    keywords=keywords or None,
+                    aliases=[raw["alias"]] if raw.get("alias") else None,
                     discovery_source="edas",
                     example_shot=ref_shot,
                 )
@@ -244,7 +263,22 @@ class EDASScanner:
         for s in signals:
             parts = (s.name or "").split("/")
             if len(parts) == 2:
-                batch.append({"id": s.id, "category": parts[0], "data_name": parts[1]})
+                data_class = next(
+                    (
+                        k.split(":", 1)[1]
+                        for k in (s.keywords or [])
+                        if k.startswith("class:")
+                    ),
+                    "",
+                )
+                batch.append(
+                    {
+                        "id": s.id,
+                        "category": parts[0],
+                        "data_name": parts[1],
+                        "data_class": data_class,
+                    }
+                )
             else:
                 batch.append({"id": s.id, "category": "", "data_name": ""})
 

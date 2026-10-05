@@ -1,10 +1,13 @@
 /* dashboard.css — plan-domain widgets.
  *
+ * Ownership: primitive layer. Reusable plan-domain widgets live here;
+ * application layout and view-specific composition belong to later layers.
+ *
  * Middle layer: knows about plans, sprints, milestones, blockers,
  * decisions, research items, NEXT handoffs, and test pulses.
  *
- * Canonical home: ~/.claude/skills/html-docs/assets/dashboard.css
- * Shipped from dotfiles. Same load convention as foundation.css —
+ * Canonical source: docs/_shared/dashboard.css.
+ * The reckon-sync asset is an exact mirror. Same load convention as foundation.css —
  * load AFTER foundation.css and BEFORE project.css.
  *
  * Composition contract: every selector either
@@ -59,7 +62,7 @@
 .roi.low  i:nth-child(1)    { background: var(--accent); }
 .roi.low  i:nth-child(n+2)  { background: var(--line-2); }
 
-/* ===== Tag (milestone / effort / tier) ========================== */
+/* ===== Tag (milestone / effort / capability) ==================== */
 
 .tag {
   display: inline-flex;
@@ -76,7 +79,7 @@
 }
 .tag.ms { background: var(--accent-3); border-color: transparent; color: var(--accent); }
 .tag.dim { color: var(--muted); }
-.tag.tier { font-family: var(--sans); }
+.tag.capability { font-family: var(--sans); }
 
 /* ===== Progress bars ============================================ */
 

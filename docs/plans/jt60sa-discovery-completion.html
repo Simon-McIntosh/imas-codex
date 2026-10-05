@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="jt60sa-discovery-completion">
+  <meta name="plan-title"     content="JT-60SA Discovery Completion">
+  <meta name="plan-summary"   content="Finish JT-60SA discovery: run the repaired EDAS signal scanner, ingest the handbook tables from EDDB, recover the failed document ingest, and discover the equilibrium code">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="30.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S16">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="jt-60sa,signals,discovery,wiki">
+  <meta name="plan-blocks"    content="imas-ambix:jt60sa-machine-map">
+  <meta name="plan-informs"   content="jt60sa-eddb-census">
+  <title>JT-60SA Discovery Completion | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Facility breadth · JT-60SA</p>
+      <h1>JT-60SA Discovery Completion</h1>
+      <p class="lead">
+        Paths and wiki discovery for JT-60SA are complete; signals and code have never run,
+        half the documents failed, and the handbook's signal tables entered the graph as
+        empty forms. This plan closes those four gaps so the ambix machine map can join
+        every EDDB channel to its handbook entry, PID and access template, and so
+        <code>search_signals</code> and <code>search_code</code> answer for jt-60sa.
+      </p>
+    </header>
+
+    <h2 id="s1">§1 — Where discovery stands, measured</h2>
+    <p>
+      Read from the ITER graph on 2026-10-05 through the repaired codex tunnel
+      (<code>bolt://localhost:17687</code>, SLURM job <code>codex-neo4j</code> on
+      98dci4-gpu-0002). <strong>Paths:</strong> 8,324 scanned and triaged, 3,778 scored,
+      frontier 0, depth 9, with SELENE, the EQDBMS client, EDAS and the TWiki roots all scored.
+      <strong>Wiki:</strong> 4,476 pages scanned and scored, 349 ingested into 8,465 chunks,
+      4,126 skipped; both handbook index pages and the EDDB API manuals are ingested.
+      <strong>Documents:</strong> 1,049 discovered, 167 scored, 10 ingested, 530 failed, 447
+      pending ingest; images 314 captioned, 311 failed; $4.41 spent. <strong>Code:</strong>
+      no files. <strong>Signals:</strong> no FacilitySignal, DataAccess, Diagnostic, epoch or
+      mapping node, and no AgentRun for jt-60sa. Compared with JET and TCV, whose PPF, JPF,
+      TDI and MDSplus scanners have run end to end with epoch detection and checks, the
+      JT-60SA signal pipeline is a scaffold that has never been exercised.
+    </p>
+    <table>
+      <thead><tr><th>Domain</th><th>Scan breadth on jt-60sa</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>paths</td><td>8,324 / 8,324 triaged, 3,778 scored, 17 roots</td><td>complete</td></tr>
+        <tr><td>wiki</td><td>4,476 scored, 349 ingested, 3 sites</td><td>complete, with the dynamic-page defect in §3</td></tr>
+        <tr><td>documents</td><td>167 scored, 10 ingested, 530 failed, 447 pending</td><td>broken, §4</td></tr>
+        <tr><td>code</td><td>none</td><td>never run, §2</td></tr>
+        <tr><td>signals (EDAS)</td><td>none</td><td>never run; scanner repaired in prototype, §2</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s2">§2 — Signals and code: run the repaired EDAS scanner and discover the equilibrium sources</h2>
+    <p>
+      Every call the EDAS scanner makes was tested against nakasvr26 on 2026-10-05 and three
+      defects were found and repaired in a prototype commit on this branch.
+      <strong>Reference shot:</strong> the config carried <code>reference_shot: 1000</code>
+      with a TODO; EDDB returns nothing for E001000, and valid data starts at E080000. It is
+      now 101173, the newest E-shot the catalogue listed. <strong>Enumeration:</strong>
+      <code>enumerate_edas.py</code> read the catalogue without a shot and kept only name,
+      alias, unit and description; it now reads the table for the reference shot and keeps
+      the data class (T time series, O one-point, P parameter), the shot validity range and
+      the UDP id, which the scanner stores as <code>keywords</code>
+      (<code>class:T</code>, <code>shots:E080000-</code>) and <code>aliases</code> until the
+      FacilitySignal schema gains typed slots for them. <strong>Access:</strong>
+      <code>eddbreadTime</code> takes its time bounds as strings; the generated
+      <code>DataAccess</code> template passed integers and raised. <strong>Check:</strong>
+      the check script tested catalogue presence rather than data; it now reads a short
+      window with <code>eddbreadTime</code> for class T and <code>eddbreadOne</code> for
+      class O. The scanner unit tests (55) pass; the live scan has not been run.
+    </p>
+    <p>
+      Done-when: <code>imas-codex discover signals jt-60sa -s edas --scan-only</code>
+      lands one FacilitySignal per (category, data name) for E101173 with class, shot range
+      and alias carried, at least 741 signals across MAG, MDAC, PSRC, FAME and MMSYS (the
+      census in <code>jt60sa-eddb-census</code> is the floor), the check stage passes for the
+      flux loops, probes and coil currents it names, and enrichment runs under a cost cap
+      with the Japanese descriptions translated. Then <code>discover code jt-60sa</code>
+      scoped to <code>/analysis/src/SAselene*</code>, <code>SAeqread</code>,
+      <code>client_eqdbms*</code>, <code>SAeqfame</code> and <code>edas2</code> chunks the
+      equilibrium sources so enrichment has code context and <code>search_code</code>
+      answers for SELENE and the EQDBMS record layout. Both runs are heavy and run from the
+      ITER host on the local lane, never on a login node.
+    </p>
+
+    <h2 id="s3">§3 — The handbook tables are CGI forms: ingest them from EDDB, and mark dynamic pages</h2>
+    <p>
+      The JT-60SA Data Handbook page links seven per-database tables
+      (<code>CategoryInformation?db=EDDB</code>, <code>DataInformation?db=EQDB</code>, FAME,
+      LCDB, MBDB, PMDB, UDDB). Each is a TWiki topic whose body is a search form and an empty
+      table that a CGI plugin fills from the database at render time. The twiki_raw adapter
+      reads the topic source over ssh, so each landed as a one-chunk page containing only
+      column headers (<em>Category, DataName, PID No., Unit, Description, Shot, State</em>) and
+      a form. The rendered page cannot be fetched either: the TWiki host 157.111.10.188 is on
+      the nakasvr23 segment, unreachable from nakasvr26 (HTTP 000 through the tunnel and from
+      the server itself on 2026-10-05), and the topic files are not present on nakasvr26.
+    </p>
+    <p>
+      The content those tables render is the EDDB catalogue itself, which the §2 scanner
+      reads directly with the same columns, so the fix is structural rather than a scrape:
+      (a) the §2 scan is the ingestion of the handbook tables, and each FacilitySignal links
+      to the handbook page for its database through a <code>DOCUMENTED_IN</code> edge so a
+      reader of the page reaches the rows; (b) the wiki scorer gains a dynamic-page rule — a
+      page whose rendered text is only table headers and form labels is marked
+      <code>dynamic</code> with the database it fronts, rather than ingested as content; (c)
+      the one-point and condition data keyed by PID No. (a nine-character key, four digits
+      then five characters, read through <code>eddbreadOne</code> and
+      <code>eddbreadPara</code> with an empty PID to enumerate) is enumerated as its own
+      FacilitySignal group so the PID column is present in the graph.
+    </p>
+    <p>
+      Done-when: the seven handbook table pages carry <code>status: dynamic</code> and a
+      <code>fronts_database</code> value; every FacilitySignal from §2 has a
+      <code>DOCUMENTED_IN</code> edge to its database's handbook page; a PID-keyed one-point
+      enumeration for E101173 is in the graph with its PIDs; and
+      <code>search_docs("flux loop", facility="jt-60sa")</code> returns the PSRC flux-loop
+      signals beside the EDDB manual chunks.
+    </p>
+
+    <h2 id="s4">§4 — Document ingest: a missing dependency, then the queue</h2>
+    <p>
+      Of the 530 failed documents, 516 failed with <code>No module named 'pypdf'</code>: the
+      PDF extractor in <code>discovery/wiki/pipeline.py</code> imports pypdf, which was never
+      declared in <code>pyproject.toml</code>, so every PDF on every host failed. It is now a
+      declared dependency (prototype commit on this branch; <code>pypdf 6.19.0</code>). Seven
+      WMF images fail because Pillow has no WMF loader; one PPTX was mis-typed; six
+      <code>MISSING RESOURCE</code> links on the Code web are dead. The remaining 348
+      discovered documents and 447 pending ingests simply never ran.
+    </p>
+    <p>
+      Done-when: after <code>uv sync</code> on the ITER checkout, the 516 pypdf failures are
+      reset and re-ingested with at least 90% succeeding; WMF files and dead links are marked
+      <code>unsupported</code> with the reason rather than retried; the 447 pending ingests
+      drain under a stated cost cap; and the eDAS quick reference, the EDDB manuals and the
+      MECS and SELENE documentation PDFs are searchable through <code>search_docs</code>.
+    </p>
+
+    <h2 id="s5">§5 — Handoff notes for the ITER host</h2>
+    <p>
+      <strong>Why ITER.</strong> This work was scoped from the WSL workstation and is picked
+      up on the ITER host for the local-lane GPU compute (embedding and LLM enrichment) and
+      because the graph and embedding server already run there as SLURM jobs
+      (<code>codex-neo4j</code> 1278157 and <code>codex-embed</code> 1276248 on
+      98dci4-gpu-0002 on 2026-10-05). On ITER, <code>GraphClient()</code> resolves the SLURM
+      node directly; no tunnel is involved.
+    </p>
+    <p>
+      <strong>Network policy, binding.</strong> No connection between JT-60SA and ITER is
+      permitted in either direction. The EDAS scan, the check stage and the code scan reach
+      nakasvr26 over <code>ssh jt-60sa</code> from the workstation only, so the remote halves
+      of §2 and §3 run from the workstation and write to the ITER graph through the codex
+      tunnel, while enrichment, embedding and document ingest run on ITER. The facility
+      config comments were corrected to say so (commit c84a855fc). The TWiki host on the
+      nakasvr23 segment is unreachable from nakasvr26; the wiki content in the graph predates
+      the server migration.
+    </p>
+    <p>
+      <strong>Remote execution facts.</strong> The login shell on nakasvr26 pre-loads
+      <code>python/3.5.6</code>, which cannot run the remote scripts (f-strings). The working
+      recipe, measured 2026-10-05 and now in <code>data_systems.edas</code>, is
+      <code>module unload python/3.5.6; module load python/3.12</code> and then the module's
+      own <code>python</code> (3.12.9, numpy 2.4.2, EDDB wrapper returns arrays).
+      <code>python3</code> stays the system 3.9 without numpy, <code>/usr/bin/python3.12</code>
+      has no numpy, and <code>module purge</code> drops the module path so the load silently
+      fails. The scanner passes <code>python_command</code> and <code>setup_commands</code> to
+      the remote executor; §6 is where this becomes a contract rather than a per-facility
+      comment. The wrapper is
+      <code>/analysis/src/eddb/eddb_pwrapper.py</code> with <code>/analysis/lib/libeddb.so</code>;
+      set <code>NUMPY = True</code> for arrays. Run under <code>nice -n 19</code>. Measured
+      call shapes, sizes and the full channel listing are in <code>jt60sa-eddb-census</code>.
+    </p>
+    <p>
+      <strong>What is committed and what is not.</strong> Committed on this branch: pypdf
+      dependency; <code>enumerate_edas.py</code>, <code>check_edas.py</code> and the scanner
+      repairs; <code>reference_shot: 101173</code>; the census research doc. Not run: the live
+      EDAS scan, the code scan, the document re-ingest, the dynamic-page rule, the
+      <code>DOCUMENTED_IN</code> linkage and the PID enumeration. The scanner stores class,
+      shot range and UDP id in <code>keywords</code> as a stopgap; the typed slots belong in
+      <code>schemas/facility.yaml</code> with a <code>build-models</code> regeneration, which
+      is a graph-touching node and must be dispatched as <code>test</code> or
+      <code>implement</code>, never <code>review</code> or <code>investigate</code>.
+    </p>
+    <p>
+      <strong>Consumer.</strong> The ambix plan <code>imas-ambix:jt60sa-machine-map</code>
+      gates its §5 census on §2 here and reads the census doc; its own handoff notes name the
+      same facts from the map's side.
+    </p>
+
+    <h2 id="s6">§6 — A remote environment contract per facility</h2>
+    <p>
+      Every remote step codex runs at a facility — signal enumeration, data checks, code
+      scans, path scans — depends on an interpreter and a shell environment that the facility
+      sets up differently: module loads on nakasvr26 and ITER, a project virtualenv on some
+      hosts, an environment file of credentials or library paths on others. Today that
+      knowledge lives in two loosely typed keys under one data system
+      (<code>python_command</code>, <code>setup_commands</code>) and in prose comments, so the
+      same host's code scan and signal scan can disagree, and a wrong default fails as a
+      syntax error inside a worker rather than as a configuration finding.
+    </p>
+    <p>
+      This section lifts it to one facility-level <code>remote_environment</code> block that
+      every remote executor applies before any script: ordered <code>setup_commands</code>
+      (module unloads and loads, <code>source</code> of an env file, virtualenv activation),
+      the <code>python_command</code> that is valid after them, the minimum interpreter
+      version the remote scripts require, and an optional per-data-system override. A
+      <code>discover preflight &lt;facility&gt;</code> probe runs the block once, prints the
+      resolved interpreter, version and importability of the libraries each scanner needs
+      (numpy and the EDDB wrapper here; MDSplus or UDA elsewhere), and refuses the scan when
+      the floor is not met, so an unmet environment is a finding with the fix command, not a
+      traceback. Done-when: the block exists in the facility schema and in
+      <code>jt-60sa.yaml</code>, <code>iter.yaml</code> and <code>tcv.yaml</code>; the executor
+      reads it for every script; and the preflight passes on nakasvr26 with the 3.12 recipe
+      and fails, naming the floor, with the recipe removed.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="signal-metadata-slots" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Do data class, shot range and PID become typed FacilitySignal slots now, or stay in keywords for this plan?</p>
+        <p class="r-dec-ctx">Typed slots need a schema change and model regeneration across the fleet; keywords work today but are not queryable by type.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="typed-slots-now">Add typed slots in §2 before the scan</button>
+          <button class="r-opt" data-value="keywords-then-migrate">Scan with keywords, migrate to slots in a follow-on section</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="dynamic-page-handling" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How are CGI-rendered handbook tables represented?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="dynamic-status-plus-signal-links">Mark the page dynamic and link FacilitySignals to it</button>
+          <button class="r-opt" data-value="synthesised-table-chunks">Synthesise table chunks from EDDB into the page</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-jdc-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-written-by="reckon-create" data-written-at="2026-10-05"
+               data-recommends-skill="/reckon-build jt60sa-discovery-completion §2">
+        <h4 class="r-fu-title">Run the repaired EDAS scan for E101173 from the workstation and verify the graph</h4>
+        <div class="r-fu-body">
+          Set the remote Python in the facility config first (§5), then scan-only, inspect
+          counts per category against the census floor, then check and enrich under a cost cap.
+          The scan must originate from the workstation because only it may reach nakasvr26.
+        </div>
+        <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §2</pre>
+      </article>
+      <article class="r-fu" data-id="f-jdc-002" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-written-by="reckon-create" data-written-at="2026-10-05"
+               data-recommends-skill="/reckon-build jt60sa-discovery-completion §4">
+        <h4 class="r-fu-title">Sync pypdf on the ITER checkout and re-ingest the 516 failed PDFs</h4>
+        <div class="r-fu-body">
+          Reset the pypdf failures to discovered, run document ingest on ITER under a cost cap,
+          and mark WMF files and dead links unsupported with the reason.
+        </div>
+        <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §4</pre>
+      </article>
+    </section>
+
+    <section data-reckon="questions" id="questions" class="r-questions">
+      <h2><span class="sec">§</span> Open questions</h2>
+      <div class="r-q" data-id="remote-python" data-section="s2"
+           data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-10-05"
+           data-resolved-at="2026-10-05" data-resolved-by="Simon McIntosh">
+        <p class="r-q-body">Which Python on nakasvr26 runs the remote scripts together with the EDDB wrapper and numpy, and should it be pinned in data_systems.edas.python_command or via setup_commands?</p>
+        <p class="r-q-resolution">Resolved 2026-10-05: <code>module unload python/3.5.6; module load python/3.12</code> then the module's <code>python</code> (3.12.9, numpy 2.4.2). Pinned in <code>data_systems.edas</code> as <code>python_command</code> plus <code>setup_commands</code> for now; §6 makes it a facility-level contract.</p>
+      </div>
+      <div class="r-q" data-id="pid-enumeration" data-section="s3"
+           data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-10-05">
+        <p class="r-q-body">eddbreadOne with an empty PID returned irc 1031 for E101173; which call enumerates the one-point data with PIDs for a shot (eddbreadPara, or eddbreadOne with a category)?</p>
+      </div>
+    </section>
+
+    <section data-reckon="research" id="research" class="r-research-list">
+      <h2><span class="sec">§</span> Research</h2>
+      <div class="r-research" data-id="r-census" data-type="doc" data-url="/imas-codex/research/jt60sa-eddb-census">
+        <span class="r-research-title">JT-60SA EDDB signal census, shot E101173</span>
+      </div>
+    </section>
+
+    <section data-reckon="comments" id="comments" class="r-comments"></section>
+  </main>
+</body>
+</html>

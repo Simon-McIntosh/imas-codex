@@ -24,9 +24,18 @@ data_systems:
     api_path: /analysis/src/eddb
     lib_path: /analysis/lib/libeddb.so
     header_path: /analysis/src/edas/include
-    reference_shot: 1000  # TODO: confirm valid reference shot
-    # No special Python or module setup needed — eddb_pwrapper uses ctypes
-    # and the script handles sys.path insertion internally
+    # Newest E-shot the catalogue listed on 2026-10-05; valid data starts at
+    # E080000 and the scanner formats an integer as E%06d.
+    reference_shot: 101173
+    # The login shell pre-loads python/3.5.6, which cannot run the remote
+    # scripts (f-strings). Swap to the python/3.12 module and call its own
+    # `python` binary: /usr/bin/python3 stays 3.9 and `module purge` drops the
+    # module path. Measured 2026-10-05: python 3.12.9, numpy 2.4.2, the EDDB
+    # wrapper returns arrays. eddb_pwrapper itself needs only numpy + ctypes.
+    python_command: python
+    setup_commands:
+      - module unload python/3.5.6
+      - module load python/3.12
 
   # IMAS data available via modules
   imas:

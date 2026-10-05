@@ -56,7 +56,7 @@ dependencies = [
     "pint>=0.24.4,<0.25.0",
     "nest-asyncio>=1.5.0,<2.0.0",
     "click>=8.0.0,<9.0.0",
-    "python-dotenv>=1.2.2",     # CVE-2026-28684
+    "python-dotenv>=1.2.2", # CVE-2026-28684
     "PyYAML>=6.0,<7.0",
     "numpy>=2.3.1",
     "cachetools>=5.3.0,<6.0.0",
@@ -72,16 +72,17 @@ dependencies = [
     # Security: CVE fix requires lxml>=6.1.0 (indirect via python-pptx/python-docx)
     "lxml>=6.1.0",
     "breame>=0.1.2",
-    "Pillow>=12.2.0",           # bounded typed image validation
+    "Pillow>=12.2.0", # bounded typed image validation
     # Security floor constraints for transitive dependencies
-    "urllib3>=2.7.0",            # CVE-2026-44432, CVE-2026-44431
+    "urllib3>=2.7.0", # CVE-2026-44432, CVE-2026-44431
     "python-multipart>=0.0.27", # CVE-2026-42561, CVE-2026-40347
-    "authlib>=1.6.11",          # CVE-2026-27962, CVE-2026-28498, CVE-2026-28490, CVE-2026-41425
-    "aiohttp>=3.13.4",          # CVE-2026-34525 + 10 more aiohttp CVEs
-    "tornado>=6.5.5",           # CVE-2026-35536, CVE-2026-31958
-    "cryptography>=46.0.7",     # CVE-2026-39892, CVE-2026-34073
-    "PyJWT>=2.12.0",            # CVE-2026-32597
-    "Pygments>=2.20.0",         # CVE-2026-4539
+    "authlib>=1.6.11", # CVE-2026-27962, CVE-2026-28498, CVE-2026-28490, CVE-2026-41425
+    "aiohttp>=3.13.4", # CVE-2026-34525 + 10 more aiohttp CVEs
+    "tornado>=6.5.5", # CVE-2026-35536, CVE-2026-31958
+    "cryptography>=46.0.7", # CVE-2026-39892, CVE-2026-34073
+    "PyJWT>=2.12.0", # CVE-2026-32597
+    "Pygments>=2.20.0", # CVE-2026-4539
+    "pypdf>=6.19.0",
 ]
 
 [project.optional-dependencies]

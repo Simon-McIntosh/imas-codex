@@ -98,7 +98,9 @@ def main():
             # eddbreadTable returns (rtn_bool, rtn_data) where rtn_data is dict
             # with keys: count, data, dnamelist, aliaslist, udpidlist,
             #            classlist, shotlist, unitlist, desclist, ircgrp, irc
-            tbl_ok, tbl_data = db.eddbreadTable(cat=cat)
+            # The table for a shot lists the data names valid at that shot;
+            # without a shot the catalogue lists every name ever registered.
+            tbl_ok, tbl_data = db.eddbreadTable(ref_shot, cat)
             if not tbl_ok or tbl_data is None:
                 continue
 
@@ -106,6 +108,12 @@ def main():
             aliases = tbl_data.get("aliaslist", [])
             units = tbl_data.get("unitlist", [])
             descs = tbl_data.get("desclist", [])
+            classes = tbl_data.get("classlist", [])
+            shot_ranges = tbl_data.get("shotlist", [])
+            udp_ids = tbl_data.get("udpidlist", [])
+
+            def _at(seq, i):
+                return seq[i].strip() if i < len(seq) and seq[i] else ""
 
             for i, dname in enumerate(dnames):
                 if not dname or not dname.strip():
@@ -113,10 +121,15 @@ def main():
                 signals.append(
                     {
                         "category": cat,
-                        "data_name": dname.strip(),
-                        "alias": aliases[i].strip() if i < len(aliases) else "",
-                        "units": units[i].strip() if i < len(units) else "",
-                        "description": descs[i].strip() if i < len(descs) else "",
+                        # dnamelist carries the full "/CAT/name" path
+                        "data_name": dname.strip().split("/")[-1],
+                        "alias": _at(aliases, i),
+                        "units": _at(units, i),
+                        "description": _at(descs, i),
+                        # T = time series, O = one-point, P = parameter
+                        "data_class": _at(classes, i),
+                        "shot_range": _at(shot_ranges, i),
+                        "udp_id": _at(udp_ids, i),
                     }
                 )
         except Exception:

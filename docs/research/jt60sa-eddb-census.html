@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="imas-codex">
+  <meta name="reckon-type"   content="research">
+  <meta name="plan-slug"     content="jt60sa-eddb-census">
+  <meta name="plan-title"    content="JT-60SA EDDB Signal Census, Shot E101173">
+  <meta name="plan-summary"  content="Catalogue of the EDDB categories that carry equilibrium magnetics, coil currents and real-time equilibrium scalars, read on 2026-10-05">
+  <meta name="plan-tags"     content="jt-60sa,signals,discovery">
+  <meta name="plan-informs"  content="jt60sa-discovery-completion,imas-ambix:jt60sa-machine-map">
+  <title>JT-60SA EDDB Signal Census, Shot E101173 | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — How it was read</h2>
+    <p>
+      Read interactively over <code>ssh jt-60sa</code> (nakasvr26, host <code>intr26-2</code>) on
+      2026-10-05 with the EDDB Python wrapper at <code>/analysis/src/eddb/eddb_pwrapper.py</code>
+      and <code>/analysis/lib/libeddb.so</code>, under <code>nice -n 19</code>, using the
+      system <code>python3</code> (3.5.6; no f-strings). <code>eddbreadShot("E101173")</code>
+      returned exactly one shot, so E101173 is the newest E-shot the catalogue lists; the
+      current pulse at the time was the coil-commissioning shot C082002. Each table below is
+      <code>eddbreadTable(shot, category)</code>; the columns are data name, class
+      (T time series, O one-point, P parameter), unit string as stored, and description.
+      Units are free text (<code>KA</code>, <code>DEG</code>, <code>T.m</code>,
+      <code>deg. C</code>) and need a normalisation table before any DD binding.
+    </p>
+    <p>
+      Call shapes measured the same day: <code>eddbreadTime(shot, cat, dname, "0.0", "0.5")</code>
+      takes string time bounds and returned 2,001 points of <code>MMSYS/curCS1LKAT</code>;
+      with no bounds it returned the full 740,900-point record from −60 s to 125 s.
+      Numeric bounds raise <code>AttributeError: 'float' object has no attribute 'encode'</code>.
+      <code>eddbreadOne</code> is the one-point and PID reader and fails (irc 1015) on a
+      time-series name. <code>eddbreadTable(cat=…)</code> with no shot returns the full
+      catalogue for the category. The UDP id column was empty for every channel read.
+    </p>
+    <h2 id="s2">§2 — Categories read</h2>
+    <table>
+      <thead><tr><th>Category</th><th>Channels</th><th>T</th><th>O</th><th>P</th></tr></thead>
+      <tbody><tr><td><code>MAG</code></td><td>18</td><td>18</td><td>0</td><td>0</td></tr><tr><td><code>MDAC</code></td><td>264</td><td>254</td><td>10</td><td>0</td></tr><tr><td><code>PSRC</code></td><td>312</td><td>298</td><td>13</td><td>0</td></tr><tr><td><code>FAME</code></td><td>100</td><td>100</td><td>0</td><td>0</td></tr><tr><td><code>MMSYS</code></td><td>47</td><td>47</td><td>0</td><td>0</td></tr></tbody>
+    </table>
+    <p>
+      The equilibrium magnetics are in <code>PSRC</code>: 34 flux loops
+      <code>magFluxLp1..34</code> (Wb), 23 poloidal probes <code>magPbTC1..23</code>, 10
+      calibrated partial fluxes <code>calFP1..10</code>, the surface flux <code>calFX</code>,
+      diamagnetic loop <code>corDmagL1</code> and the <code>calS1</code> surface integrals,
+      each with an abnormality flag, plus <code>Ip</code> and <code>calIp</code> in kA.
+      <code>MDAC</code> adds four vessel Rogowski coils <code>curAVVRC1..4</code>, 41 halo
+      Rogowski coils, one-turn voltage, diamagnetic loop voltages and the raw coil-current
+      observations <code>oCS1Cur..oEF6Cur</code>, <code>oTFCur</code>. <code>MMSYS</code> holds
+      the CS, EF, FPPC and TF currents from two measurement chains (HiTec, LKAT) and the
+      coil voltages. <code>FAME</code> holds 100 real-time equilibrium scalars. <code>MAG</code>
+      holds only MHD fluctuation probes.
+    </p>
+    <h2 id="s3">§3 — Full listing</h2>
+    <pre style="font-size:12px;white-space:pre-wrap">MAG/MHDp01 | T | T/s | Magnetic fluctuation for MHD P01 (18)
+MAG/MHDp04 | T | T/s | Magnetic fluctuation for MHD P04 (18)
+MAG/MHDp07 | T | T/s | Magnetic fluctuation for MHD P07 (18)
+MAG/MHDp10 | T | T/s | Magnetic fluctuation for MHD P10 (18)
+MAG/MHDp13 | T | T/s | Magnetic fluctuation for MHD P13 (18)
+MAG/MHDp16 | T | T/s | Magnetic fluctuation for MHD P16 (18)
+MAG/MHDtor | T | T/s | Magnetic fluctuation for Toroidal mode number
+MAG/tmode0 | T | T/s | Magnetic fluctuation amplitude (n=0)
+MAG/tmode1 | T | T/s | Magnetic fluctuation amplitude (n=1)
+MAG/tmode1cos | T | T/s | Cos component of Magnetic fluctuation (n=1)
+MAG/tmode1sin | T | T/s | Sin component of Magnetic fluctuation (n=1)
+MAG/tmode2 | T | T/s | Magnetic fluctuation amplitude (n=2)
+MAG/tmode2cos | T | T/s | Cos component of Magnetic fluctuation (n=2)
+MAG/tmode2sin | T | T/s | Sin component of Magnetic fluctuation (n=2)
+MAG/tmode3 | T | T/s | Magnetic fluctuation amplitude (n=3)
+MAG/tmode3cos | T | T/s | Cos component of Magnetic fluctuation (n=3)
+MAG/tmode3sin | T | T/s | Sin component of Magnetic fluctuation (n=3)
+MAG/wdia7RT | T |  | Stored energy
+MDAC/DaqFinTime | O | ms | Data acquisition finish time
+MDAC/DaqStrTime | O | ms | Data acquisition start time
+MDAC/NcrP10CamH | T | cps | NFM P10 Neutron Counting Rate (MSV-H)
+MDAC/NcrP10CamL | T | cps | NFM P10 Neutron Counting Rate (MSV-L)
+MDAC/NcrP10CamM | T | cps | NFM P10 Neutron Counting Rate (MSV-M)
+MDAC/NcrP10PlsH | T | cps | NFM P10 Neutron Counting Rate (Pulse-H)
+MDAC/NcrP10PlsL | T | cps | NFM P10 Neutron Counting Rate (Pulse-L)
+MDAC/NcrP18CamH | T | cps | NFM P18 Neutron Counting Rate (MSV-H)
+MDAC/NcrP18CamL | T | cps | NFM P18 Neutron Counting Rate (MSV-L)
+MDAC/NcrP18CamM | T | cps | NFM P18 Neutron Counting Rate (MSV-M)
+MDAC/NcrP18PlsH | T | cps | NFM P18 Neutron Counting Rate (Pulse-H)
+MDAC/NcrP18PlsL | T | cps | NFM P18 Neutron Counting Rate (Pulse-L)
+MDAC/NcrP6CamH | T | cps | NFM P6 Neutron Counting Rate (MSV-H)
+MDAC/NcrP6CamL | T | cps | NFM P6 Neutron Counting Rate (MSV-L)
+MDAC/NcrP6CamM | T | cps | NFM P6 Neutron Counting Rate (MSV-M)
+MDAC/NcrP6PlsH | T | cps | NFM P6 Neutron Counting Rate (Pulse-H)
+MDAC/NcrP6PlsL | T | cps | NFM P6 Neutron Counting Rate (Pulse-L)
+MDAC/NeEmiRate | T | n/s | NFM Neutron Emission Rate
+MDAC/NeP10CamH | T | cps | Neutron Yield P10 Cam(H)
+MDAC/NeP10CamL | T | cps | Neutron Yield P10 Cam(L)
+MDAC/NeP10CamM | T | cps | Neutron Yield P10 Cam(M)
+MDAC/NeP10PlsH | T | cps | Neutron Yield P10 Pls(H)
+MDAC/NeP10PlsL | T | cps | Neutron Yield P10 Pls(L)
+MDAC/NeP18CamH | T | cps | Neutron Yield P18 Cam(H)
+MDAC/NeP18CamL | T | cps | Neutron Yield P18 Cam(L)
+MDAC/NeP18CamM | T | cps | Neutron Yield P18 Cam(M)
+MDAC/NeP18PlsH | T | cps | Neutron Yield P18 Pls(H)
+MDAC/NeP18PlsL | T | cps | Neutron Yield P18  Pls(L)
+MDAC/NeP6CamH | T | cps | Neutron Yield P6 Cam(H)
+MDAC/NeP6CamL | T | cps | Neutron Yield P6 Cam(L)
+MDAC/NeP6CamM | T | cps | Neutron Yield P6 Cam(M)
+MDAC/NeP6PlsH | T | cps | Neutron Yield P6 Pls(H)
+MDAC/NeP6PlsL | T | cps | Neutron Yield P6 Pls(L)
+MDAC/NerP10 | T | n/s | NFM P10 Neutron Emission Rate
+MDAC/NerP18 | T | n/s | NFM P18 Neutron Emission Rate
+MDAC/NerP6 | T | n/s | NFM P6 Neutron Emission Rate
+MDAC/NeyMax | O | n/shot | NFM Maximum Neutron Yield
+MDAC/NeyP10 | O | n/shot | NFM P10 Neutron Yield
+MDAC/NeyP18 | O | n/shot | NFM P18 Neutron Yield
+MDAC/NeyP6 | O | n/shot | NFM P6 Neutron Yield
+MDAC/NstopFact | O |  | N-Stop factor
+MDAC/NstopTime | O | ms | N-Stop judgment time
+MDAC/SLDFact | O |  | SOFT LANDING factor
+MDAC/SLDTime | O | ms | SOFT LANDING judgment time
+MDAC/curAVVRC1 | T | A | VV Outer Rogowski Coil (1) for Ip
+MDAC/curAVVRC2 | T | A | VV Outer Rogowski Coil (2) for Ip
+MDAC/curAVVRC3 | T | A | VV Outer Rogowski Coil (3) for Ip
+MDAC/curAVVRC4 | T | A | VV Outer Rogowski Coil (4) for Ip
+MDAC/curHalo1 | T | A | Rogowski Coil (1) for Halo Current
+MDAC/curHalo10 | T | A | Rogowski Coil (10) for Halo Current
+MDAC/curHalo11 | T | A | Rogowski Coil (11) for Halo Current
+MDAC/curHalo12 | T | A | Rogowski Coil (12) for Halo Current
+MDAC/curHalo13 | T | A | Rogowski Coil (13) for Halo Current
+MDAC/curHalo14 | T | A | Rogowski Coil (14) for Halo Current
+MDAC/curHalo15 | T | A | Rogowski Coil (15) for Halo Current
+MDAC/curHalo16 | T | A | Rogowski Coil (16) for Halo Current
+MDAC/curHalo17 | T | A | Rogowski Coil (17) for Halo Current
+MDAC/curHalo18 | T | A | Rogowski Coil (18) for Halo Current
+MDAC/curHalo19 | T | A | Rogowski Coil (19) for Halo Current
+MDAC/curHalo2 | T | A | Rogowski Coil (2) for Halo Current
+MDAC/curHalo20 | T | A | Rogowski Coil (20) for Halo Current
+MDAC/curHalo21 | T | A | Rogowski Coil (21) for Halo Current
+MDAC/curHalo22 | T | A | Rogowski Coil (22) for Halo Current
+MDAC/curHalo23 | T | A | Rogowski Coil (23) for Halo Current
+MDAC/curHalo24 | T | A | Rogowski Coil (24) for Halo Current
+MDAC/curHalo25 | T | A | Rogowski Coil (25) for Halo Current
+MDAC/curHalo26 | T | A | Rogowski Coil (26) for Halo Current
+MDAC/curHalo27 | T | A | Rogowski Coil (27) for Halo Current
+MDAC/curHalo28 | T | A | Rogowski Coil (28) for Halo Current
+MDAC/curHalo29 | T | A | Rogowski Coil (29) for Halo Current
+MDAC/curHalo3 | T | A | Rogowski Coil (3) for Halo Current
+MDAC/curHalo30 | T | A | Rogowski Coil (30) for Halo Current
+MDAC/curHalo31 | T | A | Rogowski Coil (31) for Halo Current
+MDAC/curHalo32 | T | A | Rogowski Coil (32) for Halo Current
+MDAC/curHalo33 | T | A | Rogowski Coil (33) for Halo Current
+MDAC/curHalo34 | T | A | Rogowski Coil (34) for Halo Current
+MDAC/curHalo35 | T | A | Rogowski Coil (35) for Halo Current
+MDAC/curHalo36 | T | A | Rogowski Coil (36) for Halo Current
+MDAC/curHalo37 | T | A | Rogowski Coil (37) for Halo Current
+MDAC/curHalo38 | T | A | Rogowski Coil (38) for Halo Current
+MDAC/curHalo39 | T | A | Rogowski Coil (39) for Halo Current
+MDAC/curHalo4 | T | A | Rogowski Coil (4) for Halo Current
+MDAC/curHalo40 | T | A | Rogowski Coil (40) for Halo Current
+MDAC/curHalo41 | T | A | Rogowski Coil (41) for Halo Current
+MDAC/curHalo42 | T | A | Rogowski Coil (42) for Halo Current
+MDAC/curHalo43 | T | A | Rogowski Coil (43) for Halo Current
+MDAC/curHalo44 | T | A | Rogowski Coil (44) for Halo Current
+MDAC/curHalo45 | T | A | Rogowski Coil (45) for Halo Current
+MDAC/curHalo46 | T | A | Rogowski Coil (46) for Halo Current
+MDAC/curHalo47 | T | A | Rogowski Coil (47) for Halo Current
+MDAC/curHalo48 | T | A | Rogowski Coil (48) for Halo Current
+MDAC/curHalo5 | T | A | Rogowski Coil (5) for Halo Current
+MDAC/curHalo6 | T | A | Rogowski Coil (6) for Halo Current
+MDAC/curHalo7 | T | A | Rogowski Coil (7) for Halo Current
+MDAC/curHalo8 | T | A | Rogowski Coil (8) for Halo Current
+MDAC/curHalo9 | T | A | Rogowski Coil (9) for Halo Current
+MDAC/curIVVRC1 | T | A | VV Inner Rogowski Coil (1) for Ip
+MDAC/curIVVRC2 | T | A | VV Inner Rogowski Coil (2) for Ip
+MDAC/curIVVRC3 | T | A | VV Inner Rogowski Coil (3) for Ip
+MDAC/curIVVRC4 | T | A | VV Inner Rogowski Coil (4) for Ip
+MDAC/curRCIP2 | T | A | Rogowski Coil (2) for Ip
+MDAC/curRCIP3 | T | A | Rogowski Coil (3) for Ip
+MDAC/curRCIP4 | T | A | Rogowski Coil (4) for Ip
+MDAC/curRCP1 | T | A | Rogowski Coil (1) for Ip
+MDAC/curSPltRC1 | T | A | Rogowski Coil (1) on Stabilization plate
+MDAC/curSPltRC2 | T | A | Rogowski Coil (2) on Stabilization plate
+MDAC/curSPltRC3 | T | A | Rogowski Coil (3) on Stabilization plate
+MDAC/curSPltRC4 | T | A | Rogowski Coil (4) on Stabilization plate
+MDAC/curSdlC1 | T | A | Saddle Coil (1)
+MDAC/curSdlC10 | T | A | Saddle Coil (10)
+MDAC/curSdlC11 | T | A | Saddle Coil (11)
+MDAC/curSdlC12 | T | A | Saddle Coil (12)
+MDAC/curSdlC13 | T | A | Saddle Coil (13)
+MDAC/curSdlC14 | T | A | Saddle Coil (14)
+MDAC/curSdlC15 | T | A | Saddle Coil (15)
+MDAC/curSdlC16 | T | A | Saddle Coil (16)
+MDAC/curSdlC17 | T | A | Saddle Coil (17)
+MDAC/curSdlC18 | T | A | Saddle Coil (18)
+MDAC/curSdlC19 | T | A | Saddle Coil (19)
+MDAC/curSdlC2 | T | A | Saddle Coil (2)
+MDAC/curSdlC20 | T | A | Saddle Coil (20)
+MDAC/curSdlC21 | T | A | Saddle Coil (21)
+MDAC/curSdlC22 | T | A | Saddle Coil (22)
+MDAC/curSdlC23 | T | A | Saddle Coil (23)
+MDAC/curSdlC24 | T | A | Saddle Coil (24)
+MDAC/curSdlC25 | T | A | Saddle Coil (25)
+MDAC/curSdlC26 | T | A | Saddle Coil (26)
+MDAC/curSdlC27 | T | A | Saddle Coil (27)
+MDAC/curSdlC28 | T | A | Saddle Coil (28)
+MDAC/curSdlC29 | T | A | Saddle Coil (29)
+MDAC/curSdlC3 | T | A | Saddle Coil (3)
+MDAC/curSdlC30 | T | A | Saddle Coil (30)
+MDAC/curSdlC31 | T | A | Saddle Coil (31)
+MDAC/curSdlC32 | T | A | Saddle Coil (32)
+MDAC/curSdlC33 | T | A | Saddle Coil (33)
+MDAC/curSdlC34 | T | A | Saddle Coil (34)
+MDAC/curSdlC35 | T | A | Saddle Coil (35)
+MDAC/curSdlC36 | T | A | Saddle Coil (36)
+MDAC/curSdlC4 | T | A | Saddle Coil (4)
+MDAC/curSdlC5 | T | A | Saddle Coil (5)
+MDAC/curSdlC6 | T | A | Saddle Coil (6)
+MDAC/curSdlC7 | T | A | Saddle Coil (7)
+MDAC/curSdlC8 | T | A | Saddle Coil (8)
+MDAC/curSdlC9 | T | A | Saddle Coil (9)
+MDAC/magATPL1 | T | T | AT-PL1 (P09) for Plasma Control
+MDAC/magATPL10 | T | T | AT-PL10 (P09) for Plasma Control
+MDAC/magATPL15S | T | T | AT-PL15-SP (P09) for Plasma Control
+MDAC/magATPL1SP | T | T | AT-PL1-SP (P09) for Plasma Control
+MDAC/magATPL22 | T | T | AT-PL22 (P09) for Plasma Control
+MDAC/magATPL27 | T | T | AT-PL27 (P09) for Plasma Control
+MDAC/magATPL29 | T | T | AT-PL29 (P09) for Plasma Control
+MDAC/magATPL3 | T | T | AT-PL3 (P09) for Plasma Control
+MDAC/magATPL5 | T | T | AT-PL5 (P09) for Plasma Control
+MDAC/magFlxLp1 | T | Wb | Flux Loop (1-7)
+MDAC/magFlxLp10 | T | Wb | Flux Loop (10-7)
+MDAC/magFlxLp11 | T | Wb | Flux Loop (11-7)
+MDAC/magFlxLp12 | T | Wb | Flux Loop (12-7)
+MDAC/magFlxLp13 | T | Wb | Flux Loop (13-7)
+MDAC/magFlxLp14 | T | Wb | Flux Loop (14-7)
+MDAC/magFlxLp15 | T | Wb | Flux Loop (15-7)
+MDAC/magFlxLp16 | T | Wb | Flux Loop (16-7)
+MDAC/magFlxLp17 | T | Wb | Flux Loop (17-7)
+MDAC/magFlxLp18 | T | Wb | Flux Loop (18-7)
+MDAC/magFlxLp19 | T | Wb | Flux Loop (19-7)
+MDAC/magFlxLp2 | T | Wb | Flux Loop (2-7)
+MDAC/magFlxLp20 | T | Wb | Flux Loop (20-7)
+MDAC/magFlxLp21 | T | Wb | Flux Loop (21-7)
+MDAC/magFlxLp22 | T | Wb | Flux Loop (22-7)
+MDAC/magFlxLp23 | T | Wb | Flux Loop (23-7)
+MDAC/magFlxLp24 | T | Wb | Flux Loop (24-7)
+MDAC/magFlxLp25 | T | Wb | Flux Loop (25-7)
+MDAC/magFlxLp26 | T | Wb | Flux Loop (26-7)
+MDAC/magFlxLp27 | T | Wb | Flux Loop (27-7)
+MDAC/magFlxLp28 | T | Wb | Flux Loop (28-7)
+MDAC/magFlxLp29 | T | Wb | Flux Loop (29-7)
+MDAC/magFlxLp3 | T | Wb | Flux Loop (3-7)
+MDAC/magFlxLp30 | T | Wb | Flux Loop (30-7)
+MDAC/magFlxLp31 | T | Wb | Flux Loop (31-7)
+MDAC/magFlxLp32 | T | Wb | Flux Loop (32-7)
+MDAC/magFlxLp33 | T | Wb | Flux Loop (33-7)
+MDAC/magFlxLp34 | T | Wb | Flux Loop (34-7)
+MDAC/magFlxLp4 | T | Wb | Flux Loop (4-7)
+MDAC/magFlxLp5 | T | Wb | Flux Loop (5-7)
+MDAC/magFlxLp6 | T | Wb | Flux Loop (6-7)
+MDAC/magFlxLp7 | T | Wb | Flux Loop (7)
+MDAC/magFlxLp8 | T | Wb | Flux Loop (8-7)
+MDAC/magFlxLp9 | T | Wb | Flux Loop (9-7)
+MDAC/magPbTC1 | T | T | Magnetic Probe TC-(1) for Plasma Control
+MDAC/magPbTC10 | T | T | Magnetic Probe TC-(10) for Plasma Control
+MDAC/magPbTC11 | T | T | Magnetic Probe TC-(11) for Plasma Control
+MDAC/magPbTC12 | T | T | Magnetic Probe TC-(12) for Plasma Control
+MDAC/magPbTC13 | T | T | Magnetic Probe TC-(13) for Plasma Control
+MDAC/magPbTC14 | T | T | Magnetic Probe TC-(14) for Plasma Control
+MDAC/magPbTC15 | T | T | Magnetic Probe TC-(15) for Plasma Control
+MDAC/magPbTC16 | T | T | Magnetic Probe TC-(16) for Plasma Control
+MDAC/magPbTC17 | T | T | Magnetic Probe TC-(17) for Plasma Control
+MDAC/magPbTC18 | T | T | Magnetic Probe TC-(18) for Plasma Control
+MDAC/magPbTC19 | T | T | Magnetic Probe TC-(19) for Plasma Control
+MDAC/magPbTC2 | T | T | Magnetic Probe TC-(2) for Plasma Control
+MDAC/magPbTC20 | T | T | Magnetic Probe TC-(20) for Plasma Control
+MDAC/magPbTC21 | T | T | Magnetic Probe TC-(21) for Plasma Control
+MDAC/magPbTC22 | T | T | Magnetic Probe TC-(22) for Plasma Control
+MDAC/magPbTC23 | T | T | Magnetic Probe TC-(23) for Plasma Control
+MDAC/magPbTC3 | T | T | Magnetic Probe TC-(3) for Plasma Control
+MDAC/magPbTC4 | T | T | Magnetic Probe TC-(4) for Plasma Control
+MDAC/magPbTC5 | T | T | Magnetic Probe TC-(5) for Plasma Control
+MDAC/magPbTC6 | T | T | Magnetic Probe TC-(6) for Plasma Control
+MDAC/magPbTC7 | T | T | Magnetic Probe TC-(7) for Plasma Control
+MDAC/magPbTC8 | T | T | Magnetic Probe TC-(8) for Plasma Control
+MDAC/magPbTC9 | T | T | Magnetic Probe TC-(9) for Plasma Control
+MDAC/magRWM37 | T | T | RWM Coil (37) for Plasma Control
+MDAC/magRWM38 | T | T | RWM Coil (38) for Plasma Control
+MDAC/magRWM39 | T | T | RWM Coil (39) for Plasma Control
+MDAC/magRWM40 | T | T | RWM Coil (40) for Plasma Control
+MDAC/magRWM42 | T | T | RWM Coil (42) for Plasma Control
+MDAC/magRWM44 | T | T | RWM Coil (44) for Plasma Control
+MDAC/magRWM45 | T | T | RWM Coil (45) for Plasma Control
+MDAC/magRWM46 | T | T | RWM Coil (46) for Plasma Control
+MDAC/magRWM47 | T | T | RWM Coil (47) for Plasma Control
+MDAC/magRWM49 | T | T | RWM Coil (49) for Plasma Control
+MDAC/magRWM50 | T | T | RWM Coil (50) for Plasma Control
+MDAC/magRWM52 | T | T | RWM Coil (52) for Plasma Control
+MDAC/magRWM54 | T | T | RWM Coil (54) for Plasma Control
+MDAC/oCS1Cur | T | kA | Observation of CS1 Coil Current
+MDAC/oCS2Cur | T | kA | Observation of CS2 Coil Current
+MDAC/oCS3Cur | T | kA | Observation of CS3 Coil Current
+MDAC/oCS4Cur | T | kA | Observation of CS4 Coil Current
+MDAC/oEF1Cur | T | kA | Observation of EF1 Coil Current
+MDAC/oEF2Cur | T | kA | Observation of EF2 Coil Current
+MDAC/oEF3Cur | T | kA | Observation of EF3 Coil Current
+MDAC/oEF4Cur | T | kA | Observation of EF4 Coil Current
+MDAC/oEF5Cur | T | kA | Observation of EF5 Coil Current
+MDAC/oEF6Cur | T | kA | Observation of EF6 Coil Current
+MDAC/oLFPPCCr | T | kA | Observation of Lower FPPC Coil Current
+MDAC/oLFPPCVl | T | kV | Observation of Lower FPPC Coil Voltage
+MDAC/oP10_1Vol | T | V | NFM P10_1 Signal Voltage
+MDAC/oP10_2Vol | T | V | NFM P10_2 Signal Voltage
+MDAC/oP10_3Vol | T | V | NFM P10_3 Signal Voltage
+MDAC/oP10_4Vol | T | V | NFM P10_4 Signal Voltage
+MDAC/oP10_5Vol | T | V | NFM P10_5 Signal Voltage
+MDAC/oP18_1Vol | T | V | NFM P18_1 Signal Voltage
+MDAC/oP18_2Vol | T | V | NFM P18_2 Signal Voltage
+MDAC/oP18_3Vol | T | V | NFM P18_3 Signal Voltage
+MDAC/oP18_4Vol | T | V | NFM P18_4 Signal Voltage
+MDAC/oP18_5Vol | T | V | NFM P18_5 Signal Voltage
+MDAC/oP6_1Vol | T | V | NFM P6_1 Signal Voltage
+MDAC/oP6_2Vol | T | V | NFM P6_2 Signal Voltage
+MDAC/oP6_3Vol | T | V | NFM P6_3 Signal Voltage
+MDAC/oP6_4Vol | T | V | NFM P6_4 Signal Voltage
+MDAC/oP6_5Vol | T | V | NFM P6_5 Signal Voltage
+MDAC/oTFCur | T | kA | Observation of TF Coil Current
+MDAC/oTFVol | T | kV | Observation of TF Coil Voltage
+MDAC/oUFPPCCr | T | kA | Observation of Upper FPPC Coil Current
+MDAC/oUFPPCVl | T | kV | Observation of Upper FPPC Coil Voltage
+MDAC/statusP10_1 | T | V | NFM P10 Detector Status_1
+MDAC/statusP10_2 | T | V | NFM P10 Detector Status_2
+MDAC/statusP18_1 | T | V | NFM P18 Detector Status_1
+MDAC/statusP18_2 | T | V | NFM P18 Detector Status_2
+MDAC/statusP6_1 | T | V | NFM P6 Detector Status_1
+MDAC/statusP6_2 | T | V | NFM P6 Detector Status_2
+MDAC/volDmagL1 | T | V | Diamagnetic Loop (1)
+MDAC/volDmagL2 | T | V | Diamagnetic Loop (2)
+MDAC/volDmagL3 | T | V | Diamagnetic Loop (3)
+MDAC/volOneturn | T | V | One-turn voltage (Flux Loop (7))
+PSRC/AbnormFact | O |  | Abnormality factor
+PSRC/Ip | T | KA | Observation of Plasma Current (Ip)
+PSRC/IpDmpgTime | O | ms | Ip damping phase transition time
+PSRC/MMSAlwTag | O |  | MMS allowable table tag
+PSRC/MMSCodeTag | O |  | MMS code tag
+PSRC/MMSCombTag | O |  | MMS combination table tag
+PSRC/NstopTime | O | ms | N-Stop judgment time
+PSRC/NumTsExStr | O |  | Number of timings of excessive coil stress
+PSRC/RTCntlFin | O | ms | Real time control finish time
+PSRC/RTCntlStrt | O | ms | Real time control start time
+PSRC/SoftLTime | O | ms | SOFT-LANDING judgment time
+PSRC/TCCSLibTag | O |  | TCCS library tag
+PSRC/TCCSSetTag | O |  | TCCS setting tag
+PSRC/TCCSTblTag | O |  | TCCS table tag
+PSRC/abnormFL1 | T |  | Flux Loop (1)  Abnorm.
+PSRC/abnormFL10 | T |  | Flux Loop (10)  Abnorm.
+PSRC/abnormFL11 | T |  | Flux Loop (11)  Abnorm.
+PSRC/abnormFL12 | T |  | Flux Loop (12)  Abnorm.
+PSRC/abnormFL13 | T |  | Flux Loop (13)  Abnorm.
+PSRC/abnormFL14 | T |  | Flux Loop (14)  Abnorm.
+PSRC/abnormFL15 | T |  | Flux Loop (15)  Abnorm.
+PSRC/abnormFL16 | T |  | Flux Loop (16)  Abnorm.
+PSRC/abnormFL17 | T |  | Flux Loop (17)  Abnorm.
+PSRC/abnormFL18 | T |  | Flux Loop (18)  Abnorm.
+PSRC/abnormFL19 | T |  | Flux Loop (19)  Abnorm.
+PSRC/abnormFL2 | T |  | Flux Loop (2)  Abnorm.
+PSRC/abnormFL20 | T |  | Flux Loop (20)  Abnorm.
+PSRC/abnormFL21 | T |  | Flux Loop (21)  Abnorm.
+PSRC/abnormFL22 | T |  | Flux Loop (22)  Abnorm.
+PSRC/abnormFL23 | T |  | Flux Loop (23)  Abnorm.
+PSRC/abnormFL24 | T |  | Flux Loop (24)  Abnorm.
+PSRC/abnormFL25 | T |  | Flux Loop (25)  Abnorm.
+PSRC/abnormFL26 | T |  | Flux Loop (26)  Abnorm.
+PSRC/abnormFL27 | T |  | Flux Loop (27)  Abnorm.
+PSRC/abnormFL3 | T |  | Flux Loop (3)  Abnorm.
+PSRC/abnormFL4 | T |  | Flux Loop (4)  Abnorm.
+PSRC/abnormFL5 | T |  | Flux Loop (5)  Abnorm.
+PSRC/abnormFL6 | T |  | Flux Loop (6)  Abnorm.
+PSRC/abnormFL7 | T |  | Flux Loop (7)  Abnorm.
+PSRC/abnormFL8 | T |  | Flux Loop (8)  Abnorm.
+PSRC/abnormFL9 | T |  | Flux Loop (9)  Abnorm.
+PSRC/abnormMP1 | T |  | Magnetic Probe TC(1) Abnorm.
+PSRC/abnormMP10 | T |  | Magnetic Probe TC(10) Abnorm.
+PSRC/abnormMP11 | T |  | Magnetic Probe TC(11) Abnorm.
+PSRC/abnormMP12 | T |  | Magnetic Probe TC(12) Abnorm.
+PSRC/abnormMP13 | T |  | Magnetic Probe TC(13) Abnorm.
+PSRC/abnormMP14 | T |  | Magnetic Probe TC(14) Abnorm.
+PSRC/abnormMP15 | T |  | Magnetic Probe TC(15) Abnorm.
+PSRC/abnormMP16 | T |  | Magnetic Probe TC(16) Abnorm.
+PSRC/abnormMP17 | T |  | Magnetic Probe TC(17) Abnorm.
+PSRC/abnormMP2 | T |  | Magnetic Probe TC(2) Abnorm.
+PSRC/abnormMP3 | T |  | Magnetic Probe TC(3) Abnorm.
+PSRC/abnormMP4 | T |  | Magnetic Probe TC(4) Abnorm.
+PSRC/abnormMP5 | T |  | Magnetic Probe TC(5) Abnorm.
+PSRC/abnormMP6 | T |  | Magnetic Probe TC(6) Abnorm.
+PSRC/abnormMP7 | T |  | Magnetic Probe TC(7) Abnorm.
+PSRC/abnormMP8 | T |  | Magnetic Probe TC(8) Abnorm.
+PSRC/abnormMP9 | T |  | Magnetic Probe TC(9) Abnorm.
+PSRC/boolMMS | T |  | Coil stress boolean
+PSRC/calAp | T | m | Plasma Minor Radius (ap)
+PSRC/calBr2 | T | T | P1 Poloidal magnetic field (BR2)
+PSRC/calBr3 | T | T | P3 Poloidal magnetic field (BR3)
+PSRC/calBr4 | T | T | P4 Poloidal magnetic field (BR4)
+PSRC/calBz2 | T | T | P1 Poloidal magnetic field (BZ2)
+PSRC/calBz4 | T | T | P3 Poloidal magnetic field (BZ4)
+PSRC/calCCSDelt | T |  | CCS Triangularity
+PSRC/calCCSMaj | T | m | CCS Major Radius
+PSRC/calCCSMin | T | m | CCS Minor Radius
+PSRC/calCCSRc | T | m | CCS Center Pos. (Rc)
+PSRC/calCCSZc | T | m | CCS Center Pos. (Zc)
+PSRC/calDelta | T |  | Plasma Triangularity Ave. (deltaave)
+PSRC/calDeltaL | T |  | Lower Plasma Triangularity (deltal)
+PSRC/calDeltaU | T |  | Upper Plasma Triangularity (deltau)
+PSRC/calFP1 | T | Wb | P1 Poloidal flux (FP1)
+PSRC/calFP10 | T | Wb | P10 Poloidal flux (FP10)
+PSRC/calFP2 | T | Wb | P2 Poloidal flux (FP2)
+PSRC/calFP3 | T | Wb | P3 Poloidal flux (FP3)
+PSRC/calFP4 | T | Wb | P4 Poloidal flux (FP4)
+PSRC/calFP5 | T | Wb | P5 Poloidal flux (FP5)
+PSRC/calFP6 | T | Wb | P6 Poloidal flux (FP6)
+PSRC/calFP7 | T | Wb | P7 Poloidal flux (FP7)
+PSRC/calFP8 | T | Wb | P8 Poloidal flux (FP8)
+PSRC/calFP9 | T | Wb | P9 Poloidal flux (FP9)
+PSRC/calFX | T | Wb | Plasma Surface Flux (FX)
+PSRC/calGapL | T | m | Lower Outer Gap (Gl)
+PSRC/calGapU | T | m | Upper Outer Gap (Gu)
+PSRC/calIp | T | KA | Plasma Current (Ip)
+PSRC/calIteddy | T | KA | Total Eddy Current Cal.
+PSRC/calLDIVLin | T | m | Lower Diverter In-side (Dl-in)
+PSRC/calLDIVLout | T | m | Lower Diverter Out-side (Dl-out)
+PSRC/calMMS | T |  | Coil stress value
+PSRC/calNDmag | T |  | Normalized Diamagnetism
+PSRC/calNDmagCor | T |  | Normalized Diamagnetism  after correction
+PSRC/calNSindex | T |  | NS-Index
+PSRC/calNindex | T |  | Decay Index
+PSRC/calNt | T |  | Magnetic surface table No. (Nt)
+PSRC/calNts | T |  | Magnetic surface table set No. (Nts)
+PSRC/calRJ | T | m | Plasma Current Center Pos. (RJ)
+PSRC/calRP3 | T | m | Plasma top Horizontal Pos. (RP3)
+PSRC/calRX | T | m | X/Limiter Point Pos. (RX)
+PSRC/calRin | T | m | Plasma Inner Horizontal Pos. (RP2) Cal.
+PSRC/calRout | T | m | Plasma Outer Horizontal Pos. (RP4) Cal.
+PSRC/calRp0 | T | m | Plasma Horizontal Pos. (Rp0)
+PSRC/calRp1 | T | m | Plasma Bottom Horizontal Pos.(RP1)
+PSRC/calRteddy | T |  | Total Eddy Current Ratio Cal.
+PSRC/calS1 | T |  | Surface Integrals 1 (s1) for Diamagnetic loop
+PSRC/calS1Cor | T |  | Surface Integrals 1 (s1) for Diamagnetic loop
+PSRC/calS2 | T |  | Surface Integrals 2 (s2) for Diamagnetic loop
+PSRC/calS2Cor | T |  | Surface Integrals 2 (s2) for Diamagnetic loop
+PSRC/calTcom | T |  | Command time counter
+PSRC/calUDIVLin | T | m | Upper Diverter In-side (Du-in)
+PSRC/calUDIVLout | T | m | Upper Diverter Out-side (Du-out)
+PSRC/calWdia | T | MJ | Plasma Stored Energy
+PSRC/calWdiaCor | T | J | Plasma Stored Energy  after correction
+PSRC/calZJ | T | m | Plasma Current Center Pos. (ZJ)
+PSRC/calZP3 | T | m | Plasma top Vertical Pos. (ZP3)
+PSRC/calZX | T | m | X/Limiter Point Pos. (ZX)
+PSRC/calZp0 | T | m | Plasma Vertical Pos. (Zp0)
+PSRC/calZp1 | T | m | Plasma Bottom Vertical Pos.(ZP1)
+PSRC/calbetap | T |  | Poloidal beta(betap)
+PSRC/calbetap3Cor | T |  | Poloidal beta 3 (betap3) after correction
+PSRC/calbetapCor | T |  | Poloidal beta(betap) after correction
+PSRC/calkappa | T |  | Plasma Elongation Ave.(kappaave)
+PSRC/calkappaL | T |  | Lower Plasma Elongation (kappal)
+PSRC/calkappaU | T |  | Upper Plasma Elongation (kappau)
+PSRC/calli | T |  | Internal Inductance (li)
+PSRC/callichk | T |  | Internal Inductance (li) by Diamagnetic loop
+PSRC/callichkCor | T |  | Internal Inductance (li) by Diamagnetic loop
+PSRC/calslambda | T |  | Shafranov lamda
+PSRC/calslambdaCor | T |  | Shafranov lamda  after correction
+PSRC/calvolume | T |  | Plasma volume
+PSRC/comCOMBI | T |  | Control Point Pattern (COMBI.) Com.
+PSRC/comCONFIG | T |  | Configuration Pattern (CONFIG.) Com.
+PSRC/comDelta | T |  | Plasma Triangularity Ave. (deltaave) Com.
+PSRC/comDeltaL | T |  | Lower Plasma Triangularity (deltal) Com.
+PSRC/comDeltaU | T |  | Upper Plasma Triangularity (deltau) Com.
+PSRC/comGapL | T | m | Lower Outer Gap (Gl) Com.
+PSRC/comGapU | T | m | Upper Outer Gap (Gu) Com.
+PSRC/comINPUT | T |  | Control Input Pattern (INPUT) Com.
+PSRC/comIp | T | KA | Plasma current (Ip) Com.
+PSRC/comLDIV | T |  | Lower Diverter Control PT(DIV_L) Com.
+PSRC/comLDIVLlin | T | m | Lower Diverter In-side (Dl-in) Com.
+PSRC/comLDIVLout | T | m | Lower Diverter Out-side (Dl-out) Com.
+PSRC/comP10Mode | T |  | P10 control mode Com.
+PSRC/comP1Mode | T |  | P1 control mode Com.
+PSRC/comP2Mode | T |  | P2 control mode Com.
+PSRC/comP3Mode | T |  | P3 control mode Com.
+PSRC/comP4Mode | T |  | P4 control mode Com.
+PSRC/comP5Mode | T |  | P5 control mode Com.
+PSRC/comP6Mode | T |  | P6 control mode Com.
+PSRC/comP7Mode | T |  | P7 control mode Com.
+PSRC/comP8Mode | T |  | P8 control mode Com.
+PSRC/comP9Mode | T |  | P9 control mode Com.
+PSRC/comPOSFB | T |  | Position and Shape FB Control Method
+PSRC/comRP1 | T | m | P1 Reference point (RP1) Com.
+PSRC/comRP10 | T | m | P10 Reference point (RP10) Com.
+PSRC/comRP2 | T | m | P2 Reference point (RP2) Com.
+PSRC/comRP3 | T | m | P3 Reference point (RP3) Com.
+PSRC/comRP4 | T | m | P4 Reference point (RP4) Com.
+PSRC/comRP5 | T | m | P5 Reference point (RP5) Com.
+PSRC/comRP6 | T | m | P6 Reference point (RP6) Com.
+PSRC/comRP7 | T | m | P7 Reference point (RP7) Com.
+PSRC/comRP8 | T | m | P8 Reference point (RP8) Com.
+PSRC/comRP9 | T | m | P9 Reference point (RP9) Com.
+PSRC/comRPnum | T |  | Number of reference point Com.
+PSRC/comRbot | T | m | Plasma Bottom Horizontal Pos.(RP1) Com.
+PSRC/comRp0 | T | m | Plasma Horizontal Pos. (Rp0) Com.
+PSRC/comRtop | T | m | Plasma top Horizontal Pos. (RP3) Com.
+PSRC/comSHAPE | T |  | Shape Control Pattern (SHAPE) Com.
+PSRC/comUDIV | T |  | Upper Diverter Control PT(DIV_U) Com.
+PSRC/comUDIVLin | T | m | Upper Diverter In-side (Du-in) Com.
+PSRC/comUDIVLout | T | m | Upper Diverter Out-side (Du-out) Com.
+PSRC/comZP1 | T | m | P1 Reference point (ZP1) Com.
+PSRC/comZP10 | T | m | P10 Reference point (ZP10) Com.
+PSRC/comZP2 | T | m | P2 Reference point (ZP2) Com.
+PSRC/comZP3 | T | m | P3 Reference point (ZP3) Com.
+PSRC/comZP4 | T | m | P4 Reference point (ZP4) Com.
+PSRC/comZP5 | T | m | P5 Reference point (ZP5) Com.
+PSRC/comZP6 | T | m | P6 Reference point (ZP6) Com.
+PSRC/comZP7 | T | m | P7 Reference point (ZP7) Com.
+PSRC/comZP8 | T | m | P8 Reference point (ZP8) Com.
+PSRC/comZP9 | T | m | P9 Reference point (ZP9) Com.
+PSRC/comZbot | T | m | Plasma Bottom Vertical Pos.(ZP1) Com.
+PSRC/comZp0 | T | m | Plasma Vertical Pos. (Zp0) Com.
+PSRC/comZtop | T | m | Plasma top Vertical Pos. (ZP3) Com.
+PSRC/comap | T | m | Plasma Minor Radius (ap) Com.
+PSRC/comkappa | T |  | Plasma Elongation Ave. (kappaave) Com.
+PSRC/comkappaL | T |  | Lower Plasma Elongation (kappal) Com.
+PSRC/comkappaU | T |  | Upper Plasma Elongation (kappau) Com.
+PSRC/corDmagL1 | T | Wb | Observation of Diamagnetic Loop (1) after corr
+PSRC/curCS1 | T | KA | Observation of CS1 current
+PSRC/curCS2 | T | KA | Observation of CS2 current
+PSRC/curCS3 | T | KA | Observation of CS3 current
+PSRC/curCS4 | T | KA | Observation of CS4 current
+PSRC/curEF1coil | T | KA | Observation of EF1 coil current
+PSRC/curEF2coil | T | KA | Observation of EF2 coil current
+PSRC/curEF3coil | T | KA | Observation of EF3 coil current
+PSRC/curEF4coil | T | KA | Observation of EF4 coil current
+PSRC/curEF5coil | T | KA | Observation of EF5 coil current
+PSRC/curEF6coil | T | KA | Observation of EF6 coil current
+PSRC/curLowFPPC | T | KA | Observation of Lower FPPC Coil Current
+PSRC/curMMS | T |  | Coil and plasma currents for MMS
+PSRC/curUpFPPC | T | KA | Observation of Upper FPPC Coil Current
+PSRC/dispFL | T |  | Flux Loop Dispersion
+PSRC/dispMP | T |  | Magnetic Probe Dispersion
+PSRC/flccs | T | Wb | Flux Loop Signal used in CCS
+PSRC/ieddy | T |  | Eddy current
+PSRC/ishape | T |  | Plasma ShapeFlag
+PSRC/llimMMS | T |  | Coil stress lower limit
+PSRC/magFluxLp1 | T | Wb | Observation of Flux Loop (1-7)
+PSRC/magFluxLp10 | T | Wb | Observation of Flux Loop (10-7)
+PSRC/magFluxLp11 | T | Wb | Observation of Flux Loop (11-7)
+PSRC/magFluxLp12 | T | Wb | Observation of Flux Loop (12-7)
+PSRC/magFluxLp13 | T | Wb | Observation of Flux Loop (13-7)
+PSRC/magFluxLp14 | T | Wb | Observation of Flux Loop (14-7)
+PSRC/magFluxLp15 | T | Wb | Observation of Flux Loop (15-7)
+PSRC/magFluxLp16 | T | Wb | Observation of Flux Loop (16-7)
+PSRC/magFluxLp17 | T | Wb | Observation of Flux Loop (17-7)
+PSRC/magFluxLp18 | T | Wb | Observation of Flux Loop (18-7)
+PSRC/magFluxLp19 | T | Wb | Observation of Flux Loop (19-7)
+PSRC/magFluxLp2 | T | Wb | Observation of Flux Loop (2-7)
+PSRC/magFluxLp20 | T | Wb | Observation of Flux Loop (20-7)
+PSRC/magFluxLp21 | T | Wb | Observation of Flux Loop (21-7)
+PSRC/magFluxLp22 | T | Wb | Observation of Flux Loop (22-7)
+PSRC/magFluxLp23 | T | Wb | Observation of Flux Loop (23-7)
+PSRC/magFluxLp24 | T | Wb | Observation of Flux Loop (24-7)
+PSRC/magFluxLp25 | T | Wb | Observation of Flux Loop (25-7)
+PSRC/magFluxLp26 | T | Wb | Observation of Flux Loop (26-7)
+PSRC/magFluxLp27 | T | Wb | Observation of Flux Loop (27-7)
+PSRC/magFluxLp28 | T | Wb | Observation of Flux Loop (28-7)
+PSRC/magFluxLp29 | T | Wb | Observation of Flux Loop (29-7)
+PSRC/magFluxLp3 | T | Wb | Observation of Flux Loop (3-7)
+PSRC/magFluxLp30 | T | Wb | Observation of Flux Loop (30-7)
+PSRC/magFluxLp31 | T | Wb | Observation of Flux Loop (31-7)
+PSRC/magFluxLp32 | T | Wb | Observation of Flux Loop (32-7)
+PSRC/magFluxLp33 | T | Wb | Observation of Flux Loop (33-7)
+PSRC/magFluxLp34 | T | Wb | Observation of Flux Loop (34-7)
+PSRC/magFluxLp4 | T | Wb | Observation of Flux Loop (4-7)
+PSRC/magFluxLp5 | T | Wb | Observation of Flux Loop (5-7)
+PSRC/magFluxLp6 | T | Wb | Observation of Flux Loop (6-7)
+PSRC/magFluxLp7 | T | Wb | Observation of Flux Loop (7)
+PSRC/magFluxLp8 | T | Wb | Observation of Flux Loop (8-7)
+PSRC/magFluxLp9 | T | Wb | Observation of Flux Loop (9-7)
+PSRC/magPbTC1 | T | T | Observation of Magnetic Probe TC-(1)
+PSRC/magPbTC10 | T | T | Observation of Magnetic Probe TC-(10)
+PSRC/magPbTC11 | T | T | Observation of Magnetic Probe TC-(11)
+PSRC/magPbTC12 | T | T | Observation of Magnetic Probe TC-(12)
+PSRC/magPbTC13 | T | T | Observation of Magnetic Probe TC-(13)
+PSRC/magPbTC14 | T | T | Observation of Magnetic Probe TC-(14)
+PSRC/magPbTC15 | T | T | Observation of Magnetic Probe TC-(15)
+PSRC/magPbTC16 | T | T | Observation of Magnetic Probe TC-(16)
+PSRC/magPbTC17 | T | T | Observation of Magnetic Probe TC-(17)
+PSRC/magPbTC18 | T | T | Observation of Magnetic Probe TC-(18)
+PSRC/magPbTC19 | T | T | Observation of Magnetic Probe TC-(19)
+PSRC/magPbTC2 | T | T | Observation of Magnetic Probe TC-(2)
+PSRC/magPbTC20 | T | T | Observation of Magnetic Probe TC-(20)
+PSRC/magPbTC21 | T | T | Observation of Magnetic Probe TC-(21)
+PSRC/magPbTC22 | T | T | Observation of Magnetic Probe TC-(22)
+PSRC/magPbTC23 | T | T | Observation of Magnetic Probe TC-(23)
+PSRC/magPbTC3 | T | T | Observation of Magnetic Probe TC-(3)
+PSRC/magPbTC4 | T | T | Observation of Magnetic Probe TC-(4)
+PSRC/magPbTC5 | T | T | Observation of Magnetic Probe TC-(5)
+PSRC/magPbTC6 | T | T | Observation of Magnetic Probe TC-(6)
+PSRC/magPbTC7 | T | T | Observation of Magnetic Probe TC-(7)
+PSRC/magPbTC8 | T | T | Observation of Magnetic Probe TC-(8)
+PSRC/magPbTC9 | T | T | Observation of Magnetic Probe TC-(9)
+PSRC/maxabnorFL | T |  | Flux Loop Max Abnorm.
+PSRC/maxabnorMP | T |  | Magnetic Probe Max Abnorm.
+PSRC/mpccs | T | T | Magnetic Probe Signal used in CCS
+PSRC/pfcccs | T | KA | PF Coil Current used in CCS
+PSRC/refCOMBI | T |  | Control Point Pattern (COMBI.)
+PSRC/refCONFIG | T |  | Configuration Pattern (CONFIG.)
+PSRC/refDIVL | T |  | Lower Diverter Control PT(DIV_L)
+PSRC/refDIVU | T |  | Upper Diverter Control PT(DIV_U)
+PSRC/refDP7 | T | m | Reference Point (DP7)
+PSRC/refDP8 | T | m | Reference Point (DP8)
+PSRC/refDlin | T | m | Lower Diverter In-side (Dl-in)
+PSRC/refDlout | T | m | Lower Diverter Out-side (Dl-out)
+PSRC/refDltAve | T |  | Plasma Triangularity Ave. (deltaave)
+PSRC/refDltL | T |  | Lower Plasma Triangularity (deltal)
+PSRC/refGapL | T | m | Lower Outer Gap (Gl)
+PSRC/refGapU | T | m | Upper Outer Gap (Gu)
+PSRC/refINPUT | T |  | Control Input Pattern (INPUT)
+PSRC/refIP | A | KA | Plasma Current (Ip)
+PSRC/refNts | T |  | Magnetic surface table set No.(Nts) Com.
+PSRC/refRP1 | T | m | Plasma Bottom Horizontal Pos. (RP1)
+PSRC/refRP2 | T | m | Reference Point (RP2)
+PSRC/refRP3 | T | m | Plasma top Horizontal Pos. (RP3)
+PSRC/refRP4 | T | m | Reference Point (RP4)
+PSRC/refRP7 | T | m | Reference point(RP7)
+PSRC/refRP8 | T | m | Reference point(RP8)
+PSRC/refRp0 | T | m | Plasma Horiztal Pos. (Rp0)
+PSRC/refSHAPE | T |  | Shape Control Pattern (SHAPE)
+PSRC/refUDIVLin | T | m | Upper Diverter In-side (Du-in)
+PSRC/refUDIVLout | T | m | Upper Diverter Out-side (Du-out)
+PSRC/refZP1 | T | m | Plasma Bottom Vertical Pos. (ZP1)
+PSRC/refZP3 | T | m | Plasma top Vertical Pos. (ZP3)
+PSRC/refZP7 | T | m | Reference point(ZP7)
+PSRC/refZP8 | T | m | Reference point(ZP8)
+PSRC/refZp0 | T | m | Plasma Vertical Pos. (Zp0)
+PSRC/refap | T | m | Plasma Minor Radius (ap)
+PSRC/refkappa | T |  | Plasma Elongation Ave. (kappaave)
+PSRC/refkappaL | T |  | Lower Plasma Elongation (kappal)
+PSRC/refkappaU | T |  | Upper Plasma Elongation (kappau)
+PSRC/refu | T |  | Upper Plasma Triangularity (deltau)
+PSRC/rvs | T |  | Plasma Shape Viewer data
+PSRC/statsFastLp | T |  | Fast loop status
+PSRC/statsSlowLp | T |  | Slow loop status
+PSRC/surfABVxp | T |  | Plasma Surface above X point
+PSRC/surfBLWxp | T |  | Plasma Surface below X point
+PSRC/surfp | T | m | Representative Plasma Surface Point
+PSRC/ulimMMS | T |  | Coil stress upper limit
+FAME/APAVE | T | m | Mean small radius
+FAME/AREA | T | m2 | Plasma cross section area
+FAME/ASEPIBP | T | DEG | Poloidal angle against inner divertor strike p
+FAME/ASEPIBT | T | DEG | Toroidal angle against inner divertor strike p
+FAME/ASEPOBP | T | DEG | Poloidal angle against outer divertor strike p
+FAME/ASEPOBT | T | DEG | Toroidal angle against outer divertor strike p
+FAME/BETA | T |  | Toroidal bata value
+FAME/BETAN | T |  | Normalized beta value
+FAME/BETAPK | T |  | Poloidal bata value
+FAME/BPOMP | T |  | Poloidal magnetic field at the outer separatri
+FAME/BTV | T | T.m | Bt*R
+FAME/DELTA0 | T | m | Distance between VV first wall and RPMAX on th
+FAME/DELX | T | m | X point height
+FAME/DL0 | T | m | Distance between separatix and first wall at 0
+FAME/DL120 | T | m | Distance between separatix and first wall at 1
+FAME/DL150 | T | m | Distance between separatix and first wall at 1
+FAME/DL180 | T | m | Distance between separatix and first wall at 1
+FAME/DL210 | T | m | Distance between separatix and first wall at 2
+FAME/DL240 | T | m | Distance between separatix and first wall at 2
+FAME/DL270 | T | m | Distance between separatix and first wall at 2
+FAME/DL30 | T | m | Distance between separatix and first wall at 3
+FAME/DL300 | T | m | Distance between separatix and first wall at 3
+FAME/DL330 | T | m | Distance between separatix and first wall at 3
+FAME/DL60 | T | m | Distance between separatix and first wall at 6
+FAME/DL90 | T | m | Distance between separatix and first wall at 9
+FAME/DM1 | T | m | Distance between dome inner bottom tile edge a
+FAME/DM2 | T | m | Distance between dome inner upper tile edge an
+FAME/DM3 | T | m | Distance between dome outer upper tile edge an
+FAME/DM4 | T | m | Distance between dome outer bottom tile edge a
+FAME/DUIN | T | m | Distance between the inner strike point and in
+FAME/DUOUT | T | m | Distance between the outer strike point and ou
+FAME/ELL | T |  | Mean ellipticity
+FAME/GIN | T | m | Distance between inner baffle inflection point
+FAME/GOT | T | m | Distance between outer baffle inflection point
+FAME/HX | T | m | Distance between dome top and X point
+FAME/LAMBDA | T |  | Shafranov lambda
+FAME/LCN1 | T | m | Connection length of the magnteic field line 1
+FAME/LCN2 | T | m | Connection length of the magnteic field line 2
+FAME/LCN3 | T | m | Connection length of the magnteic field line 3
+FAME/LCO2 | T | m | Viewing chord of the tangential CO2 laser inte
+FAME/LGIN | T | m | Distance between X point and inner strike poin
+FAME/LGMI | T | m | Distance between outer baffle and separatrix
+FAME/LGOT | T | m | Distance between X point and outer strike poin
+FAME/LIN0 | T | m | Distance along inner baffle between inflection
+FAME/LIN1 | T | m | Distance along inner baffle between inflection
+FAME/LIN2 | T | m | Distance along inner baffle between inflection
+FAME/LIN3 | T | m | Distance along inner baffle between inflection
+FAME/LIN4 | T | m | Distance along inner baffle between inflection
+FAME/LIN5 | T | m | Distance along inner baffle between inflection
+FAME/LOT0 | T | m | Distance along outer baffle between inflection
+FAME/LOT1 | T | m | Distance along outer baffle between inflection
+FAME/LOT2 | T | m | Distance along outer baffle between inflection
+FAME/LOT3 | T | m | Distance along outer baffle between inflection
+FAME/LOT4 | T | m | Distance along outer baffle between inflection
+FAME/LOT5 | T | m | Distance along outer baffle between inflection
+FAME/LU1 | T | m | Viewing chord of FIR interferometer along U1 p
+FAME/LU2 | T | m | Viewing chord of FIR interferometer along U2 p
+FAME/NECO2 | T | m-3 | line averaged electron density measured by the
+FAME/NEU1 | T | m-3 | Line averaged electron density along the U1 li
+FAME/NEU2 | T | m-3 | Line averaged electron density along the U2 li
+FAME/NEWXP | T | m | Distance between X point and lowest point of t
+FAME/NINDX | T |  | N index value
+FAME/PSURF | T | V.S | Magnetic flux at the plasma surface
+FAME/Q95 | T |  | Safety facter at the 95% poloidal fluxes
+FAME/QAXIS | T |  | Safety factor at the magnetic axis
+FAME/QEFF | T |  | Effective safety factor
+FAME/QEFFFBI | T |  | Effective safety factor (FBI)
+FAME/QSURF | T |  | Safety factor at the plasma surface
+FAME/QSURFFBI | T |  | Safety facter at the plasma surface (FBI)
+FAME/RAXIS | T | m | R coordinate of the magnetic axis
+FAME/RMAJ | T | m | Major radius
+FAME/RPLA | T | m | Small radius in R direction
+FAME/RSEP | T | m | R coordinate of the X point
+FAME/SECOND001 | T |  | Secondary processed data of cmdA
+FAME/SIN0 | T | DEG | Angle of the magnetic field line 0cm away from
+FAME/SIN1 | T | DEG | Angle of the magnetic field line 1cm away from
+FAME/SIN2 | T | DEG | Angle of the magnetic field line 2cm away from
+FAME/SIN3 | T | DEG | Angle of the magnetic field line 3cm away from
+FAME/SOT0 | T | DEG | Angle of the magnetic field line 0cm away from
+FAME/SOT1 | T | DEG | Angle of the magnetic field line 1cm away from
+FAME/SOT2 | T | DEG | Angle of the magnetic field line 2cm away from
+FAME/SOT3 | T | DEG | Angle of the magnetic field line 3cm away from
+FAME/SURF | T | m2 | Plasma surface area
+FAME/TRG | T |  | Mean triangularity
+FAME/TRGL | T |  | Lower triangularity at separatrix
+FAME/TRGL95 | T |  | Lower triangularity at the 95% poloidal fluxes
+FAME/TRGU | T |  | Upper triangularity at separatrix
+FAME/TRGU95 | T |  | Upper triangularity at the 95% poloidal fluxes
+FAME/TTCU | T | A | Plasma current calculated by equilibrium
+FAME/VOLUM | T | m3 | Plasma volume
+FAME/VOLUM90 | T | m3 | Plasma volume inside the 90% poloidal fluxes
+FAME/VOLUM95 | T | m3 | Plasma volume inside the 95% poloidal fluxes
+FAME/VOLUM98 | T | m3 | Plasma volume inside the 98% poloidal fluxes
+FAME/WDIA8 | T | MJ | Stored energy calculated by FBI
+FAME/WSTORE | T | MJ | Stored energy
+FAME/YYLI | T |  | Internal inductance calculated by FBI
+FAME/ZAXIS | T | m | Z coordinate of the magnetic axis
+FAME/ZPLA | T | m | Small radius in Z direction
+FAME/ZSEP | T | m | Z coordinate of the X point
+FAME/ZZLI | T |  | Internal inductance calculated by equilibrium
+MMSYS/cur1TFLKAT | T | A | TF current No.1 (LKAT2)
+MMSYS/cur2TFLKAT | T | A | TF current No.2 (LKAT2)
+MMSYS/curCS1HiTe | T | A | CS1 Current (HiTec)
+MMSYS/curCS1LKAT | T | A | CS1 Current (LKAT2)
+MMSYS/curCS2HiTe | T | A | CS2 Current (HiTec)
+MMSYS/curCS2LKAT | T | A | CS2 Current (LKAT2)
+MMSYS/curCS3HiTe | T | A | CS3 Current (HiTec)
+MMSYS/curCS3LKAT | T | A | CS3 Current (LKAT2)
+MMSYS/curCS4HiTe | T | A | CS4 Current (HiTec)
+MMSYS/curCS4LKAT | T | A | CS4 Current (LKAT2)
+MMSYS/curEF1HiTe | T | A | EF1 Current (HiTec)
+MMSYS/curEF1LKAT | T | A | EF1 Current (LKAT2)
+MMSYS/curEF2HiTe | T | A | EF2 Current (HiTec)
+MMSYS/curEF2LKAT | T | A | EF2 Current (LKAT2)
+MMSYS/curEF3HiTe | T | A | EF3 Current (HiTec)
+MMSYS/curEF3LKAT | T | A | EF3 Current (LKAT2)
+MMSYS/curEF4HiTe | T | A | EF4 Current (HiTec)
+MMSYS/curEF4LKAT | T | A | EF4 Current (LKAT2)
+MMSYS/curEF5HiTe | T | A | EF5 Current (HiTec)
+MMSYS/curEF5LKAT | T | A | EF5 Current (LKAT2)
+MMSYS/curEF6HiTe | T | A | EF6 Current (HiTec)
+MMSYS/curEF6LKAT | T | A | EF6 Current (LKAT2)
+MMSYS/curLFPHiTe | T | A | Lower FPPCC Current (HiTec)
+MMSYS/curLFPLKAT | T | A | Lower FPPCC Current (LKAT2)
+MMSYS/curLFPdisr | T | A | Lower FPPCC Current for disruption (LKAT2)
+MMSYS/curUFPHiTe | T | A | Upper FPPCC Current (HiTec)
+MMSYS/curUFPLKAT | T | A | Upper FPPCC Current (LKAT2)
+MMSYS/curUFPdisr | T | A | Upper FPPCC Current for disruption (LKAT2)
+MMSYS/vol1TF | T | V | TF voltage No.1
+MMSYS/vol2TF | T | V | TF voltage No.2
+MMSYS/vol3TF | T | V | TF voltage No.3
+MMSYS/volCS1 | T | V | CS1 Voltage
+MMSYS/volCS2 | T | V | CS2 Voltage
+MMSYS/volCS3 | T | V | CS3 Voltage
+MMSYS/volCS4 | T | V | CS4 Voltage
+MMSYS/volEF1 | T | V | EF1 Voltage
+MMSYS/volEF1BPS | T | V | EF1 Booster BPS voltage
+MMSYS/volEF2 | T | V | EF2 Voltage
+MMSYS/volEF2BPS | T | V | EF2 Booster BPS voltage
+MMSYS/volEF3 | T | V | EF3 Voltage
+MMSYS/volEF4 | T | V | EF4 Voltage
+MMSYS/volEF5 | T | V | EF5 Voltage
+MMSYS/volEF5BPS | T | V | EF5 Booster BPS voltage
+MMSYS/volEF6 | T | V | EF6 Voltage
+MMSYS/volEF6BPS | T | V | EF6 Booster BPS voltage
+MMSYS/volLFPPCC | T | V | Lower FPPCC Voltage
+MMSYS/volUFPPCC | T | V | Upper FPPCC Voltage</pre>
+  </main>
+</body>
+</html>
