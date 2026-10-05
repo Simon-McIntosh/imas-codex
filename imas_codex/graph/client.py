@@ -74,16 +74,20 @@ except (ImportError, SyntaxError) as e:
 
 # Filter properties are a newer schema surface than the index list, so a
 # generated module written before they existed still yields working indexes.
+# ``None`` means the map could not be read and the expected filter properties
+# are unknown, which is not the same fact as an empty map: a live index that
+# carries a filter property is only a mismatch if the schema says it should
+# not, so an unknown map must not justify dropping it.
 try:
     from imas_codex.graph.schema_context_data import (
         VECTOR_INDEX_FILTERS as _VECTOR_INDEX_FILTERS_DATA,
     )
 
-    EXPECTED_VECTOR_INDEX_FILTERS: dict[str, list[str]] = {
+    EXPECTED_VECTOR_INDEX_FILTERS: dict[str, list[str]] | None = {
         name: list(props) for name, props in _VECTOR_INDEX_FILTERS_DATA.items()
     }
 except (ImportError, SyntaxError):
-    EXPECTED_VECTOR_INDEX_FILTERS = {}
+    EXPECTED_VECTOR_INDEX_FILTERS = None
 
 
 def _vector_index_ddl(
@@ -416,11 +420,16 @@ class GraphClient:
         dim = get_embedding_dimension()
 
         # Expected properties per index: the vector property plus any filter
-        # properties the schema registers on it.
-        expected_properties: dict[str, set[str]] = {
-            name: {prop, *EXPECTED_VECTOR_INDEX_FILTERS.get(name, [])}
-            for name, _label, prop in EXPECTED_VECTOR_INDEXES
-        }
+        # properties the schema registers on it.  A None map means the schema's
+        # filter surface could not be read, so the expected property set is
+        # unknown and only a dimension difference is a reason to drop.
+        expected_properties: dict[str, set[str]] | None = None
+        if EXPECTED_VECTOR_INDEX_FILTERS is not None:
+            expected_properties = {
+                name: {prop, *EXPECTED_VECTOR_INDEX_FILTERS.get(name, [])}
+                for name, _label, prop in EXPECTED_VECTOR_INDEXES
+            }
+        owned = {name for name, _label, _prop in EXPECTED_VECTOR_INDEXES}
 
         with self.session() as sess:
             # Drop schema-derived indexes whose dimension or registered filter
@@ -434,11 +443,34 @@ class GraphClient:
                     "properties AS props"
                 )
                 for idx in mismatch_result:
-                    expected_props = expected_properties.get(idx["name"])
-                    if expected_props is None:
+                    if idx["name"] not in owned:
                         continue
+                    dimension_differs = idx["dim"] != dim
+                    if expected_properties is None:
+                        if not dimension_differs:
+                            logger.info(
+                                "Leaving vector index %s alone: expected filter "
+                                "properties are unknown (no generated filter map), "
+                                "so a property difference is not evidence of a "
+                                "mismatch. Live properties %s.",
+                                idx["name"],
+                                sorted(idx["props"] or []),
+                            )
+                            continue
+                        logger.info(
+                            "Dropping vector index %s (dim %s vs %d); expected "
+                            "filter properties are unknown, so the live property "
+                            "set %s is not used as a reason to drop.",
+                            idx["name"],
+                            idx["dim"],
+                            dim,
+                            sorted(idx["props"] or []),
+                        )
+                        sess.run(f"DROP INDEX `{idx['name']}`")
+                        continue
+                    expected_props = expected_properties[idx["name"]]
                     live_props = set(idx["props"] or [])
-                    if idx["dim"] == dim and live_props == expected_props:
+                    if not dimension_differs and live_props == expected_props:
                         continue
                     logger.info(
                         "Dropping vector index %s (dim %s vs %d, properties %s vs %s)",
@@ -463,16 +495,13 @@ class GraphClient:
                 if index_name in existing:
                     continue  # Index already exists
 
+                filters = (
+                    EXPECTED_VECTOR_INDEX_FILTERS.get(index_name)
+                    if EXPECTED_VECTOR_INDEX_FILTERS is not None
+                    else None
+                )
                 try:
-                    sess.run(
-                        _vector_index_ddl(
-                            index_name,
-                            label,
-                            prop,
-                            dim,
-                            EXPECTED_VECTOR_INDEX_FILTERS.get(index_name),
-                        )
-                    )
+                    sess.run(_vector_index_ddl(index_name, label, prop, dim, filters))
                     logger.debug(f"Created vector index: {index_name}")
                 except Exception as e:
                     # Vector indexes may not be available in all Neo4j editions

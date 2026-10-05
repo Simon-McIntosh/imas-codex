@@ -62,11 +62,24 @@
     keep their post-filter facility predicate, since their indexes do not carry
     the filter property.
   </p>
+  <p id="search-code-facility-prefilter-unknown-filters">
+    The filter map is read from the generated
+    <code>schema_context_data.py</code>, which is gitignored and rebuilt on
+    sync, so a checkout whose copy predates the annotation cannot read it.
+    An unreadable map is not an empty one: <code>None</code> means the expected
+    properties are unknown, and the property set is then not used as a reason
+    to drop — otherwise <code>ensure_vector_indexes</code> would treat a
+    correctly built index's <code>facility_id</code> registration as a
+    mismatch, drop the populated index and recreate it without the
+    <code>WITH</code> clause, silently undoing this work from a stale checkout.
+    A dimension mismatch still drops, and an empty map — the symbol present and
+    saying no index carries a filter — still drops an index that carries one.
+  </p>
   <p id="search-code-facility-prefilter-measure">
     Gate: <code>uv run pytest tests/search tests/llm
     tests/graph/test_schema_context.py tests/graph/test_vector_search.py</code>
-    exits <strong>0</strong>, 678 passed, 10 skipped (base revision
-    <code>65c01fbbd</code>: 663 passed, so +15 from this node's tests).
+    exits <strong>0</strong>, 681 passed, 10 skipped (base revision
+    <code>65c01fbbd</code>: 663 passed, so +18 from this node's tests).
     <code>test_facility_filter_inside_search</code> pins that the facility
     predicate renders between <code>SEARCH</code> and
     <code>) SCORE AS</code> in the statement <code>_search_code</code> issues;
@@ -76,6 +89,12 @@
     index missing <code>facility_id</code> (and one with a stale dimension) is
     dropped and recreated with <code>WITH [n.facility_id]</code>, while an
     index the schema does not own is left alone.
+    <code>test_unknown_filter_map_leaves_extra_property_index_alone</code> pins
+    that an unreadable filter map leaves an index carrying
+    <code>facility_id</code> untouched;
+    <code>test_unknown_filter_map_still_drops_on_dimension_mismatch</code> and
+    <code>test_empty_filter_map_is_a_known_absence</code> pin the two cases the
+    guard must not swallow.
     <br/>
     Live check: against the rebuilt index,
     <code>_search_code('SELENE equilibrium reconstruction',
@@ -87,6 +106,14 @@
     <code>test_facility_filter_inside_search</code> (EXIT=1) while the older
     <code>test_facility_filter</code> still passes, so the control detects the
     predicate's <em>position</em> and not merely its presence or absence.
+    <br/>
+    Negative control — reverting the unknown-filter guard so an unreadable map
+    is treated as an empty one — fails
+    <code>test_unknown_filter_map_leaves_extra_property_index_alone</code>
+    (EXIT=1, the recorded drop is
+    <code>['code_chunk_embedding']</code>) while the dimension-mismatch and
+    known-empty-map tests still pass, so the control detects the drop and not
+    the absence of any reconciliation at all.
   </p>
   <p id="search-code-facility-prefilter-followon">
     Follow-on: the signal and wiki chunk searches keep post-filter facility

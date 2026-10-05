@@ -306,20 +306,30 @@ class _FakeNeo4jSession:
 class TestEnsureVectorIndexes:
     """ensure_vector_indexes reconciles live index shape against the schema."""
 
-    def _run(self, client_mod, fake):
+    def _run(self, client_mod, fake, filters="default"):
+        """Run ensure_vector_indexes against the fake session.
+
+        ``filters`` overrides the module's expected filter map.  The sentinel
+        ``"default"`` leaves it as imported; passing ``None`` models a checkout
+        whose generated module predates the filter surface.
+        """
         from contextlib import contextmanager
 
         @contextmanager
         def fake_session(self):
             yield fake
 
-        original = client_mod.GraphClient.session
+        original_session = client_mod.GraphClient.session
+        original_filters = client_mod.EXPECTED_VECTOR_INDEX_FILTERS
         client_mod.GraphClient.session = fake_session
+        if filters != "default":
+            client_mod.EXPECTED_VECTOR_INDEX_FILTERS = filters
         try:
             client = object.__new__(client_mod.GraphClient)
             client.ensure_vector_indexes()
         finally:
-            client_mod.GraphClient.session = original
+            client_mod.GraphClient.session = original_session
+            client_mod.EXPECTED_VECTOR_INDEX_FILTERS = original_filters
         return fake
 
     def test_recreates_index_missing_filter_property(self):
@@ -395,6 +405,75 @@ class TestEnsureVectorIndexes:
         self._run(client_mod, fake)
 
         assert fake.drops == []
+
+    def test_unknown_filter_map_leaves_extra_property_index_alone(self):
+        """An unreadable filter map must not justify dropping a live index.
+
+        A checkout whose generated module predates the filter surface cannot
+        say which properties an index should carry, so an index that carries
+        more than the vector property is not evidence of a mismatch.
+        """
+        from imas_codex.graph import client as client_mod
+
+        dim = client_mod.get_embedding_dimension()
+        fake = _FakeNeo4jSession(
+            vector_rows=[
+                {
+                    "name": "code_chunk_embedding",
+                    "dim": dim,
+                    "props": ["embedding", "facility_id"],
+                }
+            ],
+            existing_names=["code_chunk_embedding"],
+        )
+        self._run(client_mod, fake, filters=None)
+
+        assert fake.drops == []
+        assert not any(
+            "CREATE VECTOR INDEX" in s and "code_chunk_embedding" in s
+            for s in fake.statements
+        )
+
+    def test_unknown_filter_map_still_drops_on_dimension_mismatch(self):
+        from imas_codex.graph import client as client_mod
+
+        dim = client_mod.get_embedding_dimension()
+        fake = _FakeNeo4jSession(
+            vector_rows=[
+                {
+                    "name": "code_chunk_embedding",
+                    "dim": dim + 1,
+                    "props": ["embedding", "facility_id"],
+                }
+            ],
+            existing_names=["code_chunk_embedding"],
+        )
+        self._run(client_mod, fake, filters=None)
+
+        assert fake.drops == ["code_chunk_embedding"]
+
+    def test_empty_filter_map_is_a_known_absence(self):
+        """An empty map is a statement, unlike an unreadable one.
+
+        With the symbol present and empty the schema says no index carries a
+        filter property, so a live index that carries one is a real mismatch.
+        """
+        from imas_codex.graph import client as client_mod
+
+        dim = client_mod.get_embedding_dimension()
+        fake = _FakeNeo4jSession(
+            vector_rows=[
+                {
+                    "name": "code_chunk_embedding",
+                    "dim": dim,
+                    "props": ["embedding", "facility_id"],
+                }
+            ],
+            existing_names=["code_chunk_embedding"],
+        )
+        self._run(client_mod, fake, filters={})
+
+        assert fake.drops == ["code_chunk_embedding"]
 
 
 # =============================================================================
