@@ -23,7 +23,7 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -76,9 +76,13 @@
       <code>enumerate_edas.py</code> read the catalogue without a shot and kept only name,
       alias, unit and description; it now reads the table for the reference shot and keeps
       the data class (T time series, O one-point, P parameter), the shot validity range and
-      the UDP id, which the scanner stores as <code>keywords</code>
-      (<code>class:T</code>, <code>shots:E080000-</code>) and <code>aliases</code> until the
-      FacilitySignal schema gains typed slots for them. <strong>Access:</strong>
+      the UDP id. The prototype parks them in <code>keywords</code>
+      (<code>class:T</code>, <code>shots:E080000-</code>) and <code>aliases</code>; the decision
+      below is that typed slots come first, so the first node of this section extends
+      <code>schemas/facility.yaml</code> with <code>data_class</code>, <code>shot_range</code> and
+      <code>pid</code> on FacilitySignal, regenerates the models (a graph-touching
+      <code>implement</code> node, never <code>review</code>), moves the scanner onto the slots and
+      only then runs the scan. <strong>Access:</strong>
       <code>eddbreadTime</code> takes its time bounds as strings; the generated
       <code>DataAccess</code> template passed integers and raised. <strong>Check:</strong>
       the check script tested catalogue presence rather than data; it now reads a short
@@ -128,9 +132,13 @@
       Done-when: the seven handbook table pages carry <code>status: dynamic</code> and a
       <code>fronts_database</code> value; every FacilitySignal from §2 has a
       <code>DOCUMENTED_IN</code> edge to its database's handbook page; a PID-keyed one-point
-      enumeration for E101173 is in the graph with its PIDs; and
-      <code>search_docs("flux loop", facility="jt-60sa")</code> returns the PSRC flux-loop
-      signals beside the EDDB manual chunks.
+      enumeration for E101173 is in the graph with its PIDs; and the MCP tools follow the
+      edges in both directions — <code>search_docs</code> and <code>fetch_content</code> on a
+      dynamic page return the signals it fronts (name, class, unit, PID, access template)
+      instead of the empty form, and <code>search_signals</code> cites the handbook page —
+      proved by <code>search_docs("flux loop", facility="jt-60sa")</code> returning the PSRC
+      flux-loop signals beside the EDDB manual chunks and by <code>fetch_content</code> of the
+      EDDB Category Information page listing its categories.
     </p>
 
     <h2 id="s4">§4 — Document ingest: a missing dependency, then the queue</h2>
@@ -194,10 +202,11 @@
       repairs; <code>reference_shot: 101173</code>; the census research doc. Not run: the live
       EDAS scan, the code scan, the document re-ingest, the dynamic-page rule, the
       <code>DOCUMENTED_IN</code> linkage and the PID enumeration. The scanner stores class,
-      shot range and UDP id in <code>keywords</code> as a stopgap; the typed slots belong in
-      <code>schemas/facility.yaml</code> with a <code>build-models</code> regeneration, which
-      is a graph-touching node and must be dispatched as <code>test</code> or
-      <code>implement</code>, never <code>review</code> or <code>investigate</code>.
+      shot range and UDP id in <code>keywords</code> as a stopgap; the locked decision is typed
+      slots before the scan, so §2 begins with the schema extension and a
+      <code>build-models</code> regeneration, which is a graph-touching node and must be
+      dispatched as <code>test</code> or <code>implement</code>, never <code>review</code> or
+      <code>investigate</code>.
     </p>
     <p>
       <strong>Consumer.</strong> The ambix plan <code>imas-ambix:jt60sa-machine-map</code>
@@ -246,22 +255,22 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="signal-metadata-slots" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="signal-metadata-slots" data-choice="typed-slots-now" data-by="Simon McIntosh" data-when="2026-10-05T05:13:17+00:00">
     <p class="r-dec-q">Do data class, shot range and PID become typed FacilitySignal slots now, or stay in keywords for this plan?</p>
     <p class="r-dec-ctx">Typed slots need a schema change and model regeneration across the fleet; keywords work today but are not queryable by type.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="typed-slots-now">Add typed slots in §2 before the scan</button>
+      <button class="r-opt chosen" data-value="typed-slots-now">Add typed slots in §2 before the scan</button>
       <button class="r-opt" data-value="keywords-then-migrate">Scan with keywords, migrate to slots in a follow-on section</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead&#x27;s choice 2026-10-05: data class, shot range and PID are the keys the ambix census and the handbook linkage query on, so they are typed FacilitySignal slots before the first scan rather than parsed out of keywords later. Accepted cost: the scan waits on a schema extension and a build-models regeneration, dispatched as a graph-touching implement node. Rejected: keywords-then-migrate, which would have scanned a day earlier but written 741 signals in a shape that must be rewritten.</p>
     </div>
-<div class="r-dec" data-key="dynamic-page-handling" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="dynamic-page-handling" data-choice="dynamic-status-plus-signal-links" data-by="Simon McIntosh" data-when="2026-10-05T05:13:17+00:00">
     <p class="r-dec-q">How are CGI-rendered handbook tables represented?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="dynamic-status-plus-signal-links">Mark the page dynamic and link FacilitySignals to it</button>
+      <button class="r-opt chosen" data-value="dynamic-status-plus-signal-links">Mark the page dynamic and link FacilitySignals to it</button>
       <button class="r-opt" data-value="synthesised-table-chunks">Synthesise table chunks from EDDB into the page</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead&#x27;s choice 2026-10-05, with a condition: the handbook table pages are marked dynamic with the database they front and every scanned FacilitySignal links to its page through DOCUMENTED_IN, and the MCP tools must follow those links so search_docs and fetch_content on a dynamic page return the signals it fronts and search_signals cites the page. Rejected: synthesising table chunks from EDDB into the page, which duplicates FacilitySignal content as prose and drifts when the catalogue changes.</p>
     </div>
 </section>
 
