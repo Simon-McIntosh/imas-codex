@@ -3292,6 +3292,11 @@ classes:
         description: Vector embedding for semantic search (stored as list of floats)
         multivalued: true
         range: float
+        annotations:
+          # Registered as additional vector index properties so a
+          # facility predicate can pre-filter inside SEARCH rather than
+          # discard a small facility's chunks after the global ANN cut.
+          vector_index_filters: facility_id
       embedded_at:
         description: When the embedding was last computed
         range: datetime

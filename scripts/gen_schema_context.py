@@ -152,6 +152,13 @@ def generate_schema_context(
             if idx_name not in vector_indexes:
                 vector_indexes[idx_name] = (label, prop)
 
+    # ---- Build VECTOR_INDEX_FILTERS ----
+    vector_index_filters: dict[str, list[str]] = {}
+    for schema in [facility_schema, dd_schema]:
+        for idx_name, props in schema.vector_index_filters.items():
+            if idx_name not in vector_index_filters:
+                vector_index_filters[idx_name] = list(props)
+
     # ---- Build TASK_GROUPS (just the label lists) ----
     task_groups: dict[str, list[str]] = {}
     for group_name, group in task_groups_raw.items():
@@ -184,6 +191,10 @@ def generate_schema_context(
         "",
         "# Vector indexes: index_name -> (label, property)",
         f"VECTOR_INDEXES: dict[str, tuple[str, str]] = {_format_dict(vector_indexes)}",
+        "",
+        "# Vector index filter properties: index_name -> [properties]",
+        "# (registered via WITH [...] so a SEARCH WHERE can pre-filter)",
+        f"VECTOR_INDEX_FILTERS: dict[str, list[str]] = {_format_dict(vector_index_filters)}",
         "",
         "# Fulltext indexes: index_name -> (label, [properties])",
         f"FULLTEXT_INDEXES: dict[str, tuple[str, list[str]]] = {_format_dict(fulltext_indexes)}",

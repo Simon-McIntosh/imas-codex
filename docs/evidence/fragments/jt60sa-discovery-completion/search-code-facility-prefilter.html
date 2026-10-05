@@ -1,0 +1,126 @@
+<section>
+  <h2 id="search-code-facility-prefilter">search_code pre-filters by facility inside the vector index</h2>
+  <p id="search-code-facility-prefilter-landing">
+    <code>search_code</code> now selects its vector candidates <em>inside</em>
+    the <code>code_chunk_embedding</code> index rather than discarding them
+    afterwards. The <code>code_chunk_embedding</code> index registers
+    <code>facility_id</code> as an additional vector index property
+    (<code>WITH [n.facility_id]</code> in <code>CREATE VECTOR INDEX</code>),
+    and <code>_vector_search_code_chunks</code>
+    (<code>imas_codex/llm/search_tools.py</code>) passes the facility predicate
+    as a <code>prefilter_clauses</code> argument, which
+    <code>build_vector_search</code>
+    (<code>imas_codex/graph/vector_search.py</code>) renders as a
+    <code>WHERE</code> between <code>FOR $embedding</code> and
+    <code>LIMIT $k</code> — inside the <code>SEARCH</code> parentheses, so the
+    ANN cut is taken over the facility's own chunks.
+  </p>
+  <p id="search-code-facility-prefilter-cause">
+    The predicate used to be a post-filter: the index returned a global top-k
+    across all 271,661 <code>CodeChunk</code> nodes and the facility check ran
+    after the cut. A facility holding a small share of the corpus therefore
+    lost its chunks to the global winners before the filter ever saw them.
+    Measured on the live graph: <code>jt-60sa</code> holds 201 of 271,661
+    chunks (0.07%). The same query, embedding and <code>k</code> at 10, on the
+    rebuilt index — with the predicate inside <code>SEARCH</code> returns ten
+    chunks of which two are
+    <code>/analysis/src/SAselene_v2.0_forPSRC/eqequb.f</code>; with the
+    predicate as a post-filter (<code>WHERE</code> after
+    <code>) SCORE AS score</code>) it returns <strong>zero</strong> rows, because
+    no <code>jt-60sa</code> chunk is in the global top ten at all. The
+    starvation is total, not marginal.
+  </p>
+  <figure id="search-code-facility-prefilter-figure">
+    <img
+      src="/jt60sa-discovery-completion/figures/search-code-facility-prefilter/prefilter-vs-postfilter.png"
+      alt="Chunks returned at k=10 on the live code index: with the facility predicate inside SEARCH, 10 rows including two eqequb.f chunks; with the predicate as a post-filter, zero rows."
+    />
+    <figcaption>
+      Live query, <code>k = 10</code>, embedding for
+      &ldquo;SELENE equilibrium reconstruction&rdquo;, facility
+      <code>jt-60sa</code> against the rebuilt
+      <code>code_chunk_embedding</code> index.
+    </figcaption>
+  </figure>
+  <p id="search-code-facility-prefilter-wiring">
+    The path from schema to index statement is schema-derived and single-sourced.
+    A <code>vector_index_filters: facility_id</code> annotation on
+    <code>CodeChunk.embedding</code> (<code>imas_codex/schemas/facility.yaml</code>)
+    is read by <code>GraphSchema.vector_index_filters</code>
+    (<code>imas_codex/graph/schema.py</code>), emitted by
+    <code>scripts/gen_schema_context.py</code> as <code>VECTOR_INDEX_FILTERS</code>
+    into the generated <code>schema_context_data.py</code>, and consumed by
+    <code>GraphClient.ensure_vector_indexes</code> through
+    <code>_vector_index_ddl</code> (<code>imas_codex/graph/client.py</code>).
+    <code>ensure_vector_indexes</code> now compares each live index's dimension
+    <em>and</em> property set against the schema and drops an index whose live
+    shape differs, so the filter registration is applied by an ordinary
+    <code>ensure_vector_indexes</code> call rather than a manual rebuild.
+    <code>vector_indexes</code> stays a list of 3-tuples and the generated
+    <code>VECTOR_INDEXES</code> stays a mapping to 2-tuples; the filter map is a
+    separate surface. The signal and wiki chunk searches are unchanged — they
+    keep their post-filter facility predicate, since their indexes do not carry
+    the filter property.
+  </p>
+  <p id="search-code-facility-prefilter-unknown-filters">
+    The filter map is read from the generated
+    <code>schema_context_data.py</code>, which is gitignored and rebuilt on
+    sync, so a checkout whose copy predates the annotation cannot read it.
+    An unreadable map is not an empty one: <code>None</code> means the expected
+    properties are unknown, and the property set is then not used as a reason
+    to drop — otherwise <code>ensure_vector_indexes</code> would treat a
+    correctly built index's <code>facility_id</code> registration as a
+    mismatch, drop the populated index and recreate it without the
+    <code>WITH</code> clause, silently undoing this work from a stale checkout.
+    A dimension mismatch still drops, and an empty map — the symbol present and
+    saying no index carries a filter — still drops an index that carries one.
+  </p>
+  <p id="search-code-facility-prefilter-measure">
+    Gate: <code>uv run pytest tests/search tests/llm
+    tests/graph/test_schema_context.py tests/graph/test_vector_search.py</code>
+    exits <strong>0</strong>, 681 passed, 10 skipped (base revision
+    <code>65c01fbbd</code>: 663 passed, so +18 from this node's tests).
+    <code>test_facility_filter_inside_search</code> pins that the facility
+    predicate renders between <code>SEARCH</code> and
+    <code>) SCORE AS</code> in the statement <code>_search_code</code> issues;
+    <code>test_prefilter_renders_inside_search</code> pins the clause builder's
+    ordering; <code>TestEnsureVectorIndexes</code> drives
+    <code>ensure_vector_indexes</code> against a recording stub and asserts an
+    index missing <code>facility_id</code> (and one with a stale dimension) is
+    dropped and recreated with <code>WITH [n.facility_id]</code>, while an
+    index the schema does not own is left alone.
+    <code>test_unknown_filter_map_leaves_extra_property_index_alone</code> pins
+    that an unreadable filter map leaves an index carrying
+    <code>facility_id</code> untouched;
+    <code>test_unknown_filter_map_still_drops_on_dimension_mismatch</code> and
+    <code>test_empty_filter_map_is_a_known_absence</code> pin the two cases the
+    guard must not swallow.
+    <br/>
+    Live check: against the rebuilt index,
+    <code>_search_code('SELENE equilibrium reconstruction',
+    facility='jt-60sa')</code> at the default <code>k=10</code> returns the
+    <code>/analysis/src/SAselene_v2.0_forPSRC/eqequb.f</code> chunk at rank 1.
+    <br/>
+    Negative control — rendering the facility predicate as a post-filter again
+    in <code>_search_code</code> — fails
+    <code>test_facility_filter_inside_search</code> (EXIT=1) while the older
+    <code>test_facility_filter</code> still passes, so the control detects the
+    predicate's <em>position</em> and not merely its presence or absence.
+    <br/>
+    Negative control — reverting the unknown-filter guard so an unreadable map
+    is treated as an empty one — fails
+    <code>test_unknown_filter_map_leaves_extra_property_index_alone</code>
+    (EXIT=1, the recorded drop is
+    <code>['code_chunk_embedding']</code>) while the dimension-mismatch and
+    known-empty-map tests still pass, so the control detects the drop and not
+    the absence of any reconciliation at all.
+  </p>
+  <p id="search-code-facility-prefilter-followon">
+    Follow-on: the signal and wiki chunk searches keep post-filter facility
+    predicates because their indexes do not register a filter property. If
+    small facilities starve there too, the same annotation and clause-builder
+    path applies; that is a separate node, not part of this one. This gate
+    measures only this node's own change; verifying the merged result belongs to
+    a separately dispatched test node.
+  </p>
+</section>

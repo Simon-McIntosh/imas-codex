@@ -72,6 +72,57 @@ except (ImportError, SyntaxError) as e:
     EXPECTED_VECTOR_INDEXES = []
     EXPECTED_FULLTEXT_INDEXES = []
 
+# Filter properties are a newer schema surface than the index list, so a
+# generated module written before they existed still yields working indexes.
+# ``None`` means the map could not be read and the expected filter properties
+# are unknown, which is not the same fact as an empty map: a live index that
+# carries a filter property is only a mismatch if the schema says it should
+# not, so an unknown map must not justify dropping it.
+try:
+    from imas_codex.graph.schema_context_data import (
+        VECTOR_INDEX_FILTERS as _VECTOR_INDEX_FILTERS_DATA,
+    )
+
+    EXPECTED_VECTOR_INDEX_FILTERS: dict[str, list[str]] | None = {
+        name: list(props) for name, props in _VECTOR_INDEX_FILTERS_DATA.items()
+    }
+except (ImportError, SyntaxError):
+    EXPECTED_VECTOR_INDEX_FILTERS = None
+
+
+def _vector_index_ddl(
+    index_name: str,
+    label: str,
+    prop: str,
+    dim: int,
+    filters: list[str] | None = None,
+) -> str:
+    """Compose a ``CREATE VECTOR INDEX`` statement for a schema-derived index.
+
+    ``filters`` names additional properties registered with the index via a
+    ``WITH`` clause.  Their presence makes a predicate over them valid inside
+    a ``SEARCH ... WHERE``, where it pre-filters the ANN candidates rather
+    than discarding matches after a global top-k cut.
+
+    The ``CYPHER 25`` prefix is required: the additional-properties ``WITH``
+    clause is part of the Cypher 25 grammar, and the server rejects it when
+    the statement is parsed as Cypher 5.
+    """
+    with_clause = ""
+    if filters:
+        with_clause = "\nWITH [" + ", ".join(f"n.{p}" for p in filters) + "]"
+    return (
+        f"CYPHER 25 CREATE VECTOR INDEX {index_name} IF NOT EXISTS\n"
+        f"FOR (n:{label}) ON n.{prop}{with_clause}\n"
+        "OPTIONS {\n"
+        "    indexConfig: {\n"
+        f"        `vector.dimensions`: {dim},\n"
+        "        `vector.similarity_function`: 'cosine',\n"
+        "        `vector.quantization.enabled`: true\n"
+        "    }\n"
+        "}"
+    )
+
 
 # =============================================================================
 # Relationship Types (From Pre-Built Schema Context Data)
@@ -368,25 +419,70 @@ class GraphClient:
         """
         dim = get_embedding_dimension()
 
+        # Expected properties per index: the vector property plus any filter
+        # properties the schema registers on it.  A None map means the schema's
+        # filter surface could not be read, so the expected property set is
+        # unknown and only a dimension difference is a reason to drop.
+        expected_properties: dict[str, set[str]] | None = None
+        if EXPECTED_VECTOR_INDEX_FILTERS is not None:
+            expected_properties = {
+                name: {prop, *EXPECTED_VECTOR_INDEX_FILTERS.get(name, [])}
+                for name, _label, prop in EXPECTED_VECTOR_INDEXES
+            }
+        owned = {name for name, _label, _prop in EXPECTED_VECTOR_INDEXES}
+
         with self.session() as sess:
-            # Check for dimension mismatches on existing vector indexes
+            # Drop schema-derived indexes whose dimension or registered filter
+            # properties differ from the schema, so the creates below use the
+            # configured shape. Indexes the schema does not own are left alone.
             try:
                 mismatch_result = sess.run(
-                    "SHOW INDEXES YIELD name, type, options "
+                    "SHOW INDEXES YIELD name, type, options, properties "
                     "WHERE type = 'VECTOR' "
-                    "RETURN name, options.indexConfig.`vector.dimensions` AS dim"
+                    "RETURN name, options.indexConfig.`vector.dimensions` AS dim, "
+                    "properties AS props"
                 )
                 for idx in mismatch_result:
-                    if idx["dim"] != dim:
+                    if idx["name"] not in owned:
+                        continue
+                    dimension_differs = idx["dim"] != dim
+                    if expected_properties is None:
+                        if not dimension_differs:
+                            logger.info(
+                                "Leaving vector index %s alone: expected filter "
+                                "properties are unknown (no generated filter map), "
+                                "so a property difference is not evidence of a "
+                                "mismatch. Live properties %s.",
+                                idx["name"],
+                                sorted(idx["props"] or []),
+                            )
+                            continue
                         logger.info(
-                            "Dropping vector index %s (dim %s != configured %d)",
+                            "Dropping vector index %s (dim %s vs %d); expected "
+                            "filter properties are unknown, so the live property "
+                            "set %s is not used as a reason to drop.",
                             idx["name"],
                             idx["dim"],
                             dim,
+                            sorted(idx["props"] or []),
                         )
                         sess.run(f"DROP INDEX `{idx['name']}`")
+                        continue
+                    expected_props = expected_properties[idx["name"]]
+                    live_props = set(idx["props"] or [])
+                    if not dimension_differs and live_props == expected_props:
+                        continue
+                    logger.info(
+                        "Dropping vector index %s (dim %s vs %d, properties %s vs %s)",
+                        idx["name"],
+                        idx["dim"],
+                        dim,
+                        sorted(live_props),
+                        sorted(expected_props),
+                    )
+                    sess.run(f"DROP INDEX `{idx['name']}`")
             except Exception as e:
-                logger.warning("Could not check vector index dimensions: %s", e)
+                logger.warning("Could not check vector index shape: %s", e)
 
             # Get existing indexes (after any drops above)
             result = sess.run(
@@ -399,18 +495,13 @@ class GraphClient:
                 if index_name in existing:
                     continue  # Index already exists
 
+                filters = (
+                    EXPECTED_VECTOR_INDEX_FILTERS.get(index_name)
+                    if EXPECTED_VECTOR_INDEX_FILTERS is not None
+                    else None
+                )
                 try:
-                    sess.run(f"""
-                        CREATE VECTOR INDEX {index_name} IF NOT EXISTS
-                        FOR (n:{label}) ON n.{prop}
-                        OPTIONS {{
-                            indexConfig: {{
-                                `vector.dimensions`: {dim},
-                                `vector.similarity_function`: 'cosine',
-                                `vector.quantization.enabled`: true
-                            }}
-                        }}
-                    """)
+                    sess.run(_vector_index_ddl(index_name, label, prop, dim, filters))
                     logger.debug(f"Created vector index: {index_name}")
                 except Exception as e:
                     # Vector indexes may not be available in all Neo4j editions

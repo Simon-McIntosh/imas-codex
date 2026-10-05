@@ -207,11 +207,20 @@ class GraphSchema:
             and "description" not in self.get_all_slots(label)
         )
 
-    @cached_property
-    def vector_indexes(self) -> list[tuple[str, str, str]]:
-        """Derive vector indexes from schema based on embedding slots.
+    @staticmethod
+    def _slot_annotation(slot, key: str) -> str | None:
+        """Return a slot annotation's value, tolerant of dict/object forms."""
+        annotations = getattr(slot, "annotations", None) or {}
+        ann = (
+            annotations.get(key)
+            if isinstance(annotations, dict)
+            else getattr(annotations, key, None)
+        )
+        return ann.value if ann and hasattr(ann, "value") else None
 
-        Returns list of (index_name, node_label, property_name) tuples.
+    @cached_property
+    def _vector_index_entries(self) -> list[tuple[str, str, Any]]:
+        """Every embedding vector index as (index_name, node_label, slot).
 
         Index naming:
         - Uses `vector_index_name` annotation if present on slot
@@ -229,41 +238,59 @@ class GraphSchema:
             s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
             return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
-        def get_vector_annotation(slot) -> str | None:
-            """Get vector_index_name annotation if present."""
-            annotations = getattr(slot, "annotations", None) or {}
-            ann = (
-                annotations.get("vector_index_name")
-                if isinstance(annotations, dict)
-                else getattr(annotations, "vector_index_name", None)
-            )
-            return ann.value if ann and hasattr(ann, "value") else None
-
-        indexes = []
+        entries: list[tuple[str, str, Any]] = []
         for label in self.node_labels:
             label_snake = to_snake(label)
 
             for slot in self._view.class_induced_slots(label):
-                slot_name = slot.name
-                custom_name = get_vector_annotation(slot)
+                custom_name = self._slot_annotation(slot, "vector_index_name")
 
                 # Process slots named "embedding" OR with explicit vector_index_name
-                if slot_name != "embedding" and not custom_name:
+                if slot.name != "embedding" and not custom_name:
                     continue
 
                 if custom_name:
                     index_name = custom_name
                 else:
                     slots = self.get_all_slots(label)
-                    has_desc = "description" in slots
-                    if has_desc:
-                        index_name = f"{label_snake}_desc_embedding"
-                    else:
-                        index_name = f"{label_snake}_embedding"
+                    suffix = "desc_embedding" if "description" in slots else "embedding"
+                    index_name = f"{label_snake}_{suffix}"
 
-                indexes.append((index_name, label, slot_name))
+                entries.append((index_name, label, slot))
 
-        return indexes
+        return entries
+
+    @cached_property
+    def vector_indexes(self) -> list[tuple[str, str, str]]:
+        """Derive vector indexes from schema based on embedding slots.
+
+        Returns list of (index_name, node_label, property_name) tuples.
+        """
+        return [
+            (name, label, slot.name) for name, label, slot in self._vector_index_entries
+        ]
+
+    @cached_property
+    def vector_index_filters(self) -> dict[str, list[str]]:
+        """Properties registered on each vector index for in-index filtering.
+
+        Returns index name -> property names.  Read from the embedding
+        slot's ``vector_index_filters`` annotation (comma- or
+        whitespace-separated), these become the additional properties of
+        ``CREATE VECTOR INDEX`` and the only predicates valid inside a
+        ``SEARCH ... WHERE``.
+        """
+        import re
+
+        filters: dict[str, list[str]] = {}
+        for name, _label, slot in self._vector_index_entries:
+            raw = self._slot_annotation(slot, "vector_index_filters")
+            if not raw:
+                continue
+            props = [p for p in re.split(r"[,\s]+", raw.strip()) if p]
+            if props:
+                filters[name] = props
+        return filters
 
     @cached_property
     def fulltext_indexes(self) -> list[tuple[str, str, list[str]]]:

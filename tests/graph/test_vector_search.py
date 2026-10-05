@@ -103,6 +103,43 @@ class TestBuildVectorSearch:
             in result
         )
 
+    def test_prefilter_renders_inside_search(self):
+        """A prefilter predicate renders between FOR and LIMIT, inside SEARCH."""
+        result = build_vector_search(
+            "code_chunk_embedding",
+            "CodeChunk",
+            prefilter_clauses=["cc.facility_id = $facility"],
+            node_alias="cc",
+        )
+        open_idx = result.index("SEARCH cc IN (")
+        close_idx = result.index(") SCORE AS score")
+        pred_idx = result.index("WHERE cc.facility_id = $facility")
+        limit_idx = result.index("LIMIT $k")
+        assert open_idx < pred_idx < limit_idx < close_idx
+
+    def test_prefilter_and_postfilter_coexist(self):
+        """A prefilter stays inside SEARCH while a post-filter follows it."""
+        result = build_vector_search(
+            "code_chunk_embedding",
+            "CodeChunk",
+            prefilter_clauses=["cc.facility_id = $facility"],
+            where_clauses=["cc.language = $language"],
+            node_alias="cc",
+        )
+        close_idx = result.index(") SCORE AS score")
+        assert result.index("cc.facility_id = $facility") < close_idx
+        assert result.index("WHERE cc.language = $language") > close_idx
+
+    def test_empty_prefilter_clauses(self):
+        """Empty prefilter list produces no WHERE inside SEARCH."""
+        result = build_vector_search(
+            "code_chunk_embedding",
+            "CodeChunk",
+            prefilter_clauses=[],
+            node_alias="cc",
+        )
+        assert "WHERE" not in result
+
     def test_all_vector_indexes_from_schema(self):
         """Verify builder works with all known vector indexes."""
         from imas_codex.graph.schema_context_data import VECTOR_INDEXES
