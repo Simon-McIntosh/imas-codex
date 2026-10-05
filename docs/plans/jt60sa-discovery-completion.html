@@ -23,10 +23,10 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -256,7 +256,7 @@
     </p>
     <p>
       This section gives the host-wide recipe one home, a facility-level
-      <code>remote_environment</code> block: ordered <code>setup_commands</code> (module unloads
+      <code>remote_environment</code> block (landed in commit <code>8f50f6642</code>): ordered <code>setup_commands</code> (module unloads
       and loads, <code>source</code> of an env file, virtualenv activation), the
       <code>python_command</code> that is valid after them, the minimum interpreter version the
       remote scripts require, and the modules each scanner must import. Interface accounting:
@@ -264,11 +264,14 @@
       schema and migrated out of tcv.yaml), and the <code>DataSystemBase</code> keys are kept
       with one role only, the per-data-system override of the block (TCV's MDSplus system
       sources a profile a plain Python call does not need), so there is one default and one
-      override rather than two unrelated surfaces. One resolver in the
-      facility-aware layer (<code>imas_codex/remote/tools.py</code>, which already resolves
-      <code>ssh_host</code> and the nice level from facility config) merges the block with a
-      data system's own keys and passes the result down to the executor as parameters; the
-      executor itself stays facility-agnostic, as its contract states. The facility probe
+      override rather than two unrelated surfaces. The one resolver is
+      <code>resolve_remote_environment</code> in <code>imas_codex/remote/environment.py</code>,
+      which merges the block with a data system's own keys; its facility-aware callers
+      (<code>imas_codex/remote/tools.py</code>, which already resolves <code>ssh_host</code> and
+      the nice level, and the signals pipeline's scanner config builder) consume it and pass
+      the result down to the executor as parameters, and the executor itself stays
+      facility-agnostic, as its contract states. What remains of this section is the probe
+      extension that follows. The facility probe
       that already exists is extended, not duplicated: <code>imas_codex/remote/python.py</code>
       owns remote interpreter detection (<code>get_python_status</code>) and the version floor
       (<code>PythonVersion.meets_minimum</code>, <code>MIN_PYTHON</code>), and
@@ -291,6 +294,10 @@
       <code>imas-codex tools status jt-60sa</code> passes on nakasvr26 with the 3.12 recipe
       and fails, naming the floor, with the recipe removed.
     </p>
+
+    <h2 id="s7">§7 — A first scan drops its DATA_ACCESS edges</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>Measured on the first live EDAS scan (2026-10-05, run r-20261005T061226180725): <code>seed_worker</code> in <code>imas_codex/discovery/signals/parallel.py</code> ingests the scanned FacilitySignals before it creates the scanner's DataAccess node, so the ingest's second phase, which matches the DataAccess by id and merges the <code>DATA_ACCESS</code> edge, finds nothing on a facility's first scan and silently writes 6,240 signals with no access edge; a re-run created all 6,240 edges. The cause is the ordering, not the scanner, and it holds for every scanner that returns a DataAccess with its signals (TDI, PPF, JPF, MDSplus), so every facility's first scan has been landing edge-less until its second.</p><p>Done-when: the DataAccess node is created before the signals are ingested (or the ingest's edge phase runs after the DataAccess write) in <code>seed_worker</code>; a unit test in <code>tests/discovery/test_signals_pipeline.py</code> drives one scan result with a DataAccess through the seed path against a stubbed graph and asserts the edge-merge statement runs after the DataAccess write (negative control: restore the old order and the test fails); and a fresh facility scan on the live graph shows <code>count(DATA_ACCESS)</code> equal to the signal count on its first pass.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -328,6 +335,16 @@
           and mark WMF files and dead links unsupported with the reason.</div>
     <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §4</pre>
     </article>
+<article class="r-fu" data-id="f-jdc-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-05" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">A fenced worker cannot run ssh against the system config include</h4>
+    <div class="r-fu-body">Inside a reckon-fenced worker (bwrap user namespace) /etc/ssh/ssh_config.d/50-redhat.conf appears owned by nobody, so bare ssh aborts with 'Bad owner or permissions' and every remote launch from the executor fails; three nodes today worked around it with an ssh -F ~/.ssh/config wrapper on PATH. Exemption: foreign-owner — the fence belongs to reckon (plan a-worker-cannot-write-your-home); the imas-codex executor must not drop the system config to suit one sandbox.</div>
+    <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §6</pre>
+    </article>
+<article class="r-fu" data-id="f-jdc-004" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-05" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">EDDB unit strings need a normalisation table before any DD binding</h4>
+    <div class="r-fu-body">The 6,240 scanned signals carry free-text units as EDDB stores them (KA, DEG, T.m, V.S, deg. C). HAS_UNIT linking and standard-name binding need a normalisation table from these spellings to Unit nodes. Exemption: foreign-owner — unit normalisation is the DD-binding and standard-names pipeline's concern, not discovery completion; the ambix machine map (imas-ambix:jt60sa-machine-map) reads the raw strings meanwhile.</div>
+    <pre class="r-fu-prompt">/reckon-build jt60sa-discovery-completion §2</pre>
+    </article>
 </section>
 
     <section data-reckon="questions" id="questions" class="r-questions">
@@ -359,7 +376,7 @@
     <div class="r-comment-body"><p>remote-environment-block.html: one facility-level remote_environment block declared in facility_config.yaml, resolved by resolve_remote_environment() in imas_codex/remote/environment.py, passed to the executor as parameters by the facility-aware tools wrapper and the signal scanner config builder, carried by jt-60sa/iter/tcv; data_access_patterns.setup_commands retired; the live jt-60sa measure returned ncats=73 across 6240 signals.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261005T063001812860-review-of-remote-environment-block" data-who="reckon-build" data-when="2026-10-05T06:36:41.108Z">
-    <div class="r-comment-body"><p>review of r-20261005T060721963502-remote-environment-block — parsed record, 5/5 dimensions scored (goal_fidelity 19, evidence 17, scope_discipline 20, durability 18, fit 19), total 93, verdict SOUND WITH FINDINGS, three follow-on findings on the landing record&#x27;s base-green claim, the gate log&#x27;s revision header and the live-measure ncats figure; reviewed_base_sha b4cf687f3, reviewed_head_sha 95c4c283d, added_failure_count 0.</p></div>
+    <div class="r-comment-body"><p>review of r-20261005T060721963502-remote-environment-block — parsed record, 5/5 dimensions scored (goal_fidelity 19, evidence 17, scope_discipline 20, durability 18, fit 19), total 93, verdict SOUND WITH FINDINGS, three follow-on findings on the landing record's base-green claim, the gate log's revision header and the live-measure ncats figure; reviewed_base_sha b4cf687f3, reviewed_head_sha 95c4c283d, added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261005T055214976074-signal-typed-slots" data-who="reckon-build" data-when="2026-10-05T05:59:42.901Z">
     <div class="r-comment-body"><p>FacilitySignal now carries data_class (SignalDataClass enum: time_series/one_point/parameter), shot_range and pid as typed slots, the EDAS scanner writes the EDDB catalogue values to the slots instead of keywords, and check() reads data_class from the slot; gate 59 passed (55 baseline + 4 new) at 42c171fdd.</p></div>
