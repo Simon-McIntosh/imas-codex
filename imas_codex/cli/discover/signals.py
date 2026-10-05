@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
     type=str,
     default=None,
     help="Comma-separated signal categories to enrich and check, matched on "
-    "the leading path segment of the signal name (e.g. 'MAG,PSRC').",
+    "the leading path segment of the signal's source path (e.g. 'MAG,PSRC').",
 )
 @click.option(
     "--scan-only",

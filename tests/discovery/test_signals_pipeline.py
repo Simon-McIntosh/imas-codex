@@ -779,12 +779,13 @@ class TestPromoteWorker:
 class TestCategoryScope:
     """Category filter bounds claims and pending-work checks.
 
-    A signal name is ``<category>/<data name>``; the filter restricts the claim
-    to the leading path segment so a run enriches and checks only the
-    categories it was asked for.
+    A signal's source path is ``<category>/<data name>``; the filter restricts
+    the claim to the leading path segment so a run enriches and checks only the
+    categories it was asked for. The source path is used rather than the name
+    because enrichment rewrites the name.
     """
 
-    PREDICATE = "split(s.name, '/')[0] IN $categories"
+    PREDICATE = "split(coalesce(s.data_source_path, s.name), '/')[0] IN $categories"
 
     def _claim_query_calls(self, mock_gc, predicate):
         return [

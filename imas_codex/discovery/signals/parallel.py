@@ -252,12 +252,15 @@ def build_enrich_claimable_predicate(alias: str = "s") -> str:
 def build_category_predicate(alias: str = "s") -> str:
     """Render the category filter for FacilitySignal rows.
 
-    A signal name is ``<category>/<data name>``; its category is the leading
-    path segment. ``$categories`` bounds the claim so a run enriches and checks
-    only the categories it was asked for.
+    A signal's source path is ``<category>/<data name>``; its category is the
+    leading path segment. ``$categories`` bounds the claim so a run enriches
+    and checks only the categories it was asked for. The source path is used
+    rather than the signal name because enrichment rewrites the name, while
+    the source path keeps the catalogue's category for the life of the row.
     """
 
-    return f"($categories IS NULL OR split({alias}.name, '/')[0] IN $categories)"
+    path = f"coalesce({alias}.data_source_path, {alias}.name)"
+    return f"($categories IS NULL OR split({path}, '/')[0] IN $categories)"
 
 
 def get_checkpoint_dir() -> Path:
