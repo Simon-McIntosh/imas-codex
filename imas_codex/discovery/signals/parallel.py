@@ -54,6 +54,7 @@ from imas_codex.discovery.base.supervision import (
 )
 from imas_codex.graph import GraphClient
 from imas_codex.graph.models import DataAccess, FacilitySignalStatus
+from imas_codex.graph.vector_search import build_vector_search
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import run_python_script
 
@@ -177,6 +178,35 @@ def build_device_xml_context_query(
         base_terms.extend(["diagnostic", "hardware", "layout"])
 
     return " ".join(term for term in base_terms if term)
+
+
+def _build_code_context_query() -> str:
+    """CYPHER for the code-context semantic lookup in signal enrichment.
+
+    The facility predicate is rendered inside ``SEARCH``: ``code_chunk_embedding``
+    registers ``facility_id`` as an additional vector index property, so the ANN
+    cut is taken over this facility's own chunks rather than over a global
+    candidate set that a small facility's chunks would not survive. The source
+    join is retained only for the path field the enrichment prompt renders.
+    """
+    search_block = build_vector_search(
+        "code_chunk_embedding",
+        "CodeChunk",
+        prefilter_clauses=["node.facility_id = $facility"],
+        k="3",
+        node_alias="node",
+    )
+    return (
+        f"{search_block}\n"
+        "OPTIONAL MATCH (src)-[:HAS_CHUNK]->(node)\n"
+        "WITH node, src, score\n"
+        "WHERE score >= $min_score\n"
+        "RETURN node.text AS text,\n"
+        "       src.path AS source_path,\n"
+        "       node.language AS language,\n"
+        "       score\n"
+        "ORDER BY score DESC\n"
+    )
 
 
 def get_signal_scanner_type(signal: dict[str, Any]) -> str:
@@ -3550,23 +3580,7 @@ async def enrich_worker(
         try:
             with GraphClient() as gc:
                 results = gc.query(
-                    """
-                    CYPHER 25
-                    MATCH (node:CodeChunk)
-                    SEARCH node IN (
-                      VECTOR INDEX code_chunk_embedding
-                      FOR $embedding
-                      LIMIT 3
-                    ) SCORE AS score
-                    WHERE score >= $min_score
-                    OPTIONAL MATCH (src)-[:HAS_CHUNK]->(node)
-                    WHERE src.facility_id = $facility
-                    RETURN node.text AS text,
-                           src.path AS source_path,
-                           node.language AS language,
-                           score
-                    ORDER BY score DESC
-                    """,
+                    _build_code_context_query(),
                     embedding=embedding,
                     min_score=0.45,
                     facility=state.facility,

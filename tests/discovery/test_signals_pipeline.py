@@ -1891,3 +1891,22 @@ class TestSignalPatternDetection:
             )
 
         assert result == 5
+
+
+class TestCodeContextFacilityPredicate:
+    """The code-context lookup filters facility inside the vector SEARCH.
+
+    The predicate is rendered before the ANN cut so a small facility's own
+    chunks survive; as a post-filter over a global top-3 they would not.
+    """
+
+    def test_facility_predicate_inside_search(self):
+        from imas_codex.discovery.signals.parallel import _build_code_context_query
+
+        cypher = _build_code_context_query()
+        open_idx = cypher.index("SEARCH")
+        close_idx = cypher.index(") SCORE AS")
+        pred_idx = cypher.index("node.facility_id = $facility")
+        assert open_idx < pred_idx < close_idx, cypher
+        assert "src.facility_id" not in cypher, cypher
+        assert "code_chunk_embedding" in cypher
