@@ -14,7 +14,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from neo4j.exceptions import ServiceUnavailable
+from neo4j.exceptions import ClientError, ServiceUnavailable
 
 from imas_codex.llm.search_formatters import (
     _interpolate_template,
@@ -32,6 +32,8 @@ from imas_codex.llm.search_tools import (
     _search_code,
     _search_docs,
     _search_signals,
+    _text_search_code_chunks,
+    _text_search_signals,
 )
 
 # ---------------------------------------------------------------------------
@@ -1890,3 +1892,122 @@ class TestHandbookDocumentEdges:
         assert "EDDB manual table excerpt" in result
         assert "## Signals" in result
         assert "PSRC/magFluxLp1" in result
+
+
+class _FulltextSignatureClient:
+    """A GraphClient whose query() mirrors Session.run's own signature.
+
+    ``Session.run(query, **params)`` binds its first positional argument to a
+    parameter named ``query``, so a caller that also binds a Cypher parameter
+    named ``query`` raises ``TypeError`` before the query runs. A stub with a
+    plain ``query(cypher, **params)`` signature cannot reproduce that collision
+    and would let a regression pass, so this stub reproduces the real one.
+    """
+
+    def __init__(self, hits, marker):
+        self._hits = hits
+        self._marker = marker
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        self.calls.append((query, params))
+        if self._marker in query:
+            return list(self._hits)
+        return []
+
+
+class TestFulltextBranchParameterBinding:
+    """The fulltext branches bind search text without colliding with Session.run.
+
+    A parameter named ``query`` collides with ``Session.run``'s own argument,
+    so the call raised and the branch was silently dead. These tests drive each
+    repaired branch through a stub with the real signature, so binding the text
+    to ``query`` again fails rather than falling through unnoticed.
+    """
+
+    def test_signal_fulltext_branch_binds_search_query(self):
+        hits = [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 6.5}]
+        gc = _FulltextSignatureClient(hits, marker="facility_signal_text")
+
+        result = _text_search_signals(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == hits
+        cypher, params = gc.calls[0]
+        assert "$search_query" in cypher
+        assert params["search_query"] == "flux loop"
+        assert "query" not in params
+
+    def test_code_chunk_fulltext_branch_binds_search_query(self):
+        hits = [{"id": "jt-60sa:code:c1", "score": 3.5}]
+        gc = _FulltextSignatureClient(hits, marker="code_chunk_text")
+
+        result = _text_search_code_chunks(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == hits
+        cypher, params = gc.calls[0]
+        assert "$search_query" in cypher
+        assert params["search_query"] == "flux loop"
+        assert "query" not in params
+
+
+class _FulltextRaisingClient:
+    """Raises a programming error on the fulltext call and answers elsewhere."""
+
+    def __init__(self, marker):
+        self._marker = marker
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        if self._marker in query:
+            raise TypeError("Session.run() got multiple values for argument 'query'")
+        return []
+
+
+class _AbsentIndexClient:
+    """Raises a client error for the fulltext index, as an absent index does."""
+
+    def __init__(self):
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        self.calls.append((query, params))
+        if "queryNodes" in query:
+            raise ClientError(
+                "There is no procedure with the name "
+                "`db.index.fulltext.queryNodes` registered for this database."
+            )
+        return [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
+
+
+class TestFulltextFailureHandling:
+    """A programming error propagates; an absent index still falls back."""
+
+    def test_signal_fulltext_programming_error_propagates(self):
+        with pytest.raises(TypeError):
+            _text_search_signals(
+                _FulltextRaisingClient("facility_signal_text"),
+                "flux loop",
+                "jt-60sa",
+                8,
+            )
+
+    def test_code_chunk_fulltext_programming_error_propagates(self):
+        with pytest.raises(TypeError):
+            _text_search_code_chunks(
+                _FulltextRaisingClient("code_chunk_text"), "flux loop", "jt-60sa", 8
+            )
+
+    def test_signal_missing_index_falls_back_to_contains(self):
+        gc = _AbsentIndexClient()
+
+        result = _text_search_signals(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
+        assert "CONTAINS" in gc.calls[-1][0]
+
+    def test_code_chunk_missing_index_falls_back_to_contains(self):
+        gc = _AbsentIndexClient()
+
+        result = _text_search_code_chunks(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
+        assert "CONTAINS" in gc.calls[-1][0]

@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from neo4j.exceptions import ServiceUnavailable
+from neo4j.exceptions import ClientError, DatabaseError, ServiceUnavailable
 
 from imas_codex.embeddings.encoder import EmbeddingBackendError, Encoder
 from imas_codex.graph.client import GraphClient
@@ -514,7 +514,10 @@ def _text_search_signals(
         results = gc.query(cypher, search_query=query, facility=facility, limit=k * 2)
         if results:
             return results
-    except Exception:
+    except (ClientError, DatabaseError):
+        # The fulltext index may be absent or unavailable; fall through to the
+        # CONTAINS scan. Any other exception is a programming error and must
+        # surface rather than be absorbed here.
         pass
 
     # Fallback: CONTAINS with fixed score
@@ -1660,7 +1663,10 @@ def _text_search_code_chunks(
             results = gc.query(cypher, search_query=query, limit=k * 2)
         if results:
             return results
-    except Exception:
+    except (ClientError, DatabaseError):
+        # The fulltext index may be absent or unavailable; fall through to the
+        # CONTAINS scan. Any other exception is a programming error and must
+        # surface rather than be absorbed here.
         pass
 
     # Fallback: CONTAINS with fixed score
