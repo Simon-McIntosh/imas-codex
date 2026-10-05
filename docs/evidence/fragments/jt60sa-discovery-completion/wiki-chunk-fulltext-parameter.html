@@ -1,0 +1,46 @@
+<section id="wiki-chunk-fulltext-parameter">
+  <h2>The wiki-chunk fulltext search binds its parameter correctly</h2>
+  <p>
+    <code>_text_search_wiki_chunks</code> in
+    <code>imas_codex/llm/search_tools.py</code> bound its query text to a Cypher
+    parameter named <code>query</code>, colliding with
+    <code>GraphClient.query(query, **params)</code>; the raised
+    <code>TypeError</code> was swallowed by a bare <code>except Exception</code>,
+    so every documentation prose search ran on the <code>CONTAINS</code>
+    fallback at score 0.5. The fulltext parameter is now
+    <code>$search_query</code>, the swallow is narrowed to
+    <code>(ClientError, DatabaseError)</code> as in the signal and code-chunk
+    branches, and a regression test drives the branch through a stub with the
+    real signature.
+  </p>
+</section>
+
+<section id="wiki-chunk-fulltext-parameter-measure">
+  <h2>Measure</h2>
+  <ul>
+    <li>
+      <strong>Reproduction (base).</strong> Driving the branch through a stub
+      whose <code>query(self, query, **params)</code> mirrors
+      <code>Session.run</code> recorded only the <code>CONTAINS</code> fallback
+      call and returned <code>[]</code>, while the fulltext stub would have
+      returned its hit.
+    </li>
+    <li>
+      <strong>Negative control.</strong> Rebinding the wiki-chunk fulltext
+      query back to <code>$query</code> fails two of the new tests
+      (<code>EXIT=1</code>); the head arm passes them.
+    </li>
+    <li>
+      <strong>Gate.</strong> <code>pytest -p no:cacheprovider tests/search
+      tests/llm</code> → 634 passed, 10 skipped, <code>EXIT=0</code>.
+    </li>
+    <li>
+      <strong>Live proof.</strong> <code>_search_docs("flux loop",
+      "jt-60sa")</code> returns the wiki documentation via BM25
+      (<code>Wiki Documentation (10 chunks from 3 pages)</code>, scores
+      5.65–6.05) instead of the base arm's single fallback page, beside the
+      PSRC flux-loop signals <code>jt-60sa:general/psrc_dispfl</code> and
+      <code>jt-60sa:general/psrc_maxabnormp</code>.
+    </li>
+  </ul>
+</section>
