@@ -23,10 +23,10 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
-<meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac">
-<meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="23">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+<meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac,7bd3714029e6b4629d76c7ef25dca9291476aa62">
+<meta name="plan-impl" content="0.286">
+<meta name="plan-version" content="25">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -85,7 +85,10 @@
       <code>schemas/facility.yaml</code> with <code>data_class</code>, <code>shot_range</code> and
       <code>pid</code> on FacilitySignal, regenerates the models (a graph-touching
       <code>implement</code> node, never <code>review</code>), moves the scanner onto the slots and
-      only then runs the scan. <strong>Access:</strong>
+      only then runs the scan. Interface accounting: the three slots and the
+      <code>SignalDataClass</code> enum are this section's public definitions, and they retire
+      the prototype's <code>class:</code>/<code>shots:</code>/<code>udpid:</code> keyword parking,
+      which no scanned row carries any more. <strong>Access:</strong>
       <code>eddbreadTime</code> takes its time bounds as strings; the generated
       <code>DataAccess</code> template passed integers and raised. <strong>Check:</strong>
       the check script tested catalogue presence rather than data; it now reads a short
@@ -126,7 +129,10 @@
       chunk carries a <code>DOCUMENTS</code> edge (<code>WikiChunk.documents_signals</code>) to
       every FacilitySignal of the database it fronts, so <code>search_signals</code> and
       <code>search_docs</code> walk the one linkage the MCP tools already follow rather than
-      a second edge with a second owner; (b) the wiki scorer gains a dynamic-page rule — a
+      a second edge with a second owner; the edges are written by the existing writer,
+      <code>link_chunks_to_entities</code> in <code>imas_codex/discovery/wiki/pipeline.py</code>,
+      which keys its <code>DOCUMENTS</code> merge on chunk path mentions today and gains the
+      page's <code>fronts_database</code> as one more key, rather than a second edge-writer; (b) the wiki scorer gains a dynamic-page rule — a
       page whose rendered text is only table headers and form labels is marked with the
       database it fronts (a <code>fronts_database</code> property on WikiPage) rather than
       treated as content; <code>WikiPageStatus</code> stays a closed enum, the page keeps
@@ -164,6 +170,14 @@
       discovered documents and 447 pending ingests simply never ran.
     </p>
     <p>
+      Measured 2026-10-05 at the first drain (run r-20261005T061235195800): the recovery
+      code landed and ran — the 516 pypdf failures are back to <code>scored</code>, the 14
+      non-transient failures are <code>deferred</code> with their reasons, none is
+      <code>failed</code> — but no document can be fetched: 576 URLs point at the retired
+      nakasvr23 web server and 471 <code>ssh://jt-60sa</code> paths under
+      <code>/var/www/html/twiki/pub</code> no longer exist on nakasvr26, and the
+      <code>jt-60sa-23</code> hop closes at key exchange. The drain waits on a path to the old
+      server, which is the lead's call (followup f-jdc-002, authority-required).
       Done-when: after <code>uv sync</code> on the ITER checkout, the 516 pypdf failures are
       reset and re-ingested with at least 90% succeeding; WMF files and dead links are marked
       <code>unsupported</code> with the reason rather than retried; the 447 pending ingests
@@ -286,7 +300,9 @@
       added; <code>discover
       signals</code> and <code>discover code</code> run that check before a remote scan and
       refuse when the floor is not met, so an unmet environment is a finding with the fix
-      command, not a traceback. Done-when: the block exists in the facility schema and in
+      command, not a traceback. That refusal is not a new family: it is the probe's existing
+      <code>missing_required</code> / <code>version_too_old</code> verdict raised at the start of
+      a scan instead of surfacing as a traceback inside it, so no refusal family is added. Done-when: the block exists in the facility schema and in
       <code>jt-60sa.yaml</code>, <code>iter.yaml</code> and <code>tcv.yaml</code>;
       <code>data_access_patterns.setup_commands</code> is gone from the schema and the
       facility files; every remote script launched through the facility-aware layer carries
@@ -298,6 +314,10 @@
     <h2 id="s7">§7 — A first scan drops its DATA_ACCESS edges</h2>
 <section data-reckon="section" data-id="s7" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
 <p>Measured on the first live EDAS scan (2026-10-05, run r-20261005T061226180725): <code>seed_worker</code> in <code>imas_codex/discovery/signals/parallel.py</code> ingests the scanned FacilitySignals before it creates the scanner's DataAccess node, so the ingest's second phase, which matches the DataAccess by id and merges the <code>DATA_ACCESS</code> edge, finds nothing on a facility's first scan and silently writes 6,240 signals with no access edge; a re-run created all 6,240 edges. The cause is the ordering, not the scanner, and it holds for every scanner that returns a DataAccess with its signals (TDI, PPF, JPF, MDSplus), so every facility's first scan has been landing edge-less until its second.</p><p>Done-when: the DataAccess node is created before the signals are ingested (or the ingest's edge phase runs after the DataAccess write) in <code>seed_worker</code>; a unit test in <code>tests/discovery/test_signals_pipeline.py</code> drives one scan result with a DataAccess through the seed path against a stubbed graph and asserts the edge-merge statement runs after the DataAccess write (negative control: restore the old order and the test fails); and a fresh facility scan on the live graph shows <code>count(DATA_ACCESS)</code> equal to the signal count on its first pass.</p>
+
+    <h2 id="s8">§8 — The embedding client resolves its SLURM-hosted server from a compute node</h2>
+<section data-reckon="section" data-id="s8" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>Measured 2026-10-05 inside the document-reingest worker on the fleet compute node: the ingest's embedding step reported <em>Remote embedding server not available at http://localhost:18765. Health check timed out</em> while the server was serving on <code>98dci4-gpu-0002:18765</code> (SLURM job <code>codex-embed</code>). The graph client already resolves its SLURM-hosted service by local <code>squeue</code> discovery inside a SLURM step (repaired 2026-09-18); the embedding client's localhost redirect in <code>imas_codex/embeddings/readiness.py</code> does not take the same path there, so every ingestion run on compute falls back to a tunnel that cannot exist. The lead's rule puts all heavy work on compute, which makes this the default path, not an edge case.</p><p>Done-when: from a SLURM step with no tunnel, the encoder resolves the embed server through the same discovery the graph client uses (<code>imas_codex/remote/tunnel.py</code> local squeue path), a unit test covers the resolution with a stubbed squeue, and <code>imas-codex embed status</code> (or the readiness probe) run on this fleet node reports the gpu node URL and a healthy server; a fenced worker's run is the positive control once the ssh fault is handled.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -398,6 +418,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261005T061235195800-document-reingest" data-who="reckon-build" data-when="2026-10-05T06:44:30.739Z">
     <div class="r-comment-body"><p>recovery applied by the merged code at the first CLI start (516 pypdf failures back to scored, 14 non-transient failures deferred with reasons, failed 0), but no document can be fetched: 576 URLs point at the retired nakasvr23 web server and 471 ssh paths under /var/www/html/twiki/pub no longer exist on nakasvr26; the jt-60sa-23 hop closes at kex. The drain waits on a path to the old server (lead decision).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261005T0651-s4-blocker" data-who="reckon-build" data-when="2026-10-05T06:51:00+00:00">
+    <div class="r-comment-body">Document drain blocked externally after the recovery landed: the attachments live on the retired nakasvr23 TWiki host (576 https URLs) or under /var/www/html/twiki/pub, which does not exist on nakasvr26 (471 ssh paths); jt-60sa-23 closes at key exchange. Followup f-jdc-002 stays open under authority-required: the lead decides whether a path to nakasvr23 can be opened (laptop VPN) or the documents are written off as pre-migration. The run also exposed the embedding-client resolution gap now in §8.</div>
 </div>
 </section>
 </main>
