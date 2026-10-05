@@ -1,119 +1,96 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="docs-project"       content="imas-codex">
-  <meta name="reckon-type"        content="evidence">
-  <meta name="plan-slug"          content="remote-environment-block">
-  <meta name="plan-title"         content="Facility remote_environment block: resolved and passed to the executor">
-  <meta name="plan-summary"       content="A facility-level remote_environment block declared in the config schema, resolved by one function, passed to every remote script launch, and adopted by three facilities.">
-  <meta name="plan-status"        content="active">
-  <meta name="plan-owner"         content="Simon McIntosh">
-  <meta name="plan-tags"          content="jt60sa,discovery,remote,environment">
-  <meta name="plan-evidence-for"  content="jt60sa-discovery-completion">
-  <title>Facility remote_environment block | imas-codex</title>
-  <link rel="stylesheet" href="/_shared/foundation.css">
-  <link rel="stylesheet" href="/_shared/dashboard.css">
-</head>
-<body>
-  <main class="plan-doc">
-    <section id="remote-environment-block">
-      <h2>Facility remote_environment block</h2>
-      <p>
-        One facility-level <code>remote_environment</code> block now declares the
-        interpreter and shell setup a host's remote scripts need, resolved in a
-        single place and handed to the executor as parameters. The executor stays
-        facility-agnostic: it receives <code>python_command</code> and
-        <code>setup_commands</code> and performs no facility lookup of its own.
-      </p>
-    </section>
+<section id="remote-environment-block">
+  <h2>Facility remote_environment block</h2>
+  <p>
+    One facility-level <code>remote_environment</code> block now declares the
+    interpreter and shell setup a host's remote scripts need, resolved in a
+    single place and handed to the executor as parameters. The executor stays
+    facility-agnostic: it receives <code>python_command</code> and
+    <code>setup_commands</code> and performs no facility lookup of its own.
+  </p>
+</section>
 
-    <section id="remote-environment-block-deliverable">
-      <h2>What landed</h2>
-      <ul>
-        <li>
-          <strong>Schema.</strong> <code>RemoteEnvironmentConfig</code> and
-          <code>RemoteEnvironmentModule</code> classes in
-          <code>imas_codex/schemas/facility_config.yaml</code>, with a
-          <code>remote_environment</code> slot on <code>FacilityConfig</code>.
-          The loose <code>data_access_patterns.setup_commands</code> slot is removed.
-        </li>
-        <li>
-          <strong>Resolver.</strong> <code>resolve_remote_environment()</code> in
-          <code>imas_codex/remote/environment.py</code> is the one function. The
-          facility block supplies the default; a data system's own
-          <code>python_command</code> / <code>setup_commands</code> override it for
-          that system's scripts; an explicit caller argument wins over both.
-        </li>
-        <li>
-          <strong>Pass-down.</strong> The facility-aware
-          <code>imas_codex/remote/tools.py</code> wrapper and the signal-discovery
-          scanner config builder (<code>imas_codex/discovery/signals/parallel.py</code>)
-          resolve the block and hand the result to the executor. The executor and
-          the SSH worker pool document that their environment arrives as parameters.
-        </li>
-        <li>
-          <strong>Adoption.</strong> <code>jt-60sa.yaml</code>,
-          <code>iter.yaml</code> and <code>tcv.yaml</code> each carry the block;
-          <code>data_access_patterns.setup_commands</code> is absent from
-          <code>facility_config.yaml</code> and <code>tcv.yaml</code>.
-        </li>
-      </ul>
-      <p>
-        The block also carries <code>min_python_version</code> and
-        <code>required_modules</code> (name and optional <code>path</code>), so a
-        tool probe can read the environment floor the host expects.
-      </p>
-    </section>
+<section id="remote-environment-block-deliverable">
+  <h2>What landed</h2>
+  <ul>
+    <li>
+      <strong>Schema.</strong> <code>RemoteEnvironmentConfig</code> and
+      <code>RemoteEnvironmentModule</code> classes in
+      <code>imas_codex/schemas/facility_config.yaml</code>, with a
+      <code>remote_environment</code> slot on <code>FacilityConfig</code>.
+      The loose <code>data_access_patterns.setup_commands</code> slot is removed.
+    </li>
+    <li>
+      <strong>Resolver.</strong> <code>resolve_remote_environment()</code> in
+      <code>imas_codex/remote/environment.py</code> is the one function. The
+      facility block supplies the default; a data system's own
+      <code>python_command</code> / <code>setup_commands</code> override it for
+      that system's scripts; an explicit caller argument wins over both.
+    </li>
+    <li>
+      <strong>Pass-down.</strong> The facility-aware
+      <code>imas_codex/remote/tools.py</code> wrapper and the signal-discovery
+      scanner config builder (<code>imas_codex/discovery/signals/parallel.py</code>)
+      resolve the block and hand the result to the executor. The executor and
+      the SSH worker pool document that their environment arrives as parameters.
+    </li>
+    <li>
+      <strong>Adoption.</strong> <code>jt-60sa.yaml</code>,
+      <code>iter.yaml</code> and <code>tcv.yaml</code> each carry the block;
+      <code>data_access_patterns.setup_commands</code> is absent from
+      <code>facility_config.yaml</code> and <code>tcv.yaml</code>.
+    </li>
+  </ul>
+  <p>
+    The block also carries <code>min_python_version</code> and
+    <code>required_modules</code> (name and optional <code>path</code>), so a
+    tool probe can read the environment floor the host expects.
+  </p>
+</section>
 
-    <section id="remote-environment-block-evidence">
-      <h2>Evidence</h2>
-      <table>
-        <thead><tr><th>Measure</th><th>Result</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Gate <code>pytest tests/remote tests/config</code></td>
-            <td>exit 0 &mdash; 95 passed (base green at <code>5ae2cf2f9</code>;
-                <code>tests/remote/test_remote_environment.py</code> is new)</td>
-          </tr>
-          <tr>
-            <td>Negative control: delete the data-system override branch in
-                <code>resolve_remote_environment</code></td>
-            <td>exit 1 &mdash; the precedence test
-                <code>TestResolver::test_data_system_override_wins</code> fails; the
-                scratch <code>environment.py</code> is under test
-                (<code>module.__file__</code> names the scratch tree)</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+<section id="remote-environment-block-evidence">
+  <h2>Evidence</h2>
+  <table>
+    <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Gate <code>pytest tests/remote tests/config</code></td>
+        <td>exit 0 &mdash; 95 passed (base green at <code>5ae2cf2f9</code>;
+            <code>tests/remote/test_remote_environment.py</code> is new)</td>
+      </tr>
+      <tr>
+        <td>Negative control: delete the data-system override branch in
+            <code>resolve_remote_environment</code></td>
+        <td>exit 1 &mdash; the precedence test
+            <code>TestResolver::test_data_system_override_wins</code> fails; the
+            scratch <code>environment.py</code> is under test
+            (<code>module.__file__</code> names the scratch tree)</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
 
-    <section id="remote-environment-block-live">
-      <h2>Live measure: produced</h2>
-      <p>
-        The done-when's live step &mdash; launch <code>enumerate_edas.py</code> on
-        <code>jt-60sa</code> with the resolved environment and the data-system
-        interpreter keys removed, requiring JSON with <code>ncats</code> &gt; 0
-        &mdash; ran through the facility-aware path and returned
-        <code>ncats</code> = <strong>73</strong> across 6,240 signals. The
-        resolved environment was <code>python</code> with
-        <code>module unload python/3.5.6</code> and
-        <code>module load python/3.12</code>, read from the facility block with
-        the <code>edas</code> data system carrying no interpreter keys. First 200
-        characters of the returned JSON:
-      </p>
-      <pre>{"signals": [{"category": "CAM", "data_name": "DivIRmP15R0", "alias": "2822PA100", "units": "oC", "description": "Divertor IR camera at P15 horizontal", "data_class": "M", "shot_range": "E101173-", "u</pre>
-      <p>
-        The reading required an <code>ssh -F ~/.ssh/config</code> wrapper on
-        <code>PATH</code>: the executor invokes <code>ssh -T &lt;host&gt;</code>
-        with no <code>-F</code>, and this host's system config include
-        <code>/etc/ssh/ssh_config.d/50-redhat.conf</code> is owned
-        <code>nobody:nobody</code>, which ssh treats as a fatal &ldquo;Bad owner
-        or permissions&rdquo;. On the first attempt the workstation's reverse
-        tunnel on port 2222 was also down; it returned before this reading.
-      </p>
-    </section>
-  </main>
-</body>
-</html>
+<section id="remote-environment-block-live">
+  <h2>Live measure: produced</h2>
+  <p>
+    The done-when's live step &mdash; launch <code>enumerate_edas.py</code> on
+    <code>jt-60sa</code> with the resolved environment and the data-system
+    interpreter keys removed, requiring JSON with <code>ncats</code> &gt; 0
+    &mdash; ran through the facility-aware path and returned
+    <code>ncats</code> = <strong>73</strong> across 6,240 signals. The
+    resolved environment was <code>python</code> with
+    <code>module unload python/3.5.6</code> and
+    <code>module load python/3.12</code>, read from the facility block with
+    the <code>edas</code> data system carrying no interpreter keys. First 200
+    characters of the returned JSON:
+  </p>
+  <pre>{"signals": [{"category": "CAM", "data_name": "DivIRmP15R0", "alias": "2822PA100", "units": "oC", "description": "Divertor IR camera at P15 horizontal", "data_class": "M", "shot_range": "E101173-", "u</pre>
+  <p>
+    The reading required an <code>ssh -F ~/.ssh/config</code> wrapper on
+    <code>PATH</code>: the executor invokes <code>ssh -T &lt;host&gt;</code>
+    with no <code>-F</code>, and this host's system config include
+    <code>/etc/ssh/ssh_config.d/50-redhat.conf</code> is owned
+    <code>nobody:nobody</code>, which ssh treats as a fatal &ldquo;Bad owner
+    or permissions&rdquo;. On the first attempt the workstation's reverse
+    tunnel on port 2222 was also down; it returned before this reading.
+  </p>
+</section>
