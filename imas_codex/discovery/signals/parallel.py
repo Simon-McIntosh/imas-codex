@@ -249,6 +249,17 @@ def build_enrich_claimable_predicate(alias: str = "s") -> str:
     """.strip()
 
 
+def build_category_predicate(alias: str = "s") -> str:
+    """Render the category filter for FacilitySignal rows.
+
+    A signal name is ``<category>/<data name>``; its category is the leading
+    path segment. ``$categories`` bounds the claim so a run enriches and checks
+    only the categories it was asked for.
+    """
+
+    return f"($categories IS NULL OR split({alias}.name, '/')[0] IN $categories)"
+
+
 def get_checkpoint_dir() -> Path:
     """Get checkpoint directory for data discovery, creating if needed.
 
@@ -292,6 +303,7 @@ class DataDiscoveryState(DiscoveryStateBase):
     cost_limit: float = 10.0
     signal_limit: int | None = None
     focus: str | None = None
+    categories: list[str] | None = None
 
     # Worker stats — one per worker group for accurate display
     discover_stats: WorkerStats = field(default_factory=WorkerStats)
@@ -345,13 +357,13 @@ class DataDiscoveryState(DiscoveryStateBase):
         self.enrich_phase = PipelinePhase(
             "enrich",
             has_work_fn=lambda: has_pending_enrich_work(
-                self.facility, self.scanner_types
+                self.facility, self.scanner_types, self.categories
             ),
         )
         self.check_phase = PipelinePhase(
             "check",
             has_work_fn=lambda: has_pending_check_work(
-                self.facility, self.scanner_types
+                self.facility, self.scanner_types, self.categories
             ),
         )
         # Composite scan phase — done when all sub-phases are done
@@ -460,6 +472,7 @@ def has_pending_work(facility: str, scanner_types: list[str] | None = None) -> b
 def has_pending_enrich_work(
     facility: str,
     scanner_types: list[str] | None = None,
+    categories: list[str] | None = None,
 ) -> bool:
     """Check if there are signals awaiting enrichment."""
     scope_params = get_scanner_scope_query_params(scanner_types)
@@ -468,6 +481,7 @@ def has_pending_enrich_work(
         WITH s, {build_signal_scope_case("s")} AS scanner_scope
         WHERE s.status = $discovered
           AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
+          AND {build_category_predicate("s")}
           AND {build_enrich_claimable_predicate("s")}
           AND s.claimed_at IS NULL
         RETURN count(s) > 0 AS has_work
@@ -478,6 +492,7 @@ def has_pending_enrich_work(
                 query,
                 facility=facility,
                 discovered=FacilitySignalStatus.discovered.value,
+                categories=categories,
                 **scope_params,
             )
             return result[0]["has_work"] if result else False
@@ -488,6 +503,7 @@ def has_pending_enrich_work(
 def has_pending_check_work(
     facility: str,
     scanner_types: list[str] | None = None,
+    categories: list[str] | None = None,
 ) -> bool:
     """Check if there are enriched signals awaiting check."""
     scope_params = get_scanner_scope_query_params(scanner_types)
@@ -496,6 +512,7 @@ def has_pending_check_work(
         WITH s, {build_signal_scope_case("s")} AS scanner_scope
         WHERE s.status = $enriched
           AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
+          AND {build_category_predicate("s")}
           AND s.claimed_at IS NULL
         RETURN count(s) > 0 AS has_work
     """
@@ -505,6 +522,7 @@ def has_pending_check_work(
                 query,
                 facility=facility,
                 enriched=FacilitySignalStatus.enriched.value,
+                categories=categories,
                 **scope_params,
             )
             return result[0]["has_work"] if result else False
@@ -720,6 +738,7 @@ def claim_signals_for_enrichment(
     facility: str,
     batch_size: int = 10,
     scanner_types: list[str] | None = None,
+    categories: list[str] | None = None,
 ) -> list[dict]:
     """Claim a batch of discovered signals for enrichment.
 
@@ -756,6 +775,7 @@ def claim_signals_for_enrichment(
                                          END AS scanner_scope
                 WHERE s.status = $discovered
                                     AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
+                  AND __CATEGORY_PREDICATE__
                   AND (
                     s.accessor =~ '.*[_:]CHANNEL_?\\d{2,3}\\)?$'
                     OR s.accessor =~ '.*[_:]\\d{2,3}\\)?$'
@@ -766,11 +786,12 @@ def claim_signals_for_enrichment(
                 SET s.status = $skipped,
                     s.skip_reason = 'channel_element',
                     s.claimed_at = null
-                """,
+                """.replace("__CATEGORY_PREDICATE__", build_category_predicate("s")),
                 facility=facility,
                 discovered=FacilitySignalStatus.discovered.value,
                 skipped=FacilitySignalStatus.skipped.value,
                 scoped_scanners=scoped_scanners,
+                categories=categories,
                 static_sources=sorted(STATIC_DATA_SOURCES),
             )
 
@@ -790,6 +811,7 @@ def claim_signals_for_enrichment(
                                          END AS scanner_scope
                 WHERE s.status IN [$discovered, $underspecified]
                                     AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
+                  AND __CATEGORY_PREDICATE__
                   AND NOT EXISTS {
                     MATCH (s)-[:MEMBER_OF]->(sg:SignalSource)
                     WHERE sg.representative_id <> s.id
@@ -798,7 +820,7 @@ def claim_signals_for_enrichment(
                        OR s.claimed_at < datetime() - duration($cutoff))
                 WITH s ORDER BY rand() LIMIT $batch_size
                 SET s.claimed_at = datetime(), s.claim_token = $token
-                """,
+                """.replace("__CATEGORY_PREDICATE__", build_category_predicate("s")),
                 facility=facility,
                 discovered=FacilitySignalStatus.discovered.value,
                 underspecified=FacilitySignalStatus.underspecified.value,
@@ -806,6 +828,7 @@ def claim_signals_for_enrichment(
                 cutoff=cutoff,
                 token=claim_token,
                 scoped_scanners=scoped_scanners,
+                categories=categories,
                 static_sources=sorted(STATIC_DATA_SOURCES),
             )
 
@@ -1039,6 +1062,7 @@ def claim_signals_for_check(
     batch_size: int = 5,
     reference_shot: int | None = None,
     scanner_types: list[str] | None = None,
+    categories: list[str] | None = None,
 ) -> list[dict]:
     """Claim a batch of enriched signals for check.
 
@@ -1068,17 +1092,19 @@ def claim_signals_for_check(
                                          END AS scanner_scope
                 WHERE s.status = $enriched
                                     AND ($scoped_scanners IS NULL OR scanner_scope IN $scoped_scanners)
+                  AND __CATEGORY_PREDICATE__
                   AND (s.claimed_at IS NULL
                        OR s.claimed_at < datetime() - duration($cutoff))
                 WITH s ORDER BY rand() LIMIT $batch_size
                 SET s.claimed_at = datetime(), s.claim_token = $token
-                """,
+                """.replace("__CATEGORY_PREDICATE__", build_category_predicate("s")),
                 facility=facility,
                 enriched=FacilitySignalStatus.enriched.value,
                 batch_size=batch_size,
                 cutoff=cutoff,
                 token=claim_token,
                 scoped_scanners=scoped_scanners,
+                categories=categories,
                 static_sources=sorted(STATIC_DATA_SOURCES),
             )
 
@@ -3608,6 +3634,7 @@ async def enrich_worker(
             state.facility,
             batch_size=20,
             scanner_types=state.scanner_types,
+            categories=state.categories,
         )
 
         if not signals:
@@ -4630,6 +4657,7 @@ async def check_worker(
             batch_size=BATCH_SIZE,
             reference_shot=state.reference_shot,
             scanner_types=state.scanner_types,
+            categories=state.categories,
         )
 
         if not signals:
@@ -4958,6 +4986,7 @@ async def run_parallel_data_discovery(
     cost_limit: float = 10.0,
     signal_limit: int | None = None,
     focus: str | None = None,
+    categories: list[str] | None = None,
     num_enrich_workers: int = 2,
     num_check_workers: int = 1,
     discover_only: bool = False,
@@ -5064,6 +5093,7 @@ async def run_parallel_data_discovery(
         cost_limit=cost_limit,
         signal_limit=signal_limit,
         focus=focus,
+        categories=categories,
         enrich_only=enrich_only,
         deadline=deadline,
     )
