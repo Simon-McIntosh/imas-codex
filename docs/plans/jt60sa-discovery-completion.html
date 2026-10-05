@@ -23,7 +23,7 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
@@ -119,20 +119,26 @@
     <p>
       The content those tables render is the EDDB catalogue itself, which the §2 scanner
       reads directly with the same columns, so the fix is structural rather than a scrape:
-      (a) the §2 scan is the ingestion of the handbook tables, and each FacilitySignal links
-      to the handbook page for its database through a <code>DOCUMENTED_IN</code> edge so a
-      reader of the page reaches the rows; (b) the wiki scorer gains a dynamic-page rule — a
-      page whose rendered text is only table headers and form labels is marked
-      <code>dynamic</code> with the database it fronts, rather than ingested as content; (c)
+      (a) the §2 scan is the ingestion of the handbook tables, and the handbook page reaches
+      its rows through the graph's existing signal-documentation linkage: the page's single
+      chunk carries a <code>DOCUMENTS</code> edge (<code>WikiChunk.documents_signals</code>) to
+      every FacilitySignal of the database it fronts, so <code>search_signals</code> and
+      <code>search_docs</code> walk the one linkage the MCP tools already follow rather than
+      a second edge with a second owner; (b) the wiki scorer gains a dynamic-page rule — a
+      page whose rendered text is only table headers and form labels is marked with the
+      database it fronts (a <code>fronts_database</code> property on WikiPage) rather than
+      treated as content; <code>WikiPageStatus</code> stays a closed enum, the page keeps
+      <code>ingested</code> so its chunk can anchor the edges, and the chunk's text becomes
+      a one-line stub naming the database instead of the empty form; (c)
       the one-point and condition data keyed by PID No. (a nine-character key, four digits
       then five characters, read through <code>eddbreadOne</code> and
       <code>eddbreadPara</code> with an empty PID to enumerate) is enumerated as its own
       FacilitySignal group so the PID column is present in the graph.
     </p>
     <p>
-      Done-when: the seven handbook table pages carry <code>status: dynamic</code> and a
-      <code>fronts_database</code> value; every FacilitySignal from §2 has a
-      <code>DOCUMENTED_IN</code> edge to its database's handbook page; a PID-keyed one-point
+      Done-when: the seven handbook table pages carry a <code>fronts_database</code> value;
+      every FacilitySignal from §2 is reached from its database's handbook page through a
+      <code>DOCUMENTS</code> edge from that page's chunk; a PID-keyed one-point
       enumeration for E101173 is in the graph with its PIDs; and the MCP tools follow the
       edges in both directions — <code>search_docs</code> and <code>fetch_content</code> on a
       dynamic page return the signals it fronts (name, class, unit, PID, access template)
@@ -202,7 +208,7 @@
       dependency; <code>enumerate_edas.py</code>, <code>check_edas.py</code> and the scanner
       repairs; <code>reference_shot: 101173</code>; the census research doc. Not run: the live
       EDAS scan, the code scan, the document re-ingest, the dynamic-page rule, the
-      <code>DOCUMENTED_IN</code> linkage and the PID enumeration. The scanner stores class,
+      handbook-page <code>DOCUMENTS</code> linkage and the PID enumeration. The scanner stores class,
       shot range and UDP id in <code>keywords</code> as a stopgap; the locked decision is typed
       slots before the scan, so §2 begins with the schema extension and a
       <code>build-models</code> regeneration, which is a graph-touching node and must be
@@ -239,18 +245,27 @@
       syntax error inside a worker rather than as a configuration finding.
     </p>
     <p>
-      This section lifts it to one facility-level <code>remote_environment</code> block that
-      every remote executor applies before any script: ordered <code>setup_commands</code>
-      (module unloads and loads, <code>source</code> of an env file, virtualenv activation),
-      the <code>python_command</code> that is valid after them, the minimum interpreter
-      version the remote scripts require, and an optional per-data-system override. A
-      <code>discover preflight &lt;facility&gt;</code> probe runs the block once, prints the
-      resolved interpreter, version and importability of the libraries each scanner needs
-      (numpy and the EDDB wrapper here; MDSplus or UDA elsewhere), and refuses the scan when
-      the floor is not met, so an unmet environment is a finding with the fix command, not a
-      traceback. Done-when: the block exists in the facility schema and in
-      <code>jt-60sa.yaml</code>, <code>iter.yaml</code> and <code>tcv.yaml</code>; the executor
-      reads it for every script; and the preflight passes on nakasvr26 with the 3.12 recipe
+      This section lifts it to one facility-level <code>remote_environment</code> block:
+      ordered <code>setup_commands</code> (module unloads and loads, <code>source</code> of an
+      env file, virtualenv activation), the <code>python_command</code> that is valid after
+      them, the minimum interpreter version the remote scripts require, the modules each
+      scanner must import, and an optional per-data-system override. One resolver in the
+      facility-aware layer (<code>imas_codex/remote/tools.py</code>, which already resolves
+      <code>ssh_host</code> and the nice level from facility config) merges the block with a
+      data system's own keys and passes the result down to the executor as parameters; the
+      executor itself stays facility-agnostic, as its contract states. The facility tool
+      probe that already exists (<code>check_all_tools</code>, surfaced as
+      <code>imas-codex tools status &lt;facility&gt;</code>, with <code>min_version</code>
+      floors and <code>missing_required</code> / <code>version_too_old</code> verdicts) gains
+      the interpreter floor and the importability of the libraries each scanner needs
+      (numpy and the EDDB wrapper here; MDSplus or UDA elsewhere), so one probe owns the
+      facility-environment truth and no new CLI command is added; <code>discover
+      signals</code> and <code>discover code</code> run that check before a remote scan and
+      refuse when the floor is not met, so an unmet environment is a finding with the fix
+      command, not a traceback. Done-when: the block exists in the facility schema and in
+      <code>jt-60sa.yaml</code>, <code>iter.yaml</code> and <code>tcv.yaml</code>; every
+      remote script launched through the facility-aware layer carries it; and
+      <code>imas-codex tools status jt-60sa</code> passes on nakasvr26 with the 3.12 recipe
       and fails, naming the floor, with the recipe removed.
     </p>
 
@@ -310,6 +325,14 @@
 </section>
 
     
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20261005T0554-s3-review" data-who="reckon-build" data-when="2026-10-05T05:54:00+00:00">
+    <div class="r-comment-body">Design review (run r-20261005T053355179905, findings duplicate_owner-1 and interface_budget-2) acted on: the handbook-page linkage reuses the existing WikiChunk-[:DOCUMENTS]->FacilitySignal relationship instead of a new DOCUMENTED_IN edge, and WikiPageStatus is not widened — a dynamic page keeps status ingested and is marked by a fronts_database property. The locked decision's substance (dynamic pages marked with the database they front, signals linked, MCP tools follow the links) is unchanged; only the edge name and the status mechanism moved.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20261005T0554-s6-review" data-who="reckon-build" data-when="2026-10-05T05:54:00+00:00">
+    <div class="r-comment-body">Design review (run r-20261005T053355179905, findings thin_wrapper-1, duplicate_owner-2, interface_budget-1) acted on: remote_environment is resolved in the facility-aware layer (imas_codex/remote/tools.py and the pipelines that build each data system's scanner config) and passed to the executor as parameters, leaving the executor facility-agnostic; the interpreter floor and module importability extend check_tool/check_all_tools and surface through the existing imas-codex tools status command, so no discover preflight command is added. Nodes: remote-environment-block (schema, resolver, YAML, pass-down) then tools-status-environment-floor (probe extension and the discover gate).</div>
+</div>
+</section>
+</main>
 </body>
 </html>
