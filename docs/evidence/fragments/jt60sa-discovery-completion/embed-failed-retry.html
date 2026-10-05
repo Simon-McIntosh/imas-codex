@@ -1,0 +1,25 @@
+<section>
+  <h2 id="embed-failed-retry">A retry path for embed-failed rows</h2>
+  <p id="embed-failed-retry-landing">
+    The shared embed worker now admits a row whose <code>embed_failed_at</code>
+    is older than a retry cutoff, so a transient failure is fetched again on a
+    later pass while a fresh failure is left alone. The pending predicate is one
+    rendered fragment, <code>pending_embed_predicate(alias)</code> in
+    <code>imas_codex/discovery/base/embed_worker.py</code>, embedded by
+    <code>_fetch_unembedded</code>, <code>_count_unembedded</code> and the code
+    phase's three-aggregate progress query in
+    <code>imas_codex/discovery/code/parallel.py</code>; the cutoff is bound as
+    <code>embed_retry_cutoff</code> (<code>embed_retry_cutoff_time()</code>,
+    <code>DEFAULT_EMBED_RETRY_HOURS = 24</code>).
+    <code>SIGNAL_RESET_SPECS["discovered"].clear_fields</code> in
+    <code>reset.py</code> now also clears <code>embed_failed_at</code>, and no
+    new <code>--reset-to</code> value appears. The manual-clear instruction in
+    the <code>_mark_embed_failed</code> docstring is retired. Evidence: a new
+    <code>tests/discovery/test_embed_worker.py</code> fetches a stale-failed row
+    and excludes a fresh one; the gate
+    <code>pytest tests/discovery/test_embed_worker.py tests/discovery/test_reset.py
+    tests/discovery/test_code_pipeline.py tests/discovery/test_signals_pipeline.py</code>
+    exits <strong>0</strong> (154 passed). Negative control — dropping the cutoff
+    from the rendered fragment — fails the stale-row test, exit 1.
+  </p>
+</section>

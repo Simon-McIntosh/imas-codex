@@ -153,6 +153,7 @@ SIGNAL_RESET_SPECS: dict[str, ResetSpec] = {
             "analysis_code",
             "embedding",
             "embedded_at",
+            "embed_failed_at",
             "checked",
             "checked_at",
             "check_retries",

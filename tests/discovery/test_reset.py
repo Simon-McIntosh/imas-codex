@@ -79,6 +79,11 @@ class TestResetSpec:
         assert "checked" in spec.clear_fields
         assert spec.facility_via_rel is False
 
+    def test_signal_discovered_clears_embed_failed_at(self, reset_mod):
+        spec = reset_mod.SIGNAL_RESET_SPECS["discovered"]
+        assert "embedding" in spec.clear_fields
+        assert "embed_failed_at" in spec.clear_fields
+
     def test_signal_enriched_spec_has_post_cypher(self, reset_mod):
         spec = reset_mod.SIGNAL_RESET_SPECS["enriched"]
         assert spec.post_cypher is not None
@@ -121,6 +126,7 @@ class TestResetToStatus:
         assert "n.status = $target_status" in query
         assert "n.description = null" in query
         assert "n.embedding = null" in query
+        assert "n.embed_failed_at = null" in query
 
     def test_reset_paths_triaged(self, reset_mod):
         """Reset scored paths to triaged (via relationship)."""

@@ -18,6 +18,10 @@ import subprocess
 import time
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.discovery.base.embed_worker import (
+    embed_retry_cutoff_time,
+    pending_embed_predicate,
+)
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
 from imas_codex.discovery.base.supervision import OrphanRecoverySpec
 from imas_codex.graph import GraphClient
@@ -470,20 +474,20 @@ def get_code_discovery_stats(
         # Exclude whitespace-only chunks from pending (they can't be
         # meaningfully embedded and the workers skip them).
         embed_result = gc.query(
-            """
-            MATCH (cc:CodeChunk)-[:AT_FACILITY]->(f:Facility {id: $facility})
+            f"""
+            MATCH (cc:CodeChunk)-[:AT_FACILITY]->(f:Facility {{id: $facility}})
             MATCH (cc)<-[:HAS_CHUNK]-(:CodeExample)<-[:HAS_EXAMPLE]-(cf:CodeFile)
             WHERE cf.score_composite >= $min_score
             RETURN count(cc) AS total,
                    count(cc.embedding) AS embedded,
-                   count(CASE WHEN cc.embedding IS NULL
-                              AND cc.embed_failed_at IS NULL
+                   count(CASE WHEN {pending_embed_predicate("cc")}
                               AND cc.text IS NOT NULL
                               AND trim(cc.text) <> ''
                          THEN 1 END) AS pending
             """,
             facility=facility,
             min_score=min_score,
+            embed_retry_cutoff=embed_retry_cutoff_time(),
         )
         if embed_result:
             total_chunks = embed_result[0]["total"]
