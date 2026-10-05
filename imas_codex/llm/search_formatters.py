@@ -188,6 +188,24 @@ def format_signals_report(
                 if wiki:
                     parts.append(f"  Wiki refs: {', '.join(wiki)}")
 
+            # Dynamic handbook pages that list this signal in their catalogue.
+            pages = sig.get("documented_pages") or []
+            cites = []
+            seen_pages: set[str] = set()
+            for page in pages:
+                if not isinstance(page, dict) or not page.get("title"):
+                    continue
+                pid = page.get("id") or page["title"]
+                if pid in seen_pages:
+                    continue
+                seen_pages.add(pid)
+                label = f'"{page["title"]}"'
+                if page.get("id"):
+                    label += f" ({page['id']})"
+                cites.append(label)
+            if cites:
+                parts.append(f"  Documented in: {', '.join(cites)}")
+
             # Data access section — handles multiple access methods
             access_methods = sig.get("access_methods") or []
             # Filter out empty/null access methods from OPTIONAL MATCH
@@ -348,6 +366,7 @@ def format_docs_report(
     chunks: list[dict[str, Any]],
     documents: list[dict[str, Any]],
     scores: dict[str, float],
+    signals: list[dict[str, Any]] | None = None,
 ) -> str:
     """Format documentation search results into a readable report.
 
@@ -357,11 +376,14 @@ def format_docs_report(
         chunks: Enriched wiki chunk records.
         documents: Document/image results.
         scores: Map of chunk/document ID → similarity score.
+        signals: Signals whose name/description matched the query, shown as
+            their own section so a document search names the signal family
+            it reaches (e.g. "flux loop" → the flux-loop signals).
 
     Returns:
         Formatted text report.
     """
-    if not chunks and not documents:
+    if not chunks and not documents and not signals:
         return "No documentation found."
 
     parts: list[str] = []
@@ -410,7 +432,13 @@ def format_docs_report(
 
                 # Cross-links
                 linked_signals = chunk.get("linked_signals") or []
-                if linked_signals:
+                signal_count = chunk.get("signal_count") or 0
+                if signal_count > len(linked_signals):
+                    parts.append(
+                        f"  Fronts {signal_count} signals; "
+                        f"e.g. {', '.join(linked_signals)}"
+                    )
+                elif linked_signals:
                     parts.append(f"  Signals: {', '.join(linked_signals)}")
 
                 imas_refs = chunk.get("imas_refs") or []
@@ -443,6 +471,16 @@ def format_docs_report(
                 line += f" ({desc})"
             parts.append(line)
             parts.append(f"    fetch('{aid}') for full content")
+
+    if signals:
+        parts.append(f"\n## Signals ({len(signals)} matches)")
+        for sig in signals:
+            sid = sig.get("id", "?")
+            name = sig.get("name") or sid
+            parts.append(f"  - {name}  [{sid}]")
+            desc = sig.get("description") or ""
+            if desc:
+                parts.append(f"    {desc}")
 
     return "\n".join(parts)
 

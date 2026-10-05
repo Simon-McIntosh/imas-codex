@@ -14,7 +14,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from neo4j.exceptions import ServiceUnavailable
+from neo4j.exceptions import ClientError, ServiceUnavailable
 
 from imas_codex.llm.search_formatters import (
     _interpolate_template,
@@ -25,10 +25,15 @@ from imas_codex.llm.search_formatters import (
     format_signals_report,
 )
 from imas_codex.llm.search_tools import (
+    _CHUNK_DOCUMENTS_CAP,
+    _enrich_wiki_chunks,
     _fetch,
+    _fetch_wiki_page,
     _search_code,
     _search_docs,
     _search_signals,
+    _text_search_code_chunks,
+    _text_search_signals,
 )
 
 # ---------------------------------------------------------------------------
@@ -1711,3 +1716,298 @@ class TestSchemaGuard:
                 # CodeChunk matched via related_ids property
                 assert "CodeChunk" in cypher
                 break
+
+
+# ---------------------------------------------------------------------------
+# Dynamic handbook pages (WikiPage.fronts_database) and the DOCUMENTS edges
+# ---------------------------------------------------------------------------
+
+
+class TestHandbookDocumentEdges:
+    """The MCP tools follow the dynamic handbook page -> signal edges both ways."""
+
+    @pytest.fixture()
+    def mock_gc(self):
+        gc = MagicMock()
+        gc.query = MagicMock(side_effect=_route_query({}))
+        return gc
+
+    @pytest.fixture()
+    def mock_encoder(self):
+        enc = MagicMock()
+        enc.embed_texts = MagicMock(return_value=[[0.1] * 1024])
+        return enc
+
+    def test_fronts_database_page_lists_signals(self, mock_gc):
+        """fetch of a dynamic page renders the catalogue it fronts, capped."""
+        page_chunks = [
+            {
+                "source_type": "wiki_page",
+                "title": "Category Information",
+                "url": "https://wiki.jt60sa.org/CategoryInformation",
+                "source_id": "jt-60sa:CategoryInformation",
+                "fronts_database": ["EDDB"],
+                "section": None,
+                "text": "Dynamic table rendered from the EDDB catalogue.",
+                "chunk_index": 0,
+                "mdsplus_paths": None,
+                "imas_paths": None,
+            }
+        ]
+        fronted_rows = [
+            {
+                "category": "parameter",
+                "total": 6298,
+                "samples": [
+                    {
+                        "name": "PSRC/magFluxLp1",
+                        "unit": "Wb",
+                        "pid": None,
+                        "access": "ok, rtn = db.eddbreadTime('{shot}', ...)",
+                    }
+                ],
+            }
+        ]
+        mock_gc.query.side_effect = _route_query(
+            {
+                "RETURN 'wiki_page' AS source_type": page_chunks,
+                "p.id IN $page_ids": fronted_rows,
+            }
+        )
+
+        result = _fetch_wiki_page(mock_gc, "jt-60sa:CategoryInformation")
+
+        assert "Fronted signal catalogue (EDDB)" in result
+        assert "**parameter** — 6298 signals" in result
+        assert "PSRC/magFluxLp1" in result
+        # The stub text is still shown above the catalogue listing.
+        assert "Dynamic table rendered" in result
+
+    def test_signal_shows_documented_page_citation(self):
+        """A signal reached by DOCUMENTS cites the page that fronts its catalogue."""
+        sig = dict(
+            _SIGNAL_ENRICHMENT_IP,
+            documented_pages=[
+                {"title": "Category Information", "id": "jt-60sa:CategoryInformation"}
+            ],
+        )
+        result = format_signals_report([sig], [], {"tcv:magnetics/ip": 0.9})
+
+        assert (
+            'Documented in: "Category Information" (jt-60sa:CategoryInformation)'
+            in result
+        )
+
+    def test_stub_chunk_enrichment_query_is_capped(self, mock_gc):
+        """The chunk enrichment caps its DOCUMENTS collection per chunk.
+
+        A dynamic stub chunk documents a whole catalogue, so the query returns
+        a bounded sample plus the true count rather than every signal id.
+        """
+        _enrich_wiki_chunks(mock_gc, ["jt-60sa:chunk:stub"])
+
+        cypher = mock_gc.query.call_args[0][0]
+        kwargs = mock_gc.query.call_args[1]
+        assert "size(all_signals) AS signal_count" in cypher
+        assert "all_signals[..$documents_cap]" in cypher
+        assert kwargs.get("documents_cap") == _CHUNK_DOCUMENTS_CAP
+
+    def test_stub_chunk_report_shows_count_not_full_list(self):
+        """A capped chunk renders a total and a sample, not thousands of ids."""
+        rows = [
+            {
+                "id": "jt-60sa:chunk:stub",
+                "text": "Dynamic table rendered from the EDDB catalogue.",
+                "section": None,
+                "page_id": "jt-60sa:CategoryInformation",
+                "page_title": "Category Information",
+                "page_url": None,
+                "signal_count": 6298,
+                "linked_signals": ["jt-60sa:general/psrc_magfluxlp1"],
+                "linked_data_nodes": [],
+                "imas_refs": [],
+                "tool_mentions": None,
+            }
+        ]
+        result = format_docs_report(rows, [], {})
+
+        assert "Fronts 6298 signals; e.g. jt-60sa:general/psrc_magfluxlp1" in result
+
+    def test_docs_report_lists_matching_signals(self):
+        """Documentation search names the signal family it reaches.
+
+        The signals section sits beside the wiki/document prose, so a search
+        that names a signal family returns the signals and the pages together.
+        """
+        signals = [
+            {
+                "id": "jt-60sa:general/psrc_magfluxlp1",
+                "name": "PSRC/magFluxLp1",
+                "description": "Observation of Flux Loop (1-7)",
+            }
+        ]
+        result = format_docs_report([], [], {}, signals=signals)
+
+        assert "## Signals (1 matches)" in result
+        assert "PSRC/magFluxLp1" in result
+        assert "jt-60sa:general/psrc_magfluxlp1" in result
+
+    def test_search_docs_includes_matching_signals(self, mock_gc, mock_encoder):
+        """search_docs surfaces signals whose name/description match the query."""
+        mock_gc.query.side_effect = _route_query(
+            {
+                "wiki_chunk_embedding": [{"id": "c1", "score": 0.9}],
+                "WikiChunk {id: cid}": [
+                    {
+                        "id": "c1",
+                        "text": "EDDB manual table excerpt",
+                        "section": "General",
+                        "page_title": "EDDB Manual",
+                        "page_url": None,
+                        "linked_signals": [],
+                        "linked_data_nodes": [],
+                        "imas_refs": [],
+                    }
+                ],
+                "facility_signal_text": [
+                    {"id": "jt-60sa:general/psrc_magfluxlp1", "score": 6.5}
+                ],
+                "FacilitySignal {id: sid}": [
+                    {
+                        "id": "jt-60sa:general/psrc_magfluxlp1",
+                        "name": "PSRC/magFluxLp1",
+                        "description": "Observation of Flux Loop (1-7)",
+                    }
+                ],
+            }
+        )
+
+        result = _search_docs(
+            query="flux loop",
+            facility="jt-60sa",
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+
+        assert "EDDB manual table excerpt" in result
+        assert "## Signals" in result
+        assert "PSRC/magFluxLp1" in result
+
+
+class _FulltextSignatureClient:
+    """A GraphClient whose query() mirrors Session.run's own signature.
+
+    ``Session.run(query, **params)`` binds its first positional argument to a
+    parameter named ``query``, so a caller that also binds a Cypher parameter
+    named ``query`` raises ``TypeError`` before the query runs. A stub with a
+    plain ``query(cypher, **params)`` signature cannot reproduce that collision
+    and would let a regression pass, so this stub reproduces the real one.
+    """
+
+    def __init__(self, hits, marker):
+        self._hits = hits
+        self._marker = marker
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        self.calls.append((query, params))
+        if self._marker in query:
+            return list(self._hits)
+        return []
+
+
+class TestFulltextBranchParameterBinding:
+    """The fulltext branches bind search text without colliding with Session.run.
+
+    A parameter named ``query`` collides with ``Session.run``'s own argument,
+    so the call raised and the branch was silently dead. These tests drive each
+    repaired branch through a stub with the real signature, so binding the text
+    to ``query`` again fails rather than falling through unnoticed.
+    """
+
+    def test_signal_fulltext_branch_binds_search_query(self):
+        hits = [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 6.5}]
+        gc = _FulltextSignatureClient(hits, marker="facility_signal_text")
+
+        result = _text_search_signals(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == hits
+        cypher, params = gc.calls[0]
+        assert "$search_query" in cypher
+        assert params["search_query"] == "flux loop"
+        assert "query" not in params
+
+    def test_code_chunk_fulltext_branch_binds_search_query(self):
+        hits = [{"id": "jt-60sa:code:c1", "score": 3.5}]
+        gc = _FulltextSignatureClient(hits, marker="code_chunk_text")
+
+        result = _text_search_code_chunks(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == hits
+        cypher, params = gc.calls[0]
+        assert "$search_query" in cypher
+        assert params["search_query"] == "flux loop"
+        assert "query" not in params
+
+
+class _FulltextRaisingClient:
+    """Raises a programming error on the fulltext call and answers elsewhere."""
+
+    def __init__(self, marker):
+        self._marker = marker
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        if self._marker in query:
+            raise TypeError("Session.run() got multiple values for argument 'query'")
+        return []
+
+
+class _AbsentIndexClient:
+    """Raises a client error for the fulltext index, as an absent index does."""
+
+    def __init__(self):
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        self.calls.append((query, params))
+        if "queryNodes" in query:
+            raise ClientError(
+                "There is no procedure with the name "
+                "`db.index.fulltext.queryNodes` registered for this database."
+            )
+        return [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
+
+
+class TestFulltextFailureHandling:
+    """A programming error propagates; an absent index still falls back."""
+
+    def test_signal_fulltext_programming_error_propagates(self):
+        with pytest.raises(TypeError):
+            _text_search_signals(
+                _FulltextRaisingClient("facility_signal_text"),
+                "flux loop",
+                "jt-60sa",
+                8,
+            )
+
+    def test_code_chunk_fulltext_programming_error_propagates(self):
+        with pytest.raises(TypeError):
+            _text_search_code_chunks(
+                _FulltextRaisingClient("code_chunk_text"), "flux loop", "jt-60sa", 8
+            )
+
+    def test_signal_missing_index_falls_back_to_contains(self):
+        gc = _AbsentIndexClient()
+
+        result = _text_search_signals(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
+        assert "CONTAINS" in gc.calls[-1][0]
+
+    def test_code_chunk_missing_index_falls_back_to_contains(self):
+        gc = _AbsentIndexClient()
+
+        result = _text_search_code_chunks(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
+        assert "CONTAINS" in gc.calls[-1][0]
