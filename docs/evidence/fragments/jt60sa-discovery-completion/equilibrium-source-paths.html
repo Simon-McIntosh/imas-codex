@@ -1,0 +1,83 @@
+<section id="equilibrium-source-paths">
+  <h2 id="equilibrium-source-paths-heading">Equilibrium source paths — FacilityPath and CodeChunk coverage</h2>
+
+  <p id="equilibrium-source-paths-summary">
+    Operational run of the existing discovery pipelines to give the three
+    equilibrium source trees on the JT-60SA host scored <code>FacilityPath</code>
+    rows and <code>CodeChunk</code> rows so the EQDBMS record layout becomes
+    searchable. The node is <strong>blocked</strong>: the JT-60SA hop answered at
+    orientation (10:38Z) and then stopped accepting connections before the first
+    pipeline run completed. The before-state below was measured against the live
+    jt-60sa graph; the after-state could not be produced.
+  </p>
+
+  <h3 id="equilibrium-source-paths-before">Before-state (measured 10:39–10:41Z)</h3>
+  <p id="equilibrium-source-paths-before-note">
+    All counts are Cypher against the live jt-60sa graph. The three trees were
+    confirmed present on the host at 10:41Z
+    (<code>SAeqread</code> 15 dirs, <code>client_eqdbms.EQ32.Rev1</code> 22 dirs,
+    <code>SAeqfame</code> 5 dirs).
+  </p>
+  <table id="equilibrium-source-paths-before-table">
+    <thead>
+      <tr><th>Tree</th><th>FacilityPath rows</th><th>of which scored</th><th>CodeChunk rows</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/analysis/src/SAeqread</code></td><td>10</td><td>7</td><td>0</td></tr>
+      <tr><td><code>/analysis/src/client_eqdbms.EQ32.Rev1</code></td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td><code>/analysis/src/SAeqfame</code></td><td>0</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="equilibrium-source-paths-before-total">
+    Context: <code>FacilityPath</code> rows for jt-60sa total 8,324, of which 626
+    lie under <code>/analysis/src</code>. <code>CodeChunk</code> rows for jt-60sa
+    total 201, none under any of the three trees — the EQDBMS record layout is
+    not searchable, consistent with §2 and §14.
+  </p>
+
+  <h3 id="equilibrium-source-paths-after">After-state</h3>
+  <p id="equilibrium-source-paths-after-note">
+    Not produced. The scoped paths run
+    (<code>discover paths jt-60sa --root /analysis/src</code>) failed at its SSH
+    preflight, and every subsequent hop attempt for the following ~25 minutes was
+    refused by the remote host. No <code>FacilityPath</code> or
+    <code>CodeChunk</code> rows were added; <code>_search_code('EQDBMS record
+    layout', 'jt-60sa')</code> was therefore not run.
+  </p>
+
+  <h3 id="equilibrium-source-paths-blocker">Blocker — the JT-60SA hop went down mid-node</h3>
+  <ul id="equilibrium-source-paths-blocker-list">
+    <li id="equilibrium-source-paths-blocker-hop">
+      Target <code>nakasvr26.iferc.org:22</code> (via <code>ProxyJump laptop</code>)
+      answered at 10:38Z (<code>hostname</code> → <code>intr26-2</code>) and by
+      10:46Z was refusing with <code>kex_exchange_identification: Connection closed
+      by remote host</code>, then <code>Connection timed out during banner
+      exchange</code> continuously through 11:01Z (6 backoff probes, 13-minute
+      span).
+    </li>
+    <li id="equilibrium-source-paths-blocker-jumps">
+      The jump hosts are healthy — <code>laptop</code> → <code>FR-IWL-MCINTOS1</code>
+      and <code>98dci4-srv-1003.iter.org</code> both answer. From the jump host,
+      <code>ping nakasvr26.iferc.org</code> shows 100% packet loss and TCP/22 does
+      not complete. The failure is at the IFERC target, not the tunnel.
+    </li>
+    <li id="equilibrium-source-paths-blocker-alternate">
+      An alternate route <code>98dci4-srv-1003 → nakasvr26.iferc.org:22</code> also
+      times out. No reachable path to the source trees exists from this node while
+      the target is down.
+    </li>
+  </ul>
+
+  <h3 id="equilibrium-source-paths-logs">Logs and spend</h3>
+  <ul id="equilibrium-source-paths-logs-list">
+    <li id="equilibrium-source-paths-log-discover">Discovery log (SSH preflight failure): <code>~/.local/share/imas-codex/logs/paths_jt-60sa.log</code></li>
+    <li id="equilibrium-source-paths-spend">LLM spend this node: <strong>USD 0.00</strong> — the pipeline halted at SSH preflight before any scoring call, well under the USD 5 cap.</li>
+  </ul>
+
+  <p id="equilibrium-source-paths-resume">
+    Resume requires only the hop to recover: rerunning
+    <code>imas-codex discover paths jt-60sa --root /analysis/src</code> followed by
+    the scoped code scan is expected to complete the node unchanged. The pipeline
+    is idempotent and the root was already seeded.
+  </p>
+</section>
