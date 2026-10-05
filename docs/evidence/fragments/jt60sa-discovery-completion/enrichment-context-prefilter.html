@@ -1,0 +1,52 @@
+<section>
+  <h2 id="enrichment-context-prefilter">Signal enrichment context searches pre-filter by facility</h2>
+  <p id="enrichment-context-prefilter-landing">
+    The two vector lookups that feed the signal-enrichment prompt now select
+    their candidates <em>inside</em> the index instead of discarding them
+    afterwards. The wiki-context lookup
+    (<code>fetch_semantic_wiki_context</code> in
+    <code>imas_codex/discovery/signals/scanners/wiki.py</code>) and the
+    code-context lookup (<code>_build_code_context_query</code> in
+    <code>imas_codex/discovery/signals/parallel.py</code>) each pass
+    <code>["node.facility_id = $facility"]</code> as
+    <code>prefilter_clauses</code> to <code>build_vector_search</code>
+    (<code>imas_codex/graph/vector_search.py</code>), which renders the
+    predicate as a <code>WHERE</code> between <code>FOR $embedding</code> and
+    <code>LIMIT</code> — inside the <code>SEARCH</code> parentheses. The
+    <code>WikiPage</code> and <code>CodeChunk</code> source joins are kept only
+    for the fields the prompt renders, and the two facility post-filter
+    predicates (<code>p.facility_id</code>, <code>src.facility_id</code>) are
+    retired.
+  </p>
+  <p id="enrichment-context-prefilter-cause">
+    Each predicate used to be a post-filter over a global ANN cut, so a
+    facility holding a small share of the index lost its own rows to the
+    global winners before the filter saw them. Measured on the live graph for
+    the PSRC signal <code>jt-60sa:general/dcsv_1pdatpsrc</code> at the default
+    limits (wiki <code>k = 5</code>, code <code>LIMIT 3</code>), same embedding
+    for both arms:
+  </p>
+  <table id="enrichment-context-prefilter-counts">
+    <thead>
+      <tr><th>lookup</th><th>before (global cut, then facility filter)</th><th>after (facility predicate inside SEARCH)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>wiki-context</td><td>4 jt-60sa chunks (global top-5 held one tcv page)</td><td>5 jt-60sa chunks, all jt-60sa</td></tr>
+      <tr><td>code-context</td><td><strong>0</strong> jt-60sa chunks (global top-3 was jet, tcv, tcv)</td><td>3 jt-60sa chunks</td></tr>
+    </tbody>
+  </table>
+  <p id="enrichment-context-prefilter-repair">
+    The code-context query additionally moves its <code>score &gt;= $min_score</code>
+    threshold behind a <code>WITH</code>: the <code>WHERE</code> placed
+    immediately after <code>SEARCH</code> tripped a live planner error
+    (<code>Neo.DatabaseError.Statement.ExecutionFailed</code>), so the branch had
+    been returning no rows at all. With the threshold behind the join and
+    <code>WITH</code>, the rebuilt query plans and returns three jt-60sa chunks.
+  </p>
+  <p id="enrichment-context-prefilter-gate">
+    Tests pin both in-<code>SEARCH</code> predicates
+    (<code>tests/discovery/test_scanners.py</code>,
+    <code>tests/discovery/test_signals_pipeline.py</code>)
+    and that neither post-filter remains.
+  </p>
+</section>
