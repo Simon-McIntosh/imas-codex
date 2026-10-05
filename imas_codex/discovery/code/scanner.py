@@ -99,18 +99,19 @@ def _scan_remote_paths_batch(
         Dict mapping path -> list of file info dicts with enrichment data
     """
     from imas_codex.discovery.base.facility import get_facility
+    from imas_codex.remote.environment import resolve_remote_environment
     from imas_codex.remote.executor import run_python_script
 
     if not remote_paths:
         return {}
 
-    host = ssh_host
-    if not host:
-        try:
-            config = get_facility(facility)
-            host = config.get("ssh_host", facility)
-        except ValueError:
-            host = facility
+    try:
+        config = get_facility(facility)
+    except ValueError:
+        config = {}
+
+    host = ssh_host or config.get("ssh_host") or facility
+    environment = resolve_remote_environment(config)
 
     input_data = {
         "paths": remote_paths,
@@ -127,6 +128,8 @@ def _scan_remote_paths_batch(
             input_data=input_data,
             ssh_host=host,
             timeout=timeout,
+            python_command=environment.python_command,
+            setup_commands=list(environment.setup_commands),
         )
     except subprocess.TimeoutExpired:
         logger.warning(

@@ -1585,3 +1585,39 @@ class TestPathPrefixScan:
             "/analysis/src/SAselene",
             "/analysis/src/edas2",
         ]
+
+    def test_scan_uses_facility_remote_environment(self):
+        """The remote scan runs under the facility's resolved interpreter.
+
+        A facility whose default ``python`` is older than the executor's
+        bootstrap (jt-60sa defaults to 3.5.6) cannot parse the inline runner,
+        so the scan must pass the facility ``remote_environment`` interpreter
+        and setup commands to the executor rather than the default.
+        """
+        from imas_codex.discovery.code import scanner
+
+        config = {
+            "ssh_host": "jt-60sa",
+            "remote_environment": {
+                "python_command": "python",
+                "setup_commands": ["module load python/3.12"],
+            },
+        }
+        with (
+            patch(
+                "imas_codex.discovery.base.facility.get_facility",
+                return_value=config,
+            ),
+            patch(
+                "imas_codex.remote.executor.run_python_script",
+                return_value="[]",
+            ) as run_script,
+        ):
+            scanner._scan_remote_paths_batch(
+                "jt-60sa", ["/analysis/src/SAeqread"], ssh_host="jt-60sa"
+            )
+
+        assert run_script.call_args.kwargs["python_command"] == "python"
+        assert run_script.call_args.kwargs["setup_commands"] == [
+            "module load python/3.12"
+        ]
