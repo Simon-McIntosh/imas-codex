@@ -39,6 +39,16 @@ from imas_codex.graph.models import (
 logger = logging.getLogger(__name__)
 
 
+# EDDB data-class letter -> SignalDataClass value. The catalogue assigns the
+# letter; an unrecognised one leaves the slot unset rather than guessing.
+DATA_CLASS_BY_EDDB_LETTER = {
+    "T": "time_series",
+    "O": "one_point",
+    "P": "parameter",
+}
+EDDB_LETTER_BY_DATA_CLASS = {v: k for k, v in DATA_CLASS_BY_EDDB_LETTER.items()}
+
+
 class EDASScanner:
     """Discover signals from JT-60SA EDAS system.
 
@@ -156,6 +166,7 @@ class EDASScanner:
 
         # Convert to FacilitySignal nodes
         signals = []
+        unknown_data_classes: set[str] = set()
         for raw in raw_signals:
             cat = raw["category"]
             dname = raw["data_name"]
@@ -163,22 +174,14 @@ class EDASScanner:
             description = raw.get("description", "")
 
             signal_id = f"{facility}:general/{cat.lower()}_{dname.lower()}"
-            data_class = raw.get("data_class", "")
-            if data_class == "O":
+            eddb_class = raw.get("data_class", "")
+            if eddb_class == "O":
                 accessor = f"eddbreadOne('{shot_str}', '{cat}', '{dname}', None, 0, 0)"
             else:
                 accessor = f"eddbreadTime('{shot_str}', '{cat}', '{dname}', t1, t2)"
-            keywords = [
-                k
-                for k in (
-                    f"class:{data_class}" if data_class else "",
-                    f"shots:{raw.get('shot_range', '')}"
-                    if raw.get("shot_range")
-                    else "",
-                    f"udpid:{raw.get('udp_id', '')}" if raw.get("udp_id") else "",
-                )
-                if k
-            ]
+            data_class = DATA_CLASS_BY_EDDB_LETTER.get(eddb_class)
+            if eddb_class and data_class is None:
+                unknown_data_classes.add(eddb_class)
 
             signals.append(
                 FacilitySignal(
@@ -193,11 +196,21 @@ class EDASScanner:
                     data_source_path=f"{cat}/{dname}",
                     unit=units,
                     description=description,  # May be Japanese
-                    keywords=keywords or None,
+                    data_class=data_class,
+                    shot_range=raw.get("shot_range") or None,
+                    pid=raw.get("udp_id") or None,
                     aliases=[raw["alias"]] if raw.get("alias") else None,
                     discovery_source="edas",
                     example_shot=ref_shot,
                 )
+            )
+
+        if unknown_data_classes:
+            logger.warning(
+                "EDAS scanner: unrecognised data class(es) %s on %s; "
+                "data_class left unset",
+                sorted(unknown_data_classes),
+                ssh_host,
             )
 
         logger.info(
@@ -263,13 +276,8 @@ class EDASScanner:
         for s in signals:
             parts = (s.name or "").split("/")
             if len(parts) == 2:
-                data_class = next(
-                    (
-                        k.split(":", 1)[1]
-                        for k in (s.keywords or [])
-                        if k.startswith("class:")
-                    ),
-                    "",
+                data_class = EDDB_LETTER_BY_DATA_CLASS.get(
+                    getattr(s.data_class, "value", s.data_class), ""
                 )
                 batch.append(
                     {

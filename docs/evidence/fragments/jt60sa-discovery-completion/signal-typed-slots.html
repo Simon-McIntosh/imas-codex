@@ -1,0 +1,22 @@
+<section id="signal-typed-slots-landing">
+  <h2 id="signal-typed-slots-heading">Typed slots on FacilitySignal</h2>
+  <p id="signal-typed-slots-what">
+    <code>FacilitySignal</code> carries <code>data_class</code>,
+    <code>shot_range</code> and <code>pid</code> as typed LinkML slots,
+    beside <code>keywords</code> and <code>aliases</code>. The EDAS scanner
+    writes the EDDB catalogue values to the slots; its
+    <code>check()</code> reads <code>data_class</code> back from the slot
+    instead of parsing <code>keywords</code>.
+  </p>
+  <p id="signal-typed-slots-enum">
+    New enum <code>SignalDataClass</code>:
+    <code>time_series</code> (EDDB class T),
+    <code>one_point</code> (O),
+    <code>parameter</code> (P). An unknown EDDB letter leaves the slot unset.
+  </p>
+  <p id="signal-typed-slots-measure">
+    Gate at <code>b98b02a39</code>:
+    <code>pytest tests/discovery/test_scanners.py tests/discovery/test_signal_checking.py tests/discovery/test_edas_scanner.py</code>
+    &rarr; 59 passed (55 baseline + 4 new).
+  </p>
+</section>

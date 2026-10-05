@@ -99,6 +99,18 @@ enums:
       TASK:
         description: Task definition node
 
+  SignalDataClass:
+    description: >-
+      EDDB data class of a signal. Determines which read call returns the
+      signal: a time series, a one-point value, or a configuration parameter.
+    permissible_values:
+      time_series:
+        description: Time-varying waveform; EDDB class T, read with eddbreadTime
+      one_point:
+        description: Single-point or condition value; EDDB class O, read with eddbreadOne
+      parameter:
+        description: Configuration parameter; EDDB class P, read with eddbreadPara
+
   DiagnosticCategory:
     description: Categories of fusion plasma diagnostics
     permissible_values:
@@ -2225,6 +2237,22 @@ classes:
           parameter names, native function arguments, and legacy names.
           E.g., ["i_p", "ip", "Ip", "I_PL", "plasma current"]
         multivalued: true
+      data_class:
+        description: >-
+          Data class of the signal from the source catalogue, e.g. EDDB
+          class T (time series), O (one-point) or P (parameter). Selects the
+          read call that returns the signal.
+        range: SignalDataClass
+      shot_range:
+        description: >-
+          Shot validity range as the source reports it. EDDB form is
+          "<first>-<last>", with an open upper bound written as a trailing
+          dash, e.g. "E080000-" or "E080000-E101173".
+      pid:
+        description: >-
+          Catalogue identifier for the signal. EDDB PID No. is a
+          nine-character key: four digits then five characters. Empty when
+          the catalogue row carries none.
       # Data source fields (for signals discovered from data source traversal)
       data_source_name:
         description: >-
