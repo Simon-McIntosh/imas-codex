@@ -34,6 +34,7 @@ from imas_codex.llm.search_tools import (
     _search_signals,
     _text_search_code_chunks,
     _text_search_signals,
+    _text_search_wiki_chunks,
 )
 
 # ---------------------------------------------------------------------------
@@ -1968,6 +1969,18 @@ class TestFulltextBranchParameterBinding:
         assert params["search_query"] == "flux loop"
         assert "query" not in params
 
+    def test_wiki_chunk_fulltext_branch_binds_search_query(self):
+        hits = [{"id": "jt-60sa:wiki:c1", "score": 4.2}]
+        gc = _FulltextSignatureClient(hits, marker="wiki_chunk_text")
+
+        result = _text_search_wiki_chunks(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == hits
+        cypher, params = gc.calls[0]
+        assert "$search_query" in cypher
+        assert params["search_query"] == "flux loop"
+        assert "query" not in params
+
 
 class _FulltextRaisingClient:
     """Raises a programming error on the fulltext call and answers elsewhere."""
@@ -2015,6 +2028,12 @@ class TestFulltextFailureHandling:
                 _FulltextRaisingClient("code_chunk_text"), "flux loop", "jt-60sa", 8
             )
 
+    def test_wiki_chunk_fulltext_programming_error_propagates(self):
+        with pytest.raises(TypeError):
+            _text_search_wiki_chunks(
+                _FulltextRaisingClient("wiki_chunk_text"), "flux loop", "jt-60sa", 8
+            )
+
     def test_signal_missing_index_falls_back_to_contains(self):
         gc = _AbsentIndexClient()
 
@@ -2027,6 +2046,14 @@ class TestFulltextFailureHandling:
         gc = _AbsentIndexClient()
 
         result = _text_search_code_chunks(gc, "flux loop", "jt-60sa", 8)
+
+        assert result == [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
+        assert "CONTAINS" in gc.calls[-1][0]
+
+    def test_wiki_chunk_missing_index_falls_back_to_contains(self):
+        gc = _AbsentIndexClient()
+
+        result = _text_search_wiki_chunks(gc, "flux loop", "jt-60sa", 8)
 
         assert result == [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
         assert "CONTAINS" in gc.calls[-1][0]
