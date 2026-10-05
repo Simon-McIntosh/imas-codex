@@ -126,6 +126,46 @@ def test_explicit_neo4j_uri_survives_an_unreadable_location(monkeypatch):
         client.close()
 
 
+def test_explicit_neo4j_uri_keeps_the_locations_offset_ports(monkeypatch):
+    """The escape hatch replaces the address, not the location's port slots.
+
+    A location beyond the first in the list keeps its bolt and HTTP offset, so
+    service management still targets the right ports while ``NEO4J_URI`` names
+    the address to connect to.
+    """
+    monkeypatch.setenv("NEO4J_URI", EXPLICIT_URI)
+    monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "tcv")
+
+    profile = profiles_module.resolve_neo4j()
+
+    assert profile.uri == EXPLICIT_URI
+    assert profile.bolt_port == 7688
+    assert profile.http_port == 7475
+
+
+def test_explicit_neo4j_uri_keeps_offset_ports_when_location_is_unreadable(
+    monkeypatch,
+):
+    """An unreadable location still yields the offset ports from the list.
+
+    The port offset is read from the locations list alone, which needs no
+    location file, so the override neither raises nor loses the slots.
+    """
+    monkeypatch.setenv("NEO4J_URI", EXPLICIT_URI)
+    monkeypatch.setattr(profiles_module, "get_graph_location", lambda: "tcv")
+
+    def unreadable(_location):
+        raise RuntimeError("location config unreadable")
+
+    monkeypatch.setattr(loc, "resolve_location", unreadable)
+
+    profile = profiles_module.resolve_neo4j()
+
+    assert profile.uri == EXPLICIT_URI
+    assert profile.bolt_port == 7688
+    assert profile.http_port == 7475
+
+
 def test_the_client_default_uri_factory_is_the_profile_resolver(monkeypatch):
     """The dataclass default, not a bare profile URI, is what a client gets.
 

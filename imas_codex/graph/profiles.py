@@ -409,10 +409,19 @@ def resolve_neo4j(
     # Env var escape hatches (always win). NEO4J_URI names the address
     # outright, so it is applied before any location resolution: an operator
     # who set it never pays for an unreadable location file, and never has a
-    # resolved address overridden behind their back. The host and port fields
-    # are left at their defaults because they describe a location this URI
-    # bypasses.
+    # resolved address overridden behind their back. The ports still follow the
+    # location convention so service management keeps the right slots; when the
+    # location cannot be read the offset comes from the locations list alone,
+    # which needs no file, so the override costs nothing. The host is left None
+    # because it describes a location this URI bypasses.
     if env_uri := os.getenv("NEO4J_URI"):
+        try:
+            bolt_port = _convention_bolt_port(location)
+            http_port = _convention_http_port(location)
+        except Exception:
+            offset = _get_all_offsets().get(location, 0)
+            bolt_port = BOLT_BASE_PORT + offset
+            http_port = HTTP_BASE_PORT + offset
         return Neo4jProfile(
             name=name,
             location=location,
@@ -420,8 +429,8 @@ def resolve_neo4j(
             uri=env_uri,
             username=os.getenv("NEO4J_USERNAME", username),
             password=os.getenv("NEO4J_PASSWORD", password),
-            bolt_port=BOLT_BASE_PORT,
-            http_port=HTTP_BASE_PORT,
+            bolt_port=bolt_port,
+            http_port=http_port,
             data_dir=ACTIVE_LINK,
         )
 
