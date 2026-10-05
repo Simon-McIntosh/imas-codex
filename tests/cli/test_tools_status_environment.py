@@ -1,7 +1,11 @@
 """``tools status`` environment exit codes and the ``discover signals`` refusal.
 
-The probe is stubbed at both modules that own it: the tool summary
-(``imas_codex.remote.tools``) and the Python status (``imas_codex.remote.python``).
+The probe is stubbed at both probe sites: the tool summary
+(``imas_codex.remote.tools``) and the ``discover`` preflight
+(``imas_codex.remote.tools``), plus the python module
+(``imas_codex.remote.python``), which binds the probe by direct import. Each
+command is asserted to open the remote environment exactly once per
+invocation, the install path included.
 """
 
 from __future__ import annotations
@@ -52,13 +56,25 @@ def no_ssh(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-def _stub_probe(monkeypatch: pytest.MonkeyPatch, payload: dict) -> None:
-    monkeypatch.setattr(
-        remote_tools, "probe_remote_environment", lambda *a, **k: payload
-    )
-    monkeypatch.setattr(
-        remote_python, "probe_remote_environment", lambda *a, **k: payload
-    )
+def _stub_probe(
+    monkeypatch: pytest.MonkeyPatch,
+    payload: dict,
+    calls: list | None = None,
+) -> None:
+    """Stub every probe site, recording each call in one shared counter.
+
+    ``remote_python`` binds ``probe_remote_environment`` by direct import, so a
+    probe opened from the python module is only visible through its own name.
+    Patching both sites lets one invocation be counted across the whole path.
+    """
+
+    def _probe(*_a, **_k):
+        if calls is not None:
+            calls.append(1)
+        return payload
+
+    monkeypatch.setattr(remote_tools, "probe_remote_environment", _probe)
+    monkeypatch.setattr(remote_python, "probe_remote_environment", _probe)
 
 
 def test_status_passes_on_met_environment(
@@ -139,3 +155,74 @@ def test_discover_environment_skips_facility_without_block(
     )
     common.ensure_remote_environment({"id": "tcv", "ssh_host": "tcv"})
     assert calls == []
+
+
+def test_status_probes_the_environment_once(
+    no_ssh: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """One ``tools status`` invocation opens the remote environment once."""
+    calls: list = []
+    _stub_probe(
+        monkeypatch,
+        _declared(
+            "3.12.9",
+            "3.12",
+            [{"name": "numpy", "importable": True, "error": None}],
+        ),
+        calls=calls,
+    )
+    result = CliRunner().invoke(tools, ["status", "jt-60sa"])
+    assert result.exit_code == 0, result.output
+    assert len(calls) == 1, f"expected one probe, saw {len(calls)}"
+
+
+def test_discover_preflight_probes_the_environment_once(
+    no_ssh: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """One ``discover`` preflight opens the remote environment once."""
+    from imas_codex.cli.discover import common
+
+    calls: list = []
+    payload = _declared("3.12.9", "3.12", [])
+    payload["meets_floor"] = True
+    _stub_probe(monkeypatch, payload, calls=calls)
+    common.ensure_remote_environment(
+        {
+            "id": "jt-60sa",
+            "ssh_host": "jt-60sa",
+            "remote_environment": {
+                "python_command": "python",
+                "min_python_version": "3.12",
+            },
+        }
+    )
+    assert len(calls) == 1, f"expected one probe, saw {len(calls)}"
+
+
+def test_install_probes_the_environment_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """One ``tools install`` invocation opens the remote environment once.
+
+    ``setup_python_env`` probes the declared environment to judge the floor and
+    hands that probe to ``create_venv``; without the hand-off the venv step
+    would probe a second time.
+    """
+    monkeypatch.setattr(
+        remote_python,
+        "check_tool",
+        lambda key, facility=None: {
+            "available": key == "uv",
+            "version": "1.0" if key == "uv" else None,
+        },
+    )
+    monkeypatch.setattr(
+        remote_python,
+        "run",
+        lambda cmd, **k: "Python 3.12.9" if "--version" in cmd else "",
+    )
+    calls: list = []
+    _stub_probe(monkeypatch, _declared("3.12.9", "3.12", []), calls=calls)
+    result = remote_python.setup_python_env("jt-60sa")
+    assert any(step["step"] == "create_venv" for step in result["steps"])
+    assert len(calls) == 1, f"expected one probe, saw {len(calls)}"

@@ -16,7 +16,10 @@ No live infrastructure needed — all graph/SSH/LLM calls are mocked.
 
 from __future__ import annotations
 
+import ast
 import asyncio
+import re
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -459,6 +462,171 @@ class TestSeedWorker:
         assert events.index("data_access_write") < events.index("signal_ingest"), (
             f"DataAccess must be written before signals are ingested: {events}"
         )
+
+    @pytest.mark.anyio
+    async def test_data_access_written_without_signals(self):
+        """A ScanResult with access metadata and no signals still writes it.
+
+        Thin-client scanners may return access metadata with an empty signal
+        list; the single writer must run independently of the signal branch.
+        """
+        from imas_codex.discovery.signals.parallel import seed_worker
+        from imas_codex.discovery.signals.scanners.base import ScanResult
+        from imas_codex.graph.models import DataAccess
+
+        data_access = DataAccess(
+            id=f"{FACILITY}:edas:test_access",
+            facility_id=FACILITY,
+            method_type="edas",
+            library="eddb_pwrapper",
+            access_type="ssh",
+            data_source="edas",
+            connection_template="conn = None",
+            data_template="data = None",
+        )
+
+        class _ThinClientScanner:
+            scanner_type = "edas"
+
+            async def scan(self, facility, ssh_host, config, reference_shot=None):
+                return ScanResult(signals=[], data_access=data_access)
+
+        written: list = []
+        mock_gc = MagicMock()
+
+        def _record_query(cypher, **kwargs):
+            if "DataAccess {id: $id}" in cypher:
+                written.append(kwargs.get("id"))
+            return []
+
+        mock_gc.query.side_effect = _record_query
+        mock_gc.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc.__exit__ = MagicMock(return_value=None)
+
+        state = DataDiscoveryState(
+            facility=FACILITY,
+            ssh_host=SSH_HOST,
+            scanner_types=["edas"],
+            facility_config=FACILITY_CONFIG,
+            initial_version_counts={"total": 0},
+            initial_signal_counts={"total": 0},
+            cost_limit=10.0,
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.signals.scanners.base.get_scanner",
+                return_value=_ThinClientScanner(),
+            ),
+            patch(
+                "imas_codex.discovery.signals.parallel.ingest_discovered_signals"
+            ) as mock_ingest,
+            patch(
+                "imas_codex.discovery.signals.parallel.GraphClient",
+                return_value=mock_gc,
+            ),
+        ):
+            await seed_worker(state)
+
+        assert written == [data_access.id], written
+        assert not mock_ingest.called, "no signals must not trigger a signal ingest"
+
+    @pytest.mark.anyio
+    async def test_mdsplus_branch_routes_through_persist_data_access(self):
+        """The bespoke MDSplus path hands its DataAccess to the single writer.
+
+        The MDSplus branch builds its access metadata inline; it must route
+        through ``persist_data_access`` rather than issuing its own MERGE.
+        """
+        from imas_codex.discovery.signals.parallel import seed_worker
+
+        state = DataDiscoveryState(
+            facility=FACILITY,
+            ssh_host=SSH_HOST,
+            scanner_types=["mdsplus"],
+            facility_config=FACILITY_CONFIG,
+            initial_version_counts={"total": 0},
+            initial_signal_counts={"total": 0},
+            cost_limit=10.0,
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                return_value=0,
+            ),
+            patch("imas_codex.discovery.mdsplus.graph_ops.backfill_tree_relationships"),
+            patch(
+                "imas_codex.discovery.signals.parallel.persist_data_access"
+            ) as mock_persist,
+        ):
+            await seed_worker(state)
+
+        mock_persist.assert_called_once()
+        written_access = mock_persist.call_args.args[0]
+        assert written_access.id == f"{FACILITY}:mdsplus:tree_tdi"
+        assert written_access.facility_id == FACILITY
+
+
+_DATA_ACCESS_MERGE = re.compile(r"MERGE \(.*:DataAccess")
+
+
+def _data_access_merge_sites(src: str) -> list[tuple[int, str]]:
+    """Return ``(lineno, text)`` for every DataAccess MERGE statement."""
+    return [
+        (i + 1, line.strip())
+        for i, line in enumerate(src.splitlines())
+        if _DATA_ACCESS_MERGE.search(line)
+    ]
+
+
+def _enclosing_function_name(src: str, lineno: int) -> str | None:
+    """Name the innermost function containing ``lineno``, or None."""
+    tree = ast.parse(src)
+    owner: ast.FunctionDef | ast.AsyncFunctionDef | None = None
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            end = node.end_lineno or node.lineno
+            if node.lineno <= lineno <= end and (
+                owner is None or node.lineno > owner.lineno
+            ):
+                owner = node
+    return owner.name if owner is not None else None
+
+
+class TestSingleDataAccessWriter:
+    """The signals pipeline writes every DataAccess through one function."""
+
+    def test_one_data_access_merge_inside_persist_data_access(self):
+        """Exactly one DataAccess MERGE, inside persist_data_access."""
+        from imas_codex.discovery.signals import parallel as parallel_mod
+
+        src_path = Path(parallel_mod.__file__)
+        src = src_path.read_text(encoding="utf-8")
+        sites = _data_access_merge_sites(src)
+        assert len(sites) == 1, (
+            f"expected exactly one DataAccess MERGE in signals discovery, "
+            f"found {len(sites)}: {sites}"
+        )
+        line_no, _ = sites[0]
+        owner = _enclosing_function_name(src, line_no)
+        assert owner == "persist_data_access", (
+            f"the DataAccess MERGE at line {line_no} is not inside "
+            f"persist_data_access (owner={owner})"
+        )
+
+    def test_scan_flags_a_second_merge(self):
+        """Self-test: a planted second MERGE is reported, not silently allowed."""
+        synthetic = (
+            "def persist_data_access(data_access):\n"
+            "    gc.query('MERGE (da:DataAccess {id: $id})')\n"
+            "\n"
+            "def seed_worker(state):\n"
+            "    gc.query('MERGE (da:DataAccess {id: other})')\n"
+        )
+        sites = _data_access_merge_sites(synthetic)
+        assert len(sites) == 2, sites
+        assert _enclosing_function_name(synthetic, sites[1][0]) == "seed_worker"
 
 
 class TestEpochWorker:
