@@ -1,13 +1,14 @@
 """Neo4j 2026.01 SEARCH clause builder for vector similarity queries.
 
 Generates Cypher 25 MATCH + SEARCH syntax, replacing legacy
-db.index.vector.queryNodes() procedure calls.  All property and
-relationship filters are applied as post-filters after the ANN
-candidate selection.
+db.index.vector.queryNodes() procedure calls.
 
-In-index pre-filtering (WHERE inside SEARCH) requires properties
-to be registered as additional vector index properties.  Without
-that configuration, all filtering is post-filtering.
+In-index pre-filtering (``WHERE`` inside ``SEARCH``) runs against the ANN
+candidate selection itself, so a selective predicate does not lose its
+matches to a global top-k cut.  It requires the predicate's properties to
+be registered as additional vector index properties (the ``WITH [...]``
+clause of ``CREATE VECTOR INDEX``); a predicate over a property the index
+does not carry is only valid as a post-filter.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ def build_vector_search(
     label: str,
     *,
     where_clauses: list[str] | None = None,
+    prefilter_clauses: list[str] | None = None,
     k: str = "$k",
     node_alias: str = "n",
     score_alias: str = "score",
@@ -32,6 +34,7 @@ def build_vector_search(
         SEARCH n IN (
           VECTOR INDEX index_name
           FOR $embedding
+          WHERE n.filter_prop = $val
           LIMIT $k
         ) SCORE AS score
         WHERE n.prop = $val
@@ -43,6 +46,10 @@ def build_vector_search(
             after the ANN candidate selection.  Both property filters
             (``n.facility_id = $f``) and relationship pattern predicates
             (``NOT (n)-[:REL]->(:Other)``) are valid here.
+        prefilter_clauses: Property predicates applied inside ``SEARCH``,
+            before the ANN cut.  Each referenced property must be
+            registered as an additional vector index property, otherwise
+            the query fails to plan.
         k: Cypher expression for the ANN candidate limit
             (default: "$k").  Can be a literal like "20".
         node_alias: Variable name for the matched node.
@@ -60,12 +67,19 @@ def build_vector_search(
         f"SEARCH {node_alias} IN (",
         f"  VECTOR INDEX {index}",
         f"  FOR {embedding_param}",
-        f"  LIMIT {k}",
-        f") SCORE AS {score_alias}",
     ]
 
+    if prefilter_clauses:
+        parts.append(f"  WHERE {' AND '.join(prefilter_clauses)}")
+
+    parts.extend(
+        [
+            f"  LIMIT {k}",
+            f") SCORE AS {score_alias}",
+        ]
+    )
+
     if where_clauses:
-        where_str = " AND ".join(where_clauses)
-        parts.append(f"WHERE {where_str}")
+        parts.append(f"WHERE {' AND '.join(where_clauses)}")
 
     return "\n".join(parts)

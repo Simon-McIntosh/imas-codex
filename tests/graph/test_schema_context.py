@@ -190,6 +190,214 @@ class TestGenSchemaContext:
 
 
 # =============================================================================
+# Vector index filter properties
+# =============================================================================
+
+
+class TestVectorIndexFilters:
+    """Filter properties registered on vector indexes for in-index filtering."""
+
+    @pytest.fixture(scope="class")
+    def schemas_dir(self):
+        return Path(__file__).parent.parent.parent / "imas_codex" / "schemas"
+
+    def test_schema_exposes_code_chunk_facility_filter(self, schemas_dir):
+        from imas_codex.graph.schema import GraphSchema
+
+        schema = GraphSchema(schemas_dir / "facility.yaml")
+        filters = schema.vector_index_filters
+        assert filters.get("code_chunk_embedding") == ["facility_id"]
+
+    def test_vector_indexes_shape_unchanged(self, schemas_dir):
+        """vector_indexes stays a list of 3-tuples."""
+        from imas_codex.graph.schema import GraphSchema
+
+        schema = GraphSchema(schemas_dir / "facility.yaml")
+        for entry in schema.vector_indexes:
+            assert len(entry) == 3
+            index_name, label, prop = entry
+            assert all(isinstance(x, str) for x in (index_name, label, prop))
+
+    def test_generator_emits_vector_index_filters(self, tmp_path):
+        import importlib.util
+
+        from scripts.gen_schema_context import generate_schema_context
+
+        output = tmp_path / "schema_context_data.py"
+        generate_schema_context(output_path=output, force=True)
+
+        spec = importlib.util.spec_from_file_location("schema_context_data", output)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        assert hasattr(mod, "VECTOR_INDEX_FILTERS")
+        assert mod.VECTOR_INDEX_FILTERS["code_chunk_embedding"] == ["facility_id"]
+
+    def test_generated_vector_indexes_shape_unchanged(self, tmp_path):
+        """VECTOR_INDEXES stays a mapping to 2-tuples."""
+        import importlib.util
+
+        from scripts.gen_schema_context import generate_schema_context
+
+        output = tmp_path / "schema_context_data.py"
+        generate_schema_context(output_path=output, force=True)
+
+        spec = importlib.util.spec_from_file_location("schema_context_data", output)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        for index_name, value in mod.VECTOR_INDEXES.items():
+            assert len(value) == 2, index_name
+
+    def test_ddl_registers_filter_property(self):
+        from imas_codex.graph.client import _vector_index_ddl
+
+        ddl = _vector_index_ddl(
+            "code_chunk_embedding", "CodeChunk", "embedding", 1024, ["facility_id"]
+        )
+        # The additional-properties WITH clause is Cypher 25 grammar.
+        assert ddl.startswith("CYPHER 25 CREATE VECTOR INDEX")
+        assert "FOR (n:CodeChunk) ON n.embedding" in ddl
+        assert "WITH [n.facility_id]" in ddl
+        # WITH must sit between ON and OPTIONS
+        assert ddl.index("ON n.embedding") < ddl.index("WITH [n.facility_id]")
+        assert ddl.index("WITH [n.facility_id]") < ddl.index("OPTIONS")
+
+    def test_ddl_without_filters_has_no_with_clause(self):
+        from imas_codex.graph.client import _vector_index_ddl
+
+        ddl = _vector_index_ddl("imas_node_embedding", "IMASNode", "embedding", 1024)
+        assert "WITH [" not in ddl
+
+    def test_ddl_dimensions_and_similarity(self):
+        from imas_codex.graph.client import _vector_index_ddl
+
+        ddl = _vector_index_ddl(
+            "wiki_chunk_embedding", "WikiChunk", "embedding", 768, ["facility_id"]
+        )
+        assert "`vector.dimensions`: 768" in ddl
+        assert "`vector.similarity_function`: 'cosine'" in ddl
+
+
+class _FakeNeo4jSession:
+    """Records Cypher run against a fake session, modelling live index state."""
+
+    def __init__(self, vector_rows, existing_names=()):
+        self.vector_rows = vector_rows
+        self.existing = set(existing_names)
+        self.statements: list[str] = []
+        self.drops: list[str] = []
+
+    def run(self, cypher, **params):
+        self.statements.append(cypher)
+        if cypher.startswith("SHOW INDEXES YIELD name, type, options, properties"):
+            return iter(self.vector_rows)
+        if cypher.startswith("SHOW INDEXES YIELD name WHERE name IN"):
+            wanted = params.get("names", [])
+            return iter([{"name": n} for n in wanted if n in self.existing])
+        if cypher.startswith("DROP INDEX"):
+            name = cypher.split("`")[1]
+            self.drops.append(name)
+            self.existing.discard(name)
+            return iter([])
+        return iter([])
+
+
+class TestEnsureVectorIndexes:
+    """ensure_vector_indexes reconciles live index shape against the schema."""
+
+    def _run(self, client_mod, fake):
+        from contextlib import contextmanager
+
+        @contextmanager
+        def fake_session(self):
+            yield fake
+
+        original = client_mod.GraphClient.session
+        client_mod.GraphClient.session = fake_session
+        try:
+            client = object.__new__(client_mod.GraphClient)
+            client.ensure_vector_indexes()
+        finally:
+            client_mod.GraphClient.session = original
+        return fake
+
+    def test_recreates_index_missing_filter_property(self):
+        from imas_codex.graph import client as client_mod
+
+        dim = client_mod.get_embedding_dimension()
+        fake = _FakeNeo4jSession(
+            vector_rows=[
+                {"name": "code_chunk_embedding", "dim": dim, "props": ["embedding"]}
+            ],
+            existing_names=["code_chunk_embedding"],
+        )
+        self._run(client_mod, fake)
+
+        assert fake.drops == ["code_chunk_embedding"]
+        created = [s for s in fake.statements if "CREATE VECTOR INDEX" in s]
+        assert any(
+            "code_chunk_embedding" in s and "WITH [n.facility_id]" in s for s in created
+        )
+
+    def test_keeps_index_with_matching_shape(self):
+        from imas_codex.graph import client as client_mod
+
+        dim = client_mod.get_embedding_dimension()
+        fake = _FakeNeo4jSession(
+            vector_rows=[
+                {
+                    "name": "code_chunk_embedding",
+                    "dim": dim,
+                    "props": ["embedding", "facility_id"],
+                }
+            ],
+            existing_names=["code_chunk_embedding"],
+        )
+        self._run(client_mod, fake)
+
+        assert fake.drops == []
+        assert not any(
+            "CREATE VECTOR INDEX" in s and "code_chunk_embedding" in s
+            for s in fake.statements
+        )
+
+    def test_recreates_index_on_dimension_mismatch(self):
+        from imas_codex.graph import client as client_mod
+
+        dim = client_mod.get_embedding_dimension()
+        fake = _FakeNeo4jSession(
+            vector_rows=[
+                {
+                    "name": "code_chunk_embedding",
+                    "dim": dim + 1,
+                    "props": ["embedding", "facility_id"],
+                }
+            ],
+            existing_names=["code_chunk_embedding"],
+        )
+        self._run(client_mod, fake)
+
+        assert fake.drops == ["code_chunk_embedding"]
+        assert any(
+            "CREATE VECTOR INDEX" in s and "code_chunk_embedding" in s
+            for s in fake.statements
+        )
+
+    def test_leaves_indexes_the_schema_does_not_own(self):
+        from imas_codex.graph import client as client_mod
+
+        fake = _FakeNeo4jSession(
+            vector_rows=[
+                {"name": "peer_owned_index", "dim": 7, "props": ["embedding"]}
+            ],
+        )
+        self._run(client_mod, fake)
+
+        assert fake.drops == []
+
+
+# =============================================================================
 # Runtime schema_for() function
 # =============================================================================
 

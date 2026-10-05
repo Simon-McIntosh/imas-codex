@@ -1504,16 +1504,21 @@ def _vector_search_code_chunks(
 ) -> tuple[list[str], dict[str, float]]:
     """Vector search on code_chunk_embedding index.
 
-    Facility filtering uses CodeChunk's ``facility_id`` property directly.
-    Optionally filters by FacilityPath physics domain and score dimensions.
+    Facility filtering is pushed inside SEARCH as an in-index pre-filter:
+    ``code_chunk_embedding`` registers ``facility_id`` as an additional vector
+    index property, so the ANN cut is taken over the facility's own chunks
+    rather than over a global candidate set that a small facility's chunks
+    would not survive. Optionally filters by FacilityPath physics domain and
+    score dimensions, which stay as a post-filter over the returned chunks.
     """
-    # With property pre-filtering inside SEARCH, reduce oversampling
+    # Facility pre-filtering inside SEARCH removes the need to oversample to
+    # let a small facility's chunks survive a global ANN cut.
     internal_k = max(k * 2, 50)
     params: dict[str, Any] = {"k": internal_k, "embedding": embedding, "limit": k}
 
-    search_where: list[str] = []
+    prefilter: list[str] = []
     if facility is not None:
-        search_where.append("cc.facility_id = $facility")
+        prefilter.append("cc.facility_id = $facility")
         params["facility"] = facility
 
     # Build optional path-level filter join for physics_domain/score
@@ -1538,7 +1543,7 @@ def _vector_search_code_chunks(
     search_block = build_vector_search(
         "code_chunk_embedding",
         "CodeChunk",
-        where_clauses=search_where or None,
+        prefilter_clauses=prefilter or None,
         k="$k",
         node_alias="cc",
     )

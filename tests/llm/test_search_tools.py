@@ -821,6 +821,25 @@ class TestSearchCode:
         else:
             pytest.fail("No vector search call found")
 
+    def test_facility_filter_inside_search(self, mock_gc, mock_encoder):
+        """Facility predicate is an in-index pre-filter, inside SEARCH."""
+        _search_code(
+            query="SELENE equilibrium reconstruction",
+            facility="jt-60sa",
+            gc=mock_gc,
+            encoder=mock_encoder,
+        )
+        for call in mock_gc.query.call_args_list:
+            cypher = call[0][0]
+            if "code_chunk_embedding" in cypher:
+                open_idx = cypher.index("SEARCH")
+                close_idx = cypher.index(") SCORE AS")
+                pred_idx = cypher.index("cc.facility_id = $facility")
+                assert open_idx < pred_idx < close_idx, cypher
+                break
+        else:
+            pytest.fail("No code_chunk_embedding vector search call found")
+
     def test_no_facility_filter(self, mock_gc, mock_encoder):
         """Without facility, no facility filter in vector query."""
         _search_code(
