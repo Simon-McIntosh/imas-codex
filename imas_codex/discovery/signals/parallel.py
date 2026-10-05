@@ -42,6 +42,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from neo4j.exceptions import ClientError
+
 from imas_codex.cli.logging import WorkerLogAdapter, log_worker_error
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
@@ -54,6 +56,7 @@ from imas_codex.discovery.base.supervision import (
 )
 from imas_codex.graph import GraphClient
 from imas_codex.graph.models import DataAccess, FacilitySignalStatus
+from imas_codex.graph.vector_search import build_vector_search
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import run_python_script
 
@@ -177,6 +180,82 @@ def build_device_xml_context_query(
         base_terms.extend(["diagnostic", "hardware", "layout"])
 
     return " ".join(term for term in base_terms if term)
+
+
+def _build_code_context_query() -> str:
+    """CYPHER for the code-context semantic lookup in signal enrichment.
+
+    The facility predicate is rendered inside ``SEARCH``: ``code_chunk_embedding``
+    registers ``facility_id`` as an additional vector index property, so the ANN
+    cut is taken over this facility's own chunks rather than over a global
+    candidate set that a small facility's chunks would not survive. The source
+    join is retained only for the path field the enrichment prompt renders.
+    """
+    search_block = build_vector_search(
+        "code_chunk_embedding",
+        "CodeChunk",
+        prefilter_clauses=["node.facility_id = $facility"],
+        k="3",
+        node_alias="node",
+    )
+    return (
+        f"{search_block}\n"
+        "OPTIONAL MATCH (src)-[:HAS_CHUNK]->(node)\n"
+        "WITH node, src, score\n"
+        "WHERE score >= $min_score\n"
+        "RETURN node.text AS text,\n"
+        "       src.path AS source_path,\n"
+        "       node.language AS language,\n"
+        "       score\n"
+        "ORDER BY score DESC\n"
+    )
+
+
+def _fetch_code_chunks(facility: str, query_text: str) -> list[dict[str, str]]:
+    """Run the code-context vector lookup for one query text.
+
+    Returns an empty list only when the ``code_chunk_embedding`` vector index is
+    absent, which is the one condition under which signal enrichment can proceed
+    without code context. Every other Neo4j failure — a planner error, a
+    connection fault — propagates so it is not mistaken for "no relevant code".
+    """
+    from imas_codex.embeddings.config import EncoderConfig
+    from imas_codex.embeddings.encoder import Encoder
+
+    try:
+        config = EncoderConfig()
+        encoder = Encoder(config)
+        embedding = encoder.embed_texts([query_text])[0].tolist()
+    except Exception as e:
+        logger.debug("Could not embed for code context: %s", e)
+        return []
+
+    try:
+        with GraphClient() as gc:
+            results = gc.query(
+                _build_code_context_query(),
+                embedding=embedding,
+                min_score=0.45,
+                facility=facility,
+            )
+            chunks = []
+            for row in results:
+                text = row.get("text", "")
+                if len(text) > 600:
+                    text = text[:600] + "..."
+                chunks.append(
+                    {
+                        "text": text,
+                        "source_path": row.get("source_path", ""),
+                        "language": row.get("language", ""),
+                    }
+                )
+            return chunks
+    except ClientError as e:
+        if getattr(e, "code", None) != "Neo.ClientError.Schema.IndexNotFound":
+            raise
+        logger.debug("Code-context vector index absent: %s", e)
+        return []
 
 
 def get_signal_scanner_type(signal: dict[str, Any]) -> str:
@@ -3514,9 +3593,6 @@ async def enrich_worker(
         if group_key in code_context_cache:
             return code_context_cache[group_key]
 
-        from imas_codex.embeddings.config import EncoderConfig
-        from imas_codex.embeddings.encoder import Encoder
-
         # Build query from group key and signal names
         signal_names = " ".join(s.get("name") or "" for _, s in indexed_signals[:10])
         if group_key.startswith("tdi:"):
@@ -3538,57 +3614,9 @@ async def enrich_worker(
             code_context_cache[group_key] = []
             return []
 
-        try:
-            config = EncoderConfig()
-            encoder = Encoder(config)
-            embedding = encoder.embed_texts([query_text])[0].tolist()
-        except Exception as e:
-            logger.debug("Could not embed for code context: %s", e)
-            code_context_cache[group_key] = []
-            return []
-
-        try:
-            with GraphClient() as gc:
-                results = gc.query(
-                    """
-                    CYPHER 25
-                    MATCH (node:CodeChunk)
-                    SEARCH node IN (
-                      VECTOR INDEX code_chunk_embedding
-                      FOR $embedding
-                      LIMIT 3
-                    ) SCORE AS score
-                    WHERE score >= $min_score
-                    OPTIONAL MATCH (src)-[:HAS_CHUNK]->(node)
-                    WHERE src.facility_id = $facility
-                    RETURN node.text AS text,
-                           src.path AS source_path,
-                           node.language AS language,
-                           score
-                    ORDER BY score DESC
-                    """,
-                    embedding=embedding,
-                    min_score=0.45,
-                    facility=state.facility,
-                )
-                chunks = []
-                for row in results:
-                    text = row.get("text", "")
-                    if len(text) > 600:
-                        text = text[:600] + "..."
-                    chunks.append(
-                        {
-                            "text": text,
-                            "source_path": row.get("source_path", ""),
-                            "language": row.get("language", ""),
-                        }
-                    )
-                code_context_cache[group_key] = chunks
-                return chunks
-        except Exception as e:
-            logger.debug("Code context search failed: %s", e)
-            code_context_cache[group_key] = []
-            return []
+        chunks = await asyncio.to_thread(_fetch_code_chunks, state.facility, query_text)
+        code_context_cache[group_key] = chunks
+        return chunks
 
     # Circuit breaker: stop after consecutive batch failures to avoid
     # infinite claim/fail/release loops when LLM service is degraded.

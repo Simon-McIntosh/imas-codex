@@ -1891,3 +1891,80 @@ class TestSignalPatternDetection:
             )
 
         assert result == 5
+
+
+class TestCodeContextFacilityPredicate:
+    """The code-context lookup filters facility inside the vector SEARCH.
+
+    The predicate is rendered before the ANN cut so a small facility's own
+    chunks survive; as a post-filter over a global top-3 they would not.
+    """
+
+    def test_facility_predicate_inside_search(self):
+        from imas_codex.discovery.signals.parallel import _build_code_context_query
+
+        cypher = _build_code_context_query()
+        open_idx = cypher.index("SEARCH")
+        close_idx = cypher.index(") SCORE AS")
+        pred_idx = cypher.index("node.facility_id = $facility")
+        assert open_idx < pred_idx < close_idx, cypher
+        assert "src.facility_id" not in cypher, cypher
+        assert "code_chunk_embedding" in cypher
+
+
+class TestCodeContextLookupErrors:
+    """A failing code-context query surfaces rather than returning no context.
+
+    An empty code-context list is indistinguishable from "this facility has no
+    relevant code" in the enrichment prompt, so only an absent vector index may
+    produce it. A planner or connection failure must reach the caller.
+    """
+
+    @staticmethod
+    def _fake_encoder():
+        vector = MagicMock()
+        vector.tolist.return_value = [0.1, 0.2, 0.3]
+        encoder = MagicMock()
+        encoder.embed_texts.return_value = [vector]
+        return encoder
+
+    def _fetch(self, query_error: Exception) -> list[dict[str, str]]:
+        from imas_codex.discovery.signals import parallel as parallel_mod
+
+        gc = MagicMock()
+        gc.__enter__ = MagicMock(return_value=gc)
+        gc.__exit__ = MagicMock(return_value=False)
+        gc.query = MagicMock(side_effect=query_error)
+
+        with (
+            patch.object(parallel_mod, "GraphClient", return_value=gc),
+            patch(
+                "imas_codex.embeddings.encoder.Encoder",
+                return_value=self._fake_encoder(),
+            ),
+            patch(
+                "imas_codex.embeddings.config.EncoderConfig",
+                return_value=MagicMock(),
+            ),
+        ):
+            return parallel_mod._fetch_code_chunks("jt-60sa", "plasma current")
+
+    def test_database_error_propagates(self):
+        from neo4j.exceptions import DatabaseError
+
+        planner = DatabaseError("planner failed")
+        with pytest.raises(DatabaseError):
+            self._fetch(planner)
+
+    def test_absent_index_returns_empty(self):
+        from neo4j.exceptions import ClientError
+
+        absent = ClientError("no such index")
+        absent._neo4j_code = "Neo.ClientError.Schema.IndexNotFound"
+        assert self._fetch(absent) == []
+
+    def test_other_client_error_propagates(self):
+        from neo4j.exceptions import ClientError
+
+        with pytest.raises(ClientError):
+            self._fetch(ClientError("syntax error"))

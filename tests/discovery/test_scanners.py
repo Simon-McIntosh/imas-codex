@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from imas_codex.discovery.signals.scanners.base import (
@@ -141,3 +143,52 @@ class TestGetScannersForFacility:
 
         # Clean up
         del _registry["custom_test"]
+
+
+class TestSemanticWikiContextFacilityPredicate:
+    """The wiki-context lookup filters facility inside the vector SEARCH.
+
+    The predicate is rendered before the ANN cut so a small facility's own
+    wiki chunks survive; as a post-filter over a global cut they would not.
+    """
+
+    @staticmethod
+    def _fake_encoder():
+        vector = MagicMock()
+        vector.tolist.return_value = [0.1, 0.2, 0.3]
+        encoder = MagicMock()
+        encoder.embed_texts.return_value = [vector]
+        return encoder
+
+    @staticmethod
+    def _mock_gc():
+        gc = MagicMock()
+        gc.__enter__ = MagicMock(return_value=gc)
+        gc.__exit__ = MagicMock(return_value=False)
+        gc.query = MagicMock(return_value=[])
+        return gc
+
+    def test_facility_predicate_inside_search(self):
+        from imas_codex.discovery.signals.scanners import wiki as wiki_mod
+
+        mock_gc = self._mock_gc()
+        with (
+            patch.object(wiki_mod, "GraphClient", return_value=mock_gc),
+            patch(
+                "imas_codex.embeddings.encoder.Encoder",
+                return_value=self._fake_encoder(),
+            ),
+            patch(
+                "imas_codex.embeddings.config.EncoderConfig", return_value=MagicMock()
+            ),
+        ):
+            result = wiki_mod.fetch_semantic_wiki_context("jt-60sa", "plasma current")
+
+        assert result == []
+        cypher = mock_gc.query.call_args[0][0]
+        open_idx = cypher.index("SEARCH")
+        close_idx = cypher.index(") SCORE AS")
+        pred_idx = cypher.index("node.facility_id = $facility")
+        assert open_idx < pred_idx < close_idx, cypher
+        assert "p.facility_id" not in cypher, cypher
+        assert mock_gc.query.call_args[1]["facility"] == "jt-60sa"

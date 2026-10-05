@@ -41,6 +41,7 @@ from imas_codex.graph.models import (
     FacilitySignal,
     FacilitySignalStatus,
 )
+from imas_codex.graph.vector_search import build_vector_search
 
 logger = logging.getLogger(__name__)
 
@@ -299,17 +300,24 @@ def fetch_semantic_wiki_context(
 
     try:
         with GraphClient() as gc:
+            # The facility predicate lives inside SEARCH: wiki_chunk_embedding
+            # registers facility_id as an additional vector index property, so
+            # the ANN cut is taken over this facility's own chunks rather than
+            # over a global candidate set that a small facility's chunks would
+            # not survive. The WikiPage join is kept only for the fields the
+            # prompt renders.
+            search_block = build_vector_search(
+                "wiki_chunk_embedding",
+                "WikiChunk",
+                prefilter_clauses=["node.facility_id = $facility"],
+                k="$k",
+                node_alias="node",
+            )
             results = gc.query(
-                """
-                CYPHER 25
-                MATCH (node:WikiChunk)
-                SEARCH node IN (
-                  VECTOR INDEX wiki_chunk_embedding
-                  FOR $embedding
-                  LIMIT $k
-                ) SCORE AS score
+                f"""
+                {search_block}
                 MATCH (p:WikiPage)-[:HAS_CHUNK]->(node)
-                WHERE p.facility_id = $facility AND score >= $min_score
+                WHERE score >= $min_score
                 RETURN node.text AS text,
                        p.title AS page_title,
                        node.conventions_mentioned AS conventions,
