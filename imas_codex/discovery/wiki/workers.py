@@ -34,6 +34,7 @@ from .graph_ops import (
     claim_pages_for_scoring,
     mark_document_deferred,
     mark_document_failed,
+    mark_document_failed_or_deferred,
     mark_documents_ingested,
     mark_documents_scored,
     mark_images_scored,
@@ -831,8 +832,16 @@ async def docs_worker(
                 logger.warning(
                     "Error ingesting document %s: %s", document_id, error_msg
                 )
-                # Run blocking Neo4j call in thread pool
-                await asyncio.to_thread(mark_document_failed, document_id, error_msg)
+                # Unsupported input cannot succeed on retry: defer it with a
+                # stated reason. Anything unclassified stays failed.
+                defer_reason = await asyncio.to_thread(
+                    mark_document_failed_or_deferred,
+                    document_id,
+                    error_msg,
+                    document_type,
+                )
+                if defer_reason is not None:
+                    logger.debug("Deferred document %s: %s", filename, defer_reason)
 
         # Run blocking Neo4j call in thread pool
         await asyncio.to_thread(mark_documents_ingested, state.facility, results)

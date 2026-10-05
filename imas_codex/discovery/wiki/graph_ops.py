@@ -58,6 +58,82 @@ SCORABLE_DOCUMENT_TYPES = INGESTABLE_DOCUMENT_TYPES | {
     "other",
 }
 
+# Error substrings indicating the failure is a property of the running
+# checkout (a missing optional dependency), not of the document. An import
+# error clears as soon as the error is fixed, so such failures are recoverable
+# and must not be treated as terminal.
+ENVIRONMENT_FAULT_PATTERNS = [
+    "No module named",
+]
+
+# Error substrings indicating transient/retryable infrastructure failures.
+TRANSIENT_DOCUMENT_FAILURE_PATTERNS = [
+    "CUDA out of memory",
+    "CUDA error",
+    "Connection refused",
+    "Connection reset",
+    "connection was reset",
+    "ServiceUnavailable",
+    "Failed to establish",
+    "Read timed out",
+    "RemoteDisconnected",
+]
+
+# TWiki's marker for a link whose target no longer exists.
+_DEAD_LINK_MARKER = "MISSING RESOURCE"
+
+
+def classify_document_deferral(
+    error: str | None, document_type: str = ""
+) -> str | None:
+    """Map an ingest error to a deferral reason, or ``None`` to keep it failed.
+
+    A deferral states that the document needs a parser or resource the pipeline
+    lacks, so retrying it unchanged cannot succeed. A ``None`` return means the
+    error is genuinely unexpected and the document stays ``failed``.
+
+    Classes:
+    - unsupported image format — Pillow cannot identify the bytes or no loader
+      exists for the container (e.g. WMF).
+    - dead link — the URL is gone (TWiki's ``MISSING RESOURCE`` marker, an
+      HTTP 404).
+    - type mismatch — the bytes do not match the declared document type (e.g. a
+      Word/zip-magic mismatch).
+    """
+    if not error:
+        return None
+    lowered = error.lower()
+
+    if "unidentifiedimageerror" in lowered or "cannot identify image" in lowered:
+        return f"unsupported image format ({document_type or 'unknown'})"
+    if "cannot find loader" in lowered:
+        image_format = (
+            _image_format_from_loader_error(error) or document_type or "unknown"
+        )
+        return f"unsupported image format ({image_format})"
+
+    if _DEAD_LINK_MARKER in error:
+        return "dead link"
+    if "404" in error and ("not found" in lowered or "http" in lowered):
+        return "dead link"
+
+    if "is not a word file" in lowered:
+        return f"type mismatch: {document_type or 'text_document'}"
+    if "not a powerpoint" in lowered or "is not a pptx" in lowered:
+        return f"type mismatch: {document_type or 'presentation'}"
+    if "zip" in lowered and "bad" in lowered:
+        return f"type mismatch: {document_type or 'unknown'}"
+
+    return None
+
+
+def _image_format_from_loader_error(error: str) -> str | None:
+    """Extract the format token from 'cannot find loader for this X file'."""
+    import re
+
+    match = re.search(r"loader for this ([A-Za-z0-9]+) file", error)
+    return match.group(1).upper() if match else None
+
 
 def _document_url_filter(base_url: str | None) -> str:
     """Build a Cypher URL filter for document queries.
@@ -1412,15 +1488,18 @@ def recover_failed_pages(facility: str) -> int:
 def recover_failed_documents(facility: str) -> int:
     """Reset failed documents for re-processing.
 
-    Documents marked 'failed' due to transient errors (CUDA OOM, connection
-    refused, etc.) are reset based on their pre-failure state:
+    Documents marked 'failed' due to recoverable errors are reset based on their
+    pre-failure state:
 
     - **Without score** (failed before scoring): reset to ``discovered``
     - **With score** (failed during ingestion): reset to ``scored``
 
-    Only recovers documents whose error matches known transient patterns.
-    Documents with non-transient errors (parse failures, unsupported formats)
-    are left as-is.
+    Two recoverable classes are recognised: transient infrastructure errors
+    (CUDA OOM, connection refused, etc.) and environment faults — a missing
+    optional dependency (``No module named``) is a property of the checkout,
+    not of the document, and clears once the dependency is available. Documents
+    whose error matches neither pattern (parse failures, unsupported formats)
+    are left for :func:`defer_failed_documents` or as-is.
 
     Args:
         facility: Facility ID
@@ -1428,19 +1507,13 @@ def recover_failed_documents(facility: str) -> int:
     Returns:
         Number of documents recovered
     """
-    # Patterns that indicate transient/retryable errors
-    transient_patterns = [
-        "CUDA out of memory",
-        "CUDA error",
-        "Connection refused",
-        "Connection reset",
-        "connection was reset",
-        "ServiceUnavailable",
-        "Failed to establish",
-        "Read timed out",
-        "RemoteDisconnected",
-    ]
-    where_clauses = " OR ".join(f"wa.error CONTAINS '{p}'" for p in transient_patterns)
+    # Patterns that indicate transient/retryable or environment-fault errors
+    recoverable_patterns = (
+        ENVIRONMENT_FAULT_PATTERNS + TRANSIENT_DOCUMENT_FAILURE_PATTERNS
+    )
+    where_clauses = " OR ".join(
+        f"wa.error CONTAINS '{p}'" for p in recoverable_patterns
+    )
 
     try:
         with GraphClient() as gc:
@@ -1499,6 +1572,53 @@ def recover_failed_documents(facility: str) -> int:
     except Exception as e:
         logger.warning("Could not recover failed documents: %s", e)
         return 0
+
+
+def defer_failed_documents(facility: str) -> int:
+    """Reclassify failed documents that cannot succeed into ``deferred``.
+
+    :func:`recover_failed_documents` resets failures a retry can clear. This
+    function handles the complement: documents already marked ``failed`` whose
+    error is unsupported input (an unloadable image container, a dead link, a
+    type mismatch). Such documents are not retryable as failures, so they are
+    moved to ``deferred`` with :func:`classify_document_deferral` stating the
+    reason. Errors the classifier does not recognise are left ``failed``.
+
+    Args:
+        facility: Facility ID
+
+    Returns:
+        Number of documents deferred
+    """
+    try:
+        with GraphClient() as gc:
+            rows = gc.query(
+                """
+                MATCH (wa:Document {facility_id: $facility})
+                WHERE wa.status = $failed
+                RETURN wa.id AS id, wa.error AS error,
+                       wa.document_type AS document_type
+                """,
+                facility=facility,
+                failed=DocumentStatus.failed.value,
+            )
+    except Exception as e:
+        logger.warning("Could not list failed documents for %s: %s", facility, e)
+        return 0
+
+    deferred = 0
+    for row in rows or []:
+        reason = classify_document_deferral(
+            row.get("error"), row.get("document_type") or ""
+        )
+        if reason is None:
+            continue
+        mark_document_deferred(row["id"], reason)
+        deferred += 1
+
+    if deferred > 0:
+        logger.info("Deferred %d unsupported documents for %s", deferred, facility)
+    return deferred
 
 
 # =============================================================================
@@ -1826,6 +1946,27 @@ def mark_document_deferred(document_id: str, reason: str) -> None:
             document_id,
             e,
         )
+
+
+def mark_document_failed_or_deferred(
+    document_id: str, error: str, document_type: str = ""
+) -> str | None:
+    """Terminal-mark an ingest failure as ``deferred`` or ``failed``.
+
+    Unsupported input (an unloadable image container, a dead link, a type
+    mismatch) cannot succeed on retry, so it is deferred with a stated reason
+    and stops being counted as a failure. Any other error is recorded as
+    ``failed`` as before.
+
+    Returns:
+        The deferral reason when deferred, otherwise ``None``.
+    """
+    reason = classify_document_deferral(error, document_type)
+    if reason is not None:
+        mark_document_deferred(document_id, reason)
+    else:
+        mark_document_failed(document_id, error)
+    return reason
 
 
 # =============================================================================

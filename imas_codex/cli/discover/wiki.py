@@ -127,6 +127,7 @@ def wiki(
     from imas_codex.discovery.wiki import get_wiki_stats
     from imas_codex.discovery.wiki.graph_ops import (
         create_doc_source,
+        defer_failed_documents,
         recover_failed_documents,
         recover_failed_pages,
         reset_transient_pages,
@@ -379,6 +380,13 @@ def wiki(
         log_print(
             f"[dim]Recovered {recovered_docs:,} documents from transient failures[/dim]"
         )
+
+    # Reclassify failed documents that a retry cannot clear (unloadable image
+    # formats, dead links, type mismatches) as deferred, so they stop being
+    # counted and retried as failures.
+    deferred_docs = defer_failed_documents(facility)
+    if deferred_docs > 0:
+        log_print(f"[dim]Deferred {deferred_docs:,} unsupported documents[/dim]")
 
     # Pre-warm SSH ControlMaster for all sites that need SSH access.
     # This prevents race conditions when bulk_discover_pages tries SSH

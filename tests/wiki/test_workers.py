@@ -547,3 +547,55 @@ class TestPersistDocumentFigures:
             )
             assert result == 1
             assert mock_gc.query.call_count >= 1
+
+
+# =============================================================================
+# Ingest failure classification: defer unsupported input, fail the rest
+# =============================================================================
+
+
+class TestDocumentIngestFailureClassification:
+    """The ingest failure path defers unsupported input and fails the rest."""
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    def test_deferrable_error_defers_with_reason(self, mock_defer, mock_failed):
+        from imas_codex.discovery.wiki.graph_ops import (
+            mark_document_failed_or_deferred,
+        )
+
+        reason = mark_document_failed_or_deferred(
+            "doc:1", "cannot find loader for this WMF file", "presentation"
+        )
+
+        assert reason == "unsupported image format (WMF)"
+        mock_defer.assert_called_once_with("doc:1", "unsupported image format (WMF)")
+        mock_failed.assert_not_called()
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    def test_dead_link_defers(self, mock_defer, mock_failed):
+        from imas_codex.discovery.wiki.graph_ops import (
+            mark_document_failed_or_deferred,
+        )
+
+        reason = mark_document_failed_or_deferred(
+            "doc:3", "HTTP Error 404: Not Found", "pdf"
+        )
+
+        assert reason == "dead link"
+        mock_defer.assert_called_once_with("doc:3", "dead link")
+        mock_failed.assert_not_called()
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_failed")
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    def test_unclassified_error_marks_failed(self, mock_defer, mock_failed):
+        from imas_codex.discovery.wiki.graph_ops import (
+            mark_document_failed_or_deferred,
+        )
+
+        reason = mark_document_failed_or_deferred("doc:2", "Connection refused", "pdf")
+
+        assert reason is None
+        mock_failed.assert_called_once_with("doc:2", "Connection refused")
+        mock_defer.assert_not_called()
