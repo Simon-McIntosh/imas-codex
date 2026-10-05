@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+  <body>
+    <section>
+      <h2 id="edas-scan">EDAS scan, shot E101173</h2>
+      <p id="edas-scan-landing">
+        The repaired EDAS scanner ran end to end for E101173 against the live
+        jt-60sa graph: 6240 FacilitySignals across 73 categories, every row
+        carrying its data_class (where the EDDB letter is T/O/P), shot_range and
+        alias, linked by 6240 <code>DATA_ACCESS</code> edges to the single
+        DataAccess <code>jt-60sa:edas:eddb</code>, at zero enrichment spend. The
+        census floor is met exactly: MAG 18, MDAC 264, PSRC 312, FAME 100, MMSYS
+        47 (741 total). No product source or test changed — the scan exposed no
+        scanner defect.
+      </p>
+      <p id="edas-scan-run">
+        Command, run from the fleet compute node with an ssh wrapper on PATH
+        (<code>exec /usr/bin/ssh -F "$HOME/.ssh/config" "$@"</code>):
+        <code>imas-codex discover signals jt-60sa -s edas --scan-only</code>.
+        The wrapper was needed because the fenced worker's namespace shows
+        <code>/etc/ssh/ssh_config.d/50-redhat.conf</code> as nobody-owned, so
+        bare <code>ssh</code> aborts its config parse. Enumeration returned
+        <code>ncats=73</code>, 6240 rows; ingested 6240 in 13 batches;
+        <code>6240 scanned, 0 enriched, 0 checked</code>;
+        <code>Cost: $0.00, Time: 13.2s</code>.
+      </p>
+      <h3 id="edas-scan-census">Census floor check</h3>
+      <table id="edas-scan-census-table">
+        <thead><tr><th>category</th><th>census floor</th><th>scanned</th><th>verdict</th></tr></thead>
+        <tbody>
+          <tr><td><code>MAG</code></td><td>18</td><td>18</td><td>met</td></tr>
+          <tr><td><code>MDAC</code></td><td>264</td><td>264</td><td>met</td></tr>
+          <tr><td><code>PSRC</code></td><td>312</td><td>312</td><td>met</td></tr>
+          <tr><td><code>FAME</code></td><td>100</td><td>100</td><td>met</td></tr>
+          <tr><td><code>MMSYS</code></td><td>47</td><td>47</td><td>met</td></tr>
+          <tr><td><strong>total (five)</strong></td><td>741</td><td>741</td><td>met</td></tr>
+        </tbody>
+      </table>
+      <h3 id="edas-scan-categories">All categories produced (73, 6240 rows)</h3>
+      <p id="edas-scan-categories-note">
+        The five census categories are a floor; the catalogue lists 73.
+        The other 68 are reported with their counts and are not
+        treated as a defect.
+      </p>
+      <table id="edas-scan-categories-table">
+        <thead><tr><th>category</th><th>rows</th><th>category</th><th>rows</th><th>category</th><th>rows</th></tr></thead>
+        <tbody>
+          <tr><td><code>CAM</code></td><td>37</td><td><code>CO2</code></td><td>6</td><td><code>CS1</code></td><td>11</td></tr>
+          <tr><td><code>CS2</code></td><td>11</td><td><code>CS3</code></td><td>11</td><td><code>CS4</code></td><td>11</td></tr>
+          <tr><td><code>Cryo</code></td><td>2</td><td><code>CryoCP</code></td><td>9</td><td><code>CryoCT</code></td><td>57</td></tr>
+          <tr><td><code>CryoCTB</code></td><td>379</td><td><code>CryoDist</code></td><td>59</td><td><code>CryoHRS</code></td><td>704</td></tr>
+          <tr><td><code>CryoIL</code></td><td>286</td><td><code>CryoMC</code></td><td>17</td><td><code>CryoMCIL</code></td><td>105</td></tr>
+          <tr><td><code>CryoMag</code></td><td>413</td><td><code>CryoTS</code></td><td>121</td><td><code>DB</code></td><td>6</td></tr>
+          <tr><td><code>DCSV</code></td><td>753</td><td><code>DHC</code></td><td>249</td><td><code>DSMS</code></td><td>8</td></tr>
+          <tr><td><code>ECH</code></td><td>119</td><td><code>EF1</code></td><td>2</td><td><code>EF2</code></td><td>2</td></tr>
+          <tr><td><code>EF3</code></td><td>9</td><td><code>EF4</code></td><td>9</td><td><code>EF5</code></td><td>2</td></tr>
+          <tr><td><code>EF6</code></td><td>2</td><td><code>FAME</code></td><td>100</td><td><code>GAS</code></td><td>10</td></tr>
+          <tr><td><code>GAU</code></td><td>11</td><td><code>GLW</code></td><td>12</td><td><code>LFPPCC</code></td><td>1</td></tr>
+          <tr><td><code>MAG</code></td><td>18</td><td><code>MDAC</code></td><td>264</td><td><code>MMSYS</code></td><td>47</td></tr>
+          <tr><td><code>N2GAS</code></td><td>22</td><td><code>OIS</code></td><td>54</td><td><code>PRB</code></td><td>20</td></tr>
+          <tr><td><code>PSC</code></td><td>482</td><td><code>PSRC</code></td><td>312</td><td><code>PSSCfst</code></td><td>50</td></tr>
+          <tr><td><code>QMS</code></td><td>650</td><td><code>SPC</code></td><td>72</td><td><code>SXR</code></td><td>7</td></tr>
+          <tr><td><code>TC</code></td><td>31</td><td><code>TCIFW</code></td><td>16</td><td><code>TCTIU</code></td><td>1</td></tr>
+          <tr><td><code>TCUD</code></td><td>28</td><td><code>TF</code></td><td>63</td><td><code>TF01</code></td><td>24</td></tr>
+          <tr><td><code>TF02</code></td><td>24</td><td><code>TF03</code></td><td>24</td><td><code>TF04</code></td><td>24</td></tr>
+          <tr><td><code>TF05</code></td><td>24</td><td><code>TF06</code></td><td>24</td><td><code>TF07</code></td><td>24</td></tr>
+          <tr><td><code>TF08</code></td><td>24</td><td><code>TF09</code></td><td>24</td><td><code>TF10</code></td><td>24</td></tr>
+          <tr><td><code>TF11</code></td><td>24</td><td><code>TF12</code></td><td>24</td><td><code>TF13</code></td><td>24</td></tr>
+          <tr><td><code>TF14</code></td><td>24</td><td><code>TF15</code></td><td>24</td><td><code>TF16</code></td><td>24</td></tr>
+          <tr><td><code>TF17</code></td><td>24</td><td><code>TF18</code></td><td>24</td><td><code>TFC</code></td><td>4</td></tr>
+          <tr><td><code>TFTIME</code></td><td>8</td><td><code>UFPPCC</code></td><td>1</td><td><code>VV</code></td><td>92</td></tr>
+          <tr><td><code>VVGS</code></td><td>32</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <h3 id="edas-scan-verify">Verification Cypher</h3>
+      <ul id="edas-scan-verify-list">
+        <li><code>total</code> = 6240; <code>no_range</code> = 0;
+          <code>legacy_keywords</code> (any <code>class:</code>/<code>shots:</code>/<code>udpid:</code>) = 0;
+          <code>with_range</code> = 6240; <code>with_pid</code> = 0.</li>
+        <li><code>DATA_ACCESS</code> edges: one DataAccess,
+          <code>jt-60sa:edas:eddb</code>, carrying 6240 signals.</li>
+        <li>Per-category counts as above; the five census categories meet their floors exactly.</li>
+      </ul>
+      <h3 id="edas-scan-classes">Class coverage</h3>
+      <p id="edas-scan-classes-note">
+        The EDDB letter maps to a data_class only for T (time_series), O
+        (one_point) and P (parameter); 5889 rows
+        carry one of these. The remaining <strong>351</strong>
+        rows carry a letter outside T/O/P — <code>A, C, G, J, K, M, N, V</code> —
+        and leave <code>data_class</code> unset by design (the scanner logs the
+        unrecognised set and does not guess). Every row still carries
+        <code>shot_range</code>; <code>pid</code> is null throughout because the
+        EDDB UDP id column was empty for every channel read.
+      </p>
+      <h3 id="edas-scan-spot">Spot checks (census names)</h3>
+      <table id="edas-scan-spot-table">
+        <thead><tr><th>name</th><th>data_class</th><th>shot_range</th><th>alias</th><th>unit</th><th>accessor</th></tr></thead>
+        <tbody>
+          <tr><td>MDAC/NeyMax</td><td>one_point</td><td>E100353-</td><td>1651 I004</td><td>n/shot</td><td><code>eddbreadOne(&#x27;E101173&#x27;, &#x27;MDAC&#x27;, &#x27;NeyMax&#x27;, None, 0, 0)</code></td></tr>
+          <tr><td>MMSYS/curCS1LKAT</td><td>time_series</td><td>E080000-</td><td>4760 A002</td><td>A</td><td><code>eddbreadTime(&#x27;E101173&#x27;, &#x27;MMSYS&#x27;, &#x27;curCS1LKAT&#x27;, t1, t2)</code></td></tr>
+          <tr><td>PSRC/magFluxLp1</td><td>time_series</td><td>E080000-</td><td>1626 O037</td><td>Wb</td><td><code>eddbreadTime(&#x27;E101173&#x27;, &#x27;PSRC&#x27;, &#x27;magFluxLp1&#x27;, t1, t2)</code></td></tr>
+        </tbody>
+      </table>
+      <h3 id="edas-scan-followons">Follow-ons from the scan</h3>
+      <ul id="edas-scan-followons-list">
+        <li><strong>DATA_ACCESS edges are dropped on a first scan.</strong> In
+          <code>seed_worker</code> the signals are ingested before the DataAccess
+          node is created, so the ingest's Phase-2
+          <code>MATCH (da:DataAccess {id: sig.data_access})</code> finds nothing
+          and the <code>MERGE</code> edge is dropped; a second scan (node now
+          present) creates all 6240. The cause is the ordering in
+          <code>imas_codex/discovery/signals/parallel.py</code>, outside this
+          node's write scope; the fix is to create the DataAccess node before
+          ingesting the signals. Every facility's first scan is affected.</li>
+        <li><strong>Fenced-worker SSH.</strong> The executor calls bare
+          <code>ssh</code>; the fenced worker's nobody-owned system include makes
+          ssh abort its config parse. Reported as a sandbox/fence issue, not an
+          executor fix here.</li>
+        <li><strong>Unit normalisation.</strong> Units are free text
+          (<code>KA</code>, <code>deg. C</code>, <code>T.m</code>,
+          <code>V.S</code>) and will need a normalisation table before any DD
+          binding.</li>
+      </ul>
+    </section>
+  </body>
+</html>
