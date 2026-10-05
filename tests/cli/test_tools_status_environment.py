@@ -1,7 +1,9 @@
 """``tools status`` environment exit codes and the ``discover signals`` refusal.
 
-The probe is stubbed at both modules that own it: the tool summary
-(``imas_codex.remote.tools``) and the Python status (``imas_codex.remote.python``).
+The probe is stubbed at both probe sites: the tool summary
+(``imas_codex.remote.tools``) and the ``discover`` preflight
+(``imas_codex.remote.tools``). Each is asserted to open the remote environment
+exactly once per invocation.
 """
 
 from __future__ import annotations
@@ -52,13 +54,19 @@ def no_ssh(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-def _stub_probe(monkeypatch: pytest.MonkeyPatch, payload: dict) -> None:
-    monkeypatch.setattr(
-        remote_tools, "probe_remote_environment", lambda *a, **k: payload
-    )
-    monkeypatch.setattr(
-        remote_python, "probe_remote_environment", lambda *a, **k: payload
-    )
+def _stub_probe(
+    monkeypatch: pytest.MonkeyPatch,
+    payload: dict,
+    calls: list | None = None,
+) -> None:
+    """Stub the one probe site, optionally recording each call."""
+
+    def _probe(*_a, **_k):
+        if calls is not None:
+            calls.append(1)
+        return payload
+
+    monkeypatch.setattr(remote_tools, "probe_remote_environment", _probe)
 
 
 def test_status_passes_on_met_environment(
@@ -139,3 +147,45 @@ def test_discover_environment_skips_facility_without_block(
     )
     common.ensure_remote_environment({"id": "tcv", "ssh_host": "tcv"})
     assert calls == []
+
+
+def test_status_probes_the_environment_once(
+    no_ssh: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """One ``tools status`` invocation opens the remote environment once."""
+    calls: list = []
+    _stub_probe(
+        monkeypatch,
+        _declared(
+            "3.12.9",
+            "3.12",
+            [{"name": "numpy", "importable": True, "error": None}],
+        ),
+        calls=calls,
+    )
+    result = CliRunner().invoke(tools, ["status", "jt-60sa"])
+    assert result.exit_code == 0, result.output
+    assert len(calls) == 1, f"expected one probe, saw {len(calls)}"
+
+
+def test_discover_preflight_probes_the_environment_once(
+    no_ssh: None, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """One ``discover`` preflight opens the remote environment once."""
+    from imas_codex.cli.discover import common
+
+    calls: list = []
+    payload = _declared("3.12.9", "3.12", [])
+    payload["meets_floor"] = True
+    _stub_probe(monkeypatch, payload, calls=calls)
+    common.ensure_remote_environment(
+        {
+            "id": "jt-60sa",
+            "ssh_host": "jt-60sa",
+            "remote_environment": {
+                "python_command": "python",
+                "min_python_version": "3.12",
+            },
+        }
+    )
+    assert len(calls) == 1, f"expected one probe, saw {len(calls)}"

@@ -460,6 +460,110 @@ class TestSeedWorker:
             f"DataAccess must be written before signals are ingested: {events}"
         )
 
+    @pytest.mark.anyio
+    async def test_data_access_written_without_signals(self):
+        """A ScanResult with access metadata and no signals still writes it.
+
+        Thin-client scanners may return access metadata with an empty signal
+        list; the single writer must run independently of the signal branch.
+        """
+        from imas_codex.discovery.signals.parallel import seed_worker
+        from imas_codex.discovery.signals.scanners.base import ScanResult
+        from imas_codex.graph.models import DataAccess
+
+        data_access = DataAccess(
+            id=f"{FACILITY}:edas:test_access",
+            facility_id=FACILITY,
+            method_type="edas",
+            library="eddb_pwrapper",
+            access_type="ssh",
+            data_source="edas",
+            connection_template="conn = None",
+            data_template="data = None",
+        )
+
+        class _ThinClientScanner:
+            scanner_type = "edas"
+
+            async def scan(self, facility, ssh_host, config, reference_shot=None):
+                return ScanResult(signals=[], data_access=data_access)
+
+        written: list = []
+        mock_gc = MagicMock()
+
+        def _record_query(cypher, **kwargs):
+            if "DataAccess {id: $id}" in cypher:
+                written.append(kwargs.get("id"))
+            return []
+
+        mock_gc.query.side_effect = _record_query
+        mock_gc.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc.__exit__ = MagicMock(return_value=None)
+
+        state = DataDiscoveryState(
+            facility=FACILITY,
+            ssh_host=SSH_HOST,
+            scanner_types=["edas"],
+            facility_config=FACILITY_CONFIG,
+            initial_version_counts={"total": 0},
+            initial_signal_counts={"total": 0},
+            cost_limit=10.0,
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.signals.scanners.base.get_scanner",
+                return_value=_ThinClientScanner(),
+            ),
+            patch(
+                "imas_codex.discovery.signals.parallel.ingest_discovered_signals"
+            ) as mock_ingest,
+            patch(
+                "imas_codex.discovery.signals.parallel.GraphClient",
+                return_value=mock_gc,
+            ),
+        ):
+            await seed_worker(state)
+
+        assert written == [data_access.id], written
+        assert not mock_ingest.called, "no signals must not trigger a signal ingest"
+
+    @pytest.mark.anyio
+    async def test_mdsplus_branch_routes_through_persist_data_access(self):
+        """The bespoke MDSplus path hands its DataAccess to the single writer.
+
+        The MDSplus branch builds its access metadata inline; it must route
+        through ``persist_data_access`` rather than issuing its own MERGE.
+        """
+        from imas_codex.discovery.signals.parallel import seed_worker
+
+        state = DataDiscoveryState(
+            facility=FACILITY,
+            ssh_host=SSH_HOST,
+            scanner_types=["mdsplus"],
+            facility_config=FACILITY_CONFIG,
+            initial_version_counts={"total": 0},
+            initial_signal_counts={"total": 0},
+            cost_limit=10.0,
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.mdsplus.graph_ops.seed_versions",
+                return_value=0,
+            ),
+            patch("imas_codex.discovery.mdsplus.graph_ops.backfill_tree_relationships"),
+            patch(
+                "imas_codex.discovery.signals.parallel.persist_data_access"
+            ) as mock_persist,
+        ):
+            await seed_worker(state)
+
+        mock_persist.assert_called_once()
+        written_access = mock_persist.call_args.args[0]
+        assert written_access.id == f"{FACILITY}:mdsplus:tree_tdi"
+        assert written_access.facility_id == FACILITY
+
 
 class TestEpochWorker:
     """Tests for the epoch_worker function."""

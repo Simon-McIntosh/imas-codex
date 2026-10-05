@@ -96,18 +96,18 @@ def tools_status(
     facility = None if target == "local" else target
     setup_commands = [] if no_setup else None
 
-    # Get tool status
+    # Get tool status — this opens the remote environment probe once.
     tool_status = check_all_tools(
         facility=facility,
         python_command=python_command,
         setup_commands=setup_commands,
     )
 
-    # Get Python status
+    # Get Python status, judging the environment the probe above resolved
+    # rather than probing again.
     python_status = get_python_status(
         facility=facility,
-        python_command=python_command,
-        setup_commands=setup_commands,
+        environment=tool_status.get("environment"),
     )
 
     environment = python_status.environment or {}

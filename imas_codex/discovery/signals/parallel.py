@@ -53,7 +53,7 @@ from imas_codex.discovery.base.supervision import (
     is_infrastructure_error,
 )
 from imas_codex.graph import GraphClient
-from imas_codex.graph.models import FacilitySignalStatus
+from imas_codex.graph.models import DataAccess, FacilitySignalStatus
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import run_python_script
 
@@ -2382,6 +2382,36 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
         return ingested
 
 
+def persist_data_access(data_access: DataAccess) -> None:
+    """Merge a facility's DataAccess node and link it to its facility.
+
+    The single writer for the DataAccess node in signals discovery. The
+    scanner's access metadata is persisted here, before and independently of
+    signal ingest: the ingest's edge phase MATCHes the DataAccess by id, so on
+    a facility's first scan an absent node silently drops every DATA_ACCESS
+    edge. A thin-client scanner may return access metadata with no signals, so
+    this write stands on its own rather than inside the signal branch. The
+    bespoke MDSplus path, which builds no ``ScanResult``, routes through the
+    same writer.
+
+    Args:
+        data_access: The DataAccess node to merge.
+    """
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MERGE (da:DataAccess {id: $id})
+            SET da += $props
+            WITH da
+            MATCH (f:Facility {id: $facility})
+            MERGE (da)-[:AT_FACILITY]->(f)
+            """,
+            id=data_access.id,
+            props=data_access.model_dump(exclude_none=True),
+            facility=data_access.facility_id,
+        )
+
+
 # =============================================================================
 # Async Workers
 # =============================================================================
@@ -2509,35 +2539,21 @@ async def seed_worker(
             primary_tree = connection_tree or first_tree
             if primary_tree:
                 try:
-
-                    def _create_mdsplus_da(_facility: str, _primary_tree: str) -> None:
-                        with GraphClient() as gc:
-                            gc.query(
-                                """
-                                MATCH (f:Facility {id: $facility})
-                                MERGE (da:DataAccess {id: $id})
-                                SET da.facility_id = $facility,
-                                    da.method_type = 'mdsplus',
-                                    da.library = 'MDSplus',
-                                    da.access_type = 'local',
-                                    da.data_source = 'mdsplus',
-                                    da.connection_template = $conn_tpl,
-                                    da.data_template = $data_tpl
-                                MERGE (da)-[:AT_FACILITY]->(f)
-                                """,
-                                id=f"{_facility}:mdsplus:tree_tdi",
-                                facility=_facility,
-                                conn_tpl=(
-                                    f"import MDSplus\n"
-                                    f"tree = MDSplus.Tree('{_primary_tree}', "
-                                    f"{{shot}}, 'readonly')"
-                                ),
-                                data_tpl="data = tree.getNode('{data_source_path}').data()",
-                            )
-
-                    await asyncio.to_thread(
-                        _create_mdsplus_da, state.facility, primary_tree
+                    data_access = DataAccess(
+                        id=f"{state.facility}:mdsplus:tree_tdi",
+                        facility_id=state.facility,
+                        method_type="mdsplus",
+                        library="MDSplus",
+                        access_type="local",
+                        data_source="mdsplus",
+                        connection_template=(
+                            f"import MDSplus\n"
+                            f"tree = MDSplus.Tree('{primary_tree}', "
+                            f"{{shot}}, 'readonly')"
+                        ),
+                        data_template="data = tree.getNode('{data_source_path}').data()",
                     )
+                    await asyncio.to_thread(persist_data_access, data_access)
                 except Exception as e:
                     logger.warning("Failed to create MDSplus DataAccess: %s", e)
 
@@ -2573,37 +2589,13 @@ async def seed_worker(
             if result.wiki_context:
                 state.wiki_context.update(result.wiki_context)
 
-            # Persist the DataAccess node BEFORE the signal ingest: the
-            # ingest's edge phase MATCHes this node by id and merges the
-            # DATA_ACCESS edge, so on a facility's first scan an absent node
-            # silently drops every edge. Thin-client scanners may return
-            # access metadata without signals, so this write stands on its
-            # own rather than inside the signal branch.
+            # Persist the DataAccess node BEFORE the signal ingest, and
+            # independently of it: the ingest's edge phase MATCHes this node
+            # by id and merges the DATA_ACCESS edge, and a thin-client scanner
+            # may return access metadata with no signals.
             if result.data_access:
                 try:
-                    da = result.data_access
-
-                    def _ingest_da(_da_id: str, _props: dict, _facility: str) -> None:
-                        with GraphClient() as gc:
-                            gc.query(
-                                """
-                                MERGE (da:DataAccess {id: $id})
-                                SET da += $props
-                                WITH da
-                                MATCH (f:Facility {id: $facility})
-                                MERGE (da)-[:AT_FACILITY]->(f)
-                                """,
-                                id=_da_id,
-                                props=_props,
-                                facility=_facility,
-                            )
-
-                    await asyncio.to_thread(
-                        _ingest_da,
-                        da.id,
-                        da.model_dump(exclude_none=True),
-                        state.facility,
-                    )
+                    await asyncio.to_thread(persist_data_access, result.data_access)
                 except Exception as e:
                     logger.warning(
                         "Failed to ingest DataAccess for %s: %s",

@@ -1,10 +1,11 @@
 """Remote environment probe: interpreter floor and module importability.
 
-Covers the extension of the facility probe: ``get_python_status`` judges the
-``remote_environment`` block's interpreter against the block's floor through
-``PythonVersion.meets_minimum``, and ``check_all_tools`` reports per-module
-importability. The probe script itself is exercised end to end so a module
-that fails to import is named rather than raised.
+Covers the extension of the facility probe: ``get_python_status``, handed the
+already-resolved ``remote_environment`` probe, judges the block's interpreter
+against the block's floor through ``PythonVersion.meets_minimum``, and
+``check_all_tools`` reports per-module importability. The probe script itself is
+exercised end to end so a module that fails to import is named rather than
+raised.
 """
 
 from __future__ import annotations
@@ -226,15 +227,10 @@ class TestCheckAllToolsEnvironment:
 
 
 class TestGetPythonStatusFloor:
-    def test_block_interpreter_used_and_floor_named(
-        self, quiet_python: None, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setattr(
-            remote_python,
-            "probe_remote_environment",
-            lambda facility, **kw: _declared("3.5.6", "3.12", [], SETUP),
+    def test_block_interpreter_used_and_floor_named(self, quiet_python: None) -> None:
+        status = remote_python.get_python_status(
+            "jt-60sa", environment=_declared("3.5.6", "3.12", [], SETUP)
         )
-        status = remote_python.get_python_status("jt-60sa")
         assert status.active_python is not None
         assert status.active_python.version_string == "3.5.6"
         assert status.active_python.source == "remote_environment"
@@ -242,48 +238,42 @@ class TestGetPythonStatusFloor:
         assert status.meets_floor is False
         assert status.environment["fix"] == SETUP
 
-    def test_floor_is_the_blocks_not_the_global_minimum(
-        self, quiet_python: None, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_floor_is_the_judged_against_the_block(self, quiet_python: None) -> None:
         # 3.10 clears MIN_PYTHON but not the block's 3.12 floor.
-        monkeypatch.setattr(
-            remote_python,
-            "probe_remote_environment",
-            lambda facility, **kw: _declared("3.10.6", "3.12", [], SETUP),
+        status = remote_python.get_python_status(
+            "jt-60sa", environment=_declared("3.10.6", "3.12", [], SETUP)
         )
-        status = remote_python.get_python_status("jt-60sa")
         assert status.meets_floor is False
 
-    def test_modern_reply_passes(
-        self, quiet_python: None, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setattr(
-            remote_python,
-            "probe_remote_environment",
-            lambda facility, **kw: _declared(
+    def test_modern_reply_passes(self, quiet_python: None) -> None:
+        status = remote_python.get_python_status(
+            "jt-60sa",
+            environment=_declared(
                 "3.12.9",
                 "3.12",
                 [{"name": "numpy", "importable": True, "error": None}],
                 SETUP,
             ),
         )
-        status = remote_python.get_python_status("jt-60sa")
         assert status.meets_floor is True
 
-    def test_no_block_leaves_floor_unset(
-        self, quiet_python: None, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setattr(
-            remote_python,
-            "probe_remote_environment",
-            lambda facility, **kw: {
+    def test_no_block_leaves_floor_unset(self, quiet_python: None) -> None:
+        status = remote_python.get_python_status(
+            "tcv",
+            environment={
                 "status": "not_declared",
                 "declared": False,
                 "modules": [],
                 "fix": [],
             },
         )
-        status = remote_python.get_python_status("tcv")
         assert status.environment["declared"] is False
+        assert status.meets_floor is None
+        assert status.active_python is None
+
+    def test_absent_environment_probes_nothing(self, quiet_python: None) -> None:
+        """Without an environment the local path judges no remote floor."""
+        status = remote_python.get_python_status("tcv")
+        assert status.environment is None
         assert status.meets_floor is None
         assert status.active_python is None
