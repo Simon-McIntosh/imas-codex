@@ -1,37 +1,8 @@
 """Tests for embedding readiness check."""
 
-from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-
-class TestEmbeddingHostDiscovery:
-    """Embedding host lookup uses the embedding service job identity."""
-
-    def test_graph_and_embedding_jobs_may_run_on_different_nodes(self):
-        """A compute location's graph default cannot redirect embed discovery."""
-        location = SimpleNamespace(
-            facility="iter",
-            service_job_name="codex-neo4j",
-        )
-        with (
-            patch("imas_codex.settings.get_embedding_location", return_value="titan"),
-            patch(
-                "imas_codex.remote.locations.resolve_location",
-                return_value=location,
-            ),
-            patch(
-                "imas_codex.remote.tunnel.discover_compute_node_local",
-                return_value="98dci4-gpu-0002",
-            ) as discover,
-        ):
-            from imas_codex.settings import _embed_host_from_facility
-
-            host = _embed_host_from_facility()
-
-        assert host == "98dci4-gpu-0002"
-        discover.assert_called_once_with(service_job_name="codex-embed")
 
 
 class TestEnsureEmbeddingReady:
@@ -389,49 +360,3 @@ class TestIsOnLoginNode:
         from imas_codex.embeddings.readiness import _is_on_login_node
 
         assert _is_on_login_node() is False
-
-
-class TestResolveUrlForCompute:
-    """Tests for URL redirection to embed server host."""
-
-    @patch(
-        "imas_codex.embeddings.readiness._get_embed_host",
-        return_value="98dci4-gpu-0002",
-    )
-    def test_rewrites_localhost(self, mock_host):
-        from imas_codex.embeddings.readiness import _resolve_url_for_compute
-
-        result = _resolve_url_for_compute("http://localhost:18765")
-        assert result == "http://98dci4-gpu-0002:18765"
-
-    @patch(
-        "imas_codex.embeddings.readiness._get_embed_host",
-        return_value="98dci4-gpu-0002",
-    )
-    def test_rewrites_127_0_0_1(self, mock_host):
-        from imas_codex.embeddings.readiness import _resolve_url_for_compute
-
-        result = _resolve_url_for_compute("http://127.0.0.1:18765")
-        assert result == "http://98dci4-gpu-0002:18765"
-
-    @patch(
-        "imas_codex.embeddings.readiness._get_embed_host",
-        return_value=None,
-    )
-    def test_no_rewrite_when_no_embed_host(self, mock_host):
-        """Should not rewrite when embed host is not resolvable."""
-        from imas_codex.embeddings.readiness import _resolve_url_for_compute
-
-        url = "http://localhost:18765"
-        assert _resolve_url_for_compute(url) == url
-
-    def test_no_rewrite_for_remote_url(self):
-        from imas_codex.embeddings.readiness import _resolve_url_for_compute
-
-        url = "http://some-server:18765"
-        assert _resolve_url_for_compute(url) == url
-
-    def test_no_rewrite_for_empty_url(self):
-        from imas_codex.embeddings.readiness import _resolve_url_for_compute
-
-        assert _resolve_url_for_compute("") == ""

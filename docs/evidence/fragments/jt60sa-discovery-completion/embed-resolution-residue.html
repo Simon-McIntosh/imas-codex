@@ -1,0 +1,93 @@
+<section id="embed-resolution-residue">
+  <h2>The graph client no longer owns a SLURM discovery copy</h2>
+  <p>
+    The graph client's <code>_slurm_service_uri</code> carried its own
+    discovery of the SLURM service node — a direct
+    <code>discover_compute_node_local</code> call with an
+    <code>_resolve_compute_host</code> fallback — while
+    <code>imas_codex/remote/locations.py</code> had just become the one owner
+    of that discovery. The copy is routed through the owner: the client now
+    obtains its bolt URI from <code>_service_url_for_slurm</code>, so the graph
+    and embedding paths cannot diverge.
+  </p>
+</section>
+
+<section id="embed-resolution-residue-deliverable">
+  <h2>What landed</h2>
+  <ul>
+    <li>
+      <strong>Client delegates.</strong> <code>_slurm_service_uri</code> asks
+      <code>imas_codex.remote.locations._service_url_for_slurm</code> for the
+      SLURM address, passing protocol <code>bolt</code>, the active location's
+      service job name and <code>local=False</code>, so its contract is
+      unchanged: <code>None</code> still means "undiscoverable here — keep the
+      profile's resolution", and an unreadable location still raises rather
+      than restoring the loopback tunnel.
+    </li>
+    <li>
+      <strong>Why delegate, not delete.</strong> The only production caller is
+      <code>_resolve_graph_uri</code>'s SLURM branch, and the profile's Mode 2
+      resolves the same node, so the copy is redundant. But an existing test
+      module outside this node's write scope
+      (<code>tests/graph/test_client_address_resolution.py</code>) imports and
+      pins <code>_slurm_service_uri</code>, so deleting the symbol would leave
+      that module red. Delegation removes the duplicate discovery while keeping
+      the pinned contract intact.
+    </li>
+    <li>
+      <strong>Six retired tests removed.</strong> The five
+      <code>TestResolveUrlForCompute</code> cases of the deleted loopback
+      rewrite and the <code>TestEmbeddingHostDiscovery</code> case of the
+      retired <code>_embed_host_from_facility</code> are deleted from
+      <code>tests/embeddings/test_readiness.py</code>. The one claim that still
+      matters — the graph and embedding services may sit on different nodes —
+      is re-expressed against <code>resolve_service_url</code> in
+      <code>tests/remote/test_locations_resolution.py</code>.
+    </li>
+    <li>
+      <strong>New coverage.</strong> Two cases pin the graph client: that from a
+      compute node it resolves the discovered node's bolt URI, and that it takes
+      that URI from the shared owner unchanged. A third case shows the graph and
+      embed jobs resolving to their own nodes by their own service job names.
+    </li>
+  </ul>
+</section>
+
+<section id="embed-resolution-residue-evidence">
+  <h2>Evidence</h2>
+  <table>
+    <thead>
+      <tr><th>Measure</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>pytest tests/remote tests/embeddings
+        tests/graph/test_schema_context.py</code></td>
+        <td>exit 0 — 274 passed, 1 skipped (base: 6 failed, 271 passed); the 6
+        failures were exactly the removed internals</td>
+      </tr>
+      <tr>
+        <td><code>rg 'discover_compute_node_local|_resolve_compute_host'
+        imas_codex --type py</code></td>
+        <td>hits only in <code>remote/locations.py</code> and
+        <code>remote/tunnel.py</code>; <code>imas_codex/graph/</code> carries
+        neither</td>
+      </tr>
+      <tr>
+        <td><code>GraphClient()</code> from this compute node</td>
+        <td><code>bolt://98dci4-gpu-0002:7687</code></td>
+      </tr>
+      <tr>
+        <td>Negative control — <code>_slurm_service_uri</code> restored to call
+        <code>discover_compute_node_local</code> directly</td>
+        <td><code>EXIT=1</code>, 1 failed: the delegation case fails while the
+        head arm passes it</td>
+      </tr>
+      <tr>
+        <td><code>tests/graph/test_client_address_resolution.py</code>
+        (out-of-scope, pins the remaining symbol)</td>
+        <td>9 passed</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

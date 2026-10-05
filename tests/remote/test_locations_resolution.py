@@ -8,6 +8,8 @@ to a loopback address behind a tunnel it cannot open.
 
 from __future__ import annotations
 
+import os
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -18,6 +20,7 @@ from imas_codex.remote.locations import LocationInfo
 GPU_NODE = "98dci4-gpu-0002"
 COMPUTE_CALLER = "98dci4-clu-2018"
 PORT = 18765
+BOLT_PORT = 7687
 
 
 def _slurm_location() -> LocationInfo:
@@ -134,3 +137,110 @@ def test_non_slurm_local_location_is_unchanged():
     )
     assert url == f"http://localhost:{PORT}"
     discover.assert_not_called()
+
+
+def test_graph_client_resolves_a_bolt_uri_from_a_compute_node():
+    """The graph client reaches the service node from a compute step.
+
+    A compute node matches no login-node pattern, so the profile layer's
+    hostname test sends it to a loopback tunnel it cannot open. The graph
+    client must instead answer with the discovered service node's address.
+    """
+    from imas_codex.graph import client as client_module
+
+    with (
+        patch.object(
+            client_module, "get_graph_uri", return_value="bolt://localhost:17687"
+        ),
+        patch.object(
+            client_module,
+            "resolve_neo4j",
+            return_value=SimpleNamespace(bolt_port=BOLT_PORT),
+        ),
+        patch("imas_codex.graph.profiles.get_graph_location", return_value="titan"),
+        patch.object(loc, "resolve_location", return_value=_slurm_location()),
+        patch.object(loc, "_resolve_compute_host", return_value=None),
+        patch(
+            "imas_codex.remote.tunnel.discover_compute_node_local",
+            return_value=GPU_NODE,
+        ),
+        patch.object(loc.socket, "gethostname", return_value=COMPUTE_CALLER),
+        patch.dict(os.environ, {"SLURM_JOB_ID": "1277272", "NEO4J_URI": ""}),
+    ):
+        uri = client_module._resolve_graph_uri()
+
+    assert uri == f"bolt://{GPU_NODE}:{BOLT_PORT}"
+
+
+def test_graph_client_obtains_its_bolt_uri_from_the_shared_owner():
+    """The graph client must not run its own SLURM discovery.
+
+    It asks the shared owner in ``_service_url_for_slurm``, the same one the
+    embedding path uses, so the two cannot diverge. The value the owner
+    returns is passed through unchanged.
+    """
+    from imas_codex.graph import client as client_module
+
+    sentinel = "bolt://shared-owner.invalid:7687"
+    with (
+        patch.object(
+            client_module, "get_graph_uri", return_value="bolt://localhost:17687"
+        ),
+        patch.object(
+            client_module,
+            "resolve_neo4j",
+            return_value=SimpleNamespace(bolt_port=BOLT_PORT),
+        ),
+        patch("imas_codex.graph.profiles.get_graph_location", return_value="titan"),
+        patch.object(loc, "resolve_location", return_value=_slurm_location()),
+        patch.object(loc, "_resolve_compute_host", return_value=None),
+        patch(
+            "imas_codex.remote.tunnel.discover_compute_node_local",
+            return_value=GPU_NODE,
+        ),
+        patch.object(loc.socket, "gethostname", return_value=COMPUTE_CALLER),
+        patch.object(loc, "_service_url_for_slurm", return_value=sentinel) as helper,
+        patch.dict(os.environ, {"SLURM_JOB_ID": "1277272", "NEO4J_URI": ""}),
+    ):
+        uri = client_module._resolve_graph_uri()
+
+    assert uri == sentinel
+    helper.assert_called_once()
+    kwargs = helper.call_args.kwargs
+    assert kwargs["protocol"] == "bolt"
+    assert kwargs["service_job_name"] == "codex-neo4j"
+
+
+def test_graph_and_embedding_jobs_may_sit_on_different_nodes():
+    """Each service resolves through its own job name's node.
+
+    The graph and embedding services are separate SLURM jobs and may run on
+    different compute nodes. A caller must be sent to the node of the job it
+    asked for, never redirected to the other service's node.
+    """
+
+    def node_for(*, service_job_name):
+        return {
+            "codex-neo4j": "98dci4-gpu-0001",
+            "codex-embed": GPU_NODE,
+        }[service_job_name]
+
+    with (
+        patch.object(loc, "resolve_location", return_value=_slurm_location()),
+        patch.object(loc, "is_location_local", return_value=False),
+        patch.object(loc, "_resolve_compute_host", return_value=None),
+        patch.object(loc.socket, "gethostname", return_value=COMPUTE_CALLER),
+        patch(
+            "imas_codex.remote.tunnel.discover_compute_node_local",
+            side_effect=node_for,
+        ),
+    ):
+        graph_url = loc.resolve_service_url(
+            "titan", BOLT_PORT, protocol="bolt", service_job_name="codex-neo4j"
+        )
+        embed_url = loc.resolve_service_url(
+            "titan", PORT, protocol="http", service_job_name="codex-embed"
+        )
+
+    assert graph_url == f"bolt://98dci4-gpu-0001:{BOLT_PORT}"
+    assert embed_url == f"http://{GPU_NODE}:{PORT}"

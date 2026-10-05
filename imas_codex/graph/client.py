@@ -19,7 +19,6 @@ Example:
 
 import logging
 import os
-import socket
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -92,39 +91,37 @@ except (ImportError, SyntaxError):
 def _slurm_service_uri() -> str | None:
     """Return the bolt URI of the graph service running on this cluster.
 
-    Inside a SLURM step the profile layer does not recognise a compute node
-    as local, so it takes the remote branch of the resolution and returns a
+    SLURM service-node discovery is delegated to the shared owner in
+    :mod:`imas_codex.remote.locations`, so the graph and embedding paths
+    cannot diverge: a compute node, whose hostname matches no login-node
+    pattern, is served the service node's own address there rather than a
     workstation-style loopback tunnel endpoint that nothing is listening on.
-    The service node itself is directly reachable from a compute step, so
-    resolve its address instead of a tunnel to nowhere.
 
     Returns ``None`` when the active location is not SLURM-scheduled or no
-    service node can be discovered, leaving the scheduled address in place.
-    An unreadable location is not among those cases: it is raised, because
-    returning ``None`` here would restore the loopback tunnel endpoint.
+    service node can be discovered, leaving the profile's resolution in
+    place.  An unreadable location is not among those cases: it is raised,
+    because returning ``None`` here would restore the loopback tunnel
+    endpoint this function exists to replace.
     """
     from imas_codex.graph.profiles import get_graph_location
-    from imas_codex.remote.locations import resolve_location
+    from imas_codex.remote.locations import (
+        _service_url_for_slurm,
+        resolve_location,
+    )
 
     info = resolve_location(get_graph_location())
 
     if info.scheduler != "slurm":
         return None
 
-    from imas_codex.remote.tunnel import discover_compute_node_local
-
-    node = discover_compute_node_local(service_job_name=info.service_job_name)
-    if not node:
-        from imas_codex.remote.locations import _resolve_compute_host
-
-        node = _resolve_compute_host(info)
-    if not node:
-        return None
-
     bolt_port = resolve_neo4j(auto_tunnel=False).bolt_port
-    if node.split(".")[0] == socket.gethostname().split(".")[0]:
-        return f"bolt://localhost:{bolt_port}"
-    return f"bolt://{node}:{bolt_port}"
+    return _service_url_for_slurm(
+        info,
+        bolt_port,
+        protocol="bolt",
+        service_job_name=info.service_job_name,
+        local=False,
+    )
 
 
 def _resolve_graph_uri() -> str:
