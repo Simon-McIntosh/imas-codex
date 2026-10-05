@@ -1621,3 +1621,46 @@ class TestPathPrefixScan:
         assert run_script.call_args.kwargs["setup_commands"] == [
             "module load python/3.12"
         ]
+
+
+# =============================================================================
+# Code-phase progress query embeds the shared pending-embedding predicate
+# =============================================================================
+
+
+class TestCodeProgressEmbedPredicate:
+    """The progress query must use the shared embed-worker predicate."""
+
+    def test_progress_query_embeds_shared_fragment(self):
+        from imas_codex.discovery.base.embed_worker import (
+            pending_embed_predicate,
+        )
+        from imas_codex.discovery.code.parallel import get_code_discovery_stats
+
+        captured = []
+
+        def query(sql, **params):
+            if "AS embedded" in sql:
+                captured.append((sql, params))
+                return [{"total": 5, "embedded": 3, "pending": 2}]
+            if "accumulated_cost" in sql:
+                return [{"accumulated_cost": 0.0}]
+            if "AS pending" in sql:
+                return [{"pending": 0}]
+            return []
+
+        gc = MagicMock()
+        gc.query.side_effect = query
+        ctx = MagicMock()
+        ctx.__enter__ = MagicMock(return_value=gc)
+        ctx.__exit__ = MagicMock(return_value=False)
+
+        with patch("imas_codex.discovery.code.parallel.GraphClient", return_value=ctx):
+            stats = get_code_discovery_stats(
+                "jt-60sa", min_score=0.5, min_triage_score=0.5
+            )
+
+        assert stats["pending_embed"] == 2
+        sql, params = captured[0]
+        assert pending_embed_predicate("cc") in sql
+        assert "embed_retry_cutoff" in params

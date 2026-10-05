@@ -35,6 +35,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time as _time
+from datetime import UTC
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -80,6 +81,50 @@ ERROR_BACKOFF_MAX = 60.0
 # long texts exhaust GPU VRAM.  4000 chars ≈ 1K tokens which is safe for
 # P100-16GB batches of 6 chunks.  Oversized chunks are split at this boundary.
 TARGET_EMBED_TEXT_CHARS = 4000
+
+# Age at which a failed embedding is eligible for retry.  A row whose
+# ``embed_failed_at`` is older than this cutoff is re-fetched on a later
+# pass; a fresher failure is left alone so a transient failure (e.g. a
+# CUDA OOM or a momentary server outage) does not hammer the embed server
+# on every poll.
+DEFAULT_EMBED_RETRY_HOURS = 24
+
+
+def pending_embed_predicate(
+    alias: str,
+    cutoff_param: str = "embed_retry_cutoff",
+) -> str:
+    """Render the shared ``pending embedding`` Cypher predicate for *alias*.
+
+    A node is pending when it carries no ``embedding`` and either has never
+    failed or failed before the retry cutoff::
+
+        n.embedding IS NULL
+        AND (n.embed_failed_at IS NULL
+             OR n.embed_failed_at < datetime($embed_retry_cutoff))
+
+    Every site that decides what the embed worker will fetch embeds this one
+    rendered fragment — ``_fetch_unembedded``, ``_count_unembedded`` and the
+    code phase's progress query — so a row the worker will fetch is never
+    reported as non-pending.
+
+    Args:
+        alias: Node alias the predicate qualifies (e.g. ``"n"``, ``"cc"``).
+        cutoff_param: Name of the Cypher parameter carrying the cutoff
+            timestamp.  Callers must bind it in their query parameters.
+    """
+    return (
+        f"{alias}.embedding IS NULL AND "
+        f"({alias}.embed_failed_at IS NULL "
+        f"OR {alias}.embed_failed_at < datetime(${cutoff_param}))"
+    )
+
+
+def embed_retry_cutoff_time(hours: float = DEFAULT_EMBED_RETRY_HOURS) -> str:
+    """Return the ISO-8601 UTC instant before which failures are retried."""
+    from datetime import datetime, timedelta
+
+    return (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
 
 
 def _split_oversized_text(
@@ -138,7 +183,8 @@ def _mark_embed_failed(label: str, ids: list[str]) -> None:
     """Mark items as permanently failed for embedding.
 
     Sets ``embed_failed_at`` so these nodes are excluded from future
-    embedding attempts.  To retry, clear the property manually.
+    embedding attempts until the retry cutoff has elapsed; after
+    ``DEFAULT_EMBED_RETRY_HOURS`` a later pass fetches them again.
     """
     if not ids:
         return
@@ -185,7 +231,10 @@ def _fetch_unembedded(
     from imas_codex.graph import GraphClient
 
     facility_filter = ""
-    params: dict[str, Any] = {"batch_size": batch_size}
+    params: dict[str, Any] = {
+        "batch_size": batch_size,
+        "embed_retry_cutoff": embed_retry_cutoff_time(),
+    }
 
     if facility:
         facility_filter = "AND n.facility_id = $facility"
@@ -205,8 +254,7 @@ def _fetch_unembedded(
         WHERE n.{text_field} IS NOT NULL
           AND n.{text_field} <> ''
           AND trim(n.{text_field}) <> ''
-          AND n.embedding IS NULL
-          AND n.embed_failed_at IS NULL
+          AND {pending_embed_predicate("n")}
           {facility_filter}
         {score_filter}
         RETURN n.id AS id, n.{text_field} AS text
@@ -230,7 +278,7 @@ def _count_unembedded(
     from imas_codex.graph import GraphClient
 
     facility_filter = ""
-    params: dict[str, Any] = {}
+    params: dict[str, Any] = {"embed_retry_cutoff": embed_retry_cutoff_time()}
 
     if facility:
         facility_filter = "AND n.facility_id = $facility"
@@ -250,8 +298,7 @@ def _count_unembedded(
         WHERE n.{text_field} IS NOT NULL
           AND n.{text_field} <> ''
           AND trim(n.{text_field}) <> ''
-          AND n.embedding IS NULL
-          AND n.embed_failed_at IS NULL
+          AND {pending_embed_predicate("n")}
           {facility_filter}
         {score_filter}
         RETURN count(n) AS total
