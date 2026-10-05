@@ -44,6 +44,7 @@ SshTarget = str | tuple[str, ...]
 # the primary connection: each probe is an ssh round trip through the gateway,
 # and there is one per forward per node.
 _REVERSE_NODE_CHECK_INTERVAL = 60.0
+_LISTENER_GRACE_SECONDS = 30.0
 
 # ============================================================================
 # Helpers
@@ -835,6 +836,21 @@ def _supervised_links(
     return links
 
 
+def _listener_missing_is_failure(started_at: float | None, now: float) -> bool:
+    """Return whether an absent local listener means the tunnel has failed.
+
+    A fresh ssh session through a jump host spends several seconds in key
+    exchange and authentication before OpenSSH binds its ``-L`` listeners
+    (measured 5 s to ITER through the SDCC gateway on 2026-10-05). Inside the
+    grace window an absent listener is a connection still being established,
+    so restarting autossh there kills a healthy session on every cycle and the
+    tunnel never comes up. After the window a missing listener is a failure.
+    """
+    if started_at is None:
+        return True
+    return now - started_at >= _LISTENER_GRACE_SECONDS
+
+
 def _run_service_supervisor(
     host: str,
     neo4j_only: bool,
@@ -852,6 +868,7 @@ def _run_service_supervisor(
     children: dict[str, subprocess.Popen | None] = {}
     signatures: dict[str, tuple[tuple[int, int, str], ...]] = {}
     last_reverse_check: dict[str, float] = {}
+    started: dict[str, float] = {}
 
     def _handle_signal(_signum, _frame) -> None:
         nonlocal stop_requested
@@ -921,6 +938,7 @@ def _run_service_supervisor(
                     start_new_session=True,
                 )
                 signatures[name] = signature
+                started[name] = time.monotonic()
 
             for _ in range(15):
                 if stop_requested:
@@ -936,7 +954,9 @@ def _run_service_supervisor(
                     for _remote, local_port, _label, _bind, direction in ports
                     if direction == "L" and not is_tunnel_active(local_port)
                 ]
-                if missing_ports:
+                if missing_ports and _listener_missing_is_failure(
+                    started.get(host), time.monotonic()
+                ):
                     click.echo(
                         f"Tunnel listeners missing for {host}: "
                         + ", ".join(str(port) for port in missing_ports)

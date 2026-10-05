@@ -1,3 +1,6 @@
+import itertools
+import os
+import signal
 import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -6,6 +9,7 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.tunnel import (
+    _LISTENER_GRACE_SECONDS,
     SERVICE_MANIFEST_PREFIX,
     _build_foreground_tunnel_command,
     _build_systemd_service_content,
@@ -13,10 +17,12 @@ from imas_codex.cli.tunnel import (
     _get_tunnel_ports,
     _installed_service_supports_request,
     _is_remote_clipboard_active,
+    _listener_missing_is_failure,
     _probe_reverse_ssh_forward,
     _reclaim_reverse_forwards,
     _resolve_reverse_nodes,
     _reverse_forward_answers,
+    _run_service_supervisor,
     _service_selected_services,
     _supervised_links,
     _terminate_tunnel_process,
@@ -673,3 +679,68 @@ class TestReclaimDroppedSession:
         assert result.exit_code == 1
         assert ":2490 still held by session-7.scope" in result.output
         assert reclaim.call_args.kwargs == {"dry_run": True}
+
+
+class TestListenerGraceWindow:
+    """A listener absent while ssh is still connecting is not a failure."""
+
+    def test_missing_listener_inside_grace_is_not_a_failure(self):
+        assert not _listener_missing_is_failure(100.0, 105.0)
+        assert _listener_missing_is_failure(100.0, 100.0 + _LISTENER_GRACE_SECONDS)
+        assert _listener_missing_is_failure(None, 0.0)
+
+    def _run_supervisor(self, monotonic_values, sleeps_before_stop=4):
+        ports = [(7687, 17687, "neo4j-bolt", "gpu-node", "L")]
+        child = MagicMock()
+        child.pid = 42
+        child.poll.return_value = None
+        sleeps = {"count": 0}
+
+        def stop_after_a_few_sleeps(_seconds):
+            sleeps["count"] += 1
+            if sleeps["count"] >= sleeps_before_stop:
+                os.kill(os.getpid(), signal.SIGTERM)
+
+        previous = {
+            sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGINT)
+        }
+        try:
+            with (
+                patch("imas_codex.cli.tunnel._get_tunnel_ports", return_value=ports),
+                patch("imas_codex.cli.tunnel._resolve_reverse_nodes", return_value=[]),
+                patch(
+                    "imas_codex.cli.tunnel._build_foreground_tunnel_command",
+                    return_value=(["autossh"], {}),
+                ),
+                patch(
+                    "imas_codex.cli.tunnel.subprocess.Popen", return_value=child
+                ) as popen,
+                patch("imas_codex.cli.tunnel._terminate_tunnel_process"),
+                patch("imas_codex.remote.tunnel.is_tunnel_active", return_value=False),
+                patch(
+                    "imas_codex.cli.tunnel.time.sleep",
+                    side_effect=stop_after_a_few_sleeps,
+                ),
+                patch(
+                    "imas_codex.cli.tunnel.time.monotonic", side_effect=monotonic_values
+                ),
+                patch("imas_codex.cli.tunnel.click.echo") as echo,
+            ):
+                _run_service_supervisor("iter", False, False, False)
+        finally:
+            for sig, handler in previous.items():
+                signal.signal(sig, handler)
+        messages = [call.args[0] for call in echo.call_args_list]
+        return popen.call_count, messages
+
+    def test_supervisor_waits_for_a_connecting_session(self):
+        starts, messages = self._run_supervisor(itertools.repeat(0.0))
+
+        assert starts == 1
+        assert not any("listeners missing" in message for message in messages)
+
+    def test_supervisor_restarts_once_the_grace_window_has_passed(self):
+        starts, messages = self._run_supervisor(itertools.count(0.0, 20.0))
+
+        assert starts >= 2
+        assert any("listeners missing" in message for message in messages)
