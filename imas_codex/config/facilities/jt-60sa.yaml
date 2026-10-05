@@ -15,11 +15,31 @@ ssh_host: jt-60sa
 # Lower the priority of codex SSH workloads on shared JT-60SA hosts.
 nice_level: 19
 
+# Host-wide remote environment: the interpreter and shell setup every remote
+# script on this host needs before it runs. The login shell pre-loads
+# python/3.5.6, which cannot run the remote scripts; the recipe unloads it,
+# loads python/3.12, and calls that module's own `python` binary (the system
+# /usr/bin/python3 stays 3.9, and `module purge` drops the module path).
+# eddb_pwrapper is not installed into the interpreter's environment, so its
+# entry carries the source directory added to sys.path before the import.
+remote_environment:
+  python_command: python
+  setup_commands:
+    - module unload python/3.5.6
+    - module load python/3.12
+  min_python_version: "3.12"
+  required_modules:
+    - name: numpy
+    - name: eddb_pwrapper
+      path: /analysis/src/eddb
+
 # Data system configuration for signal discovery
 # Used by: imas-codex discover signals jt-60sa
 data_systems:
   # EDAS is JT-60SA's primary experiment data access system.
   # Wraps proprietary data formats with C/Fortran/Python APIs.
+  # The interpreter and module recipe comes from the facility
+  # remote_environment block above.
   edas:
     api_path: /analysis/src/eddb
     lib_path: /analysis/lib/libeddb.so
@@ -27,15 +47,6 @@ data_systems:
     # Newest E-shot the catalogue listed on 2026-10-05; valid data starts at
     # E080000 and the scanner formats an integer as E%06d.
     reference_shot: 101173
-    # The login shell pre-loads python/3.5.6, which cannot run the remote
-    # scripts (f-strings). Swap to the python/3.12 module and call its own
-    # `python` binary: /usr/bin/python3 stays 3.9 and `module purge` drops the
-    # module path. Measured 2026-10-05: python 3.12.9, numpy 2.4.2, the EDDB
-    # wrapper returns arrays. eddb_pwrapper itself needs only numpy + ctypes.
-    python_command: python
-    setup_commands:
-      - module unload python/3.5.6
-      - module load python/3.12
 
   # IMAS data available via modules
   imas:

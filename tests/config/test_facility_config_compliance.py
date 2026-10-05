@@ -416,3 +416,25 @@ class TestSchemaCompleteness:
                     f"FacilityConfig.{field_name} references {inner.__name__} "
                     "which is not a ConfiguredBaseModel subclass"
                 )
+
+
+class TestRemoteEnvironmentBlock:
+    """The three named facilities declare the block and drop the loose key."""
+
+    NAMED = ("jt-60sa", "iter", "tcv")
+
+    @pytest.mark.parametrize("facility", NAMED)
+    def test_block_declared(self, facility: str) -> None:
+        data = _load_raw_yaml(FACILITIES_DIR / f"{facility}.yaml")
+        assert isinstance(data.get("remote_environment"), dict), (
+            f"{facility}.yaml has no remote_environment block"
+        )
+
+    @pytest.mark.parametrize("facility", NAMED)
+    def test_data_access_patterns_setup_commands_retired(self, facility: str) -> None:
+        data = _load_raw_yaml(FACILITIES_DIR / f"{facility}.yaml")
+        patterns = data.get("data_access_patterns") or {}
+        assert "setup_commands" not in patterns, (
+            f"{facility}.yaml still carries data_access_patterns.setup_commands; "
+            "the recipe belongs in remote_environment"
+        )
