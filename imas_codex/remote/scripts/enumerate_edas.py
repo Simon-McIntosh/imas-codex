@@ -5,6 +5,13 @@ This script runs on the JT-60SA host where the eddb_pwrapper module
 is available. It uses eddbreadCatTable()/eddbreadTable() to enumerate
 all categories and their data names with metadata.
 
+A second pass enumerates the one-point and condition data that EDDB keys
+by PID No. (a nine-character key, four digits then five characters). An
+empty PID on a valid one-point data name makes eddbreadOne return the
+category's whole PID-keyed block; eddbreadPara does not enumerate it
+(irc 1014) and an empty data name returns irc 1031. Those rows are
+emitted with ``pid_keyed: true`` and their ``udp_id`` set to the PID.
+
 Requirements:
 - Python 3.8+ (stdlib only except eddb_pwrapper)
 - eddb_pwrapper or edas_eddb_api (available at /analysis/lib)
@@ -38,7 +45,14 @@ Output (JSON on stdout):
 """
 
 import json
+import re
 import sys
+
+# One record of the PID-keyed block that eddbreadOne returns for an empty
+# PID: PID="1651 A001" NAME="Data acquisition start time" UNIT="ms" DATA="-15000"
+PID_RECORD_RE = re.compile(
+    r'PID="([^"]*)"\s+NAME="([^"]*)"\s+UNIT="([^"]*)"\s+DATA="([^"]*)"'
+)
 
 
 def main():
@@ -88,6 +102,7 @@ def main():
         categories = []
 
     signals = []
+    pid_seen = set()
     for cat in categories:
         if not cat or not cat.strip():
             continue
@@ -132,6 +147,52 @@ def main():
                         "udp_id": _at(udp_ids, i),
                     }
                 )
+
+            # Second pass: the one-point and condition data are keyed by
+            # PID No. An empty PID on a valid one-point data name makes
+            # eddbreadOne return the category's whole PID-keyed block, whose
+            # records map a PID to the one-point data name announced in the
+            # table by the same alias. The table's own udpidlist column is
+            # empty, so this pass is the only source of the PIDs.
+            one_point = [
+                (dnames[i].strip().split("/")[-1], _at(aliases, i))
+                for i in range(len(dnames))
+                if dnames[i] and dnames[i].strip() and _at(classes, i) == "O"
+            ]
+            if one_point:
+                dname_by_pid = {
+                    pid.strip(): dname for dname, pid in one_point if pid.strip()
+                }
+                try:
+                    pid_ok, pid_data = db.eddbreadOne(
+                        ref_shot, cat, one_point[0][0], "", 0, 0
+                    )
+                except Exception:
+                    pid_ok, pid_data = False, None
+                if pid_ok and isinstance(pid_data, dict):
+                    for blob in pid_data.get("data") or []:
+                        for line in (blob or "").split("\n"):
+                            match = PID_RECORD_RE.search(line)
+                            if not match:
+                                continue
+                            pid = match.group(1).strip()
+                            if not pid or (cat, pid) in pid_seen:
+                                continue
+                            pid_seen.add((cat, pid))
+                            signals.append(
+                                {
+                                    "category": cat,
+                                    "data_name": dname_by_pid.get(pid, pid),
+                                    "source_dname": dname_by_pid.get(pid, ""),
+                                    "alias": "",
+                                    "units": match.group(3).strip(),
+                                    "description": match.group(2).strip(),
+                                    "data_class": "O",
+                                    "shot_range": "",
+                                    "udp_id": pid,
+                                    "pid_keyed": True,
+                                }
+                            )
         except Exception:
             pass
 

@@ -9,6 +9,7 @@ class back from the slot rather than parsing it out of `keywords`.
 from __future__ import annotations
 
 import json
+import re
 from unittest.mock import AsyncMock, patch
 
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
@@ -154,3 +155,77 @@ class TestEdasCheckReadsSlot:
         sent = captured["payload"]["signals"][0]
         assert sent["data_class"] == "O"
         assert results[0]["valid"] is True
+
+
+# Rows from the PID-keyed second pass of the enumeration: each carries the
+# nine-character PID No. as its udp_id, and cites the source catalogue data
+# name so the accessor can pass both. The second row carries no PID.
+PID_KEYED_FIXTURE = {
+    "signals": [
+        {
+            "category": "PSRC",
+            "data_name": "AbnormFact",
+            "source_dname": "AbnormFact",
+            "units": "-",
+            "description": "Abnormality factor",
+            "alias": "",
+            "data_class": "O",
+            "shot_range": "",
+            "udp_id": "1626 A006",
+            "pid_keyed": True,
+        },
+        {
+            "category": "MDAC",
+            "data_name": "DaqStrTime",
+            "source_dname": "DaqStrTime",
+            "units": "ms",
+            "description": "Data acquisition start time",
+            "alias": "",
+            "data_class": "O",
+            "shot_range": "",
+            "udp_id": "",
+            "pid_keyed": True,
+        },
+    ],
+    "ncats": 2,
+    "categories": ["PSRC", "MDAC"],
+}
+
+
+class TestEdasPidKeyedGroup:
+    """The PID pass persists the one-point data keyed by its PID No."""
+
+    async def test_pid_keyed_rows_map_pid_and_one_point(self):
+        scanner = EDASScanner()
+        remote = AsyncMock(return_value=json.dumps(PID_KEYED_FIXTURE))
+
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await scanner.scan(
+                facility="jt-60sa", ssh_host="nakasvr26", config=CONFIG
+            )
+
+        by_id = {s.id: s for s in result.signals}
+        keyed = by_id["jt-60sa:general/psrc_1626_a006"]
+        assert keyed.pid == "1626 A006"
+        assert keyed.data_class == SignalDataClass.one_point
+        # Four digits then five characters, nine in all.
+        assert re.match(r"^\d{4}.{5}$", keyed.pid)
+        # The accessor reads the PID-keyed datum by both the source data name
+        # and the PID.
+        assert "'AbnormFact'" in keyed.accessor
+        assert "'1626 A006'" in keyed.accessor
+
+    async def test_pid_keyed_row_with_empty_pid_keeps_pid_unset(self):
+        scanner = EDASScanner()
+        remote = AsyncMock(return_value=json.dumps(PID_KEYED_FIXTURE))
+
+        with patch("imas_codex.remote.executor.async_run_python_script", remote):
+            result = await scanner.scan(
+                facility="jt-60sa", ssh_host="nakasvr26", config=CONFIG
+            )
+
+        empty = next(
+            s for s in result.signals if s.data_source_path == "MDAC/DaqStrTime"
+        )
+        assert empty.pid is None
+        assert empty.data_class == SignalDataClass.one_point
