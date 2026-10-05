@@ -32,6 +32,17 @@ logger = logging.getLogger(__name__)
     help="Focus on specific patterns (e.g. 'equilibrium', 'transport')",
 )
 @click.option(
+    "--path-prefix",
+    "path_prefixes",
+    multiple=True,
+    help=(
+        "Restrict scanning to FacilityPaths whose path starts with this prefix "
+        "(repeatable). Without it the scan claims an arbitrary sample of scored "
+        "paths; with it the claim and its has-work predicate cover only the "
+        "named trees."
+    ),
+)
+@click.option(
     "--cost-limit",
     "-c",
     type=float,
@@ -104,6 +115,7 @@ def code(
     min_score: float | None,
     max_paths: int,
     focus: str | None,
+    path_prefixes: tuple[str, ...],
     cost_limit: float,
     scan_workers: int,
     triage_workers: int,
@@ -303,6 +315,7 @@ def code(
                 min_score=min_score,
                 max_paths=max_paths,
                 focus=focus,
+                path_prefixes=list(path_prefixes) or None,
                 num_scan_workers=scan_workers,
                 num_triage_workers=triage_workers,
                 num_enrich_workers=enrich_workers,

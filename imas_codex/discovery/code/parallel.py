@@ -57,6 +57,7 @@ async def run_parallel_code_discovery(
     min_score: float | None = None,
     max_paths: int = 100,
     focus: str | None = None,
+    path_prefixes: list[str] | None = None,
     num_scan_workers: int = 2,
     num_triage_workers: int = 2,
     num_enrich_workers: int = 2,
@@ -94,6 +95,9 @@ async def run_parallel_code_discovery(
         min_score: Minimum FacilityPath score for scanning
         max_paths: Maximum paths to scan per batch
         focus: Natural language focus for scoring
+        path_prefixes: When given, restrict scanning to FacilityPaths whose
+            ``path`` starts with one of these prefixes; the has-work predicate
+            and the scan claim both honour it.
         num_scan_workers: Number of parallel scan workers
         num_triage_workers: Number of parallel triage workers
         num_enrich_workers: Number of parallel enrich workers
@@ -142,6 +146,7 @@ async def run_parallel_code_discovery(
         min_triage_score=min_triage_score,
         max_paths=max_paths,
         focus=focus,
+        path_prefixes=path_prefixes,
         deadline=deadline,
         scan_only=scan_only,
         score_only=score_only,
@@ -149,7 +154,9 @@ async def run_parallel_code_discovery(
 
     # Wire up graph-backed has_work_fn on each phase.
     # Pipeline: scan → triage → enrich → score → code → link
-    state.scan_phase.set_has_work_fn(lambda: has_pending_scan_work(facility, min_score))
+    state.scan_phase.set_has_work_fn(
+        lambda: has_pending_scan_work(facility, min_score, path_prefixes)
+    )
     state.triage_phase.set_has_work_fn(
         lambda: has_pending_triage_work(facility) or not state.scan_phase.done
     )

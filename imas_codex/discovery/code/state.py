@@ -29,6 +29,7 @@ class FileDiscoveryState(DiscoveryStateBase):
     min_triage_score: float = 0.75
     max_paths: int = 100
     focus: str | None = None
+    path_prefixes: list[str] | None = None
 
     # Worker stats
     scan_stats: WorkerStats = field(default_factory=WorkerStats)
