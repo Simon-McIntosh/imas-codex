@@ -21,7 +21,8 @@
     text to a Cypher parameter named <code>query</code>, which collides with
     <code>Session.run()</code>'s own <code>query</code> argument, so every
     fulltext call raised and fell back to a <code>CONTAINS</code> scan. The
-    parameter is now <code>search_query</code> in the signal, wiki-chunk and
-    code-chunk text searches.
+    parameter is now <code>search_query</code> in the signal and code-chunk
+    text searches; the wiki-chunk search keeps the old form because repairing
+    it changes which chunks a documentation search ranks.
   </p>
 </section>
