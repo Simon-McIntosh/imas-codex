@@ -56,6 +56,7 @@ from imas_codex.discovery.base.supervision import (
 )
 from imas_codex.graph import GraphClient
 from imas_codex.graph.models import DataAccess, FacilitySignalStatus
+from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.vector_search import build_vector_search
 from imas_codex.remote.environment import resolve_remote_environment
 from imas_codex.remote.executor import run_python_script
@@ -189,7 +190,9 @@ def _build_code_context_query() -> str:
     registers ``facility_id`` as an additional vector index property, so the ANN
     cut is taken over this facility's own chunks rather than over a global
     candidate set that a small facility's chunks would not survive. The source
-    join is retained only for the path field the enrichment prompt renders.
+    path the enrichment prompt renders resolves through the owning CodeExample's
+    ``HAS_CHUNK`` edge, rendered by ``render_chunk_source`` so this reader shares
+    the one resolution every other chunk reader uses.
     """
     search_block = build_vector_search(
         "code_chunk_embedding",
@@ -200,11 +203,10 @@ def _build_code_context_query() -> str:
     )
     return (
         f"{search_block}\n"
-        "OPTIONAL MATCH (src)-[:HAS_CHUNK]->(node)\n"
-        "WITH node, src, score\n"
+        f"{render_chunk_source('node', 'source_path')}\n"
         "WHERE score >= $min_score\n"
         "RETURN node.text AS text,\n"
-        "       src.path AS source_path,\n"
+        "       source_path,\n"
         "       node.language AS language,\n"
         "       score\n"
         "ORDER BY score DESC\n"
