@@ -5,7 +5,9 @@
     escape hatch in <code>resolve_neo4j</code> is evaluated before
     <code>resolve_location</code> is called. When the variable is set, the
     function returns a <code>Neo4jProfile</code> carrying the environment
-    address immediately, so nothing reads the location file.
+    address immediately, so nothing reads the location file. The profile's bolt
+    and HTTP ports still follow the location convention, so a location beyond
+    the first in the list keeps its offset slots.
   </p>
   <p id="neo4j-uri-before-location-cause">
     Before the change the env override was applied after
@@ -13,23 +15,29 @@
     call back into it). §10 removed the client wrapper that previously applied
     the env value first, so an operator who set <code>NEO4J_URI</code> with an
     unreadable location file got a raise from the location read instead of the
-    address they named. The raise itself is the correct default and is kept for
-    the no-override case: <code>tests/graph/test_client_address_resolution.py</code>
+    address they named. The ports come from the convention helpers when the
+    location is readable and, when it is not, from the locations list alone
+    (which reads no file), so the override neither raises nor loses the offset
+    slots. The raise itself is the correct default and is kept for the
+    no-override case: <code>tests/graph/test_client_address_resolution.py</code>
     still pins that an unreadable location surfaces rather than being swallowed
     into a fallback address.
   </p>
   <p id="neo4j-uri-before-location-measure">
     Gate:
     <code>pytest tests/graph/test_client_address_resolution.py tests/remote
-    tests/embeddings</code> exits <strong>0</strong>, 256 passed, 1 skipped,
-    6 deselected (base 255 passed; the added case is the 256th). New case
+    tests/embeddings tests/core/test_graph_profiles.py</code> exits
+    <strong>0</strong>, 276 passed, 1 skipped, 6 deselected (base 273 passed;
+    the three added cases are the difference). Case
     <code>test_explicit_neo4j_uri_survives_an_unreadable_location</code> pins
     <code>resolve_location</code> to raise and asserts
-    <code>GraphClient().uri == "bolt://example.invalid:1"</code>. The existing
-    unreadable-location raise (<code>test_an_unreadable_location_is_not_swallowed</code>)
-    still holds without the env, and
-    <code>tests/core/test_graph_profiles.py</code> (25 passed, including
-    <code>test_env_uri_overrides_convention</code>) is unchanged.
+    <code>GraphClient().uri == "bolt://example.invalid:1"</code>.
+    <code>test_explicit_neo4j_uri_keeps_the_locations_offset_ports</code> and its
+    unreadable variant pin location <code>tcv</code> (offset 1) to
+    <code>bolt_port 7688</code>, <code>http_port 7475</code> — the convention
+    the reviewer flagged. The existing unreadable-location raise
+    (<code>test_an_unreadable_location_is_not_swallowed</code>) and
+    <code>test_env_uri_overrides_convention</code> both still hold.
   </p>
   <p id="neo4j-uri-before-location-negative-control">
     Negative control — moving the env check back after
