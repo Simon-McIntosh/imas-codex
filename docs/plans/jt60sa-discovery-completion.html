@@ -26,7 +26,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac,7bd3714029e6b4629d76c7ef25dca9291476aa62,a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f,b47967a659fd7e631ce24e41a26cd47437afc19c,f10be0595b4528c88b7affb2e14c9af7126315a6,c120c1285846f28ce0d2d23abc2f6b141798bcca,c5a0b064e31c5dc753e9b768c11df98bdf797f0c,386d33e54dc2888363a5d2afa11633d48e43c43e,4a30fab9dd0235c395a2649c73fec2fb3ea4accd">
 <meta name="plan-impl" content="0.62">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -372,6 +372,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261005T091040046895-review-of-handbook-rule-in-pipeline" data-who="reckon-build" data-when="2026-10-05T09:22:54.648Z">
     <div class="r-comment-body"><p>review of run r-20261005T083945283477-handbook-rule-in-pipeline (imas-codex:jt60sa-discovery-completion §3) — SOUND WITH FINDINGS, total 90/100, 0 added failures; five follow-on findings (bulk marking fails open, graph test EXPLAINs a duplicated statement, third topic keeps status skipped, per-page facility-wide chunk scan, bulk pass misses a skipped page with no inbound link).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261005T091018839603-review-of-handbook-mcp-surfaces" data-who="reckon-build" data-when="2026-10-05T09:23:42.067Z">
+    <div class="r-comment-body"><p>review of run r-20261005T084005396994-handbook-mcp-surfaces — SOUND WITH FINDINGS, 92/100 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 16, fit 19), zero added failures; two follow-on findings, both the same fulltext query-parameter collision: the wiki-chunk text search still carries it (search_tools.py:908) so it runs the CONTAINS fallback, and the parameter rename that repaired it in the signal/code-chunk searches (search_tools.py:514) has no regression test.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261005T0554-s6-review" data-who="reckon-build" data-when="2026-10-05T05:54:00+00:00">
     <div class="r-comment-body">Design review (run r-20261005T053355179905, findings thin_wrapper-1, duplicate_owner-2, interface_budget-1) acted on: remote_environment is resolved in the facility-aware layer (imas_codex/remote/tools.py and the pipelines that build each data system's scanner config) and passed to the executor as parameters, leaving the executor facility-agnostic; the interpreter floor and module importability extend check_tool/check_all_tools and surface through the existing imas-codex tools status command, so no discover preflight command is added. Nodes: remote-environment-block (schema, resolver, YAML, pass-down) then tools-status-environment-floor (probe extension and the discover gate).</div>
