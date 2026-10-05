@@ -1,0 +1,1666 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "887486007d862b2a920b71c02c7138e821929901",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T064825009582-tools-status-environment-floor/brief.md",
+    "sha256": "e4deb2b3a1b106bdebc62980a284827b9b6bedb9b501a6c95b26c0327344ba9e"
+  },
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 12035160,
+      "input_tokens_cumulative": 12035160,
+      "output_tokens": 62346,
+      "output_tokens_cumulative": 62346,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 938,
+    "files": 10,
+    "removed": 7
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_schedule_install_writes_and_enables_timer",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_remove_schedule_disables_and_deletes_units",
+        "path": "tests/cli/test_graph_push_schedule.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_retry_quarantined_sets_validation_status",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 233,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_vocab_adjudicate_reset_requires_a_reason",
+        "path": "tests/cli/test_vocab_gap_adjudication.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_build_cross_ids_summary_with_clusters",
+        "path": "tests/clusters/test_extractor.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_initialization_with_documents",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 315,
+        "name": "test_get_path_ids_loaded",
+        "path": "tests/embeddings/test_embeddings.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 272,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_sn_resolve_keeps_contested_override_semantics",
+        "path": "tests/standard_names/test_cli_approve.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_domain_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_include_unreviewed_forwarded",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 169,
+        "name": "test_override_edits_forwarded_as_list",
+        "path": "tests/standard_names/test_cli_export.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 262,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 267,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 305,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_reset_to_include_accepted_no_focus_raises",
+        "path": "tests/standard_names/test_reset_focus_scoping.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 449,
+        "name": "test_cli_dry_run_previews_scope_without_graph_writes",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 473,
+        "name": "test_cli_wires_bypass_to_existing_pool_orchestrator",
+        "path": "tests/standard_names/test_scoped_global_maintenance.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 189,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "code",
+        "path": "imas_codex/cli/discover/code.py"
+      },
+      "window_line": 229
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "_declared",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 20
+    },
+    {
+      "existing_function": {
+        "line": 48,
+        "name": "quiet_python",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 37
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 43
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 35,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 43
+    },
+    {
+      "existing_function": {
+        "line": 84,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 64,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 65
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 64,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 65
+    },
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 84,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 85
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 84,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 85
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 84,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 90
+    },
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "test_status_passes_on_met_environment",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 109,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 110
+    },
+    {
+      "existing_function": {
+        "line": 84,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 109,
+        "name": "test_discover_signals_refuses_on_failing_probe",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "window_line": 110
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "_declared",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 33
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 48,
+        "name": "quiet_python",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "test_adds_module_path_before_import",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 59,
+        "name": "test_reports_version_and_names_unimportable_module",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 67
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "test_reports_version_and_names_unimportable_module",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 86,
+        "name": "test_adds_module_path_before_import",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 91
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 170
+    },
+    {
+      "existing_function": {
+        "line": 84,
+        "name": "test_status_fails_and_shows_fix_on_unmet_floor",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 184
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 168
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "no_ssh",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 204
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_declared_block_carries_module_verdicts",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 202
+    },
+    {
+      "existing_function": {
+        "line": 273,
+        "name": "test_no_block_leaves_floor_unset",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 201,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 218
+    },
+    {
+      "existing_function": {
+        "line": 245,
+        "name": "test_floor_is_the_blocks_not_the_global_minimum",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 229,
+        "name": "test_block_interpreter_used_and_floor_named",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 230
+    },
+    {
+      "existing_function": {
+        "line": 229,
+        "name": "test_block_interpreter_used_and_floor_named",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 245,
+        "name": "test_floor_is_the_blocks_not_the_global_minimum",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 246
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_no_block_reports_not_declared",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "run_function": {
+        "line": 273,
+        "name": "test_no_block_leaves_floor_unset",
+        "path": "tests/remote/test_tools_environment.py"
+      },
+      "window_line": 280
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b47967a659fd7e631ce24e41a26cd47437afc19c"
+  ],
+  "completed_at": "2026-10-05T07:10:14.633Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-05T06:48:28Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/remote",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "3.5.6"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run pytest -p no:cacheprovider tests/remote tests/cli/test_tools_status_environment.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T064825009582-tools-status-environment-floor/gate.log"
+  },
+  "impl_move": {
+    "at_complete": 0.286,
+    "at_dispatch": 0.25,
+    "plan": "jt60sa-discovery-completion",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-05T07:48:25.391968+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-05T06:48:25Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 25,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 13,
+    "mean_context": 140000,
+    "observed_at": "2026-10-05T06:48:00Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 25,
+      "aggregate_tokens_per_second": 269.807,
+      "detail": "",
+      "mean_tokens_per_second": 84.315,
+      "observed_at": "2026-10-05T06:48:00Z",
+      "runs": 3.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-05T07:10:14.633Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T064825009582-tools-status-environment-floor/manifest.md",
+  "member": "disposable-r-20261005T064825009582-tools-status-environment-floor",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/remote/test_tools_environment.py::TestGetPythonStatusFloor::test_floor_is_the_blocks_not_the_global_minimum"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/remote/test_tools_environment.py::TestGetPythonStatusFloor::test_floor_is_the_blocks_not_the_global_minimum"
+    ],
+    "declaration": "make get_python_status ignore the block's min_python_version and judge against MIN_PYTHON only: the floor test in tests/remote/test_tools_environment.py fails",
+    "head_failure_ids": [],
+    "log": "/tmp/jt60sa-toolsenv-negative.log",
+    "resolved_log": "/tmp/jt60sa-toolsenv-negative.log",
+    "test_paths": [
+      "tests/cli/test_tools_status_environment.py",
+      "tests/remote/test_remote_environment.py",
+      "tests/remote/test_tools_environment.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "tools-status-environment-floor",
+  "node_definition": {
+    "brief": "/home/ITER/mcintos/.cache/imas-codex-jt60sa-briefs/tools-status-environment-floor.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T064825009582-tools-status-environment-floor/brief.md",
+    "brief_sha256": "e4deb2b3a1b106bdebc62980a284827b9b6bedb9b501a6c95b26c0327344ba9e",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1221,
+          "cached_input_tokens": 632660,
+          "input_tokens": 633913,
+          "output_tokens": 3975,
+          "reasoning_output_tokens": 1142,
+          "total_tokens": 637888,
+          "uncached_input_tokens": 32
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "pytest tests/remote tests/cli/test_tools_status_environment.py exits 0 (base: tests/remote green at 0031ac62e with 95 tests; tests/remote/test_tools_environment.py and tests/cli/test_tools_status_environment.py are new) with tests that get_python_status under a remote_environment block judges the block's interpreter against the block's floor through PythonVersion.meets_minimum, check_all_tools carries per-module importability, and discover signals refuses on a failing probe; uv run imas-codex tools status jt-60sa exits 0 showing python 3.12.9 with numpy and eddb_pwrapper importable; the same command with --no-setup --python-command python3 exits non-zero naming the 3.12 floor and the module recipe",
+    "estimated_hours": 3.0,
+    "goal": "The existing facility probe reports the remote interpreter floor and module importability under the facility's remote environment, surfaced by tools status, and discover signals and discover code refuse before a remote scan when the floor is unmet",
+    "id": "tools-status-environment-floor",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-05T06:48:25Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 25,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 13,
+      "mean_context": 140000,
+      "observed_at": "2026-10-05T06:48:00Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 25,
+        "aggregate_tokens_per_second": 269.807,
+        "detail": "",
+        "mean_tokens_per_second": 84.315,
+        "observed_at": "2026-10-05T06:48:00Z",
+        "runs": 3.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T064825009582-tools-status-environment-floor/manifest.md",
+    "negative_control": "make get_python_status ignore the block's min_python_version and judge against MIN_PYTHON only: the floor test in tests/remote/test_tools_environment.py fails",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/remote/python.py",
+      "imas_codex/remote/tools.py",
+      "imas_codex/remote/scripts/probe_environment.py",
+      "imas_codex/cli/tools.py",
+      "imas_codex/cli/discover/common.py",
+      "imas_codex/cli/discover/signals.py",
+      "imas_codex/cli/discover/code.py",
+      "tests/remote/test_tools_environment.py",
+      "tests/remote/test_remote_environment.py",
+      "tests/cli/test_tools_status_environment.py",
+      "docs/evidence/fragments/jt60sa-discovery-completion/tools-status-environment-floor.html",
+      "docs/figures/jt60sa-discovery-completion/tools-status-environment-floor"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1282737.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "tools-status-environment-floor",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-05T06:48:26.425491+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.89,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 1490.427,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1549.009,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 7,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 35
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.91,
+      "codex": 0.04,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "hold": 0.05
+    },
+    "rendered_token_estimate": 1090,
+    "usage": {
+      "cost": 0.000129108,
+      "input_tokens": 3074,
+      "output_tokens": 89
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "b47967a659fd7e631ce24e41a26cd47437afc19c",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "887486007d862b2a920b71c02c7138e821929901",
+    "reviewed_head_sha": "b47967a659fd7e631ce24e41a26cd47437afc19c",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261005T064825009582-tools-status-environment-floor",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "9a6c6694-9a86-4345-b1f5-8f2bcb05d499",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 15,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 12214440,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1298.899,
+    "generated_tokens": 69337,
+    "generation_seconds": 900.541,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.3,
+    "machine_seconds": 398.358,
+    "peak_input_tokens": 177980,
+    "tokens_per_second": 76.99,
+    "wall_tokens_per_second": 53.38
+  },
+  "time_budget": "60m",
+  "tool_steps": 113.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1306,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-05T07:10:17Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-05T06:48:32Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261005T064825009582-tools-status-environment-floor",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 11197,
+    "worker_pid": 85029
+  },
+  "worker_seconds": 1288,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
