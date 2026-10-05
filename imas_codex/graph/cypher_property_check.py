@@ -52,8 +52,6 @@ _ADJUDICATION_REASONS = {
 # shrink that count, and any excess occurrence still fails the audit.
 # CodeChunk.related_ids in ingestion/graph.py is a runtime-property allowance:
 # live coverage is 4,826/271,460, while declared CodeExample.related_ids is 0/69,746.
-# CodeChunk.embed_failed_at in discovery/code/parallel.py is also runtime-only:
-# live coverage is 1,649/271,460, and the canonical embed worker writes and filters it.
 _ADJUDICATED_OCCURRENCES = """
 [defect]
 imas_codex/cli/discover/__init__.py|FacilityPath|scanned_at|352,353
@@ -102,7 +100,6 @@ imas_codex/discovery/base/grouping.py|SignalSource|claimed_at|128,210,260
 imas_codex/discovery/code/graph_ops.py|FacilityPath|files_claim_token|149
 imas_codex/discovery/code/graph_ops.py|FacilityPath|files_claimed_at|134,135,149,212,230,231
 imas_codex/discovery/code/graph_ops.py|FacilityPath|last_file_scan_at|143,145,192,555,557
-imas_codex/discovery/code/parallel.py|CodeChunk|embed_failed_at|473
 imas_codex/discovery/code/scanner.py|FacilityPath|evidence_linked|627
 imas_codex/discovery/code/scanner.py|FacilityPath|last_file_scan_at|366,626
 imas_codex/discovery/mdsplus/graph_ops.py|SignalNode|category|807,1041,1132,1535
