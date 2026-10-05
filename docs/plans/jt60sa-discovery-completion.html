@@ -23,7 +23,7 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
@@ -239,17 +239,27 @@
       scans, path scans — depends on an interpreter and a shell environment that the facility
       sets up differently: module loads on nakasvr26 and ITER, a project virtualenv on some
       hosts, an environment file of credentials or library paths on others. Today that
-      knowledge lives in two loosely typed keys under one data system
-      (<code>python_command</code>, <code>setup_commands</code>) and in prose comments, so the
-      same host's code scan and signal scan can disagree, and a wrong default fails as a
-      syntax error inside a worker rather than as a configuration finding.
+      knowledge has two homes, both per data system or unread: the <code>DataSystemBase</code>
+      mixin (<code>imas_codex/schemas/facility_config.yaml</code>) gives every data system
+      <code>python_command</code> and <code>setup_commands</code>, which the signal scanners
+      read and the signals pipeline merges; and <code>data_access_patterns.setup_commands</code>,
+      a facility-wide key that no code consumes (tcv.yaml sets it). A code scan, a path scan
+      and the facility tool probe belong to no data system, so they fall back to a bare
+      <code>python3</code> with no setup, the same host's code scan and signal scan can
+      disagree, and a wrong default fails as a syntax error inside a worker rather than as a
+      configuration finding.
     </p>
     <p>
-      This section lifts it to one facility-level <code>remote_environment</code> block:
-      ordered <code>setup_commands</code> (module unloads and loads, <code>source</code> of an
-      env file, virtualenv activation), the <code>python_command</code> that is valid after
-      them, the minimum interpreter version the remote scripts require, the modules each
-      scanner must import, and an optional per-data-system override. One resolver in the
+      This section gives the host-wide recipe one home, a facility-level
+      <code>remote_environment</code> block: ordered <code>setup_commands</code> (module unloads
+      and loads, <code>source</code> of an env file, virtualenv activation), the
+      <code>python_command</code> that is valid after them, the minimum interpreter version the
+      remote scripts require, and the modules each scanner must import. Interface accounting:
+      the block retires <code>data_access_patterns.setup_commands</code> (removed from the
+      schema and migrated out of tcv.yaml), and the <code>DataSystemBase</code> keys are kept
+      with one role only, the per-data-system override of the block (TCV's MDSplus system
+      sources a profile a plain Python call does not need), so there is one default and one
+      override rather than two unrelated surfaces. One resolver in the
       facility-aware layer (<code>imas_codex/remote/tools.py</code>, which already resolves
       <code>ssh_host</code> and the nice level from facility config) merges the block with a
       data system's own keys and passes the result down to the executor as parameters; the
@@ -263,8 +273,10 @@
       signals</code> and <code>discover code</code> run that check before a remote scan and
       refuse when the floor is not met, so an unmet environment is a finding with the fix
       command, not a traceback. Done-when: the block exists in the facility schema and in
-      <code>jt-60sa.yaml</code>, <code>iter.yaml</code> and <code>tcv.yaml</code>; every
-      remote script launched through the facility-aware layer carries it; and
+      <code>jt-60sa.yaml</code>, <code>iter.yaml</code> and <code>tcv.yaml</code>;
+      <code>data_access_patterns.setup_commands</code> is gone from the schema and the
+      facility files; every remote script launched through the facility-aware layer carries
+      the block; and
       <code>imas-codex tools status jt-60sa</code> passes on nakasvr26 with the 3.12 recipe
       and fails, naming the floor, with the recipe removed.
     </p>
@@ -327,7 +339,7 @@
     
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20261005T0554-s3-review" data-who="reckon-build" data-when="2026-10-05T05:54:00+00:00">
-    <div class="r-comment-body">Design review (run r-20261005T053355179905, findings duplicate_owner-1 and interface_budget-2) acted on: the handbook-page linkage reuses the existing WikiChunk-[:DOCUMENTS]->FacilitySignal relationship instead of a new DOCUMENTED_IN edge, and WikiPageStatus is not widened — a dynamic page keeps status ingested and is marked by a fronts_database property. The locked decision's substance (dynamic pages marked with the database they front, signals linked, MCP tools follow the links) is unchanged; only the edge name and the status mechanism moved.</div>
+    <div class="r-comment-body">Design review (run r-20261005T053355179905, findings duplicate_owner-1 and interface_budget-2) acted on: the handbook-page linkage reuses the existing WikiChunk-[:DOCUMENTS]-&gt;FacilitySignal relationship instead of a new DOCUMENTED_IN edge, and WikiPageStatus is not widened — a dynamic page keeps status ingested and is marked by a fronts_database property. The locked decision's substance (dynamic pages marked with the database they front, signals linked, MCP tools follow the links) is unchanged; only the edge name and the status mechanism moved.</div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261005T0554-s6-review" data-who="reckon-build" data-when="2026-10-05T05:54:00+00:00">
     <div class="r-comment-body">Design review (run r-20261005T053355179905, findings thin_wrapper-1, duplicate_owner-2, interface_budget-1) acted on: remote_environment is resolved in the facility-aware layer (imas_codex/remote/tools.py and the pipelines that build each data system's scanner config) and passed to the executor as parameters, leaving the executor facility-agnostic; the interpreter floor and module importability extend check_tool/check_all_tools and surface through the existing imas-codex tools status command, so no discover preflight command is added. Nodes: remote-environment-block (schema, resolver, YAML, pass-down) then tools-status-environment-floor (probe extension and the discover gate).</div>
