@@ -1,0 +1,66 @@
+<section>
+  <h2 id="handbook-rule-in-pipeline">The wiki ingest path marks dynamic handbook tables itself</h2>
+
+  <p id="handbook-rule-in-pipeline-landed">
+    <code>WikiIngestionPipeline.ingest_page</code> now applies the dynamic-page
+    rule where a page's chunks are written: it resolves the databases a table
+    fronts from the <code>?db=</code> links its sibling pages carry, stubs the
+    header-only chunks before embedding, and writes
+    <code>WikiPage.fronts_database</code> in the same persist. The stub text is
+    embedded, not the empty form, so a fresh ingest marks the page without an
+    operator call. The page-id-keyed <code>apply_dynamic_page_rule</code> is
+    replaced by <code>mark_dynamic_handbook_pages</code>, applied at the end of
+    <code>ingest_pages</code>, which reads the stored linking chunks and so
+    marks a topic whose own ingest was skipped for lack of content. A failure
+    of that marker is raised out of the run, not logged away, so a complete
+    ingestion is never reported while the dynamic-page guarantee did not hold;
+    the marker also sets the page's <code>status</code> to
+    <code>ingested</code> in the same write.
+  </p>
+
+  <p id="handbook-rule-in-pipeline-marked">
+    Run through the pipeline's own functions
+    (<code>mark_dynamic_handbook_pages("jt-60sa")</code> then
+    <code>link_chunks_to_entities("jt-60sa")</code>), not hand Cypher. Every
+    jt-60sa handbook table topic the detector matches is marked, including the
+    previously unmarked third topic:
+  </p>
+
+  <p id="handbook-rule-in-pipeline-table">
+    <code>CategoryInformation</code> &rarr; <code>['EDDB', 'PMDB']</code>;
+    <code>DataInformation</code> &rarr; <code>['UDDB', 'EQDB', 'FAME']</code>;
+    <code>CategoryInformation2</code> &rarr; <code>['LCDB', 'MBDB']</code>. Each
+    carries one stub chunk, and all three stub chunks have a non-null
+    <code>embedding</code> (Cypher count: <strong>3</strong>). All three now
+    carry <code>status=ingested</code> rather than the <code>skipped</code> a
+    content-less ingest left behind. The EDDB-fronting page reaches
+    <strong>12,596</strong> <code>FacilitySignal</code> nodes through
+    <code>DOCUMENTS</code>.
+  </p>
+
+  <p id="handbook-rule-in-pipeline-measure">
+    Gate: <code>pytest tests/wiki/test_pipeline.py tests/wiki/test_graph_ops_unit.py
+    tests/wiki/test_workers.py</code> exits 0 with 106 passed (base 103 at the
+    landed handbook-dynamic-pages node), the added
+    <code>TestIngestMarksDynamicPage</code> showing a header-only form ingested
+    with inbound <code>?db=</code> links is marked without an operator;
+    <code>pytest -m graph tests/wiki/test_pipeline.py -k database_merge</code>
+    exits 0, EXPLAINing the fourth <code>DOCUMENTS</code> merge against the live
+    graph — the statement is the module constant
+    <code>FRONTS_DATABASE_DOCUMENTS_MERGE</code> that
+    <code>link_chunks_to_entities</code> runs, so the gate parses the production
+    Cypher and not a copy. Negative control: removing the detector call from the
+    ingest path fails
+    <code>TestIngestMarksDynamicPage::test_ingest_marks_dynamic_page</code>
+    with exit 1.
+  </p>
+
+  <p id="handbook-rule-in-pipeline-followon">
+    Unchanged follow-on: <code>PMDB</code>, <code>UDDB</code>,
+    <code>EQDB</code>, <code>FAME</code>, <code>CategoryInformation2</code>'s
+    <code>LCDB</code> and <code>MBDB</code> front pages that reach no signal
+    until a scanner writes those source names into
+    <code>DATABASE_SIGNAL_SOURCES</code>; only <code>EDDB&nbsp;&rarr;&nbsp;edas</code>
+    is mapped today.
+  </p>
+</section>
