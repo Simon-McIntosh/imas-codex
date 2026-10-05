@@ -30,6 +30,11 @@
     <p>Commit <code>a212437fd</code> (review 94/100): <code>seed_worker</code> MERGEs the scanner's DataAccess node before ingesting the scanned signals, so the ingest's edge phase finds it on a facility's first scan; a recording-stub test asserts the order and the negative control (old order) fails with events <code>['signal_ingest','data_access_write']</code>; 41 passed. The live first-pass proof awaits the next facility's first scan (JT-60SA's edges were created on its second pass before this fix). The review's design note, that the DataAccess write now sits in three places and belongs to <code>ingest_discovered_signals</code>, is carried to §9.</p>
   </section>
 
+  <section id="s8-embed-resolution">
+    <h2>§8 — SLURM service discovery unified on resolve_service_url</h2>
+    <p>Two nodes. <code>embed-service-resolution</code> (c120c1285, review 85) made <code>resolve_service_url</code> in <code>imas_codex/remote/locations.py</code> the single owner of SLURM node discovery through the helper <code>_service_url_for_slurm</code>: <code>profiles.py</code> delegates and keeps its tunnel branch, <code>settings.get_embed_host</code> reads the host from the resolved URL, and <code>readiness._resolve_url_for_compute</code> is removed. <code>embed-resolution-residue</code> (c5a0b064e, review 95) routed <code>imas_codex/graph/client.py::_slurm_service_uri</code> through the same helper, removed the six tests of the retired readiness internals and re-expressed the different-nodes claim in <code>tests/remote/test_locations_resolution.py</code>.</p><p>Positive control from the compute node: <code>Encoder(EncoderConfig())</code> resolved <code>http://98dci4-gpu-0002:18765</code> and embedded one vector in 0.08 s, where it previously addressed a loopback tunnel nothing listened on. <code>GraphClient().uri</code> still resolves <code>bolt://98dci4-gpu-0002:7687</code>. Gate: <code>pytest tests/remote tests/embeddings tests/graph/test_schema_context.py</code> 274 passed, 1 skipped; negative control red on restoring the direct discovery call. Residue carried to §10: <code>_slurm_service_uri</code> and the SLURM branch of <code>_resolve_graph_uri</code> now duplicate <code>profiles.py</code> Mode 2 and are kept only because <code>tests/graph/test_client_address_resolution.py</code> pins them.</p>
+  </section>
+
 </main>
 </body>
 </html>
