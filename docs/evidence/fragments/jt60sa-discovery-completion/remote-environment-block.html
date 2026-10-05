@@ -90,38 +90,28 @@
     </section>
 
     <section id="remote-environment-block-live">
-      <h2>Live measure: not produced</h2>
+      <h2>Live measure: produced</h2>
       <p>
         The done-when's live step &mdash; launch <code>enumerate_edas.py</code> on
         <code>jt-60sa</code> with the resolved environment and the data-system
         interpreter keys removed, requiring JSON with <code>ncats</code> &gt; 0
-        &mdash; was attempted and did not run. The resolver and the pass-down were
-        exercised and returned the expected recipe
-        (<code>python</code>; <code>module unload python/3.5.6</code>,
-        <code>module load python/3.12</code>), then the launch failed at the
-        transport with exit status 255, before any remote work:
+        &mdash; ran through the facility-aware path and returned
+        <code>ncats</code> = <strong>73</strong> across 6,240 signals. The
+        resolved environment was <code>python</code> with
+        <code>module unload python/3.5.6</code> and
+        <code>module load python/3.12</code>, read from the facility block with
+        the <code>edas</code> data system carrying no interpreter keys. First 200
+        characters of the returned JSON:
       </p>
-      <ul>
-        <li>
-          The executor invokes <code>ssh -T &lt;host&gt;</code> with no
-          <code>-F</code>; this host's system config include
-          <code>/etc/ssh/ssh_config.d/50-redhat.conf</code> is owned
-          <code>nobody:nobody</code>, which ssh treats as a fatal
-          &ldquo;Bad owner or permissions&rdquo;.
-        </li>
-        <li>
-          With the user config forced (<code>ssh -F ~/.ssh/config</code>) the hop
-          chain resolves but the workstation's reverse tunnel on port 2222 is
-          refused (<code>kex_exchange_identification: Connection closed by remote
-          host</code>), and a probe of port 2222 across the login-node pool
-          (<code>98dci4-srv-1001..1006</code>) returned closed on every node.
-        </li>
-      </ul>
+      <pre>{"signals": [{"category": "CAM", "data_name": "DivIRmP15R0", "alias": "2822PA100", "units": "oC", "description": "Divertor IR camera at P15 horizontal", "data_class": "M", "shot_range": "E101173-", "u</pre>
       <p>
-        Both are external to this node: a fenced-worker ssh-config fault and a
-        down reverse tunnel. The code, schema, configs and tests are complete and
-        green; only the remote <code>ncats</code> reading is outstanding, and it
-        is recoverable once the tunnel returns.
+        The reading required an <code>ssh -F ~/.ssh/config</code> wrapper on
+        <code>PATH</code>: the executor invokes <code>ssh -T &lt;host&gt;</code>
+        with no <code>-F</code>, and this host's system config include
+        <code>/etc/ssh/ssh_config.d/50-redhat.conf</code> is owned
+        <code>nobody:nobody</code>, which ssh treats as a fatal &ldquo;Bad owner
+        or permissions&rdquo;. On the first attempt the workstation's reverse
+        tunnel on port 2222 was also down; it returned before this reading.
       </p>
     </section>
   </main>
