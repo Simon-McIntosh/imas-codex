@@ -1,0 +1,65 @@
+<section>
+  <h2 id="facility-prefilter-sibling-indexes">Signal, wiki-chunk and code-example vector searches pre-filter by facility</h2>
+  <p id="facility-prefilter-sibling-indexes-landing">
+    The three remaining <code>imas_codex/llm/search_tools.py</code> vector
+    searches now select candidates <em>inside</em> their index rather than
+    discarding them afterwards. A <code>vector_index_filters: facility_id</code>
+    annotation on the <code>FacilitySignal.embedding</code>,
+    <code>WikiChunk.embedding</code> and <code>CodeExample.embedding</code> slots
+    (<code>imas_codex/schemas/facility.yaml</code>) registers
+    <code>facility_id</code> on the
+    <code>facility_signal_desc_embedding</code>, <code>wiki_chunk_embedding</code>
+    and <code>code_example_desc_embedding</code> indexes. Each search passes its
+    facility predicate as <code>prefilter_clauses</code> to
+    <code>build_vector_search</code>, which renders it as a <code>WHERE</code>
+    inside <code>SEARCH</code>, so the ANN cut is taken over the facility's own
+    rows. <code>_vector_search_code_examples</code> now catches only
+    <code>(ClientError, DatabaseError)</code>, so a programming error surfaces
+    instead of reading as an empty result. Commits:
+    <code>3072c2f07</code>.
+  </p>
+  <p id="facility-prefilter-sibling-indexes-overfetch">
+    The over-fetch the in-index filter made unnecessary is retired.
+    <code>_vector_search_signals</code> and <code>_vector_search_wiki_chunks</code>
+    passed <code>k = max(k * 2, 50)</code> as the ANN limit behind a post-filter
+    facility predicate; both now pass the requested <code>k</code>. The
+    <code>diagnostic</code> and <code>physics_domain</code> signal predicates,
+    and the wiki site/domain/score predicates, stay as post-filters over the
+    returned rows, since their properties are not on the index.
+  </p>
+  <p id="facility-prefilter-sibling-indexes-rebuild">
+    The three live indexes were rebuilt through the owner's option-mismatch path
+    (<code>GraphClient.ensure_vector_indexes</code>, which drops an index whose
+    live dimension or property set differs from the schema). <code>SHOW
+    INDEXES</code> after the rebuild:
+  </p>
+  <table id="facility-prefilter-sibling-indexes-indexes">
+    <tr><th>index</th><th>state</th><th>properties</th></tr>
+    <tr><td>facility_signal_desc_embedding</td><td>ONLINE</td><td>embedding, facility_id</td></tr>
+    <tr><td>wiki_chunk_embedding</td><td>ONLINE</td><td>embedding, facility_id</td></tr>
+    <tr><td>code_example_desc_embedding</td><td>ONLINE</td><td>embedding, facility_id</td></tr>
+  </table>
+  <p id="facility-prefilter-sibling-indexes-live">
+    Against the rebuilt indexes at the default <code>k = 10</code>:
+    <code>_search_signals(query="divertor IR camera", facility="jt-60sa")</code>
+    returns 10 <code>jt-60sa</code> signals
+    (<code>jt-60sa:general/cam_divirmp15r0</code>, <code>…r2</code>,
+    <code>…r4</code>, …), and
+    <code>_search_docs(query="JT-60SA data analysis server software", facility="jt-60sa")</code>
+    returns 10 <code>jt-60sa</code> handbook chunks from three
+    <code>JT-60SA Data Analysis Server</code> pages. Both are the facility's own
+    rows; before the filter moved inside the index a small facility's rows could
+    not survive the global top-k cut.
+  </p>
+  <p id="facility-prefilter-sibling-indexes-gate">
+    <code>pytest tests/search tests/llm tests/graph/test_schema_context.py
+    tests/graph/test_vector_search.py</code> → <strong>692 passed, 10 skipped,
+    66 deselected</strong>, exit 0 at <code>3072c2f07</code> (base
+    <code>b5c36b0a2</code> → 684 passed, 10 skipped, exit 0; the 8 added tests are
+    the new in-SEARCH predicate, no-over-fetch and narrowed-except cases). The
+    declared negative control — the signal facility predicate rendered as a
+    post-filter again — turns
+    <code>TestSearchSignals::test_facility_filter_inside_search</code> red while
+    the head arm does not fail it.
+  </p>
+</section>
