@@ -249,6 +249,223 @@ def persist_chunks_batch(chunks: list[dict]) -> int:
         return len(chunks)
 
 
+# Catalogue name -> FacilitySignal.data_source_name for its scanner. A dynamic
+# handbook page fronts one or more of these databases and is linked to the
+# signals the matching scanner wrote. Extend the map when another database gets
+# a scanner; an unmapped database simply links to nothing yet.
+DATABASE_SIGNAL_SOURCES: dict[str, str] = {"EDDB": "edas"}
+
+# A TWiki link that names a catalogue parameter: [[Topic?db=EDDB][label]].
+_DB_LINK_RE = re.compile(
+    r"\[\[\s*([^\[\]?\s]+)\s*\?db=([A-Za-z0-9_]+)(?:\]\[[^\]]*)?\]\]"
+)
+
+# Markdown table row / separator as produced by html_to_text.
+_TABLE_ROW_RE = re.compile(r"^\s*\|.*\|\s*$")
+_TABLE_SEPARATOR_RE = re.compile(r"^\s*\|(?:\s*:?-{2,}:?\s*\|)+\s*$")
+
+
+def extract_database_links(text: str) -> dict[str, list[str]]:
+    """Map each topic named in a ``[[Topic?db=X][label]]`` link to its databases.
+
+    The JT-60SA Data Handbook links its per-database tables this way, e.g.
+    ``[[CategoryInformation?db=EDDB][Experiment database (EDDB)]]``. The
+    ``?db=`` suffix is a render parameter, not part of the topic name, so the
+    link target is the topic and the parameter names the database it fronts.
+
+    Args:
+        text: Extracted page text that may contain TWiki links.
+
+    Returns:
+        Mapping of topic name to the databases linked to it, in first-seen order.
+    """
+    result: dict[str, list[str]] = {}
+    for match in _DB_LINK_RE.finditer(text):
+        topic = match.group(1).strip()
+        database = match.group(2)
+        databases = result.setdefault(topic, [])
+        if topic and database not in databases:
+            databases.append(database)
+    return result
+
+
+def _cells(line: str) -> tuple[str, ...]:
+    """Pipe-separated cell values of a table row, trailing empties dropped."""
+    values = [value.strip() for value in line.strip().strip("|").split("|")]
+    while values and values[-1] == "":
+        values.pop()
+    return tuple(values)
+
+
+def _is_header_only_form(text: str) -> bool:
+    """True when text is a table page with no data row beneath any header.
+
+    A dynamic handbook table renders as its column headers and a search form
+    when the plugin has no rows to fill in at fetch time, so the page keeps
+    only table headers and the form's own labels. A row that survives is a
+    header; a data row is a table row that sits under a header separator and
+    is not one of the header rows the empty table repeats.
+    """
+    lines = text.splitlines()
+    rows = [
+        (index, _cells(line))
+        for index, line in enumerate(lines)
+        if _TABLE_ROW_RE.match(line) and not _TABLE_SEPARATOR_RE.match(line)
+    ]
+    if not rows:
+        return False
+
+    def followed_by_separator(index: int) -> bool:
+        """True when the next non-blank line closes this row: it is a header."""
+        for offset in range(index + 1, len(lines)):
+            if lines[offset].strip():
+                return bool(_TABLE_SEPARATOR_RE.match(lines[offset]))
+        return False
+
+    headers = {
+        cells for index, cells in rows if cells and followed_by_separator(index)
+    }
+    if not headers:
+        return False
+    previous_is_header = False
+    for index, cells in rows:
+        if previous_is_header and cells and cells not in headers:
+            return False
+        previous_is_header = followed_by_separator(index)
+    return True
+
+
+def detect_dynamic_page(
+    text: str, fronts_database: list[str] | None = None
+) -> bool:
+    """True when a page is a dynamic table fronting at least one database.
+
+    A page whose extracted text is only table headers and a search form carries
+    no content of its own; it is a catalogue table a plugin fills at render
+    time. It is treated as dynamic only when a database it fronts is known —
+    without one there is nothing to name in its stub and nothing to link.
+    """
+    if not _is_header_only_form(text):
+        return False
+    return bool(fronts_database)
+
+
+def dynamic_page_stub(databases: list[str]) -> str:
+    """One-line stub naming the databases a dynamic page is rendered from.
+
+    Replaces the empty-header chunk text so a vector search on the page lands
+    on a description of what the page is, rather than on bare column headers.
+    """
+    names = sorted({database for database in databases if database})
+    joined = " and ".join(names)
+    plural = "s" if len(names) != 1 else ""
+    return (
+        f"Dynamic table rendered from the {joined} catalogue{plural}; "
+        "the rows are the FacilitySignals linked to this page."
+    )
+
+
+def fronts_databases_for_topic(
+    facility_id: str, topic_name: str, linking_texts: list[str]
+) -> list[str]:
+    """Databases linked to ``topic_name`` by ``?db=`` links in other pages.
+
+    The links that reach a dynamic topic carry the database it fronts; the
+    topic's own markup carries no parameter of its own. Falls back to an empty
+    list when no link names it.
+    """
+    for text in linking_texts:
+        databases = extract_database_links(text).get(topic_name)
+        if databases:
+            return databases
+    return []
+
+
+def _chunk_rows(gc: GraphClient, facility_id: str) -> list[dict]:
+    """Chunks whose text carries a ``?db=`` link, the handbook-table linkers."""
+    return gc.query(
+        """
+        MATCH (c:WikiChunk {facility_id: $facility_id})
+        WHERE c.text CONTAINS '?db='
+        RETURN c.text AS text
+        """,
+        facility_id=facility_id,
+    )
+
+
+def apply_dynamic_page_rule(
+    facility_id: str, page_ids: list[str]
+) -> dict[str, list[str]]:
+    """Mark dynamic handbook pages and stub their empty-header chunks.
+
+    For each named page: derive the databases it fronts from the ``?db=`` links
+    that reach it, set ``WikiPage.fronts_database``, and replace the text of any
+    chunk that is only table headers and a search form with a one-line stub.
+    The page keeps status 'ingested' so its chunk anchors the DOCUMENTS edges.
+
+    Args:
+        facility_id: Facility to process.
+        page_ids: WikiPage ids to evaluate.
+
+    Returns:
+        Mapping of page id to the databases that were recorded (empty omitted).
+    """
+    applied: dict[str, list[str]] = {}
+    with GraphClient() as gc:
+        linking_texts = [row["text"] for row in _chunk_rows(gc, facility_id)]
+        for page_id in page_ids:
+            topic_name = page_id.split(":", 1)[1] if ":" in page_id else page_id
+            rows = gc.query(
+                """
+                MATCH (p:WikiPage {id: $page_id})-[:HAS_CHUNK]->(c:WikiChunk)
+                RETURN p.id AS page_id, c.id AS chunk_id, c.chunk_index AS idx,
+                       c.text AS text
+                ORDER BY c.chunk_index
+                """,
+                page_id=page_id,
+            )
+            if not rows:
+                continue
+            texts = [row["text"] or "" for row in rows]
+            # A header-only chunk with no database to name keeps its text.
+            if not any(_is_header_only_form(text) for text in texts):
+                continue
+            databases = fronts_databases_for_topic(
+                facility_id, topic_name, linking_texts
+            )
+            if not databases:
+                # No inbound link carries a parameter: fall back to the page's
+                # own form, which names the database it is rendered from.
+                databases = fronts_databases_for_topic(
+                    facility_id, topic_name, texts
+                )
+            if not databases:
+                # A header-only chunk with no database to name keeps its text.
+                continue
+            stub = dynamic_page_stub(databases)
+            for row in rows:
+                if not _is_header_only_form(row["text"] or ""):
+                    continue
+                gc.query(
+                    """
+                    MATCH (c:WikiChunk {id: $chunk_id})
+                    SET c.text = $text
+                    """,
+                    chunk_id=row["chunk_id"],
+                    text=stub,
+                )
+            gc.query(
+                """
+                MATCH (p:WikiPage {id: $page_id})
+                SET p.fronts_database = $databases
+                """,
+                page_id=page_id,
+                databases=databases,
+            )
+            applied[page_id] = databases
+    return applied
+
+
 def link_chunks_to_entities(facility_id: str) -> dict[str, int]:
     """Create DOCUMENTS and MENTIONS relationships from chunk metadata.
 
@@ -257,14 +474,22 @@ def link_chunks_to_entities(facility_id: str) -> dict[str, int]:
     - MDSplus paths → SignalNode (DOCUMENTS relationship)
     - IMAS paths → IMASNode (MENTIONS_IMAS relationship)
     - PPF paths → FacilitySignal (DOCUMENTS relationship)
+    - fronts_database → FacilitySignal (DOCUMENTS relationship): a dynamic
+      handbook page documents every signal of the catalogue it fronts
 
     Args:
         facility_id: Facility to process
 
     Returns:
-        Dict with counts: {data_nodes_linked, imas_paths_linked, ppf_signals_linked}
+        Dict with counts: {data_nodes_linked, imas_paths_linked,
+                           ppf_signals_linked, database_signals_linked}
     """
-    stats = {"data_nodes_linked": 0, "imas_paths_linked": 0, "ppf_signals_linked": 0}
+    stats = {
+        "data_nodes_linked": 0,
+        "imas_paths_linked": 0,
+        "ppf_signals_linked": 0,
+        "database_signals_linked": 0,
+    }
 
     with GraphClient() as gc:
         # Link to DataNodes via MDSplus paths
@@ -323,6 +548,27 @@ def link_chunks_to_entities(facility_id: str) -> dict[str, int]:
         )
         if result:
             stats["ppf_signals_linked"] = result[0]["linked"]
+
+        # Link dynamic handbook pages to every signal of the catalogue they
+        # front. The database -> scanner source map is small and lives beside
+        # this function; an unmapped database yields no edges (source IS NULL).
+        result = gc.query(
+            """
+            MATCH (p:WikiPage {facility_id: $facility_id})-[:HAS_CHUNK]->(c:WikiChunk)
+            WHERE p.fronts_database IS NOT NULL
+            UNWIND p.fronts_database AS database
+            WITH c, $database_sources[database] AS source
+            WHERE source IS NOT NULL
+            MATCH (fs:FacilitySignal {facility_id: $facility_id})
+            WHERE fs.data_source_name = source
+            MERGE (c)-[:DOCUMENTS]->(fs)
+            RETURN count(*) AS linked
+            """,
+            facility_id=facility_id,
+            database_sources=DATABASE_SIGNAL_SOURCES,
+        )
+        if result:
+            stats["database_signals_linked"] = result[0]["linked"]
 
     return stats
 
@@ -2453,10 +2699,15 @@ __all__ = [
     "ProgressCallback",
     "DocumentPipeline",
     "WikiIngestionPipeline",
+    "apply_dynamic_page_rule",
     "clear_facility_wiki",
+    "detect_dynamic_page",
+    "dynamic_page_stub",
+    "extract_database_links",
     "fetch_document_content",
     "fetch_document_size",
     "get_embed_model",
+    "fronts_databases_for_topic",
     "get_pending_wiki_documents",
     "get_pending_wiki_pages",
     "get_wiki_queue_stats",

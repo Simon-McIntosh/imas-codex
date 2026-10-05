@@ -1,0 +1,89 @@
+<section>
+  <h2 id="handbook-dynamic-pages">Dynamic handbook tables link to the catalogue they front</h2>
+
+  <p id="handbook-dynamic-pages-landed">
+    The JT-60SA Data Handbook renders one table per database at request time:
+    the topic markup carries only column headers and a search form, and a CGI
+    plugin fills the rows from the catalogue. Ingest therefore kept an
+    empty-header chunk and linked it to no signal, so the handbook page reached
+    none of the data it documents. A dynamic page now records the database(s) it
+    fronts on <code>WikiPage.fronts_database</code>, its empty-header chunk text
+    is replaced by a one-line stub naming those databases, and the page anchors
+    <code>DOCUMENTS</code> edges to every <code>FacilitySignal</code> of the
+    catalogues it fronts.
+  </p>
+
+  <p id="handbook-dynamic-pages-detect">
+    The database a page fronts comes from the <code>?db=</code> parameters of the
+    links that reach it — the handbook's
+    <code>[[CategoryInformation?db=EDDB][Experiment database (EDDB)]]</code> and
+    its siblings — parsed from the linking page's own stored chunk text. A page
+    is read as dynamic when its extracted text is a table with no data row
+    beneath any header: a data row is a table row that sits under a header
+    separator and is not one of the header rows the empty table repeats. The
+    literal word "search" is not required, because the Datatype Information
+    topics carry no search label and are dynamic all the same.
+  </p>
+
+  <p id="handbook-dynamic-pages-link">
+    <code>link_chunks_to_entities</code> gained a fourth <code>MERGE</code>
+    keyed on <code>fronts_database</code>. A page that fronts database D has
+    each of its chunks linked to every <code>FacilitySignal</code> whose
+    <code>data_source_name</code> is the scanner source for D. The
+    database&rarr;source map (<code>EDDB&nbsp;&rarr;&nbsp;edas</code>) is a small
+    dict beside the function; a database with no scanner source links to
+    nothing, so adding a scanner is the only change needed to extend the map.
+  </p>
+
+  <figure id="handbook-dynamic-pages-figure">
+    <img src="/jt60sa-discovery-completion/figures/handbook-dynamic-pages/reach.png"
+         alt="Signals reached by each dynamic handbook page, and by each database those pages front." />
+    <figcaption>
+      Live <code>jt-60sa</code> graph, 2026-10-05. Left: signals each dynamic
+      handbook page reaches through <code>HAS_CHUNK</code> and
+      <code>DOCUMENTS</code> after the rule and linker were applied.
+      Right: signals a page can reach per database it fronts — only
+      <code>EDDB</code> has a scanner writing its source name
+      (<code>edas</code>), so <code>DataInformation</code>, fronting
+      <code>UDDB</code>, <code>EQDB</code> and <code>FAME</code>, reaches none
+      yet.
+    </figcaption>
+  </figure>
+
+  <p id="handbook-dynamic-pages-measure">
+    Applied to the live graph through the pipeline's own functions
+    (<code>apply_dynamic_page_rule</code> for the handbook topics, then
+    <code>link_chunks_to_entities("jt-60sa")</code>), not through hand Cypher.
+    The rule reads the linking page's stored chunk text rather than a fresh
+    fetch, because the JT-60SA wiki host is not reachable from the compute node
+    this ran on; the derivation is from the same markup the ingest stored.
+    <code>CategoryInformation</code> now carries
+    <code>fronts_database = ['EDDB', 'PMDB']</code> and
+    <code>DataInformation</code> carries
+    <code>['UDDB', 'EQDB', 'FAME']</code>, both still <code>ingested</code>. The
+    linker created <strong>12,596</strong> <code>DOCUMENTS</code> edges; the
+    EDDB-fronting page reaches <strong>6,298</strong> <code>FacilitySignal</code>
+    nodes, and the signal <code>jt-60sa:general/psrc_magfluxlp1</code> is reached
+    from both of that page's chunks. The brief's 6,240 was the EDAS scan size
+    when it was written; the graph has since grown to 6,298, and the page reaches
+    every one of them.
+  </p>
+
+  <p id="handbook-dynamic-pages-control">
+    Negative control: removing the <code>fronts_database</code> derivation from
+    <code>detect_dynamic_page</code> (so a header-only, database-less page reads
+    as dynamic) fails
+    <code>test_header_only_without_database_is_not_dynamic</code> with a non-zero
+    exit; the unmodified detector passes the same test.
+  </p>
+
+  <p id="handbook-dynamic-pages-followon">
+    Two follow-ons. The stub text is written to the graph but the chunk's
+    <code>embedding</code> is not recomputed, because the embedding backend was
+    unreachable from the compute node during this run; a re-embed pass is needed
+    before the stub text is searchable by vector. And <code>PMDB</code>,
+    <code>UDDB</code>, <code>EQDB</code> and <code>FAME</code> front pages that
+    reach no signal until a scanner writes those source names — extending
+    <code>DATABASE_SIGNAL_SOURCES</code> is all that is required.
+  </p>
+</section>
