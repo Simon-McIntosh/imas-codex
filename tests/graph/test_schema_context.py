@@ -208,6 +208,16 @@ class TestVectorIndexFilters:
         filters = schema.vector_index_filters
         assert filters.get("code_chunk_embedding") == ["facility_id"]
 
+    def test_schema_exposes_sibling_facility_filters(self, schemas_dir):
+        """The signal, wiki-chunk and code-example indexes also carry the filter."""
+        from imas_codex.graph.schema import GraphSchema
+
+        schema = GraphSchema(schemas_dir / "facility.yaml")
+        filters = schema.vector_index_filters
+        assert filters.get("facility_signal_desc_embedding") == ["facility_id"]
+        assert filters.get("wiki_chunk_embedding") == ["facility_id"]
+        assert filters.get("code_example_desc_embedding") == ["facility_id"]
+
     def test_vector_indexes_shape_unchanged(self, schemas_dir):
         """vector_indexes stays a list of 3-tuples."""
         from imas_codex.graph.schema import GraphSchema
@@ -232,6 +242,13 @@ class TestVectorIndexFilters:
 
         assert hasattr(mod, "VECTOR_INDEX_FILTERS")
         assert mod.VECTOR_INDEX_FILTERS["code_chunk_embedding"] == ["facility_id"]
+        # The three sibling indexes rebuilt alongside it carry the same filter.
+        for index in (
+            "facility_signal_desc_embedding",
+            "wiki_chunk_embedding",
+            "code_example_desc_embedding",
+        ):
+            assert mod.VECTOR_INDEX_FILTERS[index] == ["facility_id"]
 
     def test_generated_vector_indexes_shape_unchanged(self, tmp_path):
         """VECTOR_INDEXES stays a mapping to 2-tuples."""

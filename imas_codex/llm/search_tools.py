@@ -448,12 +448,17 @@ def _vector_search_signals(
 ) -> tuple[list[str], dict[str, float]]:
     """Vector search on facility_signal_desc_embedding index.
 
-    Uses property-based facility filter with over-fetching to avoid
-    facility starvation when one facility dominates the index.
+    Facility filtering is pushed inside SEARCH as an in-index pre-filter:
+    ``facility_signal_desc_embedding`` registers ``facility_id`` as an
+    additional vector index property, so the ANN cut is taken over the
+    facility's own signals rather than over a global candidate set that a
+    small facility's signals would not survive. ``diagnostic`` and
+    ``physics_domain`` stay as post-filters over the returned signals.
     """
-    where_parts = ["s.facility_id = $facility"]
+    prefilter_parts = ["s.facility_id = $facility"]
+    where_parts: list[str] = []
     params: dict[str, Any] = {
-        "k": max(k * 2, 50),
+        "k": k,
         "embedding": embedding,
         "facility": facility,
         "limit": k,
@@ -470,7 +475,8 @@ def _vector_search_signals(
         build_vector_search(
             "facility_signal_desc_embedding",
             "FacilitySignal",
-            where_clauses=where_parts,
+            prefilter_clauses=prefilter_parts,
+            where_clauses=where_parts or None,
             k="$k",
             node_alias="s",
         )
@@ -800,15 +806,16 @@ def _vector_search_wiki_chunks(
 ) -> tuple[list[str], dict[str, float]]:
     """Vector search on wiki_chunk_embedding index.
 
-    Uses property-based facility filter with over-fetching.
-    Optionally filters by wiki site URL substring, physics domain,
-    and score dimension thresholds.
+    Facility filtering is pushed inside SEARCH as an in-index pre-filter:
+    ``wiki_chunk_embedding`` registers ``facility_id`` as an additional
+    vector index property, so the ANN cut is taken over the facility's own
+    chunks rather than a global candidate set. Site, physics-domain and
+    score filters stay as a post-filter over the joined WikiPage.
     """
-    internal_k = max(k * 2, 50)
     # Build dynamic WHERE clauses for WikiPage join
     page_filters: list[str] = []
     params: dict[str, Any] = {
-        "k": internal_k,
+        "k": k,
         "embedding": embedding,
         "facility": facility,
         "limit": k,
@@ -829,7 +836,7 @@ def _vector_search_wiki_chunks(
     search_block = build_vector_search(
         "wiki_chunk_embedding",
         "WikiChunk",
-        where_clauses=["c.facility_id = $facility"],
+        prefilter_clauses=["c.facility_id = $facility"],
         k="$k",
         node_alias="c",
     )
@@ -1573,19 +1580,22 @@ def _vector_search_code_examples(
 
     Searches the code_example_desc_embedding index and traverses to child
     CodeChunks, returning chunk IDs with scores inherited from the parent.
-    Gracefully returns empty on missing index.
+    The facility predicate renders inside SEARCH: ``code_example_desc_embedding``
+    registers ``facility_id`` as an additional vector index property, so the
+    ANN cut is taken over the facility's own examples. Returns empty on a
+    missing or unavailable index; any other error surfaces.
     """
     try:
         params: dict[str, Any] = {"k": max(k, 20), "embedding": embedding}
-        search_where: list[str] = []
+        prefilter: list[str] = []
         if facility is not None:
-            search_where.append("ce.facility_id = $facility")
+            prefilter.append("ce.facility_id = $facility")
             params["facility"] = facility
 
         search_block = build_vector_search(
             "code_example_desc_embedding",
             "CodeExample",
-            where_clauses=search_where or None,
+            prefilter_clauses=prefilter or None,
             k="$k",
             node_alias="ce",
         )
@@ -1598,7 +1608,10 @@ def _vector_search_code_examples(
         )
         params["limit"] = k * 2
         return gc.query(cypher, **params)
-    except Exception:
+    except (ClientError, DatabaseError):
+        # The vector index may be absent or unavailable; return no examples
+        # rather than failing the whole search. Any other exception is a
+        # programming error and must surface rather than be absorbed here.
         return []
 
 
