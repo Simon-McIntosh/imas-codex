@@ -2,8 +2,10 @@
 
 The probe is stubbed at both probe sites: the tool summary
 (``imas_codex.remote.tools``) and the ``discover`` preflight
-(``imas_codex.remote.tools``). Each is asserted to open the remote environment
-exactly once per invocation.
+(``imas_codex.remote.tools``), plus the python module
+(``imas_codex.remote.python``), which binds the probe by direct import. Each
+command is asserted to open the remote environment exactly once per
+invocation, the install path included.
 """
 
 from __future__ import annotations
@@ -59,7 +61,12 @@ def _stub_probe(
     payload: dict,
     calls: list | None = None,
 ) -> None:
-    """Stub the one probe site, optionally recording each call."""
+    """Stub every probe site, recording each call in one shared counter.
+
+    ``remote_python`` binds ``probe_remote_environment`` by direct import, so a
+    probe opened from the python module is only visible through its own name.
+    Patching both sites lets one invocation be counted across the whole path.
+    """
 
     def _probe(*_a, **_k):
         if calls is not None:
@@ -67,6 +74,7 @@ def _stub_probe(
         return payload
 
     monkeypatch.setattr(remote_tools, "probe_remote_environment", _probe)
+    monkeypatch.setattr(remote_python, "probe_remote_environment", _probe)
 
 
 def test_status_passes_on_met_environment(
@@ -188,4 +196,33 @@ def test_discover_preflight_probes_the_environment_once(
             },
         }
     )
+    assert len(calls) == 1, f"expected one probe, saw {len(calls)}"
+
+
+def test_install_probes_the_environment_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """One ``tools install`` invocation opens the remote environment once.
+
+    ``setup_python_env`` probes the declared environment to judge the floor and
+    hands that probe to ``create_venv``; without the hand-off the venv step
+    would probe a second time.
+    """
+    monkeypatch.setattr(
+        remote_python,
+        "check_tool",
+        lambda key, facility=None: {
+            "available": key == "uv",
+            "version": "1.0" if key == "uv" else None,
+        },
+    )
+    monkeypatch.setattr(
+        remote_python,
+        "run",
+        lambda cmd, **k: "Python 3.12.9" if "--version" in cmd else "",
+    )
+    calls: list = []
+    _stub_probe(monkeypatch, _declared("3.12.9", "3.12", []), calls=calls)
+    result = remote_python.setup_python_env("jt-60sa")
+    assert any(step["step"] == "create_venv" for step in result["steps"])
     assert len(calls) == 1, f"expected one probe, saw {len(calls)}"

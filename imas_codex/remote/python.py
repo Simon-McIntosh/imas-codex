@@ -439,6 +439,7 @@ def create_venv(
     python_version: str = RECOMMENDED_PYTHON,
     venv_path: str = DEFAULT_VENV_PATH,
     force: bool = False,
+    environment: dict | None = None,
 ) -> dict:
     """Create a venv for imas-codex on a facility.
 
@@ -449,6 +450,10 @@ def create_venv(
         python_version: Preferred Python version
         venv_path: Path for the venv
         force: Recreate even if exists
+        environment: The already-resolved ``remote_environment`` probe. A
+            caller that has probed it does not open the remote environment
+            again; omitted, it is probed here so one invocation still probes
+            once.
 
     Returns:
         Dict with success status and details
@@ -487,8 +492,10 @@ def create_venv(
         }
 
     # Check available Pythons, judging the facility's declared remote
-    # environment from a single probe of this invocation.
-    environment = _probe_facility_environment(facility)
+    # environment. A caller that already resolved it hands it in, so one
+    # invocation probes once.
+    if environment is None:
+        environment = _probe_facility_environment(facility)
     status = get_python_status(facility=facility, environment=environment)
 
     # Determine which Python to use
@@ -668,7 +675,10 @@ def setup_python_env(
 
     # Step 3: Create venv
     venv_result = create_venv(
-        facility=facility, python_version=python_version, force=force
+        facility=facility,
+        python_version=python_version,
+        force=force,
+        environment=environment,
     )
     results["steps"].append(
         {
