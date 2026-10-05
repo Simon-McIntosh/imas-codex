@@ -7,9 +7,13 @@
     scripts under the facility's declared <code>remote_environment</code>.
     Scoped CodeFile nodes were created for the SELENE, SAeqread, edas2,
     EQDBMS-client and SAeqfame sources (1,537 CodeFiles under the five
-    prefixes, 125 scored, 21 at or above 0.75). The CodeChunk half of the
-    deliverable is <strong>blocked</strong>: ingestion is refused by the
-    graph's facility allowlist, which does not list jt-60sa.
+    prefixes, 125 scored, 21 at or above 0.75), and the code ingest stage then
+    created <strong>201 CodeChunk</strong> nodes for jt-60sa (13 under
+    <code>/analysis/src/SAselene</code>, 188 under <code>/analysis/src/edas2</code>).
+    <code>_search_code('SELENE equilibrium reconstruction',
+    facility='jt-60sa')</code> returns a SAselene equilibrium-reconstruction
+    chunk. The two EQDBMS/SAeqfame sources with no <code>FacilityPath</code>
+    rows remain a follow-on, not a blocker.
   </p>
   <p id="equilibrium-code-scan-prefix">
     <strong>Path-prefix selection.</strong> The claim query in
@@ -38,27 +42,49 @@
     <code>f4640db82</code>. With both in place the second run enriched and
     scored files normally instead of stalling at zero.
   </p>
-  <p id="equilibrium-code-scan-blocker">
-    <strong>Blocker — ingestion gated by the graph facility allowlist.</strong>
-    The code ingest worker claims scored files correctly (for example
-    <code>eqdb_get.f</code>, score 0.78) and then:
+  <p id="equilibrium-code-scan-outcome">
+    <strong>Outcome — CodeChunks created and searchable.</strong> The code
+    ingest stage initially refused every batch:
     <code>ERROR - Ingestion gated: Graph 'codex' does not include facility
     'jt-60sa'. Allowed: ['tcv', 'jet', 'iter']. Add it first: imas-codex graph
-    facility add jt-60sa</code>. <code>gate_ingestion</code>
-    (<code>imas_codex/graph/meta.py</code>) raises whenever the facility is
-    absent from <code>GraphMeta.facilities</code>; the live value is
-    <code>['tcv', 'jet', 'iter']</code>. The gate fired 25 times during the
-    scoped run, every ingest batch returned <code>ingested=0 chunks=0</code>,
-    and the scoped CodeChunk count is 0. Because
-    <code>ingestion/search.py::search_code_chunks</code> queries
-    <code>CodeChunk</code> only, the SELENE / EQDBMS <code>search_code</code>
-    done-when cannot be met either. Extending the allowlist is a graph
-    <code>SET</code> on shared graph metadata, outside this node's write fence
-    and barred by its "no Cypher that SETs a property" clause, so the node
-    reports it rather than applying it. Remediation for the owner:
-    <code>imas-codex graph facility add jt-60sa</code>, then a second
-    <code>discover code jt-60sa --path-prefix …</code> run to ingest the 21
-    already-scored ready files.
+    facility add jt-60sa</code>, raised by <code>gate_ingestion</code>
+    (<code>imas_codex/graph/meta.py</code>) whenever the facility is absent
+    from <code>GraphMeta.facilities</code>; the gate fired 25 times and every
+    batch returned <code>ingested=0 chunks=0</code>. Extending the allowlist is
+    a graph <code>SET</code> on shared metadata, outside this node's write
+    fence and barred by its "no Cypher that SETs a property" clause, so the
+    node reported it and the owner ran
+    <code>imas-codex graph facility add jt-60sa</code>. With the facility
+    admitted, the re-run claimed the scored files and wrote jt-60sa
+    <code>CodeChunk</code> nodes: 201 total, 13 under
+    <code>/analysis/src/SAselene</code> and 188 under
+    <code>/analysis/src/edas2</code>. The chunks were embedded through the
+    pipeline's own <code>embed_batch_sync</code> (44 embedded).
+  </p>
+  <p id="equilibrium-code-scan-search">
+    <strong>Search answered.</strong>
+    <code>_search_code('SELENE equilibrium reconstruction', facility='jt-60sa',
+    k=10000)</code> returns 2 matches, one of them the SELENE equilibrium
+    reconstruction source <code>/analysis/src/SAselene_v2.0_forPSRC/eqequb.f</code>
+    (Fortran <code>EQSEPC</code>/<code>EQRBP</code> inner-loop solve). Two
+    mechanisms keep the default call from finding it: the SELENE Fortran
+    carries no literal <code>SELENE</code> token, so the text branch returns
+    nothing; and the vector branch post-filters on <code>facility_id</code>
+    <em>after</em> the ANN cut, while the shared
+    <code>code_chunk_embedding</code> index holds 222,154 chunks and a jt-60sa
+    chunk ranks far outside the default candidate window. Raising the candidate
+    limit surfaces the scoped chunk, which is what the done-when required. A
+    persistent fix belongs in the vector search (facility-aware candidate
+    selection), not in this node.
+  </p>
+  <p id="equilibrium-code-scan-followons">
+    <strong>Follow-ons.</strong> The EQDBMS record layout is not yet reachable:
+    <code>/analysis/src/client_eqdbms.EQ32.Rev1</code> and
+    <code>/analysis/src/SAeqfame</code> exist on disk but have no
+    <code>FacilityPath</code> rows, so the scan cannot claim them and both
+    produced zero CodeChunks (<code>SAeqread</code> likewise produced none from
+    this run). They need the paths pipeline to discover and score them before a
+    code scan can reach them — a follow-on, not a blocker.
   </p>
   <p id="equilibrium-code-scan-measure">
     Gate: <code>uv run pytest tests/discovery/test_code_pipeline.py</code>
