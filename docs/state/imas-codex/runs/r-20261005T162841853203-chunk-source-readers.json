@@ -81844,6 +81844,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "bb1f4911db4a4a5af688378bc92f81605c50f506",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 204,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261005T162841853203-chunk-source-readers",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 204,
+        "path": "/tmp/reckon-crew-scratch/r-20261005T162841853203-chunk-source-readers"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/chunk-source-readers",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
