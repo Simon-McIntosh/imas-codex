@@ -100,8 +100,9 @@ tests/search/.expected_paths_cache.json
 .bench-work/
 
 
-# Local research artifacts (session logs, benchmark outputs) — never committed
-research/
+# Local research artifacts (session logs, benchmark outputs) — never committed.
+# Anchored to the repository root: docs/research/ holds tracked research docs.
+/research/
 sn_benchmark_*.json
 sn_bench_*.json
 
