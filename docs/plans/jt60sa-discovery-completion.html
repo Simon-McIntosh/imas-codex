@@ -26,7 +26,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="42c171fdd0b2be04ae2c7d9048b22627595a0b57,737830b4ff12c632cdc48ad5da67583dc5d6850d,8f50f6642eed2c4c7e5fe39d8302bd48365e9bae,95c4c283db886823e414f26bdc90b188b3cdb3ac,7bd3714029e6b4629d76c7ef25dca9291476aa62,a212437fd9e73a3a4cccd8a9a4d5e30f734dd79f,b47967a659fd7e631ce24e41a26cd47437afc19c">
 <meta name="plan-impl" content="0.4">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-10-05">
 </head>
 <body>
@@ -403,6 +403,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261005T073435673986-review-of-embed-service-resolution" data-who="reckon-build" data-when="2026-10-05T07:48:16.334Z">
     <div class="r-comment-body"><p>landing: review of r-20261005T072040452763-embed-service-resolution at base b1debac9 head c120c1285 is SOUND WITH FINDINGS (85/100 — goal_fidelity 19, evidence 15, scope_discipline 17, durability 16, fit 18); resolve_service_url now owns SLURM discovery (compute node gets http://98dci4-gpu-0002:18765, verified live against the base's localhost), the four briefed copies are unified, the negative control reddens the compute-node test, and three follow-ons are recorded: the change leaves 6 tests red in tests/embeddings/test_readiness.py (gate omitted tests/embeddings), graph/client.py::_slurm_service_uri remains a fifth copy now in plan section 8 scope, and the reviewed manifest names no baseline_suite/after_suite gate logs so its record's added-failure count is unmeasured.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261005T074717216467-embed-resolution-residue" data-who="reckon-build" data-when="2026-10-05T08:04:28.827Z">
+    <div class="r-comment-body"><p>embed-resolution-residue: imas_codex/graph/client.py::_slurm_service_uri now delegates SLURM node discovery to remote.locations._service_url_for_slurm (no discover_compute_node_local/_resolve_compute_host call in graph/), the six retired readiness-internal tests are removed and their surviving different-nodes claim re-expressed in tests/remote/test_locations_resolution.py; gate exits 0 (274 passed, 1 skipped) and the negative control is red (EXIT=1)</p></div>
 </div>
 </section>
 </main>
