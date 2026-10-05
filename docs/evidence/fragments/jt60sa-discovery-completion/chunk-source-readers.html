@@ -1,0 +1,69 @@
+<section>
+  <h2 id="chunk-source-readers">Every code-chunk reader resolves its source through the one declared edge</h2>
+  <p id="chunk-source-readers-readers">
+    The three remaining CodeChunk source readers now embed
+    <code>render_chunk_source</code> from
+    <code>imas_codex/graph/query_builder.py</code>, so every reader resolves a
+    chunk's path through the owning <code>CodeExample</code>'s
+    <code>HAS_CHUNK</code> edge. The code-context lookup
+    (<code>_build_code_context_query</code> in
+    <code>imas_codex/discovery/signals/parallel.py</code>) no longer reads
+    <code>src.path</code>, an attribute the example does not carry; it projects
+    the renderer's <code>source_path</code>. <code>_search_code_chunks</code>
+    in <code>imas_codex/llm/server.py</code> no longer joins the undeclared
+    <code>(sf:CodeFile)-[:HAS_CHUNK]-&gt;(node)</code> arm; its Cypher is now
+    built by a module-level <code>_code_chunk_search_query()</code> that embeds
+    the renderer and reads <code>node.facility_id</code> for the facility.
+    <code>_enrich_code_chunks</code> in
+    <code>imas_codex/llm/search_tools.py</code> drops its inline
+    <code>coalesce(ce.source_file, cc.source_file)</code> arm for the renderer's
+    identical binding, and its docstring no longer names the retracted
+    <code>CODE_EXAMPLE_ID</code> edge.
+  </p>
+  <p id="chunk-source-readers-rg">
+    Done-when check: <code>rg 'CODE_EXAMPLE_ID|CodeFile\)-\[:HAS_CHUNK\]|coalesce\(.*source_file' imas_codex</code>
+    matches only the renderer at
+    <code>imas_codex/graph/query_builder.py:89</code>.
+  </p>
+  <p id="chunk-source-readers-repro">
+    Reproduction of the recorded defect on the live graph (same jt-60sa chunks,
+    both arms side by side): the old <code>src.path</code> arm reads null, the
+    renderer's coalesce reads the path.
+  </p>
+  <pre id="chunk-source-readers-repro-output">
+{'chunk': 'jt-60sa:eqpde:6c0d9d11:chunk_0:0fb80112', 'old_src_path': None, 'new_source_path': '/analysis/src/SAselene_v2.0_forPSRC/eqpde.f'}
+{'chunk': 'jt-60sa:contor:53fe6513:chunk_0:463f50c9', 'old_src_path': None, 'new_source_path': '/analysis/src/SAselene_v2.0_forPSRC/plt/contor.f'}
+{'chunk': 'jt-60sa:plteq:dd434a36:chunk_0:f1c92ddd', 'old_src_path': None, 'new_source_path': '/analysis/src/SAselene_v2.0_forPSRC/plt/plteq.f'}
+  </pre>
+  <p id="chunk-source-readers-live">
+    Live graph, jt-60sa, the real embedding path
+    (<code>_fetch_code_chunks('jt-60sa', q)</code>): the code-context lookup
+    renders a non-null <code>source_path</code> for every returned chunk.
+  </p>
+  <pre id="chunk-source-readers-live-output">
+query='coil current equilibrium magnetic flux' rows=3
+   source_path= '/analysis/src/edas2/v2.1.15/edas_share/edas_plugins/jt60sa/edas_device_function_jt60sa.py'  lang= python
+   source_path= '/analysis/src/SAselene_v2.0_forPSRC/eqequb.f'  lang= fortran
+   source_path= '/analysis/src/SAselene_v2.0_forPSRC/eqequb.f'  lang= fortran
+query='EFIT equilibrium reconstruction' rows=3
+   source_path= '/analysis/src/edas2/v2.1.15/edas_share/edas_plugins/jt60sa/edas_device_function_jt60sa.py'  lang= python
+   source_path= '/analysis/src/edas2/v2.1.15/edas_share/edas_plugins/jt60sa/edas_device_function_jt60sa.py'  lang= python
+   source_path= '/analysis/src/edas2/v2.1.15/edas_share/edas_plugins/jt60sa/edas_device_function_jt60sa.py'  lang= python
+  </pre>
+  <p id="chunk-source-readers-base">
+    Base counts re-recorded 2026-10-05: 201 jt-60sa CodeChunk rows, all 201 with
+    an inbound <code>HAS_CHUNK</code> (0 lacking one), so the null path was the
+    reader defect alone and no writer repair is needed.
+  </p>
+  <p id="chunk-source-readers-gate">
+    Gate <code>pytest tests/llm/test_search_tools.py
+    tests/discovery/test_signals_pipeline.py tests/discovery/test_code_pipeline.py
+    tests/ingestion</code> exits <strong>0</strong> (312 passed, 8 skipped). A
+    test per reader pins the attribute it reads
+    (<code>TestCodeChunkSourceResolution</code> and
+    <code>TestCodeContextFacilityPredicate::test_source_resolved_through_renderer</code>).
+    Negative control — removing the renderer's <code>OPTIONAL MATCH</code> line
+    from <code>_enrich_code_chunks</code>' composed Cypher — fails
+    <code>test_enrich_code_chunks_embeds_renderer</code> at exit 1.
+  </p>
+</section>

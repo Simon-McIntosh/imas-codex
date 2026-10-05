@@ -19,6 +19,7 @@ from neo4j.exceptions import ClientError, DatabaseError, ServiceUnavailable
 
 from imas_codex.embeddings.encoder import EmbeddingBackendError, Encoder
 from imas_codex.graph.client import GraphClient
+from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.vector_search import build_vector_search
 from imas_codex.llm.search_formatters import (
     format_code_report,
@@ -1638,16 +1639,17 @@ def _enrich_code_chunks(
     """Enrich code chunks with data references and directory context.
 
     Uses traversals that work with both current and migrated graph states:
-    ``CodeExample -[:HAS_CHUNK]-> CodeChunk`` (inverse of schema CODE_EXAMPLE_ID)
+    ``CodeExample -[:HAS_CHUNK]-> CodeChunk`` (the owning edge the chunk writer
+    materialises, rendered by ``render_chunk_source``)
     ``CodeChunk -[:CONTAINS_REF]-> DataReference -[:RESOLVES_TO_NODE]-> SignalNode``
     ``DataReference -[:RESOLVES_TO_IMAS_PATH]-> IMASNode``
     ``CodeFile -[:IN_DIRECTORY]-> FacilityPath``
     """
-    cypher = """
+    cypher = f"""
         UNWIND $chunk_ids AS cid
-        MATCH (cc:CodeChunk {id: cid})
-        OPTIONAL MATCH (ce:CodeExample)-[:HAS_CHUNK]->(cc)
-        OPTIONAL MATCH (cf:CodeFile {path: cc.source_file})
+        MATCH (cc:CodeChunk {{id: cid}})
+        {render_chunk_source("cc", "source_file")}
+        OPTIONAL MATCH (cf:CodeFile {{path: cc.source_file}})
             WHERE cf.facility_id = cc.facility_id
         OPTIONAL MATCH (cc)-[:CONTAINS_REF]->(dr:DataReference)
         OPTIONAL MATCH (dr)-[:RESOLVES_TO_NODE]->(tn)
@@ -1656,11 +1658,11 @@ def _enrich_code_chunks(
         RETURN cc.id AS id, cc.text AS text,
                cc.function_name AS function_name,
                cc.language AS language,
-               coalesce(ce.source_file, cc.source_file) AS source_file,
+               source_file,
                cf.id AS source_file_id,
                coalesce(ce.facility_id, cc.facility_id) AS facility_id,
-               collect(DISTINCT {type: dr.ref_type, raw: dr.raw_string,
-                       tree: tn.path, imas_path: ip.id}) AS data_refs,
+               collect(DISTINCT {{type: dr.ref_type, raw: dr.raw_string,
+                       tree: tn.path, imas_path: ip.id}}) AS data_refs,
                fp.path AS directory, fp.description AS dir_description
     """
     return gc.query(cypher, chunk_ids=chunk_ids)

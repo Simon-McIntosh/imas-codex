@@ -16,6 +16,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from neo4j.exceptions import ClientError, ServiceUnavailable
 
+from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.llm.search_formatters import (
     _interpolate_template,
     format_code_report,
@@ -26,6 +27,7 @@ from imas_codex.llm.search_formatters import (
 )
 from imas_codex.llm.search_tools import (
     _CHUNK_DOCUMENTS_CAP,
+    _enrich_code_chunks,
     _enrich_wiki_chunks,
     _fetch,
     _fetch_wiki_page,
@@ -2210,3 +2212,35 @@ class TestFulltextFailureHandling:
 
         assert result == [{"id": "jt-60sa:general/psrc_magfluxlp1", "score": 0.6}]
         assert "CONTAINS" in gc.calls[-1][0]
+
+
+class TestCodeChunkSourceResolution:
+    """Each code-chunk reader resolves its source through the one declared edge.
+
+    A chunk reaches the file it came from through the owning CodeExample's
+    ``HAS_CHUNK`` edge, so every reader embeds ``render_chunk_source`` rather
+    than an inline join or coalesce the schema does not back. These pin the
+    attribute each reader reads so the readers cannot diverge again.
+    """
+
+    def test_enrich_code_chunks_embeds_renderer(self):
+        gc = MagicMock()
+        gc.query = MagicMock(return_value=[])
+
+        _enrich_code_chunks(gc, ["jt-60sa:general/psrc_magflux:chunk-1"])
+
+        cypher = gc.query.call_args[0][0]
+        assert render_chunk_source("cc", "source_file") in cypher
+        # exactly one coalesce over source_file: the renderer's, not a second arm
+        assert cypher.count("coalesce(ce.source_file, cc.source_file)") == 1
+        assert "coalesce(ce.source_file, cc.source_file) AS source_file" in cypher
+        assert "source_file,\n" in cypher
+        assert "CODE_EXAMPLE_ID" not in cypher
+
+    def test_code_chunk_search_embeds_renderer(self):
+        from imas_codex.llm.server import _code_chunk_search_query
+
+        cypher = _code_chunk_search_query()
+        assert render_chunk_source("node", "source_file") in cypher
+        assert "source_file, node.facility_id AS source_facility" in cypher
+        assert "CodeFile" not in cypher

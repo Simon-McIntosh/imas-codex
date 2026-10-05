@@ -71,6 +71,7 @@ from fastmcp import FastMCP
 from neo4j.exceptions import ServiceUnavailable
 from ruamel.yaml import YAML
 
+from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.llm._warmup import warmup
 from imas_codex.llm.prompt_loader import (
     PromptDefinition,
@@ -599,6 +600,25 @@ def _format_error_fields_report(result: dict) -> str:
     return "\n".join(lines)
 
 
+def _code_chunk_search_query() -> str:
+    """Cypher for the CodeChunk branch of ``semantic_search``.
+
+    The chunk reaches the file it came from through the owning CodeExample's
+    ``HAS_CHUNK`` edge, so the source path is rendered by
+    ``render_chunk_source`` rather than a join the schema does not declare.
+    ``source_facility`` is read from the chunk itself, which carries the
+    facility the chunk writer stamped on it.
+    """
+    return (
+        f"{render_chunk_source('node', 'source_file')}\n"
+        "RETURN [k IN keys(node) "
+        "WHERE NOT k ENDS WITH 'embedding' | [k, node[k]]] "
+        "AS properties, labels(node) AS labels, score, "
+        "source_file, node.facility_id AS source_facility "
+        "ORDER BY score DESC"
+    )
+
+
 def _init_repl() -> dict[str, Any]:
     """Initialize the persistent REPL environment with all utilities.
 
@@ -823,13 +843,7 @@ def _init_repl() -> dict[str, Any]:
             "  VECTOR INDEX code_chunk_embedding\n"
             "  FOR $embedding\n"
             "  LIMIT $k\n"
-            ") SCORE AS score\n"
-            "OPTIONAL MATCH (sf:CodeFile)-[:HAS_CHUNK]->(node) "
-            "RETURN [k IN keys(node) "
-            "WHERE NOT k ENDS WITH 'embedding' | [k, node[k]]] "
-            "AS properties, labels(node) AS labels, score, "
-            "sf.path AS source_file, sf.facility_id AS source_facility "
-            "ORDER BY score DESC",
+            ") SCORE AS score\n" + _code_chunk_search_query(),
             k=k,
             embedding=embedding,
         )

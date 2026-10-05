@@ -1911,6 +1911,17 @@ class TestCodeContextFacilityPredicate:
         assert "src.facility_id" not in cypher, cypher
         assert "code_chunk_embedding" in cypher
 
+    def test_source_resolved_through_renderer(self):
+        from imas_codex.discovery.signals.parallel import _build_code_context_query
+        from imas_codex.graph.query_builder import render_chunk_source
+
+        cypher = _build_code_context_query()
+        assert render_chunk_source("node", "source_path") in cypher, cypher
+        # the reader projects the renderer's output, not an attribute of a
+        # source node it never binds
+        assert "source_path," in cypher, cypher
+        assert "src.path" not in cypher, cypher
+
 
 class TestCodeContextLookupErrors:
     """A failing code-context query surfaces rather than returning no context.
