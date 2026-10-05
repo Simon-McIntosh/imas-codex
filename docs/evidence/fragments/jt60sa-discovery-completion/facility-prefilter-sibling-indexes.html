@@ -51,15 +51,38 @@
     rows; before the filter moved inside the index a small facility's rows could
     not survive the global top-k cut.
   </p>
+  <p id="facility-prefilter-sibling-indexes-code">
+    <code>find_code</code> in <code>imas_codex/graph/domain_queries.py</code>
+    filtered facility through a <code>CodeFile</code> join on the
+    <code>CodeExample</code>'s <code>source_file</code> after the ANN cut — a
+    predicate the <code>code_chunk_embedding</code> index cannot evaluate
+    inside <code>SEARCH</code>. It now pre-filters on
+    <code>cc.facility_id</code> (registered on that index by the
+    <code>CodeChunk.embedding</code> annotation) via
+    <code>prefilter_clauses</code>. The join existed only to carry the filter,
+    so it is removed; the <code>CodeExample</code> <code>OPTIONAL MATCH</code>
+    remains and the <code>RETURN</code> coalesces its
+    <code>source_file</code> with the <code>CodeChunk</code>'s denormalized
+    copy. That copy is load-bearing for jt-60sa: none of its 201
+    <code>CodeChunk</code>s carries a <code>CODE_EXAMPLE_ID</code> link, so the
+    old join matched nothing and facility-scoped code search returned no rows;
+    it now returns the facility's own chunks with usable file paths. Commit:
+    <code>34c7f90c1</code>.
+  </p>
   <p id="facility-prefilter-sibling-indexes-gate">
     <code>pytest tests/search tests/llm tests/graph/test_schema_context.py
-    tests/graph/test_vector_search.py</code> → <strong>692 passed, 10 skipped,
-    66 deselected</strong>, exit 0 at <code>3072c2f07</code> (base
-    <code>b5c36b0a2</code> → 684 passed, 10 skipped, exit 0; the 8 added tests are
-    the new in-SEARCH predicate, no-over-fetch and narrowed-except cases). The
-    declared negative control — the signal facility predicate rendered as a
-    post-filter again — turns
-    <code>TestSearchSignals::test_facility_filter_inside_search</code> red while
-    the head arm does not fail it.
+    tests/graph/test_vector_search.py tests/graph/test_domain_queries.py</code>
+    → <strong>730 passed, 10 skipped, 66 deselected</strong>, exit 0 at
+    <code>34c7f90c1</code> (base <code>b5c36b0a2</code> → 684 passed, 10
+    skipped, exit 0; the added tests are the in-SEARCH predicate,
+    no-over-fetch and narrowed-except cases across the signal, wiki-chunk,
+    code-example, domain-signal, domain-wiki and find_code searches). The
+    declared negative controls turn the corresponding test red while the head
+    arms do not: the signal facility predicate as a post-filter
+    (<code>TestSearchSignals::test_facility_filter_inside_search</code>), the
+    domain signal predicate as a post-filter
+    (<code>TestFindSignals::test_facility_predicate_inside_search</code>), and
+    the find_code predicate as a post-filter
+    (<code>TestFindCode::test_facility_predicate_inside_search</code>).
   </p>
 </section>
