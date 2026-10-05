@@ -358,6 +358,108 @@ class TestSeedWorker:
         assert calls["magnetics"] == [1, 2, 3]
         assert calls["results"] == [5000]
 
+    @pytest.mark.anyio
+    async def test_data_access_written_before_signal_ingest(self):
+        """seed_worker persists the scanner's DataAccess before ingesting signals.
+
+        The ingest's edge phase MATCHes the DataAccess by id and merges the
+        DATA_ACCESS edge, so a DataAccess written after the signals leaves a
+        facility's first scan with signals but no access edges.
+        """
+        from imas_codex.discovery.signals.parallel import seed_worker
+        from imas_codex.discovery.signals.scanners.base import ScanResult
+        from imas_codex.graph.models import (
+            DataAccess,
+            FacilitySignal,
+            SignalDataClass,
+        )
+
+        events: list[str] = []
+
+        data_access = DataAccess(
+            id=f"{FACILITY}:tdi:test_access",
+            facility_id=FACILITY,
+            method_type="tdi",
+            library="MDSplus",
+            access_type="local",
+            data_source="tdi",
+            connection_template="data = None",
+            data_template="data = tree.getNode('{data_source_path}').data()",
+        )
+        signals = [
+            FacilitySignal(
+                id=f"{FACILITY}:general/sig_{i}",
+                facility_id=FACILITY,
+                accessor=f"\\TOP:SIG_{i}",
+                name=f"SIG_{i}",
+                data_class=SignalDataClass.one_point,
+            )
+            for i in range(2)
+        ]
+
+        class _FakeScanner:
+            scanner_type = "tdi"
+
+            async def scan(self, facility, ssh_host, config, reference_shot=None):
+                return ScanResult(signals=signals, data_access=data_access)
+
+        state = DataDiscoveryState(
+            facility=FACILITY,
+            ssh_host=SSH_HOST,
+            scanner_types=["tdi"],
+            facility_config=FACILITY_CONFIG,
+            initial_version_counts={
+                "total": 0,
+                "discovered": 0,
+                "ingested": 0,
+                "failed": 0,
+            },
+            initial_signal_counts={
+                "total": 0,
+                "discovered": 0,
+                "enriched": 0,
+                "checked": 0,
+            },
+            cost_limit=10.0,
+        )
+
+        def _record_ingest(sig_dicts, *, batch_size=500):
+            events.append("signal_ingest")
+            return len(sig_dicts)
+
+        mock_gc = MagicMock()
+
+        def _record_query(cypher, **_kwargs):
+            if "DataAccess {id: $id}" in cypher:
+                events.append("data_access_write")
+            return []
+
+        mock_gc.query.side_effect = _record_query
+        mock_gc.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc.__exit__ = MagicMock(return_value=None)
+
+        with (
+            patch(
+                "imas_codex.discovery.signals.scanners.base.get_scanner",
+                return_value=_FakeScanner(),
+            ),
+            patch(
+                "imas_codex.discovery.signals.parallel.ingest_discovered_signals",
+                side_effect=_record_ingest,
+            ),
+            patch(
+                "imas_codex.discovery.signals.parallel.GraphClient",
+                return_value=mock_gc,
+            ),
+        ):
+            await seed_worker(state)
+
+        assert "data_access_write" in events, events
+        assert "signal_ingest" in events, events
+        assert events.index("data_access_write") < events.index("signal_ingest"), (
+            f"DataAccess must be written before signals are ingested: {events}"
+        )
+
 
 class TestEpochWorker:
     """Tests for the epoch_worker function."""

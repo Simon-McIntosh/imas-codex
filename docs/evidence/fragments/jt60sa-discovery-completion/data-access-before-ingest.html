@@ -1,0 +1,44 @@
+<section>
+  <h2 id="data-access-before-ingest">DataAccess written before signal ingest</h2>
+  <p id="data-access-before-ingest-landing">
+    A facility's first signal scan now writes its <code>DATA_ACCESS</code>
+    edges. In <code>seed_worker</code>
+    (<code>imas_codex/discovery/signals/parallel.py</code>) the scanner's
+    DataAccess node is now MERGEd <em>before</em> the scanned signals are
+    ingested, so the ingest's edge phase —
+    <code>MATCH (da:DataAccess {id: sig.data_access}) MERGE (s)-[:DATA_ACCESS]-&gt;(da)</code>
+    — finds the node on the first pass instead of silently matching nothing.
+  </p>
+  <p id="data-access-before-ingest-cause">
+    Previously the signals were ingested first and the DataAccess written
+    afterwards, so the edge phase ran against an absent node and dropped every
+    edge; a second scan (node then present) created them all. This reproduces
+    the first live EDAS scan of run r-20261005T061226180725, where 6,240
+    FacilitySignals landed with zero edges and a re-run produced all 6,240. The
+    cause is the ordering, and it held for every scanner returning a
+    <code>ScanResult.data_access</code> (TDI, PPF, JPF, EDAS) through
+    <code>seed_worker</code>. The fix is the ordering alone — no re-link repair
+    pass. The MDSplus branch seeds via <code>seed_versions</code> and creates
+    its <code>mdsplus:tree_tdi</code> DataAccess in a separate block; it was
+    not touched.
+  </p>
+  <p id="data-access-before-ingest-measure">
+    Gate:
+    <code>uv run pytest tests/discovery/test_signals_pipeline.py
+    tests/discovery/test_scanners.py</code> exits <strong>0</strong>, 41 passed.
+    The new test <code>test_data_access_written_before_signal_ingest</code>
+    drives one <code>ScanResult</code> carrying a DataAccess and two signals
+    through the seed persistence against a recording stub of
+    <code>GraphClient.query</code> and <code>ingest_discovered_signals</code>,
+    and asserts the DataAccess write precedes the first signal batch.
+    Negative control — restoring the old order (ingest signals, then write the
+    DataAccess) — records
+    <code>['signal_ingest', 'data_access_write']</code> and fails the ordering
+    assertion.
+  </p>
+  <p id="data-access-before-ingest-followon">
+    Follow-on measure: a fresh facility's first scan on the live graph must show
+    <code>count(DATA_ACCESS)</code> equal to the signal count on its first pass;
+    no live graph run was made in this node.
+  </p>
+</section>

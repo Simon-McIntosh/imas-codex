@@ -2543,34 +2543,12 @@ async def seed_worker(
             if result.wiki_context:
                 state.wiki_context.update(result.wiki_context)
 
-            if result.signals:
-                batch_start = time.monotonic()
-                count = await asyncio.to_thread(
-                    ingest_discovered_signals,
-                    [s.model_dump(exclude_none=True) for s in result.signals],
-                )
-                total_discovered += count
-                state.discover_stats.processed += count
-                state.discover_stats.last_batch_time = time.monotonic() - batch_start
-                state.discover_stats.record_batch(count)
-
-                if on_progress:
-                    on_progress(
-                        f"{scanner_type}: discovered {count} signals",
-                        state.discover_stats,
-                        [
-                            {
-                                "id": s.id,
-                                "data_source_name": scanner_type,
-                                "data_source_path": s.accessor,
-                                "signals_in_source": count,
-                            }
-                            for s in result.signals[:20]
-                        ],
-                    )
-
-            # Persist DataAccess node independently of signals —
-            # thin-client scanners create access metadata without signals
+            # Persist the DataAccess node BEFORE the signal ingest: the
+            # ingest's edge phase MATCHes this node by id and merges the
+            # DATA_ACCESS edge, so on a facility's first scan an absent node
+            # silently drops every edge. Thin-client scanners may return
+            # access metadata without signals, so this write stands on its
+            # own rather than inside the signal branch.
             if result.data_access:
                 try:
                     da = result.data_access
@@ -2601,6 +2579,32 @@ async def seed_worker(
                         "Failed to ingest DataAccess for %s: %s",
                         scanner_type,
                         e,
+                    )
+
+            if result.signals:
+                batch_start = time.monotonic()
+                count = await asyncio.to_thread(
+                    ingest_discovered_signals,
+                    [s.model_dump(exclude_none=True) for s in result.signals],
+                )
+                total_discovered += count
+                state.discover_stats.processed += count
+                state.discover_stats.last_batch_time = time.monotonic() - batch_start
+                state.discover_stats.record_batch(count)
+
+                if on_progress:
+                    on_progress(
+                        f"{scanner_type}: discovered {count} signals",
+                        state.discover_stats,
+                        [
+                            {
+                                "id": s.id,
+                                "data_source_name": scanner_type,
+                                "data_source_path": s.accessor,
+                                "signals_in_source": count,
+                            }
+                            for s in result.signals[:20]
+                        ],
                     )
 
             if scanner_type == "tdi" and result.metadata.get("functions"):
