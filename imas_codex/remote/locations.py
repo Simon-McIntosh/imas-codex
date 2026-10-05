@@ -246,6 +246,68 @@ def resolve_service_url(
     return url
 
 
+def _discover_slurm_compute_node(
+    info: LocationInfo,
+    *,
+    service_job_name: str | None = None,
+    port: int = 7474,
+) -> str | None:
+    """Discover the compute node hosting a SLURM-scheduled service.
+
+    The single owner of SLURM service-node discovery.  ``squeue`` answers
+    only from inside the cluster, which is exactly the reachability test
+    being asked — discovery decides reachability, not the hostname — so a
+    caller on a compute node is served here even though its hostname
+    matches no login-node pattern.  When no running job is visible the
+    last-known host recorded by the batch script is used instead, since a
+    service may outlive its SLURM allocation.
+
+    Returns the compute node hostname, or None when it cannot be
+    discovered from where this runs.
+    """
+    from imas_codex.remote.tunnel import discover_compute_node_local
+
+    job_name = service_job_name or info.service_job_name
+    compute_node = discover_compute_node_local(service_job_name=job_name)
+    if not compute_node:
+        compute_node = _resolve_compute_host(info, port)
+    return compute_node
+
+
+def _service_url_for_slurm(
+    info: LocationInfo,
+    port: int,
+    *,
+    protocol: str,
+    service_job_name: str | None,
+    local: bool,
+) -> str | None:
+    """Resolve the URL for a SLURM-scheduled service.
+
+    Discovery decides reachability, not the hostname.  A discovered node is
+    reached directly; the service node itself collapses to the loopback.
+    When discovery fails from inside the cluster a local service may still
+    be listening, so the loopback answer is kept; from outside the cluster
+    the caller falls through to the remote/tunnel branch.
+
+    Returns the URL, or None to signal "fall through to the remote branch".
+    """
+    compute_node = _discover_slurm_compute_node(
+        info, service_job_name=service_job_name, port=port
+    )
+    if compute_node:
+        if compute_node.split(".")[0] == socket.gethostname().split(".")[0]:
+            return f"{protocol}://localhost:{port}"
+        return f"{protocol}://{compute_node}:{port}"
+    if local:
+        return f"{protocol}://localhost:{port}"
+    logger.debug(
+        "SLURM: no service job '%s' discoverable from here → remote",
+        service_job_name or info.service_job_name,
+    )
+    return None
+
+
 def _resolve_service_url_uncached(
     location: str,
     port: int,
@@ -262,22 +324,20 @@ def _resolve_service_url_uncached(
     if local and info.scheduler != "slurm":
         return f"{protocol}://localhost:{port}"
 
-    # Mode 2: local + SLURM → discover compute node
-    if local and info.scheduler == "slurm":
-        from imas_codex.remote.tunnel import discover_compute_node_local
-
-        compute_node = discover_compute_node_local(service_job_name=job_name)
-        if not compute_node:
-            # squeue found no running service job — try the configured
-            # compute host (services may outlive the SLURM allocation).
-            compute_node = _resolve_compute_host(info, port)
-        if compute_node:
-            my_hostname = socket.gethostname().split(".")[0]
-            if compute_node.split(".")[0] == my_hostname:
-                return f"{protocol}://localhost:{port}"
-            return f"{protocol}://{compute_node}:{port}"
-        # No SLURM job and no configured compute host — fall back to localhost
-        return f"{protocol}://localhost:{port}"
+    # Mode 2: SLURM-scheduled service → discovery decides reachability, not
+    # the hostname.  Gating this on ``local`` sent compute callers down the
+    # remote branch, whose tunnel they cannot open, leaving a loopback URL
+    # that never answers.
+    if info.scheduler == "slurm":
+        url = _service_url_for_slurm(
+            info,
+            port,
+            protocol=protocol,
+            service_job_name=job_name,
+            local=local,
+        )
+        if url is not None:
+            return url
 
     # Mode 3: remote → access via SSH tunnel (localhost)
     return f"{protocol}://localhost:{port}"

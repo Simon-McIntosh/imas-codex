@@ -286,9 +286,10 @@ def _resolve_uri(host: str | None, bolt_port: int) -> str:
 def _resolve_uri_uncached(host: str | None, bolt_port: int) -> str:
     """Uncached URI resolution — called once per (host, bolt_port) pair.
 
-    Delegates local/SLURM resolution to :func:`resolve_service_url` from
-    the shared locations module.  Remote mode still handles auto-tunneling
-    directly since bolt needs the ``bolt://`` protocol and tunnel offset.
+    SLURM service-node discovery is delegated to the shared owner in
+    ``imas_codex.remote.locations``, so the graph and embedding paths cannot
+    diverge.  Remote mode still handles auto-tunneling directly since bolt
+    needs the ``bolt://`` protocol and tunnel offset.
     """
     from imas_codex.remote.locations import resolve_location
 
@@ -304,48 +305,27 @@ def _resolve_uri_uncached(host: str | None, bolt_port: int) -> str:
         return f"bolt://localhost:{bolt_port}"
 
     # ── Mode 2: SLURM-scheduled service ────────────────────────────────
-    # Discovery decides reachability here, not the hostname. ``squeue`` only
-    # answers from inside the cluster, and every node inside it reaches the
-    # service node directly, so a compute node is served here even though it
-    # matches no ``login_nodes`` pattern. Gating this on ``local`` sent compute
-    # nodes down the remote branch, where the tunnel they cannot open left them
-    # holding a loopback address that never answers.
+    # Discovery decides reachability here, not the hostname.  The shared owner
+    # in ``locations`` answers for every node inside the cluster, so the graph
+    # and embedding paths cannot diverge; a compute node is served there even
+    # though its hostname matches no ``login_nodes`` pattern, whereas gating on
+    # ``local`` sent it down the remote branch where the tunnel it cannot open
+    # left a loopback address that never answers.
     if info.scheduler == "slurm":
-        import socket
+        from imas_codex.remote.locations import _service_url_for_slurm
 
-        from imas_codex.remote.tunnel import discover_compute_node_local
-
-        compute_node = discover_compute_node_local(
-            service_job_name=info.service_job_name
+        slurm_url = _service_url_for_slurm(
+            info,
+            bolt_port,
+            protocol="bolt",
+            service_job_name=info.service_job_name,
+            local=local,
         )
-        if not compute_node:
-            # squeue found no running service job — try the configured
-            # compute host (services may outlive the SLURM allocation).
-            from imas_codex.remote.locations import _resolve_compute_host
-
-            compute_node = _resolve_compute_host(info)
-            if compute_node:
-                logger.info(
-                    "SLURM: no service job, using configured host %s",
-                    compute_node,
-                )
-        if compute_node:
-            my_hostname = socket.gethostname().split(".")[0]
-            if compute_node.split(".")[0] == my_hostname:
-                logger.debug("SLURM: Neo4j on this node → localhost:%d", bolt_port)
-                return f"bolt://localhost:{bolt_port}"
-            logger.info(
-                "SLURM: Neo4j on peer node %s → direct connection", compute_node
-            )
-            return f"bolt://{compute_node}:{bolt_port}"
-        if local:
-            # squeue failed and no configured compute host — fall back to
-            # localhost, where a local service may still be listening.
-            logger.debug("SLURM: no service job found → localhost:%d", bolt_port)
-            return f"bolt://localhost:{bolt_port}"
-        # Undiscoverable from outside the cluster: fall through to the remote
+        if slurm_url is not None:
+            logger.info("SLURM: Neo4j resolved to %s", slurm_url)
+            return slurm_url
+        # Undiscoverable from outside the cluster — fall through to the remote
         # branch, which tunnels rather than guessing an address.
-        logger.debug("SLURM: no service job discoverable from here → remote")
 
     # ── Mode 3: remote ─────────────────────────────────────────────────
     # Check tunnel port override
