@@ -899,13 +899,13 @@ def _text_search_wiki_chunks(
     # Try fulltext index first (BM25 scoring)
     try:
         cypher = """
-            CALL db.index.fulltext.queryNodes('wiki_chunk_text', $search_query)
+            CALL db.index.fulltext.queryNodes('wiki_chunk_text', $query)
             YIELD node AS c, score
             WHERE c.facility_id = $facility
             RETURN c.id AS id, score
             LIMIT $limit
         """
-        results = gc.query(cypher, search_query=query, facility=facility, limit=k * 2)
+        results = gc.query(cypher, query=query, facility=facility, limit=k * 2)
         if results:
             return results
     except Exception:
