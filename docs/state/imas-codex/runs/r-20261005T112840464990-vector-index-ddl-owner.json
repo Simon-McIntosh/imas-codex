@@ -1,0 +1,3819 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "8736d628d3c96302aec7bce0c916c62d0365e774",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8092893,
+      "input_tokens_cumulative": 8092893,
+      "output_tokens": 23946,
+      "output_tokens_cumulative": 23946,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 204,
+    "files": 6,
+    "removed": 89
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 842,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1542,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "get_wiki_queue_stats",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 48,
+        "name": "test_status_displays",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 1188,
+        "name": "ingest_page",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1218
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_review_record",
+        "path": "tests/standard_names/test_suggestion_persist_gate.py"
+      },
+      "run_function": {
+        "line": 1188,
+        "name": "ingest_page",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1218
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1188,
+        "name": "ingest_page",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1218
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 842,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 1542,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1480
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1457,
+        "name": "ingest_pages",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1478
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 842,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1604
+    },
+    {
+      "existing_function": {
+        "line": 1542,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1604
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_get_summary_wrapper_renders_sections",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_block_present_with_feedback",
+        "path": "tests/standard_names/test_compose_feedback_injection.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_additive.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1604
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_manifest_kwargs",
+        "path": "tests/standard_names/test_export_manifest_scope.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1604
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "staging_dir",
+        "path": "tests/standard_names/test_export_report_is_published.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "test_cli_default_routes_to_run_sn_pools",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_full_review_with_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 125,
+        "name": "test_full_review_without_comments",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reviewer_comments_per_dim_set",
+        "path": "tests/standard_names/test_reviewer_per_dim.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 478,
+        "name": "test_build_survey_table",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1607
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "make_document_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "make_image_score_results",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 1571,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 1605
+    },
+    {
+      "existing_function": {
+        "line": 403,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 842,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 1542,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 297,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 2383,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 325,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 87,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 117,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 387,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 61,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 443,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 520,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 508,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 1539,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 249,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 442,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 499,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 669,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 762,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 232,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 278,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 2632,
+        "name": "ingest_from_graph",
+        "path": "imas_codex/discovery/wiki/pipeline.py"
+      },
+      "window_line": 2651
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "cbca1d52914a37e9402c6738cd23e6dec55fcb63",
+    "2c135a284918f3510a8e91b2fa5d532d54c15e47",
+    "3f879c996bc89a50a41c8d12d5a084bf7df27c36"
+  ],
+  "completed_at": "2026-10-05T11:57:05.857Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-05T11:28:46Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest tests/graph/test_schema_context.py",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider tests/graph/test_schema_context.py tests/graph/test_vector_index_ddl_owner.py tests/graph/test_dd_identifier_enrichment.py tests/graph/test_dd_ids_enrichment.py tests/graph/test_dd_enrichment.py tests/wiki/test_pipeline.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112840464990-vector-index-ddl-owner/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.67,
+    "plan": "jt60sa-discovery-completion",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-05T12:28:40.974497+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-05T11:28:40Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 13,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 0,
+    "headroom": 16,
+    "mean_context": 160000,
+    "observed_at": "2026-10-05T11:28:27Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 13,
+      "aggregate_tokens_per_second": 97.675,
+      "detail": "",
+      "mean_tokens_per_second": 162.792,
+      "observed_at": "2026-10-05T11:28:27Z",
+      "runs": 0.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-05T11:57:05.857Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112840464990-vector-index-ddl-owner/manifest.md",
+  "member": "disposable-r-20261005T112840464990-vector-index-ddl-owner",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/graph/test_vector_index_ddl_owner.py::test_only_the_owner_composes_vector_index_ddl"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/graph/test_vector_index_ddl_owner.py::test_only_the_owner_composes_vector_index_ddl"
+    ],
+    "declaration": "restore one hand-written statement in dd_ids_enrichment.py: the rg assertion test fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112840464990-vector-index-ddl-owner/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112840464990-vector-index-ddl-owner/negative-control.log",
+    "test_paths": [
+      "tests/dd",
+      "tests/graph",
+      "tests/wiki/test_pipeline.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "vector-index-ddl-owner",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1208,
+          "cached_input_tokens": 510166,
+          "input_tokens": 511376,
+          "output_tokens": 959,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 512335,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "f5b6708b-f19f-46de-88d6-d2c02a0ddc68",
+      "session_id": "jt60sa-20261005"
+    },
+    "done_when": "rg --glob '*.py' 'CREATE VECTOR INDEX' imas_codex matches only the owner in imas_codex/graph/client.py; any index the schema did not declare is declared so the owner derives it; the DD build, identifier enrichment, IDS enrichment and wiki pipeline tests pass; SHOW INDEXES on the live graph lists cluster_description_embedding, identifier_schema_embedding, imas_node_embedding, ids_embedding and wiki_chunk_embedding ONLINE with unchanged dimensions; pytest tests/graph/test_schema_context.py tests/wiki/test_pipeline.py plus the DD enrichment test modules exits 0 (base at 7bc7c86c9)",
+    "estimated_hours": null,
+    "goal": "Every CREATE VECTOR INDEX statement in the package is composed by GraphClient.ensure_vector_indexes, with the five hand-written copies in the DD build, identifier enrichment, IDS enrichment and wiki pipeline modules replaced by calls to that owner",
+    "id": "vector-index-ddl-owner",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-05T11:28:40Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 13,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 0,
+      "headroom": 16,
+      "mean_context": 160000,
+      "observed_at": "2026-10-05T11:28:27Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 13,
+        "aggregate_tokens_per_second": 97.675,
+        "detail": "",
+        "mean_tokens_per_second": 162.792,
+        "observed_at": "2026-10-05T11:28:27Z",
+        "runs": 0.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T112840464990-vector-index-ddl-owner/manifest.md",
+    "negative_control": "restore one hand-written statement in dd_ids_enrichment.py: the rg assertion test fails",
+    "plan": "jt60sa-discovery-completion",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§15",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "imas_codex/graph/client.py",
+      "imas_codex/graph/build_dd.py",
+      "imas_codex/graph/dd_identifier_enrichment.py",
+      "imas_codex/graph/dd_ids_enrichment.py",
+      "imas_codex/discovery/wiki/pipeline.py",
+      "imas_codex/schemas/imas_dd.yaml",
+      "tests/graph",
+      "tests/wiki/test_pipeline.py",
+      "tests/dd",
+      "docs/evidence/fragments/jt60sa-discovery-completion/vector-index-ddl-owner.html",
+      "docs/figures/jt60sa-discovery-completion/vector-index-ddl-owner"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1604937.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "vector-index-ddl-owner",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-05T11:28:42.245775+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.69,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 336.333,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 425.499,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 50
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": null,
+        "burn_multiple": 1.5112098799506335,
+        "congestion": null,
+        "days_to_reset": 4.406050700763889,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.407620416047123,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 56.00000000000001,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": null,
+        "burn_multiple": 1.5112098799506335,
+        "congestion": null,
+        "days_to_reset": 4.406050700763889,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.407620416047123,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 56.00000000000001,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": null,
+        "burn_multiple": 1.5112098799506335,
+        "congestion": null,
+        "days_to_reset": 4.406050700763889,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.407620416047123,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 56.00000000000001,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0.01,
+      "clive": 0.74,
+      "codex": 0.16,
+      "codex-astra": 0,
+      "codex-luna": 0.01,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 1116,
+    "usage": {
+      "cost": 0.000137928,
+      "input_tokens": 3284,
+      "output_tokens": 89
+    }
+  },
+  "plan": "jt60sa-discovery-completion",
+  "plan_impl_at_dispatch": 0.67,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3f879c996bc89a50a41c8d12d5a084bf7df27c36",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8736d628d3c96302aec7bce0c916c62d0365e774",
+    "reviewed_head_sha": "3f879c996bc89a50a41c8d12d5a084bf7df27c36",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 117
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261005T112840464990-vector-index-ddl-owner",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§15",
+  "session": "jt60sa-20261005",
+  "session_harness": "claude",
+  "session_id": "08dee21b-2c6c-4aba-ac02-e2aef1e01df7",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 14527234,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 528.24,
+    "generated_tokens": 56553,
+    "generation_seconds": 297.862,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 73.7,
+    "machine_seconds": 230.378,
+    "peak_input_tokens": 169527,
+    "tokens_per_second": 189.86,
+    "wall_tokens_per_second": 107.06
+  },
+  "time_budget": "60m",
+  "tool_steps": 75.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: JT-60SA target nakasvr26.iferc.org:22 unreachable from this node from 10:46Z onward — kex_exchange_identification: Connection closed by remote host; then Connection timed out during banner exchange across 6 backoff probes (13 min). From the jump host ping shows 100% packet loss and TCP/22 does not complete; an alternate route (98dci4-srv-1003 -> nakasvr26) also times out. Jump hosts laptop (FR-IWL-MCINTOS1) and 98dci4-srv-1003 are healthy.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 3093,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-05T11:04:43Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-05T10:37:38Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261005T103700585487-equilibrium-source-paths",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4208,
+          "worker_pid": 1187934
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "JT-60SA target nakasvr26.iferc.org:22 unreachable from this node from 10:46Z onward — kex_exchange_identification: Connection closed by remote host; then Connection timed out during banner exchange across 6 backoff probes (13 min). From the jump host ping shows 100% packet loss and TCP/22 does not complete; an alternate route (98dci4-srv-1003 -> nakasvr26) also times out. Jump hosts laptop (FR-IWL-MCINTOS1) and 98dci4-srv-1003 are healthy.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-05T11:04:43Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1440,
+        "log_fresh": false,
+        "manifest_commits": [
+          "1bcad7df3"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "9b610fbb6218aa63aaafb45dd5a2f6aa488b6e0f89a80df1f5611d5330dd143e",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T103700585487-equilibrium-source-paths/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T103700585487-equilibrium-source-paths/manifest.md; resolve the blocker before resuming the run",
+        "node": "equilibrium-source-paths",
+        "phase": "blocked",
+        "plan": "jt60sa-discovery-completion",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "imas-codex",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261005T103700585487-equilibrium-source-paths",
+        "session": "jt60sa-20261005",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261005T103700585487-equilibrium-source-paths",
+          "session_id": "16d15311-2b94-4d7d-a134-8237a859fee8",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 1509,
+        "terminal_at": "2026-10-05T11:03:32Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/jt60sa-20261005/equilibrium-source-paths"
+      }
+    ]
+  },
+  "wall_seconds": 1699,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-05T11:57:08Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-05T11:48:13Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261005T112840464990-vector-index-ddl-owner",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 8786,
+    "worker_pid": 1420017
+  },
+  "worker_seconds": 1681,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
