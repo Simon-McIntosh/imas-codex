@@ -115,6 +115,9 @@ async def image_fetch_worker(
         make_image_id,
         persist_images,
     )
+    from imas_codex.discovery.wiki.graph_ops import (
+        mark_document_failed_or_deferred,
+    )
 
     while not state.should_stop():
         if state.scan_only:
@@ -249,7 +252,11 @@ async def image_fetch_worker(
             await asyncio.to_thread(_mark_documents_ingested, ingested_ids)
 
         for doc_id, error in failed_ids:
-            await asyncio.to_thread(_mark_document_failed, doc_id, error)
+            # An image container Pillow cannot decode is unsupported input, not
+            # a transient failure: defer it with the reason rather than retry.
+            await asyncio.to_thread(
+                mark_document_failed_or_deferred, doc_id, error, "image"
+            )
 
         state.image_stats.processed += len(ingested_ids)
 

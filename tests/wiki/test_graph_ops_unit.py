@@ -367,3 +367,169 @@ class TestClaimConfiguration:
     def test_timeout_value(self):
         """Claim timeout should be 5 minutes."""
         assert CLAIM_TIMEOUT_SECONDS == 300
+
+
+# =============================================================================
+# Document failure classification (deferral) and recoverable-failure patterns
+# =============================================================================
+
+
+class TestClassifyDocumentDeferral:
+    """classify_document_deferral maps unsupported-input errors to reasons."""
+
+    def test_no_error_returns_none(self):
+        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+
+        assert classify_document_deferral(None) is None
+        assert classify_document_deferral("") is None
+
+    def test_wmf_loader_defers_with_format(self):
+        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+
+        reason = classify_document_deferral(
+            "cannot find loader for this WMF file", "presentation"
+        )
+        assert reason == "unsupported image format (WMF)"
+
+    def test_unidentified_image_defers(self):
+        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+
+        reason = classify_document_deferral(
+            "UnidentifiedImageError: cannot identify image file", "image"
+        )
+        assert reason == "unsupported image format (image)"
+
+    def test_missing_resource_dead_link(self):
+        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+
+        reason = classify_document_deferral(
+            "Failed to fetch https://nakasvr23.iferc.org/MISSING RESOURCE Code/x",
+            "pdf",
+        )
+        assert reason == "dead link"
+
+    def test_http_404_dead_link(self):
+        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+
+        assert (
+            classify_document_deferral("HTTP Error 404: Not Found", "pdf")
+            == "dead link"
+        )
+
+    def test_word_file_type_mismatch(self):
+        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+
+        reason = classify_document_deferral(
+            "file '<_io.BytesIO object at 0x1>' is not a Word file", "text_document"
+        )
+        assert reason == "type mismatch: text_document"
+
+    def test_unknown_error_stays_failed(self):
+        from imas_codex.discovery.wiki.graph_ops import classify_document_deferral
+
+        assert classify_document_deferral("Connection refused", "pdf") is None
+        assert classify_document_deferral("some novel parse error", "pdf") is None
+
+
+class TestRecoverFailedDocuments:
+    """recover_failed_documents resets environment faults by prior state."""
+
+    def _mock_gc(self, mock_gc_class, counts):
+        mock_gc = MagicMock()
+        mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc_class.return_value.__exit__ = MagicMock(return_value=False)
+        mock_gc.query.side_effect = [[{"recovered": c}] for c in counts]
+        return mock_gc
+
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_environment_fault_recovers_to_discovered_without_score(
+        self, mock_gc_class
+    ):
+        from imas_codex.discovery.wiki.graph_ops import recover_failed_documents
+
+        mock_gc = self._mock_gc(mock_gc_class, (4, 0))
+        total = recover_failed_documents("jt-60sa")
+
+        assert total == 4
+        first_query = mock_gc.query.call_args_list[0].args[0]
+        assert "No module named" in first_query
+        assert "score_composite IS NULL" in first_query
+
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_environment_fault_recovers_to_scored_with_score(self, mock_gc_class):
+        from imas_codex.discovery.wiki.graph_ops import recover_failed_documents
+
+        mock_gc = self._mock_gc(mock_gc_class, (0, 516))
+        total = recover_failed_documents("jt-60sa")
+
+        assert total == 516
+        second_query = mock_gc.query.call_args_list[1].args[0]
+        assert "No module named" in second_query
+        assert "score_composite IS NOT NULL" in second_query
+
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_returns_zero_on_graph_error(self, mock_gc_class):
+        from imas_codex.discovery.wiki.graph_ops import recover_failed_documents
+
+        mock_gc = MagicMock()
+        mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc_class.return_value.__exit__ = MagicMock(return_value=False)
+        mock_gc.query.side_effect = RuntimeError("Neo4j unavailable")
+
+        assert recover_failed_documents("jt-60sa") == 0
+
+
+class TestDeferFailedDocuments:
+    """defer_failed_documents reclassifies unsupported already-failed rows."""
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_reclassifies_three_classes_leaves_unknown(self, mock_gc_class, mock_defer):
+        from imas_codex.discovery.wiki.graph_ops import defer_failed_documents
+
+        mock_gc = MagicMock()
+        mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc_class.return_value.__exit__ = MagicMock(return_value=False)
+        mock_gc.query.return_value = [
+            {
+                "id": "d1",
+                "error": "cannot find loader for this WMF file",
+                "document_type": "presentation",
+            },
+            {
+                "id": "d2",
+                "error": "Failed to fetch https://x/MISSING RESOURCE Code/",
+                "document_type": "pdf",
+            },
+            {
+                "id": "d3",
+                "error": "file '<_io.BytesIO>' is not a Word file",
+                "document_type": "text_document",
+            },
+            {
+                "id": "d4",
+                "error": "Connection refused",
+                "document_type": "pdf",
+            },
+        ]
+
+        assert defer_failed_documents("jt-60sa") == 3
+
+        calls = {c.args[0]: c.args[1] for c in mock_defer.call_args_list}
+        assert calls["d1"] == "unsupported image format (WMF)"
+        assert calls["d2"] == "dead link"
+        assert calls["d3"] == "type mismatch: text_document"
+        assert "d4" not in calls
+
+    @patch("imas_codex.discovery.wiki.graph_ops.mark_document_deferred")
+    @patch("imas_codex.discovery.wiki.graph_ops.GraphClient")
+    def test_returns_zero_on_graph_error(self, mock_gc_class, mock_defer):
+        from imas_codex.discovery.wiki.graph_ops import defer_failed_documents
+
+        mock_gc = MagicMock()
+        mock_gc_class.return_value.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc_class.return_value.__exit__ = MagicMock(return_value=False)
+        mock_gc.query.side_effect = RuntimeError("Neo4j unavailable")
+
+        assert defer_failed_documents("jt-60sa") == 0
+        mock_defer.assert_not_called()

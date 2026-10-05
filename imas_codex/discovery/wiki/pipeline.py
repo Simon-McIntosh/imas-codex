@@ -34,6 +34,7 @@ from imas_codex.graph import GraphClient
 from imas_codex.ingestion.chunkers import chunk_text as _chunk_text
 from imas_codex.settings import get_embedding_dimension
 
+from .graph_ops import mark_document_failed_or_deferred
 from .monitor import WikiProgressMonitor, set_current_monitor
 from .scraper import WikiPage, fetch_wiki_page
 
@@ -2435,16 +2436,13 @@ class DocumentPipeline:
 
             except Exception as e:
                 logger.error("Failed to ingest document %s: %s", document_id, e)
-                with GraphClient() as gc:
-                    gc.query(
-                        """
-                        MATCH (wa:Document {id: $id})
-                        SET wa.status = 'failed', wa.error = $error
-                        """,
-                        id=document_id,
-                        error=str(e),
-                    )
-                total_stats["documents_failed"] += 1
+                defer_reason = mark_document_failed_or_deferred(
+                    document_id, str(e), document_type
+                )
+                if defer_reason is not None:
+                    total_stats["documents_deferred"] += 1
+                else:
+                    total_stats["documents_failed"] += 1
 
         return total_stats
 

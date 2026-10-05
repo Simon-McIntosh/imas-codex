@@ -267,3 +267,80 @@ class TestPipelineIntegration:
         # Full integration tests would verify graph state
         # For now just validate the page is valid
         assert _page.page_name == "Test"
+
+
+class TestIngestFromGraphFailureRouting:
+    """ingest_from_graph routes unsupported failures to deferred, rest to failed."""
+
+    def _pipeline(self):
+        from imas_codex.discovery.wiki.pipeline import DocumentPipeline
+
+        pipeline = object.__new__(DocumentPipeline)
+        pipeline.facility_id = "jt-60sa"
+        pipeline.max_size_bytes = 100 * 1024 * 1024
+        return pipeline
+
+    def _pending(self):
+        return [
+            {
+                "id": "doc:pdf",
+                "document_type": "pdf",
+                "url": "https://example.com/a.pdf",
+                "filename": "a.pdf",
+            }
+        ]
+
+    def test_deferrable_failure_counts_deferred(self):
+        import asyncio
+        from unittest.mock import AsyncMock, patch
+
+        from imas_codex.discovery.wiki import pipeline as pl
+
+        pipeline = self._pipeline()
+        with (
+            patch.object(
+                pl, "get_pending_wiki_documents", return_value=self._pending()
+            ),
+            patch.object(pl, "fetch_document_size", return_value=1024),
+            patch.object(
+                pl,
+                "fetch_document_content",
+                new=AsyncMock(side_effect=RuntimeError("HTTP Error 404: Not Found")),
+            ),
+            patch.object(
+                pl, "mark_document_failed_or_deferred", return_value="dead link"
+            ) as mock_mark,
+            patch.object(pl, "GraphClient"),
+        ):
+            stats = asyncio.run(pipeline.ingest_from_graph())
+
+        assert stats["documents_deferred"] == 1
+        assert stats["documents_failed"] == 0
+        args = mock_mark.call_args.args
+        assert args[0] == "doc:pdf"
+        assert args[2] == "pdf"
+
+    def test_unclassified_failure_counts_failed(self):
+        import asyncio
+        from unittest.mock import AsyncMock, patch
+
+        from imas_codex.discovery.wiki import pipeline as pl
+
+        pipeline = self._pipeline()
+        with (
+            patch.object(
+                pl, "get_pending_wiki_documents", return_value=self._pending()
+            ),
+            patch.object(pl, "fetch_document_size", return_value=1024),
+            patch.object(
+                pl,
+                "fetch_document_content",
+                new=AsyncMock(side_effect=RuntimeError("Connection refused")),
+            ),
+            patch.object(pl, "mark_document_failed_or_deferred", return_value=None),
+            patch.object(pl, "GraphClient"),
+        ):
+            stats = asyncio.run(pipeline.ingest_from_graph())
+
+        assert stats["documents_failed"] == 1
+        assert stats["documents_deferred"] == 0

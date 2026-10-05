@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <body>
+    <section>
+      <h2 id="document-failure-classes">Document failure classes</h2>
+      <p id="document-failure-classes-landing">
+        Recoverable-failure patterns now include environment faults
+        (<code>No module named</code>), so the 516 pypdf failures reset by prior
+        state on the next discovery run; unsupported input (unloadable image
+        containers, <code>MISSING RESOURCE</code> dead links, type mismatches)
+        is classified and deferred with a stated reason instead of retried as
+        failed. Gate: 94 passed, exit 0.
+      </p>
+    </section>
+  </body>
+</html>
