@@ -42,6 +42,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from neo4j.exceptions import ClientError
+
 from imas_codex.cli.logging import WorkerLogAdapter, log_worker_error
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
@@ -207,6 +209,53 @@ def _build_code_context_query() -> str:
         "       score\n"
         "ORDER BY score DESC\n"
     )
+
+
+def _fetch_code_chunks(facility: str, query_text: str) -> list[dict[str, str]]:
+    """Run the code-context vector lookup for one query text.
+
+    Returns an empty list only when the ``code_chunk_embedding`` vector index is
+    absent, which is the one condition under which signal enrichment can proceed
+    without code context. Every other Neo4j failure — a planner error, a
+    connection fault — propagates so it is not mistaken for "no relevant code".
+    """
+    from imas_codex.embeddings.config import EncoderConfig
+    from imas_codex.embeddings.encoder import Encoder
+
+    try:
+        config = EncoderConfig()
+        encoder = Encoder(config)
+        embedding = encoder.embed_texts([query_text])[0].tolist()
+    except Exception as e:
+        logger.debug("Could not embed for code context: %s", e)
+        return []
+
+    try:
+        with GraphClient() as gc:
+            results = gc.query(
+                _build_code_context_query(),
+                embedding=embedding,
+                min_score=0.45,
+                facility=facility,
+            )
+            chunks = []
+            for row in results:
+                text = row.get("text", "")
+                if len(text) > 600:
+                    text = text[:600] + "..."
+                chunks.append(
+                    {
+                        "text": text,
+                        "source_path": row.get("source_path", ""),
+                        "language": row.get("language", ""),
+                    }
+                )
+            return chunks
+    except ClientError as e:
+        if getattr(e, "code", None) != "Neo.ClientError.Schema.IndexNotFound":
+            raise
+        logger.debug("Code-context vector index absent: %s", e)
+        return []
 
 
 def get_signal_scanner_type(signal: dict[str, Any]) -> str:
@@ -3544,9 +3593,6 @@ async def enrich_worker(
         if group_key in code_context_cache:
             return code_context_cache[group_key]
 
-        from imas_codex.embeddings.config import EncoderConfig
-        from imas_codex.embeddings.encoder import Encoder
-
         # Build query from group key and signal names
         signal_names = " ".join(s.get("name") or "" for _, s in indexed_signals[:10])
         if group_key.startswith("tdi:"):
@@ -3568,41 +3614,9 @@ async def enrich_worker(
             code_context_cache[group_key] = []
             return []
 
-        try:
-            config = EncoderConfig()
-            encoder = Encoder(config)
-            embedding = encoder.embed_texts([query_text])[0].tolist()
-        except Exception as e:
-            logger.debug("Could not embed for code context: %s", e)
-            code_context_cache[group_key] = []
-            return []
-
-        try:
-            with GraphClient() as gc:
-                results = gc.query(
-                    _build_code_context_query(),
-                    embedding=embedding,
-                    min_score=0.45,
-                    facility=state.facility,
-                )
-                chunks = []
-                for row in results:
-                    text = row.get("text", "")
-                    if len(text) > 600:
-                        text = text[:600] + "..."
-                    chunks.append(
-                        {
-                            "text": text,
-                            "source_path": row.get("source_path", ""),
-                            "language": row.get("language", ""),
-                        }
-                    )
-                code_context_cache[group_key] = chunks
-                return chunks
-        except Exception as e:
-            logger.debug("Code context search failed: %s", e)
-            code_context_cache[group_key] = []
-            return []
+        chunks = await asyncio.to_thread(_fetch_code_chunks, state.facility, query_text)
+        code_context_cache[group_key] = chunks
+        return chunks
 
     # Circuit breaker: stop after consecutive batch failures to avoid
     # infinite claim/fail/release loops when LLM service is degraded.
