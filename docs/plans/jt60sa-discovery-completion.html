@@ -23,7 +23,7 @@
   <title>JT-60SA Discovery Completion | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
@@ -343,6 +343,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261005T0554-s6-review" data-who="reckon-build" data-when="2026-10-05T05:54:00+00:00">
     <div class="r-comment-body">Design review (run r-20261005T053355179905, findings thin_wrapper-1, duplicate_owner-2, interface_budget-1) acted on: remote_environment is resolved in the facility-aware layer (imas_codex/remote/tools.py and the pipelines that build each data system's scanner config) and passed to the executor as parameters, leaving the executor facility-agnostic; the interpreter floor and module importability extend check_tool/check_all_tools and surface through the existing imas-codex tools status command, so no discover preflight command is added. Nodes: remote-environment-block (schema, resolver, YAML, pass-down) then tools-status-environment-floor (probe extension and the discover gate).</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261005T055214976074-signal-typed-slots" data-who="reckon-build" data-when="2026-10-05T05:59:42.901Z">
+    <div class="r-comment-body"><p>FacilitySignal now carries data_class (SignalDataClass enum: time_series/one_point/parameter), shot_range and pid as typed slots, the EDAS scanner writes the EDDB catalogue values to the slots instead of keywords, and check() reads data_class from the slot; gate 59 passed (55 baseline + 4 new) at 42c171fdd.</p></div>
 </div>
 </section>
 </main>
