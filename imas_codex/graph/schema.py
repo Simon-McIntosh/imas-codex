@@ -114,6 +114,10 @@ class GraphSchema:
         schema's class list but that carry an explicit ``relationship_type`` and
         ``target_label`` annotation (e.g. StandardNameSource.dd_path →
         IMASNode in a different schema file).
+
+        Slots carrying an ``inverse_of`` annotation derive no Relationship: the
+        edge is owned by the named multivalued slot on the target class, so
+        materialising this one too would create a second, reversed edge.
         """
         rels = []
         for class_name in self.node_labels:
@@ -143,6 +147,36 @@ class GraphSchema:
                         else str(target_label_ann)
                     )
                 else:
+                    continue
+
+                # ``inverse_of`` marks a stored foreign key whose edge is owned
+                # by a multivalued slot on the target class. Deriving a
+                # Relationship here would materialise a second, reversed edge
+                # for an edge the owner already writes, so such a slot derives
+                # none. It fails closed: the named owner must exist on the
+                # target class and must range back to the annotating class.
+                inverse_of = self._slot_annotation(slot, "inverse_of")
+                if inverse_of:
+                    owner = next(
+                        (
+                            s
+                            for s in self._view.class_induced_slots(target_class)
+                            if s.name == inverse_of
+                        ),
+                        None,
+                    )
+                    if owner is None:
+                        raise ValueError(
+                            f"Slot '{class_name}.{slot.name}' declares "
+                            f"inverse_of '{inverse_of}', which is not a slot "
+                            f"on {target_class}."
+                        )
+                    if owner.range != class_name:
+                        raise ValueError(
+                            f"Slot '{class_name}.{slot.name}' declares "
+                            f"inverse_of '{inverse_of}' on {target_class}, "
+                            f"whose range '{owner.range}' is not {class_name}."
+                        )
                     continue
 
                 cypher_type = (

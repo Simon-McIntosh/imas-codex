@@ -3276,6 +3276,8 @@ classes:
         description: Parent CodeExample
         required: true
         range: CodeExample
+        annotations:
+          inverse_of: has_chunks
       facility_id:
         description: Parent facility ID (denormalized for query performance)
         required: true
@@ -3783,9 +3785,13 @@ classes:
         description: Parent WikiPage ID (stored as property, relationship created via WikiPage.has_chunks)
         required: true
         range: WikiPage
+        annotations:
+          inverse_of: has_chunks
       document_id:
         description: Parent Document ID for chunks created from document parsing
         range: Document
+        annotations:
+          inverse_of: has_chunks
       facility_id:
         description: Facility for efficient filtering
         required: true

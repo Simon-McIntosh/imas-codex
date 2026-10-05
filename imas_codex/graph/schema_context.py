@@ -12,6 +12,7 @@ Example:
 
 from __future__ import annotations
 
+from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.schema_context_data import (
     ENUM_VALUES,
     NODE_LABEL_PROPS,
@@ -92,8 +93,8 @@ _EXAMPLE_PATTERNS: dict[str, list[str]] = {
             "  FOR $embedding\n"
             "  LIMIT $k\n"
             ") SCORE AS score\n"
-            "MATCH (cf:CodeFile)-[:HAS_CHUNK]->(node)\n"
-            "RETURN node.text, cf.path, cf.facility_id, score\n"
+            f"{render_chunk_source('node', 'source_file')}\n"
+            "RETURN node.text, source_file, node.facility_id, score\n"
             "ORDER BY score DESC"
         ),
     ],
