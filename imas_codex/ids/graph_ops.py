@@ -551,9 +551,12 @@ def write_candidates(
 
     Deletes every existing MAPPING_CANDIDATE edge on the source, then writes
     one edge per judgment, MATCHing both the SignalSource and each candidate's
-    IMASNode. The same statement sets ``candidate_route`` and releases the
-    source's mapping claim, so a re-judge replaces the earlier edges and a
-    failed re-judge still frees the claim for the next pass.
+    IMASNode. The statement counts the edges it wrote and sets
+    ``candidate_route`` only when that count equals the number of judgments;
+    on a shortfall the source's route stays null, so the next pass re-judges
+    it rather than treating it as done. The claim is released either way, and
+    a shortfall raises ``CandidateWriteError``. An empty judgment list is a
+    valid write: a ``no_candidate`` route with no edges still sets the route.
 
     Args:
         source_id: SignalSource ID.
@@ -565,6 +568,7 @@ def write_candidates(
             candidate.
         route: Route decision stored on ``SignalSource.candidate_route``
             (e.g. 'selected', 'escalated', 'no_candidate'), or None to clear it.
+            Written only when every judgment persisted.
         gc: Graph client instance.
 
     Returns:
@@ -580,29 +584,33 @@ def write_candidates(
     rows = gc.query(
         """
         MATCH (sg:SignalSource {id: $source_id})
-        SET sg.candidate_route = $route,
-            sg.mapping_claimed_at = null,
-            sg.mapping_claim_token = null
-        WITH sg
         OPTIONAL MATCH (sg)-[old:MAPPING_CANDIDATE]->(:IMASNode)
         DELETE old
         WITH DISTINCT sg
-        UNWIND $records AS rec
-        MATCH (ip:IMASNode {id: rec.path})
-        MERGE (sg)-[r:MAPPING_CANDIDATE]->(ip)
-        SET r.rank = rec.rank,
-            r.retrieval_score = rec.retrieval_score,
-            r.ids = rec.ids,
-            r.choice_probability = rec.choice_probability,
-            r.p_same_quantity = rec.p_same_quantity,
-            r.model = rec.model,
-            r.judged_at = rec.judged_at,
-            r.route = rec.route
-        RETURN count(r) AS written
+        CALL {
+            WITH sg
+            UNWIND $records AS rec
+            MATCH (ip:IMASNode {id: rec.path})
+            MERGE (sg)-[r:MAPPING_CANDIDATE]->(ip)
+            SET r.rank = rec.rank,
+                r.retrieval_score = rec.retrieval_score,
+                r.ids = rec.ids,
+                r.choice_probability = rec.choice_probability,
+                r.p_same_quantity = rec.p_same_quantity,
+                r.model = rec.model,
+                r.judged_at = rec.judged_at,
+                r.route = rec.route
+            RETURN count(r) AS written
+        }
+        SET sg.candidate_route = CASE WHEN written = $expected THEN $route ELSE null END,
+            sg.mapping_claimed_at = null,
+            sg.mapping_claim_token = null
+        RETURN written AS written
         """,
         source_id=source_id,
         route=route,
         records=records,
+        expected=expected,
     )
 
     written = rows[0]["written"] if rows else 0

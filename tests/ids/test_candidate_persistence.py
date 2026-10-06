@@ -100,10 +100,36 @@ class TestWriteCandidates:
         assert "sg.mapping_claimed_at = null" in statement
         assert "sg.mapping_claim_token = null" in statement
 
-    def test_empty_judgments_clear_the_source(self):
+    def test_shortfall_keeps_route_null_and_releases_claim(self):
+        """A shortfall must not mark the source judged: the route is guarded so
+        the next pass re-claims and re-judges it, while the claim is still
+        freed. Failing to gate the route on the written count would strand the
+        source as 'judged' with partial edges and no way back."""
+        gc = _gc_returning([{"written": 1}])
+        judgments = [{"path": "a/b"}, {"path": "a/gone"}]
+
+        with pytest.raises(CandidateWriteError):
+            write_candidates("jet:PF:r", judgments, "selected", gc)
+
+        statement = _normalised(gc)
+        assert "CASE WHEN written = $expected THEN $route ELSE null END" in statement
+        assert gc.query.call_args.kwargs["expected"] == 2
+        assert "sg.mapping_claimed_at = null" in statement
+        assert "sg.mapping_claim_token = null" in statement
+
+    def test_empty_judgments_sets_the_route(self):
+        """A no_candidate judgment is a real decision: no edges, but the route
+        still lands, so the source is not re-judged forever."""
         gc = _gc_returning([{"written": 0}])
 
-        assert write_candidates("jet:PF:r", [], None, gc) == 0
+        written = write_candidates("jet:PF:r", [], "no_candidate", gc)
+
+        assert written == 0
+        assert gc.query.call_args.kwargs["route"] == "no_candidate"
+        assert gc.query.call_args.kwargs["expected"] == 0
+        assert "CASE WHEN written = $expected THEN $route ELSE null END" in (
+            _normalised(gc)
+        )
 
     def test_selection_flag_normalised_to_boolean(self):
         gc = _gc_returning([{"written": 1}])
@@ -235,6 +261,58 @@ def test_write_and_clear_candidates_round_trip():
             assert claimed[0]["claimed_at"] is None
             assert claimed[0]["token"] is None
             assert claimed[0]["route"] == "selected"
+
+            # A shortfall must fail closed: with one judgment pointing at a
+            # node that does not exist, the write persists only one edge, keeps
+            # the route null so the next pass re-judges the source, and still
+            # releases the claim.
+            gc.query(
+                """
+                MATCH (sg:SignalSource {id: $source_id})
+                SET sg.mapping_claimed_at = datetime(),
+                    sg.mapping_claim_token = 'fixture-token'
+                """,
+                source_id=source_id,
+            )
+            with pytest.raises(CandidateWriteError):
+                write_candidates(
+                    source_id,
+                    [
+                        {"path": node_ids[0], "rank": 1},
+                        {"path": f"{facility}:missing:node", "rank": 2},
+                    ],
+                    "selected",
+                    gc,
+                )
+            shortfall = gc.query(
+                """
+                MATCH (sg:SignalSource {id: $source_id})
+                OPTIONAL MATCH (sg)-[r:MAPPING_CANDIDATE]->(ip:IMASNode)
+                RETURN sg.candidate_route AS route,
+                       sg.mapping_claimed_at AS claimed_at,
+                       sg.mapping_claim_token AS token,
+                       count(r) AS edges
+                """,
+                source_id=source_id,
+            )
+            assert shortfall[0]["route"] is None
+            assert shortfall[0]["claimed_at"] is None
+            assert shortfall[0]["token"] is None
+            assert shortfall[0]["edges"] == 1
+
+            # An empty judgment list is a real decision: a no_candidate route
+            # with no edges still lands, so the source is not re-judged forever.
+            assert write_candidates(source_id, [], "no_candidate", gc) == 0
+            empty = gc.query(
+                """
+                MATCH (sg:SignalSource {id: $source_id})
+                OPTIONAL MATCH (sg)-[r:MAPPING_CANDIDATE]->(ip:IMASNode)
+                RETURN sg.candidate_route AS route, count(r) AS edges
+                """,
+                source_id=source_id,
+            )
+            assert empty[0]["route"] == "no_candidate"
+            assert empty[0]["edges"] == 0
 
             # Re-judge with a single candidate: the earlier edges are replaced.
             assert (

@@ -24,15 +24,20 @@
   <h3 id="candidate-schema-functions">Functions in <code>graph_ops.py</code></h3>
   <p id="candidate-schema-write-behaviour">
     <code>write_candidates(source_id, judgments, route, gc)</code> replaces a
-    source's MAPPING_CANDIDATE edges in one statement: it sets
-    <code>candidate_route</code>, releases the mapping claim
-    (<code>mapping_claimed_at</code> and <code>mapping_claim_token</code> to
-    null), deletes the prior edges, then UNWINDs the judgments, MATCHing both
-    the SignalSource and each IMASNode. It returns the written count and raises
-    <code>CandidateWriteError</code> when that count is below the number of
-    judgments, so a candidate whose node has vanished fails loudly. The release
-    rides in the same statement that can raise, so a failed write still frees
-    the claim.
+    source's MAPPING_CANDIDATE edges in one statement: it deletes the prior
+    edges, UNWINDs the judgments inside a <code>CALL</code> subquery that
+    MATCHes both the SignalSource and each IMASNode, counts the edges written,
+    then releases the mapping claim (<code>mapping_claimed_at</code> and
+    <code>mapping_claim_token</code> to null) and sets
+    <code>candidate_route</code>. The route is set with
+    <code>CASE WHEN written = $expected THEN $route ELSE null END</code>: it
+    lands only when every judgment persisted, so a shortfall leaves the route
+    null and the next pass re-judges the source rather than treating it as
+    done. The statement still raises <code>CandidateWriteError</code> when the
+    release has run, so a candidate whose node has vanished fails loudly
+    without stranding the source. The subquery keeps the count row when the
+    judgment list is empty, so a <code>no_candidate</code> decision with no
+    edges still records its route.
   </p>
   <p id="candidate-schema-clear-behaviour">
     <code>clear_candidates(facility, gc)</code> removes a facility's candidate
@@ -43,18 +48,23 @@
   <h3 id="candidate-schema-evidence">Evidence</h3>
   <ul id="candidate-schema-gate">
     <li><code>uv run --no-sync pytest tests/ids -p no:cacheprovider</code>:
-      409 passed, 5 skipped, 1 deselected (the graph test), exit 0.
-      <code>tests/ids/test_candidate_persistence.py</code> contributes 10
+      410 passed, 5 skipped, 1 deselected (the graph test), exit 0.
+      <code>tests/ids/test_candidate_persistence.py</code> contributes 11
       passing tests showing a re-judge replaces earlier edges, a missing
-      IMASNode raises, the claim is released on success and on failure, and
+      IMASNode raises, a shortfall keeps <code>candidate_route</code> null
+      while still releasing the claim, an empty <code>no_candidate</code> write
+      sets the route, the claim is released on success and on failure, and
       <code>clear_candidates</code> reports its counts.</li>
     <li><code>-m graph</code> against the live database (compute node
       <code>98dci4-clu-2018</code>): creates a uniquely named fixture source,
-      writes two candidates, re-judges to one (earlier edges replaced), reads
-      the released claim, clears, and deletes the fixture — exit 0, zero
-      residue.</li>
-    <li>Negative control: removing the written-count check makes
-      <code>test_missing_imnode_raises</code> fail (exit 1), so the guard is
-      load-bearing.</li>
+      writes two candidates, re-judges to one (earlier edges replaced), then
+      proves a shortfall leaves the route null with one partial edge and a
+      released claim, and an empty <code>no_candidate</code> write sets the
+      route with zero edges; reads the released claim, clears, and deletes the
+      fixture — exit 0, zero residue.</li>
+    <li>Negative control: dropping the route's <code>CASE</code> guard so it is
+      set unconditionally makes both the shortfall unit test and the live graph
+      round-trip fail (route reads <code>selected</code> after a shortfall,
+      exit 1), so the fail-closed guard is load-bearing.</li>
   </ul>
 </section>
