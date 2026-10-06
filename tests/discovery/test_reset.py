@@ -204,3 +204,41 @@ class TestResetToStatus:
 
         query = mock_gc.query.call_args[0][0]
         assert "n.expanded_at = null" in query
+
+    def test_code_discovered_reset_includes_skipped(self, reset_mod):
+        """A triage-skipped code file is reset to discovered so it can be re-triaged."""
+        spec = reset_mod.CODE_RESET_SPECS["discovered"]
+        assert "skipped" in spec.source_statuses
+
+    def test_reset_path_prefixes_scopes_the_query(self, reset_mod):
+        """A prefix-scope reset renders the prefix clause and carries the list,
+        so only rows whose path starts with a named prefix can match."""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 7}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.CODE_RESET_SPECS["discovered"]
+            count = reset_mod.reset_to_status(
+                spec,
+                "jt-60sa",
+                path_prefixes=["/analysis/src/SAeqread"],
+            )
+
+        assert count == 7
+        query = mock_gc.query.call_args[0][0]
+        assert "n.path STARTS WITH prefix" in query
+        assert mock_gc.query.call_args[1]["path_prefixes"] == ["/analysis/src/SAeqread"]
+
+    def test_reset_without_prefixes_stays_facility_wide(self, reset_mod):
+        """No prefixes keeps the facility-wide reset: no prefix clause is rendered."""
+        mock_gc, mock_gc_ctx = self._mock_gc()
+        mock_gc.query.return_value = [{"reset_count": 3}]
+
+        with patch("imas_codex.graph.GraphClient", return_value=mock_gc_ctx):
+            spec = reset_mod.CODE_RESET_SPECS["discovered"]
+            reset_mod.reset_to_status(spec, "jt-60sa")
+
+        query = mock_gc.query.call_args[0][0]
+        assert "STARTS WITH" not in query
+        assert "path_prefixes" not in query
+        assert "path_prefixes" not in mock_gc.query.call_args[1]

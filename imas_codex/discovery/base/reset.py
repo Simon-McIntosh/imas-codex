@@ -60,6 +60,7 @@ def reset_to_status(
     spec: ResetSpec,
     facility: str,
     *,
+    path_prefixes: list[str] | None = None,
     extra_filter: str = "",
     extra_params: dict | None = None,
 ) -> int:
@@ -68,6 +69,10 @@ def reset_to_status(
     Args:
         spec: Reset specification for the target state.
         facility: Facility identifier.
+        path_prefixes: When given, restrict the reset to nodes whose ``path``
+            starts with one of these prefixes; the clause and its Cypher
+            parameter name are rendered here so callers pass the list only.
+            When ``None``, the reset covers the whole facility.
         extra_filter: Additional Cypher WHERE fragment (e.g., scanner filter).
             Must start with ``AND``.  Use ``n`` as the node alias.
         extra_params: Additional query parameters referenced by *extra_filter*.
@@ -76,6 +81,7 @@ def reset_to_status(
         Number of nodes reset.
     """
     from imas_codex.graph import GraphClient
+    from imas_codex.graph.query_builder import render_path_prefix_clause
 
     # Build MATCH clause
     if spec.facility_via_rel:
@@ -83,8 +89,14 @@ def reset_to_status(
     else:
         match = f"MATCH (n:{spec.label} {{{spec.facility_key}: $facility}})"
 
-    # Build WHERE clause
-    where = f"WHERE n.status IN $source_statuses {extra_filter}"
+    # Build WHERE clause — the prefix scope is rendered here so callers never
+    # spell the predicate or name its parameter themselves.
+    where_parts = ["WHERE n.status IN $source_statuses"]
+    if extra_filter:
+        where_parts.append(extra_filter)
+    if path_prefixes:
+        where_parts.append(render_path_prefix_clause("n", "path_prefixes"))
+    where = " ".join(where_parts)
 
     # Build SET clause
     set_parts = ["n.status = $target_status", "n.claimed_at = null"]
@@ -109,8 +121,10 @@ def reset_to_status(
         "facility": facility,
         "source_statuses": spec.source_statuses,
         "target_status": spec.target_status,
-        **(extra_params or {}),
     }
+    if path_prefixes:
+        params["path_prefixes"] = path_prefixes
+    params.update(extra_params or {})
 
     with GraphClient() as gc:
         result = gc.query(query, **params)
@@ -350,7 +364,7 @@ CODE_RESET_SPECS: dict[str, ResetSpec] = {
     "discovered": ResetSpec(
         label="CodeFile",
         target_status="discovered",
-        source_statuses=["triaged", "scored", "ingested", "enriched"],
+        source_statuses=["triaged", "scored", "ingested", "enriched", "skipped"],
         clear_fields=(
             _CODE_TRIAGE_FIELDS
             + _CODE_ENRICH_FIELDS
