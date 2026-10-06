@@ -99,7 +99,7 @@ imas.add_command(map_cmd, "map")
     help=(
         "Override the LLM model for enrichment and refinement "
         "(e.g., 'openrouter/anthropic/claude-sonnet-4.6'). "
-        "Default: uses [tool.imas-codex.language] model from pyproject.toml."
+        "Default: uses [tool.imas-codex.dd-enrichment] model from pyproject.toml."
     ),
 )
 @click.option(

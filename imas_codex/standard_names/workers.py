@@ -6969,10 +6969,10 @@ async def process_refine_name_batch(
             if escalate:
                 model = DEFAULT_ESCALATION_MODEL
             else:
-                # Dedicated refine seat rather than the generic
-                # [language] seat: a flash-lite tier lifted critiqued
-                # names at ~5% against ~42% for the compose tier, so
-                # refine needs its own model choice.
+                # Dedicated refine seat: a flash-lite tier lifted critiqued
+                # names at ~5% against ~42% for the compose tier, so refine
+                # owns its own model choice rather than sharing the compose
+                # seat's.
                 model = get_model("sn-refine")
 
             # ── Build prompt context ──────────────────────────────────
@@ -10567,8 +10567,8 @@ async def process_refine_docs_batch(
         if escalate:
             model = DEFAULT_ESCALATION_MODEL
         else:
-            # Dedicated refine seat — see the refine_name comment for
-            # why refine does not borrow the generic [language] seat.
+            # Dedicated refine seat — see the refine_name comment for why
+            # refine owns its own model choice rather than sharing compose's.
             model = get_model("sn-refine")
 
         # ── Build prompt context ──────────────────────────────────

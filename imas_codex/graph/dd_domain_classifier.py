@@ -175,8 +175,8 @@ async def classify_domains(
 
     if model is None:
         # Domain classification feeds SN names' physics_domain, so it is an
-        # SN-attributable seat with its own [sn-classifier] config rather than
-        # borrowing the generic [language] model.
+        # SN-attributable seat with its own [sn-classifier] config, its model
+        # choice owned by the SN pipeline that consumes its output.
         model = _get_model("sn-classifier")
 
     stats: dict[str, Any] = {
