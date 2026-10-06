@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -682,6 +682,11 @@
     <h4 class="r-gate-measure">call_decisions and acall_decisions are in imas_codex/discovery/base/llm.py with the model as a parameter, strict answer validation and a test guard against live decisions requests</h4>
     <p class="r-gate-required-evidence">jt60sa-discovery-completion#s25</p>
     </div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T164923233082-mapping-edge-loss" data-who="reckon-build" data-when="2026-10-06T17:05:48.643Z">
+    <div class="r-comment-body"><p>§2 investigated read-only; VERDICT names the map CLI&#x27;s --clear path (imas_codex/cli/map.py:79/:147 with _clear_mapping imas_codex/cli/map.py:647-695) plus the MATCH-gated silent no-op re-persist (imas_codex/ids/models.py:530/:579) as the removal mechanism, dated by map_jet.log 2026-10-06T05:21-08:35Z runs and the live-graph counts at 2026-10-06T17:14Z; the DD-rebuild reading is ruled out by DDVersion 4.1.0 build_completed_at=2026-06-18 and imas_dd_dd.log mtime 2026-07-22; EDGE_RISK=yes with two narrow protections (distinct relationship type for §6 candidates; fail closed on a zero-row IMASNode MATCH)</p></div>
+</div>
 </section>
 </main>
 </body>
