@@ -136,7 +136,19 @@ data_access_patterns:
 # These are seeded as starting points for directory scanning
 discovery_roots:
   - /home                          # User home directories
-  - /analysis/src                  # Analysis source code
+  # /analysis/src is named only through its seeded subdirectories: a seed of
+  # the parent itself creates a depth-0 row that walks every unseeded child.
+  - /analysis/src/SAselene_v2.0_forPSRC
+  - /analysis/src/SAeqread
+  - /analysis/src/edas2
+  - /analysis/src/ECCD
+  - /analysis/src/ofmcauto
+  - /analysis/src/topics_release
+  - /analysis/src/easy-v5.01
+  - /analysis/src/eagle-v4.05
+  - /analysis/src/client_eqdbms.EQ32.Rev1
+  - /analysis/src/SAeqfame
+  - /analysis/src/getseldata_v4.2
   - /analysis/bin                  # Analysis binaries and scripts
   - /analysis/data                 # Analysis data outputs
   - /analysis/manual               # Documentation
