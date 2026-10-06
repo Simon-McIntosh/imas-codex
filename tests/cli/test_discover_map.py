@@ -40,13 +40,12 @@ _IDS_BY_DESCRIPTION = {
 # under the thresholds below: selected, escalated and no_candidate.
 _SCORES = {
     "src-sel": [0.9, 0.2],
-    "src-esc": [0.5, 0.5],
+    "src-esc": [0.45, 0.45],
     "src-none": [0.1],
 }
 
 _THRESHOLDS = RouteThresholds(
     select_threshold=0.5,
-    select_margin=0.1,
     floor_threshold=0.4,
     shortlist_size=5,
 )
@@ -81,17 +80,20 @@ class _Candidate:
             self.path = path
             self.score = score
             self.ids_name = path.split("/", 1)[0]
+            self.see_also = []
 
-    def __init__(self, path, score):
+    def __init__(self, path, score, arms=()):
         self.hit = self._Hit(path, score)
+        self.arms = frozenset(arms)
 
 
-def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0):
+def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0, expand=None):
     """Replace every graph and decisions call the candidate worker makes.
 
     ``add_cost`` makes each replaced helper add its call's reported spend to the
     ``PipelineCost`` the worker passes, so the cost-limit test exercises the real
-    budget path rather than a patched seam.
+    budget path rather than a patched seam. ``expand`` optionally replaces
+    ``expand_cluster_siblings``; it defaults to no siblings.
     """
     remaining = list(SOURCES)
 
@@ -110,17 +112,32 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0):
     def fake_retrieve(sources, ids_by_source, *, gc, k=20, dd_version=None):
         captured.setdefault("ids_by_source", {}).update(ids_by_source)
         return {
-            sid: ([_Candidate(f"{ids[0]}/field", 0.7)] if ids else [])
+            sid: ([_Candidate(f"{ids[0]}/field", 0.7, arms={ids[0]})] if ids else [])
             for sid, ids in ids_by_source.items()
         }
 
-    def fake_judge(source, facility, candidates, *, model=None, cost=None):
+    def fake_judge(source, facility, candidates, *, model=None, cost=None, step=None):
         if cost is not None and add_cost:
             cost.add("candidate_judgment", add_cost, 0)
         return [
             _judgment(f"{source['id']}/p{i}", p)
             for i, p in enumerate(_SCORES[source["id"]])
         ]
+
+    def fake_expand(
+        source,
+        facility,
+        candidates,
+        judgments,
+        *,
+        gc,
+        model=None,
+        cost=None,
+        dd_version=None,
+    ):
+        if expand is not None:
+            return expand(source, candidates, judgments, cost=cost)
+        return [], []
 
     def fake_write(source_id, records, route, gc):
         captured.setdefault("routes", {})[source_id] = route
@@ -133,6 +150,7 @@ def _patch_worker(monkeypatch, captured: dict, *, add_cost: float = 0.0):
     monkeypatch.setattr("imas_codex.ids.workers.route_ids", fake_route_ids)
     monkeypatch.setattr("imas_codex.ids.workers.retrieve_candidates", fake_retrieve)
     monkeypatch.setattr("imas_codex.ids.workers.judge_candidates", fake_judge)
+    monkeypatch.setattr("imas_codex.ids.workers.expand_cluster_siblings", fake_expand)
     monkeypatch.setattr("imas_codex.ids.workers.write_candidates", fake_write)
     monkeypatch.setattr(
         "imas_codex.ids.workers.get_mapping_route_thresholds", lambda: _THRESHOLDS
@@ -201,6 +219,33 @@ def test_candidate_worker_ids_filter_narrows_routed_ids(monkeypatch):
         "src-esc": [],
         "src-none": ["magnetics"],
     }
+
+
+def test_candidate_worker_adds_cluster_siblings_and_books_the_second_call(monkeypatch):
+    captured: dict = {}
+
+    def expand(source, candidates, judgments, *, cost=None):
+        if source["id"] != "src-sel":
+            return [], []
+        if cost is not None:
+            cost.add("candidate_cluster_judgment", 0.001, 0)
+        candidates[0].hit.see_also = ["magnetics/ip_sibling"]
+        captured["seed_see_also"] = list(candidates[0].hit.see_also)
+        sibling = _Candidate("magnetics/ip_sibling", 0.0, arms={"cluster"})
+        return [sibling], [_judgment("magnetics/ip_sibling", 0.95)]
+
+    _patch_worker(monkeypatch, captured, expand=expand)
+    state = _new_state(batch_size=10)
+
+    asyncio.run(candidate_worker(state))
+
+    assert captured["seed_see_also"] == ["magnetics/ip_sibling"]
+    by_path = {r["path"]: r for r in captured["records"]["src-sel"]}
+    assert by_path["magnetics/ip_sibling"]["arms"] == ["cluster"]
+    # the sibling reaches the select threshold, so it is selected as well
+    assert by_path["magnetics/ip_sibling"]["route"] is True
+    assert captured["routes"]["src-sel"] == "selected"
+    assert state.cost.steps["candidate_cluster_judgment"] == pytest.approx(0.001)
 
 
 def test_cost_limit_stops_the_loop(monkeypatch):

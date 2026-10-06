@@ -152,6 +152,45 @@ class TestWriteCandidates:
 
         assert gc.query.call_count == 0
 
+    def test_persists_arms_on_the_edge(self):
+        """Each record's arms — the retrieval routes that returned it — are
+        written so a cluster sibling can be told from a retrieval hit."""
+        gc = _gc_returning([{"written": 1}])
+
+        write_candidates(
+            "jet:PF:r",
+            [{"path": "a/b", "arms": ["cluster"], "route": True}],
+            "selected",
+            gc,
+        )
+
+        records = gc.query.call_args.kwargs["records"]
+        assert records[0]["arms"] == ["cluster"]
+        assert "r.arms = rec.arms" in _normalised(gc)
+
+    def test_arms_defaults_to_empty_when_absent(self):
+        gc = _gc_returning([{"written": 1}])
+
+        write_candidates("jet:PF:r", [{"path": "a/b"}], "escalated", gc)
+
+        assert gc.query.call_args.kwargs["records"][0]["arms"] == []
+
+    def test_arms_not_a_list_of_strings_is_refused(self):
+        """A bare string or a list of non-strings must not be written as arms."""
+        gc = _gc_returning([{"written": 1}])
+        with pytest.raises(CandidateWriteError):
+            write_candidates(
+                "jet:PF:r", [{"path": "a/b", "arms": "cluster"}], "escalated", gc
+            )
+        assert gc.query.call_count == 0
+
+        gc2 = _gc_returning([{"written": 1}])
+        with pytest.raises(CandidateWriteError):
+            write_candidates(
+                "jet:PF:r", [{"path": "a/b", "arms": [1, 2]}], "escalated", gc2
+            )
+        assert gc2.query.call_count == 0
+
 
 class TestClearCandidates:
     def test_reports_edge_and_route_counts(self):

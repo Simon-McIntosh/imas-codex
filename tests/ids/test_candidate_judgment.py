@@ -237,54 +237,32 @@ def test_default_thresholds_escalate_and_shortlist_top_five_in_jev_order():
     assert [j.p_same_quantity for j in result.shortlist] == scores[:5]
 
 
-def test_select_threshold_returns_each_route_including_margin_case():
+def test_select_threshold_marks_every_candidate_at_or_above_it():
+    """Every candidate reaching the select threshold is selected, not only the
+    best: with several homes for one quantity a near-tie is expected."""
     selected = route(
-        [_judgment("ids/p0", 0.9), _judgment("ids/p1", 0.2)],
-        RouteThresholds(
-            select_threshold=0.5,
-            select_margin=0.1,
-            floor_threshold=None,
-            shortlist_size=5,
-        ),
+        [_judgment("ids/p0", 0.9), _judgment("ids/p1", 0.85), _judgment("ids/p2", 0.2)],
+        RouteThresholds(select_threshold=0.5, floor_threshold=None, shortlist_size=5),
     )
     assert selected is not None
     assert selected.decision == "selected"
-
-    margin = route(
-        [_judgment("ids/p0", 0.9), _judgment("ids/p1", 0.85)],
-        RouteThresholds(
-            select_threshold=0.5,
-            select_margin=0.1,
-            floor_threshold=None,
-            shortlist_size=5,
-        ),
-    )
-    assert margin is not None
-    assert margin.decision == "escalated"
+    assert selected.selected == frozenset({"ids/p0", "ids/p1"})
 
     no_candidate = route(
         [_judgment("ids/p0", 0.4), _judgment("ids/p1", 0.3)],
-        RouteThresholds(
-            select_threshold=0.5,
-            select_margin=0.1,
-            floor_threshold=0.5,
-            shortlist_size=5,
-        ),
+        RouteThresholds(select_threshold=0.5, floor_threshold=0.5, shortlist_size=5),
     )
     assert no_candidate is not None
     assert no_candidate.decision == "no_candidate"
+    assert no_candidate.selected == frozenset()
 
     below_select_above_floor = route(
         [_judgment("ids/p0", 0.5)],
-        RouteThresholds(
-            select_threshold=0.6,
-            select_margin=0.1,
-            floor_threshold=0.3,
-            shortlist_size=5,
-        ),
+        RouteThresholds(select_threshold=0.6, floor_threshold=0.3, shortlist_size=5),
     )
     assert below_select_above_floor is not None
     assert below_select_above_floor.decision == "escalated"
+    assert below_select_above_floor.selected == frozenset()
 
 
 def test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered(monkeypatch):
@@ -329,3 +307,130 @@ def test_route_ids_returns_three_ids_drawn_from_the_criteria_it_offered(monkeypa
     assert set(result) <= offered
     assert set(captured["body"]["questions"]["ids_routing"]["criteria"]) == offered
     assert captured["body"]["model"] == MODEL
+
+
+# ---------------------------------------------------------------------------
+# Cross-IDS cluster sibling expansion
+# ---------------------------------------------------------------------------
+
+
+class _DocGraph:
+    """Graph client answering only the parent-documentation lookup."""
+
+    def query(self, cypher, **params):
+        return []
+
+
+def _related_result(path: str, sibling_paths: list[str]):
+    """A ``RelatedPathResult`` carrying ``sibling_paths`` as cluster hits."""
+    from imas_codex.graph.dd_search import RelatedPathHit, RelatedPathResult
+
+    return RelatedPathResult(
+        path=path,
+        relationship_types="cluster",
+        hits=[
+            RelatedPathHit(
+                path=sibling,
+                ids=sibling.split("/", 1)[0],
+                relationship_type="cluster",
+                via="plasma current",
+                doc=f"documentation for {sibling}",
+            )
+            for sibling in sibling_paths
+        ],
+    )
+
+
+def _patch_related(monkeypatch, by_seed: dict[str, list[str]]):
+    from imas_codex.ids import candidates as cand
+
+    def fake_related(gc, path, *, relationship_types="all", dd_version=None):
+        assert relationship_types == "cluster"
+        return _related_result(path, by_seed.get(path, []))
+
+    monkeypatch.setattr(cand, "related_dd_search", fake_related)
+
+
+def _answering_post(captured: dict | None = None):
+    def fake_post(headers, body, timeout):
+        if captured is not None:
+            captured["body"] = body
+        count = len(body["state"]["candidates"])
+        answers = {
+            f"same_quantity_{i}": {"type": "noul", "noul": 0.5} for i in range(count)
+        }
+        return _FakeResponse(_payload(answers))
+
+    return fake_post
+
+
+def test_expansion_adds_cluster_siblings_with_the_cluster_arm_and_see_also(
+    monkeypatch,
+):
+    from imas_codex.ids import candidates as cand
+
+    siblings = [
+        "equilibrium/time_slice/constraints/ip",
+        "core_profiles/global_quantities/ip",
+    ]
+    _patch_related(monkeypatch, {"magnetics/ip": siblings})
+    captured: dict = {}
+    monkeypatch.setattr(llm, "_post_decisions", _answering_post(captured))
+
+    seed = _candidate("magnetics/ip", 0.9)
+    new_candidates, new_judgments = cand.expand_cluster_siblings(
+        {"id": "src-1", "description": "plasma current"},
+        {"facility_id": "jet"},
+        [seed],
+        [_judgment("magnetics/ip", 0.9)],
+        gc=_DocGraph(),
+    )
+
+    assert [c.hit.path for c in new_candidates] == siblings
+    assert all(c.arms == frozenset({cand.CLUSTER_ARM}) for c in new_candidates)
+    assert seed.hit.see_also == siblings
+    # the siblings were judged in a second call carrying them as the candidates
+    assert [j.path for j in new_judgments] == siblings
+    assert [c["path"] for c in captured["body"]["state"]["candidates"]] == siblings
+
+
+def test_expansion_dedupes_shortlist_paths_and_caps_at_ten(monkeypatch):
+    from imas_codex.ids import candidates as cand
+
+    already = "equilibrium/p0"
+    returned = [f"equilibrium/p{i}" for i in range(12)]
+    _patch_related(monkeypatch, {"magnetics/ip": returned})
+    monkeypatch.setattr(llm, "_post_decisions", _answering_post())
+
+    new_candidates, _ = cand.expand_cluster_siblings(
+        {"id": "src-1", "description": "plasma current"},
+        {"facility_id": "jet"},
+        [_candidate("magnetics/ip", 0.9), _candidate(already, 0.8)],
+        [_judgment("magnetics/ip", 0.9), _judgment(already, 0.8)],
+        gc=_DocGraph(),
+    )
+
+    paths = [c.hit.path for c in new_candidates]
+    assert already not in paths
+    assert len(paths) == len(set(paths))
+    assert len(paths) == cand.CLUSTER_SIBLING_CAP
+
+
+def test_expansion_books_second_call_cost_to_the_cluster_step(monkeypatch):
+    from imas_codex.ids import candidates as cand
+
+    _patch_related(monkeypatch, {"magnetics/ip": ["equilibrium/time_slice/ip"]})
+    monkeypatch.setattr(llm, "_post_decisions", _answering_post())
+
+    cost = PipelineCost()
+    cand.expand_cluster_siblings(
+        {"id": "src-1", "description": "plasma current"},
+        {"facility_id": "jet"},
+        [_candidate("magnetics/ip", 0.9)],
+        [_judgment("magnetics/ip", 0.9)],
+        gc=_DocGraph(),
+        cost=cost,
+    )
+
+    assert cost.steps["candidate_cluster_judgment"] == pytest.approx(COST)
+    assert cost.total_usd == pytest.approx(COST)

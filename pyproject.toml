@@ -283,14 +283,12 @@ triage-offset = 0.15
 code-triage-threshold = 0.4
 code-ingest-threshold = 0.5
 # Candidate-stage routing thresholds (get_mapping_route_thresholds). A source
-# is selected only when map-select-threshold is set and its best same_quantity
-# reaches it while leading the next by map-select-margin; it is rejected only
-# when map-floor-threshold is set and no score reaches it. Both gate keys are
-# intentionally absent: the selected route never reached usable precision, so
-# it stays disabled until the select threshold is written, and no source is
-# rejected. map-select-margin is the Jev operating-point margin and
-# map-shortlist-size the reranked top size that held every recoverable hit.
-map-select-margin = 0.10
+# is selected when map-select-threshold is set and any candidate's same_quantity
+# reaches it; it is rejected only when map-floor-threshold is set and no score
+# reaches it. Both gate keys are intentionally absent: the selected route never
+# reached usable precision, so it stays disabled until the select threshold is
+# written, and no source is rejected. map-shortlist-size is the reranked top
+# size that held every recoverable hit.
 map-shortlist-size = 5
 
 [tool.imas-codex.logs]
