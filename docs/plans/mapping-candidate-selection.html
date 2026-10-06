@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -344,9 +344,12 @@
       Retrieval is deterministic and calls no LLM. A new module,
       <code>imas_codex/ids/candidates.py</code>, exposes
       <code>retrieve_candidates(sources, *, gc, k, dd_version) -&gt; dict[str,
-      list[Candidate]]</code>. <code>Candidate</code> is a dataclass with fields path, ids,
-      retrieval_score, arms (the set of arms that produced it), unit, documentation,
-      node_category, data_type, physics_domain and parent_documentation.
+      list[Candidate]]</code>. <code>Candidate</code> wraps the <code>SearchHit</code>
+      (<code>imas_codex/search/search_strategy.py:93</code>) that
+      <code>hybrid_dd_search</code> already returns, which carries path, IDS, documentation,
+      units, data type, physics domain and score. It adds only what a hit lacks:
+      <code>arms</code>, the set of arms that produced it, and
+      <code>parent_documentation</code>. No hit field is copied.
     </p>
     <p>
       The shortlist is already built once, in <code>gather_ids_context</code>
@@ -491,8 +494,15 @@
     </ul>
     <p>
       <strong>Surface.</strong> The section adds one relationship type, one field and two
-      functions. The relationship cannot merge into <code>MAPS_TO_IMAS</code>, for two
-      reasons:
+      functions. What they displace: the assign stage today stores its free-text choice on
+      SignalSource as <code>mapping_target_path</code>, <code>mapping_target_ids</code> and
+      <code>mapping_target_type</code> (<code>imas_codex/schemas/facility.yaml:1931–1935</code>,
+      written at <code>imas_codex/ids/workers.py:552</code>). The selected
+      <code>MAPPING_CANDIDATE</code> edge carries the path and IDS, and the node's data type
+      gives the target type, so §8 retires those three fields.
+      <code>write_candidates</code> replaces that <code>set_mapping_status</code> call for the
+      target. The relationship cannot merge into
+      <code>MAPS_TO_IMAS</code>, for two reasons:
     </p>
     <ul>
       <li><code>MAPS_TO_IMAS</code> is a binding with a transform, written by
@@ -678,6 +688,12 @@
       <li><strong>Retired options.</strong> <code>imas map run</code> loses
         <code>--skip-metadata</code>, which is parsed and never read, and
         <code>--skip-errors</code>, which is the same as <code>--stage data</code>.</li>
+      <li><strong>Retired fields.</strong> SignalSource loses
+        <code>mapping_target_path</code>, <code>mapping_target_ids</code> and
+        <code>mapping_target_type</code>. The map stage reads the target from the selected
+        <code>MAPPING_CANDIDATE</code> edge, and derives the target type from that node's
+        data type, where <code>claim_sources_for_mapping</code> reads the scalar today
+        (<code>workers.py:237</code>).</li>
     </ul>
     <p><strong>Node</strong> <code>map-run-consumes-candidates</code>, role implement.</p>
     <ul>
@@ -686,7 +702,8 @@
         <code>imas_codex/llm/prompts/mapping/target_assignment.md</code>,
         <code>imas_codex/llm/prompts/mapping/target_assignment_system.md</code>,
         <code>imas_codex/ids/tools.py</code>, <code>imas_codex/ids/graph_ops.py</code>,
-        <code>imas_codex/cli/map.py</code> and <code>tests/ids/</code>.</li>
+        <code>imas_codex/schemas/facility.yaml</code>, <code>imas_codex/cli/map.py</code> and
+        <code>tests/ids/</code>.</li>
       <li>It runs after §7, which also writes <code>workers.py</code>.</li>
     </ul>
     <p><strong>Done when</strong> <code>tests/ids</code> passes with tests that show the
