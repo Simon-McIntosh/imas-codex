@@ -85,8 +85,6 @@ def map_cmd() -> None:
       --stage data         Run LLM data mapping only (Stage 1)
       --stage error        Run error derivation only (Stage 2, requires Stage 1)
       --stage all          Run all stages (default)
-      --skip-errors        Skip error derivation (same as --stage data)
-      --skip-metadata      Skip metadata population (placeholder)
     """
 
 
@@ -156,16 +154,6 @@ def map_cmd() -> None:
     "'error': error derivation only (requires existing data mappings). "
     "'all': full pipeline (default).",
 )
-@click.option(
-    "--skip-errors",
-    is_flag=True,
-    help="Skip Stage 2 error derivation (data mapping only).",
-)
-@click.option(
-    "--skip-metadata",
-    is_flag=True,
-    help="Skip Stage 3 metadata population (placeholder for future).",
-)
 def map_run(
     facility: str,
     domains: tuple[str, ...],
@@ -179,8 +167,6 @@ def map_run(
     verbose: bool,
     clear: bool,
     stage: str,
-    skip_errors: bool,
-    skip_metadata: bool,
 ) -> None:
     """Run the IMAS signal mapping pipeline.
 
@@ -272,10 +258,10 @@ def map_run(
 
     # -------------------------------------------------------------------
     # Resolve stage flags
-    # --skip-errors is equivalent to --stage data
-    # --stage error means run only error derivation (skip LLM data mapping)
+    # --stage data runs the LLM data mapping only, skipping error derivation;
+    # --stage error runs only error derivation.
     # -------------------------------------------------------------------
-    effective_skip_errors = skip_errors or stage == "data"
+    effective_skip_errors = stage == "data"
     error_only = stage == "error"
 
     if error_only:
@@ -650,20 +636,12 @@ def _clear_mapping(facility: str, ids_name: str, log_print=None) -> int:
     Returns the number of mapping nodes deleted.
     """
     from imas_codex.graph.client import GraphClient
+    from imas_codex.ids.graph_ops import clear_mapping_bindings
 
     gc = GraphClient()
 
     # Delete MAPS_TO_IMAS from signal sources used by this mapping
-    gc.query(
-        """
-        MATCH (m:IMASMapping {facility_id: $facility, ids_name: $ids})
-              -[:USES_SIGNAL_SOURCE]->(sg:SignalSource)
-        MATCH (sg)-[r:MAPS_TO_IMAS]->(:IMASNode)
-        DELETE r
-        """,
-        facility=facility,
-        ids=ids_name,
-    )
+    clear_mapping_bindings(facility, ids_name, gc)
 
     # Delete evidence nodes
     gc.query(
@@ -748,6 +726,17 @@ def map_status(facility: str, ids_name: str | None) -> None:
         )
         if not rows:
             click.echo(f"No mappings found for {facility}.")
+
+        from imas_codex.ids.graph_ops import count_candidates_by_route
+
+        route_counts = count_candidates_by_route(facility, gc)
+        click.echo("Candidate routes:")
+        if route_counts:
+            for route, count in sorted(route_counts.items()):
+                click.echo(f"  {route:<14} {count}")
+        else:
+            click.echo("  none")
+        if not rows:
             return
 
         click.echo(f"{'IDS':<20} {'Status':<12} {'DD Version':<12}")

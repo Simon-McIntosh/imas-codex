@@ -7,7 +7,7 @@ Covers:
 - classify_error_signals: uncertainty vs physics-error-field exclusion
 - match_error_signals_to_imas: cross-reference with existing data mappings
 - persist_mapping_result: error fields are persisted in MAPS_TO_IMAS relationships
-- CLI: --stage, --skip-errors, --skip-metadata flags appear in help text
+- CLI: --stage appears in help text; --skip-errors and --skip-metadata do not
 """
 
 from __future__ import annotations
@@ -650,8 +650,22 @@ def test_match_error_signals_confidence_reduced(mock_gc):
 # ---------------------------------------------------------------------------
 
 
-def test_persist_mapping_result_error_fields(mock_gc):
+def _gc_with_written_map():
+    """A graph client whose MAPS_TO_IMAS MERGE reports one edge written."""
+    gc = MagicMock()
+
+    def _query(query, **kwargs):
+        if "MERGE (sg)-[r:MAPS_TO_IMAS]->(ip)" in query:
+            return [{"written": 1}]
+        return []
+
+    gc.query.side_effect = _query
+    return gc
+
+
+def test_persist_mapping_result_error_fields():
     """Error-derived mappings persist mapping_type, error_type, derived_from."""
+    mock_gc = _gc_with_written_map()
     result = ValidatedMappingResult(
         facility="jet",
         ids_name="equilibrium",
@@ -692,8 +706,9 @@ def test_persist_mapping_result_error_fields(mock_gc):
     assert "equilibrium/time_slice/global_quantities/ip" in call_str
 
 
-def test_persist_mapping_result_direct_mapping_fields(mock_gc):
+def test_persist_mapping_result_direct_mapping_fields():
     """Direct mappings persist with mapping_type='direct' and no error fields."""
+    mock_gc = _gc_with_written_map()
     result = ValidatedMappingResult(
         facility="jet",
         ids_name="equilibrium",
@@ -721,8 +736,9 @@ def test_persist_mapping_result_direct_mapping_fields(mock_gc):
     # error_type and derived_from should be None (absent or 'None' string)
 
 
-def test_persist_mapping_result_multiple_bindings(mock_gc):
+def test_persist_mapping_result_multiple_bindings():
     """Mixed bindings (direct + error_derived) all get persisted."""
+    mock_gc = _gc_with_written_map()
     result = ValidatedMappingResult(
         facility="jet",
         ids_name="equilibrium",
@@ -780,8 +796,9 @@ def test_map_run_help_includes_stage():
     assert "--stage" in result.output
 
 
-def test_map_run_help_includes_skip_errors():
-    """CLI help text includes --skip-errors flag."""
+def test_map_run_help_omits_retired_skip_flags():
+    """--skip-errors and --skip-metadata are retired: --stage data replaces the
+    first and the second was parsed but never read."""
     from click.testing import CliRunner
 
     from imas_codex.cli.map import map_cmd
@@ -789,19 +806,8 @@ def test_map_run_help_includes_skip_errors():
     runner = CliRunner()
     result = runner.invoke(map_cmd, ["run", "--help"])
     assert result.exit_code == 0
-    assert "--skip-errors" in result.output
-
-
-def test_map_run_help_includes_skip_metadata():
-    """CLI help text includes --skip-metadata flag."""
-    from click.testing import CliRunner
-
-    from imas_codex.cli.map import map_cmd
-
-    runner = CliRunner()
-    result = runner.invoke(map_cmd, ["run", "--help"])
-    assert result.exit_code == 0
-    assert "--skip-metadata" in result.output
+    assert "--skip-errors" not in result.output
+    assert "--skip-metadata" not in result.output
 
 
 def test_map_run_help_stage_choices():

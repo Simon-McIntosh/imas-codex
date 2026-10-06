@@ -30,6 +30,7 @@ from typing import Any
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.ids.candidates import DEFAULT_K, retrieve_candidates
+from imas_codex.ids.graph_ops import write_mapping_binding
 from imas_codex.ids.metadata import (
     IDSMetadataResult,
     persist_metadata,
@@ -2001,35 +2002,7 @@ def run_error_derivation_only(
 
     if error_bindings and not dry_run:
         for fm in error_bindings:
-            gc.query(
-                """
-                MATCH (sg:SignalSource {id: $sg_id})
-                MATCH (ip:IMASNode {id: $target_id})
-                MERGE (sg)-[r:MAPS_TO_IMAS]->(ip)
-                SET r.source_property = $source_property,
-                    r.transform_expression = $transform_expression,
-                    r.source_units = $source_units,
-                    r.target_units = $target_units,
-                    r.cocos_label = $cocos_label,
-                    r.confidence = $confidence,
-                    r.evidence = $evidence,
-                    r.mapping_type = $mapping_type,
-                    r.error_type = $error_type,
-                    r.derived_from = $derived_from
-                """,
-                sg_id=fm.source_id,
-                target_id=fm.target_id,
-                source_property=fm.source_property,
-                transform_expression=fm.transform_expression,
-                source_units=fm.source_units,
-                target_units=fm.target_units,
-                cocos_label=fm.cocos_label,
-                confidence=fm.confidence,
-                evidence=fm.evidence,
-                mapping_type=fm.mapping_type,
-                error_type=fm.error_type,
-                derived_from=fm.derived_from,
-            )
+            write_mapping_binding(fm, gc)
         logger.info(
             "Persisted %d error mappings for %s:%s",
             len(error_bindings),

@@ -46,9 +46,21 @@ from imas_codex.models.result_models import FetchPathsResult
 
 @pytest.fixture
 def mock_gc():
-    """Create a mock GraphClient."""
+    """Create a mock GraphClient.
+
+    The MAPS_TO_IMAS writer reads the count row its MERGE returns and fails
+    closed when the write reports zero edges, so the mock reports one edge for
+    that statement while every other query keeps the test's configured result.
+    """
     gc = MagicMock()
     gc.query.return_value = []
+
+    def _query(query, **kwargs):
+        if "MERGE (sg)-[r:MAPS_TO_IMAS]->(ip)" in query:
+            return [{"written": 1}]
+        return gc.query.return_value
+
+    gc.query.side_effect = _query
     return gc
 
 
