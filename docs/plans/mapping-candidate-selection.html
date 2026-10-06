@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
 </head>
@@ -148,8 +148,12 @@
         proportional, with at least 3 per domain. The set includes 20 of the 56 previously
         validated sources with a negative disposition, including the probe and passive
         examples in §1. It also includes all 13 enriched JT-60SA sources.</li>
-      <li>A label is the DD 4.1.1 quantity, geometry or identifier node (or nodes) that should
-        hold the source's values, or <code>none</code> with a one-line reason.</li>
+      <li>A label is the <em>set</em> of current DD 4.1.1 quantity, geometry or identifier
+        nodes that could correctly hold the source's values, or <code>none</code> with a
+        one-line reason. A source can have more than one correct home: q on axis fits both
+        <code>equilibrium/time_slice/global_quantities/q_axis</code> and
+        <code>summary/local/magnetic_axis/q</code>. A judgment is correct when its node is
+        in the set.</li>
       <li>Labels come from a reasoning pass that queries the DD through the graph
         (<code>search_dd_paths</code>, <code>fetch_dd_paths</code>, IDS subtrees). That pass
         <em>never sees the shortlist being measured</em>, because seeing it would inflate
@@ -179,7 +183,9 @@
       <li><strong>Pair judgment.</strong> AUC of <code>same_quantity</code> over (source,
         candidate) pairs; top-1 accuracy after reranking, among sources whose label is in the
         shortlist; the change in both when <code>same_object</code> is combined (product,
-        and minimum).</li>
+        and minimum). Also report how often the top two candidates are <em>both</em> in a
+        source's set. The margin rule in §5 must not escalate a source only because two
+        correct homes score alike.</li>
       <li><strong>None detection.</strong> Precision and recall of "best
         <code>same_quantity</code> below a floor" against <code>none</code> labels, across
         floors.</li>
@@ -253,8 +259,33 @@
             with a reason, and <code>split.json</code> gives the dev/test assignment.
             <code>agreement.json</code> states the agreement between the two passes as a
             number.</li>
+          <li><em>Landed.</em> 163 sources: 82 labelled over 52 current nodes, 81
+            <code>none</code> with reasons, 0 failures. Exact agreement on the 30-source
+            subsample is 0.633. The local pass made errors that the second pass did not, for
+            example labelling a pressure profile as <code>barometry/gauge/pressure</code>.</li>
+        </ul></li>
+      <li><strong><code>candidate-label-adjudication</code></strong>, role implement.
+        <ul>
+          <li>The local pass is too noisy to measure a 0.9 precision against, so the test
+            split is adjudicated.</li>
+          <li>The second-pass model labels every test source, with the same top-down walk
+            and the same restriction to current nodes.</li>
+          <li>Where the two passes agree, the label stands. Where they disagree, an
+            adjudicator receives the source, both answers and the candidate nodes of the IDSs
+            either pass chose. It returns the acceptable set, or <code>none</code> with a
+            reason.</li>
+          <li>Dev labels stay as they are, because tuning tolerates noise and measurement
+            does not.</li>
+          <li>It writes <code>labels_test.json</code> and <code>adjudication.json</code>
+            under <code>$PROBE/labels/</code>. The spend counts against the shared
+            $3 cap.</li>
+          <li><strong>Done when</strong> <code>labels_test.json</code> has one entry per test
+            source, each a non-empty set of current IMASNode ids that exist in the graph or
+            <code>none</code> with a reason. <code>adjudication.json</code> states how many
+            test labels stood, how many were adjudicated, and how many changed.</li>
         </ul></li>
       <li><strong><code>candidate-retrieval-probe</code></strong>, role implement.
+        Test-split measures use <code>labels_test.json</code>.
         <ul>
           <li>It computes measure 1 for every arm. It writes the K-candidate shortlists
             and <code>recall.json</code> under
@@ -710,7 +741,10 @@
     <div class="r-comment-body"><p>Gate <code>grep -c '^VERDICT '</code> passed; §2 closed. Audit correction to the landing line above: the 05:21–08:35Z map_jet.log entries are mocked test runs logging to the shared CLI log, not JET re-runs, so the removal is not dated. The mechanism and the EDGE_RISK finding stand.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261006T171919450098-candidate-labels" data-who="reckon-build" data-when="2026-10-06T18:05:15.625Z">
-    <div class="r-comment-body"><p>candidate-labels drew and labelled a frozen 163-source set (150 JET over 20 domains plus the 13 enriched JT-60SA sources) by a scripted top-down DD walk and split it dev/test by domain; the gate prints 163 163 0.6333333333333333 (sample size, split size, two-model exact agreement on the 30-source subsample), 82 sources carry 52 distinct current DD 4.1.1 IMASNode ids (0 absent, 0 lifecycle_status &#x27;removed&#x27;), 81 are none each with a DD reason, 0 failed, spend $0.389 against the $3 cap.</p></div>
+    <div class="r-comment-body"><p>candidate-labels drew and labelled a frozen 163-source set (150 JET over 20 domains plus the 13 enriched JT-60SA sources) by a scripted top-down DD walk and split it dev/test by domain; the gate prints 163 163 0.6333333333333333 (sample size, split size, two-model exact agreement on the 30-source subsample), 82 sources carry 52 distinct current DD 4.1.1 IMASNode ids (0 absent, 0 lifecycle_status 'removed'), 81 are none each with a DD reason, 0 failed, spend $0.389 against the $3 cap.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261006T1810-labels-audit" data-who="reckon-build" data-when="2026-10-06T18:10:00Z">
+    <div class="r-comment-body"><p>Node <code>candidate-labels</code>: gate passed; merged as <code>57ae0880a</code>. Audit sent it back once. 11 of its labels named removed DD3-era nodes, and 37 labeller failures had been stored as <code>none</code>. The repaired set has 82 labelled sources, 81 <code>none</code> with reasons and no failures. A breakdown of the 30-source subsample: 15 both <code>none</code>, 4 same nodes, 1 overlapping, 2 disjoint, and 8 where one pass says <code>none</code>. That noise is why <code>candidate-label-adjudication</code> now precedes the measurement.</p></div>
 </div>
 </section>
 </main>
