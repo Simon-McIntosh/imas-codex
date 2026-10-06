@@ -1,0 +1,46 @@
+<section id="equilibrium-tree-paths-resume-record">
+  <h3>Resumed scoped paths run triages the twelve equilibrium child directories</h3>
+  <p id="equilibrium-tree-paths-resume-landing">
+    Re-ran the scoped paths discovery after the local-reply abort repair, with
+    the three tree roots and no reset:
+    <code>discover paths jt-60sa --root /analysis/src/client_eqdbms.EQ32.Rev1
+    --root /analysis/src/SAeqfame --root /analysis/src/getseldata_v4.2 --time 20</code>.
+    Run exit <code>EXIT=0</code>; log line
+    <code>Discovery complete: scanned=13, scored=10, cost=$0.000, elapsed=19m 55s</code>,
+    <code>Graph state: total=8359, scored=3753 (44.9%), pending=0</code>.
+    All seven child directories recorded at <code>scanned</code> before the run
+    left <code>scanned</code> (each to <code>scored</code>); the count of
+    jt-60sa <code>FacilityPath</code> rows outside the three trees whose status
+    changed reads <code>0</code> (0 added, 0 deleted); spend <code>$0</code>.
+    Aborted or malformed-JSON replies in the run window: <code>0</code>.
+  </p>
+  <table id="equilibrium-tree-paths-resume-counts">
+    <caption>FacilityPath status counts under each tree, before → after the run.</caption>
+    <thead>
+      <tr><th>tree</th><th>scanned</th><th>triaged</th><th>scored</th><th>skipped</th><th>discovered</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/analysis/src/client_eqdbms.EQ32.Rev1</td><td>3 → 0</td><td>0 → 4</td><td>1 → 5</td><td>4 → 11</td><td>0 → 1</td></tr>
+      <tr><td>/analysis/src/SAeqfame</td><td>2 → 0</td><td>1 → 2</td><td>1 → 2</td><td>0 → 0</td><td>0 → 1</td></tr>
+      <tr><td>/analysis/src/getseldata_v4.2</td><td>2 → 0</td><td>0 → 5</td><td>1 → 3</td><td>0 → 0</td><td>0 → 1</td></tr>
+    </tbody>
+  </table>
+  <p id="equilibrium-tree-paths-resume-children">
+    The seven originally-<code>scanned</code> children all moved to
+    <code>scored</code>: <code>client_eqdbms.EQ32.Rev1/eqdbms</code>,
+    <code>client_eqdbms.EQ32.Rev1/eqtrace</code>,
+    <code>client_eqdbms.EQ32.Rev1/inc</code>, <code>SAeqfame/eqread</code>,
+    <code>SAeqfame/selene</code>, <code>getseldata_v4.2/TEST</code>,
+    <code>getseldata_v4.2/UTL</code>. The remaining five children were already
+    off <code>scanned</code> before the run (four <code>skipped</code>, one
+    <code>triaged</code>).
+  </p>
+  <ul id="equilibrium-tree-paths-resume-evidence">
+    <li>run directory (r-20261006T065557576295-equilibrium-tree-paths-resume): <code>probe/run.stdout</code>, <code>probe/run_window.log</code></li>
+    <li>CLI auto-log: <code>~/.local/share/imas-codex/logs/paths_jt-60sa.log</code> (run window 2026-10-06 09:00–09:20 local)</li>
+    <li>before/after graph snapshots: run directory <code>probe/before.json</code>, <code>probe/after.json</code></li>
+    <li>aborted/malformed replies in run window: 0; ERROR/Traceback in run window: 0</li>
+    <li>negative control — rows with path exactly <code>/analysis/src</code>: 0</li>
+    <li>spend: $0 (local discovery seats)</li>
+  </ul>
+</section>
