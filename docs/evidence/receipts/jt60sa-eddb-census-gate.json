@@ -1,0 +1,681 @@
+{
+ "receipt": "JT-60SA EDDB census in the codex graph: FacilitySignal rows for shot E101173 with data class, shot range and a handbook link",
+ "consumer": "imas-ambix plan jt60sa-machine-map, gate g-jt60sa-machine-map-1",
+ "producer": "imas-codex plan jt60sa-discovery-completion (sections 2 and 3)",
+ "measured_at_utc": "2026-10-06T04:23:56Z",
+ "codex_revision_at_measurement": "f277984c5694c61c23ee91f23120115b7d7918d5",
+ "graph": "codex Neo4j resolved by GraphClient discovery (SLURM service codex-neo4j)",
+ "notes": [
+  "Handbook link means a WikiChunk -[:DOCUMENTS]-> FacilitySignal edge; all links come from the jt-60sa:CategoryInformation page, which fronts EDDB and PMDB.",
+  "Category is the first segment of data_source_path, falling back to name.",
+  "example_shot is stored as the integer 101173 for every jt-60sa signal."
+ ],
+ "query": "MATCH (s:FacilitySignal {facility_id: 'jt-60sa'})\nWHERE s.example_shot = 101173\nWITH s, split(coalesce(s.data_source_path, s.name), '/')[0] AS category,\n     EXISTS { MATCH (:WikiChunk)-[:DOCUMENTS]->(s) } AS documented\nRETURN category,\n       count(s) AS signals,\n       count(s.data_class) AS with_data_class,\n       count(s.shot_range) AS with_shot_range,\n       sum(CASE WHEN documented THEN 1 ELSE 0 END) AS with_handbook_link,\n       sum(CASE WHEN s.data_class IS NOT NULL AND s.shot_range IS NOT NULL AND documented THEN 1 ELSE 0 END) AS meets_all_three,\n       count(s.pid) AS with_pid\nORDER BY category",
+ "rows": [
+  {
+   "category": "CAM",
+   "signals": 37,
+   "with_data_class": 30,
+   "with_shot_range": 37,
+   "with_handbook_link": 37,
+   "meets_all_three": 30,
+   "with_pid": 0
+  },
+  {
+   "category": "CO2",
+   "signals": 6,
+   "with_data_class": 6,
+   "with_shot_range": 6,
+   "with_handbook_link": 6,
+   "meets_all_three": 6,
+   "with_pid": 0
+  },
+  {
+   "category": "CS1",
+   "signals": 11,
+   "with_data_class": 11,
+   "with_shot_range": 11,
+   "with_handbook_link": 11,
+   "meets_all_three": 11,
+   "with_pid": 0
+  },
+  {
+   "category": "CS2",
+   "signals": 11,
+   "with_data_class": 11,
+   "with_shot_range": 11,
+   "with_handbook_link": 11,
+   "meets_all_three": 11,
+   "with_pid": 0
+  },
+  {
+   "category": "CS3",
+   "signals": 11,
+   "with_data_class": 11,
+   "with_shot_range": 11,
+   "with_handbook_link": 11,
+   "meets_all_three": 11,
+   "with_pid": 0
+  },
+  {
+   "category": "CS4",
+   "signals": 11,
+   "with_data_class": 11,
+   "with_shot_range": 11,
+   "with_handbook_link": 11,
+   "meets_all_three": 11,
+   "with_pid": 0
+  },
+  {
+   "category": "Cryo",
+   "signals": 2,
+   "with_data_class": 0,
+   "with_shot_range": 2,
+   "with_handbook_link": 2,
+   "meets_all_three": 0,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoCP",
+   "signals": 9,
+   "with_data_class": 9,
+   "with_shot_range": 9,
+   "with_handbook_link": 9,
+   "meets_all_three": 9,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoCT",
+   "signals": 57,
+   "with_data_class": 57,
+   "with_shot_range": 57,
+   "with_handbook_link": 57,
+   "meets_all_three": 57,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoCTB",
+   "signals": 379,
+   "with_data_class": 379,
+   "with_shot_range": 379,
+   "with_handbook_link": 379,
+   "meets_all_three": 379,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoDist",
+   "signals": 59,
+   "with_data_class": 59,
+   "with_shot_range": 59,
+   "with_handbook_link": 59,
+   "meets_all_three": 59,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoHRS",
+   "signals": 704,
+   "with_data_class": 704,
+   "with_shot_range": 704,
+   "with_handbook_link": 704,
+   "meets_all_three": 704,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoIL",
+   "signals": 286,
+   "with_data_class": 286,
+   "with_shot_range": 286,
+   "with_handbook_link": 286,
+   "meets_all_three": 286,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoMC",
+   "signals": 17,
+   "with_data_class": 17,
+   "with_shot_range": 17,
+   "with_handbook_link": 17,
+   "meets_all_three": 17,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoMCIL",
+   "signals": 105,
+   "with_data_class": 105,
+   "with_shot_range": 105,
+   "with_handbook_link": 105,
+   "meets_all_three": 105,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoMag",
+   "signals": 413,
+   "with_data_class": 413,
+   "with_shot_range": 413,
+   "with_handbook_link": 413,
+   "meets_all_three": 413,
+   "with_pid": 0
+  },
+  {
+   "category": "CryoTS",
+   "signals": 121,
+   "with_data_class": 121,
+   "with_shot_range": 121,
+   "with_handbook_link": 121,
+   "meets_all_three": 121,
+   "with_pid": 0
+  },
+  {
+   "category": "DB",
+   "signals": 6,
+   "with_data_class": 0,
+   "with_shot_range": 6,
+   "with_handbook_link": 6,
+   "meets_all_three": 0,
+   "with_pid": 0
+  },
+  {
+   "category": "DCSV",
+   "signals": 753,
+   "with_data_class": 439,
+   "with_shot_range": 753,
+   "with_handbook_link": 753,
+   "meets_all_three": 439,
+   "with_pid": 0
+  },
+  {
+   "category": "DHC",
+   "signals": 272,
+   "with_data_class": 272,
+   "with_shot_range": 249,
+   "with_handbook_link": 272,
+   "meets_all_three": 249,
+   "with_pid": 23
+  },
+  {
+   "category": "DSMS",
+   "signals": 8,
+   "with_data_class": 8,
+   "with_shot_range": 8,
+   "with_handbook_link": 8,
+   "meets_all_three": 8,
+   "with_pid": 0
+  },
+  {
+   "category": "ECH",
+   "signals": 119,
+   "with_data_class": 119,
+   "with_shot_range": 119,
+   "with_handbook_link": 119,
+   "meets_all_three": 119,
+   "with_pid": 0
+  },
+  {
+   "category": "EF1",
+   "signals": 2,
+   "with_data_class": 2,
+   "with_shot_range": 2,
+   "with_handbook_link": 2,
+   "meets_all_three": 2,
+   "with_pid": 0
+  },
+  {
+   "category": "EF2",
+   "signals": 2,
+   "with_data_class": 2,
+   "with_shot_range": 2,
+   "with_handbook_link": 2,
+   "meets_all_three": 2,
+   "with_pid": 0
+  },
+  {
+   "category": "EF3",
+   "signals": 9,
+   "with_data_class": 9,
+   "with_shot_range": 9,
+   "with_handbook_link": 9,
+   "meets_all_three": 9,
+   "with_pid": 0
+  },
+  {
+   "category": "EF4",
+   "signals": 9,
+   "with_data_class": 9,
+   "with_shot_range": 9,
+   "with_handbook_link": 9,
+   "meets_all_three": 9,
+   "with_pid": 0
+  },
+  {
+   "category": "EF5",
+   "signals": 2,
+   "with_data_class": 2,
+   "with_shot_range": 2,
+   "with_handbook_link": 2,
+   "meets_all_three": 2,
+   "with_pid": 0
+  },
+  {
+   "category": "EF6",
+   "signals": 2,
+   "with_data_class": 2,
+   "with_shot_range": 2,
+   "with_handbook_link": 2,
+   "meets_all_three": 2,
+   "with_pid": 0
+  },
+  {
+   "category": "FAME",
+   "signals": 100,
+   "with_data_class": 100,
+   "with_shot_range": 100,
+   "with_handbook_link": 100,
+   "meets_all_three": 100,
+   "with_pid": 0
+  },
+  {
+   "category": "GAS",
+   "signals": 10,
+   "with_data_class": 10,
+   "with_shot_range": 10,
+   "with_handbook_link": 10,
+   "meets_all_three": 10,
+   "with_pid": 0
+  },
+  {
+   "category": "GAU",
+   "signals": 11,
+   "with_data_class": 9,
+   "with_shot_range": 11,
+   "with_handbook_link": 11,
+   "meets_all_three": 9,
+   "with_pid": 0
+  },
+  {
+   "category": "GLW",
+   "signals": 12,
+   "with_data_class": 12,
+   "with_shot_range": 12,
+   "with_handbook_link": 12,
+   "meets_all_three": 12,
+   "with_pid": 0
+  },
+  {
+   "category": "LFPPCC",
+   "signals": 1,
+   "with_data_class": 1,
+   "with_shot_range": 1,
+   "with_handbook_link": 1,
+   "meets_all_three": 1,
+   "with_pid": 0
+  },
+  {
+   "category": "MAG",
+   "signals": 18,
+   "with_data_class": 18,
+   "with_shot_range": 18,
+   "with_handbook_link": 18,
+   "meets_all_three": 18,
+   "with_pid": 0
+  },
+  {
+   "category": "MDAC",
+   "signals": 274,
+   "with_data_class": 274,
+   "with_shot_range": 264,
+   "with_handbook_link": 274,
+   "meets_all_three": 264,
+   "with_pid": 10
+  },
+  {
+   "category": "MMSYS",
+   "signals": 47,
+   "with_data_class": 47,
+   "with_shot_range": 47,
+   "with_handbook_link": 47,
+   "meets_all_three": 47,
+   "with_pid": 0
+  },
+  {
+   "category": "N2GAS",
+   "signals": 22,
+   "with_data_class": 22,
+   "with_shot_range": 22,
+   "with_handbook_link": 22,
+   "meets_all_three": 22,
+   "with_pid": 0
+  },
+  {
+   "category": "OIS",
+   "signals": 54,
+   "with_data_class": 54,
+   "with_shot_range": 54,
+   "with_handbook_link": 54,
+   "meets_all_three": 54,
+   "with_pid": 0
+  },
+  {
+   "category": "PRB",
+   "signals": 20,
+   "with_data_class": 20,
+   "with_shot_range": 20,
+   "with_handbook_link": 20,
+   "meets_all_three": 20,
+   "with_pid": 0
+  },
+  {
+   "category": "PSC",
+   "signals": 494,
+   "with_data_class": 493,
+   "with_shot_range": 482,
+   "with_handbook_link": 494,
+   "meets_all_three": 481,
+   "with_pid": 12
+  },
+  {
+   "category": "PSRC",
+   "signals": 325,
+   "with_data_class": 324,
+   "with_shot_range": 312,
+   "with_handbook_link": 325,
+   "meets_all_three": 311,
+   "with_pid": 13
+  },
+  {
+   "category": "PSSCfst",
+   "signals": 50,
+   "with_data_class": 50,
+   "with_shot_range": 50,
+   "with_handbook_link": 50,
+   "meets_all_three": 50,
+   "with_pid": 0
+  },
+  {
+   "category": "QMS",
+   "signals": 650,
+   "with_data_class": 645,
+   "with_shot_range": 650,
+   "with_handbook_link": 650,
+   "meets_all_three": 645,
+   "with_pid": 0
+  },
+  {
+   "category": "SPC",
+   "signals": 72,
+   "with_data_class": 72,
+   "with_shot_range": 72,
+   "with_handbook_link": 72,
+   "meets_all_three": 72,
+   "with_pid": 0
+  },
+  {
+   "category": "SXR",
+   "signals": 7,
+   "with_data_class": 7,
+   "with_shot_range": 7,
+   "with_handbook_link": 7,
+   "meets_all_three": 7,
+   "with_pid": 0
+  },
+  {
+   "category": "TC",
+   "signals": 31,
+   "with_data_class": 30,
+   "with_shot_range": 31,
+   "with_handbook_link": 31,
+   "meets_all_three": 30,
+   "with_pid": 0
+  },
+  {
+   "category": "TCIFW",
+   "signals": 16,
+   "with_data_class": 16,
+   "with_shot_range": 16,
+   "with_handbook_link": 16,
+   "meets_all_three": 16,
+   "with_pid": 0
+  },
+  {
+   "category": "TCTIU",
+   "signals": 1,
+   "with_data_class": 0,
+   "with_shot_range": 1,
+   "with_handbook_link": 1,
+   "meets_all_three": 0,
+   "with_pid": 0
+  },
+  {
+   "category": "TCUD",
+   "signals": 28,
+   "with_data_class": 28,
+   "with_shot_range": 28,
+   "with_handbook_link": 28,
+   "meets_all_three": 28,
+   "with_pid": 0
+  },
+  {
+   "category": "TF",
+   "signals": 63,
+   "with_data_class": 63,
+   "with_shot_range": 63,
+   "with_handbook_link": 63,
+   "meets_all_three": 63,
+   "with_pid": 0
+  },
+  {
+   "category": "TF01",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF02",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF03",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF04",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF05",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF06",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF07",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF08",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF09",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF10",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF11",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF12",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF13",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF14",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF15",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF16",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF17",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TF18",
+   "signals": 24,
+   "with_data_class": 24,
+   "with_shot_range": 24,
+   "with_handbook_link": 24,
+   "meets_all_three": 24,
+   "with_pid": 0
+  },
+  {
+   "category": "TFC",
+   "signals": 4,
+   "with_data_class": 4,
+   "with_shot_range": 4,
+   "with_handbook_link": 4,
+   "meets_all_three": 4,
+   "with_pid": 0
+  },
+  {
+   "category": "TFTIME",
+   "signals": 8,
+   "with_data_class": 0,
+   "with_shot_range": 8,
+   "with_handbook_link": 8,
+   "meets_all_three": 0,
+   "with_pid": 0
+  },
+  {
+   "category": "UFPPCC",
+   "signals": 1,
+   "with_data_class": 1,
+   "with_shot_range": 1,
+   "with_handbook_link": 1,
+   "meets_all_three": 1,
+   "with_pid": 0
+  },
+  {
+   "category": "VV",
+   "signals": 92,
+   "with_data_class": 91,
+   "with_shot_range": 92,
+   "with_handbook_link": 92,
+   "meets_all_three": 91,
+   "with_pid": 0
+  },
+  {
+   "category": "VVGS",
+   "signals": 32,
+   "with_data_class": 30,
+   "with_shot_range": 32,
+   "with_handbook_link": 32,
+   "meets_all_three": 30,
+   "with_pid": 0
+  }
+ ],
+ "totals": {
+  "signals": 6298,
+  "with_data_class": 5947,
+  "with_shot_range": 6240,
+  "with_handbook_link": 6298,
+  "meets_all_three": 5889,
+  "with_pid": 58
+ }
+}
