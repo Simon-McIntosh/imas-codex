@@ -1,0 +1,46 @@
+<section>
+  <h2 id="edge-ownership">One count-checked owner for the SignalSource to IMASNode edge</h2>
+  <p id="edge-ownership-scope">
+    Every create and delete of a <code>MAPS_TO_IMAS</code> edge now lives in
+    <code>imas_codex/ids/graph_ops.py</code>.
+    <code>write_mapping_binding(binding, gc)</code> MATCHes both endpoints,
+    MERGEs the edge and reads the <code>RETURN count(r) AS written</code> row;
+    a reported count of zero raises <code>CandidateWriteError</code>, so a
+    binding whose source or target IMASNode has vanished fails loudly.
+    <code>persist_mapping_result</code> and the error-derivation writer both
+    call it, and the unused <code>create_signal_source</code> is removed with
+    its test. <code>clear_mapping_bindings(facility, ids_name, gc)</code> owns
+    the delete; <code>imas map clear</code> and <code>--clear</code> call it
+    instead of issuing their own Cypher. <code>_candidate_record</code>
+    type-checks a judgment's <code>route</code> rather than coercing it with
+    <code>bool()</code>, so a route string can no longer mark a candidate
+    selected. <code>imas map status</code> reports candidate routes through
+    <code>count_candidates_by_route</code>, which moves into
+    <code>graph_ops.py</code> beside the candidate writers. <code>imas map
+    run</code> drops <code>--skip-errors</code> (same as <code>--stage
+    data</code>) and <code>--skip-metadata</code> (parsed but never read).
+  </p>
+  <table id="edge-ownership-gate">
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run --no-sync pytest tests/ids tests/test_cli.py -p no:cacheprovider</code></td><td>476 passed, 5 skipped, 1 deselected, exit 0</td></tr>
+      <tr><td>census <code>grep -rnE 'MERGE \(sg\)-\[(r|rel):MAPS_TO_IMAS\]' imas_codex/</code></td><td>only <code>graph_ops.py:586</code></td></tr>
+      <tr><td>census <code>grep -rnE '\[r:MAPS_TO_IMAS\]-&gt;\(:IMASNode\)' imas_codex/</code></td><td>only <code>graph_ops.py:641</code></td></tr>
+      <tr><td>negative control — remove the written-count check from <code>write_mapping_binding</code></td><td>3 failed, exit 1</td></tr>
+    </tbody>
+  </table>
+  <p id="edge-ownership-tests">
+    <code>tests/ids/test_mapping_edge_ownership.py</code> shows the writer
+    returns its count and raises on a reported zero; both writers
+    (<code>persist_mapping_result</code> and
+    <code>run_error_derivation_only</code>) raise on a zero-row write;
+    <code>clear_mapping_bindings</code> returns the deleted count and
+    <code>_clear_mapping</code> issues no <code>MAPS_TO_IMAS</code> statement of
+    its own; <code>imas map status</code> prints the route counts; and a
+    source-tree census finds every <code>MAPS_TO_IMAS</code> write and delete
+    site in <code>imas_codex/ids/graph_ops.py</code>.
+    <code>tests/ids/test_candidate_persistence.py</code> shows a boolean
+    <code>route</code> marks the edge while a route string is refused before any
+    write.
+  </p>
+</section>
