@@ -1,0 +1,34 @@
+<section id="seed-reports-created-count-record">
+  <h3>Root seeding reports the rows it created, not the rows it processed</h3>
+  <p id="seed-reports-created-count-landing">
+    <code>GraphClient.create_nodes</code> gained a default-off create-only
+    option in an earlier change so an additive caller could seed without
+    resetting an existing row, but it still returned only
+    <code>processed</code>. <code>seed_facility_roots</code> therefore could
+    not tell how many roots it had actually created and printed every
+    configured root as added. The create-only branch now marks the rows
+    <code>MERGE</code> creates, aggregates that mark into the statement's
+    returned row and clears it in the same query, so the returned
+    <code>created</code> count is the rows newly created and the mark never
+    persists. <code>create_nodes</code> returns <code>created</code> under
+    create-only; <code>seed_facility_roots</code> returns that count for its
+    canonical and alias rows. The default upsert path is unchanged and reports
+    no <code>created</code> key.
+  </p>
+  <p id="seed-reports-created-count-measure">
+    Measure: <code>tests/discovery/test_seed_existing_roots.py::test_seed_reports_only_created_roots</code>
+    seeds two roots that already exist as <code>scored</code> and one new root
+    and asserts the seed returns 1. Gate:
+    <code>uv run pytest tests/discovery tests/graph</code> — 4 failed, 1731
+    passed, 357 deselected; the four failures
+    (<code>test_dd_aux_streaming.py</code> ×2,
+    <code>test_vector_quantization.py</code> ×2) fail identically at base
+    <code>5e0d75eb5</code>, so added failures read 0. The novel Cypher
+    compiles against the live graph under <code>EXPLAIN</code> (no write).
+  </p>
+  <p id="seed-reports-created-count-negative-control">
+    Negative control — the same test against a scratch copy whose create-only
+    write returns the processed count — 1 failed (EXIT=1), first failure
+    <code>assert 3 == 1</code> on the created-count assertion.
+  </p>
+</section>
