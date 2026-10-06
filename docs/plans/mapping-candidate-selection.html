@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;,&quot;s11&quot;:&quot;done&quot;}">
 </head>
@@ -436,8 +436,15 @@
                 <code>read_candidates</code> and never calls
                 <code>retrieve_candidates</code>;</li>
               <li><code>discover status</code> prints the route counts from the
-                <code>graph_ops.py</code> reader.</li>
+                <code>graph_ops.py</code> reader;</li>
+              <li><code>_candidate_records</code> raises when a judgment has no matching
+                candidate, instead of writing it with empty arms.</li>
             </ul>
+            That last item is §11's carried follow-on: <code>_candidate_records</code>
+            (<code>imas_codex/ids/workers.py</code>) reads arms with
+            <code>arms_by_path.get(path, [])</code>, a producer-side default that would
+            bypass <code>write_candidates</code>' refusal of absent arms. It becomes a strict
+            lookup.
             <code>grep -n 'retrieve_candidates' imas_codex/ids/mapping.py</code> and
             <code>grep -n 'imas_node_embedding' imas_codex/ids/tools.py</code> print nothing,
             and <code>grep -rn 'def count_candidates_by_route\|count_sources_by_mapping_status'
