@@ -17,13 +17,13 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery">
-  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;, &quot;mapping-candidate-selection#s4&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s4&quot;: [&quot;mapping-candidate-selection#s3&quot;], &quot;s5&quot;: [&quot;jt60sa-discovery-completion#s25&quot;, &quot;mapping-candidate-selection#s3&quot;, &quot;mapping-candidate-selection#s4&quot;], &quot;s6&quot;: [&quot;mapping-candidate-selection#s2&quot;, &quot;mapping-candidate-selection#s3&quot;], &quot;s7&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s5&quot;, &quot;mapping-candidate-selection#s6&quot;], &quot;s8&quot;: [&quot;mapping-candidate-selection#s4&quot;, &quot;mapping-candidate-selection#s6&quot;, &quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s10&quot;], &quot;s10&quot;: [&quot;mapping-candidate-selection#s7&quot;], &quot;s9&quot;: [&quot;mapping-candidate-selection#s7&quot;, &quot;mapping-candidate-selection#s8&quot;]}">
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -394,6 +394,10 @@
         route and best path.</li>
     </ul>
 
+    <h2 id="s10">§10 — Candidate spend reaches the run budget through PipelineCost</h2>
+<section data-reckon="section" data-id="s10" data-effort-hours="0.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p><strong>Why.</strong> §5's <code>route_ids</code> and <code>judge_candidates</code> call <code>call_decisions</code>, which returns <code>(answers, cost)</code>, and then discard the cost. The plan's §5 text had left cost out of <code>PairJudgment</code>. §7 therefore recovers the spend with <code>_capture_decisions_cost</code> in <code>imas_codex/ids/workers.py</code>. That function replaces the module attribute <code>imas_codex.ids.candidates.call_decisions</code> for the life of the worker. It is global mutable state in production code: it double-counts or breaks under any concurrency, and it interacts with every test that patches the same symbol.</p><p><strong>Change.</strong></p><ul><li><code>route_ids</code> and <code>judge_candidates</code> take a keyword <code>cost: PipelineCost</code> and add each request's <code>usage.cost</code> to it under a step name, the way the map pipeline's <code>_acall_llm(..., cost=...)</code> does in <code>imas_codex/ids/mapping.py</code>.</li><li><code>candidate_worker</code> passes <code>state.cost</code>.</li><li><code>_capture_decisions_cost</code> is deleted, and nothing in production assigns to a module attribute of <code>candidates</code>.</li></ul><p><strong>Node</strong> <code>candidate-cost</code>, role implement. It runs before §8, which also writes <code>workers.py</code>.</p><ul><li>Write paths: <code>imas_codex/ids/candidates.py</code>, <code>imas_codex/ids/workers.py</code>, <code>tests/ids/test_candidate_judgment.py</code> and <code>tests/cli/test_discover_map.py</code>.</li></ul><p><strong>Done when</strong> the §7 gate passes, with tests showing that one <code>route_ids</code> call and one <code>judge_candidates</code> call add their transport's reported cost to the passed <code>PipelineCost</code>, and that <code>discover map</code>'s cost limit still stops the loop. <code>grep -n "_capture_decisions_cost\|candidates.call_decisions =" imas_codex/</code> must find nothing.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="jev-role" data-choice="" data-by="" data-when="" data-recommended="prescreen-only" data-recommended-by="reckon-build">
@@ -482,6 +486,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261006T201152869415-review-of-candidate-judgment" data-who="reckon-build" data-when="2026-10-06T20:23:04.555Z">
     <div class="r-comment-body"><p>the review for r-20261006T195542872031-candidate-judgment is stored: six dimensions scored (goal_fidelity 20, evidence 19, scope_discipline 19, durability 19, fit 19, reuse 18; total 114), reviewed_base_sha 67c2de2dae12fbb5b1d750cbbad73514f43b326c and reviewed_head_sha be469845a0e051345a584093c5311919b8864115, item_aggregate 6, call_sites none, added_failure_count null (unmeasured), two follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20261006T2050-s7-audit" data-who="reckon-build" data-when="2026-10-06T20:50:00Z">
+    <div class="r-comment-body"><p>Audit of <code>discover-map-cli</code> (<code>70eb1c178</code>): the gate passed with 1,684 tests, and the negative control (skipping <code>route_ids</code>) fails as declared. One design defect is accepted for now and repaired in §10: <code>_capture_decisions_cost</code> recovers Jev spend by replacing <code>candidates.call_decisions</code> at runtime. Its root cause is the §5 text, which dropped cost from the judgment API.</p></div>
 </div>
 </section>
 </main>
