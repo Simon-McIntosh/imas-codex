@@ -2895,10 +2895,12 @@ classes:
       
       Lifecycle: discovered -> triaged -> scored -> ingested | skipped | failed | stale
       
-      Triage assigns fast per-dimension scores from minimal context (parent dir
-      description + filename). Files triaging over threshold are enriched (rg
-      pattern matching + preview extraction) then independently scored with
-      full evidence. Scored files over the ingestion threshold are fetched,
+      Triage asks a decisions model for typed relevance judgements from
+      minimal context (parent dir description + filename). Files whose relevance
+      reaches the triage threshold are enriched (rg pattern matching + preview
+      extraction) then scored with full evidence, where a content-arm decision
+      records the file's content relevance. Scored files whose content
+      relevance reaches the ingestion threshold are fetched,
       chunked by tree-sitter, embedded, and data references extracted.
       
       Path scanning is detected by the presence of (CodeFile)-[:IN_DIRECTORY]->
@@ -2971,44 +2973,31 @@ classes:
         range: float
       score_reason:
         description: Brief LLM explanation for the assigned scores
-      # Triage-phase dimension scores (1st pass, minimal context)
-      # Permanently preserved so calibration can draw from the full triage
-      # population (triaged + scored). Naming mirrors FacilityPath convention.
-      triage_composite:
-        description: Combined triage score (max * (1+mean_nonzero)/2)
+      # Jev decision relevance (typed judgements, 0.0-1.0 each). A decisions
+      # model answers the six triage questions; these hold the four scope
+      # probabilities plus the simulation probability and the chosen role.
+      # A file's relevance is the largest of the four scope probabilities.
+      relevance_loads:
+        description: Probability the file reads measured data from the facility's data systems
         range: float
-        required: true
-        annotations:
-          required_after: triaged
-      triage_modeling_code:
-        description: Triage score for forward modeling/simulation code
+      relevance_processes:
+        description: Probability the file processes measured diagnostic signals
         range: float
-      triage_analysis_code:
-        description: Triage score for experimental analysis code
+      relevance_describes:
+        description: Probability the file defines or reads the machine or diagnostic description
         range: float
-      triage_operations_code:
-        description: Triage score for real-time operations code
+      relevance_imas:
+        description: Probability the file maps facility data to or from IMAS
         range: float
-      triage_data_access:
-        description: Triage score for data access tools
+      relevance_simulation:
+        description: Probability the file is part of a simulation or physics solver
         range: float
-      triage_workflow:
-        description: Triage score for orchestration and batch processing
-        range: float
-      triage_visualization:
-        description: Triage score for plotting and rendering tools
-        range: float
-      triage_documentation:
-        description: Triage score for documentation value
-        range: float
-      triage_imas:
-        description: Triage score for IMAS relevance
-        range: float
-      triage_convention:
-        description: Triage score for COCOS convention handling
-        range: float
-      triage_description:
-        description: Brief description from triage (passed to scorer without triage scores)
+      relevance_role:
+        description: The role the decisions model chose for the CodeFile
+      relevance_stage:
+        description: Which arm produced the stored relevance, "name" or "content"
+      relevance_model:
+        description: The decisions model that produced the stored relevance
       triaged_at:
         description: When triage was completed
         range: datetime

@@ -1717,7 +1717,7 @@ class TestCodeProgressEmbedPredicate:
 
         with patch("imas_codex.discovery.code.parallel.GraphClient", return_value=ctx):
             stats = get_code_discovery_stats(
-                "jt-60sa", min_score=0.5, min_triage_score=0.5
+                "jt-60sa", min_relevance=0.5, min_ingest_relevance=0.5
             )
 
         assert stats["pending_embed"] == 2

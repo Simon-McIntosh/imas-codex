@@ -1,0 +1,103 @@
+<section>
+  <h2 id="code-relevance-triage">Code files are judged for diagnostic relevance by a decisions model, in two arms</h2>
+  <p id="code-relevance-triage-result">
+    The code discovery triage stage no longer scores eleven dimensions from a
+    structured completion. <code>imas_codex/llm/prompts/code/triage.md</code> is
+    rewritten in place as the decisions template whose six questions — reads
+    measured data, processes measured signals, describes the machine or its
+    diagnostics, maps to IMAS, is a simulation, and role — carry the wording
+    validated for code relevance. <code>triage_worker</code> renders that
+    template into a questions mapping through
+    <code>build_triage_questions()</code>, builds each discovered file's
+    decision state (<code>build_triage_state</code>, carrying the facility's
+    <code>data_access_patterns</code> — primary method, key tools, import
+    patterns, tree organisation, signal naming — plus the file's path,
+    language, directory, directory description and sibling names), and calls
+    <code>acall_decisions</code> on the <code>discovery-relevance</code> seat
+    with <code>service=facility-discovery</code> at bounded concurrency 8. A
+    file's relevance is the largest of the four scope probabilities
+    (<code>triage_relevance</code>); it passes when that reaches
+    <code>code-triage-threshold</code> (default 0.40) and is otherwise skipped
+    with a reason naming its role and its two highest role probabilities. A
+    decisions failure leaves the file at its status and unclaimed, so a later
+    pass retries it (fail closed).
+  </p>
+  <p id="code-relevance-triage-score">
+    The score stage keeps its LLM description call but no longer decides skip.
+    Before a file is marked scored, a content arm asks the same six questions
+    of its preview text — the state adds the first 1500 characters as
+    <code>content_head</code> — and the description scores and the content-arm
+    relevance fields are written to <code>scored</code> in one step
+    (<code>apply_file_scores</code>). A file whose content decision fails is
+    written nowhere: it stays at its prior status, carries no content
+    relevance, and has its claim released, so the next score pass reclaims and
+    retries it rather than stranding it. The ingest claim admits only a file
+    whose relevance came from the content arm (<code>relevance_stage =
+    'content'</code>) and reaches <code>code-ingest-threshold</code> (default
+    0.50), claiming the highest relevance first; a name-arm relevance can never
+    carry a file into ingestion. The content-stage requirement is applied in
+    every pending-ingest count and has-work predicate — the ingest claim,
+    <code>has_pending_code_work</code> and the <code>pending_ingest</code> and
+    embedding counts in <code>get_code_discovery_stats</code> — so a run never
+    counts or waits on a name-only file as ingestable. Both thresholds live
+    under <code>[tool.imas-codex.discovery]</code> with accessors beside
+    <code>get_triage_threshold</code> in <code>imas_codex/settings.py</code>.
+    <code>CodeFile</code> loses its eleven <code>triage_*</code> fields and
+    gains eight relevance fields (<code>relevance_loads</code>,
+    <code>relevance_processes</code>, <code>relevance_describes</code>,
+    <code>relevance_imas</code>, <code>relevance_simulation</code>,
+    <code>relevance_role</code>, <code>relevance_stage</code>,
+    <code>relevance_model</code>); the reset spec, claim predicates, has-work
+    predicates, progress display and CLI model section are migrated to the new
+    fields. <code>build-models --force</code> regenerates the derived models
+    with exit 0, so the schema edit is valid.
+  </p>
+  <p id="code-relevance-triage-evidence">
+    Gate (exit <strong>0</strong>, 2468 passed, 11 skipped, 5 deselected, on the
+    fleet compute allocation):
+    <code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
+    PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/discovery
+    tests/core tests/llm tests/graph/test_path_prefix_filter.py</code>.
+    <code>tests/discovery/test_code_relevance.py</code> drives both arms
+    through the fake decisions seam at
+    <code>_apost_decisions</code>: a below-threshold file is skipped with a
+    reason naming its role and probabilities, an above-threshold file is
+    triaged, a validation failure leaves the file untouched and releases its
+    claim, a successful content decision marks the file scored with its
+    content relevance in one write, a failed content decision writes nothing
+    and releases the claim so the next pass retries, the ingest claim takes the
+    highest relevance first while refusing a file below the ingest threshold,
+    and the ingest claim refuses a file whose relevance came from the names arm
+    (<code>relevance_stage='name'</code>). No live decisions request, no live
+    graph write and no discover run was made by this node. Negative control
+    (log recorded): in a scratch copy of the package with the
+    <code>relevance_stage = 'content'</code> filter removed from the ingest
+    claim, the test run exits <strong>1</strong> —
+    <code>test_ingest_claim_refuses_name_stage_relevance</code> fails while the
+    other seven stay green — so a name-arm relevance reaching ingestion is
+    caught by that assertion alone.
+  </p>
+  <p id="code-relevance-triage-caveat">
+    Landing commits: <code>0617918f1</code> (implementation),
+    <code>a01edec53</code> (tests), <code>cb8092d0a</code> (content-stage ingest
+    gate and unstranding retry) and <code>af1a5d81d</code> (its tests). The
+    retained <code>FileTriageResult</code>
+    and <code>FileTriageBatch</code> classes and the
+    <code>apply_triage_results</code> entry point stay in
+    <code>scorer.py</code> so the package's existing re-exports continue to
+    import; retiring them is a follow-on that needs a write grant for
+    <code>imas_codex/discovery/code/__init__.py</code> and
+    <code>imas_codex/llm/prompt_loader.py</code>, which were outside this
+    node's scope.
+  </p>
+  <figure>
+    <img src="/jt60sa-discovery-completion/figures/code-relevance-triage/pipeline.svg"
+         alt="discovered feeds the names arm, whose relevance is the max of four scope nouls; at or above 0.40 the file is triaged, below it is skipped with a role-naming reason; triaged is enriched and scored, a content arm records content relevance, and the ingest claim admits relevance at or above 0.50 highest first"/>
+    <figcaption>Two decision arms share one relevance definition. The names arm
+      keeps a discovered file when the largest of its four scope probabilities
+      reaches the code-triage threshold; the content arm marks the file scored
+      together with its content relevance, and the ingest claim reads only that
+      content-stage relevance, taking the highest first and refusing a file
+      below the threshold.</figcaption>
+  </figure>
+</section>

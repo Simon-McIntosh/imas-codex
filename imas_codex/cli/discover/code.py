@@ -138,7 +138,7 @@ def code(
     \b
     Pipeline stages:
       SCAN:    SSH to facility, enumerate code files + rg pattern enrichment
-      TRIAGE:  Per-dimension LLM scoring (discovered → triaged | skipped)
+      TRIAGE:  Relevance decision on file identity (discovered → triaged | skipped)
       SCORE:   Detailed multi-dimensional LLM scoring with pattern evidence
       INGEST:  Fetch, tree-sitter chunk, embed, extract IDS/MDSplus refs
 
@@ -233,7 +233,7 @@ def code(
             domain="code",
             facility=facility,
             facility_config=facility_config,
-            model_section="discovery-triage",
+            model_section="discovery-relevance",
             display=display,
             check_graph=True,
             check_embed=not scan_only and not score_only,
