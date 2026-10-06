@@ -43,6 +43,7 @@ from imas_codex.settings import (
 
 if TYPE_CHECKING:
     from imas_codex.graph.client import GraphClient
+    from imas_codex.ids.mapping import PipelineCost
 
 logger = logging.getLogger(__name__)
 
@@ -267,6 +268,8 @@ def _call_judgment(
     questions: Mapping[str, Any],
     *,
     service: str,
+    step: str,
+    cost: PipelineCost | None = None,
 ) -> dict[str, Any] | None:
     """Run one decisions call, returning ``None`` when the transport fails.
 
@@ -274,14 +277,19 @@ def _call_judgment(
     swallowed: it is a deterministic contract violation to reject, never a
     reason to leave a source silently unjudged. Any other failure returns
     ``None`` so the source is neither selected nor rejected and can be retried.
+
+    The transport's reported ``usage.cost`` is added to ``cost`` under ``step``
+    when a tracker is passed, the way the map pipeline's ``_acall_llm`` does.
     """
     try:
-        answers, _cost = call_decisions(model, state, questions, service=service)
+        answers, spent = call_decisions(model, state, questions, service=service)
     except DecisionsValidationError:
         raise
     except Exception as exc:  # noqa: BLE001 - fail closed on any transport fault
         logger.warning("candidate decisions call failed: %s", exc)
         return None
+    if cost is not None:
+        cost.add(step, spent, 0)
     return answers
 
 
@@ -301,6 +309,7 @@ def route_ids(
     gc: GraphClient,
     model: str | None = None,
     service: str = JUDGMENT_SERVICE,
+    cost: PipelineCost | None = None,
 ) -> list[str] | None:
     """Ask the decisions model which IDSs would hold a source's values.
 
@@ -314,6 +323,8 @@ def route_ids(
         gc: Active graph client, read for the IDS criteria.
         model: Decisions model id; defaults to the mapping-candidates seat.
         service: Service tag for the API key and headers.
+        cost: Optional run cost tracker; the decisions call's reported cost is
+            added to it under the ``candidate_route`` step.
     """
     criteria = _ids_criteria(gc)
     if not criteria:
@@ -323,7 +334,12 @@ def route_ids(
     resolved_model = model or get_model("mapping-candidates")
     state = {"signal_source": {"description": description}}
     answers = _call_judgment(
-        resolved_model, state, {"ids_routing": routing}, service=service
+        resolved_model,
+        state,
+        {"ids_routing": routing},
+        service=service,
+        step="candidate_route",
+        cost=cost,
     )
     if answers is None:
         return None
@@ -367,6 +383,7 @@ def judge_candidates(
     *,
     model: str | None = None,
     service: str = JUDGMENT_SERVICE,
+    cost: PipelineCost | None = None,
 ) -> list[PairJudgment] | None:
     """Judge every candidate's quantity against one source in a single call.
 
@@ -381,6 +398,8 @@ def judge_candidates(
         candidates: The retrieved candidates to judge, in shortlist order.
         model: Decisions model id; defaults to the mapping-candidates seat.
         service: Service tag for the API key and headers.
+        cost: Optional run cost tracker; the decisions call's reported cost is
+            added to it under the ``candidate_judgment`` step.
     """
     if not candidates:
         return []
@@ -395,7 +414,14 @@ def judge_candidates(
         }
     resolved_model = model or get_model("mapping-candidates")
     state = _judgment_state(source, facility, candidates)
-    answers = _call_judgment(resolved_model, state, questions, service=service)
+    answers = _call_judgment(
+        resolved_model,
+        state,
+        questions,
+        service=service,
+        step="candidate_judgment",
+        cost=cost,
+    )
     if answers is None:
         return None
     judged_at = datetime.now(UTC).isoformat()

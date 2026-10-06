@@ -23,6 +23,7 @@ from imas_codex.ids.candidates import (
     route,
     route_ids,
 )
+from imas_codex.ids.mapping import PipelineCost
 from imas_codex.models.constants import SearchMode
 from imas_codex.search.search_strategy import SearchHit
 from imas_codex.settings import RouteThresholds, get_mapping_route_thresholds
@@ -156,6 +157,69 @@ def test_transport_error_yields_no_route(monkeypatch):
 
     graph = _FakeGraph({"equilibrium": "equilibrium IDS"})
     assert route_ids("flux", gc=graph) is None
+
+
+def test_judge_candidates_adds_reported_cost_to_the_pipeline_cost(monkeypatch):
+    def fake_post(headers, body, timeout):
+        count = len(body["state"]["candidates"])
+        answers = {
+            f"same_quantity_{i}": {"type": "noul", "noul": 0.5} for i in range(count)
+        }
+        return _FakeResponse(_payload(answers))
+
+    monkeypatch.setattr(llm, "_post_decisions", fake_post)
+
+    cost = PipelineCost()
+    candidates = [
+        _candidate("equilibrium/time_slice/profiles_1d/psi", 0.9),
+        _candidate("core_profiles/profiles_1d/electrons/temperature", 0.8),
+    ]
+    result = judge_candidates(
+        {"id": "src-1", "description": "plasma poloidal flux"},
+        {"facility_id": "jet"},
+        candidates,
+        cost=cost,
+    )
+
+    assert result is not None
+    assert cost.steps["candidate_judgment"] == pytest.approx(COST)
+    assert cost.total_usd == pytest.approx(COST)
+
+
+def test_route_ids_adds_reported_cost_to_the_pipeline_cost(monkeypatch):
+    graph = _FakeGraph(
+        {
+            "equilibrium": "equilibrium fields",
+            "core_profiles": "core plasma profiles",
+        }
+    )
+
+    def fake_post(headers, body, timeout):
+        criteria = body["questions"]["ids_routing"]["criteria"]
+        probabilities = dict.fromkeys(criteria, 0.0)
+        probabilities["equilibrium"] = 0.9
+        probabilities["core_profiles"] = 0.1
+        return _FakeResponse(
+            _payload(
+                {
+                    "ids_routing": {
+                        "type": "choice",
+                        "choice": "equilibrium",
+                        "probabilities": probabilities,
+                        "confidence": 0.8,
+                    }
+                }
+            )
+        )
+
+    monkeypatch.setattr(llm, "_post_decisions", fake_post)
+
+    cost = PipelineCost()
+    result = route_ids("plasma poloidal flux", gc=graph, cost=cost)
+
+    assert result == ["equilibrium", "core_profiles"]
+    assert cost.steps["candidate_route"] == pytest.approx(COST)
+    assert cost.total_usd == pytest.approx(COST)
 
 
 def test_default_thresholds_escalate_and_shortlist_top_five_in_jev_order():

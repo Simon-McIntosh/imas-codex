@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -168,9 +167,8 @@ class CandidateDiscoveryState(DiscoveryStateBase):
     dd_version: int | None = None
     model: str | None = None
 
-    # Cumulative candidate-stage cost; the decisions layer's per-call cost is
-    # routed in by ``_capture_decisions_cost`` because the candidate helpers
-    # return the answers and discard the cost.
+    # Cumulative candidate-stage cost; every decisions call's reported spend is
+    # added to it as the call is made, so ``--cost-limit`` halts the loop.
     cost: PipelineCost = field(default_factory=PipelineCost)
 
     sources_judged: int = 0
@@ -974,33 +972,6 @@ async def validate_worker(
     state.validate_phase.mark_done()
 
 
-@contextmanager
-def _capture_decisions_cost(cost: PipelineCost, step: str):
-    """Route the candidate stage's decisions spend into ``cost``.
-
-    ``route_ids`` and ``judge_candidates`` consume the shared decisions layer's
-    ``(answers, cost)`` pair and return only the answers, so a candidate run's
-    spend would otherwise never reach the run budget and ``--cost-limit`` could
-    not stop it. The candidate engine runs a single worker, so wrapping the
-    module-level decisions entry point those helpers call is safe here: no
-    second worker reaches it concurrently. The original is restored on exit.
-    """
-    from imas_codex.ids import candidates as _candidates
-
-    original = _candidates.call_decisions
-
-    def recording(model, state, questions, *, service, **kwargs):
-        answers, spent = original(model, state, questions, service=service, **kwargs)
-        cost.add(step, spent, 0)
-        return answers, spent
-
-    _candidates.call_decisions = recording
-    try:
-        yield
-    finally:
-        _candidates.call_decisions = original
-
-
 def _candidate_records(
     judgments: list,
     candidates: list,
@@ -1090,7 +1061,7 @@ async def candidate_worker(
 
         state.candidate_phase.record_activity(len(sources))
 
-        with GraphClient() as gc, _capture_decisions_cost(state.cost, "candidate"):
+        with GraphClient() as gc:
             descriptions: dict[str, str] = {}
             routed: dict[str, list[str]] = {}
             for source in sources:
@@ -1101,6 +1072,7 @@ async def candidate_worker(
                     source.get("description") or "",
                     gc=gc,
                     model=state.model,
+                    cost=state.cost,
                 )
                 if ids is None:
                     await asyncio.to_thread(release_mapping_claim, source["id"])
@@ -1136,6 +1108,7 @@ async def candidate_worker(
                     facility_block,
                     candidates,
                     model=state.model,
+                    cost=state.cost,
                 )
                 decision = route(judgments, thresholds)
                 if decision is None:
