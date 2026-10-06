@@ -21,7 +21,7 @@
   <title>Mapping Candidate Selection | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="51">
+<meta name="plan-version" content="52">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;done&quot;}">
 </head>
@@ -204,10 +204,13 @@
             §6's <code>write_candidates</code>. It checks the returned count and raises
             on zero, so a binding can no longer vanish silently.</li>
           <li><code>persist_mapping_result</code> calls that function.</li>
-          <li><code>create_signal_source</code>, whose only caller is
-            <code>tests/ids/test_graph_ops.py</code>, is deleted together with that test,
-            unless a production caller has appeared, in which case it calls the same
-            function.</li>
+          <li><code>create_signal_source</code> in <code>ids/graph_ops.py</code>, whose only
+            caller is <code>tests/ids/test_graph_ops.py</code>, is deleted together with that
+            test, unless a production caller has appeared, in which case it calls the same
+            function. SignalSource <em>node</em> creation keeps its owner, the like-named
+            <code>create_signal_source</code> in
+            <code>imas_codex/discovery/base/grouping.py</code>. The one-module claim here is
+            about the SignalSource → IMASNode relationship only.</li>
         </ul></li>
       <li><code>imas map status</code> shows the candidate routes beside the mapping status
         by calling <code>count_candidates_by_route</code>, so both surfaces share one count.
@@ -226,7 +229,11 @@
         <code>match_matrix_ctx</code> (<code>mapping.py:1058, 1245</code>). Nothing else
         produces that per-source bridge. <code>fetch_wiki_context</code> and
         <code>fetch_code_context</code> are domain-filtered facility blocks, not a
-        replacement. So it stays, and is called only for the sources the escalated choice
+        replacement. <code>fetch_source_code_refs</code> (<code>tools.py:541</code>) is
+        per-source, but it follows explicit graph links from the source through its
+        representative signal and SignalNode to code chunks. The embedding bridge finds wiki
+        and code that no such link reaches, so the two complement each other and both feed
+        the escalated prompt. So it stays, and is called only for the sources the escalated choice
         prompt carries, not for every enriched source as today. Its own
         <code>imas_node_embedding</code> arm is removed from
         <code>imas_codex/ids/tools.py</code>, along with the post-hoc filter at
